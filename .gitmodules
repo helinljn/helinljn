@@ -4,3 +4,6 @@
 [submodule "codes/c_c++/hiredis/hiredis"]
 	path = codes/c_c++/hiredis/hiredis
 	url = https://github.com/redis/hiredis.git
+[submodule "codes/c_c++/fmt/fmt"]
+	path = codes/c_c++/fmt/fmt
+	url = https://github.com/fmtlib/fmt.git

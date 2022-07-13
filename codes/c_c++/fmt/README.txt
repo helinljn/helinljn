@@ -1,9 +1,11 @@
-mkdir fmt
+git submodule:
+	cd helinljn
+	git submodule add https://github.com/fmtlib/fmt.git codes/c_c++/fmt/fmt
 
-git clone https://github.com/fmtlib/fmt.git ./fmt
-
-git tag
-
-git branch -a
-
-git checkout branch_name
+git config:
+	Windows:
+        git config --global core.autocrlf true
+    Linux or Mac:
+        git config --global core.autocrlf input
+	Windows only:
+		git config --global core.autocrlf false
