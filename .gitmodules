@@ -13,3 +13,6 @@
 [submodule "codes/c_c++/vcpkg/vcpkg"]
 	path = codes/c_c++/vcpkg/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "codes/c_c++/libevent/libevent"]
+	path = codes/c_c++/libevent/libevent
+	url = https://github.com/libevent/libevent.git
