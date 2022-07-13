@@ -1,0 +1,47 @@
+Preferences -> Settings
+{
+	"font_face": "ÐÂËÎÌå",
+	"font_size": 14,
+	"tab_size": 4,
+
+	"default_encoding": "UTF-8",
+	"default_line_ending": "unix",
+
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true,
+
+	"file_exclude_patterns":
+	[
+		"*.gitignore",
+		".DS_Store",
+		"*.dll",
+		"*.lib",
+		"*.pdb",
+		"*.exp",
+		"*.ilk",
+		"*.manifest",
+		"*.exe",
+		"*.rar",
+		"*.zip",
+		"*.tar",
+		"*.gz"
+	],
+
+	"folder_exclude_patterns":
+	[
+		"__pycache__",
+		".git"
+	],
+
+	"ignored_packages":
+	[
+		"Vintage"
+	]
+}
+
+Tools -> Build System -> New Build System -> Python_3_8_10.sublime-build
+{
+    "cmd": ["C:/ProgramData/Miniconda3/envs/python_3_8_10/python.exe", "-u", "$file"],
+    "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+    "selector": "source.python"
+}
