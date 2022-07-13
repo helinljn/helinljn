@@ -1,0 +1,313 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\libevent\event2\buffer.h" />
+    <ClInclude Include="..\include\libevent\event2\bufferevent.h" />
+    <ClInclude Include="..\include\libevent\event2\bufferevent_compat.h" />
+    <ClInclude Include="..\include\libevent\event2\bufferevent_struct.h" />
+    <ClInclude Include="..\include\libevent\event2\buffer_compat.h" />
+    <ClInclude Include="..\include\libevent\event2\dns.h" />
+    <ClInclude Include="..\include\libevent\event2\dns_compat.h" />
+    <ClInclude Include="..\include\libevent\event2\dns_struct.h" />
+    <ClInclude Include="..\include\libevent\event2\event-config.h" />
+    <ClInclude Include="..\include\libevent\event2\event.h" />
+    <ClInclude Include="..\include\libevent\event2\event_compat.h" />
+    <ClInclude Include="..\include\libevent\event2\event_struct.h" />
+    <ClInclude Include="..\include\libevent\event2\http.h" />
+    <ClInclude Include="..\include\libevent\event2\http_compat.h" />
+    <ClInclude Include="..\include\libevent\event2\http_struct.h" />
+    <ClInclude Include="..\include\libevent\event2\keyvalq_struct.h" />
+    <ClInclude Include="..\include\libevent\event2\listener.h" />
+    <ClInclude Include="..\include\libevent\event2\rpc.h" />
+    <ClInclude Include="..\include\libevent\event2\rpc_compat.h" />
+    <ClInclude Include="..\include\libevent\event2\rpc_struct.h" />
+    <ClInclude Include="..\include\libevent\event2\tag.h" />
+    <ClInclude Include="..\include\libevent\event2\tag_compat.h" />
+    <ClInclude Include="..\include\libevent\event2\thread.h" />
+    <ClInclude Include="..\include\libevent\event2\util.h" />
+    <ClInclude Include="..\include\libevent\event2\visibility.h" />
+    <ClInclude Include="..\include\libevent\sys\queue.h" />
+    <ClInclude Include="..\include\libevent\sys\tree.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_aes.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_assert.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_async_logging.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_atomic.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_base64.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_byte_order.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_checked_delete.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_common.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_condition.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_countdown_latch.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_file.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_fixed_buffer.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_lock.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_md5.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_noncopyable.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_once.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_scoped_ptr.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_sha.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_shared_ptr.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_singleton.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_stream_buffer.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_thread.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_time.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_time_counter.h" />
+    <ClInclude Include="..\include\libevpp\base\ev_types.h" />
+    <ClInclude Include="..\include\libevpp\net\ev_poll.h" />
+    <ClInclude Include="..\include\libevpp\net\ev_socket.h" />
+    <ClInclude Include="..\src\libevent\bufferevent-internal.h" />
+    <ClInclude Include="..\src\libevent\changelist-internal.h" />
+    <ClInclude Include="..\src\libevent\defer-internal.h" />
+    <ClInclude Include="..\src\libevent\evbuffer-internal.h" />
+    <ClInclude Include="..\src\libevent\evconfig-private.h" />
+    <ClInclude Include="..\src\libevent\event-internal.h" />
+    <ClInclude Include="..\src\libevent\evmap-internal.h" />
+    <ClInclude Include="..\src\libevent\evrpc-internal.h" />
+    <ClInclude Include="..\src\libevent\evsignal-internal.h" />
+    <ClInclude Include="..\src\libevent\evthread-internal.h" />
+    <ClInclude Include="..\src\libevent\ht-internal.h" />
+    <ClInclude Include="..\src\libevent\http-internal.h" />
+    <ClInclude Include="..\src\libevent\iocp-internal.h" />
+    <ClInclude Include="..\src\libevent\ipv6-internal.h" />
+    <ClInclude Include="..\src\libevent\log-internal.h" />
+    <ClInclude Include="..\src\libevent\minheap-internal.h" />
+    <ClInclude Include="..\src\libevent\mm-internal.h" />
+    <ClInclude Include="..\src\libevent\ratelim-internal.h" />
+    <ClInclude Include="..\src\libevent\strlcpy-internal.h" />
+    <ClInclude Include="..\src\libevent\time-internal.h" />
+    <ClInclude Include="..\src\libevent\util-internal.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\libevent\buffer.c" />
+    <ClCompile Include="..\src\libevent\bufferevent.c" />
+    <ClCompile Include="..\src\libevent\bufferevent_async.c" />
+    <ClCompile Include="..\src\libevent\bufferevent_filter.c" />
+    <ClCompile Include="..\src\libevent\bufferevent_pair.c" />
+    <ClCompile Include="..\src\libevent\bufferevent_ratelim.c" />
+    <ClCompile Include="..\src\libevent\bufferevent_sock.c" />
+    <ClCompile Include="..\src\libevent\buffer_iocp.c" />
+    <ClCompile Include="..\src\libevent\evdns.c" />
+    <ClCompile Include="..\src\libevent\event.c" />
+    <ClCompile Include="..\src\libevent\event_iocp.c" />
+    <ClCompile Include="..\src\libevent\event_tagging.c" />
+    <ClCompile Include="..\src\libevent\evmap.c" />
+    <ClCompile Include="..\src\libevent\evrpc.c" />
+    <ClCompile Include="..\src\libevent\evthread.c" />
+    <ClCompile Include="..\src\libevent\evthread_win32.c" />
+    <ClCompile Include="..\src\libevent\evutil.c" />
+    <ClCompile Include="..\src\libevent\evutil_rand.c" />
+    <ClCompile Include="..\src\libevent\evutil_time.c" />
+    <ClCompile Include="..\src\libevent\http.c" />
+    <ClCompile Include="..\src\libevent\listener.c" />
+    <ClCompile Include="..\src\libevent\log.c" />
+    <ClCompile Include="..\src\libevent\signal.c" />
+    <ClCompile Include="..\src\libevent\strlcpy.c" />
+    <ClCompile Include="..\src\libevent\win32select.c" />
+    <ClCompile Include="..\src\libevpp\base\ev_aes.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_assert.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_async_logging.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_atomic.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_base64.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_byte_order.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_common.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_condition.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_countdown_latch.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_file.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_fixed_buffer.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_lock.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_md5.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_once.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_sha.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_stream_buffer.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_thread.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_time.cpp" />
+    <ClCompile Include="..\src\libevpp\base\ev_time_counter.cpp" />
+    <ClCompile Include="..\src\libevpp\net\ev_poll.cpp" />
+    <ClCompile Include="..\src\libevpp\net\ev_socket.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B9B84354-A65D-4D37-BC33-4D6BE65B15D9}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libevpp</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)\..\lib\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libevpp32d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libevpp64d</TargetName>
+    <OutDir>$(SolutionDir)\..\lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)\..\lib\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libevpp32</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>libevpp64</TargetName>
+    <OutDir>$(SolutionDir)\..\lib\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\include\libevent;..\include\libevpp;..\src\libevent;..\src\libevpp</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderFile />
+      <PrecompiledHeaderOutputFile />
+      <ProgramDataBaseFileName>$(IntDir)libevpp32d.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\include\libevent;..\include\libevpp;..\src\libevent;..\src\libevpp</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <ProgramDataBaseFileName>$(IntDir)libevpp64d.pdb</ProgramDataBaseFileName>
+      <OmitFramePointers>false</OmitFramePointers>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\include\libevent;..\include\libevpp;..\src\libevent;..\src\libevpp</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeaderFile />
+      <PrecompiledHeaderOutputFile />
+      <ProgramDataBaseFileName>$(IntDir)libevpp32.pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\include\libevent;..\include\libevpp;..\src\libevent;..\src\libevpp</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <ProgramDataBaseFileName>$(IntDir)libevpp64.pdb</ProgramDataBaseFileName>
+      <OmitFramePointers>false</OmitFramePointers>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+    </Lib>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

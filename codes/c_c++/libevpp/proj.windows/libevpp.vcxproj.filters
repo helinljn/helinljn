@@ -1,0 +1,410 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="include\libevent">
+      <UniqueIdentifier>{41f36666-e16e-4931-a1ec-73c73af0867f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\libevent">
+      <UniqueIdentifier>{81ac7a7f-add2-4bc5-bb0e-132f4f49aa51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\libevent\event2">
+      <UniqueIdentifier>{c358f31b-a65a-4565-8d5d-adc14fc0bf15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\libevent\sys">
+      <UniqueIdentifier>{ce20ec9b-046d-4bf4-b1fa-a436d45a726e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\libevpp">
+      <UniqueIdentifier>{78ae9cc3-0824-429e-b6db-5a524042a4ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\libevpp">
+      <UniqueIdentifier>{fb33ccd1-8602-4237-8d15-d760c520b39d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\libevpp\base">
+      <UniqueIdentifier>{e838a6f5-5b25-4375-902c-1a6265e19374}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\libevpp\net">
+      <UniqueIdentifier>{a5046825-04c6-4c06-9cec-f53cf2e41df3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\libevpp\base">
+      <UniqueIdentifier>{7f8b2f71-eea0-4800-9afb-6814a2452204}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\libevpp\net">
+      <UniqueIdentifier>{80053857-70d1-4cf4-b533-827ca7932e35}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\libevent\event2\buffer.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\buffer_compat.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\bufferevent.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\bufferevent_compat.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\bufferevent_struct.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\dns.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\dns_compat.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\dns_struct.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\event.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\event_compat.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\event_struct.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\event-config.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\http.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\http_compat.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\http_struct.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\keyvalq_struct.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\listener.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\rpc.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\rpc_compat.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\rpc_struct.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\tag.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\tag_compat.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\thread.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\util.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\event2\visibility.h">
+      <Filter>include\libevent\event2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\sys\queue.h">
+      <Filter>include\libevent\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevent\sys\tree.h">
+      <Filter>include\libevent\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_aes.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_assert.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_async_logging.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_atomic.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_base64.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_byte_order.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_checked_delete.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_common.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_condition.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_countdown_latch.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_file.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_fixed_buffer.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_lock.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_md5.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_noncopyable.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_once.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_scoped_ptr.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_sha.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_shared_ptr.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_singleton.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_stream_buffer.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_thread.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_time.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_time_counter.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\base\ev_types.h">
+      <Filter>include\libevpp\base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\net\ev_poll.h">
+      <Filter>include\libevpp\net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\libevpp\net\ev_socket.h">
+      <Filter>include\libevpp\net</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\bufferevent-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\changelist-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\defer-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\evbuffer-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\evconfig-private.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\event-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\evmap-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\evrpc-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\evsignal-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\evthread-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\ht-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\http-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\iocp-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\ipv6-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\log-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\minheap-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\mm-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\ratelim-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\strlcpy-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\time-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\libevent\util-internal.h">
+      <Filter>src\libevent</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\libevent\buffer.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\buffer_iocp.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\bufferevent.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\bufferevent_async.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\bufferevent_filter.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\bufferevent_pair.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\bufferevent_ratelim.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\bufferevent_sock.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evdns.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\event.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\event_iocp.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\event_tagging.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evmap.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evrpc.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evthread.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evthread_win32.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evutil.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evutil_rand.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\evutil_time.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\http.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\listener.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\log.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\signal.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\strlcpy.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevent\win32select.c">
+      <Filter>src\libevent</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_aes.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_assert.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_async_logging.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_atomic.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_base64.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_byte_order.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_common.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_condition.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_countdown_latch.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_file.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_fixed_buffer.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_lock.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_md5.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_once.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_sha.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_stream_buffer.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_thread.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_time.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\base\ev_time_counter.cpp">
+      <Filter>src\libevpp\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\net\ev_poll.cpp">
+      <Filter>src\libevpp\net</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp\net\ev_socket.cpp">
+      <Filter>src\libevpp\net</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

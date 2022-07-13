@@ -1,0 +1,14 @@
+﻿//////////////////////////////////////////////////////////////////////////
+// libevent接口测试
+//////////////////////////////////////////////////////////////////////////
+#ifndef __TEST_LIBEVENT_H__
+#define __TEST_LIBEVENT_H__
+
+namespace test_libevent {
+
+// 功能：测试libevent接口
+void test_libevent_interface(void);
+
+} // namespace test_libevent
+
+#endif // __TEST_LIBEVENT_H__

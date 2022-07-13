@@ -1,0 +1,14 @@
+﻿//////////////////////////////////////////////////////////////////////////
+// ev_scoped_ptr测试
+//////////////////////////////////////////////////////////////////////////
+#ifndef __TEST_SCOPED_PTR_H__
+#define __TEST_SCOPED_PTR_H__
+
+namespace test_scoped_ptr {
+
+// 功能：测试ev_scoped_ptr
+void test_ev_scoped_ptr(void);
+
+} // namespace test_scoped_ptr
+
+#endif // __TEST_SCOPED_PTR_H__

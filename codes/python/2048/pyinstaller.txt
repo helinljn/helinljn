@@ -1,0 +1,11 @@
+1. 在源文件中加入以下代码：
+	import os
+	import base64
+	from icon import icon_img
+	
+    with open("temp_icon.ico", "wb") as f:
+        f.write(base64.b64decode(icon_img))
+    root.iconbitmap("temp_icon.ico")
+    os.remove("temp_icon.ico")
+	
+2. pyinstaller -Fw -i icon.ico 2048.py

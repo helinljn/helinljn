@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\libevpp.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_atomic.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_libevent.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_misc.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_public.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_scoped_ptr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_shared_ptr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_socket.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_tcp_performance.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test_thread.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\libevpp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\libevpp-test.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_atomic.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_libevent.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_misc.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_scoped_ptr.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_shared_ptr.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_socket.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_tcp_performance.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\test_thread.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
