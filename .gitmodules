@@ -7,3 +7,6 @@
 [submodule "codes/c_c++/fmt/fmt"]
 	path = codes/c_c++/fmt/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "codes/c_c++/spdlog/spdlog"]
+	path = codes/c_c++/spdlog/spdlog
+	url = https://github.com/gabime/spdlog.git
