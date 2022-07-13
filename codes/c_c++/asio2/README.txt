@@ -1,9 +1,11 @@
-mkdir asio2
+git submodule:
+	cd helinljn
+	git submodule add https://github.com/zhllxt/asio2.git codes/c_c++/asio2/asio2
 
-git clone https://github.com/zhllxt/asio2.git ./asio2
-
-git tag
-
-git branch -a
-
-git checkout branch_name
+git config:
+	Windows:
+        git config --global core.autocrlf true
+    Linux or Mac:
+        git config --global core.autocrlf input
+	Windows only:
+		git config --global core.autocrlf false
