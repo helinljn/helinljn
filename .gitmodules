@@ -10,3 +10,6 @@
 [submodule "codes/c_c++/spdlog/spdlog"]
 	path = codes/c_c++/spdlog/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "codes/c_c++/vcpkg/vcpkg"]
+	path = codes/c_c++/vcpkg/vcpkg
+	url = https://github.com/microsoft/vcpkg.git
