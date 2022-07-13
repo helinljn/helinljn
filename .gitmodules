@@ -16,3 +16,6 @@
 [submodule "codes/c_c++/libevent/libevent"]
 	path = codes/c_c++/libevent/libevent
 	url = https://github.com/libevent/libevent.git
+[submodule "codes/c_c++/abseil/abseil"]
+	path = codes/c_c++/abseil/abseil
+	url = https://github.com/abseil/abseil-cpp.git
