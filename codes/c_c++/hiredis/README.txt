@@ -1,9 +1,11 @@
-mkdir hiredis
+git submodule:
+	cd helinljn
+	git submodule add https://github.com/redis/hiredis.git codes/c_c++/hiredis/hiredis
 
-git clone https://github.com/redis/hiredis.git ./hiredis
-
-git tag
-
-git branch -a
-
-git checkout branch_name
+git config:
+	Windows:
+        git config --global core.autocrlf true
+    Linux or Mac:
+        git config --global core.autocrlf input
+	Windows only:
+		git config --global core.autocrlf false

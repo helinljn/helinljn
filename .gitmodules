@@ -1,3 +1,6 @@
 [submodule "codes/c_c++/asio2/asio2"]
 	path = codes/c_c++/asio2/asio2
 	url = https://github.com/zhllxt/asio2.git
+[submodule "codes/c_c++/hiredis/hiredis"]
+	path = codes/c_c++/hiredis/hiredis
+	url = https://github.com/redis/hiredis.git
