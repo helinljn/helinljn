@@ -29,6 +29,8 @@ IF(MSVC)
     INCLUDE_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows/include
+        ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
+        ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
     )
 
     # 公共依赖库路径
@@ -42,8 +44,10 @@ IF(MSVC)
 
     # 宏定义
     ADD_DEFINITIONS(
-		-DXXX_VALUE_JUST_FOR_TEST=818
-		# ...
+        -DXXX_VALUE_JUST_FOR_TEST=818
+        -DASIO_STANDALONE
+        -D_WIN32_WINNT=0x0601
+        # ...
     )
 
     # 编译选项
@@ -62,6 +66,8 @@ ELSE()
     INCLUDE_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/include
+        ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
+        ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
     )
 
     # 公共依赖库路径
@@ -76,7 +82,8 @@ ELSE()
     # 宏定义
     ADD_DEFINITIONS(
         -DXXX_VALUE_JUST_FOR_TEST=818
-		# ...
+        -DASIO_STANDALONE
+        # ...
     )
 
     # 编译选项
