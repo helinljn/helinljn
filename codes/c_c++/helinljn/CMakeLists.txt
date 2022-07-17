@@ -23,7 +23,7 @@ ELSE()
     SET(BUILD_TARGET_NAME "${CMAKE_PROJECT_NAME}_r")
 ENDIF()
 
-# 添加头文件、公共依赖库、宏定义、编译选项
+# 添加头文件、依赖库、宏定义、编译选项
 IF(MSVC)
     # 公共头文件
     INCLUDE_DIRECTORIES(
@@ -100,22 +100,22 @@ MESSAGE(STATUS "----------------------------------------------------------------
 
 # 添加common目录下所有源文件(不包括头文件)
 AUX_SOURCE_DIRECTORY(./common SRC_COMMON)
-MESSAGE(STATUS "SRC_COMMON = ${SRC_COMMON}")
+#MESSAGE(STATUS "SRC_COMMON = ${SRC_COMMON}")
 
 # 添加tests目录下所有源文件(不包括头文件)
 AUX_SOURCE_DIRECTORY(./tests SRC_TESTS)
-MESSAGE(STATUS "SRC_TESTS = ${SRC_TESTS}")
+#MESSAGE(STATUS "SRC_TESTS = ${SRC_TESTS}")
 
 # 添加main目录下所有源文件(不包括头文件)
 AUX_SOURCE_DIRECTORY(./main SRC_MAIN)
-MESSAGE(STATUS "SRC_MAIN = ${SRC_MAIN}")
+#MESSAGE(STATUS "SRC_MAIN = ${SRC_MAIN}")
 
 # 生成目标可执行文件
 ADD_EXECUTABLE(${BUILD_TARGET_NAME} ${SRC_COMMON} ${SRC_TESTS} ${SRC_MAIN})
 
 # 链接公共依赖库
 TARGET_LINK_LIBRARIES(${BUILD_TARGET_NAME} ${PUBLIC_LINK_LIBS})
-MESSAGE(STATUS "PUBLIC_LINK_LIBS = ${PUBLIC_LINK_LIBS}")
+#MESSAGE(STATUS "PUBLIC_LINK_LIBS = ${PUBLIC_LINK_LIBS}")
 
 # 调试信息
 MESSAGE(STATUS "---------------------------------------------------------------------")
