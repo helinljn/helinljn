@@ -1,0 +1,131 @@
+# CMake最低版本要求
+CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
+
+# C++语言设置
+SET(CMAKE_CXX_STANDARD          17)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS        OFF)
+SET(CMAKE_VERBOSE_MAKEFILE      OFF)
+
+# 设置Debug或者Release
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose Debug or Release" FORCE)
+    MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, set default build to Debug")
+ENDIF()
+
+# 项目名字
+PROJECT(helinljn)
+
+# 生成目标名字
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    SET(BUILD_TARGET_NAME "${CMAKE_PROJECT_NAME}_d")
+ELSE()
+    SET(BUILD_TARGET_NAME "${CMAKE_PROJECT_NAME}_r")
+ENDIF()
+
+# 添加头文件、公共依赖库、宏定义、编译选项
+IF(MSVC)
+    # 公共头文件
+    INCLUDE_DIRECTORIES(
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows/include
+    )
+
+    # 公共依赖库路径
+    LINK_DIRECTORIES(
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows/lib
+    )
+
+    # 公共依赖库(优先链接静态库，然后才是动态库)
+    SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    SET(PUBLIC_LINK_LIBS libssl libcrypto crypt32)
+
+    # 宏定义
+    ADD_DEFINITIONS(
+		-DXXX_VALUE_JUST_FOR_TEST=818
+		# ...
+    )
+
+    # 编译选项
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
+    SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
+
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:__cplusplus /W4 /MP")
+    SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+
+    # 设置MTd & MT
+    SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ELSE()
+    # 公共头文件
+    INCLUDE_DIRECTORIES(
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/include
+    )
+
+    # 公共依赖库路径
+    LINK_DIRECTORIES(
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/lib
+    )
+
+    # 公共依赖库(优先链接静态库，然后才是动态库)
+    SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    SET(PUBLIC_LINK_LIBS -lssl -lcrypto -lstdc++fs -lpthread -ldl)
+
+    # 宏定义
+    ADD_DEFINITIONS(
+        -DXXX_VALUE_JUST_FOR_TEST=818
+		# ...
+    )
+
+    # 编译选项
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
+    SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
+
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic")
+    SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
+    SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+ENDIF()
+
+MESSAGE(STATUS "---------------------------------------------------------------------")
+
+# 添加common目录下所有源文件(不包括头文件)
+AUX_SOURCE_DIRECTORY(./common SRC_COMMON)
+MESSAGE(STATUS "SRC_COMMON = ${SRC_COMMON}")
+
+# 添加tests目录下所有源文件(不包括头文件)
+AUX_SOURCE_DIRECTORY(./tests SRC_TESTS)
+MESSAGE(STATUS "SRC_TESTS = ${SRC_TESTS}")
+
+# 添加main目录下所有源文件(不包括头文件)
+AUX_SOURCE_DIRECTORY(./main SRC_MAIN)
+MESSAGE(STATUS "SRC_MAIN = ${SRC_MAIN}")
+
+# 生成目标可执行文件
+ADD_EXECUTABLE(${BUILD_TARGET_NAME} ${SRC_COMMON} ${SRC_TESTS} ${SRC_MAIN})
+
+# 链接公共依赖库
+TARGET_LINK_LIBRARIES(${BUILD_TARGET_NAME} ${PUBLIC_LINK_LIBS})
+MESSAGE(STATUS "PUBLIC_LINK_LIBS = ${PUBLIC_LINK_LIBS}")
+
+# 调试信息
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR             = ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR             = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CMAKE_PROJECT_NAME             = ${CMAKE_PROJECT_NAME}")
+MESSAGE(STATUS "BUILD_TARGET_NAME              = ${BUILD_TARGET_NAME}")
+MESSAGE(STATUS "CMAKE_CXX_STANDARD             = C++${CMAKE_CXX_STANDARD}")
+MESSAGE(STATUS "CMAKE_BUILD_TYPE               = ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "CMAKE_FIND_LIBRARY_SUFFIXES    = ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+MESSAGE(STATUS "CMAKE_C_FLAGS                  = ${CMAKE_C_FLAGS}")
+MESSAGE(STATUS "CMAKE_C_FLAGS_DEBUG            = ${CMAKE_C_FLAGS_DEBUG}")
+MESSAGE(STATUS "CMAKE_C_FLAGS_RELEASE          = ${CMAKE_C_FLAGS_RELEASE}")
+MESSAGE(STATUS "CMAKE_CXX_FLAGS                = ${CMAKE_CXX_FLAGS}")
+MESSAGE(STATUS "CMAKE_CXX_FLAGS_DEBUG          = ${CMAKE_CXX_FLAGS_DEBUG}")
+MESSAGE(STATUS "CMAKE_CXX_FLAGS_RELEASE        = ${CMAKE_CXX_FLAGS_RELEASE}")
+MESSAGE(STATUS "CMAKE_EXE_LINKER_FLAGS         = ${CMAKE_EXE_LINKER_FLAGS}")
+MESSAGE(STATUS "CMAKE_EXE_LINKER_FLAGS_DEBUG   = ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
+MESSAGE(STATUS "CMAKE_EXE_LINKER_FLAGS_RELEASE = ${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+MESSAGE(STATUS "---------------------------------------------------------------------")
