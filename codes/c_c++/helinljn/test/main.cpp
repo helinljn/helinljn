@@ -1,3 +1,4 @@
+#include "spdlog/fmt/fmt.h"
 #include "util/time.h"
 
 //#include "asio.hpp"
@@ -8,8 +9,6 @@
 //
 //#include "openssl/ssl.h"
 //#include "hiredis/hiredis.h"
-
-#include "spdlog/fmt/fmt.h"
 
 int main(void)
 {
