@@ -28,19 +28,20 @@ IF(MSVC)
     # 公共头文件
     INCLUDE_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../date/date/include
     )
 
     # 公共依赖库路径
     LINK_DIRECTORIES(
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/lib
     )
 
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    SET(PUBLIC_LINK_LIBS libssl libcrypto crypt32)
+    SET(PUBLIC_LINK_LIBS hiredis libssl libcrypto crypt32)
 
     # 宏定义
     ADD_DEFINITIONS(
@@ -68,6 +69,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../date/date/include
     )
 
     # 公共依赖库路径
@@ -77,7 +79,7 @@ ELSE()
 
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    SET(PUBLIC_LINK_LIBS -lssl -lcrypto -lstdc++fs -lpthread -ldl)
+    SET(PUBLIC_LINK_LIBS -lhiredis -lssl -lcrypto -lstdc++fs -lpthread -ldl)
 
     # 宏定义
     ADD_DEFINITIONS(
