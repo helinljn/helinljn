@@ -2,8 +2,8 @@
 #define __TIME_H__
 
 #include <ctime>
-#include <cstdint>
 #include <chrono>
+#include <string>
 
 namespace ljn {
 
@@ -19,6 +19,32 @@ inline time_t steady_clock_now(void)
 {
     std::chrono::steady_clock::duration dt = std::chrono::steady_clock::now().time_since_epoch();
     return std::chrono::duration_cast<DurationType>(dt).count();
+}
+
+inline std::string safe_asctime(const tm* stm)
+{
+    char buf[128] = {0};
+
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
+    asctime_s(buf, stm);
+#else
+    asctime_r(stm, buf);
+#endif // defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
+
+    return std::string(buf);
+}
+
+inline std::string safe_ctime(const time_t* timep)
+{
+    char buf[128] = {0};
+
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
+    ctime_s(buf, sizeof(buf), timep);
+#else
+    ctime_r(timep, buf);
+#endif // defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
+
+    return std::string(buf);
 }
 
 inline void safe_gmtime(const time_t* timep, tm* result)

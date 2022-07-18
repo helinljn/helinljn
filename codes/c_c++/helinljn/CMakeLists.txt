@@ -100,12 +100,12 @@ ENDIF()
 
 MESSAGE(STATUS "---------------------------------------------------------------------")
 
-# 添加[${PROJECT_SOURCE_DIR}/test]目录下所有源文件(不包括头文件)
-AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/test SRC_LIST_TEST)
+# 添加[./test]目录下所有源文件(不包括头文件)
+AUX_SOURCE_DIRECTORY(./test SRC_LIST_TEST)
 MESSAGE(STATUS "SRC_LIST_TEST = ${SRC_LIST_TEST}")
 
-# 添加[${PROJECT_SOURCE_DIR}/util]目录下所有源文件(不包括头文件)
-AUX_SOURCE_DIRECTORY(${PROJECT_SOURCE_DIR}/util SRC_LIST_UTIL)
+# 添加[./util]目录下所有源文件(不包括头文件)
+AUX_SOURCE_DIRECTORY(./util SRC_LIST_UTIL)
 MESSAGE(STATUS "SRC_LIST_UTIL = ${SRC_LIST_UTIL}")
 
 # 生成目标可执行文件
