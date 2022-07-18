@@ -1,4 +1,5 @@
 #include "spdlog/fmt/fmt.h"
+#include "spdlog/fmt/bundled/color.h"
 #include "test/test_all.h"
 
 //#include "asio.hpp"
@@ -13,6 +14,8 @@
 int main(void)
 {
     fmt::print("Hello helinljn!\n");
+    fmt::print(fg(fmt::color::green), "Hello helinljn!\n");
+    fmt::print(fg(fmt::color::red), "Hello helinljn!\n");
 
     test_all();
 
