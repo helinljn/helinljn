@@ -100,20 +100,16 @@ ENDIF()
 
 MESSAGE(STATUS "---------------------------------------------------------------------")
 
-# 添加common目录下所有源文件(不包括头文件)
-AUX_SOURCE_DIRECTORY(./common SRC_COMMON)
-#MESSAGE(STATUS "SRC_COMMON = ${SRC_COMMON}")
-
-# 添加tests目录下所有源文件(不包括头文件)
-AUX_SOURCE_DIRECTORY(./tests SRC_TESTS)
-#MESSAGE(STATUS "SRC_TESTS = ${SRC_TESTS}")
+# 添加test目录下所有源文件(不包括头文件)
+AUX_SOURCE_DIRECTORY(./test SRC_TEST)
+#MESSAGE(STATUS "SRC_TEST = ${SRC_TEST}")
 
 # 添加main目录下所有源文件(不包括头文件)
-AUX_SOURCE_DIRECTORY(./main SRC_MAIN)
-#MESSAGE(STATUS "SRC_MAIN = ${SRC_MAIN}")
+AUX_SOURCE_DIRECTORY(./util SRC_UTIL)
+#MESSAGE(STATUS "SRC_UTIL = ${SRC_UTIL}")
 
 # 生成目标可执行文件
-ADD_EXECUTABLE(${BUILD_TARGET_NAME} ${SRC_COMMON} ${SRC_TESTS} ${SRC_MAIN})
+ADD_EXECUTABLE(${BUILD_TARGET_NAME} ${SRC_TEST} ${SRC_UTIL})
 
 # 链接公共依赖库
 TARGET_LINK_LIBRARIES(${BUILD_TARGET_NAME} ${PUBLIC_LINK_LIBS})
