@@ -1,6 +1,5 @@
 #include "test_size.h"
-#include "spdlog/fmt/fmt.h"
-#include "spdlog/fmt/bundled/color.h"
+#include "util/common.h"
 
 #include <ctime>
 #include <cstdint>
@@ -31,7 +30,7 @@ void test_sizeof(void)
     static_assert(201703 == __cplusplus);
     static_assert(818    == XXX_VALUE_JUST_FOR_TEST);
 
-    fmt::print(fg(fmt::color::green), "{}() success!\n", __func__);
+    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_numeric_limits(void)
@@ -52,5 +51,5 @@ void test_numeric_limits(void)
     static_assert(LLONG_MAX  == std::numeric_limits<int64_t>::max());
     static_assert(ULLONG_MAX == std::numeric_limits<uint64_t>::max());
 
-    fmt::print(fg(fmt::color::green), "{}() success!\n", __func__);
+    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }

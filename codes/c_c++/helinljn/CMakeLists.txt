@@ -32,6 +32,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../date/date/include
+        ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
     )
 
     # 公共依赖库路径
@@ -41,13 +42,15 @@ IF(MSVC)
 
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    SET(PUBLIC_LINK_LIBS hiredis libssl libcrypto crypt32)
+    SET(PUBLIC_LINK_LIBS libssl libcrypto crypt32)
 
     # 宏定义
     ADD_DEFINITIONS(
         -DXXX_VALUE_JUST_FOR_TEST=818
         -DASIO_STANDALONE
         -D_WIN32_WINNT=0x0601
+        -DFMT_HEADER_ONLY
+        -DSPDLOG_FMT_EXTERNAL
         # ...
     )
 
@@ -56,7 +59,7 @@ IF(MSVC)
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:__cplusplus /W4 /MP")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:__cplusplus /W3 /MP")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
@@ -70,6 +73,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../date/date/include
+        ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
     )
 
     # 公共依赖库路径
@@ -79,12 +83,14 @@ ELSE()
 
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    SET(PUBLIC_LINK_LIBS -lhiredis -lssl -lcrypto -lstdc++fs -lpthread -ldl)
+    SET(PUBLIC_LINK_LIBS -lssl -lcrypto -lstdc++fs -lpthread -ldl)
 
     # 宏定义
     ADD_DEFINITIONS(
         -DXXX_VALUE_JUST_FOR_TEST=818
         -DASIO_STANDALONE
+        -DFMT_HEADER_ONLY
+        -DSPDLOG_FMT_EXTERNAL
         # ...
     )
 

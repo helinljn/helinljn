@@ -1,7 +1,6 @@
 #include "test_misc.h"
+#include "util/common.h"
 #include "util/time.h"
-#include "spdlog/fmt/fmt.h"
-#include "spdlog/fmt/bundled/color.h"
 
 void test_safe_time(void)
 {
@@ -11,13 +10,11 @@ void test_safe_time(void)
     fmt::print("Current timestamp={}\n", cur_timestamp);
     fmt::print("Call safe_ctime() is:{}\n", safe_ctime(&cur_timestamp));
 
-    tm localTM{};
-    ljn::safe_localtime(&cur_timestamp, &localTM);
-    fmt::print("Call safe_localtime() and safe_asctime() is:{}\n", safe_asctime(&localTM));
+    tm local_tm = ljn::safe_localtime(&cur_timestamp);
+    fmt::print("Call safe_localtime() and safe_asctime() is:{}\n", safe_asctime(&local_tm));
 
-    tm gmTM{};
-    ljn::safe_gmtime(&cur_timestamp, &gmTM);
-    fmt::print("Call safe_gmtime() and safe_asctime() is:{}\n", safe_asctime(&gmTM));
+    tm gm_tm = ljn::safe_gmtime(&cur_timestamp);
+    fmt::print("Call safe_gmtime() and safe_asctime() is:{}\n", safe_asctime(&gm_tm));
 
-    fmt::print(fg(fmt::color::green), "{}() success!\n", __func__);
+    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }

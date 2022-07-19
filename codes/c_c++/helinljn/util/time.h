@@ -23,7 +23,7 @@ inline time_t steady_clock_now(void)
 
 inline std::string safe_asctime(const tm* stm)
 {
-    char buf[128] = {0};
+    char buf[64] = {0};
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
     asctime_s(buf, stm);
@@ -36,7 +36,7 @@ inline std::string safe_asctime(const tm* stm)
 
 inline std::string safe_ctime(const time_t* timep)
 {
-    char buf[128] = {0};
+    char buf[64] = {0};
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
     ctime_s(buf, sizeof(buf), timep);
@@ -47,22 +47,30 @@ inline std::string safe_ctime(const time_t* timep)
     return std::string(buf);
 }
 
-inline void safe_gmtime(const time_t* timep, tm* result)
+inline tm safe_gmtime(const time_t* timep)
 {
+    tm result{};
+
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
-    ::gmtime_s(result, timep);
+    ::gmtime_s(&result, timep);
 #else
-    ::gmtime_r(timep, result);
+    ::gmtime_r(timep, &result);
 #endif // defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
+
+    return result;
 }
 
-inline void safe_localtime(const time_t* timep, tm* result)
+inline tm safe_localtime(const time_t* timep)
 {
+    tm result{};
+
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
-    ::localtime_s(result, timep);
+    ::localtime_s(&result, timep);
 #else
-    ::localtime_r(timep, result);
+    ::localtime_r(timep, &result);
 #endif // defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(_WINDOWS_)
+
+    return result;
 }
 
 } // namespace ljn
