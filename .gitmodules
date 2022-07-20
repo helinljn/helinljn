@@ -1,9 +1,6 @@
 [submodule "codes/c_c++/asio2/asio2"]
 	path = codes/c_c++/asio2/asio2
 	url = https://github.com/zhllxt/asio2.git
-[submodule "codes/c_c++/hiredis/hiredis"]
-	path = codes/c_c++/hiredis/hiredis
-	url = https://github.com/redis/hiredis.git
 [submodule "codes/c_c++/fmt/fmt"]
 	path = codes/c_c++/fmt/fmt
 	url = https://github.com/fmtlib/fmt.git
@@ -13,9 +10,6 @@
 [submodule "codes/c_c++/vcpkg/vcpkg"]
 	path = codes/c_c++/vcpkg/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
-[submodule "codes/c_c++/libevent/libevent"]
-	path = codes/c_c++/libevent/libevent
-	url = https://github.com/libevent/libevent.git
 [submodule "codes/c_c++/abseil/abseil"]
 	path = codes/c_c++/abseil/abseil
 	url = https://github.com/abseil/abseil-cpp.git
