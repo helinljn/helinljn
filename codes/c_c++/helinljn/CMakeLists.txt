@@ -31,7 +31,6 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../date/date/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
     )
 
@@ -72,7 +71,6 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../date/date/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
     )
 

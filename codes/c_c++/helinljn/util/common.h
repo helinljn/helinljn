@@ -11,8 +11,4 @@
 #include "spdlog/spdlog.h"
 #include "spdlog/async.h"
 
-#include "date/date.h"
-#include "date/iso_week.h"
-#include "date/julian.h"
-
 #endif // __COMMON_H__

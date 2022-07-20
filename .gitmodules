@@ -13,9 +13,6 @@
 [submodule "codes/c_c++/abseil/abseil"]
 	path = codes/c_c++/abseil/abseil
 	url = https://github.com/abseil/abseil-cpp.git
-[submodule "codes/c_c++/date/date"]
-	path = codes/c_c++/date/date
-	url = https://github.com/HowardHinnant/date.git
 [submodule "codes/c_c++/asio/asio"]
 	path = codes/c_c++/asio/asio
 	url = https://github.com/chriskohlhoff/asio.git
