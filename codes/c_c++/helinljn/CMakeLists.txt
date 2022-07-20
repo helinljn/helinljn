@@ -47,8 +47,8 @@ IF(MSVC)
     # 宏定义
     ADD_DEFINITIONS(
         -DXXX_VALUE_JUST_FOR_TEST=818
-        -DASIO_STANDALONE
         -D_WIN32_WINNT=0x0601
+        -DASIO_STANDALONE
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
         # ...
