@@ -1,0 +1,11 @@
+﻿【Windows添加svn服务】：
+sc create svnserve binPath= "C:\Program Files\TortoiseSVN\bin\svnserve.exe --service -r D:\SVNRepository" displayname= "Subversion" depend=Tcpip  start=auto
+
+【Windows删除服务】：
+sc delete svnserve
+
+【Win10关闭自动更新】：
+services.msc -> Windows update 禁用并关闭
+
+【Win10关闭驱动自动更新】：
+控制面板\所有控制面板项\系统 点击：高级系统设置 然后点击：硬件->设备安装设置->否

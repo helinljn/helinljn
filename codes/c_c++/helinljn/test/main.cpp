@@ -9,5 +9,8 @@ int main(void)
 
     test_all();
 
+    fmt::print("Press \'Enter\' to exit...\n");
+    while (std::getchar() != '\n');
+
     return 0;
 }
