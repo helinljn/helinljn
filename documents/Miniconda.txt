@@ -1,45 +1,45 @@
-# MinicondaÏÂÔØµØÖ·£¬Win7Ê×Ñ¡£ºMiniconda3-py38_4.10.3-Windows-x86_64°æ±¾
+# Minicondaä¸‹è½½åœ°å€ï¼ŒWin7é¦–é€‰ï¼šMiniconda3-py38_4.10.3-Windows-x86_64ç‰ˆæœ¬
 https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/
 
-# ¸ü»»CondaÔ´
+# æ›´æ¢Condaæº
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
 conda config --set show_channel_urls yes
 
-# Conda³£ÓÃÃüÁî
-	²é¿´µ±Ç°ÏµÍ³ÏÂµÄ»·¾³
+# Condaå¸¸ç”¨å‘½ä»¤
+	æŸ¥çœ‹å½“å‰ç³»ç»Ÿä¸‹çš„ç¯å¢ƒ
 	conda info -e
 
-	´´½¨Ö¸¶¨python°æ±¾µÄ»·¾³
+	åˆ›å»ºæŒ‡å®špythonç‰ˆæœ¬çš„ç¯å¢ƒ
 	conda create -n env_name python=3.8.10
 
-	¼¤»îÄ³¸ö»·¾³
+	æ¿€æ´»æŸä¸ªç¯å¢ƒ
 	conda activate env_name
 
-	ÍË³öÄ³¸ö»·¾³
+	é€€å‡ºæŸä¸ªç¯å¢ƒ
 	conda deactivate
 
-	É¾³ıÄ³¸ö»·¾³
+	åˆ é™¤æŸä¸ªç¯å¢ƒ
 	conda remove env_name
 
-	²é¿´Ö¸¶¨»·¾³ÏÂµÄ°ü
+	æŸ¥çœ‹æŒ‡å®šç¯å¢ƒä¸‹çš„åŒ…
 	conda list -n env_name
 
-	ÔÚÖ¸¶¨»·¾³ÏÂ°²×°°ü
+	åœ¨æŒ‡å®šç¯å¢ƒä¸‹å®‰è£…åŒ…
 	conda install -n env_name xxx
 
-# ÁÙÊ±¸ü¸ÄpipÔ´
-pip install <°üÃû> -i https://pypi.tuna.tsinghua.edu.cn/simple
+# ä¸´æ—¶æ›´æ”¹pipæº
+pip install <åŒ…å> -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-Èç¹ûÓöµ½£ºraise ValueError("check_hostname requires server_hostname")±¨´í£¬ĞèÒª¹Ø±Õ·­Ç½´úÀí
+å¦‚æœé‡åˆ°ï¼šraise ValueError("check_hostname requires server_hostname")æŠ¥é”™ï¼Œéœ€è¦å…³é—­ç¿»å¢™ä»£ç†
 
-# ³£ÓÃ°üpip°²×°
+# å¸¸ç”¨åŒ…pipå®‰è£…
 pip install requests -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install tornado  -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install pymysql  -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip install redis    -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-# ³£ÓÃ°üconda°²×°
+# å¸¸ç”¨åŒ…condaå®‰è£…
 conda install -n env_name requests
 conda install -n env_name tornado
 conda install -n env_name pymysql

@@ -1,4 +1,4 @@
-﻿【Windows添加svn服务】：
+【Windows添加svn服务】：
 sc create svnserve binPath= "C:\Program Files\TortoiseSVN\bin\svnserve.exe --service -r D:\SVNRepository" displayname= "Subversion" depend=Tcpip  start=auto
 
 【Windows删除服务】：

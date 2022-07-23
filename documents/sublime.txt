@@ -1,6 +1,6 @@
 Preferences -> Settings
 {
-	"font_face": "ĞÂËÎÌå",
+	"font_face": "æ–°å®‹ä½“",
 	"font_size": 14,
 	"tab_size": 4,
 
