@@ -1,4 +1,5 @@
-# Miniconda下载地址，Win7首选：Miniconda3-py38_4.10.3-Windows-x86_64版本
+# Miniconda下载地址，Win7 首选：Miniconda3-py38_4.10.3-Windows-x86_64版本
+# Miniconda下载地址，Win10首选：Miniconda3-py38_4.12.0-Windows-x86_64版本
 https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/
 
 # 更换Conda源
