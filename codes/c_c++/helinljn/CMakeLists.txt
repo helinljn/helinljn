@@ -41,7 +41,22 @@ IF(MSVC)
 
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    SET(PUBLIC_LINK_LIBS libssl libcrypto crypt32)
+    SET(PUBLIC_LINK_LIBS
+        boost_atomic-vc140-mt
+        boost_chrono-vc140-mt
+        boost_container-vc140-mt
+        boost_date_time-vc140-mt
+        boost_exception-vc140-mt
+        boost_filesystem-vc140-mt
+        boost_random-vc140-mt
+        boost_regex-vc140-mt
+        boost_system-vc140-mt
+        boost_thread-vc140-mt
+        boost_timer-vc140-mt
+        libssl
+        libcrypto
+        crypt32
+    )
 
     # 宏定义
     ADD_DEFINITIONS(
@@ -81,7 +96,24 @@ ELSE()
 
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    SET(PUBLIC_LINK_LIBS -lssl -lcrypto -lstdc++fs -lpthread -ldl)
+    SET(PUBLIC_LINK_LIBS
+        -lboost_atomic
+        -lboost_chrono
+        -lboost_container
+        -lboost_date_time
+        -lboost_exception
+        -lboost_filesystem
+        -lboost_random
+        -lboost_regex
+        -lboost_system
+        -lboost_thread
+        -lboost_timer
+        -lssl
+        -lcrypto
+        -lstdc++fs
+        -lpthread
+        -ldl
+    )
 
     # 宏定义
     ADD_DEFINITIONS(
