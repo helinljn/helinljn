@@ -16,3 +16,6 @@
 [submodule "codes/c_c++/asio/asio"]
 	path = codes/c_c++/asio/asio
 	url = https://github.com/chriskohlhoff/asio.git
+[submodule "codes/c_c++/libevent/libevent"]
+	path = codes/c_c++/libevent/libevent
+	url = https://github.com/libevent/libevent.git
