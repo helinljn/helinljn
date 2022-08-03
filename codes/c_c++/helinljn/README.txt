@@ -3,6 +3,8 @@ Dependencies:
         Windows:
             vcpkg install openssl:x64-windows-static
 
+            vcpkg install libevent[openssl]:x64-windows-static
+
             vcpkg install boost-algorithm:x64-windows-static
             vcpkg install boost-align:x64-windows-static
             vcpkg install boost-any:x64-windows-static
@@ -24,6 +26,8 @@ Dependencies:
 
         Linux:
             ./vcpkg install openssl:x64-linux
+
+            ./vcpkg install libevent[openssl]:x64-linux
 
             ./vcpkg install boost-algorithm:x64-linux
             ./vcpkg install boost-align:x64-linux

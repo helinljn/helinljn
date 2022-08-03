@@ -42,6 +42,10 @@ IF(MSVC)
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
     SET(PUBLIC_LINK_LIBS
+        event
+        event_core
+        event_extra
+        event_openssl
         boost_atomic-vc140-mt
         boost_chrono-vc140-mt
         boost_container-vc140-mt
@@ -97,6 +101,11 @@ ELSE()
     # 公共依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
     SET(PUBLIC_LINK_LIBS
+        -levent
+        -levent_core
+        -levent_extra
+        -levent_openssl
+        -levent_pthreads
         -lboost_atomic
         -lboost_chrono
         -lboost_container
