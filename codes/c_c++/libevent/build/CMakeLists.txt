@@ -63,7 +63,7 @@ IF(MSVC)
     )
 
     # 编译选项
-    SET(CMAKE_C_FLAGS         "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS         "${CMAKE_C_FLAGS} /W3 /MP /wd4244 /wd4267 /wd4996")
     SET(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 
@@ -113,10 +113,12 @@ ELSE()
     )
 
     # 编译选项
-    SET(CMAKE_C_FLAGS         "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS         "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter -Wno-unused-value")
     SET(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 ENDIF()
+
+MESSAGE(STATUS "---------------------------------------------------------------------")
 
 # 设置生成目录
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -125,6 +127,9 @@ SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 # 生成静态库
 ADD_LIBRARY(${BUILD_TARGET_NAME} ${LIBEVENT_SRC_LIST})
 TARGET_INCLUDE_DIRECTORIES(${BUILD_TARGET_NAME} PRIVATE ${LIBEVENT_INCLUDE_DIR})
+
+MESSAGE(STATUS "LIBEVENT_SRC_LIST    = ${LIBEVENT_SRC_LIST}")
+MESSAGE(STATUS "LIBEVENT_INCLUDE_DIR = ${LIBEVENT_INCLUDE_DIR}")
 
 # 调试信息
 MESSAGE(STATUS "---------------------------------------------------------------------")
