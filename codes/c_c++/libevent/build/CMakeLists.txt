@@ -1,0 +1,141 @@
+# CMake最低版本要求
+CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
+
+# 设置Debug或者Release
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose Debug or Release" FORCE)
+    MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, set default build to Debug")
+ENDIF()
+
+# 项目名字
+PROJECT(event_all)
+
+# 生成目标名字
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    SET(BUILD_TARGET_NAME "${CMAKE_PROJECT_NAME}_d")
+ELSE()
+    SET(BUILD_TARGET_NAME "${CMAKE_PROJECT_NAME}_r")
+ENDIF()
+
+# 头文件目录、源文件、宏定义、编译选项
+IF(MSVC)
+    # 头文件目录
+    SET(LIBEVENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../../vcpkg/vcpkg/installed/x64-windows-static/include
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
+    )
+
+    # 源文件
+    SET(LIBEVENT_SRC_LIST
+        ${PROJECT_SOURCE_DIR}/src/buffer.c
+        ${PROJECT_SOURCE_DIR}/src/buffer_iocp.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_async.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_filter.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_openssl.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_pair.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_ratelim.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_sock.c
+        ${PROJECT_SOURCE_DIR}/src/evdns.c
+        ${PROJECT_SOURCE_DIR}/src/event.c
+        ${PROJECT_SOURCE_DIR}/src/event_iocp.c
+        ${PROJECT_SOURCE_DIR}/src/event_tagging.c
+        ${PROJECT_SOURCE_DIR}/src/evmap.c
+        ${PROJECT_SOURCE_DIR}/src/evrpc.c
+        ${PROJECT_SOURCE_DIR}/src/evthread.c
+        ${PROJECT_SOURCE_DIR}/src/evthread_win32.c
+        ${PROJECT_SOURCE_DIR}/src/evutil.c
+        ${PROJECT_SOURCE_DIR}/src/evutil_rand.c
+        ${PROJECT_SOURCE_DIR}/src/evutil_time.c
+        ${PROJECT_SOURCE_DIR}/src/http.c
+        ${PROJECT_SOURCE_DIR}/src/listener.c
+        ${PROJECT_SOURCE_DIR}/src/log.c
+        ${PROJECT_SOURCE_DIR}/src/signal.c
+        ${PROJECT_SOURCE_DIR}/src/strlcpy.c
+        ${PROJECT_SOURCE_DIR}/src/win32select.c
+    )
+
+    # 宏定义
+    ADD_DEFINITIONS(
+        -DXXX_VALUE_JUST_FOR_TEST=818
+        # ...
+    )
+
+    # 编译选项
+    SET(CMAKE_C_FLAGS         "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}")
+    SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+
+    # 设置MTd & MT
+    SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+ELSE()
+    # 头文件目录
+    SET(LIBEVENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../../vcpkg/vcpkg/installed/x64-linux/include
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/src
+    )
+
+    # 源文件
+    SET(LIBEVENT_SRC_LIST
+        ${PROJECT_SOURCE_DIR}/src/buffer.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_filter.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_openssl.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_pair.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_ratelim.c
+        ${PROJECT_SOURCE_DIR}/src/bufferevent_sock.c
+        ${PROJECT_SOURCE_DIR}/src/epoll.c
+        ${PROJECT_SOURCE_DIR}/src/evdns.c
+        ${PROJECT_SOURCE_DIR}/src/event.c
+        ${PROJECT_SOURCE_DIR}/src/event_tagging.c
+        ${PROJECT_SOURCE_DIR}/src/evmap.c
+        ${PROJECT_SOURCE_DIR}/src/evrpc.c
+        ${PROJECT_SOURCE_DIR}/src/evthread.c
+        ${PROJECT_SOURCE_DIR}/src/evthread_pthread.c
+        ${PROJECT_SOURCE_DIR}/src/evutil.c
+        ${PROJECT_SOURCE_DIR}/src/evutil_rand.c
+        ${PROJECT_SOURCE_DIR}/src/evutil_time.c
+        ${PROJECT_SOURCE_DIR}/src/http.c
+        ${PROJECT_SOURCE_DIR}/src/listener.c
+        ${PROJECT_SOURCE_DIR}/src/log.c
+        ${PROJECT_SOURCE_DIR}/src/poll.c
+        ${PROJECT_SOURCE_DIR}/src/select.c
+        ${PROJECT_SOURCE_DIR}/src/signal.c
+        ${PROJECT_SOURCE_DIR}/src/strlcpy.c
+    )
+
+    # 宏定义
+    ADD_DEFINITIONS(
+        -DXXX_VALUE_JUST_FOR_TEST=818
+        # ...
+    )
+
+    # 编译选项
+    SET(CMAKE_C_FLAGS         "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}")
+    SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+ENDIF()
+
+# 设置生成目录
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+
+# 生成静态库
+ADD_LIBRARY(${BUILD_TARGET_NAME} ${LIBEVENT_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${BUILD_TARGET_NAME} PRIVATE ${LIBEVENT_INCLUDE_DIR})
+
+# 调试信息
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR    = ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR    = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CMAKE_PROJECT_NAME    = ${CMAKE_PROJECT_NAME}")
+MESSAGE(STATUS "BUILD_TARGET_NAME     = ${BUILD_TARGET_NAME}")
+MESSAGE(STATUS "CMAKE_BUILD_TYPE      = ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "CMAKE_C_FLAGS         = ${CMAKE_C_FLAGS}")
+MESSAGE(STATUS "CMAKE_C_FLAGS_DEBUG   = ${CMAKE_C_FLAGS_DEBUG}")
+MESSAGE(STATUS "CMAKE_C_FLAGS_RELEASE = ${CMAKE_C_FLAGS_RELEASE}")
+MESSAGE(STATUS "---------------------------------------------------------------------")
