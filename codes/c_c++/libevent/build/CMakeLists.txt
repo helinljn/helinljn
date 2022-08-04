@@ -21,10 +21,9 @@ ENDIF()
 IF(MSVC)
     # 头文件目录
     SET(LIBEVENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../vcpkg/vcpkg/installed/x64-windows-static/include
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/../../vcpkg/vcpkg/installed/x64-windows-static/include
     )
 
     # 源文件
@@ -73,10 +72,9 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(LIBEVENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../vcpkg/vcpkg/installed/x64-linux/include
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
+        ${PROJECT_SOURCE_DIR}/../../vcpkg/vcpkg/installed/x64-linux/include
     )
 
     # 源文件
