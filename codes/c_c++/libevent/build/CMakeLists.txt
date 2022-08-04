@@ -122,7 +122,6 @@ MESSAGE(STATUS "----------------------------------------------------------------
 
 # 设置生成目录
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 # 生成静态库
 ADD_LIBRARY(${BUILD_TARGET_NAME} ${LIBEVENT_SRC_LIST})
