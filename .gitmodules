@@ -10,9 +10,6 @@
 [submodule "codes/c_c++/vcpkg/vcpkg"]
 	path = codes/c_c++/vcpkg/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
-[submodule "codes/c_c++/abseil/abseil"]
-	path = codes/c_c++/abseil/abseil
-	url = https://github.com/abseil/abseil-cpp.git
 [submodule "codes/c_c++/asio/asio"]
 	path = codes/c_c++/asio/asio
 	url = https://github.com/chriskohlhoff/asio.git
