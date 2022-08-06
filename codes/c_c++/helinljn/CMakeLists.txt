@@ -45,17 +45,6 @@ IF(MSVC)
         event_core
         event_extra
         event_openssl
-        boost_atomic-vc140-mt
-        boost_chrono-vc140-mt
-        boost_container-vc140-mt
-        boost_date_time-vc140-mt
-        boost_exception-vc140-mt
-        boost_filesystem-vc140-mt
-        boost_random-vc140-mt
-        boost_regex-vc140-mt
-        boost_system-vc140-mt
-        boost_thread-vc140-mt
-        boost_timer-vc140-mt
         libssl
         libcrypto
         crypt32
@@ -111,17 +100,6 @@ ELSE()
         -levent_extra
         -levent_openssl
         -levent_pthreads
-        -lboost_atomic
-        -lboost_chrono
-        -lboost_container
-        -lboost_date_time
-        -lboost_exception
-        -lboost_filesystem
-        -lboost_random
-        -lboost_regex
-        -lboost_system
-        -lboost_thread
-        -lboost_timer
         -lssl
         -lcrypto
         -lstdc++fs

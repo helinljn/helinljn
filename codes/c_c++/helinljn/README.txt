@@ -1,52 +1,25 @@
 Dependencies:
     1. static libs
-        Windows:
-            vcpkg install openssl:x64-windows-static
+        git checkout 3b3bd424827a1f7f4813216f6b32b6c61e386b2e
+            Windows:
+                bootstrap-vcpkg.bat
 
-            vcpkg install libevent[openssl]:x64-windows-static
+                # 1.1.1n
+                vcpkg install openssl:x64-windows-static
 
-            vcpkg install boost-algorithm:x64-windows-static
-            vcpkg install boost-align:x64-windows-static
-            vcpkg install boost-any:x64-windows-static
-            vcpkg install boost-atomic:x64-windows-static
-            vcpkg install boost-chrono:x64-windows-static
-            vcpkg install boost-circular-buffer:x64-windows-static
-            vcpkg install boost-crc:x64-windows-static
-            vcpkg install boost-date-time:x64-windows-static
-            vcpkg install boost-endian:x64-windows-static
-            vcpkg install boost-filesystem:x64-windows-static
-            vcpkg install boost-hana:x64-windows-static
-            vcpkg install boost-heap:x64-windows-static
-            vcpkg install boost-interprocess:x64-windows-static
-            vcpkg install boost-random:x64-windows-static
-            vcpkg install boost-sort:x64-windows-static
-            vcpkg install boost-static-string:x64-windows-static
-            vcpkg install boost-thread:x64-windows-static
-            vcpkg install boost-timer:x64-windows-static
+                # 2.1.12
+                vcpkg install libevent[openssl]:x64-windows-static
 
-        Linux:
-            ./vcpkg install openssl:x64-linux
+            Linux:
+                ./bootstrap-vcpkg.sh
 
-            ./vcpkg install libevent[openssl]:x64-linux
+                # 1.1.1n
+                ./vcpkg install openssl:x64-linux
 
-            ./vcpkg install boost-algorithm:x64-linux
-            ./vcpkg install boost-align:x64-linux
-            ./vcpkg install boost-any:x64-linux
-            ./vcpkg install boost-atomic:x64-linux
-            ./vcpkg install boost-chrono:x64-linux
-            ./vcpkg install boost-circular-buffer:x64-linux
-            ./vcpkg install boost-crc:x64-linux
-            ./vcpkg install boost-date-time:x64-linux
-            ./vcpkg install boost-endian:x64-linux
-            ./vcpkg install boost-filesystem:x64-linux
-            ./vcpkg install boost-hana:x64-linux
-            ./vcpkg install boost-heap:x64-linux
-            ./vcpkg install boost-interprocess:x64-linux
-            ./vcpkg install boost-random:x64-linux
-            ./vcpkg install boost-sort:x64-linux
-            ./vcpkg install boost-static-string:x64-linux
-            ./vcpkg install boost-thread:x64-linux
-            ./vcpkg install boost-timer:x64-linux
+                # 2.1.12
+                ./vcpkg install libevent[openssl]:x64-linux
+
+        git checkout 2022.05.10
 
     2. asio with openssl
 
