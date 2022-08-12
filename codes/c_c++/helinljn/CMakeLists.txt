@@ -1,13 +1,15 @@
-# CMake最低版本要求
+# CMake最低版本
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
-# C++语言设置
+# C/C++语言
+SET(CMAKE_C_STANDARD            99)
+SET(CMAKE_C_STANDARD_REQUIRED   ON)
+SET(CMAKE_C_EXTENSIONS          OFF)
 SET(CMAKE_CXX_STANDARD          17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS        OFF)
-SET(CMAKE_VERBOSE_MAKEFILE      OFF)
 
-# 设置Debug或者Release
+# Debug & Release选项
 IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose Debug or Release" FORCE)
     MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, set default build to Debug")
@@ -23,9 +25,9 @@ ELSE()
     SET(BUILD_TARGET_NAME "${CMAKE_PROJECT_NAME}_r")
 ENDIF()
 
-# 添加头文件、依赖库、宏定义、编译选项
+# 头文件目录、依赖库目录、依赖库、宏定义、编译选项、链接选项
 IF(MSVC)
-    # 公共头文件
+    # 头文件目录
     INCLUDE_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/include
@@ -34,12 +36,12 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
     )
 
-    # 公共依赖库路径
+    # 依赖库目录
     LINK_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/lib
     )
 
-    # 公共依赖库(优先链接静态库，然后才是动态库)
+    # 依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
     SET(PUBLIC_LINK_LIBS
         libprotobuf
@@ -64,7 +66,7 @@ IF(MSVC)
     )
 
     # 编译选项
-    SET(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} /W4 /MP")
     SET(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE}")
 
@@ -80,7 +82,7 @@ IF(MSVC)
     # 设置MTd & MT
     SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 ELSE()
-    # 公共头文件
+    # 头文件目录
     INCLUDE_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/include
@@ -89,12 +91,12 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
     )
 
-    # 公共依赖库路径
+    # 依赖库目录
     LINK_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/lib
     )
 
-    # 公共依赖库(优先链接静态库，然后才是动态库)
+    # 依赖库(优先链接静态库，然后才是动态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
     SET(PUBLIC_LINK_LIBS
         -lprotobuf
@@ -119,7 +121,7 @@ ELSE()
     )
 
     # 编译选项
-    SET(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS}")
+    SET(CMAKE_C_FLAGS                  "${CMAKE_C_FLAGS} -std=c99 -Wall -Wextra -Wpedantic")
     SET(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE}")
 
@@ -135,6 +137,11 @@ ENDIF()
 
 MESSAGE(STATUS "---------------------------------------------------------------------")
 
+# 设置生成目录
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/output)
+
 # 添加[./test]目录下所有源文件(不包括头文件)
 AUX_SOURCE_DIRECTORY(./test SRC_LIST_TEST)
 MESSAGE(STATUS "SRC_LIST_TEST = ${SRC_LIST_TEST}")
@@ -145,17 +152,20 @@ MESSAGE(STATUS "SRC_LIST_UTIL = ${SRC_LIST_UTIL}")
 
 # 生成目标可执行文件
 ADD_EXECUTABLE(${BUILD_TARGET_NAME} ${SRC_LIST_TEST} ${SRC_LIST_UTIL})
+TARGET_LINK_LIBRARIES(${BUILD_TARGET_NAME} PRIVATE ${PUBLIC_LINK_LIBS})
 
-# 链接公共依赖库
-TARGET_LINK_LIBRARIES(${BUILD_TARGET_NAME} ${PUBLIC_LINK_LIBS})
 MESSAGE(STATUS "PUBLIC_LINK_LIBS = ${PUBLIC_LINK_LIBS}")
 
 # 调试信息
 MESSAGE(STATUS "---------------------------------------------------------------------")
 MESSAGE(STATUS "PROJECT_SOURCE_DIR             = ${PROJECT_SOURCE_DIR}")
 MESSAGE(STATUS "PROJECT_BINARY_DIR             = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CMAKE_ARCHIVE_OUTPUT_DIRECTORY = ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+MESSAGE(STATUS "CMAKE_LIBRARY_OUTPUT_DIRECTORY = ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+MESSAGE(STATUS "CMAKE_RUNTIME_OUTPUT_DIRECTORY = ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 MESSAGE(STATUS "CMAKE_PROJECT_NAME             = ${CMAKE_PROJECT_NAME}")
 MESSAGE(STATUS "BUILD_TARGET_NAME              = ${BUILD_TARGET_NAME}")
+MESSAGE(STATUS "CMAKE_C_STANDARD               = C${CMAKE_C_STANDARD}")
 MESSAGE(STATUS "CMAKE_CXX_STANDARD             = C++${CMAKE_CXX_STANDARD}")
 MESSAGE(STATUS "CMAKE_BUILD_TYPE               = ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS "CMAKE_FIND_LIBRARY_SUFFIXES    = ${CMAKE_FIND_LIBRARY_SUFFIXES}")

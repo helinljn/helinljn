@@ -8,9 +8,9 @@ cmake -DCMAKE_BUILD_TYPE=Release ..\..\
 
 cmake --build .
 
-cd ..\..\lib
+cd ..\..\output
 
-move /y Debug\event_all_r.lib .
+move /y Debug\* .
 
 del /q Debug\*
 rd  /q Debug
