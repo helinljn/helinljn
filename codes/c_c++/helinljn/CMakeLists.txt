@@ -1,7 +1,7 @@
 # CMake最低版本
 CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 
-# C/C++语言
+# C/C++语言标准
 SET(CMAKE_C_STANDARD            99)
 SET(CMAKE_C_STANDARD_REQUIRED   ON)
 SET(CMAKE_C_EXTENSIONS          OFF)
@@ -41,7 +41,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/lib
     )
 
-    # 依赖库(优先链接静态库，然后才是动态库)
+    # 依赖库(优先链接静态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
     SET(PUBLIC_LINK_LIBS
         libprotobuf
@@ -96,7 +96,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/lib
     )
 
-    # 依赖库(优先链接静态库，然后才是动态库)
+    # 依赖库(优先链接静态库)
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
     SET(PUBLIC_LINK_LIBS
         -lprotobuf
