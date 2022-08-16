@@ -3,9 +3,9 @@
 	git config --global user.email xxx@xxx.com
 
 	Windows:
-        git config --global core.autocrlf true
-    Linux or Mac:
-        git config --global core.autocrlf input
+		git config --global core.autocrlf true
+	Linux or Mac:
+		git config --global core.autocrlf input
 	Windows only:
 		git config --global core.autocrlf false
 		

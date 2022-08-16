@@ -41,7 +41,7 @@ Preferences -> Settings
 
 Tools -> Build System -> New Build System -> Python_3_8_10.sublime-build
 {
-    "cmd": ["C:/ProgramData/Miniconda3/envs/python_3_8_10/python.exe", "-u", "$file"],
-    "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-    "selector": "source.python"
+	"cmd": ["C:/ProgramData/Miniconda3/envs/python_3_8_10/python.exe", "-u", "$file"],
+	"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+	"selector": "source.python"
 }

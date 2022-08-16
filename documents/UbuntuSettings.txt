@@ -287,8 +287,8 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 	2. 端口转发脚本wslbridge.ps1
 		# 使用管理员权限运行
 		if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-		    Start-Process PowerShell -Verb RunAs "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$pwd'; & '$PSCommandPath';`"";
-		    exit;
+		  Start-Process PowerShell -Verb RunAs "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$pwd'; & '$PSCommandPath';`"";
+		  exit;
 		}
 
 		#读取WSL2的IP地址
