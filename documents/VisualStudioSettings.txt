@@ -1,7 +1,20 @@
 【安装插件】
     1. Force UTF-8(No BOM)
 
-【设置Visual Assist X快捷键】
+    2. VisualAssist
+        a. Coloring And Attributes -> Enable all
+
+        b. Underlining -> Disable all
+
+        c. Display -> Display VA Navigation Bar -> Top & Occurrence
+
+        d. Enhanced Listboxes -> Source of C/C++ content -> Visual Assist
+
+        e. Debug Assistance -> Disable all
+
+        f. Startup -> Disable all
+
+【设置Visual Assist X快捷键，如果安装了此插件则只需要设置 视图.向后导航 即可】
     1. 打开VS -> 工具 -> 选项 -> 环境 -> 键盘
 
     2. 应用 (默认值) 键盘方案
