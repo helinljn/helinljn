@@ -8,11 +8,9 @@
 
         c. Display -> Display VA Navigation Bar -> Top & Occurrence
 
-        d. Enhanced Listboxes -> Source of C/C++ content -> Visual Assist
+        d. Debug Assistance -> Disable all
 
-        e. Debug Assistance -> Disable all
-
-        f. Startup -> Disable all
+        e. Startup -> Disable all
 
 【设置Visual Assist X快捷键，如果安装了此插件则只需要设置 视图.向后导航 即可】
     1. 打开VS -> 工具 -> 选项 -> 环境 -> 键盘
