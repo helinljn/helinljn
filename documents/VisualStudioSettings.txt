@@ -10,7 +10,7 @@
 
         d. Debug Assistance -> Disable all
 
-        e. Enhanced Listboxes -> Source of C/C++ content -> Visual Assist
+        e. Enhanced Listboxes -> Source of C/C++ content -> Default Intellisense
 
         f. Startup -> Disable all
 
