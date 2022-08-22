@@ -24,15 +24,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef EVENT2_EVENT_CONFIG_H_INCLUDED_
-#define EVENT2_EVENT_CONFIG_H_INCLUDED_
+#ifndef EVENT2_EVENT_PLATFORM_H_INCLUDED_
+#define EVENT2_EVENT_PLATFORM_H_INCLUDED_
 
-#include <event2/event-platform.h>
+#if (defined(_MSC_VER) && !defined(__INTEL_COMPILER)) || defined(_WIN32) || defined(WIN32) || defined(_WIN64) || defined(WIN64)
+    #if !defined(__EVENT_WINDOWS__)
+        #define __EVENT_WINDOWS__
+    
+        #if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0601)
+            #undef  _WIN32_WINNT
+            #define _WIN32_WINNT 0x0601
+        #endif // !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0601)
+    #endif // !defined(__EVENT_WINDOWS__)
+#elif defined(__linux__)
+    #if !defined(__EVENT_LINUX__)
+        #define __EVENT_LINUX__
+    #endif // !defined(__EVENT_LINUX__)
+#else
+    #error "Unrecognized OS Platform!"
+#endif // (defined(_MSC_VER) && !defined(__INTEL_COMPILER)) || defined(_WIN32) || defined(WIN32) || defined(_WIN64) || defined(WIN64)
 
-#if defined(__EVENT_WINDOWS__)
-    #include <event2/event-config-windows.h>
-#elif defined(__EVENT_LINUX__)
-    #include <event2/event-config-linux.h>
-#endif // defined(__EVENT_WINDOWS__)
-
-#endif // EVENT2_EVENT_CONFIG_H_INCLUDED_
+#endif // EVENT2_EVENT_PLATFORM_H_INCLUDED_

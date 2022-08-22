@@ -27,29 +27,12 @@
 #ifndef EVENT_EVCONFIG__PRIVATE_H_
 #define EVENT_EVCONFIG__PRIVATE_H_
 
-#if (defined(_MSC_VER) && !defined(__INTEL_COMPILER)) || defined(_WIN32) || defined(WIN32) || defined(_WIN64) || defined(WIN64)
-    #if !defined(__EV_WINDOWS__)
-        #define __EV_WINDOWS__
+#include <event2/event-platform.h>
 
-        #if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0601)
-            #undef  _WIN32_WINNT
-            #define _WIN32_WINNT 0x0601
-        #endif // !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0601)
-    #endif // !defined(__EV_WINDOWS__)
-#elif defined(__linux__)
-    #if !defined(__EV_LINUX__)
-        #define __EV_LINUX__
-    #endif // !defined(__EV_LINUX__)
-#else
-    #error "Unrecognized os platform!"
-#endif // (defined(_MSC_VER) && !defined(__INTEL_COMPILER)) || defined(_WIN32) || defined(WIN32) || defined(_WIN64) || defined(WIN64)
-
-#if defined(__EV_WINDOWS__)
+#if defined(__EVENT_WINDOWS__)
     #include <evconfig-private-windows.h>
-#elif defined(__EV_LINUX__)
+#elif defined(__EVENT_LINUX__)
     #include <evconfig-private-linux.h>
-#else
-    #error "Unrecognized os platform!"
-#endif // defined(__EV_WINDOWS__)
+#endif // defined(__EVENT_WINDOWS__)
 
 #endif // EVENT_EVCONFIG__PRIVATE_H_
