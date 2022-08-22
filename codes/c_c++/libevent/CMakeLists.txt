@@ -72,7 +72,7 @@ IF(MSVC)
     )
 
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /W4 /MP /wd4100 /wd4152 /wd4244 /wd4245 /wd4267 /wd4706 /wd4996")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /W4 /MP /wd4100 /wd4152 /wd4244 /wd4245 /wd4267 /wd4456 /wd4702 /wd4706 /wd4996")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
