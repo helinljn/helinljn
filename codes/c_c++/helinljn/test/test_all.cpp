@@ -1,7 +1,7 @@
 #include "test_all.h"
 #include "test_misc.h"
 
-void test_all(void)
+void test_misc(void)
 {
     test_sizeof();
 

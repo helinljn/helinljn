@@ -1,8 +1,10 @@
 #include "test_misc.h"
 #include "util/common.h"
-#include "util/time.h"
 
-#include <cstdint>
+#include "fmt/core.h"
+#include "fmt/format.h"
+#include "fmt/color.h"
+
 #include <limits>
 #include <utility>
 
@@ -57,6 +59,8 @@ void test_numeric_limits(void)
 
 void test_safe_time(void)
 {
+    using namespace common;
+
     time_t cur_timestamp = system_clock_now<std::chrono::seconds>();
     fmt::print("Current timestamp={}\n", cur_timestamp);
     fmt::print("Call safe_ctime() is:{}\n", safe_ctime(&cur_timestamp));

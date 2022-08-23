@@ -11,8 +11,8 @@ SET(CMAKE_CXX_EXTENSIONS        OFF)
 
 # Debug & Release选项
 IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose Debug or Release" FORCE)
-    MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, set default build to Debug")
+    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Debug or Release" FORCE)
+    MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, set default build to Release")
 ENDIF()
 
 # 项目名字
@@ -29,9 +29,9 @@ ENDIF()
 IF(MSVC)
     # 头文件目录
     SET(LIBEVENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/include
     )
 
     # 源文件
@@ -85,9 +85,9 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(LIBEVENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/include
     )
 
     # 源文件

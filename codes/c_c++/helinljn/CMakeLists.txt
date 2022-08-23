@@ -11,8 +11,8 @@ SET(CMAKE_CXX_EXTENSIONS        OFF)
 
 # Debug & Release选项
 IF(NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose Debug or Release" FORCE)
-    MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, set default build to Debug")
+    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Debug or Release" FORCE)
+    MESSAGE(STATUS "CMAKE_BUILD_TYPE is not set, set default build to Release")
 ENDIF()
 
 # 项目名字
@@ -30,7 +30,9 @@ IF(MSVC)
     # 头文件目录
     INCLUDE_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/libevent_x64-windows-static/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
@@ -38,7 +40,9 @@ IF(MSVC)
 
     # 依赖库目录
     LINK_DIRECTORIES(
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-windows-static/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/libevent_x64-windows-static/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/lib
     )
 
     # 依赖库(优先链接静态库)
@@ -70,7 +74,7 @@ IF(MSVC)
     SET(CMAKE_C_FLAGS_DEBUG            "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE          "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:__cplusplus /W4 /MP")
+    SET(CMAKE_CXX_FLAGS                "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:__cplusplus /W4 /MP /wd4819")
     SET(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE}")
 
@@ -85,7 +89,9 @@ ELSE()
     # 头文件目录
     INCLUDE_DIRECTORIES(
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/libevent_x64-linux/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
@@ -93,7 +99,9 @@ ELSE()
 
     # 依赖库目录
     LINK_DIRECTORIES(
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/installed/x64-linux/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/libevent_x64-linux/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/lib
     )
 
     # 依赖库(优先链接静态库)
@@ -106,9 +114,7 @@ ELSE()
         -levent_pthreads
         -lssl
         -lcrypto
-        -lstdc++fs
         -lpthread
-        -ldl
     )
 
     # 宏定义
