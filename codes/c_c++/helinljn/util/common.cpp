@@ -4,7 +4,7 @@
 
 namespace common {
 
-std::string memory_to_hex_string(const void* mem, size_t memlen, bool uppercase)
+std::string convert_memory_to_hex_string(const void* mem, size_t memlen, bool uppercase)
 {
     static const char uppercase_hex_table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     static const char lowercase_hex_table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
@@ -26,7 +26,7 @@ std::string memory_to_hex_string(const void* mem, size_t memlen, bool uppercase)
     return ret;
 }
 
-bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len)
+bool convert_hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len)
 {
     static const uint8_t ascii_to_uint8_table[] = {
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,

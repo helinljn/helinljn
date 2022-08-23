@@ -118,7 +118,7 @@ inline tm safe_localtime(const time_t* timep)
  * @param uppercase 十六进制字符是否大写
  * @return 成功返回转换后的字符串，失败返回空字符串
  */
-std::string memory_to_hex_string(const void* mem, size_t memlen, bool uppercase = true);
+std::string convert_memory_to_hex_string(const void* mem, size_t memlen, bool uppercase = true);
 
 /**
  * @brief 将16进制字符串转换为内存数据
@@ -131,7 +131,7 @@ std::string memory_to_hex_string(const void* mem, size_t memlen, bool uppercase 
  * @param outbuf_len 输出缓冲区的长度
  * @return 成功返回true，失败返回false
  */
-bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len);
+bool convert_hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len);
 
 } // namespace common
 
