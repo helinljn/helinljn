@@ -54,8 +54,8 @@ IF(MSVC)
         event_openssl
         libssl
         libcrypto
-        crypt32
         ws2_32
+        crypt32
         iphlpapi
     )
 
