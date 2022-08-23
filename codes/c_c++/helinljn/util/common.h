@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <chrono>
 #include <string>
-#include <vector>
 
 #if defined(NDEBUG)
     #define common_assert(expr) ((void)0)
