@@ -1,8 +1,41 @@
 #include "common.h"
 
+#include <cstdio>
 #include <cstring>
 
-namespace common {
+namespace common  {
+namespace details {
+
+int assert_internal(const char* msg, const char* file, const char* func, int line, bool is_abort)
+{
+    // 去除文件名中的路径信息
+#if defined(__COMMON_WINDOWS__)
+    const char* slash = strrchr(file, '\\');
+#else
+    const char* slash = strrchr(file, '/');
+#endif // defined(__COMMON_WINDOWS__)
+    if (slash)
+        file = slash + 1;
+
+    // 格式化输出断言信息
+    fprintf(stdout,
+        "\n----------- [ASSERTION FAILED BEGIN] -----------\n"
+        "File   : %s\n"
+        "Func   : %s\n"
+        "Line   : %d\n"
+        "Reason : %s\n"
+        "----------- [ ASSERTION FAILED END ] -----------\n\n",
+        file, func, line, msg
+    );
+
+    // 终止进程
+    if (is_abort)
+        abort();
+
+    return 1;
+}
+
+} // namespace details
 
 std::string convert_memory_to_hex_string(const void* mem, size_t memlen, bool uppercase)
 {

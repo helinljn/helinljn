@@ -123,6 +123,7 @@ void test_memory_and_hex_convert(void)
         convert_hex_string_to_memory(hex_string_upper.c_str(), &local_tm_upper, sizeof(local_tm_upper));
 
         local_tm_upper_str = safe_asctime(&local_tm_upper);
+        abort_assert(local_tm_str == local_tm_upper_str);
         fmt::print("local_tm_upper={}", local_tm_upper_str);
     }
 
@@ -132,13 +133,11 @@ void test_memory_and_hex_convert(void)
         convert_hex_string_to_memory(hex_string_lower.c_str(), &local_tm_lower, sizeof(local_tm_lower));
 
         local_tm_lower_str = safe_asctime(&local_tm_lower);
+        abort_assert(local_tm_str == local_tm_lower_str);
         fmt::print("local_tm_upper={}", local_tm_lower_str);
     }
-
-    if (local_tm_str != local_tm_upper_str || local_tm_str != local_tm_lower_str)
-        fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() failed!!! ", __func__)));
-    else
-        fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    
+    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_pair_tuple_tie(void)

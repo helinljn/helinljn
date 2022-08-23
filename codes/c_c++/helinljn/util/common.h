@@ -9,7 +9,31 @@
 #include <string>
 #include <vector>
 
-namespace common {
+#if defined(NDEBUG)
+    #define common_assert(expr) ((void)0)
+#else
+    #define common_assert(expr) \
+        ((void)(!!(expr) || common::details::assert_internal((#expr), __FILE__, __FUNCTION__, __LINE__, true)))
+#endif // defined(NDEBUG)
+
+#define abort_assert(expr) \
+    ((void)(!!(expr) || common::details::assert_internal((#expr), __FILE__, __FUNCTION__, __LINE__, true)))
+
+namespace common  {
+namespace details {
+
+/**
+ * @brief 内部断言实现
+ * @param msg      断言信息
+ * @param file     文件名
+ * @param func     函数名
+ * @param line     行号
+ * @param is_abort 是否终止进程
+ * @return
+ */
+int assert_internal(const char* msg, const char* file, const char* func, int line, bool is_abort);
+
+} // namespace details
 
 /**
  * @brief 获取系统时间(可回退)
