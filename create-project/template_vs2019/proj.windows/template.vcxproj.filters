@@ -11,11 +11,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\template.h">
+    <ClInclude Include="..\include\print_c.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\print_cpp.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\print_c.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\print_cpp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\template.cpp">
       <Filter>src</Filter>
     </ClCompile>

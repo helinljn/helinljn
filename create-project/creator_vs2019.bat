@@ -7,33 +7,8 @@ set /p name=Please input project name:
 
 xcopy /S /Y /i template_vs2019 %name%
 
-cd %name%\include\
-ren template.h %name%.h
-(
-	for /f "tokens=1* delims=:" %%a in ('findstr /n ".*" %name%.h') do (
-		set str=%%b
-		if "!str!" neq "" (
-			set str=!str:template=%name%!
-		)
-		echo,!str!
-	)
-) > temp%name%.h
-move /y temp%name%.h %name%.h
-cd ..\..\
-
 cd %name%\src\
 ren template.cpp %name%.cpp
-(
-	for /f "tokens=1* delims=:" %%a in ('findstr /n ".*" %name%.cpp') do (
-		set str=%%b
-		if "!str!" neq "" (
-			set str=!str:template=%name%!
-		)
-		echo,!str!
-	)
-) > temp%name%.cpp
-move /y temp%name%.cpp %name%.cpp
-
 (
 	for /f "tokens=1* delims=:" %%a in ('findstr /n ".*" Makefile') do (
 		set str=%%b

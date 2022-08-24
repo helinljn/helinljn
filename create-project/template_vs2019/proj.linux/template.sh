@@ -28,14 +28,14 @@ fi
 cd ../src
 
 if   [ "$xx_build_mode" = "debug" ]; then
-	make -f Makefile build_version=debug clean
-	make -f Makefile build_version=debug
+	make -f Makefile build_type=debug clean
+	make -f Makefile build_type=debug
 elif [ "$xx_build_mode" = "release" ]; then
 	make -f Makefile clean
 	make -f Makefile
 else
-	make -f Makefile build_version=debug clean
-	make -f Makefile build_version=debug
+	make -f Makefile build_type=debug clean
+	make -f Makefile build_type=debug
 	
 	make -f Makefile clean
 	make -f Makefile
