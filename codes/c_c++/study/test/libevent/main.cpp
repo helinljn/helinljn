@@ -1,7 +1,6 @@
 #include <cstdio>
 
 #include "libevent-config.h"
-#include "util/common.h"
 
 int main(void)
 {

@@ -2,7 +2,6 @@
 
 #include "event2/event.h"
 #include "event2/thread.h"
-#include "util/common.h"
 
 namespace libevent {
 
