@@ -36,6 +36,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
+        ${PROJECT_SOURCE_DIR}/../hana/hana/include
     )
 
     # 依赖库目录
@@ -95,6 +96,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
+        ${PROJECT_SOURCE_DIR}/../hana/hana/include
     )
 
     # 依赖库目录
