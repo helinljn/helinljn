@@ -14,7 +14,7 @@ ELSE()
     SET(EXEC_COMMON_UTIL_LIBRARY     "util_r")
 ENDIF()
 
-# 头文件目录、依赖库目录、依赖库、宏定义、额外编译选项
+# 头文件目录、依赖库目录、依赖库、宏定义、编译选项
 IF(MSVC)
     # 头文件目录
     SET(EXEC_LIBEVENT_INCLUDE_DIR
@@ -46,7 +46,7 @@ IF(MSVC)
         -DEXEC_LIBEVENT_VALUE_JUST_FOR_TEST=818
     )
 
-    # 额外编译选项
+    # 编译选项
     SET(EXEC_LIBEVENT_COMPILE_OPTIONS
         /wd4819
     )
@@ -79,7 +79,7 @@ ELSE()
         -DEXEC_LIBEVENT_VALUE_JUST_FOR_TEST=818
     )
 
-    # 额外编译选项
+    # 编译选项
     SET(EXEC_LIBEVENT_COMPILE_OPTIONS
         # ...
     )

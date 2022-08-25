@@ -5,7 +5,7 @@ ELSE()
     SET(LIBRARY_UTIL_BUILD_TARGET_NAME "util_r")
 ENDIF()
 
-# 头文件目录、宏定义、额外编译选项
+# 头文件目录、宏定义、编译选项
 IF(MSVC)
     # 头文件目录
     SET(LIBRARY_UTIL_INCLUDE_DIR
@@ -17,7 +17,7 @@ IF(MSVC)
         -DLIBRARY_UTIL_VALUE_JUST_FOR_TEST=818
     )
 
-    # 额外编译选项
+    # 编译选项
     SET(LIBRARY_UTIL_COMPILE_OPTIONS
         /wd4819
     )
@@ -32,7 +32,7 @@ ELSE()
         -DLIBRARY_UTIL_VALUE_JUST_FOR_TEST=818
     )
 
-    # 额外编译选项
+    # 编译选项
     SET(LIBRARY_UTIL_COMPILE_OPTIONS
         # ...
     )

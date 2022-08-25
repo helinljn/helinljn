@@ -5,7 +5,7 @@ ELSE()
     SET(LIBRARY_LIBEVENT_BUILD_TARGET_NAME "event_all_r")
 ENDIF()
 
-# 头文件目录、源文件、宏定义、额外编译选项
+# 头文件目录、源文件、宏定义、编译选项
 IF(MSVC)
     # 头文件目录
     SET(LIBRARY_LIBEVENT_INCLUDE_DIR
@@ -51,7 +51,7 @@ IF(MSVC)
         -D_WIN32_WINNT=0x0601
     )
 
-    # 额外编译选项
+    # 编译选项
     SET(LIBRARY_LIBEVENT_COMPILE_OPTIONS
         /wd4100
         /wd4152
@@ -107,7 +107,7 @@ ELSE()
         -DLIBRARY_LIBEVENT_VALUE_JUST_FOR_TEST=818
     )
 
-    # 额外编译选项
+    # 编译选项
     SET(LIBRARY_LIBEVENT_COMPILE_OPTIONS
         -Wno-format
         -Wno-unused-parameter
