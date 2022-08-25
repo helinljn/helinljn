@@ -7,11 +7,11 @@ ENDIF()
 
 # 本地编译的带_d & _r后缀的库需要特殊处理
 IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    SET(EXEC_COMMON_LIBEVENT_LIBRARY "event_all_d")
-    SET(EXEC_COMMON_UTIL_LIBRARY     "util_d")
+    SET(EXEC_LIBEVENT_LIBEVENT_LIBRARY "event_all_d")
+    SET(EXEC_LIBEVENT_UTIL_LIBRARY     "util_d")
 ELSE()
-    SET(EXEC_COMMON_LIBEVENT_LIBRARY "event_all_r")
-    SET(EXEC_COMMON_UTIL_LIBRARY     "util_r")
+    SET(EXEC_LIBEVENT_LIBEVENT_LIBRARY "event_all_r")
+    SET(EXEC_LIBEVENT_UTIL_LIBRARY     "util_r")
 ENDIF()
 
 # 头文件目录、依赖库目录、依赖库、宏定义、编译选项
@@ -32,8 +32,8 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_LIBEVENT_LINK_LIBS
-        ${EXEC_COMMON_UTIL_LIBRARY}
-        ${EXEC_COMMON_LIBEVENT_LIBRARY}
+        ${EXEC_LIBEVENT_UTIL_LIBRARY}
+        ${EXEC_LIBEVENT_LIBEVENT_LIBRARY}
         libssl
         libcrypto
         ws2_32
@@ -67,8 +67,8 @@ ELSE()
 
     # 依赖库
     SET(EXEC_LIBEVENT_LINK_LIBS
-        -l${EXEC_COMMON_UTIL_LIBRARY}
-        -l${EXEC_COMMON_LIBEVENT_LIBRARY}
+        -l${EXEC_LIBEVENT_UTIL_LIBRARY}
+        -l${EXEC_LIBEVENT_LIBEVENT_LIBRARY}
         -lssl
         -lcrypto
         -lpthread
