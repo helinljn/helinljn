@@ -1,0 +1,107 @@
+# 生成目标名字
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    SET(EXEC_LIBEVENT_BUILD_TARGET_NAME "libevent_d")
+ELSE()
+    SET(EXEC_LIBEVENT_BUILD_TARGET_NAME "libevent_r")
+ENDIF()
+
+# 本地编译的带_d & _r后缀的库需要特殊处理
+IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    SET(EXEC_COMMON_LIBEVENT_LIBRARY "event_all_d")
+    SET(EXEC_COMMON_UTIL_LIBRARY     "util_d")
+ELSE()
+    SET(EXEC_COMMON_LIBEVENT_LIBRARY "event_all_r")
+    SET(EXEC_COMMON_UTIL_LIBRARY     "util_r")
+ENDIF()
+
+# 头文件目录、依赖库目录、依赖库、宏定义、额外编译选项
+IF(MSVC)
+    # 头文件目录
+    SET(EXEC_LIBEVENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/test/libevent
+        ${PROJECT_SOURCE_DIR}/3rd/libevent/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
+    )
+
+    # 依赖库目录
+    SET(EXEC_LIBEVENT_LINK_LIBS_DIR
+        ${PROJECT_SOURCE_DIR}/output
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/lib
+    )
+
+    # 依赖库
+    SET(EXEC_LIBEVENT_LINK_LIBS
+        ${EXEC_COMMON_UTIL_LIBRARY}
+        ${EXEC_COMMON_LIBEVENT_LIBRARY}
+        libssl
+        libcrypto
+        ws2_32
+        crypt32
+        iphlpapi
+    )
+
+    # 宏定义
+    SET(EXEC_LIBEVENT_COMPILE_DEFINITIONS
+        -DEXEC_LIBEVENT_VALUE_JUST_FOR_TEST=818
+    )
+
+    # 额外编译选项
+    SET(EXEC_LIBEVENT_COMPILE_OPTIONS
+        /wd4819
+    )
+ELSE()
+    # 头文件目录
+    SET(EXEC_LIBEVENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/test/libevent
+        ${PROJECT_SOURCE_DIR}/3rd/libevent/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
+    )
+
+    # 依赖库目录
+    SET(EXEC_LIBEVENT_LINK_LIBS_DIR
+        ${PROJECT_SOURCE_DIR}/output
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/lib
+    )
+
+    # 依赖库
+    SET(EXEC_LIBEVENT_LINK_LIBS
+        -l${EXEC_COMMON_UTIL_LIBRARY}
+        -l${EXEC_COMMON_LIBEVENT_LIBRARY}
+        -lssl
+        -lcrypto
+        -lpthread
+    )
+
+    # 宏定义
+    SET(EXEC_LIBEVENT_COMPILE_DEFINITIONS
+        -DEXEC_LIBEVENT_VALUE_JUST_FOR_TEST=818
+    )
+
+    # 额外编译选项
+    SET(EXEC_LIBEVENT_COMPILE_OPTIONS
+        # ...
+    )
+ENDIF()
+
+MESSAGE(STATUS "---------------------------------------------------------------------")
+
+# 递归添加[./]目录下所有源文件(不包括头文件)
+#AUX_SOURCE_DIRECTORY(./ EXEC_LIBEVENT_DIR_SRC_LIST)
+FILE(GLOB_RECURSE EXEC_LIBEVENT_DIR_SRC_LIST ./*.c ./*.cc ./*.cpp)
+
+# 生成目标可执行文件
+ADD_EXECUTABLE(${EXEC_LIBEVENT_BUILD_TARGET_NAME}                     ${EXEC_LIBEVENT_DIR_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${EXEC_LIBEVENT_BUILD_TARGET_NAME} PRIVATE ${EXEC_LIBEVENT_INCLUDE_DIR})
+TARGET_COMPILE_DEFINITIONS(${EXEC_LIBEVENT_BUILD_TARGET_NAME} PRIVATE ${EXEC_LIBEVENT_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${EXEC_LIBEVENT_BUILD_TARGET_NAME}     PRIVATE ${EXEC_LIBEVENT_COMPILE_OPTIONS})
+TARGET_LINK_DIRECTORIES(${EXEC_LIBEVENT_BUILD_TARGET_NAME}    PRIVATE ${EXEC_LIBEVENT_LINK_LIBS_DIR})
+TARGET_LINK_LIBRARIES(${EXEC_LIBEVENT_BUILD_TARGET_NAME}      PRIVATE ${EXEC_LIBEVENT_LINK_LIBS})
+
+MESSAGE(STATUS "EXEC_LIBEVENT_DIR_SRC_LIST        = ${EXEC_LIBEVENT_DIR_SRC_LIST}")
+MESSAGE(STATUS "EXEC_LIBEVENT_INCLUDE_DIR         = ${EXEC_LIBEVENT_INCLUDE_DIR}")
+MESSAGE(STATUS "EXEC_LIBEVENT_COMPILE_DEFINITIONS = ${EXEC_LIBEVENT_COMPILE_DEFINITIONS}")
+MESSAGE(STATUS "EXEC_LIBEVENT_COMPILE_OPTIONS     = ${EXEC_LIBEVENT_COMPILE_OPTIONS}")
+MESSAGE(STATUS "EXEC_LIBEVENT_LINK_LIBS_DIR       = ${EXEC_LIBEVENT_LINK_LIBS_DIR}")
+MESSAGE(STATUS "EXEC_LIBEVENT_LINK_LIBS           = ${EXEC_LIBEVENT_LINK_LIBS}")
