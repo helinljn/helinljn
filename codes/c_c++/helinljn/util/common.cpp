@@ -37,29 +37,28 @@ int assert_internal(const char* msg, const char* file, const char* func, int lin
 
 } // namespace details
 
-std::string convert_memory_to_hex_string(const void* mem, size_t memlen, bool uppercase)
+bool convert_memory_to_hex_string(const void* mem, size_t memlen, std::string& result, bool uppercase)
 {
     static const char uppercase_hex_table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     static const char lowercase_hex_table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-    std::string ret;
-    if (NULL == mem || 0 == memlen)
-        return ret;
+    if (nullptr == mem || 0 == memlen)
+        return false;
 
-    ret.reserve(memlen * 2);
+    result.reserve(memlen * 2);
 
     const char*    hex_table = (uppercase ? uppercase_hex_table : lowercase_hex_table);
     const uint8_t* temp_mem  = reinterpret_cast<const uint8_t*>(mem);
     for (size_t idx = 0; idx != memlen; ++idx)
     {
-        ret.push_back(hex_table[(temp_mem[idx]  & 0xF0) >> 4]);
-        ret.push_back(hex_table[(temp_mem[idx]) & 0x0F]);
+        result.push_back(hex_table[(temp_mem[idx]  & 0xF0) >> 4]);
+        result.push_back(hex_table[(temp_mem[idx]) & 0x0F]);
     }
 
-    return ret;
+    return true;
 }
 
-bool convert_hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len)
+bool convert_hex_string_to_memory(const char* hex_string, size_t hex_string_len, void* outbuf, size_t outbuf_len)
 {
     static const uint8_t ascii_to_uint8_table[] = {
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -90,10 +89,9 @@ bool convert_hex_string_to_memory(const char* hex_string, void* outbuf, size_t o
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     };
 
-    if (NULL == hex_string || NULL == outbuf || 0 == outbuf_len)
+    if (nullptr == hex_string || 0 == hex_string_len || nullptr == outbuf || 0 == outbuf_len)
         return false;
 
-    size_t hex_string_len = strlen(hex_string);
     if (hex_string_len % 2 != 0 || hex_string_len / 2 > outbuf_len)
         return false;
 
@@ -109,6 +107,11 @@ bool convert_hex_string_to_memory(const char* hex_string, void* outbuf, size_t o
     }
 
     return true;
+}
+
+bool convert_hex_string_to_memory(const std::string& hex_string, void* outbuf, size_t outbuf_len)
+{
+    return convert_hex_string_to_memory(hex_string.c_str(), hex_string.size(), outbuf, outbuf_len);
 }
 
 } // namespace common

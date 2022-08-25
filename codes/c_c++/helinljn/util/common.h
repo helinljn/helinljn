@@ -138,10 +138,11 @@ inline tm safe_localtime(const time_t* timep)
  *        比如：0xF8转换为：'F'和'8'
  * @param mem       需要转换的内存地址
  * @param memlen    需要转换的内存长度
+ * @param result    转换的结果
  * @param uppercase 十六进制字符是否大写
- * @return 成功返回转换后的字符串，失败返回空字符串
+ * @return 成功返回true，失败返回false
  */
-std::string convert_memory_to_hex_string(const void* mem, size_t memlen, bool uppercase = true);
+bool convert_memory_to_hex_string(const void* mem, size_t memlen, std::string& result, bool uppercase = true);
 
 /**
  * @brief 将16进制字符串转换为内存数据
@@ -149,12 +150,14 @@ std::string convert_memory_to_hex_string(const void* mem, size_t memlen, bool up
  *        比如："F8"转换为：0xF8，hex_string和outbuf_len必须满足以下关系
  *        (0 == strlen(hex_string) % 2) && (outbuf_len >= strlen(hex_string) / 2)
  *        即：字符串的长度必须为偶数，输出缓冲区的长度必须 >= 字符串的长度 / 2
- * @param hex_string 需要转换的16进制字符串
- * @param outbuf     输出缓冲区
- * @param outbuf_len 输出缓冲区的长度
+ * @param hex_string     需要转换的16进制字符串
+ * @param hex_string_len 需要转换的16进制字符串的长度
+ * @param outbuf         输出缓冲区
+ * @param outbuf_len     输出缓冲区的长度
  * @return 成功返回true，失败返回false
  */
-bool convert_hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len);
+bool convert_hex_string_to_memory(const char* hex_string, size_t hex_string_len, void* outbuf, size_t outbuf_len);
+bool convert_hex_string_to_memory(const std::string& hex_string, void* outbuf, size_t outbuf_len);
 
 } // namespace common
 
