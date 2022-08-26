@@ -1,9 +1,5 @@
 # 生成目标名字
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    SET(LIBRARY_LIBEVENT_BUILD_TARGET_NAME "event_all_d")
-ELSE()
-    SET(LIBRARY_LIBEVENT_BUILD_TARGET_NAME "event_all_r")
-ENDIF()
+SET(LIBRARY_LIBEVENT_BUILD_TARGET_NAME "event_all")
 
 # 头文件目录、源文件、宏定义、编译选项
 IF(MSVC)

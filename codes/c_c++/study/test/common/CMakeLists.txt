@@ -1,16 +1,5 @@
 # 生成目标名字
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    SET(EXEC_COMMON_BUILD_TARGET_NAME "common_d")
-ELSE()
-    SET(EXEC_COMMON_BUILD_TARGET_NAME "common_r")
-ENDIF()
-
-# 本地编译的带_d & _r后缀的库需要特殊处理
-IF("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    SET(EXEC_COMMON_UTIL_LIBRARY "util_d")
-ELSE()
-    SET(EXEC_COMMON_UTIL_LIBRARY "util_r")
-ENDIF()
+SET(EXEC_COMMON_BUILD_TARGET_NAME "common")
 
 # 头文件目录、依赖库目录、依赖库、宏定义、编译选项
 IF(MSVC)
@@ -22,12 +11,12 @@ IF(MSVC)
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/output
+        ${PROJECT_SOURCE_DIR}/output/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库
     SET(EXEC_COMMON_LINK_LIBS
-        ${EXEC_COMMON_UTIL_LIBRARY}
+        util
     )
 
     # 宏定义
@@ -48,12 +37,12 @@ ELSE()
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/output
+        ${PROJECT_SOURCE_DIR}/output/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库
     SET(EXEC_COMMON_LINK_LIBS
-        -l${EXEC_COMMON_UTIL_LIBRARY}
+        -lutil
         -lpthread
     )
 

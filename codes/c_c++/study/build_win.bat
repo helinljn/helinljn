@@ -4,11 +4,11 @@ mkdir build\windows
 
 cd build\windows
 
-cmake -DCMAKE_BUILD_TYPE=Release ..\..\
+cmake -DCMAKE_BUILD_TYPE=release ..\..\
 
 cmake --build .
 
-cd ..\..\output
+cd ..\..\output\release
 
 move /y Debug\* .
 
