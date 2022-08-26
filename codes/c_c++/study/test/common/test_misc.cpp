@@ -1,5 +1,4 @@
 #include "test_misc.h"
-#include "util/common.h"
 
 #include "fmt/core.h"
 #include "fmt/format.h"
@@ -29,9 +28,6 @@ void test_sizeof(void)
     static_assert(8 == sizeof(size_t));
     static_assert(8 == sizeof(ptrdiff_t));
     static_assert(8 == sizeof(intptr_t));
-
-    static_assert(201703 == __cplusplus);
-    static_assert(818    == XXX_VALUE_JUST_FOR_TEST);
 
     fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }

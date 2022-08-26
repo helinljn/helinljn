@@ -1,6 +1,8 @@
 #ifndef __TEST_MISC_H__
 #define __TEST_MISC_H__
 
+#include "util/common.h"
+
 void test_sizeof(void);
 
 void test_numeric_limits(void);

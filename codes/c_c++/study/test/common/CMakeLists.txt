@@ -7,11 +7,13 @@ IF(MSVC)
     SET(EXEC_COMMON_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/test/common
+        ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
+        ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
     )
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/output/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/out/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库
@@ -22,6 +24,8 @@ IF(MSVC)
     # 宏定义
     SET(EXEC_COMMON_COMPILE_DEFINITIONS
         -DEXEC_COMMON_VALUE_JUST_FOR_TEST=818
+        -DFMT_HEADER_ONLY
+        -DSPDLOG_FMT_EXTERNAL
     )
 
     # 编译选项
@@ -33,11 +37,13 @@ ELSE()
     SET(EXEC_COMMON_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/test/common
+        ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
+        ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
     )
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/output/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/out/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库
@@ -49,6 +55,8 @@ ELSE()
     # 宏定义
     SET(EXEC_COMMON_COMPILE_DEFINITIONS
         -DEXEC_COMMON_VALUE_JUST_FOR_TEST=818
+        -DFMT_HEADER_ONLY
+        -DSPDLOG_FMT_EXTERNAL
     )
 
     # 编译选项
