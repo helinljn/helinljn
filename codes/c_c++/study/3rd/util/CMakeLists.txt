@@ -5,7 +5,8 @@ SET(LIBRARY_UTIL_BUILD_TARGET_NAME "util")
 IF(MSVC)
     # 头文件目录
     SET(LIBRARY_UTIL_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/util
+        ${PROJECT_SOURCE_DIR}/3rd/util
+        ${PROJECT_SOURCE_DIR}/3rd/util/include
     )
 
     # 宏定义
@@ -20,7 +21,8 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(LIBRARY_UTIL_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/util
+        ${PROJECT_SOURCE_DIR}/3rd/util
+        ${PROJECT_SOURCE_DIR}/3rd/util/include
     )
 
     # 宏定义

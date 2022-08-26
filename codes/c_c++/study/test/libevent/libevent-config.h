@@ -4,7 +4,7 @@
 #ifndef __LIBEVENT_H__
 #define __LIBEVENT_H__
 
-#include "util/common.h"
+#include "common.h"
 
 namespace libevent {
 

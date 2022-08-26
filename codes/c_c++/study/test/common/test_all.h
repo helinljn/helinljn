@@ -1,7 +1,7 @@
 #ifndef __TEST_ALL_H__
 #define __TEST_ALL_H__
 
-#include "util/common.h"
+#include "common.h"
 
 void test_misc(void);
 

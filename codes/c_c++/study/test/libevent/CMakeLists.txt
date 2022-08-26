@@ -5,8 +5,8 @@ SET(EXEC_LIBEVENT_BUILD_TARGET_NAME "libevent")
 IF(MSVC)
     # 头文件目录
     SET(EXEC_LIBEVENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/test/libevent
+        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
@@ -40,8 +40,8 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(EXEC_LIBEVENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/test/libevent
+        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )

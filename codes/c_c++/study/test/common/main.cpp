@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "util/common.h"
+#include "common.h"
 #include "test_all.h"
 
 int main(void)

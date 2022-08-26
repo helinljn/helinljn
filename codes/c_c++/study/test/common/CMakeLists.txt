@@ -5,8 +5,8 @@ SET(EXEC_COMMON_BUILD_TARGET_NAME "common")
 IF(MSVC)
     # 头文件目录
     SET(EXEC_COMMON_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/test/common
+        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
     )
@@ -35,8 +35,8 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(EXEC_COMMON_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/test/common
+        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
     )
