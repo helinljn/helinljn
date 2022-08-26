@@ -9,10 +9,10 @@ SET(CMAKE_CXX_STANDARD          17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS        OFF)
 
-# debug & release选项
-IF(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "debug") AND NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "release"))
-    SET(CMAKE_BUILD_TYPE "release")
-    MESSAGE(STATUS "CMAKE_BUILD_TYPE is invalid, must be one of 'debug | release', set default build type to 'release'.")
+# Debug & Release选项
+IF(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug") AND NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Release"))
+    SET(CMAKE_BUILD_TYPE "Release")
+    MESSAGE(STATUS "CMAKE_BUILD_TYPE is invalid, must be one of 'Debug | Release', set default build type to 'Release'.")
 ENDIF()
 
 # 项目名字
