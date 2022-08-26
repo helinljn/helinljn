@@ -50,11 +50,16 @@ IF(MSVC)
     # 编译选项
     SET(LIBRARY_LIBEVENT_COMPILE_OPTIONS
         /wd4100
+        /wd4115
+        /wd4127
+        /wd4131
         /wd4152
         /wd4244
         /wd4245
         /wd4267
+        /wd4295
         /wd4456
+        /wd4457
         /wd4702
         /wd4706
         /wd4819
