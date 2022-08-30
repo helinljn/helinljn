@@ -4,45 +4,8 @@
 #include "fmt/format.h"
 #include "fmt/color.h"
 
-#include "protocol/TestMsgDefine.pb.h"
-#include "protocol/TestMsgStruct.pb.h"
-
 #include <limits>
 #include <utility>
-
-class CommonInfo
-{
-public:
-    bool        test_bool;
-    float       test_float;
-    double      test_double;
-    std::string test_string;
-    int32_t     test_int32;
-    int32_t     test_sint32;
-    uint32_t    test_uint32;
-    int64_t     test_int64;
-    int64_t     test_sint64;
-    uint64_t    test_uint64;
-};
-
-bool operator ==(const CommonInfo& cinfo, const TestMsg::CommonInfo& pinfo)
-{
-    return cinfo.test_bool   == pinfo.test_bool()
-        && cinfo.test_float  == pinfo.test_float()
-        && cinfo.test_double == pinfo.test_double()
-        && cinfo.test_string == pinfo.test_string()
-        && cinfo.test_int32  == pinfo.test_int32()
-        && cinfo.test_sint32 == pinfo.test_sint32()
-        && cinfo.test_uint32 == pinfo.test_uint32()
-        && cinfo.test_int64 == pinfo.test_int64()
-        && cinfo.test_sint64 == pinfo.test_sint64()
-        && cinfo.test_uint64 == pinfo.test_uint64();
-}
-
-bool operator ==(const TestMsg::CommonInfo& pinfo, const CommonInfo& cinfo)
-{
-    return cinfo == pinfo;
-}
 
 void test_sizeof(void)
 {
@@ -92,8 +55,6 @@ void test_numeric_limits(void)
 
 void test_safe_time(void)
 {
-    using namespace common;
-
     time_t cur_timestamp = system_clock_now<std::chrono::seconds>();
     fmt::print("Current timestamp={}\n", cur_timestamp);
     fmt::print("Call safe_ctime() is:{}\n", safe_ctime(&cur_timestamp));
@@ -137,8 +98,6 @@ void test_safe_time(void)
 
 void test_memory_and_hex_convert(void)
 {
-    using namespace common;
-
     time_t cur_timestamp = system_clock_now<std::chrono::seconds>();
     fmt::print("Current timestamp={}\n", cur_timestamp);
 
@@ -175,23 +134,6 @@ void test_memory_and_hex_convert(void)
     }
     
     fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
-}
-
-void test_protobuf(void)
-{
-    CommonInfo info{true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
-
-    TestMsg::CommonInfo testInfo;
-    testInfo.set_test_bool(info.test_bool);
-    testInfo.set_test_float(info.test_float);
-    testInfo.set_test_double(info.test_double);
-    testInfo.set_test_string(info.test_string);
-    testInfo.set_test_int32(info.test_int32);
-    testInfo.set_test_sint32(info.test_sint32);
-    testInfo.set_test_uint32(info.test_uint32);
-    testInfo.set_test_int64(info.test_int64);
-    testInfo.set_test_sint64(info.test_sint64);
-    testInfo.set_test_uint64(info.test_uint64);
 }
 
 void test_pair_tuple_tie(void)

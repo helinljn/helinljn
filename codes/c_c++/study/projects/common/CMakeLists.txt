@@ -5,31 +5,43 @@ SET(EXEC_COMMON_BUILD_TARGET_NAME "common")
 IF(MSVC)
     # 头文件目录
     SET(EXEC_COMMON_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/test/common
-        ${PROJECT_SOURCE_DIR}/3rd/util/include
+        ${PROJECT_SOURCE_DIR}/projects/common
+        ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
+        ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_COMMON_LINK_LIBS
-        util
+        http_parser
+        event_all
         libprotobuf${VCPKG_LIBS_NAME_REFIX}
+        libssl
+        libcrypto
+        ws2_32
+        crypt32
+        iphlpapi
     )
 
     # 宏定义
     SET(EXEC_COMMON_COMPILE_DEFINITIONS
         -D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
+        -D_WIN32_WINNT=0x0601
         -DEXEC_COMMON_VALUE_JUST_FOR_TEST=818
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
+        -DASIO_STANDALONE
     )
 
     # 编译选项
@@ -41,24 +53,32 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(EXEC_COMMON_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/test/common
-        ${PROJECT_SOURCE_DIR}/3rd/util/include
+        ${PROJECT_SOURCE_DIR}/projects/common
+        ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
+        ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_COMMON_LINK_LIBS
-        -lutil
+        -lhttp_parser
+        -levent_all
         -lprotobuf${VCPKG_LIBS_NAME_REFIX}
+        -lssl
+        -lcrypto
         -lpthread
+        -ldl
     )
 
     # 宏定义
@@ -66,6 +86,7 @@ ELSE()
         -DEXEC_COMMON_VALUE_JUST_FOR_TEST=818
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
+        -DASIO_STANDALONE
     )
 
     # 编译选项

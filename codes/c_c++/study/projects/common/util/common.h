@@ -12,13 +12,12 @@
     #define common_assert(expr) ((void)0)
 #else
     #define common_assert(expr) \
-        ((void)(!!(expr) || common::details::assert_internal((#expr), __FILE__, __FUNCTION__, __LINE__, true)))
+        ((void)(!!(expr) || details::assert_internal((#expr), __FILE__, __FUNCTION__, __LINE__, true)))
 #endif // defined(NDEBUG)
 
 #define abort_assert(expr) \
-    ((void)(!!(expr) || common::details::assert_internal((#expr), __FILE__, __FUNCTION__, __LINE__, true)))
+    ((void)(!!(expr) || details::assert_internal((#expr), __FILE__, __FUNCTION__, __LINE__, true)))
 
-namespace common  {
 namespace details {
 
 /**
@@ -158,7 +157,5 @@ bool convert_memory_to_hex_string(const void* mem, size_t memlen, std::string& r
  */
 bool convert_hex_string_to_memory(const char* hex_string, size_t hex_string_len, void* outbuf, size_t outbuf_len);
 bool convert_hex_string_to_memory(const std::string& hex_string, void* outbuf, size_t outbuf_len);
-
-} // namespace common
 
 #endif // __COMMON_H__

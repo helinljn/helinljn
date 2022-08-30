@@ -5,7 +5,7 @@ SET(EXEC_ASIO_BUILD_TARGET_NAME "asio")
 IF(MSVC)
     # 头文件目录
     SET(EXEC_ASIO_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/test/asio
+        ${PROJECT_SOURCE_DIR}/projects/asio
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
@@ -38,7 +38,7 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(EXEC_ASIO_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/test/asio
+        ${PROJECT_SOURCE_DIR}/projects/asio
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )

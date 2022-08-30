@@ -3,8 +3,6 @@
 #include "event2/event.h"
 #include "event2/thread.h"
 
-namespace libevent {
-
 void libevent_init(void)
 {
     //////////////////////////////////////////////////////////////////////////
@@ -113,5 +111,3 @@ void libevent_fatal_callback(int error_code)
 
     abort_assert(false && "libevent_fatal_callback()!!!");
 }
-
-} // namespace libevent

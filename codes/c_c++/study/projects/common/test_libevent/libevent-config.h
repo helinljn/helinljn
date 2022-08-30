@@ -4,9 +4,7 @@
 #ifndef __LIBEVENT_H__
 #define __LIBEVENT_H__
 
-#include "common.h"
-
-namespace libevent {
+#include "util/common.h"
 
 /**
  * @brief 初始化libevent
@@ -64,7 +62,5 @@ void libevent_log_callback(int severity, const char* msg);
  * @return
  */
 void libevent_fatal_callback(int error_code);
-
-} // namespace libevent
 
 #endif // __LIBEVENT_H__

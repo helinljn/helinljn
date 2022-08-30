@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <cstring>
 
-namespace common  {
 namespace details {
 
 int assert_internal(const char* msg, const char* file, const char* func, int line, bool is_abort)
@@ -113,5 +112,3 @@ bool convert_hex_string_to_memory(const std::string& hex_string, void* outbuf, s
 {
     return convert_hex_string_to_memory(hex_string.c_str(), hex_string.size(), outbuf, outbuf_len);
 }
-
-} // namespace common
