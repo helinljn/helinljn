@@ -11,6 +11,8 @@ void test_safe_time(void);
 
 void test_memory_and_hex_convert(void);
 
+void test_protobuf(void);
+
 void test_pair_tuple_tie(void);
 
 #endif // __TEST_MISC_H__

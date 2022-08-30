@@ -6,20 +6,17 @@ IF(MSVC)
     # 头文件目录
     SET(EXEC_ASIO_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}/test/asio
-        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
 
     # 依赖库目录
     SET(EXEC_ASIO_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_ASIO_LINK_LIBS
-        util
         libssl
         libcrypto
         ws2_32
@@ -36,26 +33,23 @@ IF(MSVC)
 
     # 编译选项
     SET(EXEC_ASIO_COMPILE_OPTIONS
-        /wd4819
+        # ...
     )
 ELSE()
     # 头文件目录
     SET(EXEC_ASIO_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}/test/asio
-        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
 
     # 依赖库目录
     SET(EXEC_ASIO_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_ASIO_LINK_LIBS
-        -lutil
         -lssl
         -lcrypto
         -lpthread

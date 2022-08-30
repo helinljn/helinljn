@@ -1,3 +1,2 @@
 ADD_SUBDIRECTORY(http-parser)
 ADD_SUBDIRECTORY(libevent)
-ADD_SUBDIRECTORY(util)

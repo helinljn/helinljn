@@ -9,20 +9,24 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/include
     )
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_COMMON_LINK_LIBS
         util
+        libprotobuf${VCPKG_LIBS_NAME_REFIX}
     )
 
     # 宏定义
     SET(EXEC_COMMON_COMPILE_DEFINITIONS
+        -D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
         -DEXEC_COMMON_VALUE_JUST_FOR_TEST=818
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
@@ -30,6 +34,8 @@ IF(MSVC)
 
     # 编译选项
     SET(EXEC_COMMON_COMPILE_OPTIONS
+        /wd4100
+        /wd4125
         /wd4819
     )
 ELSE()
@@ -39,16 +45,19 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/include
     )
 
     # 依赖库目录
     SET(EXEC_COMMON_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_COMMON_LINK_LIBS
         -lutil
+        -lprotobuf${VCPKG_LIBS_NAME_REFIX}
         -lpthread
     )
 
@@ -61,7 +70,7 @@ ELSE()
 
     # 编译选项
     SET(EXEC_COMMON_COMPILE_OPTIONS
-        # ...
+        -Wno-unused-parameter
     )
 ENDIF()
 

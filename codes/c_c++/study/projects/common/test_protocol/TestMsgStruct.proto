@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package TestMsg;
+
+import "TestMsgDefine.proto";
+
+message CommonInfo
+{
+    bool   test_bool   = 1;
+    float  test_float  = 2;
+    double test_double = 3;
+    bytes  test_string = 4;
+    int32  test_int32  = 5;
+    sint32 test_sint32 = 6;
+    uint32 test_uint32 = 7;
+    int64  test_int64  = 8;
+    sint64 test_sint64 = 9;
+    uint64 test_uint64 = 10;
+}
+
+message CommonInfoList
+{
+    repeated CommonInfo common_info_list = 1;
+    repeated CommonType common_type_list = 2;
+}

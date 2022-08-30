@@ -6,7 +6,6 @@ IF(MSVC)
     # 头文件目录
     SET(EXEC_LIBEVENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}/test/libevent
-        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
@@ -14,12 +13,11 @@ IF(MSVC)
     # 依赖库目录
     SET(EXEC_LIBEVENT_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_LIBEVENT_LINK_LIBS
-        util
         event_all
         libssl
         libcrypto
@@ -35,13 +33,12 @@ IF(MSVC)
 
     # 编译选项
     SET(EXEC_LIBEVENT_COMPILE_OPTIONS
-        /wd4819
+        # ...
     )
 ELSE()
     # 头文件目录
     SET(EXEC_LIBEVENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}/test/libevent
-        ${PROJECT_SOURCE_DIR}/3rd/util/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
@@ -49,16 +46,16 @@ ELSE()
     # 依赖库目录
     SET(EXEC_LIBEVENT_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/lib
+        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
     SET(EXEC_LIBEVENT_LINK_LIBS
-        -lutil
         -levent_all
         -lssl
         -lcrypto
         -lpthread
+        -ldl
     )
 
     # 宏定义

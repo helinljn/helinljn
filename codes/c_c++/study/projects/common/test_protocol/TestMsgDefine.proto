@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package TestMsg;
+
+enum CommonType
+{
+    CT_BOOL    = 0;  // bool   - 布尔值
+    CT_BYTES   = 1;  // string - 可能包含任意顺序的字节数据，类似Java的ByteString以及C++的string
+    CT_DOUBLE  = 2;  // double - 浮点数
+    CT_FLOAT   = 3;  // float  - 单精度浮点
+    CT_INT32   = 4;  // int32  - 使用可变长编码，编码负数不够高效，如果有负数那么使用sint32
+    CT_SINT32  = 5;  // sint32 - 使用可变长编码，比通常的int32高效
+    CT_UINT32  = 6;  // uint32 - 无符号整数，使用可变长编码
+    CT_INT64   = 7;  // int64  - 使用可变长编码，编码负数不够高效，如果有负数那么使用sint64
+    CT_SINT64  = 8;  // sint64 - 使用可变长编码，比通常的int64高效
+    CT_UINT64  = 9;  // uint64 - 无符号整数，使用可变长编码
+}
