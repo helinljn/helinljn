@@ -275,7 +275,7 @@ void test_protocol_serialization_list(void)
         {
             temp = string_to_info_list.mutable_common_info_list(idx);
             abort_assert(temp != nullptr);
-            temp->set_test_string(temp->test_string() + "CommonInfo");
+            temp->set_test_string(temp->test_string() + "CommonInfoString");
         }
 
         // for mutable_common_type_list
@@ -325,21 +325,21 @@ void test_protocol_serialization_list(void)
 
         // foreach mutable_common_type_list
         for (auto& val : *array_to_info_list.mutable_common_type_list())
-            val = TestMsg::CT_BOOL;
+            val = TestMsg::CT_BYTES;
 
         // for mutable_common_info_list
         for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
         {
             temp = array_to_info_list.mutable_common_info_list(idx);
             abort_assert(temp != nullptr);
-            temp->set_test_string(temp->test_string() + "CommonInfo");
+            temp->set_test_string(temp->test_string() + "CommonInfoArray");
         }
 
         // for mutable_common_type_list
         if (auto ptr = array_to_info_list.mutable_common_type_list(); ptr != nullptr)
             for (idx = 0; idx != ptr->size(); ++idx)
                 if (0 == idx % 2)
-                    (*ptr)[idx] = TestMsg::CT_BYTES;
+                    (*ptr)[idx] = TestMsg::CT_BOOL;
 
         // DebugString
         fmt::print("---- array_to_info_list.DebugString() start ----\n");
