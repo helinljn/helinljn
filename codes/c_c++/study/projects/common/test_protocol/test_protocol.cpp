@@ -350,9 +350,80 @@ void test_protocol_serialization_list(void)
     fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
+void test_protocol_performance(void)
+{
+    CommonInfo info{true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
+
+    TestMsg::CommonInfo test_info;
+    test_info.set_test_bool(info.test_bool);
+    test_info.set_test_float(info.test_float);
+    test_info.set_test_double(info.test_double);
+    test_info.set_test_string(info.test_string);
+    test_info.set_test_int32(info.test_int32);
+    test_info.set_test_sint32(info.test_sint32);
+    test_info.set_test_uint32(info.test_uint32);
+    test_info.set_test_int64(info.test_int64);
+    test_info.set_test_sint64(info.test_sint64);
+    test_info.set_test_uint64(info.test_uint64);
+
+    size_t test_info_size = test_info.ByteSizeLong();
+    size_t repeat_times   = 1000000;
+    time_t start_time     = 0;
+    time_t end_time       = 0;
+
+    std::string info_to_string;
+    char        info_to_array[128];
+
+    // SerializeToString VS SerializeToArray
+    {
+        start_time = steady_clock_now();
+        for (size_t idx = 0; idx != repeat_times; ++idx)
+        {
+            info_to_string.clear();
+            abort_assert(test_info.SerializeToString(&info_to_string));
+        }
+        end_time = steady_clock_now();
+        fmt::print("Repeat {} times, SerializeToString: {} microsecond!!!\n", repeat_times, end_time - start_time);
+        
+        start_time = steady_clock_now();
+        for (size_t idx = 0; idx != repeat_times; ++idx)
+        {
+            abort_assert(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
+        }
+        end_time = steady_clock_now();
+        fmt::print("Repeat {} times, SerializeToArray: {} microsecond!!!\n", repeat_times, end_time - start_time);
+    }
+
+    // ParseFromString VS ParseFromArray
+    {
+        TestMsg::CommonInfo string_to_info;
+        start_time = steady_clock_now();
+        for (size_t idx = 0; idx != repeat_times; ++idx)
+        {
+            abort_assert(string_to_info.ParseFromString(info_to_string));
+            abort_assert(string_to_info == info);
+        }
+        end_time = steady_clock_now();
+        fmt::print("Repeat {} times, ParseFromString: {} microsecond!!!\n", repeat_times, end_time - start_time);
+        
+        TestMsg::CommonInfo array_to_info;
+        start_time = steady_clock_now();
+        for (size_t idx = 0; idx != repeat_times; ++idx)
+        {
+            abort_assert(array_to_info.ParseFromArray(info_to_array, static_cast<int>(test_info_size)));
+            abort_assert(array_to_info == info);
+        }
+        end_time = steady_clock_now();
+        fmt::print("Repeat {} times, ParseFromArray: {} microsecond!!!\n", repeat_times, end_time - start_time);
+    }
+
+    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+}
+
 void test_protocol_all(void)
 {
     test_protocol_enum();
     test_protocol_serialization();
     test_protocol_serialization_list();
+    test_protocol_performance();
 }

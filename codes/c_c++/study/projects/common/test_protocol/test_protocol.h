@@ -15,6 +15,9 @@ void test_protocol_serialization(void);
 // 功能：测试序列化列表
 void test_protocol_serialization_list(void);
 
+// 功能：测试性能
+void test_protocol_performance(void);
+
 // 功能：测试所有接口
 void test_protocol_all(void);
 
