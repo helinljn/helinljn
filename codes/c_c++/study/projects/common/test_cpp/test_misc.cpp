@@ -152,3 +152,12 @@ void test_pair_tuple_tie(void)
 
     fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
+
+void test_misc_all(void)
+{
+    test_sizeof();
+    test_numeric_limits();
+    test_safe_time();
+    test_memory_and_hex_convert();
+    test_pair_tuple_tie();
+}

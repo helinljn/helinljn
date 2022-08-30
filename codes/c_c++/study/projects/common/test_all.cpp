@@ -6,12 +6,7 @@
 
 void test_cpp(void)
 {
-    // test_misc
-    test_sizeof();
-    test_numeric_limits();
-    test_safe_time();
-    test_memory_and_hex_convert();
-    test_pair_tuple_tie();
+    test_misc_all();
 }
 
 void test_libevent(void)
