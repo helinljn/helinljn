@@ -120,7 +120,7 @@ void test_protocol_enum(void)
 
 void test_protocol_serialization(void)
 {
-    CommonInfo info{ true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890 };
+    CommonInfo info{true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
 
     TestMsg::CommonInfo test_info;
     test_info.set_test_bool(info.test_bool);
@@ -144,26 +144,208 @@ void test_protocol_serialization(void)
     fmt::print("---- test_info.DebugString() end ----\n");
 
     // SerializeToString & ParseFromString
-    std::string info_to_string;
-    abort_assert(test_info.SerializeToString(&info_to_string));
-    abort_assert(test_info_size == info_to_string.size());
-    fmt::print("test_info.ByteSizeLong={}, test_info.SerializeToString={}\n", test_info.ByteSizeLong(), info_to_string);
+    {
+        std::string info_to_string;
+        abort_assert(test_info.SerializeToString(&info_to_string));
+        abort_assert(test_info_size == info_to_string.size());
+        fmt::print("test_info.ByteSizeLong={}, test_info.SerializeToString={}\n", test_info.ByteSizeLong(), info_to_string);
 
-    TestMsg::CommonInfo string_to_info;
-    abort_assert(string_to_info.ParseFromString(info_to_string));
-    abort_assert(string_to_info == info);
-    abort_assert(string_to_info.ByteSizeLong() == test_info_size);
+        TestMsg::CommonInfo string_to_info;
+        abort_assert(string_to_info.ParseFromString(info_to_string));
+        abort_assert(string_to_info == info);
+        abort_assert(string_to_info.ByteSizeLong() == test_info_size);
+    }
 
     // SerializeToArray & ParseFromArray
-    char info_to_array[128] = {0};
-    abort_assert(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
-    abort_assert(test_info_size == strlen(info_to_array));
-    fmt::print("test_info.ByteSizeLong={}, test_info.SerializeToArray={}\n", test_info.ByteSizeLong(), info_to_array);
+    {
+        char info_to_array[128] = {0};
+        abort_assert(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
 
-    TestMsg::CommonInfo array_to_info;
-    abort_assert(array_to_info.ParseFromArray(info_to_array, static_cast<int>(strlen(info_to_array))));
-    abort_assert(array_to_info == info);
-    abort_assert(array_to_info.ByteSizeLong() == test_info_size);
+        TestMsg::CommonInfo array_to_info;
+        abort_assert(array_to_info.ParseFromArray(info_to_array, static_cast<int>(test_info_size)));
+        abort_assert(array_to_info == info);
+        abort_assert(array_to_info.ByteSizeLong() == test_info_size);
+    }
+
+    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+}
+
+void test_protocol_serialization_list(void)
+{
+    std::vector<CommonInfo> info_list{
+        {true,  1.23f, 4.5678, "CommonInfo1", 123456, -123456, 123456, 567890, -567890, 567890},
+        {false, 4.56f, 9.0123, "CommonInfo2", 456789, -456789, 456789, 123456, -123456, 123456},
+    };
+
+    std::vector<TestMsg::CommonType> type_list{
+        TestMsg::CT_BOOL,   TestMsg::CT_BYTES,  TestMsg::CT_DOUBLE, TestMsg::CT_FLOAT,  TestMsg::CT_INT32,
+        TestMsg::CT_SINT32, TestMsg::CT_UINT32, TestMsg::CT_INT64,  TestMsg::CT_SINT64, TestMsg::CT_UINT64
+    };
+
+    // common_info_list_size
+    TestMsg::CommonInfoList test_info_list;
+    abort_assert(0 == test_info_list.common_info_list_size());
+    abort_assert(0 == test_info_list.common_type_list_size());
+
+    // add_common_info_list
+    TestMsg::CommonInfo* temp = test_info_list.add_common_info_list();
+    abort_assert(temp != nullptr);
+    temp->set_test_bool(info_list[0].test_bool);
+    temp->set_test_float(info_list[0].test_float);
+    temp->set_test_double(info_list[0].test_double);
+    temp->set_test_string(info_list[0].test_string);
+    temp->set_test_int32(info_list[0].test_int32);
+    temp->set_test_sint32(info_list[0].test_sint32);
+    temp->set_test_uint32(info_list[0].test_uint32);
+    temp->set_test_int64(info_list[0].test_int64);
+    temp->set_test_sint64(info_list[0].test_sint64);
+    temp->set_test_uint64(info_list[0].test_uint64);
+
+    temp = test_info_list.add_common_info_list();
+    abort_assert(temp != nullptr);
+    temp->set_test_bool(info_list[1].test_bool);
+    temp->set_test_float(info_list[1].test_float);
+    temp->set_test_double(info_list[1].test_double);
+    temp->set_test_string(info_list[1].test_string);
+    temp->set_test_int32(info_list[1].test_int32);
+    temp->set_test_sint32(info_list[1].test_sint32);
+    temp->set_test_uint32(info_list[1].test_uint32);
+    temp->set_test_int64(info_list[1].test_int64);
+    temp->set_test_sint64(info_list[1].test_sint64);
+    temp->set_test_uint64(info_list[1].test_uint64);
+
+    // add_common_type_list
+    for (auto val : type_list)
+        test_info_list.add_common_type_list(val);
+
+    abort_assert(test_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+    abort_assert(test_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+
+    // ByteSizeLong
+    size_t test_info_list_size = test_info_list.ByteSizeLong();
+    fmt::print("test_info_list.ByteSizeLong={}\n", test_info_list_size);
+
+    // DebugString
+    fmt::print("---- test_info_list.DebugString() start ----\n");
+    fmt::print("{}", test_info_list.DebugString());
+    fmt::print("---- test_info_list.DebugString() end ----\n");
+
+    // SerializeToString & ParseFromString
+    {
+        std::string info_list_to_string;
+        abort_assert(test_info_list.SerializeToString(&info_list_to_string));
+        abort_assert(test_info_list_size == info_list_to_string.size());
+        fmt::print("test_info_list.ByteSizeLong={}, test_info_list.SerializeToString={}\n",
+            test_info_list.ByteSizeLong(), info_list_to_string);
+
+        TestMsg::CommonInfoList string_to_info_list;
+        abort_assert(string_to_info_list.ParseFromString(info_list_to_string));
+        abort_assert(string_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+        abort_assert(string_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+        abort_assert(string_to_info_list.ByteSizeLong() == test_info_list_size);
+
+        // foreach
+        int idx = 0;
+        for (const auto& val : string_to_info_list.common_info_list())
+            abort_assert(val == info_list[idx++]);
+
+        // foreach
+        idx = 0;
+        for (const auto& val : string_to_info_list.common_type_list())
+            abort_assert(val == type_list[idx++]);
+
+        // for
+        for (idx = 0; idx != string_to_info_list.common_info_list_size(); ++idx)
+            abort_assert(string_to_info_list.common_info_list(idx) == info_list[idx]);
+
+        // for
+        for (idx = 0; idx != string_to_info_list.common_type_list_size(); ++idx)
+            abort_assert(string_to_info_list.common_type_list(idx) == type_list[idx]);
+
+        // foreach mutable_common_info_list
+        for (auto& val : *string_to_info_list.mutable_common_info_list())
+            val.set_test_string("Mutable");
+
+        // foreach mutable_common_type_list
+        for (auto& val : *string_to_info_list.mutable_common_type_list())
+            val = TestMsg::CT_BOOL;
+
+        // for mutable_common_info_list
+        for (idx = 0; idx != string_to_info_list.common_info_list_size(); ++idx)
+        {
+            temp = string_to_info_list.mutable_common_info_list(idx);
+            abort_assert(temp != nullptr);
+            temp->set_test_string(temp->test_string() + "CommonInfo");
+        }
+
+        // for mutable_common_type_list
+        if (auto ptr = string_to_info_list.mutable_common_type_list(); ptr != nullptr)
+            for (idx = 0; idx != ptr->size(); ++idx)
+                if (0 == idx % 2)
+                    (*ptr)[idx] = TestMsg::CT_BYTES;
+
+        // DebugString
+        fmt::print("---- string_to_info_list.DebugString() start ----\n");
+        fmt::print("{}", string_to_info_list.DebugString());
+        fmt::print("---- string_to_info_list.DebugString() end ----\n");
+    }
+
+    // SerializeToArray & ParseFromArray
+    {
+        char info_list_to_array[128] = {0};
+        abort_assert(test_info_list.SerializeToArray(info_list_to_array, sizeof(info_list_to_array)));
+
+        TestMsg::CommonInfoList array_to_info_list;
+        abort_assert(array_to_info_list.ParseFromArray(info_list_to_array, static_cast<int>(test_info_list_size)));
+        abort_assert(array_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+        abort_assert(array_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+        abort_assert(array_to_info_list.ByteSizeLong() == test_info_list_size);
+
+        // foreach
+        int idx = 0;
+        for (const auto& val : array_to_info_list.common_info_list())
+            abort_assert(val == info_list[idx++]);
+
+        // foreach
+        idx = 0;
+        for (const auto& val : array_to_info_list.common_type_list())
+            abort_assert(val == type_list[idx++]);
+
+        // for
+        for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
+            abort_assert(array_to_info_list.common_info_list(idx) == info_list[idx]);
+
+        // for
+        for (idx = 0; idx != array_to_info_list.common_type_list_size(); ++idx)
+            abort_assert(array_to_info_list.common_type_list(idx) == type_list[idx]);
+
+        // foreach mutable_common_info_list
+        for (auto& val : *array_to_info_list.mutable_common_info_list())
+            val.set_test_string("Mutable");
+
+        // foreach mutable_common_type_list
+        for (auto& val : *array_to_info_list.mutable_common_type_list())
+            val = TestMsg::CT_BOOL;
+
+        // for mutable_common_info_list
+        for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
+        {
+            temp = array_to_info_list.mutable_common_info_list(idx);
+            abort_assert(temp != nullptr);
+            temp->set_test_string(temp->test_string() + "CommonInfo");
+        }
+
+        // for mutable_common_type_list
+        if (auto ptr = array_to_info_list.mutable_common_type_list(); ptr != nullptr)
+            for (idx = 0; idx != ptr->size(); ++idx)
+                if (0 == idx % 2)
+                    (*ptr)[idx] = TestMsg::CT_BYTES;
+
+        // DebugString
+        fmt::print("---- array_to_info_list.DebugString() start ----\n");
+        fmt::print("{}", array_to_info_list.DebugString());
+        fmt::print("---- array_to_info_list.DebugString() end ----\n");
+    }
 
     fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
@@ -172,4 +354,5 @@ void test_protocol_all(void)
 {
     test_protocol_enum();
     test_protocol_serialization();
+    test_protocol_serialization_list();
 }
