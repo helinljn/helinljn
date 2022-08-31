@@ -16,7 +16,7 @@ void test_libevent_random(void)
         fmt::print("Random ev_uint32_t={}\n", random_num);
     }
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_libevent_evbuffer(void)
@@ -45,7 +45,7 @@ void test_libevent_evbuffer(void)
 
     evbuffer_free(buf);
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_libevent_all(void)

@@ -60,7 +60,7 @@ inline void str_println(T&&... args)
 {
     std::string str = str_concat(std::forward<T>(args)...);
     str.push_back('\n');
-    fprintf(stdout, str.c_str());
+    fprintf(stdout, "%s", str.c_str());
 }
 
 /**

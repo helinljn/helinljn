@@ -28,7 +28,7 @@ void test_sizeof(void)
     static_assert(8 == sizeof(ptrdiff_t));
     static_assert(8 == sizeof(intptr_t));
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_numeric_limits(void)
@@ -49,7 +49,7 @@ void test_numeric_limits(void)
     static_assert(LLONG_MAX  == std::numeric_limits<int64_t>::max());
     static_assert(ULLONG_MAX == std::numeric_limits<uint64_t>::max());
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_safe_time(void)
@@ -92,7 +92,7 @@ void test_safe_time(void)
     end_time   = steady_clock_now();
     fmt::print("safe_asctime(gm_tm) cost {} microseconds\n", end_time - start_time);
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_memory_and_hex_convert(void)
@@ -132,7 +132,44 @@ void test_memory_and_hex_convert(void)
         fmt::print("local_tm_upper={}", local_tm_lower_str);
     }
     
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
+}
+
+void test_str_println(void)
+{
+    int32_t     val1 = 123456;
+    uint64_t    val2 = 123456789;
+    float       val3 = 3.1415926f;
+    double      val4 = 1.23456789;
+    std::string val5 = "AaBbCcDdEeFfGg";
+    str_println("This is ", __FUNCTION__, ", val1=", val1, ", val2=", val2, ", val3=", val3, ", val4=", val4, ", val5=", val5);
+
+    size_t repeat_times = 100000;
+    time_t start_time   = 0;
+    time_t end_time     = 0;
+
+    start_time = steady_clock_now();
+    for (size_t idx = 0; idx != repeat_times; ++idx)
+    {
+        std::string str = str_concat("This is ", __FUNCTION__, ", val1=", val1, ", val2=", val2,
+            ", val3=", val3, ", val4=", val4, ", val5=", val5);
+        str.push_back('\n');
+        abort_assert(!str.empty());
+    }
+    end_time = steady_clock_now();
+    fmt::print("Repeat {} times, str_concat cost {} microsecond!!!\n", repeat_times, end_time - start_time);
+
+    start_time = steady_clock_now();
+    for (size_t idx = 0; idx != repeat_times; ++idx)
+    {
+        std::string str = fmt::format("This is {}, val1={}, val2={}, val3={}, val4={}, val5={}\n",
+            __FUNCTION__, val1, val2, val3, val4, val5);
+        abort_assert(!str.empty());
+    }
+    end_time = steady_clock_now();
+    fmt::print("Repeat {} times, fmt::format cost {} microsecond!!!\n", repeat_times, end_time - start_time);
+
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_pair_tuple_tie(void)
@@ -149,7 +186,7 @@ void test_pair_tuple_tie(void)
         fmt::print("[{}, {}]\n", p3.first, p3.second);
     }
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_misc_all(void)
@@ -158,5 +195,6 @@ void test_misc_all(void)
     test_numeric_limits();
     test_safe_time();
     test_memory_and_hex_convert();
+    test_str_println();
     test_pair_tuple_tie();
 }

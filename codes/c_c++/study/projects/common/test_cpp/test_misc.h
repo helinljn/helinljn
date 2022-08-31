@@ -15,6 +15,9 @@ void test_safe_time(void);
 // 功能：测试memory & hex_string互转
 void test_memory_and_hex_convert(void);
 
+// 功能：测试str_println
+void test_str_println(void);
+
 // 功能：测试pair & tuple
 void test_pair_tuple_tie(void);
 

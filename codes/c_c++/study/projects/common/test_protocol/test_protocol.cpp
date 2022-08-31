@@ -109,7 +109,7 @@ void test_protocol_enum(void)
     abort_assert(!TestMsg::CommonType_Parse(str_null1, &val));
     abort_assert(!TestMsg::CommonType_Parse(str_null2, &val));
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_protocol_serialization(void)
@@ -154,7 +154,7 @@ void test_protocol_serialization(void)
         abort_assert(array_to_info.ByteSizeLong() == test_info_size);
     }
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_protocol_serialization_list(void)
@@ -316,7 +316,7 @@ void test_protocol_serialization_list(void)
                     (*ptr)[idx] = TestMsg::CT_FLOAT;
     }
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_protocol_performance(void)
@@ -351,7 +351,7 @@ void test_protocol_performance(void)
             abort_assert(test_info.SerializeToString(&info_to_string));
         }
         end_time = steady_clock_now();
-        fmt::print("Repeat {} times, SerializeToString: {} microsecond!!!\n", repeat_times, end_time - start_time);
+        fmt::print("Repeat {} times, SerializeToString cost {} microsecond!!!\n", repeat_times, end_time - start_time);
         
         start_time = steady_clock_now();
         for (size_t idx = 0; idx != repeat_times; ++idx)
@@ -359,7 +359,7 @@ void test_protocol_performance(void)
             abort_assert(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
         }
         end_time = steady_clock_now();
-        fmt::print("Repeat {} times, SerializeToArray: {} microsecond!!!\n", repeat_times, end_time - start_time);
+        fmt::print("Repeat {} times, SerializeToArray cost {} microsecond!!!\n", repeat_times, end_time - start_time);
     }
 
     // ParseFromString VS ParseFromArray
@@ -372,7 +372,7 @@ void test_protocol_performance(void)
             abort_assert(string_to_info == info);
         }
         end_time = steady_clock_now();
-        fmt::print("Repeat {} times, ParseFromString: {} microsecond!!!\n", repeat_times, end_time - start_time);
+        fmt::print("Repeat {} times, ParseFromString cost {} microsecond!!!\n", repeat_times, end_time - start_time);
         
         TestMsg::CommonInfo array_to_info;
         start_time = steady_clock_now();
@@ -382,10 +382,10 @@ void test_protocol_performance(void)
             abort_assert(array_to_info == info);
         }
         end_time = steady_clock_now();
-        fmt::print("Repeat {} times, ParseFromArray: {} microsecond!!!\n", repeat_times, end_time - start_time);
+        fmt::print("Repeat {} times, ParseFromArray cost {} microsecond!!!\n", repeat_times, end_time - start_time);
     }
 
-    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 
 void test_protocol_all(void)
