@@ -108,6 +108,8 @@ void test_protocol_enum(void)
 
     abort_assert(!TestMsg::CommonType_Parse(str_null1, &val));
     abort_assert(!TestMsg::CommonType_Parse(str_null2, &val));
+
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_protocol_serialization(void)
@@ -134,7 +136,6 @@ void test_protocol_serialization(void)
         std::string info_to_string;
         abort_assert(test_info.SerializeToString(&info_to_string));
         abort_assert(test_info_size == info_to_string.size());
-        fmt::print("test_info.ByteSizeLong={}, test_info.SerializeToString={}\n", test_info.ByteSizeLong(), info_to_string);
 
         TestMsg::CommonInfo string_to_info;
         abort_assert(string_to_info.ParseFromString(info_to_string));
@@ -215,8 +216,6 @@ void test_protocol_serialization_list(void)
         std::string info_list_to_string;
         abort_assert(test_info_list.SerializeToString(&info_list_to_string));
         abort_assert(test_info_list_size == info_list_to_string.size());
-        fmt::print("test_info_list.ByteSizeLong={}, test_info_list.SerializeToString={}\n",
-            test_info_list.ByteSizeLong(), info_list_to_string);
 
         TestMsg::CommonInfoList string_to_info_list;
         abort_assert(string_to_info_list.ParseFromString(info_list_to_string));
