@@ -129,11 +129,6 @@ void test_protocol_serialization(void)
     size_t test_info_size = test_info.ByteSizeLong();
     fmt::print("test_info.ByteSizeLong={}\n", test_info_size);
 
-    // DebugString
-    fmt::print("---- test_info.DebugString() start ----\n");
-    fmt::print("{}", test_info.DebugString());
-    fmt::print("---- test_info.DebugString() end ----\n");
-
     // SerializeToString & ParseFromString
     {
         std::string info_to_string;
@@ -215,11 +210,6 @@ void test_protocol_serialization_list(void)
     size_t test_info_list_size = test_info_list.ByteSizeLong();
     fmt::print("test_info_list.ByteSizeLong={}\n", test_info_list_size);
 
-    // DebugString
-    fmt::print("---- test_info_list.DebugString() start ----\n");
-    fmt::print("{}", test_info_list.DebugString());
-    fmt::print("---- test_info_list.DebugString() end ----\n");
-
     // SerializeToString & ParseFromString
     {
         std::string info_list_to_string;
@@ -273,11 +263,6 @@ void test_protocol_serialization_list(void)
             for (idx = 0; idx != ptr->size(); ++idx)
                 if (0 == idx % 2)
                     (*ptr)[idx] = TestMsg::CT_DOUBLE;
-
-        // DebugString
-        fmt::print("---- string_to_info_list.DebugString() start ----\n");
-        fmt::print("{}", string_to_info_list.DebugString());
-        fmt::print("---- string_to_info_list.DebugString() end ----\n");
     }
 
     // SerializeToArray & ParseFromArray
@@ -330,11 +315,6 @@ void test_protocol_serialization_list(void)
             for (idx = 0; idx != ptr->size(); ++idx)
                 if (0 == idx % 2)
                     (*ptr)[idx] = TestMsg::CT_FLOAT;
-
-        // DebugString
-        fmt::print("---- array_to_info_list.DebugString() start ----\n");
-        fmt::print("{}", array_to_info_list.DebugString());
-        fmt::print("---- array_to_info_list.DebugString() end ----\n");
     }
 
     fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
