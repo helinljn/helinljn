@@ -1,8 +1,7 @@
-﻿#include "test_libevent.h"
+#include "test_libevent.h"
 
 #include "fmt/core.h"
 #include "fmt/format.h"
-#include "fmt/color.h"
 
 #include "event2/util.h"
 #include "event2/buffer.h"
@@ -17,7 +16,7 @@ void test_libevent_random(void)
         printf("Random ev_uint32_t=%u\n", random_num);
     }
 
-	fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_libevent_evbuffer(void)
@@ -46,7 +45,7 @@ void test_libevent_evbuffer(void)
 
     evbuffer_free(buf);
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_libevent_all(void)

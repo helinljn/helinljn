@@ -2,7 +2,6 @@
 
 #include "fmt/core.h"
 #include "fmt/format.h"
-#include "fmt/color.h"
 
 #include "TestMsgDefine.pb.h"
 #include "TestMsgStruct.pb.h"
@@ -159,7 +158,7 @@ void test_protocol_serialization(void)
         abort_assert(array_to_info.ByteSizeLong() == test_info_size);
     }
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_protocol_serialization_list(void)
@@ -338,7 +337,7 @@ void test_protocol_serialization_list(void)
         fmt::print("---- array_to_info_list.DebugString() end ----\n");
     }
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_protocol_performance(void)
@@ -407,7 +406,7 @@ void test_protocol_performance(void)
         fmt::print("Repeat {} times, ParseFromArray: {} microsecond!!!\n", repeat_times, end_time - start_time);
     }
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_protocol_all(void)

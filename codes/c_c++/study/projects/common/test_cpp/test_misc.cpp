@@ -2,7 +2,6 @@
 
 #include "fmt/core.h"
 #include "fmt/format.h"
-#include "fmt/color.h"
 
 #include <limits>
 #include <utility>
@@ -29,7 +28,7 @@ void test_sizeof(void)
     static_assert(8 == sizeof(ptrdiff_t));
     static_assert(8 == sizeof(intptr_t));
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_numeric_limits(void)
@@ -50,7 +49,7 @@ void test_numeric_limits(void)
     static_assert(LLONG_MAX  == std::numeric_limits<int64_t>::max());
     static_assert(ULLONG_MAX == std::numeric_limits<uint64_t>::max());
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_safe_time(void)
@@ -93,7 +92,7 @@ void test_safe_time(void)
     end_time   = steady_clock_now();
     fmt::print("safe_asctime(gm_tm) cost {} microseconds\n", end_time - start_time);
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_memory_and_hex_convert(void)
@@ -133,7 +132,7 @@ void test_memory_and_hex_convert(void)
         fmt::print("local_tm_upper={}", local_tm_lower_str);
     }
     
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_pair_tuple_tie(void)
@@ -150,7 +149,7 @@ void test_pair_tuple_tie(void)
         fmt::print("[{}, {}]\n", p3.first, p3.second);
     }
 
-    fmt::print(fmt::fg(fmt::color::green), "{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
+    fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));
 }
 
 void test_misc_all(void)
