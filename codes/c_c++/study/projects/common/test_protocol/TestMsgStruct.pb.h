@@ -151,9 +151,9 @@ class CommonInfo : public ::google::protobuf::Message /* @@protoc_insertion_poin
 
   // accessors -------------------------------------------------------
 
-  // bytes test_string = 4;
+  // bytes test_string = 3;
   void clear_test_string();
-  static const int kTestStringFieldNumber = 4;
+  static const int kTestStringFieldNumber = 3;
   const ::std::string& test_string() const;
   void set_test_string(const ::std::string& value);
   #if LANG_CXX11
@@ -165,74 +165,67 @@ class CommonInfo : public ::google::protobuf::Message /* @@protoc_insertion_poin
   ::std::string* release_test_string();
   void set_allocated_test_string(::std::string* test_string);
 
-  // bool test_bool = 1;
-  void clear_test_bool();
-  static const int kTestBoolFieldNumber = 1;
-  bool test_bool() const;
-  void set_test_bool(bool value);
-
-  // float test_float = 2;
-  void clear_test_float();
-  static const int kTestFloatFieldNumber = 2;
-  float test_float() const;
-  void set_test_float(float value);
-
-  // double test_double = 3;
+  // double test_double = 2;
   void clear_test_double();
-  static const int kTestDoubleFieldNumber = 3;
+  static const int kTestDoubleFieldNumber = 2;
   double test_double() const;
   void set_test_double(double value);
 
-  // int32 test_int32 = 5;
+  // float test_float = 1;
+  void clear_test_float();
+  static const int kTestFloatFieldNumber = 1;
+  float test_float() const;
+  void set_test_float(float value);
+
+  // int32 test_int32 = 4;
   void clear_test_int32();
-  static const int kTestInt32FieldNumber = 5;
+  static const int kTestInt32FieldNumber = 4;
   ::google::protobuf::int32 test_int32() const;
   void set_test_int32(::google::protobuf::int32 value);
 
-  // sint32 test_sint32 = 6;
+  // sint32 test_sint32 = 5;
   void clear_test_sint32();
-  static const int kTestSint32FieldNumber = 6;
+  static const int kTestSint32FieldNumber = 5;
   ::google::protobuf::int32 test_sint32() const;
   void set_test_sint32(::google::protobuf::int32 value);
 
-  // int64 test_int64 = 8;
+  // uint32 test_uint32 = 6;
+  void clear_test_uint32();
+  static const int kTestUint32FieldNumber = 6;
+  ::google::protobuf::uint32 test_uint32() const;
+  void set_test_uint32(::google::protobuf::uint32 value);
+
+  // int64 test_int64 = 7;
   void clear_test_int64();
-  static const int kTestInt64FieldNumber = 8;
+  static const int kTestInt64FieldNumber = 7;
   ::google::protobuf::int64 test_int64() const;
   void set_test_int64(::google::protobuf::int64 value);
 
-  // sint64 test_sint64 = 9;
+  // sint64 test_sint64 = 8;
   void clear_test_sint64();
-  static const int kTestSint64FieldNumber = 9;
+  static const int kTestSint64FieldNumber = 8;
   ::google::protobuf::int64 test_sint64() const;
   void set_test_sint64(::google::protobuf::int64 value);
 
-  // uint64 test_uint64 = 10;
+  // uint64 test_uint64 = 9;
   void clear_test_uint64();
-  static const int kTestUint64FieldNumber = 10;
+  static const int kTestUint64FieldNumber = 9;
   ::google::protobuf::uint64 test_uint64() const;
   void set_test_uint64(::google::protobuf::uint64 value);
-
-  // uint32 test_uint32 = 7;
-  void clear_test_uint32();
-  static const int kTestUint32FieldNumber = 7;
-  ::google::protobuf::uint32 test_uint32() const;
-  void set_test_uint32(::google::protobuf::uint32 value);
 
   // @@protoc_insertion_point(class_scope:TestMsg.CommonInfo)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::ArenaStringPtr test_string_;
-  bool test_bool_;
-  float test_float_;
   double test_double_;
+  float test_float_;
   ::google::protobuf::int32 test_int32_;
   ::google::protobuf::int32 test_sint32_;
+  ::google::protobuf::uint32 test_uint32_;
   ::google::protobuf::int64 test_int64_;
   ::google::protobuf::int64 test_sint64_;
   ::google::protobuf::uint64 test_uint64_;
-  ::google::protobuf::uint32 test_uint32_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   friend struct ::protobuf_TestMsgStruct_2eproto::TableStruct;
 };
@@ -368,21 +361,7 @@ class CommonInfoList : public ::google::protobuf::Message /* @@protoc_insertion_
 #endif  // __GNUC__
 // CommonInfo
 
-// bool test_bool = 1;
-inline void CommonInfo::clear_test_bool() {
-  test_bool_ = false;
-}
-inline bool CommonInfo::test_bool() const {
-  // @@protoc_insertion_point(field_get:TestMsg.CommonInfo.test_bool)
-  return test_bool_;
-}
-inline void CommonInfo::set_test_bool(bool value) {
-  
-  test_bool_ = value;
-  // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_bool)
-}
-
-// float test_float = 2;
+// float test_float = 1;
 inline void CommonInfo::clear_test_float() {
   test_float_ = 0;
 }
@@ -396,7 +375,7 @@ inline void CommonInfo::set_test_float(float value) {
   // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_float)
 }
 
-// double test_double = 3;
+// double test_double = 2;
 inline void CommonInfo::clear_test_double() {
   test_double_ = 0;
 }
@@ -410,7 +389,7 @@ inline void CommonInfo::set_test_double(double value) {
   // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_double)
 }
 
-// bytes test_string = 4;
+// bytes test_string = 3;
 inline void CommonInfo::clear_test_string() {
   test_string_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -463,7 +442,7 @@ inline void CommonInfo::set_allocated_test_string(::std::string* test_string) {
   // @@protoc_insertion_point(field_set_allocated:TestMsg.CommonInfo.test_string)
 }
 
-// int32 test_int32 = 5;
+// int32 test_int32 = 4;
 inline void CommonInfo::clear_test_int32() {
   test_int32_ = 0;
 }
@@ -477,7 +456,7 @@ inline void CommonInfo::set_test_int32(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_int32)
 }
 
-// sint32 test_sint32 = 6;
+// sint32 test_sint32 = 5;
 inline void CommonInfo::clear_test_sint32() {
   test_sint32_ = 0;
 }
@@ -491,7 +470,7 @@ inline void CommonInfo::set_test_sint32(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_sint32)
 }
 
-// uint32 test_uint32 = 7;
+// uint32 test_uint32 = 6;
 inline void CommonInfo::clear_test_uint32() {
   test_uint32_ = 0u;
 }
@@ -505,7 +484,7 @@ inline void CommonInfo::set_test_uint32(::google::protobuf::uint32 value) {
   // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_uint32)
 }
 
-// int64 test_int64 = 8;
+// int64 test_int64 = 7;
 inline void CommonInfo::clear_test_int64() {
   test_int64_ = GOOGLE_LONGLONG(0);
 }
@@ -519,7 +498,7 @@ inline void CommonInfo::set_test_int64(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_int64)
 }
 
-// sint64 test_sint64 = 9;
+// sint64 test_sint64 = 8;
 inline void CommonInfo::clear_test_sint64() {
   test_sint64_ = GOOGLE_LONGLONG(0);
 }
@@ -533,7 +512,7 @@ inline void CommonInfo::set_test_sint64(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:TestMsg.CommonInfo.test_sint64)
 }
 
-// uint64 test_uint64 = 10;
+// uint64 test_uint64 = 9;
 inline void CommonInfo::clear_test_uint64() {
   test_uint64_ = GOOGLE_ULONGLONG(0);
 }

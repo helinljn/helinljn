@@ -50,14 +50,14 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\023TestMsgDefine.proto\022\007TestMsg*\234\001\n\nCommo"
-      "nType\022\013\n\007CT_BOOL\020\000\022\014\n\010CT_BYTES\020\001\022\r\n\tCT_D"
-      "OUBLE\020\002\022\014\n\010CT_FLOAT\020\003\022\014\n\010CT_INT32\020\004\022\r\n\tC"
-      "T_SINT32\020\005\022\r\n\tCT_UINT32\020\006\022\014\n\010CT_INT64\020\007\022"
-      "\r\n\tCT_SINT64\020\010\022\r\n\tCT_UINT64\020\tb\006proto3"
+      "\n\023TestMsgDefine.proto\022\007TestMsg*\217\001\n\nCommo"
+      "nType\022\014\n\010CT_FLOAT\020\000\022\r\n\tCT_DOUBLE\020\001\022\014\n\010CT"
+      "_BYTES\020\002\022\014\n\010CT_INT32\020\003\022\r\n\tCT_SINT32\020\004\022\r\n"
+      "\tCT_UINT32\020\005\022\014\n\010CT_INT64\020\006\022\r\n\tCT_SINT64\020"
+      "\007\022\r\n\tCT_UINT64\020\010b\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 197);
+      descriptor, 184);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "TestMsgDefine.proto", &protobuf_RegisterTypes);
 }
@@ -89,7 +89,6 @@ bool CommonType_IsValid(int value) {
     case 6:
     case 7:
     case 8:
-    case 9:
       return true;
     default:
       return false;

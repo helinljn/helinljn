@@ -77,7 +77,6 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::TestMsg::CommonInfo, test_bool_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::TestMsg::CommonInfo, test_float_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::TestMsg::CommonInfo, test_double_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::TestMsg::CommonInfo, test_string_),
@@ -97,7 +96,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::TestMsg::CommonInfo)},
-  { 15, -1, sizeof(::TestMsg::CommonInfoList)},
+  { 14, -1, sizeof(::TestMsg::CommonInfoList)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -127,18 +126,18 @@ void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
       "\n\023TestMsgStruct.proto\022\007TestMsg\032\023TestMsgD"
-      "efine.proto\"\331\001\n\nCommonInfo\022\021\n\ttest_bool\030"
-      "\001 \001(\010\022\022\n\ntest_float\030\002 \001(\002\022\023\n\013test_double"
-      "\030\003 \001(\001\022\023\n\013test_string\030\004 \001(\014\022\022\n\ntest_int3"
-      "2\030\005 \001(\005\022\023\n\013test_sint32\030\006 \001(\021\022\023\n\013test_uin"
-      "t32\030\007 \001(\r\022\022\n\ntest_int64\030\010 \001(\003\022\023\n\013test_si"
-      "nt64\030\t \001(\022\022\023\n\013test_uint64\030\n \001(\004\"n\n\016Commo"
-      "nInfoList\022-\n\020common_info_list\030\001 \003(\0132\023.Te"
-      "stMsg.CommonInfo\022-\n\020common_type_list\030\002 \003"
-      "(\0162\023.TestMsg.CommonTypeb\006proto3"
+      "efine.proto\"\306\001\n\nCommonInfo\022\022\n\ntest_float"
+      "\030\001 \001(\002\022\023\n\013test_double\030\002 \001(\001\022\023\n\013test_stri"
+      "ng\030\003 \001(\014\022\022\n\ntest_int32\030\004 \001(\005\022\023\n\013test_sin"
+      "t32\030\005 \001(\021\022\023\n\013test_uint32\030\006 \001(\r\022\022\n\ntest_i"
+      "nt64\030\007 \001(\003\022\023\n\013test_sint64\030\010 \001(\022\022\023\n\013test_"
+      "uint64\030\t \001(\004\"n\n\016CommonInfoList\022-\n\020common"
+      "_info_list\030\001 \003(\0132\023.TestMsg.CommonInfo\022-\n"
+      "\020common_type_list\030\002 \003(\0162\023.TestMsg.Common"
+      "Typeb\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 391);
+      descriptor, 372);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "TestMsgStruct.proto", &protobuf_RegisterTypes);
   ::protobuf_TestMsgDefine_2eproto::AddDescriptors();
@@ -162,7 +161,6 @@ namespace TestMsg {
 void CommonInfo::InitAsDefaultInstance() {
 }
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
-const int CommonInfo::kTestBoolFieldNumber;
 const int CommonInfo::kTestFloatFieldNumber;
 const int CommonInfo::kTestDoubleFieldNumber;
 const int CommonInfo::kTestStringFieldNumber;
@@ -189,17 +187,17 @@ CommonInfo::CommonInfo(const CommonInfo& from)
   if (from.test_string().size() > 0) {
     test_string_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.test_string_);
   }
-  ::memcpy(&test_bool_, &from.test_bool_,
-    static_cast<size_t>(reinterpret_cast<char*>(&test_uint32_) -
-    reinterpret_cast<char*>(&test_bool_)) + sizeof(test_uint32_));
+  ::memcpy(&test_double_, &from.test_double_,
+    static_cast<size_t>(reinterpret_cast<char*>(&test_uint64_) -
+    reinterpret_cast<char*>(&test_double_)) + sizeof(test_uint64_));
   // @@protoc_insertion_point(copy_constructor:TestMsg.CommonInfo)
 }
 
 void CommonInfo::SharedCtor() {
   test_string_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  ::memset(&test_bool_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&test_uint32_) -
-      reinterpret_cast<char*>(&test_bool_)) + sizeof(test_uint32_));
+  ::memset(&test_double_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&test_uint64_) -
+      reinterpret_cast<char*>(&test_double_)) + sizeof(test_uint64_));
 }
 
 CommonInfo::~CommonInfo() {
@@ -232,9 +230,9 @@ void CommonInfo::Clear() {
   (void) cached_has_bits;
 
   test_string_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  ::memset(&test_bool_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&test_uint32_) -
-      reinterpret_cast<char*>(&test_bool_)) + sizeof(test_uint32_));
+  ::memset(&test_double_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&test_uint64_) -
+      reinterpret_cast<char*>(&test_double_)) + sizeof(test_uint64_));
   _internal_metadata_.Clear();
 }
 
@@ -248,24 +246,10 @@ bool CommonInfo::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // bool test_bool = 1;
+      // float test_float = 1;
       case 1: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(8u /* 8 & 0xFF */)) {
-
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &test_bool_)));
-        } else {
-          goto handle_unusual;
-        }
-        break;
-      }
-
-      // float test_float = 2;
-      case 2: {
-        if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(21u /* 21 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(13u /* 13 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
@@ -276,10 +260,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // double test_double = 3;
-      case 3: {
+      // double test_double = 2;
+      case 2: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(25u /* 25 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(17u /* 17 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
@@ -290,10 +274,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // bytes test_string = 4;
-      case 4: {
+      // bytes test_string = 3;
+      case 3: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(34u /* 34 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(26u /* 26 & 0xFF */)) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_test_string()));
         } else {
@@ -302,10 +286,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // int32 test_int32 = 5;
-      case 5: {
+      // int32 test_int32 = 4;
+      case 4: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(40u /* 40 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(32u /* 32 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -316,10 +300,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // sint32 test_sint32 = 6;
-      case 6: {
+      // sint32 test_sint32 = 5;
+      case 5: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(48u /* 48 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(40u /* 40 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_SINT32>(
@@ -330,10 +314,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // uint32 test_uint32 = 7;
-      case 7: {
+      // uint32 test_uint32 = 6;
+      case 6: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(56u /* 56 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(48u /* 48 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
@@ -344,10 +328,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // int64 test_int64 = 8;
-      case 8: {
+      // int64 test_int64 = 7;
+      case 7: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(64u /* 64 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(56u /* 56 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
@@ -358,10 +342,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // sint64 test_sint64 = 9;
-      case 9: {
+      // sint64 test_sint64 = 8;
+      case 8: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(72u /* 72 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(64u /* 64 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_SINT64>(
@@ -372,10 +356,10 @@ bool CommonInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // uint64 test_uint64 = 10;
-      case 10: {
+      // uint64 test_uint64 = 9;
+      case 9: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(80u /* 80 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(72u /* 72 & 0xFF */)) {
 
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
@@ -412,55 +396,50 @@ void CommonInfo::SerializeWithCachedSizes(
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bool test_bool = 1;
-  if (this->test_bool() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->test_bool(), output);
-  }
-
-  // float test_float = 2;
+  // float test_float = 1;
   if (this->test_float() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteFloat(2, this->test_float(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(1, this->test_float(), output);
   }
 
-  // double test_double = 3;
+  // double test_double = 2;
   if (this->test_double() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(3, this->test_double(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(2, this->test_double(), output);
   }
 
-  // bytes test_string = 4;
+  // bytes test_string = 3;
   if (this->test_string().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      4, this->test_string(), output);
+      3, this->test_string(), output);
   }
 
-  // int32 test_int32 = 5;
+  // int32 test_int32 = 4;
   if (this->test_int32() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->test_int32(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->test_int32(), output);
   }
 
-  // sint32 test_sint32 = 6;
+  // sint32 test_sint32 = 5;
   if (this->test_sint32() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteSInt32(6, this->test_sint32(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteSInt32(5, this->test_sint32(), output);
   }
 
-  // uint32 test_uint32 = 7;
+  // uint32 test_uint32 = 6;
   if (this->test_uint32() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(7, this->test_uint32(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->test_uint32(), output);
   }
 
-  // int64 test_int64 = 8;
+  // int64 test_int64 = 7;
   if (this->test_int64() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(8, this->test_int64(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(7, this->test_int64(), output);
   }
 
-  // sint64 test_sint64 = 9;
+  // sint64 test_sint64 = 8;
   if (this->test_sint64() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteSInt64(9, this->test_sint64(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteSInt64(8, this->test_sint64(), output);
   }
 
-  // uint64 test_uint64 = 10;
+  // uint64 test_uint64 = 9;
   if (this->test_uint64() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt64(10, this->test_uint64(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(9, this->test_uint64(), output);
   }
 
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
@@ -477,56 +456,51 @@ void CommonInfo::SerializeWithCachedSizes(
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // bool test_bool = 1;
-  if (this->test_bool() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->test_bool(), target);
-  }
-
-  // float test_float = 2;
+  // float test_float = 1;
   if (this->test_float() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(2, this->test_float(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(1, this->test_float(), target);
   }
 
-  // double test_double = 3;
+  // double test_double = 2;
   if (this->test_double() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(3, this->test_double(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(2, this->test_double(), target);
   }
 
-  // bytes test_string = 4;
+  // bytes test_string = 3;
   if (this->test_string().size() > 0) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        4, this->test_string(), target);
+        3, this->test_string(), target);
   }
 
-  // int32 test_int32 = 5;
+  // int32 test_int32 = 4;
   if (this->test_int32() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->test_int32(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->test_int32(), target);
   }
 
-  // sint32 test_sint32 = 6;
+  // sint32 test_sint32 = 5;
   if (this->test_sint32() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteSInt32ToArray(6, this->test_sint32(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteSInt32ToArray(5, this->test_sint32(), target);
   }
 
-  // uint32 test_uint32 = 7;
+  // uint32 test_uint32 = 6;
   if (this->test_uint32() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(7, this->test_uint32(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->test_uint32(), target);
   }
 
-  // int64 test_int64 = 8;
+  // int64 test_int64 = 7;
   if (this->test_int64() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(8, this->test_int64(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(7, this->test_int64(), target);
   }
 
-  // sint64 test_sint64 = 9;
+  // sint64 test_sint64 = 8;
   if (this->test_sint64() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(9, this->test_sint64(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteSInt64ToArray(8, this->test_sint64(), target);
   }
 
-  // uint64 test_uint64 = 10;
+  // uint64 test_uint64 = 9;
   if (this->test_uint64() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(10, this->test_uint64(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(9, this->test_uint64(), target);
   }
 
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
@@ -546,68 +520,63 @@ size_t CommonInfo::ByteSizeLong() const {
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()));
   }
-  // bytes test_string = 4;
+  // bytes test_string = 3;
   if (this->test_string().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::BytesSize(
         this->test_string());
   }
 
-  // bool test_bool = 1;
-  if (this->test_bool() != 0) {
-    total_size += 1 + 1;
-  }
-
-  // float test_float = 2;
-  if (this->test_float() != 0) {
-    total_size += 1 + 4;
-  }
-
-  // double test_double = 3;
+  // double test_double = 2;
   if (this->test_double() != 0) {
     total_size += 1 + 8;
   }
 
-  // int32 test_int32 = 5;
+  // float test_float = 1;
+  if (this->test_float() != 0) {
+    total_size += 1 + 4;
+  }
+
+  // int32 test_int32 = 4;
   if (this->test_int32() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->test_int32());
   }
 
-  // sint32 test_sint32 = 6;
+  // sint32 test_sint32 = 5;
   if (this->test_sint32() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::SInt32Size(
         this->test_sint32());
   }
 
-  // int64 test_int64 = 8;
+  // uint32 test_uint32 = 6;
+  if (this->test_uint32() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::UInt32Size(
+        this->test_uint32());
+  }
+
+  // int64 test_int64 = 7;
   if (this->test_int64() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int64Size(
         this->test_int64());
   }
 
-  // sint64 test_sint64 = 9;
+  // sint64 test_sint64 = 8;
   if (this->test_sint64() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::SInt64Size(
         this->test_sint64());
   }
 
-  // uint64 test_uint64 = 10;
+  // uint64 test_uint64 = 9;
   if (this->test_uint64() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::UInt64Size(
         this->test_uint64());
-  }
-
-  // uint32 test_uint32 = 7;
-  if (this->test_uint32() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::UInt32Size(
-        this->test_uint32());
   }
 
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
@@ -641,20 +610,20 @@ void CommonInfo::MergeFrom(const CommonInfo& from) {
 
     test_string_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.test_string_);
   }
-  if (from.test_bool() != 0) {
-    set_test_bool(from.test_bool());
+  if (from.test_double() != 0) {
+    set_test_double(from.test_double());
   }
   if (from.test_float() != 0) {
     set_test_float(from.test_float());
-  }
-  if (from.test_double() != 0) {
-    set_test_double(from.test_double());
   }
   if (from.test_int32() != 0) {
     set_test_int32(from.test_int32());
   }
   if (from.test_sint32() != 0) {
     set_test_sint32(from.test_sint32());
+  }
+  if (from.test_uint32() != 0) {
+    set_test_uint32(from.test_uint32());
   }
   if (from.test_int64() != 0) {
     set_test_int64(from.test_int64());
@@ -664,9 +633,6 @@ void CommonInfo::MergeFrom(const CommonInfo& from) {
   }
   if (from.test_uint64() != 0) {
     set_test_uint64(from.test_uint64());
-  }
-  if (from.test_uint32() != 0) {
-    set_test_uint32(from.test_uint32());
   }
 }
 
@@ -696,15 +662,14 @@ void CommonInfo::InternalSwap(CommonInfo* other) {
   using std::swap;
   test_string_.Swap(&other->test_string_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
-  swap(test_bool_, other->test_bool_);
-  swap(test_float_, other->test_float_);
   swap(test_double_, other->test_double_);
+  swap(test_float_, other->test_float_);
   swap(test_int32_, other->test_int32_);
   swap(test_sint32_, other->test_sint32_);
+  swap(test_uint32_, other->test_uint32_);
   swap(test_int64_, other->test_int64_);
   swap(test_sint64_, other->test_sint64_);
   swap(test_uint64_, other->test_uint64_);
-  swap(test_uint32_, other->test_uint32_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }
 

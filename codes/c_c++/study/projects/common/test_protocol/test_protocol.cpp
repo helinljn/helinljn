@@ -10,7 +10,6 @@
 class CommonInfo
 {
 public:
-    bool        test_bool;
     float       test_float;
     double      test_double;
     std::string test_string;
@@ -24,8 +23,7 @@ public:
 
 bool operator ==(const CommonInfo& cinfo, const TestMsg::CommonInfo& pinfo)
 {
-    return cinfo.test_bool   == pinfo.test_bool()
-        && cinfo.test_float  == pinfo.test_float()
+    return cinfo.test_float  == pinfo.test_float()
         && cinfo.test_double == pinfo.test_double()
         && cinfo.test_string == pinfo.test_string()
         && cinfo.test_int32  == pinfo.test_int32()
@@ -44,10 +42,9 @@ bool operator ==(const TestMsg::CommonInfo& pinfo, const CommonInfo& cinfo)
 void test_protocol_enum(void)
 {
     // CommonType_Name
-    const std::string& str_bool     = TestMsg::CommonType_Name(TestMsg::CT_BOOL);
-    const std::string& str_bytes    = TestMsg::CommonType_Name(TestMsg::CT_BYTES);
-    const std::string& str_double   = TestMsg::CommonType_Name(TestMsg::CT_DOUBLE);
     const std::string& str_float    = TestMsg::CommonType_Name(TestMsg::CT_FLOAT);
+    const std::string& str_double   = TestMsg::CommonType_Name(TestMsg::CT_DOUBLE);
+    const std::string& str_bytes    = TestMsg::CommonType_Name(TestMsg::CT_BYTES);
     const std::string& str_int32    = TestMsg::CommonType_Name(TestMsg::CT_INT32);
     const std::string& str_sint32   = TestMsg::CommonType_Name(TestMsg::CT_SINT32);
     const std::string& str_uint32   = TestMsg::CommonType_Name(TestMsg::CT_UINT32);
@@ -59,36 +56,32 @@ void test_protocol_enum(void)
     const std::string& str_null1    = TestMsg::CommonType_Name(TestMsg::CommonType(100));
     const std::string& str_null2    = TestMsg::CommonType_Name(TestMsg::CommonType(-1));
 
-    abort_assert(str_bool     == "CT_BOOL");
-    abort_assert(str_bytes    == "CT_BYTES");
-    abort_assert(str_double   == "CT_DOUBLE");
     abort_assert(str_float    == "CT_FLOAT");
+    abort_assert(str_double   == "CT_DOUBLE");
+    abort_assert(str_bytes    == "CT_BYTES");
     abort_assert(str_int32    == "CT_INT32");
     abort_assert(str_sint32   == "CT_SINT32");
     abort_assert(str_uint32   == "CT_UINT32");
     abort_assert(str_int64    == "CT_INT64");
     abort_assert(str_sint64   == "CT_SINT64");
     abort_assert(str_uint64   == "CT_UINT64");
-    abort_assert(str_default1 == "CT_BOOL");
-    abort_assert(str_default2 == "CT_BOOL");
+    abort_assert(str_default1 == "CT_FLOAT");
+    abort_assert(str_default2 == "CT_FLOAT");
     abort_assert(str_null1.empty());
     abort_assert(str_null2.empty());
 
     // CommonType_Parse
     TestMsg::CommonType val{};
-    abort_assert(TestMsg::CT_BOOL == val);
+    abort_assert(TestMsg::CT_FLOAT == val);
 
-    abort_assert(TestMsg::CommonType_Parse(str_bool, &val));
-    abort_assert(TestMsg::CT_BOOL == val);
-
-    abort_assert(TestMsg::CommonType_Parse(str_bytes, &val));
-    abort_assert(TestMsg::CT_BYTES == val);
+    abort_assert(TestMsg::CommonType_Parse(str_float, &val));
+    abort_assert(TestMsg::CT_FLOAT == val);
 
     abort_assert(TestMsg::CommonType_Parse(str_double, &val));
     abort_assert(TestMsg::CT_DOUBLE == val);
 
-    abort_assert(TestMsg::CommonType_Parse(str_float, &val));
-    abort_assert(TestMsg::CT_FLOAT == val);
+    abort_assert(TestMsg::CommonType_Parse(str_bytes, &val));
+    abort_assert(TestMsg::CT_BYTES == val);
 
     abort_assert(TestMsg::CommonType_Parse(str_int32, &val));
     abort_assert(TestMsg::CT_INT32 == val);
@@ -109,10 +102,10 @@ void test_protocol_enum(void)
     abort_assert(TestMsg::CT_UINT64 == val);
 
     abort_assert(TestMsg::CommonType_Parse(str_default1, &val));
-    abort_assert(TestMsg::CT_BOOL == val);
+    abort_assert(TestMsg::CT_FLOAT == val);
 
     abort_assert(TestMsg::CommonType_Parse(str_default2, &val));
-    abort_assert(TestMsg::CT_BOOL == val);
+    abort_assert(TestMsg::CT_FLOAT == val);
 
     abort_assert(!TestMsg::CommonType_Parse(str_null1, &val));
     abort_assert(!TestMsg::CommonType_Parse(str_null2, &val));
@@ -120,10 +113,9 @@ void test_protocol_enum(void)
 
 void test_protocol_serialization(void)
 {
-    CommonInfo info{true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
+    CommonInfo info{1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
 
     TestMsg::CommonInfo test_info;
-    test_info.set_test_bool(info.test_bool);
     test_info.set_test_float(info.test_float);
     test_info.set_test_double(info.test_double);
     test_info.set_test_string(info.test_string);
@@ -173,13 +165,14 @@ void test_protocol_serialization(void)
 void test_protocol_serialization_list(void)
 {
     std::vector<CommonInfo> info_list{
-        {true,  1.23f, 4.5678, "CommonInfo1", 123456, -123456, 123456, 567890, -567890, 567890},
-        {false, 4.56f, 9.0123, "CommonInfo2", 456789, -456789, 456789, 123456, -123456, 123456},
+        {1.23f, 4.5678, "CommonInfo1", 123456, -123456, 123456, 567890, -567890, 567890},
+        {4.56f, 9.0123, "CommonInfo2", 456789, -456789, 456789, 123456, -123456, 123456},
     };
 
     std::vector<TestMsg::CommonType> type_list{
-        TestMsg::CT_BOOL,   TestMsg::CT_BYTES,  TestMsg::CT_DOUBLE, TestMsg::CT_FLOAT,  TestMsg::CT_INT32,
-        TestMsg::CT_SINT32, TestMsg::CT_UINT32, TestMsg::CT_INT64,  TestMsg::CT_SINT64, TestMsg::CT_UINT64
+        TestMsg::CT_FLOAT,  TestMsg::CT_DOUBLE, TestMsg::CT_BYTES,
+        TestMsg::CT_INT32,  TestMsg::CT_SINT32, TestMsg::CT_UINT32,
+        TestMsg::CT_INT64,  TestMsg::CT_SINT64, TestMsg::CT_UINT64
     };
 
     // common_info_list_size
@@ -190,7 +183,6 @@ void test_protocol_serialization_list(void)
     // add_common_info_list
     TestMsg::CommonInfo* temp = test_info_list.add_common_info_list();
     abort_assert(temp != nullptr);
-    temp->set_test_bool(info_list[0].test_bool);
     temp->set_test_float(info_list[0].test_float);
     temp->set_test_double(info_list[0].test_double);
     temp->set_test_string(info_list[0].test_string);
@@ -203,7 +195,6 @@ void test_protocol_serialization_list(void)
 
     temp = test_info_list.add_common_info_list();
     abort_assert(temp != nullptr);
-    temp->set_test_bool(info_list[1].test_bool);
     temp->set_test_float(info_list[1].test_float);
     temp->set_test_double(info_list[1].test_double);
     temp->set_test_string(info_list[1].test_string);
@@ -268,7 +259,7 @@ void test_protocol_serialization_list(void)
 
         // foreach mutable_common_type_list
         for (auto& val : *string_to_info_list.mutable_common_type_list())
-            val = TestMsg::CT_BOOL;
+            val = TestMsg::CT_FLOAT;
 
         // for mutable_common_info_list
         for (idx = 0; idx != string_to_info_list.common_info_list_size(); ++idx)
@@ -282,7 +273,7 @@ void test_protocol_serialization_list(void)
         if (auto ptr = string_to_info_list.mutable_common_type_list(); ptr != nullptr)
             for (idx = 0; idx != ptr->size(); ++idx)
                 if (0 == idx % 2)
-                    (*ptr)[idx] = TestMsg::CT_BYTES;
+                    (*ptr)[idx] = TestMsg::CT_DOUBLE;
 
         // DebugString
         fmt::print("---- string_to_info_list.DebugString() start ----\n");
@@ -325,7 +316,7 @@ void test_protocol_serialization_list(void)
 
         // foreach mutable_common_type_list
         for (auto& val : *array_to_info_list.mutable_common_type_list())
-            val = TestMsg::CT_BYTES;
+            val = TestMsg::CT_DOUBLE;
 
         // for mutable_common_info_list
         for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
@@ -339,7 +330,7 @@ void test_protocol_serialization_list(void)
         if (auto ptr = array_to_info_list.mutable_common_type_list(); ptr != nullptr)
             for (idx = 0; idx != ptr->size(); ++idx)
                 if (0 == idx % 2)
-                    (*ptr)[idx] = TestMsg::CT_BOOL;
+                    (*ptr)[idx] = TestMsg::CT_FLOAT;
 
         // DebugString
         fmt::print("---- array_to_info_list.DebugString() start ----\n");
@@ -352,10 +343,9 @@ void test_protocol_serialization_list(void)
 
 void test_protocol_performance(void)
 {
-    CommonInfo info{true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
+    CommonInfo info{1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
 
     TestMsg::CommonInfo test_info;
-    test_info.set_test_bool(info.test_bool);
     test_info.set_test_float(info.test_float);
     test_info.set_test_double(info.test_double);
     test_info.set_test_string(info.test_string);

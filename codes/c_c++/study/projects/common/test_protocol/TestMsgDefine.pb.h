@@ -49,21 +49,20 @@ namespace TestMsg {
 namespace TestMsg {
 
 enum CommonType {
-  CT_BOOL = 0,
-  CT_BYTES = 1,
-  CT_DOUBLE = 2,
-  CT_FLOAT = 3,
-  CT_INT32 = 4,
-  CT_SINT32 = 5,
-  CT_UINT32 = 6,
-  CT_INT64 = 7,
-  CT_SINT64 = 8,
-  CT_UINT64 = 9,
+  CT_FLOAT = 0,
+  CT_DOUBLE = 1,
+  CT_BYTES = 2,
+  CT_INT32 = 3,
+  CT_SINT32 = 4,
+  CT_UINT32 = 5,
+  CT_INT64 = 6,
+  CT_SINT64 = 7,
+  CT_UINT64 = 8,
   CommonType_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   CommonType_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool CommonType_IsValid(int value);
-const CommonType CommonType_MIN = CT_BOOL;
+const CommonType CommonType_MIN = CT_FLOAT;
 const CommonType CommonType_MAX = CT_UINT64;
 const int CommonType_ARRAYSIZE = CommonType_MAX + 1;
 
