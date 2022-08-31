@@ -13,7 +13,7 @@ void test_libevent_random(void)
     for (int idx = 0; idx != test_times; ++idx)
     {
         evutil_secure_rng_get_bytes(&random_num, sizeof(random_num));
-        printf("Random ev_uint32_t=%u\n", random_num);
+        fmt::print("Random ev_uint32_t={}\n", random_num);
     }
 
     fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __func__)));

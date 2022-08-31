@@ -1,5 +1,8 @@
 #include "libevent-config.h"
 
+#include "fmt/core.h"
+#include "fmt/format.h"
+
 #include "event2/event.h"
 #include "event2/thread.h"
 
@@ -34,9 +37,9 @@ void libevent_init(void)
     //////////////////////////////////////////////////////////////////////////
     // 获取当前平台支持的方法
     //////////////////////////////////////////////////////////////////////////
-    fprintf(stdout, "-- !!! The libevent initialized successfully !!! --\n");
-    fprintf(stdout, "Libevent version: %s\n", event_get_version());
-    fprintf(stdout, "Libevent supported methods:\n");
+    fmt::print("-- !!! The libevent initialized successfully !!! --\n");
+    fmt::print("Libevent version: {}\n", event_get_version());
+    fmt::print("Libevent supported methods:\n");
 
     uint32_t     idx               = 1;
     const char** supported_methods = event_get_supported_methods();
@@ -48,10 +51,10 @@ void libevent_init(void)
 
     while (*supported_methods != NULL)
     {
-        fprintf(stdout, "    [%u]. %s\n", idx++, *supported_methods++);
+        fmt::print("    [{}]. {}\n", idx++, *supported_methods++);
     }
 
-    fprintf(stdout, "---------------------------------------------------\n");
+    fmt::print("---------------------------------------------------\n");
 }
 
 void libevent_destroy(void)
@@ -102,12 +105,12 @@ void libevent_log_callback(int severity, const char* msg)
         break;
     }
 
-    fprintf(stdout, "[%s] %s\n", severity_str, msg);
+    fmt::print("[{}] {}\n", severity_str, msg);
 }
 
 void libevent_fatal_callback(int error_code)
 {
-    fprintf(stdout, "Libevent fatal error! Please check you code, error_code = %d", error_code);
+    fmt::print("Libevent fatal error! Please check you code, error_code = {}\n", error_code);
 
     abort_assert(false && "libevent_fatal_callback()!!!");
 }

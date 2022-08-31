@@ -4,9 +4,13 @@
 #include "common-platform.h"
 
 #include <ctime>
+#include <cstdio>
 #include <cstdint>
+#include <cstring>
 #include <chrono>
 #include <string>
+#include <sstream>
+#include <type_traits>
 
 #if defined(NDEBUG)
     #define common_assert(expr) ((void)0)
@@ -32,6 +36,32 @@ namespace details {
 int assert_internal(const char* msg, const char* file, const char* func, int line, bool is_abort);
 
 } // namespace details
+
+/**
+ * @brief 拼接字符串
+ * @param
+ * @return
+ */
+template<typename... T>
+inline std::string str_concat(T&&... args)
+{
+    std::stringstream ss;
+    (ss << ... << std::forward<T>(args));
+    return ss.str();
+}
+
+/**
+ * @brief 打印字符串(自动追加换行符'\n')
+ * @param
+ * @return
+ */
+template<typename... T>
+inline void str_println(T&&... args)
+{
+    std::string str = str_concat(std::forward<T>(args)...);
+    str.push_back('\n');
+    fprintf(stdout, str.c_str());
+}
 
 /**
  * @brief 获取系统时间(可回退)

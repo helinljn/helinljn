@@ -1,7 +1,7 @@
 #include "common.h"
 
-#include <cstdio>
-#include <cstring>
+#include "fmt/core.h"
+#include "fmt/format.h"
 
 namespace details {
 
@@ -17,12 +17,12 @@ int assert_internal(const char* msg, const char* file, const char* func, int lin
         file = slash + 1;
 
     // 格式化输出断言信息
-    fprintf(stdout,
+    fmt::print(
         "\n----------- [ASSERTION FAILED BEGIN] -----------\n"
-        "File   : %s\n"
-        "Func   : %s\n"
-        "Line   : %d\n"
-        "Reason : %s\n"
+        "File   : {}\n"
+        "Func   : {}\n"
+        "Line   : {}\n"
+        "Reason : {}\n"
         "----------- [ ASSERTION FAILED END ] -----------\n\n",
         file, func, line, msg
     );
