@@ -1,7 +1,9 @@
 【安装插件】
     1. Force UTF-8(No BOM)
 
-    2. VisualAssist
+    2. Markdown Editor
+
+    3. VisualAssist
         a. Coloring And Attributes -> Enable all
 
         b. Underlining -> Disable all
