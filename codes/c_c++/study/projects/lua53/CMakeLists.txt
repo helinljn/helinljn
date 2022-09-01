@@ -1,11 +1,11 @@
 # 生成目标名字
-SET(EXEC_LUA_BUILD_TARGET_NAME "lua-5.3")
+SET(EXEC_LUA_BUILD_TARGET_NAME "lua53")
 
 # 头文件目录、依赖库目录、依赖库、宏定义、编译选项
 IF(MSVC)
     # 头文件目录
     SET(EXEC_LUA_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/projects/lua-5.3
+        ${PROJECT_SOURCE_DIR}/projects/lua53
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
     )
 
@@ -16,7 +16,7 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_LUA_LINK_LIBS
-        lua_5.3
+        lua-5.3
     )
 
     # 宏定义
@@ -31,7 +31,7 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(EXEC_LUA_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/projects/lua-5.3
+        ${PROJECT_SOURCE_DIR}/projects/lua53
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
     )
 
@@ -42,7 +42,7 @@ ELSE()
 
     # 依赖库
     SET(EXEC_LUA_LINK_LIBS
-        -llua_5.3
+        -llua-5.3
         -lm
         -ldl
     )

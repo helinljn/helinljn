@@ -1,5 +1,5 @@
 # 生成目标名字
-SET(LIBRARY_HTTP_PARSER_BUILD_TARGET_NAME "http_parser")
+SET(LIBRARY_HTTP_PARSER_BUILD_TARGET_NAME "http-parser")
 
 # 头文件目录、宏定义、编译选项
 IF(MSVC)

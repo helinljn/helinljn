@@ -1,5 +1,5 @@
 # 生成目标名字
-SET(LIBRARY_LUA_BUILD_TARGET_NAME "lua_5.3")
+SET(LIBRARY_LUA_BUILD_TARGET_NAME "lua-5.3")
 
 # 头文件目录、宏定义、编译选项
 IF(MSVC)

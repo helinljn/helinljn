@@ -1,5 +1,5 @@
 # 生成目标名字
-SET(LIBRARY_LIBEVENT_BUILD_TARGET_NAME "event_all")
+SET(LIBRARY_LIBEVENT_BUILD_TARGET_NAME "event-all")
 
 # 头文件目录、源文件、宏定义、编译选项
 IF(MSVC)

@@ -18,7 +18,7 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_LIBEVENT_LINK_LIBS
-        event_all
+        event-all
         libssl
         libcrypto
         ws2_32
@@ -52,7 +52,7 @@ ELSE()
 
     # 依赖库
     SET(EXEC_LIBEVENT_LINK_LIBS
-        -levent_all
+        -levent-all
         -lssl
         -lcrypto
         -lpthread
