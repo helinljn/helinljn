@@ -1,24 +1,24 @@
 //////////////////////////////////////////////////////////////////////////
-// protobuf²âÊÔ
+// protobufæµ‹è¯•
 //////////////////////////////////////////////////////////////////////////
 #ifndef __TEST_PROTOCOL_H__
 #define __TEST_PROTOCOL_H__
 
 #include "util/common.h"
 
-// ¹¦ÄÜ£º²âÊÔÃ¶¾Ù
+// åŠŸèƒ½ï¼šæµ‹è¯•æšä¸¾
 void test_protocol_enum(void);
 
-// ¹¦ÄÜ£º²âÊÔĞòÁĞ»¯
+// åŠŸèƒ½ï¼šæµ‹è¯•åºåˆ—åŒ–
 void test_protocol_serialization(void);
 
-// ¹¦ÄÜ£º²âÊÔĞòÁĞ»¯ÁĞ±í
+// åŠŸèƒ½ï¼šæµ‹è¯•åºåˆ—åŒ–åˆ—è¡¨
 void test_protocol_serialization_list(void);
 
-// ¹¦ÄÜ£º²âÊÔĞÔÄÜ
+// åŠŸèƒ½ï¼šæµ‹è¯•æ€§èƒ½
 void test_protocol_performance(void);
 
-// ¹¦ÄÜ£º²âÊÔËùÓĞ½Ó¿Ú
+// åŠŸèƒ½ï¼šæµ‹è¯•æ‰€æœ‰æ¥å£
 void test_protocol_all(void);
 
 #endif // __TEST_PROTOCOL_H__

@@ -6,15 +6,15 @@ import "TestMsgDefine.proto";
 
 message CommonInfo
 {
-    float  test_float  = 1;  // float  - µ¥¾«¶È¸¡µãÊı
-    double test_double = 2;  // double - Ë«¾«¶È¸¡µãÊı
-    bytes  test_string = 3;  // bytes  - ¿ÉÄÜ°üº¬ÈÎÒâË³ĞòµÄ×Ö½ÚÊı¾İ£¬ÀàËÆJavaµÄByteStringÒÔ¼°C++µÄstring
-    int32  test_int32  = 4;  // int32  - Ê¹ÓÃ¿É±ä³¤±àÂë£¬±àÂë¸ºÊı²»¹»¸ßĞ§£¬Èç¹ûÓĞ¸ºÊıÄÇÃ´Ê¹ÓÃsint32
-    sint32 test_sint32 = 5;  // sint32 - Ê¹ÓÃ¿É±ä³¤±àÂë£¬±ÈÍ¨³£µÄint32¸ßĞ§
-    uint32 test_uint32 = 6;  // uint32 - ÎŞ·ûºÅÕûÊı£¬Ê¹ÓÃ¿É±ä³¤±àÂë
-    int64  test_int64  = 7;  // int64  - Ê¹ÓÃ¿É±ä³¤±àÂë£¬±àÂë¸ºÊı²»¹»¸ßĞ§£¬Èç¹ûÓĞ¸ºÊıÄÇÃ´Ê¹ÓÃsint64
-    sint64 test_sint64 = 8;  // sint64 - Ê¹ÓÃ¿É±ä³¤±àÂë£¬±ÈÍ¨³£µÄint64¸ßĞ§
-    uint64 test_uint64 = 9;  // uint64 - ÎŞ·ûºÅÕûÊı£¬Ê¹ÓÃ¿É±ä³¤±àÂë
+    float  test_float  = 1;  // float  - å•ç²¾åº¦æµ®ç‚¹æ•°
+    double test_double = 2;  // double - åŒç²¾åº¦æµ®ç‚¹æ•°
+    bytes  test_string = 3;  // bytes  - å¯èƒ½åŒ…å«ä»»æ„é¡ºåºçš„å­—èŠ‚æ•°æ®ï¼Œç±»ä¼¼Javaçš„ByteStringä»¥åŠC++çš„string
+    int32  test_int32  = 4;  // int32  - ä½¿ç”¨å¯å˜é•¿ç¼–ç ï¼Œç¼–ç è´Ÿæ•°ä¸å¤Ÿé«˜æ•ˆï¼Œå¦‚æœæœ‰è´Ÿæ•°é‚£ä¹ˆä½¿ç”¨sint32
+    sint32 test_sint32 = 5;  // sint32 - ä½¿ç”¨å¯å˜é•¿ç¼–ç ï¼Œæ¯”é€šå¸¸çš„int32é«˜æ•ˆ
+    uint32 test_uint32 = 6;  // uint32 - æ— ç¬¦å·æ•´æ•°ï¼Œä½¿ç”¨å¯å˜é•¿ç¼–ç 
+    int64  test_int64  = 7;  // int64  - ä½¿ç”¨å¯å˜é•¿ç¼–ç ï¼Œç¼–ç è´Ÿæ•°ä¸å¤Ÿé«˜æ•ˆï¼Œå¦‚æœæœ‰è´Ÿæ•°é‚£ä¹ˆä½¿ç”¨sint64
+    sint64 test_sint64 = 8;  // sint64 - ä½¿ç”¨å¯å˜é•¿ç¼–ç ï¼Œæ¯”é€šå¸¸çš„int64é«˜æ•ˆ
+    uint64 test_uint64 = 9;  // uint64 - æ— ç¬¦å·æ•´æ•°ï¼Œä½¿ç”¨å¯å˜é•¿ç¼–ç 
 }
 
 message CommonInfoList

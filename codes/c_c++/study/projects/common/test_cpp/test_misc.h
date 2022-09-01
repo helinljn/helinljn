@@ -3,25 +3,25 @@
 
 #include "util/common.h"
 
-// ¹¦ÄÜ£º²âÊÔ¸÷ÖÖÀàĞÍsize
+// åŠŸèƒ½ï¼šæµ‹è¯•å„ç§ç±»å‹size
 void test_sizeof(void);
 
-// ¹¦ÄÜ£º²âÊÔÊıÖµ¼«ÏŞ
+// åŠŸèƒ½ï¼šæµ‹è¯•æ•°å€¼æé™
 void test_numeric_limits(void);
 
-// ¹¦ÄÜ£º²âÊÔsafe_*
+// åŠŸèƒ½ï¼šæµ‹è¯•safe_*
 void test_safe_time(void);
 
-// ¹¦ÄÜ£º²âÊÔmemory & hex_string»¥×ª
+// åŠŸèƒ½ï¼šæµ‹è¯•memory & hex_stringäº’è½¬
 void test_memory_and_hex_convert(void);
 
-// ¹¦ÄÜ£º²âÊÔstr_println
+// åŠŸèƒ½ï¼šæµ‹è¯•str_println
 void test_str_println(void);
 
-// ¹¦ÄÜ£º²âÊÔpair & tuple
+// åŠŸèƒ½ï¼šæµ‹è¯•pair & tuple
 void test_pair_tuple_tie(void);
 
-// ¹¦ÄÜ£º²âÊÔËùÓĞ½Ó¿Ú
+// åŠŸèƒ½ï¼šæµ‹è¯•æ‰€æœ‰æ¥å£
 void test_misc_all(void);
 
 #endif // __TEST_MISC_H__
