@@ -8,6 +8,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/projects/common
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
+        ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
@@ -26,6 +27,7 @@ IF(MSVC)
     SET(EXEC_COMMON_LINK_LIBS
         http_parser
         event_all
+        lua
         libprotobuf${VCPKG_LIBS_NAME_REFIX}
         libssl
         libcrypto
@@ -56,6 +58,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/projects/common
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
+        ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
@@ -74,6 +77,7 @@ ELSE()
     SET(EXEC_COMMON_LINK_LIBS
         -lhttp_parser
         -levent_all
+        -llua
         -lprotobuf${VCPKG_LIBS_NAME_REFIX}
         -lssl
         -lcrypto
