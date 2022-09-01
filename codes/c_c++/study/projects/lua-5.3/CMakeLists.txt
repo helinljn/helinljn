@@ -16,7 +16,7 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_LUA_LINK_LIBS
-        lua
+        lua_5.3
     )
 
     # 宏定义
@@ -42,7 +42,7 @@ ELSE()
 
     # 依赖库
     SET(EXEC_LUA_LINK_LIBS
-        -llua
+        -llua_5.3
         -lm
         -ldl
     )

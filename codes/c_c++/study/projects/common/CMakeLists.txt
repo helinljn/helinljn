@@ -27,7 +27,7 @@ IF(MSVC)
     SET(EXEC_COMMON_LINK_LIBS
         http_parser
         event_all
-        lua
+        lua_5.3
         libprotobuf${VCPKG_LIBS_NAME_REFIX}
         libssl
         libcrypto
@@ -77,7 +77,7 @@ ELSE()
     SET(EXEC_COMMON_LINK_LIBS
         -lhttp_parser
         -levent_all
-        -llua
+        -llua_5.3
         -lm
         -lprotobuf${VCPKG_LIBS_NAME_REFIX}
         -lssl
