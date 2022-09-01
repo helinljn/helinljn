@@ -44,6 +44,7 @@ ELSE()
     SET(EXEC_LUA_LINK_LIBS
         -llua
         -lm
+        -ldl
     )
 
     # 宏定义

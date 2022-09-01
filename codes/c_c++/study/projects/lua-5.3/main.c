@@ -3,7 +3,11 @@
 ** Lua stand-alone interpreter
 ** See Copyright Notice in lua.h
 */
+
 #define lua_c
+
+#include "lprefix.h"
+
 
 #include <signal.h>
 #include <stdio.h>
@@ -11,56 +15,58 @@
 #include <string.h>
 
 #include "lua.h"
-#include "lualib.h"
+
 #include "lauxlib.h"
-#include "lprefix.h"
+#include "lualib.h"
+
+
 
 #if !defined(LUA_PROMPT)
-#define LUA_PROMPT      "> "
-#define LUA_PROMPT2     ">> "
+#define LUA_PROMPT		"> "
+#define LUA_PROMPT2		">> "
 #endif
 
 #if !defined(LUA_PROGNAME)
-#define LUA_PROGNAME        "lua"
+#define LUA_PROGNAME		"lua"
 #endif
 
 #if !defined(LUA_MAXINPUT)
-#define LUA_MAXINPUT        512
+#define LUA_MAXINPUT		512
 #endif
 
 #if !defined(LUA_INIT_VAR)
-#define LUA_INIT_VAR        "LUA_INIT"
+#define LUA_INIT_VAR		"LUA_INIT"
 #endif
 
-#define LUA_INITVARVERSION  LUA_INIT_VAR LUA_VERSUFFIX
+#define LUA_INITVARVERSION	LUA_INIT_VAR LUA_VERSUFFIX
 
 
 /*
 ** lua_stdin_is_tty detects whether the standard input is a 'tty' (that
 ** is, whether we're running lua interactively).
 */
-#if !defined(lua_stdin_is_tty)  /* { */
+#if !defined(lua_stdin_is_tty)	/* { */
 
-#if defined(LUA_USE_POSIX)  /* { */
+#if defined(LUA_USE_POSIX)	/* { */
 
 #include <unistd.h>
-#define lua_stdin_is_tty()  isatty(0)
+#define lua_stdin_is_tty()	isatty(0)
 
-#elif defined(LUA_USE_WINDOWS)  /* }{ */
+#elif defined(LUA_USE_WINDOWS)	/* }{ */
 
 #include <io.h>
 #include <windows.h>
 
-#define lua_stdin_is_tty()  _isatty(_fileno(stdin))
+#define lua_stdin_is_tty()	_isatty(_fileno(stdin))
 
-#else               /* }{ */
+#else				/* }{ */
 
 /* ISO C definition */
-#define lua_stdin_is_tty()  1  /* assume stdin is a tty */
+#define lua_stdin_is_tty()	1  /* assume stdin is a tty */
 
-#endif              /* } */
+#endif				/* } */
 
-#endif              /* } */
+#endif				/* } */
 
 
 /*
@@ -69,27 +75,27 @@
 ** lua_saveline defines how to "save" a read line in a "history".
 ** lua_freeline defines how to free a line read by lua_readline.
 */
-#if !defined(lua_readline)  /* { */
+#if !defined(lua_readline)	/* { */
 
-#if defined(LUA_USE_READLINE)   /* { */
+#if defined(LUA_USE_READLINE)	/* { */
 
 #include <readline/readline.h>
 #include <readline/history.h>
-#define lua_readline(L,b,p) ((void)L, ((b)=readline(p)) != NULL)
-#define lua_saveline(L,line)    ((void)L, add_history(line))
-#define lua_freeline(L,b)   ((void)L, free(b))
+#define lua_readline(L,b,p)	((void)L, ((b)=readline(p)) != NULL)
+#define lua_saveline(L,line)	((void)L, add_history(line))
+#define lua_freeline(L,b)	((void)L, free(b))
 
-#else               /* }{ */
+#else				/* }{ */
 
 #define lua_readline(L,b,p) \
         ((void)L, fputs(p, stdout), fflush(stdout),  /* show prompt */ \
         fgets(b, LUA_MAXINPUT, stdin) != NULL)  /* get line */
-#define lua_saveline(L,line)    { (void)L; (void)line; }
-#define lua_freeline(L,b)   { (void)L; (void)b; }
+#define lua_saveline(L,line)	{ (void)L; (void)line; }
+#define lua_freeline(L,b)	{ (void)L; (void)b; }
 
-#endif              /* } */
+#endif				/* } */
 
-#endif              /* } */
+#endif				/* } */
 
 
 
@@ -273,8 +279,8 @@ static const char *get_prompt (lua_State *L, int firstline) {
 }
 
 /* mark in error messages for incomplete statements */
-#define EOFMARK     "<eof>"
-#define marklen     (sizeof(EOFMARK)/sizeof(char) - 1)
+#define EOFMARK		"<eof>"
+#define marklen		(sizeof(EOFMARK)/sizeof(char) - 1)
 
 
 /*
@@ -444,11 +450,11 @@ static int handle_script (lua_State *L, char **argv) {
 
 
 /* bits of various argument indicators in 'args' */
-#define has_error   1   /* bad option */
-#define has_i       2   /* -i */
-#define has_v       4   /* -v */
-#define has_e       8   /* -e */
-#define has_E       16  /* -E */
+#define has_error	1	/* bad option */
+#define has_i		2	/* -i */
+#define has_v		4	/* -v */
+#define has_e		8	/* -e */
+#define has_E		16	/* -E */
 
 /*
 ** Traverses all arguments from 'argv', returning a mask with those
@@ -603,3 +609,4 @@ int main (int argc, char **argv) {
   lua_close(L);
   return (result && status == LUA_OK) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+

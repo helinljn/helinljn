@@ -31,7 +31,7 @@ ELSE()
     # 宏定义
     SET(LIBRARY_LUA_COMPILE_DEFINITIONS
         -DLIBRARY_LUA_VALUE_JUST_FOR_TEST=818
-        -D_GNU_SOURCE
+        -DLUA_USE_LINUX
     )
 
     # 编译选项

@@ -78,6 +78,7 @@ ELSE()
         -lhttp_parser
         -levent_all
         -llua
+        -lm
         -lprotobuf${VCPKG_LIBS_NAME_REFIX}
         -lssl
         -lcrypto
