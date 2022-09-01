@@ -18,13 +18,13 @@ ENDIF()
 # 项目名字
 PROJECT(study)
 
-# 编译选项
+# 编译选项、优先链接静态库
 IF(MSVC)
     # 编译选项
     SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /W4 /MP")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
-                                
+
     SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /Zc:__cplusplus /W4 /MP")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
@@ -39,7 +39,7 @@ ELSE()
     SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c99 -Wall -Wextra -Wpedantic")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
-                                
+
     SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
