@@ -16,3 +16,6 @@
 [submodule "codes/c_c++/hana/hana"]
 	path = codes/c_c++/hana/hana
 	url = https://github.com/boostorg/hana.git
+[submodule "codes/c_c++/sqlpp11/sqlpp11"]
+	path = codes/c_c++/sqlpp11/sqlpp11
+	url = https://github.com/rbock/sqlpp11.git
