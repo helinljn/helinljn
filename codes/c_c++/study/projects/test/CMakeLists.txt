@@ -13,6 +13,8 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
+        ${PROJECT_SOURCE_DIR}/../hana/hana/include
+        ${PROJECT_SOURCE_DIR}/../sqlpp11/sqlpp11/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
@@ -65,6 +67,8 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
+        ${PROJECT_SOURCE_DIR}/../hana/hana/include
+        ${PROJECT_SOURCE_DIR}/../sqlpp11/sqlpp11/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
