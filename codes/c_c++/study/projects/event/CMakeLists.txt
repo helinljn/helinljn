@@ -1,11 +1,11 @@
 # 生成目标名字
-SET(EXEC_LIBEVENT_BUILD_TARGET_NAME "libevent")
+SET(EXEC_LIBEVENT_BUILD_TARGET_NAME "event")
 
 # 头文件目录、依赖库目录、依赖库、宏定义、编译选项
 IF(MSVC)
     # 头文件目录
     SET(EXEC_LIBEVENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/projects/libevent
+        ${PROJECT_SOURCE_DIR}/projects/event
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
@@ -18,7 +18,7 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_LIBEVENT_LINK_LIBS
-        event-all
+        libevent-all
         libssl
         libcrypto
         ws2_32
@@ -39,7 +39,7 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(EXEC_LIBEVENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/projects/libevent
+        ${PROJECT_SOURCE_DIR}/projects/event
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )

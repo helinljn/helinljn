@@ -32,6 +32,10 @@ IF(MSVC)
     # 优先链接静态库
     SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
+    # 设置静态库 & 动态库的库前缀
+    SET(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+    SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+
     # 设置MTd & MT
     SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 ELSE()

@@ -25,9 +25,9 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_COMMON_LINK_LIBS
-        http-parser
-        event-all
-        lua-5.3
+        libhttp-parser
+        libevent-all
+        liblua-5.3
         libprotobuf${VCPKG_LIBS_NAME_REFIX}
         libssl
         libcrypto
@@ -78,11 +78,11 @@ ELSE()
         -lhttp-parser
         -levent-all
         -llua-5.3
-        -lm
         -lprotobuf${VCPKG_LIBS_NAME_REFIX}
         -lssl
         -lcrypto
         -lpthread
+        -lm
         -ldl
     )
 

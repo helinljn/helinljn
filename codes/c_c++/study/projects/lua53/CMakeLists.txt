@@ -16,7 +16,7 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_LUA_LINK_LIBS
-        lua-5.3
+        liblua-5.3
     )
 
     # 宏定义
