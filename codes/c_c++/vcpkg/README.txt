@@ -29,6 +29,9 @@ Dependencies:
 
                 # 2.1.12
                 vcpkg install libevent[openssl]:x64-windows-static
+
+                # 1.0.2
+                vcpkg install hiredis[ssl]:x64-windows-static
             Linux:
                 ./bootstrap-vcpkg.sh
 
@@ -37,6 +40,9 @@ Dependencies:
 
                 # 2.1.12
                 ./vcpkg install libevent[openssl]:x64-linux
+
+                # 1.0.2
+                ./vcpkg install hiredis[ssl]:x64-linux
 
         git checkout 2022.05.10
             Windows:
