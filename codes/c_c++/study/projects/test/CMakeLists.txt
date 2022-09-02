@@ -6,6 +6,7 @@ IF(MSVC)
     # 头文件目录
     SET(EXEC_TEST_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}/projects/test
+        ${PROJECT_SOURCE_DIR}/3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
@@ -25,6 +26,7 @@ IF(MSVC)
 
     # 依赖库
     SET(EXEC_TEST_LINK_LIBS
+        libhiredis
         libhttp-parser
         libevent-all
         liblua-5.3
@@ -56,6 +58,7 @@ ELSE()
     # 头文件目录
     SET(EXEC_TEST_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}/projects/test
+        ${PROJECT_SOURCE_DIR}/3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
@@ -75,6 +78,7 @@ ELSE()
 
     # 依赖库
     SET(EXEC_TEST_LINK_LIBS
+        -lhiredis
         -lhttp-parser
         -levent-all
         -llua-5.3
