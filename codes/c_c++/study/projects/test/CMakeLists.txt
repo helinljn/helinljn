@@ -10,6 +10,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
@@ -64,6 +65,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
