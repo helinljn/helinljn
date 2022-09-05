@@ -8,6 +8,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/projects/test
         ${PROJECT_SOURCE_DIR}/3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
+        ${PROJECT_SOURCE_DIR}/3rd/jsoncpp/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
         ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
@@ -31,6 +32,7 @@ IF(MSVC)
     SET(EXEC_TEST_LINK_LIBS
         libhiredis
         libhttp-parser
+        libjsoncpp
         libevent-all
         liblua-5.3
         libprotobuf${VCPKG_LIBS_NAME_REFIX}
@@ -63,6 +65,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/projects/test
         ${PROJECT_SOURCE_DIR}/3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
+        ${PROJECT_SOURCE_DIR}/3rd/jsoncpp/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
         ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
@@ -86,6 +89,7 @@ ELSE()
     SET(EXEC_TEST_LINK_LIBS
         -lhiredis
         -lhttp-parser
+        -ljsoncpp
         -levent-all
         -llua-5.3
         -lprotobuf${VCPKG_LIBS_NAME_REFIX}
