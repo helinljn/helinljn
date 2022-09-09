@@ -53,6 +53,7 @@ IF(MSVC)
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
         -DASIO_STANDALONE
+        -DLUABRIDGE_CXX17
     )
 
     # 编译选项
@@ -110,6 +111,7 @@ ELSE()
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
         -DASIO_STANDALONE
+        -DLUABRIDGE_CXX17
     )
 
     # 编译选项
