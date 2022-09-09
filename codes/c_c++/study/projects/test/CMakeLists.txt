@@ -11,6 +11,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/3rd/jsoncpp/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/3rd/LuaBridge/include
         ${PROJECT_SOURCE_DIR}/3rd/rapidjson/include
         ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
@@ -69,6 +70,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/3rd/jsoncpp/include
         ${PROJECT_SOURCE_DIR}/3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/3rd/LuaBridge/include
         ${PROJECT_SOURCE_DIR}/3rd/rapidjson/include
         ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
