@@ -1,37 +1,37 @@
-# 生成目标名字
-SET(EXEC_TEST_BUILD_TARGET_NAME "test")
+# 项目名字
+PROJECT(test)
 
 # 头文件目录、依赖库目录、依赖库、宏定义、编译选项
 IF(MSVC)
     # 头文件目录
-    SET(EXEC_TEST_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/projects/test
-        ${PROJECT_SOURCE_DIR}/3rd/hiredis/include
-        ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
-        ${PROJECT_SOURCE_DIR}/3rd/jsoncpp/include
-        ${PROJECT_SOURCE_DIR}/3rd/libevent/include
-        ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
-        ${PROJECT_SOURCE_DIR}/3rd/LuaBridge/include
-        ${PROJECT_SOURCE_DIR}/3rd/rapidjson/include
-        ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
-        ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
-        ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
-        ${PROJECT_SOURCE_DIR}/../hana/hana/include
-        ${PROJECT_SOURCE_DIR}/../sqlpp11/sqlpp11/include
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/include
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
+    SET(CURRENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
+        ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
+        ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../../../asio/asio/asio/include
+        ${PROJECT_SOURCE_DIR}/../../../hana/hana/include
+        ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-windows-static/include
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
 
     # 依赖库目录
-    SET(EXEC_TEST_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
+    SET(CURRENT_LINK_LIBS_DIR
+        ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
-    SET(EXEC_TEST_LINK_LIBS
+    SET(CURRENT_LINK_LIBS
         libhiredis
         libhttp-parser
         libjsoncpp
@@ -46,10 +46,10 @@ IF(MSVC)
     )
 
     # 宏定义
-    SET(EXEC_TEST_COMPILE_DEFINITIONS
+    SET(CURRENT_COMPILE_DEFINITIONS
         -D_WIN32_WINNT=0x0601
         -D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
-        -DEXEC_TEST_VALUE_JUST_FOR_TEST=818
+        -DVALUE_JUST_FOR_TEST=818
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
         -DASIO_STANDALONE
@@ -57,41 +57,41 @@ IF(MSVC)
     )
 
     # 编译选项
-    SET(EXEC_TEST_COMPILE_OPTIONS
+    SET(CURRENT_COMPILE_OPTIONS
         /wd4100
         /wd4125
         /wd4819
     )
 ELSE()
     # 头文件目录
-    SET(EXEC_TEST_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}/projects/test
-        ${PROJECT_SOURCE_DIR}/3rd/hiredis/include
-        ${PROJECT_SOURCE_DIR}/3rd/http-parser/include
-        ${PROJECT_SOURCE_DIR}/3rd/jsoncpp/include
-        ${PROJECT_SOURCE_DIR}/3rd/libevent/include
-        ${PROJECT_SOURCE_DIR}/3rd/lua-5.3/include
-        ${PROJECT_SOURCE_DIR}/3rd/LuaBridge/include
-        ${PROJECT_SOURCE_DIR}/3rd/rapidjson/include
-        ${PROJECT_SOURCE_DIR}/3rd/rapidxml/include
-        ${PROJECT_SOURCE_DIR}/../fmt/fmt/include
-        ${PROJECT_SOURCE_DIR}/../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../asio/asio/asio/include
-        ${PROJECT_SOURCE_DIR}/../hana/hana/include
-        ${PROJECT_SOURCE_DIR}/../sqlpp11/sqlpp11/include
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/include
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
+    SET(CURRENT_INCLUDE_DIR
+        ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
+        ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
+        ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
+        ${PROJECT_SOURCE_DIR}/../../../asio/asio/asio/include
+        ${PROJECT_SOURCE_DIR}/../../../hana/hana/include
+        ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-linux/include
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
 
     # 依赖库目录
-    SET(EXEC_TEST_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/protobuf_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
-        ${PROJECT_SOURCE_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
+    SET(CURRENT_LINK_LIBS_DIR
+        ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
+        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
-    SET(EXEC_TEST_LINK_LIBS
+    SET(CURRENT_LINK_LIBS
         -lhiredis
         -lhttp-parser
         -ljsoncpp
@@ -106,8 +106,8 @@ ELSE()
     )
 
     # 宏定义
-    SET(EXEC_TEST_COMPILE_DEFINITIONS
-        -DEXEC_TEST_VALUE_JUST_FOR_TEST=818
+    SET(CURRENT_COMPILE_DEFINITIONS
+        -DVALUE_JUST_FOR_TEST=818
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
         -DASIO_STANDALONE
@@ -115,28 +115,32 @@ ELSE()
     )
 
     # 编译选项
-    SET(EXEC_TEST_COMPILE_OPTIONS
+    SET(CURRENT_COMPILE_OPTIONS
         -Wno-unused-parameter
     )
 ENDIF()
 
-MESSAGE(STATUS "---------------------------------------------------------------------")
-
 # 递归添加[./]目录下所有源文件(不包括头文件)
-#AUX_SOURCE_DIRECTORY(./ EXEC_TEST_DIR_SRC_LIST)
-FILE(GLOB_RECURSE EXEC_TEST_DIR_SRC_LIST ./*.c ./*.cc ./*.cpp)
+#AUX_SOURCE_DIRECTORY(./ CURRENT_DIR_SRC_LIST)
+FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST ./*.c ./*.cc ./*.cpp)
 
 # 生成目标可执行文件
-ADD_EXECUTABLE(${EXEC_TEST_BUILD_TARGET_NAME}                     ${EXEC_TEST_DIR_SRC_LIST})
-TARGET_INCLUDE_DIRECTORIES(${EXEC_TEST_BUILD_TARGET_NAME} PRIVATE ${EXEC_TEST_INCLUDE_DIR})
-TARGET_COMPILE_DEFINITIONS(${EXEC_TEST_BUILD_TARGET_NAME} PRIVATE ${EXEC_TEST_COMPILE_DEFINITIONS})
-TARGET_COMPILE_OPTIONS(${EXEC_TEST_BUILD_TARGET_NAME}     PRIVATE ${EXEC_TEST_COMPILE_OPTIONS})
-TARGET_LINK_DIRECTORIES(${EXEC_TEST_BUILD_TARGET_NAME}    PRIVATE ${EXEC_TEST_LINK_LIBS_DIR})
-TARGET_LINK_LIBRARIES(${EXEC_TEST_BUILD_TARGET_NAME}      PRIVATE ${EXEC_TEST_LINK_LIBS})
+ADD_EXECUTABLE(${PROJECT_NAME}                     ${CURRENT_DIR_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
+TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${PROJECT_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
+TARGET_LINK_DIRECTORIES(${PROJECT_NAME}    PRIVATE ${CURRENT_LINK_LIBS_DIR})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}      PRIVATE ${CURRENT_LINK_LIBS})
 
-MESSAGE(STATUS "EXEC_TEST_DIR_SRC_LIST        = ${EXEC_TEST_DIR_SRC_LIST}")
-MESSAGE(STATUS "EXEC_TEST_INCLUDE_DIR         = ${EXEC_TEST_INCLUDE_DIR}")
-MESSAGE(STATUS "EXEC_TEST_COMPILE_DEFINITIONS = ${EXEC_TEST_COMPILE_DEFINITIONS}")
-MESSAGE(STATUS "EXEC_TEST_COMPILE_OPTIONS     = ${EXEC_TEST_COMPILE_OPTIONS}")
-MESSAGE(STATUS "EXEC_TEST_LINK_LIBS_DIR       = ${EXEC_TEST_LINK_LIBS_DIR}")
-MESSAGE(STATUS "EXEC_TEST_LINK_LIBS           = ${EXEC_TEST_LINK_LIBS}")
+# 调试信息
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "CMAKE_PROJECT_NAME          = ${CMAKE_PROJECT_NAME}")
+MESSAGE(STATUS "PROJECT_NAME                = ${PROJECT_NAME}")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR          = ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR          = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CURRENT_DIR_SRC_LIST        = ${CURRENT_DIR_SRC_LIST}")
+MESSAGE(STATUS "CURRENT_INCLUDE_DIR         = ${CURRENT_INCLUDE_DIR}")
+MESSAGE(STATUS "CURRENT_COMPILE_DEFINITIONS = ${CURRENT_COMPILE_DEFINITIONS}")
+MESSAGE(STATUS "CURRENT_COMPILE_OPTIONS     = ${CURRENT_COMPILE_OPTIONS}")
+MESSAGE(STATUS "CURRENT_LINK_LIBS_DIR       = ${CURRENT_LINK_LIBS_DIR}")
+MESSAGE(STATUS "CURRENT_LINK_LIBS           = ${CURRENT_LINK_LIBS}")
