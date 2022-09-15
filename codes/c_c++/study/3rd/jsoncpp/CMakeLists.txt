@@ -1,6 +1,9 @@
 # 项目名字
 PROJECT(jsoncpp)
 
+# 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
+SET(ALL_DEPENDENT_LIBS "${ALL_DEPENDENT_LIBS};${PROJECT_NAME}" CACHE STRING INTERNAL FORCE)
+
 # 头文件目录、宏定义、编译选项
 IF(MSVC)
     # 头文件目录

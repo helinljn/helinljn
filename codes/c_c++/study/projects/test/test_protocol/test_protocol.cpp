@@ -55,6 +55,20 @@ void test_protocol_enum(void)
     const std::string& str_null1    = TestMsg::CommonType_Name(TestMsg::CommonType(100));
     const std::string& str_null2    = TestMsg::CommonType_Name(TestMsg::CommonType(-1));
 
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_FLOAT));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_DOUBLE));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_BYTES));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_INT32));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_SINT32));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_UINT32));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_INT64));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_SINT64));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CT_UINT64));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CommonType{}));
+    abort_assert(TestMsg::CommonType_IsValid(TestMsg::CommonType(0)));
+    abort_assert(!TestMsg::CommonType_IsValid(TestMsg::CommonType(100)));
+    abort_assert(!TestMsg::CommonType_IsValid(TestMsg::CommonType(-1)));
+
     abort_assert(str_float    == "CT_FLOAT");
     abort_assert(str_double   == "CT_DOUBLE");
     abort_assert(str_bytes    == "CT_BYTES");
@@ -71,40 +85,40 @@ void test_protocol_enum(void)
 
     // CommonType_Parse
     TestMsg::CommonType val{};
-    abort_assert(TestMsg::CT_FLOAT == val);
+    abort_assert(TestMsg::CT_FLOAT == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_float, &val));
-    abort_assert(TestMsg::CT_FLOAT == val);
+    abort_assert(TestMsg::CT_FLOAT == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_double, &val));
-    abort_assert(TestMsg::CT_DOUBLE == val);
+    abort_assert(TestMsg::CT_DOUBLE == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_bytes, &val));
-    abort_assert(TestMsg::CT_BYTES == val);
+    abort_assert(TestMsg::CT_BYTES == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_int32, &val));
-    abort_assert(TestMsg::CT_INT32 == val);
+    abort_assert(TestMsg::CT_INT32 == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_sint32, &val));
-    abort_assert(TestMsg::CT_SINT32 == val);
+    abort_assert(TestMsg::CT_SINT32 == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_uint32, &val));
-    abort_assert(TestMsg::CT_UINT32 == val);
+    abort_assert(TestMsg::CT_UINT32 == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_int64, &val));
-    abort_assert(TestMsg::CT_INT64 == val);
+    abort_assert(TestMsg::CT_INT64 == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_sint64, &val));
-    abort_assert(TestMsg::CT_SINT64 == val);
+    abort_assert(TestMsg::CT_SINT64 == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_uint64, &val));
-    abort_assert(TestMsg::CT_UINT64 == val);
+    abort_assert(TestMsg::CT_UINT64 == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_default1, &val));
-    abort_assert(TestMsg::CT_FLOAT == val);
+    abort_assert(TestMsg::CT_FLOAT == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(TestMsg::CommonType_Parse(str_default2, &val));
-    abort_assert(TestMsg::CT_FLOAT == val);
+    abort_assert(TestMsg::CT_FLOAT == val && TestMsg::CommonType_IsValid(val));
 
     abort_assert(!TestMsg::CommonType_Parse(str_null1, &val));
     abort_assert(!TestMsg::CommonType_Parse(str_null2, &val));
