@@ -1,0 +1,293 @@
+# 项目名字
+PROJECT(protobuf-3.15)
+
+# 设置编译目标
+SET(CURRENT_PROTOBUF_LITE_NAME "protobuf-lite-3.15")
+SET(CURRENT_PROTOBUF_NAME      "protobuf-3.15")
+SET(CURRENT_PROTOC_NAME        "protoc-3.15")
+
+# 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
+SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${CURRENT_PROTOBUF_LITE_NAME}" CACHE STRING INTERNAL FORCE)
+SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${CURRENT_PROTOBUF_NAME}"      CACHE STRING INTERNAL FORCE)
+SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${CURRENT_PROTOC_NAME}"        CACHE STRING INTERNAL FORCE)
+
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${PROJECT_SOURCE_DIR}
+)
+
+# 源文件 - protobuf-lite-3.15
+SET(CURRENT_PROTO_LITE_SRC_LIST
+    ${PROJECT_SOURCE_DIR}/google/protobuf/any_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/arena.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/arenastring.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/extension_set.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/generated_enum_util.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/generated_message_table_driven_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/generated_message_util.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/implicit_weak_message.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/coded_stream.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/io_win32.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/strtod.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/zero_copy_stream.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/zero_copy_stream_impl.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/zero_copy_stream_impl_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/map.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/message_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/parse_context.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/repeated_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/bytestream.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/common.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/int128.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/status.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/statusor.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/stringpiece.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/stringprintf.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/structurally_valid.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/strutil.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/time.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/wire_format_lite.cc
+)
+
+# 源文件 - protobuf-3.15
+SET(CURRENT_PROTOBUF_SRC_LIST
+    ${PROJECT_SOURCE_DIR}/google/protobuf/any.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/any.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/api.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/importer.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/parser.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/descriptor.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/descriptor.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/descriptor_database.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/duration.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/dynamic_message.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/empty.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/extension_set_heavy.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/field_mask.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/generated_message_reflection.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/generated_message_table_driven.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/gzip_stream.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/printer.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/io/tokenizer.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/map_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/message.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/reflection_ops.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/service.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/source_context.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/struct.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/stubs/substitute.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/text_format.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/timestamp.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/type.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/unknown_field_set.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/delimited_message_util.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/field_comparator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/field_mask_util.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/datapiece.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/default_value_objectwriter.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/error_listener.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/field_mask_utility.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/json_escaping.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/json_objectwriter.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/json_stream_parser.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/object_writer.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/proto_writer.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/protostream_objectsource.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/protostream_objectwriter.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/type_info.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/type_info_test_helper.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/internal/utility.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/json_util.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/message_differencer.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/time_util.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/util/type_resolver_util.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/wire_format.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/wrappers.pb.cc
+)
+
+# 源文件 - protoc-3.15
+SET(CURRENT_PROTOC_SRC_LIST
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/code_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/command_line_interface.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_enum.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_enum_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_extension.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_file.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_helpers.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_map_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_message.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_message_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_padding_optimizer.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_primitive_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_service.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/cpp/cpp_string_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_doc_comment.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_enum.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_enum_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_field_base.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_helpers.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_map_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_message.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_message_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_primitive_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_reflection_class.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_repeated_enum_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_repeated_message_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_repeated_primitive_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_source_generator_base.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/csharp/csharp_wrapper_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_context.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_doc_comment.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_enum.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_enum_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_enum_field_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_enum_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_extension.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_extension_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_file.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_generator_factory.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_helpers.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_map_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_map_field_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_message.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_message_builder.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_message_builder_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_message_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_message_field_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_message_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_name_resolver.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_primitive_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_primitive_field_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_service.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_shared_code_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_string_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/java/java_string_field_lite.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/js/js_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/js/well_known_types_embed.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_enum.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_enum_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_extension.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_file.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_helpers.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_map_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_message.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_message_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_oneof.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/objectivec/objectivec_primitive_field.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/php/php_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/plugin.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/plugin.pb.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/python/python_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/ruby/ruby_generator.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/subprocess.cc
+    ${PROJECT_SOURCE_DIR}/google/protobuf/compiler/zip_writer.cc
+)
+
+# 宏定义、编译选项
+IF(MSVC)
+    # 宏定义
+    SET(CURRENT_COMPILE_DEFINITIONS
+        -DVALUE_JUST_FOR_TEST=818
+    )
+
+    # 编译选项
+    SET(CURRENT_COMPILE_OPTIONS
+        /wd4018
+        /wd4065
+        /wd4100
+        /wd4125
+        /wd4127
+        /wd4146
+        /wd4244
+        /wd4251
+        /wd4267
+        /wd4305
+        /wd4307
+        /wd4309
+        /wd4310
+        /wd4334
+        /wd4355
+        /wd4389
+        /wd4456
+        /wd4457
+        /wd4506
+        /wd4702
+        /wd4800
+        /wd4996
+    )
+ELSE()
+    # 宏定义
+    SET(CURRENT_COMPILE_DEFINITIONS
+        -DVALUE_JUST_FOR_TEST=818
+        -DGOOGLE_PROTOBUF_CMAKE_BUILD
+        -DHAVE_PTHREAD
+    )
+
+    # 编译选项
+    SET(CURRENT_COMPILE_OPTIONS
+        -Wno-unused-parameter
+        -Wno-unused-function
+        -Wno-sign-compare
+        -Wno-redundant-move
+        -Wno-pedantic
+        -Wno-missing-field-initializers
+    )
+ENDIF()
+
+# 生成静态库 - protobuf-lite-3.15
+ADD_LIBRARY(${CURRENT_PROTOBUF_LITE_NAME}                STATIC  ${CURRENT_PROTO_LITE_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${CURRENT_PROTOBUF_LITE_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
+TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOBUF_LITE_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${CURRENT_PROTOBUF_LITE_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
+
+# 调试信息 - protobuf-lite-3.15
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "CMAKE_PROJECT_NAME          = ${CMAKE_PROJECT_NAME}")
+MESSAGE(STATUS "PROJECT_NAME                = ${CURRENT_PROTOBUF_LITE_NAME}")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR          = ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR          = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CURRENT_PROTO_LITE_SRC_LIST = ${CURRENT_PROTO_LITE_SRC_LIST}")
+MESSAGE(STATUS "CURRENT_INCLUDE_DIR         = ${CURRENT_INCLUDE_DIR}")
+MESSAGE(STATUS "CURRENT_COMPILE_DEFINITIONS = ${CURRENT_COMPILE_DEFINITIONS}")
+MESSAGE(STATUS "CURRENT_COMPILE_OPTIONS     = ${CURRENT_COMPILE_OPTIONS}")
+
+# 生成静态库 - protobuf-3.15
+ADD_LIBRARY(${CURRENT_PROTOBUF_NAME}                STATIC  ${CURRENT_PROTO_LITE_SRC_LIST} ${CURRENT_PROTOBUF_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${CURRENT_PROTOBUF_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
+TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOBUF_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${CURRENT_PROTOBUF_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
+
+# 调试信息 - protobuf-3.15
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "CMAKE_PROJECT_NAME          = ${CMAKE_PROJECT_NAME}")
+MESSAGE(STATUS "PROJECT_NAME                = ${CURRENT_PROTOBUF_NAME}")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR          = ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR          = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CURRENT_PROTOBUF_SRC_LIST   = ${CURRENT_PROTO_LITE_SRC_LIST} ${CURRENT_PROTOBUF_SRC_LIST}")
+MESSAGE(STATUS "CURRENT_INCLUDE_DIR         = ${CURRENT_INCLUDE_DIR}")
+MESSAGE(STATUS "CURRENT_COMPILE_DEFINITIONS = ${CURRENT_COMPILE_DEFINITIONS}")
+MESSAGE(STATUS "CURRENT_COMPILE_OPTIONS     = ${CURRENT_COMPILE_OPTIONS}")
+
+# 生成静态库 - protoc-3.15
+ADD_LIBRARY(${CURRENT_PROTOC_NAME}                STATIC  ${CURRENT_PROTOC_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${CURRENT_PROTOC_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
+TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOC_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${CURRENT_PROTOC_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
+
+# 调试信息 - protoc-3.15
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "CMAKE_PROJECT_NAME          = ${CMAKE_PROJECT_NAME}")
+MESSAGE(STATUS "PROJECT_NAME                = ${CURRENT_PROTOC_NAME}")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR          = ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR          = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CURRENT_PROTOC_SRC_LIST     = ${CURRENT_PROTOC_SRC_LIST}")
+MESSAGE(STATUS "CURRENT_INCLUDE_DIR         = ${CURRENT_INCLUDE_DIR}")
+MESSAGE(STATUS "CURRENT_COMPILE_DEFINITIONS = ${CURRENT_COMPILE_DEFINITIONS}")
+MESSAGE(STATUS "CURRENT_COMPILE_OPTIONS     = ${CURRENT_COMPILE_OPTIONS}")

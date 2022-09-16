@@ -12,6 +12,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
         ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
@@ -19,14 +20,12 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../../../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../../../hana/hana/include
         ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-windows-static/include
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
@@ -37,7 +36,7 @@ IF(MSVC)
         libjsoncpp
         libevent-all
         liblua-5.3
-        libprotobuf${VCPKG_LIBS_NAME_REFIX}
+        libprotobuf-3.15
         libssl
         libcrypto
         ws2_32
@@ -60,6 +59,8 @@ IF(MSVC)
     SET(CURRENT_COMPILE_OPTIONS
         /wd4100
         /wd4125
+        /wd4127
+        /wd4244
         /wd4819
     )
 ELSE()
@@ -72,6 +73,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
         ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
         ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
@@ -79,14 +81,12 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../../../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../../../hana/hana/include
         ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-linux/include
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/protobuf_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
@@ -97,7 +97,7 @@ ELSE()
         -ljsoncpp
         -levent-all
         -llua-5.3
-        -lprotobuf${VCPKG_LIBS_NAME_REFIX}
+        -lprotobuf-3.15
         -lssl
         -lcrypto
         -lpthread
