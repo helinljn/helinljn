@@ -6,7 +6,7 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15
+        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15/include
     )
 
     # 依赖库目录
@@ -33,7 +33,7 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15
+        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15/include
     )
 
     # 依赖库目录
