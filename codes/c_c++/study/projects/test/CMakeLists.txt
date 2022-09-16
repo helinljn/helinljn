@@ -117,6 +117,7 @@ ELSE()
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
         -Wno-unused-parameter
+        -Wno-type-limits
     )
 ENDIF()
 

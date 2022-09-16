@@ -235,6 +235,7 @@ ELSE()
         -Wno-unused-parameter
         -Wno-unused-function
         -Wno-sign-compare
+        -Wno-type-limits
         -Wno-redundant-move
         -Wno-pedantic
         -Wno-missing-field-initializers
