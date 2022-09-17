@@ -10,9 +10,9 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
         ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
         ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
@@ -34,9 +34,9 @@ IF(MSVC)
         libhiredis
         libhttp-parser
         libjsoncpp
-        libevent-all
-        liblua-5.3
-        libprotobuf-3.15
+        libevent
+        liblua
+        libprotobuf
         libssl
         libcrypto
         ws2_32
@@ -70,9 +70,9 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
         ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
         ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf-3.15/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
@@ -94,9 +94,9 @@ ELSE()
         -lhiredis
         -lhttp-parser
         -ljsoncpp
-        -levent-all
-        -llua-5.3
-        -lprotobuf-3.15
+        -levent
+        -llua
+        -lprotobuf
         -lssl
         -lcrypto
         -lpthread

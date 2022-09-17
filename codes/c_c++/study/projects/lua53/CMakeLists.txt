@@ -6,7 +6,7 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
     )
 
     # 依赖库目录
@@ -16,7 +16,7 @@ IF(MSVC)
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
-        liblua-5.3
+        liblua
     )
 
     # 宏定义
@@ -32,7 +32,7 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua-5.3/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
     )
 
     # 依赖库目录
@@ -42,7 +42,7 @@ ELSE()
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
-        -llua-5.3
+        -llua
         -lm
         -ldl
     )
