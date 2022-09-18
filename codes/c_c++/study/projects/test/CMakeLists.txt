@@ -6,6 +6,7 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../../3rd/asio/include
         ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
@@ -17,7 +18,6 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../../../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../../../hana/hana/include
         ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
@@ -31,6 +31,7 @@ IF(MSVC)
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
+        libasio
         libhiredis
         libhttp-parser
         libjsoncpp
@@ -48,9 +49,10 @@ IF(MSVC)
     SET(CURRENT_COMPILE_DEFINITIONS
         -D_WIN32_WINNT=0x0601
         -DVALUE_JUST_FOR_TEST=818
+        -DASIO_STANDALONE
+        -DASIO_SEPARATE_COMPILATION
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
-        -DASIO_STANDALONE
         -DLUABRIDGE_CXX17
     )
 
@@ -66,6 +68,7 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../../3rd/asio/include
         ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
@@ -77,7 +80,6 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../../../asio/asio/asio/include
         ${PROJECT_SOURCE_DIR}/../../../hana/hana/include
         ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/include
@@ -91,6 +93,7 @@ ELSE()
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
+        -lasio
         -lhiredis
         -lhttp-parser
         -ljsoncpp
@@ -107,9 +110,10 @@ ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DVALUE_JUST_FOR_TEST=818
+        -DASIO_STANDALONE
+        -DASIO_SEPARATE_COMPILATION
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
-        -DASIO_STANDALONE
         -DLUABRIDGE_CXX17
     )
 
