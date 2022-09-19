@@ -71,10 +71,8 @@ ELSE()
     SET(VCPKG_LIBS_DIR_REFIX  ".")
 ENDIF()
 
-# 生成静态库
+# 添加子目录
 ADD_SUBDIRECTORY(3rd)
-
-# 生成可执行文件
 ADD_SUBDIRECTORY(projects)
 
 # 调试信息
