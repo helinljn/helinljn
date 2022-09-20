@@ -57,7 +57,7 @@ PROTOBUF_NAMESPACE_OPEN
 PROTOBUF_NAMESPACE_CLOSE
 namespace TestMsg {
 
-enum CommonType : int {
+enum TestCommonType : int {
   CT_FLOAT = 0,
   CT_DOUBLE = 1,
   CT_BYTES = 2,
@@ -67,27 +67,27 @@ enum CommonType : int {
   CT_INT64 = 6,
   CT_SINT64 = 7,
   CT_UINT64 = 8,
-  CommonType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  CommonType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+  TestCommonType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  TestCommonType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
-bool CommonType_IsValid(int value);
-constexpr CommonType CommonType_MIN = CT_FLOAT;
-constexpr CommonType CommonType_MAX = CT_UINT64;
-constexpr int CommonType_ARRAYSIZE = CommonType_MAX + 1;
+bool TestCommonType_IsValid(int value);
+constexpr TestCommonType TestCommonType_MIN = CT_FLOAT;
+constexpr TestCommonType TestCommonType_MAX = CT_UINT64;
+constexpr int TestCommonType_ARRAYSIZE = TestCommonType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CommonType_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* TestCommonType_descriptor();
 template<typename T>
-inline const std::string& CommonType_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, CommonType>::value ||
+inline const std::string& TestCommonType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, TestCommonType>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function CommonType_Name.");
+    "Incorrect type passed to function TestCommonType_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    CommonType_descriptor(), enum_t_value);
+    TestCommonType_descriptor(), enum_t_value);
 }
-inline bool CommonType_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, CommonType* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<CommonType>(
-    CommonType_descriptor(), name, value);
+inline bool TestCommonType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, TestCommonType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<TestCommonType>(
+    TestCommonType_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -111,10 +111,10 @@ inline bool CommonType_Parse(
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::TestMsg::CommonType> : ::std::true_type {};
+template <> struct is_proto_enum< ::TestMsg::TestCommonType> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::TestMsg::CommonType>() {
-  return ::TestMsg::CommonType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::TestMsg::TestCommonType>() {
+  return ::TestMsg::TestCommonType_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

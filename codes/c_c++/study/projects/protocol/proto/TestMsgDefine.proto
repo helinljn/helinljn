@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package TestMsg;
 
-enum CommonType
+enum TestCommonType
 {
     CT_FLOAT  = 0;
     CT_DOUBLE = 1;

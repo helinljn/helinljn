@@ -4,7 +4,7 @@ package TestMsg;
 
 import "TestMsgDefine.proto";
 
-message CommonInfo
+message TestCommonInfo
 {
     float  test_float  = 1;  // float  - 单精度浮点数
     double test_double = 2;  // double - 双精度浮点数
@@ -17,8 +17,8 @@ message CommonInfo
     uint64 test_uint64 = 9;  // uint64 - 无符号整数，使用可变长编码
 }
 
-message CommonInfoList
+message TestCommonInfoList
 {
-    repeated CommonInfo common_info_list = 1;
-    repeated CommonType common_type_list = 2;
+    repeated TestCommonInfo common_info_list = 1;
+    repeated TestCommonType common_type_list = 2;
 }

@@ -26,15 +26,15 @@ static constexpr ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema* schemas = n
 static constexpr ::PROTOBUF_NAMESPACE_ID::Message* const* file_default_instances = nullptr;
 
 const char descriptor_table_protodef_TestMsgDefine_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\023TestMsgDefine.proto\022\007TestMsg*\217\001\n\nCommo"
-  "nType\022\014\n\010CT_FLOAT\020\000\022\r\n\tCT_DOUBLE\020\001\022\014\n\010CT"
-  "_BYTES\020\002\022\014\n\010CT_INT32\020\003\022\r\n\tCT_SINT32\020\004\022\r\n"
-  "\tCT_UINT32\020\005\022\014\n\010CT_INT64\020\006\022\r\n\tCT_SINT64\020"
-  "\007\022\r\n\tCT_UINT64\020\010b\006proto3"
+  "\n\023TestMsgDefine.proto\022\007TestMsg*\223\001\n\016TestC"
+  "ommonType\022\014\n\010CT_FLOAT\020\000\022\r\n\tCT_DOUBLE\020\001\022\014"
+  "\n\010CT_BYTES\020\002\022\014\n\010CT_INT32\020\003\022\r\n\tCT_SINT32\020"
+  "\004\022\r\n\tCT_UINT32\020\005\022\014\n\010CT_INT64\020\006\022\r\n\tCT_SIN"
+  "T64\020\007\022\r\n\tCT_UINT64\020\010b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_TestMsgDefine_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgDefine_2eproto = {
-  false, false, 184, descriptor_table_protodef_TestMsgDefine_2eproto, "TestMsgDefine.proto", 
+  false, false, 188, descriptor_table_protodef_TestMsgDefine_2eproto, "TestMsgDefine.proto", 
   &descriptor_table_TestMsgDefine_2eproto_once, nullptr, 0, 0,
   schemas, file_default_instances, TableStruct_TestMsgDefine_2eproto::offsets,
   file_level_metadata_TestMsgDefine_2eproto, file_level_enum_descriptors_TestMsgDefine_2eproto, file_level_service_descriptors_TestMsgDefine_2eproto,
@@ -48,11 +48,11 @@ descriptor_table_TestMsgDefine_2eproto_metadata_getter(int index) {
 // Force running AddDescriptors() at dynamic initialization time.
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_TestMsgDefine_2eproto(&descriptor_table_TestMsgDefine_2eproto);
 namespace TestMsg {
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CommonType_descriptor() {
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* TestCommonType_descriptor() {
   ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_TestMsgDefine_2eproto);
   return file_level_enum_descriptors_TestMsgDefine_2eproto[0];
 }
-bool CommonType_IsValid(int value) {
+bool TestCommonType_IsValid(int value) {
   switch (value) {
     case 0:
     case 1:
