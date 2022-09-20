@@ -50,8 +50,8 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-unused-function
         -Wno-unused-variable
+        -Wno-unused-function
     )
 ENDIF()
 

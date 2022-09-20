@@ -196,6 +196,7 @@ IF(MSVC)
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DVALUE_JUST_FOR_TEST=818
+        -DGOOGLE_PROTOBUF_CMAKE_BUILD
     )
 
     # 编译选项
@@ -235,9 +236,9 @@ ELSE()
     SET(CURRENT_COMPILE_OPTIONS
         -Wno-unused-parameter
         -Wno-unused-function
+        -Wno-redundant-move
         -Wno-sign-compare
         -Wno-type-limits
-        -Wno-redundant-move
         -Wno-pedantic
         -Wno-missing-field-initializers
         -Wno-stringop-overflow
