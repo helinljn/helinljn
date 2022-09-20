@@ -51,8 +51,6 @@ ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DVALUE_JUST_FOR_TEST=818
-        -DGOOGLE_PROTOBUF_CMAKE_BUILD
-        -DHAVE_PTHREAD
     )
 
     # 编译选项
