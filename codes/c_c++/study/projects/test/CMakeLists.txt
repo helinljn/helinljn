@@ -6,6 +6,7 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../protocol
         ${PROJECT_SOURCE_DIR}/../../3rd/asio/include
         ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
@@ -31,6 +32,7 @@ IF(MSVC)
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
+        libprotocol
         libasio
         libhiredis
         libhttp-parser
@@ -58,16 +60,14 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4100
-        /wd4125
         /wd4127
-        /wd4244
         /wd4819
     )
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${PROJECT_SOURCE_DIR}/../protocol
         ${PROJECT_SOURCE_DIR}/../../3rd/asio/include
         ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
@@ -93,6 +93,7 @@ ELSE()
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
+        -lprotocol
         -lasio
         -lhiredis
         -lhttp-parser
@@ -119,7 +120,6 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-unused-parameter
         -Wno-type-limits
     )
 ENDIF()
