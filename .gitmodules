@@ -1,6 +1,3 @@
-[submodule "codes/c_c++/asio2/asio2"]
-	path = codes/c_c++/asio2/asio2
-	url = https://github.com/zhllxt/asio2.git
 [submodule "codes/c_c++/fmt/fmt"]
 	path = codes/c_c++/fmt/fmt
 	url = https://github.com/fmtlib/fmt.git
