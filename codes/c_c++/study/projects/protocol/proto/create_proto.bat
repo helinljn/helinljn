@@ -1,6 +1,8 @@
 @echo off
 
-..\..\..\build\Release\protoc315.exe TestMsgDefine.proto --cpp_out=..
-..\..\..\build\Release\protoc315.exe TestMsgStruct.proto --cpp_out=..
+for %%f in (*.proto) do (
+    echo %%f
+    ..\..\..\build\Release\protoc315.exe %%f --cpp_out=..
+)
 
 pause

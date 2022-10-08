@@ -1,2 +1,5 @@
-../../../build/Release/protoc315 TestMsgDefine.proto --cpp_out=..
-../../../build/Release/protoc315 TestMsgStruct.proto --cpp_out=..
+for f in `ls *.proto`
+do
+    echo $f
+    ../../../build/Release/protoc315 $f --cpp_out=..
+done
