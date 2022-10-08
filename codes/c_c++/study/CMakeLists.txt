@@ -21,11 +21,11 @@ PROJECT(study)
 # 编译选项、优先链接静态库
 IF(MSVC)
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /W4 /MP")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /W4 /WX /MP")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /W4 /MP")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /W4 /WX /MP")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
@@ -39,16 +39,33 @@ IF(MSVC)
     # 设置MTd & MT
     SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
+    # 设置代码支持的最低操作系统版本
+    # _WIN32_WINNT_NT4                    0x0400 // Windows NT 4.0
+    # _WIN32_WINNT_WIN2K                  0x0500 // Windows 2000
+    # _WIN32_WINNT_WINXP                  0x0501 // Windows XP
+    # _WIN32_WINNT_WS03                   0x0502 // Windows Server 2003
+    # _WIN32_WINNT_WIN6                   0x0600 // Windows Vista
+    # _WIN32_WINNT_VISTA                  0x0600 // Windows Vista
+    # _WIN32_WINNT_WS08                   0x0600 // Windows Server 2008
+    # _WIN32_WINNT_LONGHORN               0x0600 // Windows Vista
+    # _WIN32_WINNT_WIN7                   0x0601 // Windows 7
+    # _WIN32_WINNT_WIN8                   0x0602 // Windows 8
+    # _WIN32_WINNT_WINBLUE                0x0603 // Windows 8.1
+    # _WIN32_WINNT_WINTHRESHOLD           0x0A00 // Windows 10
+    # _WIN32_WINNT_WIN10                  0x0A00 // Windows 10
+    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -D_WIN32_WINNT=0x0601")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0601")
+
     # 消除 WinBase.h 中 MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 宏定义导致的 C5105 编译警告
     SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -DMICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS=0")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DMICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS=0")
 ELSE()
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -Werror")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic -Werror")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 

@@ -46,7 +46,6 @@ IF(MSVC)
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -D_WIN32_WINNT=0x0601
         -DVALUE_JUST_FOR_TEST=818
     )
 
