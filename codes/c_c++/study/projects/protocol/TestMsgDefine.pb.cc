@@ -18,7 +18,6 @@
 PROTOBUF_PRAGMA_INIT_SEG
 namespace TestMsg {
 }  // namespace TestMsg
-static constexpr ::PROTOBUF_NAMESPACE_ID::Metadata* file_level_metadata_TestMsgDefine_2eproto = nullptr;
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_TestMsgDefine_2eproto[1];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_TestMsgDefine_2eproto = nullptr;
 const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_TestMsgDefine_2eproto::offsets[1] = {};
@@ -37,12 +36,10 @@ const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMs
   false, false, 188, descriptor_table_protodef_TestMsgDefine_2eproto, "TestMsgDefine.proto", 
   &descriptor_table_TestMsgDefine_2eproto_once, nullptr, 0, 0,
   schemas, file_default_instances, TableStruct_TestMsgDefine_2eproto::offsets,
-  file_level_metadata_TestMsgDefine_2eproto, file_level_enum_descriptors_TestMsgDefine_2eproto, file_level_service_descriptors_TestMsgDefine_2eproto,
+  nullptr, file_level_enum_descriptors_TestMsgDefine_2eproto, file_level_service_descriptors_TestMsgDefine_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK ::PROTOBUF_NAMESPACE_ID::Metadata
-descriptor_table_TestMsgDefine_2eproto_metadata_getter(int index) {
-  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_TestMsgDefine_2eproto);
-  return descriptor_table_TestMsgDefine_2eproto.file_level_metadata[index];
+PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable* descriptor_table_TestMsgDefine_2eproto_getter() {
+  return &descriptor_table_TestMsgDefine_2eproto;
 }
 
 // Force running AddDescriptors() at dynamic initialization time.

@@ -21,6 +21,7 @@ SET(CURRENT_PROTO_LITE_SRC_LIST
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/generated_message_table_driven_lite.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/generated_message_util.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/implicit_weak_message.cc
+    ${PROJECT_SOURCE_DIR}/src/google/protobuf/inlined_string_field.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/io/coded_stream.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/io/io_win32.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/io/strtod.cc
@@ -59,6 +60,7 @@ SET(CURRENT_PROTOBUF_SRC_LIST
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/empty.pb.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/extension_set_heavy.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/field_mask.pb.cc
+    ${PROJECT_SOURCE_DIR}/src/google/protobuf/generated_message_bases.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/generated_message_reflection.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/generated_message_table_driven.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/io/gzip_stream.cc
@@ -115,6 +117,7 @@ SET(CURRENT_PROTOC_SRC_LIST
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/cpp/cpp_message.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/cpp/cpp_message_field.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/cpp/cpp_padding_optimizer.cc
+    ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/cpp/cpp_parse_function_generator.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/cpp/cpp_primitive_field.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/cpp/cpp_service.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/cpp/cpp_string_field.cc
@@ -147,6 +150,7 @@ SET(CURRENT_PROTOC_SRC_LIST
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/java/java_generator.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/java/java_generator_factory.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/java/java_helpers.cc
+    ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/java/java_kotlin_generator.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/java/java_map_field.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/java/java_map_field_lite.cc
     ${PROJECT_SOURCE_DIR}/src/google/protobuf/compiler/java/java_message.cc
@@ -219,7 +223,9 @@ IF(MSVC)
         /wd4456
         /wd4457
         /wd4506
+        /wd4701
         /wd4702
+        /wd4703
         /wd4800
         /wd4996
     )
@@ -238,12 +244,9 @@ ELSE()
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
         -Wno-unused-parameter
-        -Wno-unused-function
         -Wno-redundant-move
         -Wno-sign-compare
-        -Wno-type-limits
         -Wno-pedantic
-        -Wno-missing-field-initializers
         -Wno-stringop-overflow
     )
 ENDIF()

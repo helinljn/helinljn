@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(protoc315)
+PROJECT(protoc318)
 
 # 头文件目录、依赖库目录、依赖库、宏定义、编译选项
 IF(MSVC)
