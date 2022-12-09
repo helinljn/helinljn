@@ -7,7 +7,6 @@ IF(MSVC)
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/../protocol
-        ${PROJECT_SOURCE_DIR}/../../3rd/asio/include
         ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
@@ -32,7 +31,6 @@ IF(MSVC)
     # 依赖库
     SET(CURRENT_LINK_LIBS
         libprotocol
-        libasio
         libhiredis
         libhttp-parser
         libjsoncpp
@@ -48,8 +46,6 @@ IF(MSVC)
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DASIO_STANDALONE
-        -DASIO_SEPARATE_COMPILATION
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
         -DLUABRIDGE_CXX17
@@ -65,7 +61,6 @@ ELSE()
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/../protocol
-        ${PROJECT_SOURCE_DIR}/../../3rd/asio/include
         ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
         ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
         ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
@@ -90,7 +85,6 @@ ELSE()
     # 依赖库
     SET(CURRENT_LINK_LIBS
         -lprotocol
-        -lasio
         -lhiredis
         -lhttp-parser
         -ljsoncpp
@@ -106,8 +100,6 @@ ELSE()
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DASIO_STANDALONE
-        -DASIO_SEPARATE_COMPILATION
         -DFMT_HEADER_ONLY
         -DSPDLOG_FMT_EXTERNAL
         -DLUABRIDGE_CXX17
