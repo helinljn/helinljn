@@ -17,7 +17,6 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../../3rd/tinyxml2/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
 
@@ -71,7 +70,6 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../../3rd/tinyxml2/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
 
