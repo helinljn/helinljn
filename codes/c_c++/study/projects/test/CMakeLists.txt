@@ -14,8 +14,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
         ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
         ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/tinyxml2/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
@@ -37,6 +36,7 @@ IF(MSVC)
         libevent
         liblua
         libprotobuf
+        libtinyxml2
         libssl
         libcrypto
         ws2_32
@@ -68,8 +68,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
         ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
         ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/rapidjson/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/rapidxml/include
+        ${PROJECT_SOURCE_DIR}/../../3rd/tinyxml2/include
         ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
         ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
         ${PROJECT_SOURCE_DIR}/../../../sqlpp11/sqlpp11/include
@@ -91,6 +90,7 @@ ELSE()
         -levent
         -llua
         -lprotobuf
+        -ltinyxml2
         -lssl
         -lcrypto
         -lpthread
