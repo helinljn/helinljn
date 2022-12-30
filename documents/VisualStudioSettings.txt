@@ -1,43 +1,56 @@
+【常用设置】
+	1. 工具 -> 选项 -> 环境 -> 产品更新(禁用)
+
+	2. 工具 -> 选项 -> 环境 -> 扩展(允许扩展自动更新)
+
+	3. 工具 -> 选项 -> 环境 -> 字体和颜色
+
+	4. 工具 -> 选项 -> 文本编辑器 -> 文件扩展名
+
+	5. 工具 -> 选项 -> 文本编辑器 -> C/C++(常规->行号、导航栏、滚动条、制表符)
+
+	6. 工具 -> 选项 -> 文本编辑器 -> C/C++ -> 代码样式 -> 格式设置 -> 常规(键入制表符自动缩进、键入';'和'}'时自动设置格式)
+
 【安装插件】
-    1. Force UTF-8(No BOM)
+	1. Force UTF-8(No BOM)
 
-    2. Markdown Editor
+	2. Markdown Editor
 
-    3. VisualAssist
-        a. Coloring And Attributes -> Enable all
+	3. VisualAssist
+		a. Coloring And Attributes -> Enable all
 
-        b. Underlining -> Disable all
+		b. Underlining -> Disable all
 
-        c. Display -> Display VA Navigation Bar -> Top & Occurrence
+		c. Display -> Display VA Navigation Bar -> Top & Occurrence
 
-        d. Debug Assistance -> Disable all
+		d. Debug Assistance -> Disable all
 
-        e. Enhanced Listboxes -> Source of C/C++ content -> Default Intellisense
+		e. Enhanced Listboxes -> Source of C/C++ content -> Default Intellisense
 
-        f. Startup -> Disable all
+		f. Startup -> Disable all
 
 【设置Visual Assist X快捷键，如果安装了此插件则只需要设置 视图.向后导航 即可】
-    1. 打开VS -> 工具 -> 选项 -> 环境 -> 键盘
+	1. 打开VS -> 工具 -> 选项 -> 环境 -> 键盘
 
-    2. 应用 (默认值) 键盘方案
+	2. 应用 (默认值) 键盘方案
 
-    3. 【显示命令包含】中搜索并【分配】以下快捷键(全局+分配，新旧快捷键都能用)：
-        编辑.转到文件     -> Shift + Alt + O
+	3. 【显示命令包含】中搜索并【分配】以下快捷键(全局+分配，新旧快捷键都能用)：
+		编辑.转到文件     -> Shift + Alt + O
 
-        编辑.转到符号     -> Shift + Alt + S
+		编辑.转到符号     -> Shift + Alt + S
 
-        编辑.重命名       -> Shift + Alt + R
+		编辑.重命名       -> Shift + Alt + R
 
-        查找所有引用      -> Shift + Alt + F
+		查找所有引用      -> Shift + Alt + F
 
-        编辑.转至“成员” -> Alt + M
+		编辑.转至“成员” -> Alt + M
 
-        编辑.转到定义     -> Alt + G
+		编辑.转到定义     -> Alt + G
 
-        视图.向后导航     -> Alt + B
+		视图.向后导航     -> Alt + B
 
-        切换标题代码文件  -> Alt + O
+		切换标题代码文件  -> Alt + O
 
-    4. 跳转窗口显示设置
-        显示详细信息
-        居中窗口
+	4. 跳转窗口显示设置
+		显示详细信息
+		居中窗口
