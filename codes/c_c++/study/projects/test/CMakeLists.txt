@@ -22,7 +22,7 @@ IF(MSVC)
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
@@ -75,7 +75,7 @@ ELSE()
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
         ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 

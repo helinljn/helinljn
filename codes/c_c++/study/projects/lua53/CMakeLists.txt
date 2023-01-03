@@ -11,7 +11,7 @@ IF(MSVC)
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库
@@ -37,7 +37,7 @@ ELSE()
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../build/${CMAKE_BUILD_TYPE}
+        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库

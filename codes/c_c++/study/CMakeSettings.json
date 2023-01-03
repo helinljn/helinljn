@@ -5,8 +5,8 @@
             "generator": "Ninja",
             "configurationType": "Debug",
             "inheritEnvironments": [ "msvc_x64_x64" ],
-            "buildRoot": "${projectDir}\\build\\windows\\${name}",
-            "installRoot": "${projectDir}\\build\\windows\\${name}",
+            "buildRoot": "${projectDir}\\.build\\windows\\${name}",
+            "installRoot": "${projectDir}\\.build\\windows\\${name}",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "",
             "ctestCommandArgs": ""
@@ -16,8 +16,8 @@
             "generator": "Ninja",
             "configurationType": "Release",
             "inheritEnvironments": [ "msvc_x64_x64" ],
-            "buildRoot": "${projectDir}\\build\\windows\\${name}",
-            "installRoot": "${projectDir}\\build\\windows\\${name}",
+            "buildRoot": "${projectDir}\\.build\\windows\\${name}",
+            "installRoot": "${projectDir}\\.build\\windows\\${name}",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "",
             "ctestCommandArgs": ""

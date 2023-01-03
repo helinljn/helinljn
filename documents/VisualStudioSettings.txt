@@ -11,6 +11,8 @@
 
 	6. 工具 -> 选项 -> 文本编辑器 -> C/C++ -> 代码样式 -> 格式设置 -> 常规(键入制表符自动缩进、键入';'和'}'时自动设置格式)
 
+	7. 打开 C:\Users\Administrator\AppData\Local\Microsoft\VisualStudio\16.0_361f00da\OpenFolder\VSWorkspaceSettings.json，在ExcludedItems属性中添加 ".build"
+
 【安装插件】
 	1. Force UTF-8(No BOM)
 
