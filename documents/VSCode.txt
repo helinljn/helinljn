@@ -22,6 +22,12 @@
     "editor.renderWhitespace": "all",
     "editor.trimAutoWhitespace": false,
 
+    "editor.gotoLocation.multipleDeclarations": "goto",
+    "editor.gotoLocation.multipleDefinitions": "goto",
+    "editor.gotoLocation.multipleImplementations": "goto",
+    "editor.gotoLocation.multipleReferences": "goto",
+    "editor.gotoLocation.multipleTypeDefinitions": "goto",
+
     "files.encoding": "utf8",
     "files.eol": "\r\n",
     "files.trimFinalNewlines": true,
