@@ -1,0 +1,134 @@
+【安装插件】
+	1. Chinese (Simplified) (简体中文) Language Pack for Visual Studio Code
+
+	2. C/C++ Extension Pack
+
+	3. GBKtoUTF8
+
+	4. Markdown All in One
+
+【常用设置】
+{
+    "workbench.colorTheme": "Default Light+",
+
+    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "editor.fontSize": 14,
+    "editor.tabSize": 4,
+
+    "editor.detectIndentation": true,
+    "editor.insertSpaces": true,
+    "editor.renderWhitespace": "all",
+    "editor.trimAutoWhitespace": false,
+
+    "files.encoding": "utf8",
+    "files.eol": "\r\n",
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.vs": true,
+        "**/__pycache__": true,
+    },
+
+    "search.exclude": {
+        "**/aaa": true,
+        "**/bbb": true,
+    },
+
+    "diffEditor.codeLens": true,
+    "diffEditor.ignoreTrimWhitespace": false,
+}
+
+【键盘设置】
+[
+    {
+        "key": "shift+alt+o",
+        "command": "workbench.action.quickOpen"
+    },
+    {
+        "key": "shift+alt+s",
+        "command": "workbench.action.showAllSymbols"
+    },
+    {
+        "key": "shift+alt+r",
+        "command": "editor.action.rename",
+        "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "shift+alt+f",
+        "command": "references-view.findReferences",
+        "when": "editorHasReferenceProvider"
+    },
+    {
+        "key": "alt+m",
+        "command": "workbench.action.gotoSymbol"
+    },
+    {
+        "key": "alt+g",
+        "command": "editor.action.revealDefinition",
+        "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
+    },
+    {
+        "key": "alt+b",
+        "command": "workbench.action.navigateBack",
+        "when": "canNavigateBack"
+    },
+    {
+        "key": "alt+o",
+        "command": "C_Cpp.SwitchHeaderSource",
+        "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'"
+    },
+    {
+        "key": "f12",
+        "command": "editor.action.revealDefinition",
+        "when": "editorHasDefinitionProvider && editorTextFocus && !isInEmbeddedEditor"
+    },
+    {
+        "key": "ctrl+-",
+        "command": "workbench.action.navigateBack",
+        "when": "canNavigateBack"
+    },
+
+    {
+        "key": "shift+alt+o",
+        "command": "-editor.action.organizeImports",
+        "when": "editorTextFocus && !editorReadonly && supportedCodeAction =~ /(\\s|^)source\\.organizeImports\\b/"
+    },
+    {
+        "key": "shift+alt+r",
+        "command": "-revealFileInOS",
+        "when": "!editorFocus"
+    },
+    {
+        "key": "shift+alt+f12",
+        "command": "-references-view.findReferences",
+        "when": "editorHasReferenceProvider"
+    },
+    {
+        "key": "ctrl+t",
+        "command": "-workbench.action.showAllSymbols"
+    },
+    {
+        "key": "ctrl+e",
+        "command": "-workbench.action.quickOpen"
+    },
+    {
+        "key": "ctrl+shift+o",
+        "command": "-workbench.action.gotoSymbol"
+    },
+    {
+        "key": "ctrl+oem_minus",
+        "command": "-workbench.action.zoomOut"
+    },
+    {
+        "key": "ctrl+oem_plus",
+        "command": "-workbench.action.zoomIn"
+    },
+    {
+        "key": "f2",
+        "command": "-editor.action.rename",
+        "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
+    },
+]
