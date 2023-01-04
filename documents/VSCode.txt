@@ -20,7 +20,7 @@
     "editor.detectIndentation": true,
     "editor.insertSpaces": true,
     "editor.renderWhitespace": "all",
-    "editor.trimAutoWhitespace": false,
+    "editor.trimAutoWhitespace": true,
 
     "editor.gotoLocation.multipleDeclarations": "goto",
     "editor.gotoLocation.multipleDefinitions": "goto",
