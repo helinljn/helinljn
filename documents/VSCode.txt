@@ -7,6 +7,8 @@
 
 	4. Markdown All in One
 
+	5. Protobuf support
+
 【常用设置】
 {
     "workbench.colorTheme": "Default Light+",
