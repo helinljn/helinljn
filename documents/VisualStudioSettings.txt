@@ -14,11 +14,13 @@
 	7. 打开 C:\Users\Administrator\AppData\Local\Microsoft\VisualStudio\16.0_361f00da\OpenFolder\VSWorkspaceSettings.json，在ExcludedItems属性中添加 ".build"
 
 【安装插件】
-	1. Force UTF-8(No BOM)
+	1. Trailing Whitespace Visualizer
 
-	2. Markdown Editor
+	2. Force UTF-8(No BOM)
 
-	3. VisualAssist
+	3. Markdown Editor
+
+	4. VisualAssist
 		a. Coloring And Attributes -> Enable all
 
 		b. Underlining -> Disable all
