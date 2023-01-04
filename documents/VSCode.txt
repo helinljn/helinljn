@@ -12,7 +12,7 @@
     "workbench.colorTheme": "Default Light+",
 
     "editor.fontFamily": "Consolas, 'Courier New', monospace",
-    "editor.fontSize": 14,
+    "editor.fontSize": 16,
     "editor.tabSize": 4,
 
     "editor.detectIndentation": true,
@@ -29,6 +29,7 @@
         "**/.git": true,
         "**/.svn": true,
         "**/.vs": true,
+        "**/.vscode": true,
         "**/__pycache__": true,
     },
 
@@ -39,6 +40,9 @@
 
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
+
+    "cmake.buildTask": true,
+    "cmake.buildDirectory": "${workspaceFolder}/.cache",
 }
 
 【键盘设置】
