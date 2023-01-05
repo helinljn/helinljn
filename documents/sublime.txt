@@ -1,6 +1,6 @@
 Preferences -> Settings
 {
-	"font_face": "新宋体",
+	"font_face": "Consolas",
 	"font_size": 14,
 	"tab_size": 4,
 
