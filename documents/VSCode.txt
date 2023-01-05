@@ -1,5 +1,5 @@
-ã€å®‰è£…æ’ä»¶ã€‘
-	1. Chinese (Simplified) (ç®€ä½“ä¸­æ–‡) Language Pack for Visual Studio Code
+¡¾°²×°²å¼ş¡¿
+	1. Chinese (Simplified) (¼òÌåÖĞÎÄ) Language Pack for Visual Studio Code
 
 	2. C/C++ Extension Pack
 
@@ -9,7 +9,7 @@
 
 	5. Protobuf support
 
-ã€å¸¸ç”¨è®¾ç½®ã€‘
+¡¾³£ÓÃÉèÖÃ¡¿
 {
     "workbench.colorTheme": "Default Light+",
 
@@ -37,7 +37,7 @@
     "diffEditor.ignoreTrimWhitespace": false,
 }
 
-ã€é”®ç›˜è®¾ç½®ã€‘
+¡¾¼üÅÌÉèÖÃ¡¿
 [
     {
         "key": "shift+alt+o",
