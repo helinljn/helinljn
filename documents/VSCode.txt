@@ -35,6 +35,8 @@
 
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
+
+    "security.workspace.trust.enabled": false,
 }
 
 【键盘设置】
