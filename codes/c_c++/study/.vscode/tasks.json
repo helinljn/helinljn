@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build debug",
+            "label": "build windows debug",
             "type": "shell",
             "windows": {
                 "command": ".\\build_win.bat debug"
@@ -13,7 +13,7 @@
             }
         },
         {
-            "label": "build release",
+            "label": "build windows release",
             "type": "shell",
             "windows": {
                 "command": ".\\build_win.bat release"
@@ -21,7 +21,7 @@
             "group": "build"
         },
         {
-            "label": "build all",
+            "label": "build windows all",
             "type": "shell",
             "windows": {
                 "command": ".\\build_win.bat all"

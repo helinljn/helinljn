@@ -33,24 +33,8 @@
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
 
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.vs": true,
-        "**/.vscode": true,
-        "**/__pycache__": true,
-    },
-
-    "search.exclude": {
-        "**/aaa": true,
-        "**/bbb": true,
-    },
-
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
-
-    "cmake.buildTask": true,
-    "cmake.buildDirectory": "${workspaceFolder}/.cache",
 }
 
 【键盘设置】
