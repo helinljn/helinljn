@@ -4,9 +4,7 @@
         {
             "label": "build windows debug",
             "type": "shell",
-            "windows": {
-                "command": ".\\build_win.bat debug"
-            },
+            "command": ".\\build_win.bat debug",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -15,17 +13,32 @@
         {
             "label": "build windows release",
             "type": "shell",
-            "windows": {
-                "command": ".\\build_win.bat release"
-            },
+            "command": ".\\build_win.bat release",
             "group": "build"
         },
         {
             "label": "build windows all",
             "type": "shell",
-            "windows": {
-                "command": ".\\build_win.bat all"
-            },
+            "command": ".\\build_win.bat all",
+            "group": "build"
+        },
+
+        {
+            "label": "build linux debug",
+            "type": "shell",
+            "command": "wsl ./build_linux.sh debug",
+            "group": "build"
+        },
+        {
+            "label": "build linux release",
+            "type": "shell",
+            "command": "wsl ./build_linux.sh release",
+            "group": "build"
+        },
+        {
+            "label": "build linux all",
+            "type": "shell",
+            "command": "wsl ./build_linux.sh all",
             "group": "build"
         }
     ]
