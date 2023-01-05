@@ -8,34 +8,34 @@
 		git config --global core.autocrlf input
 	Windows only:
 		git config --global core.autocrlf false
-		
+
 2. 拉取代码
 	git clone https://github.com/helinljn/helinljn.git ./helinljn
 
 	git pull --rebase
-	
+
 	git submodule init
-	
+
 	git submodule update
-	
+
 3. 分支相关
 	# 显示所有标签
 	git tag
 
 	# 显示所有分支
 	git branch -a
-	
+
 	# 切换分支
 	git checkout feature_xxx
-	
+
 	# 创建 + 切换分支
 	git checkout -b feature_xxx
-	
+
 	# 删除本地分支
 	git branch -D feature_xxx
-	
+
 	# 删除远端分支
 	git push origin --delete feature_xxx
-	
+
 	# 分支提交
 	git push origin feature_xxx

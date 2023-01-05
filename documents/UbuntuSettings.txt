@@ -62,7 +62,7 @@
 【6. 修改更新源为aliyun】
 	cp /etc/apt/sources.list /etc/apt/sources.list.bak
 	vi /etc/apt/sources.list
-	
+
 	将源文件内容全部注释，并添加以下内容任意源
 	Ubuntu 20.04
 		deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
@@ -91,7 +91,7 @@
 
 		deb http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
 		deb-src http://mirrors.aliyun.com/ubuntu/ jammy-proposed main restricted universe multiverse
-		
+
 		deb http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
 		deb-src http://mirrors.aliyun.com/ubuntu/ jammy-backports main restricted universe multiverse
 
@@ -108,7 +108,7 @@
 		dpkg-reconfigure dash 然后选择no
 
 	在/etc/rc.local中加入以下内容，要放在exit 0的上面
-	# format the name of core file.   
+	# format the name of core file.
 	# %% – 符号%
 	# %p – 进程号
 	# %u – 进程用户id
@@ -125,7 +125,7 @@
 		root hard core   unlimited
 		root soft nofile 102400
 		root hard nofile 102400
-		
+
 		helin soft core   unlimited
 		helin hard core   unlimited
 		helin soft nofile 102400
@@ -238,10 +238,10 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 	b. 开启Windows子系统模块: dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 	c. 开启Windows虚拟机功能: dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 	d. 重启电脑
-	
+
 4. 下载并安装Linux kernel补丁包
 	https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
-	
+
 5. 使用管理员权限打开PowerShell
 	如果还没安装子系统的情况
 		WSL --set-default-version 2
@@ -249,7 +249,7 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 	如果已经存在一个现有的子系统的情况
 		WSL -l 来找到对应的子系统名
 		WSL --set-version {subsystem-name} 2
-		
+
 	检查是否已经成功更新为WSL2版本
 		WSL -l -v
 

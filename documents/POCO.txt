@@ -12,15 +12,15 @@
 		JSON
 		Util
 		Net
-		
+
 	b. 修改poco-poco-1.9.5/Foundation/Foundation_vs140.sln & Foundation_x64_vs140.sln，删除以下两个工程：
 		TestApp
 		TestLibrary
-		
+
 	c. 打开命令行，进入poco-poco-1.9.5目录，输入以下编译命令：
 		buildwin 140 build static_mt both Win32 nosamples notests devenv
 		buildwin 140 build static_mt both x64 nosamples notests devenv
-			
+
 4. CentOS-7编译流程：
 	mv poco-poco-1.9.5.zip /usr/local/src/
 	cd /usr/local/src/
