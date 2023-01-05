@@ -81,11 +81,6 @@
         "when": "editorTextFocus && editorLangId == 'c' || editorTextFocus && editorLangId == 'cpp' || editorTextFocus && editorLangId == 'cuda-cpp'"
     },
     {
-        "key": "ctrl+-",
-        "command": "workbench.action.navigateBack",
-        "when": "canNavigateBack"
-    },
-    {
         "key": "ctrl+oem_6",
         "command": "editor.action.jumpToBracket",
         "when": "editorTextFocus"
@@ -102,21 +97,8 @@
         "when": "!editorFocus"
     },
     {
-        "key": "shift+alt+f12",
-        "command": "-references-view.findReferences",
-        "when": "editorHasReferenceProvider"
-    },
-    {
-        "key": "ctrl+t",
-        "command": "-workbench.action.showAllSymbols"
-    },
-    {
         "key": "ctrl+e",
         "command": "-workbench.action.quickOpen"
-    },
-    {
-        "key": "ctrl+shift+o",
-        "command": "-workbench.action.gotoSymbol"
     },
     {
         "key": "ctrl+oem_minus",
@@ -127,23 +109,13 @@
         "command": "-workbench.action.zoomIn"
     },
     {
-        "key": "ctrl+shift+oem_5",
-        "command": "-editor.action.jumpToBracket",
-        "when": "editorTextFocus"
+        "key": "ctrl+oem_4",
+        "command": "-editor.action.outdentLines",
+        "when": "editorTextFocus && !editorReadonly"
     },
     {
         "key": "ctrl+oem_6",
         "command": "-editor.action.indentLines",
         "when": "editorTextFocus && !editorReadonly"
-    },
-    {
-        "key": "ctrl+f12",
-        "command": "-editor.action.goToImplementation",
-        "when": "editorHasImplementationProvider && editorTextFocus && !isInEmbeddedEditor"
-    },
-    {
-        "key": "f2",
-        "command": "-editor.action.rename",
-        "when": "editorHasRenameProvider && editorTextFocus && !editorReadonly"
     },
 ]
