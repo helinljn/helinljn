@@ -38,6 +38,8 @@
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
 
+    "explorer.autoReveal": false,
+
     "security.workspace.trust.enabled": false,
 }
 
