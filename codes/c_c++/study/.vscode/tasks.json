@@ -5,10 +5,7 @@
             "label": "build windows debug",
             "type": "shell",
             "command": ".\\build_win.bat debug",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "build windows release",
