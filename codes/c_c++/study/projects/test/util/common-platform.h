@@ -4,7 +4,7 @@
 #if (defined(_MSC_VER) && !defined(__INTEL_COMPILER)) || defined(_WIN32) || defined(WIN32) || defined(_WIN64) || defined(WIN64)
     #if !defined(__COMMON_WINDOWS__)
         #define __COMMON_WINDOWS__
-    
+
         #if !defined(_WIN32_WINNT) || (_WIN32_WINNT < 0x0601)
             #undef  _WIN32_WINNT
             #define _WIN32_WINNT 0x0601

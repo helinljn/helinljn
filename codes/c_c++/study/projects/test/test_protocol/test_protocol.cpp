@@ -390,7 +390,7 @@ void test_protocol_performance(void)
         }
         end_time = steady_clock_now();
         fmt::print("Repeat {} times, SerializeToString cost {} microsecond!!!\n", repeat_times, end_time - start_time);
-        
+
         start_time = steady_clock_now();
         for (size_t idx = 0; idx != repeat_times; ++idx)
         {
@@ -411,7 +411,7 @@ void test_protocol_performance(void)
         }
         end_time = steady_clock_now();
         fmt::print("Repeat {} times, ParseFromString cost {} microsecond!!!\n", repeat_times, end_time - start_time);
-        
+
         TestMsg::TestCommonInfo array_to_info;
         start_time = steady_clock_now();
         for (size_t idx = 0; idx != repeat_times; ++idx)

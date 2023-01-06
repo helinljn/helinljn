@@ -131,7 +131,7 @@ void test_memory_and_hex_convert(void)
         abort_assert(local_tm_str == local_tm_lower_str);
         fmt::print("local_tm_upper={}", local_tm_lower_str);
     }
-    
+
     fmt::print("{}\n", fmt::format("{:-^60}", fmt::format(" !!!{}() success!!! ", __FUNCTION__)));
 }
 

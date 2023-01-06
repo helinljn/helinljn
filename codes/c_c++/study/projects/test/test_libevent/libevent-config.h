@@ -35,7 +35,7 @@ void* libevent_malloc(size_t size);
 void* libevent_calloc(size_t count, size_t size);
 
 /**
- * @brief 内存申请函数：realloc 
+ * @brief 内存申请函数：realloc
  * @param
  * @return
  */

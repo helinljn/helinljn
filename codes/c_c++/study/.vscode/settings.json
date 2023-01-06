@@ -5,7 +5,8 @@
     "cmake.sourceDirectory": "${workspaceFolder}",
     "cmake.buildDirectory": "${workspaceFolder}/.cache",
     "cmake.configureArgs": [
-        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_CONFIGURATION_TYPES=Debug",
+        "-DCMAKE_BUILD_TYPE=Debug"
     ],
 
     "search.exclude": {

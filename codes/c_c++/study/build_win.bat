@@ -1,41 +1,37 @@
 @echo off
 
-if %1 equ debug (
-    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+set vs_version="Visual Studio 16 2019"
 
+if %1 equ debug (
     mkdir .build\windows\x64-Debug
     cd .build\windows\x64-Debug
 
-    cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug ../../../
-    cmake --build .
+    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
+    cmake --build . --config Debug
 
     cd ../../../
 ) else if %1 equ release (
-    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-
     mkdir .build\windows\x64-Release
     cd .build\windows\x64-Release
 
-    cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ../../../
-    cmake --build .
+    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
+    cmake --build . --config Release
 
     cd ../../../
 ) else if %1 equ all (
-    call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-
     mkdir .build\windows\x64-Debug
     cd .build\windows\x64-Debug
 
-    cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug ../../../
-    cmake --build .
+    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
+    cmake --build . --config Debug
 
     cd ../../../
 
     mkdir .build\windows\x64-Release
     cd .build\windows\x64-Release
 
-    cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release ../../../
-    cmake --build .
+    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
+    cmake --build . --config Release
 
     cd ../../../
 ) else (
