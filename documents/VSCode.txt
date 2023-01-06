@@ -12,6 +12,8 @@
 【常用设置】
 {
     "workbench.colorTheme": "Default Light+",
+    "workbench.tree.indent": 24,
+    "workbench.tree.renderIndentGuides": "always",
 
     "editor.fontFamily": "Consolas, 'Courier New', monospace",
     "editor.fontSize": 16,
