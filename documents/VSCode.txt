@@ -89,6 +89,10 @@
         "command": "editor.action.jumpToBracket",
         "when": "editorTextFocus"
     },
+    {
+        "key": "ctrl+shift+f9",
+        "command": "workbench.debug.viewlet.action.removeAllBreakpoints"
+    },
 
     {
         "key": "shift+alt+o",
