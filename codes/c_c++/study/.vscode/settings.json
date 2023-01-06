@@ -3,7 +3,7 @@
     "cmake.configureOnOpen": false,
     "cmake.clearOutputBeforeBuild": true,
     "cmake.sourceDirectory": "${workspaceFolder}",
-    "cmake.buildDirectory": "${workspaceFolder}/.cache",
+    "cmake.buildDirectory": "${workspaceFolder}/.build/.cache/vscode",
     "cmake.configureArgs": [
         "-DCMAKE_CONFIGURATION_TYPES=Debug",
         "-DCMAKE_BUILD_TYPE=Debug"
@@ -21,7 +21,6 @@
         "**/.vscode": true,
         "**/__pycache__": true,
         "**/.build": true,
-        "**/.cache": true,
     },
 
     "files.associations": {

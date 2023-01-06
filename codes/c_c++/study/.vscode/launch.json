@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch test",
+            "name": "Launch windows test",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceRoot}/.build/Debug/test.exe",
