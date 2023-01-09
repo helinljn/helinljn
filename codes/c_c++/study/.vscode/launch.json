@@ -45,8 +45,7 @@
                 "/mnt/c": "C:\\",
                 "/mnt/d": "D:\\",
                 "/mnt/e": "E:\\",
-                "/mnt/f": "F:\\",
-                "/usr": "${env:LOCALAPPDATA}\\lxss\\rootfs\\usr"
+                "/mnt/f": "F:\\"
             }
         }
     ]
