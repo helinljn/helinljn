@@ -9,6 +9,8 @@
 
 	5. Protobuf support
 
+	6. WSL workspaceFolder
+
 【常用设置】
 {
     "workbench.colorTheme": "Default Light+",

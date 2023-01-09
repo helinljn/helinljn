@@ -1,4 +1,6 @@
 {
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
@@ -11,10 +13,22 @@
             }
         },
         {
+            "label": "build windows release",
+            "type": "shell",
+            "command": ".\\build_win.bat release",
+            "group": "build"
+        },
+        {
             "label": "build linux debug",
             "type": "shell",
             "command": "wsl ./build_linux.sh debug",
             "group": "build"
         },
+        {
+            "label": "build linux release",
+            "type": "shell",
+            "command": "wsl ./build_linux.sh release",
+            "group": "build"
+        }
     ]
 }
