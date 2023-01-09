@@ -25,7 +25,7 @@
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/.build/Debug",
             "environment": [],
-            "externalConsole": false,
+            "externalConsole": true,
             "preLaunchTask": "build linux debug",
             "MIMode": "gdb",
             "setupCommands": [
