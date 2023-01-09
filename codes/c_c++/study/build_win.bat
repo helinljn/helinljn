@@ -6,7 +6,7 @@ if %1 equ debug (
     mkdir .build\windows\x64-Debug
     cd .build\windows\x64-Debug
 
-    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
+    cmake -G %vs_version% -A x64 -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
     cmake --build . --config Debug
 
     cd ../../../
@@ -14,7 +14,7 @@ if %1 equ debug (
     mkdir .build\windows\x64-Release
     cd .build\windows\x64-Release
 
-    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
+    cmake -G %vs_version% -A x64 -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
     cmake --build . --config Release
 
     cd ../../../
@@ -22,7 +22,7 @@ if %1 equ debug (
     mkdir .build\windows\x64-Debug
     cd .build\windows\x64-Debug
 
-    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
+    cmake -G %vs_version% -A x64 -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
     cmake --build . --config Debug
 
     cd ../../../
@@ -30,7 +30,7 @@ if %1 equ debug (
     mkdir .build\windows\x64-Release
     cd .build\windows\x64-Release
 
-    cmake -G %vs_version% -A x64 -DCMAKE_INSTALL_PREFIX=. -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
+    cmake -G %vs_version% -A x64 -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
     cmake --build . --config Release
 
     cd ../../../

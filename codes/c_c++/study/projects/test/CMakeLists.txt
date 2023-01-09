@@ -6,24 +6,24 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../protocol
-        ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/tinyxml2/include
-        ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
-        ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/http-parser/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
+        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库
@@ -59,24 +59,24 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../protocol
-        ${PROJECT_SOURCE_DIR}/../../3rd/hiredis/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/http-parser/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/jsoncpp/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/libevent/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/LuaBridge/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
-        ${PROJECT_SOURCE_DIR}/../../3rd/tinyxml2/include
-        ${PROJECT_SOURCE_DIR}/../../../fmt/fmt/include
-        ${PROJECT_SOURCE_DIR}/../../../spdlog/spdlog/include
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/include
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/http-parser/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
+        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/${VCPKG_LIBS_DIR_REFIX}/lib
     )
 
     # 依赖库

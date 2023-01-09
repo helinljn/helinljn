@@ -13,7 +13,7 @@
             "intelliSenseMode": "windows-msvc-x64",
             "configurationProvider": "ms-vscode.cmake-tools",
             "browse": {
-                "databaseFilename": "${workspaceFolder}/.build/cache/browse.vc.db"
+                "databaseFilename": "${workspaceFolder}/.vscode/cache/browse.vc.db"
             }
         }
     ],

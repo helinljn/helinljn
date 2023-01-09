@@ -11,7 +11,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
     )
 
     # 源文件
@@ -73,7 +73,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${PROJECT_SOURCE_DIR}/../../../vcpkg/vcpkg/packages/openssl_x64-linux/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
     )
 
     # 源文件

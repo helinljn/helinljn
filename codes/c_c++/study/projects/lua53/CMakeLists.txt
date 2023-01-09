@@ -6,12 +6,12 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
+        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库
@@ -32,12 +32,12 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/lua/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
-        ${PROJECT_SOURCE_DIR}/../../.build/${CMAKE_BUILD_TYPE}
+        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
     )
 
     # 依赖库

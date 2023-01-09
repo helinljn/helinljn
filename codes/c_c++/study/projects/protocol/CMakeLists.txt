@@ -9,7 +9,7 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/include
     )
 
     # 宏定义
@@ -27,7 +27,7 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${PROJECT_SOURCE_DIR}/../../3rd/protobuf/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/include
     )
 
     # 宏定义
