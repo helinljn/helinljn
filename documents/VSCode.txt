@@ -1,15 +1,17 @@
 【安装插件】
-	1. Chinese (Simplified) (简体中文) Language Pack for Visual Studio Code
+    1. Chinese (Simplified) (简体中文) Language Pack for Visual Studio Code
 
-	2. C/C++ Extension Pack
+    2. C/C++ Extension Pack
 
-	3. GBKtoUTF8
+    3. GBKtoUTF8
 
-	4. Markdown All in One
+    4. Markdown All in One
 
-	5. Protobuf support
+    5. Protobuf support
 
-	6. WSL workspaceFolder
+    6. WSL workspaceFolder
+
+    7. Lua language support for Visual Studio Code
 
 【常用设置】
 {
