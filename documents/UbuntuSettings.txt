@@ -210,7 +210,10 @@ apt autoclean
 【15. VS2019 + WSL gdb调试环境】
 apt -y install openssh-server
 
-设置root密码，gdb调试需要root权限
+如果提示"ptrace:Operation not permitted"类似或相关的错误提示，则执行以下命令：
+	echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+
+否则，设置root密码，gdb调试需要root权限
 	sudo su
 	passwd root
 
