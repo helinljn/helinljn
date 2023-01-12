@@ -17,26 +17,33 @@
 
 【常用设置】
 {
-    "workbench.colorTheme": "One Dark Pro Mix",
+    "workbench.colorTheme": "One Dark Pro",
+    "workbench.startupEditor": "none",
+    "oneDarkPro.italic": false,
 
     "workbench.tree.indent": 24,
     "workbench.tree.renderIndentGuides": "always",
 
-    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "workbench.editor.tabSizing": "shrink",
+    "workbench.editor.highlightModifiedTabs": true,
+
+    "editor.fontFamily": "Consolas",
     "editor.fontSize": 16,
     "editor.tabSize": 4,
-
+    "editor.rulers": [120],
     "editor.detectIndentation": true,
     "editor.insertSpaces": true,
     "editor.renderWhitespace": "all",
     "editor.trimAutoWhitespace": true,
+    "editor.dragAndDrop": false,
 
-    // "editor.gotoLocation.multipleDeclarations": "goto",
-    // "editor.gotoLocation.multipleDefinitions": "goto",
-    // "editor.gotoLocation.multipleImplementations": "goto",
-    // "editor.gotoLocation.multipleReferences": "goto",
-    // "editor.gotoLocation.multipleTypeDefinitions": "goto",
+    "editor.minimap.enabled": true,
+    "editor.minimap.renderCharacters": true,
+    "editor.minimap.size": "proportional",
+    "editor.minimap.showSlider": "mouseover",
 
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 5000,
     "files.encoding": "utf8",
     "files.eol": "\r\n",
     "files.trimFinalNewlines": true,
