@@ -19,7 +19,6 @@
         "**/.svn": true,
         "**/.vs": true,
         "**/.vscode": true,
-        "**/__pycache__": true,
         "**/.build": true
     },
 
