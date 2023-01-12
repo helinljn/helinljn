@@ -42,8 +42,7 @@
     "editor.minimap.size": "proportional",
     "editor.minimap.showSlider": "mouseover",
 
-    "files.autoSave": "afterDelay",
-    "files.autoSaveDelay": 5000,
+    "files.autoSave": "off",
     "files.encoding": "utf8",
     "files.eol": "\r\n",
     "files.trimFinalNewlines": true,
