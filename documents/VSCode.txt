@@ -17,7 +17,7 @@
 
 【常用设置】
 {
-    "workbench.colorTheme": "One Dark Pro",
+    "workbench.colorTheme": "One Dark Pro Mix",
 
     "workbench.tree.indent": 24,
     "workbench.tree.renderIndentGuides": "always",
