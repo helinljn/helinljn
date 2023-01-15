@@ -3,11 +3,14 @@
 	git config --global user.email xxx@xxx.com
 
 	Windows:
+		# 签出时将换行符转换成CRLF，签入时转换回LF
 		git config --global core.autocrlf true
 	Linux or Mac:
+		# 签出时不转换换行符，签入时转换回LF
 		git config --global core.autocrlf input
-	Windows only:
-		git config --global core.autocrlf false
+
+	# 拒绝提交包含混合换行符的文件
+	git config --global core.safecrlf true
 
 2. 拉取代码
 	git clone https://github.com/helinljn/helinljn.git ./helinljn
