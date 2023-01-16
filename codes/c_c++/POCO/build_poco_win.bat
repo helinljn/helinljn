@@ -31,5 +31,6 @@ cmd /c "buildwin.cmd 160 build static_mt both x64 nosamples notests msbuild noen
 git checkout -- components
 
 rd /s /q %POCO_INIT_DIR%\Crypto\include\openssl
+del /q %POCO_INIT_DIR%\lib64\Poco*64*
 
 pause
