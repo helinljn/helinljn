@@ -1,0 +1,46 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build windows debug",
+            "type": "shell",
+            "command": ".\\build_test_win.bat debug",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build windows release",
+            "type": "shell",
+            "command": ".\\build_test_win.bat release",
+            "group": "build"
+        },
+        {
+            "label": "build windows poco",
+            "type": "shell",
+            "command": ".\\build_poco_win.bat",
+            "group": "build"
+        },
+        {
+            "label": "build linux debug",
+            "type": "shell",
+            "command": "wsl ./build_test_linux.sh debug",
+            "group": "build"
+        },
+        {
+            "label": "build linux release",
+            "type": "shell",
+            "command": "wsl ./build_test_linux.sh release",
+            "group": "build"
+        },
+        {
+            "label": "build linux poco",
+            "type": "shell",
+            "command": "wsl ./build_poco_linux.sh",
+            "group": "build"
+        }
+    ]
+}
