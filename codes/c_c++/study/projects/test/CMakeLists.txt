@@ -17,13 +17,13 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/include
         ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-windows/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-windows/lib
     )
 
     # 依赖库
@@ -70,13 +70,13 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/include
         ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-linux/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-linux/lib
     )
 
     # 依赖库
