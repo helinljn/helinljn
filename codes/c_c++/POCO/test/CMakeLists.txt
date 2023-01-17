@@ -6,6 +6,8 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/CppUnit/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/CppUnit/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Foundation/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Foundation/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/XML/include
@@ -20,17 +22,25 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Crypto/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/src
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/src
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/MySQL/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/MySQL/src
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/mysqlclient-8.0.30/x64-windows/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/poco/lib64
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-windows-static/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-windows/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/mysqlclient-8.0.30/x64-windows/lib
     )
 
     # 依赖库后缀修正
@@ -42,6 +52,7 @@ IF(MSVC)
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
+        CppUnit${CURRENT_POCO_LIBS_SUFFIX}
         PocoFoundation${CURRENT_POCO_LIBS_SUFFIX}
         PocoXML${CURRENT_POCO_LIBS_SUFFIX}
         PocoJSON${CURRENT_POCO_LIBS_SUFFIX}
@@ -49,10 +60,14 @@ IF(MSVC)
         PocoNet${CURRENT_POCO_LIBS_SUFFIX}
         PocoCrypto${CURRENT_POCO_LIBS_SUFFIX}
         PocoNetSSL${CURRENT_POCO_LIBS_SUFFIX}
+        PocoData${CURRENT_POCO_LIBS_SUFFIX}
+        PocoDataMySQL${CURRENT_POCO_LIBS_SUFFIX}
+        PocoZip${CURRENT_POCO_LIBS_SUFFIX}
         PocoJWT${CURRENT_POCO_LIBS_SUFFIX}
         PocoRedis${CURRENT_POCO_LIBS_SUFFIX}
         libssl
         libcrypto
+        mysqlclient
         ws2_32
         crypt32
         iphlpapi
@@ -60,7 +75,7 @@ IF(MSVC)
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DPOCO_NO_AUTOMATIC_LIBS
     )
 
     # 编译选项
@@ -71,6 +86,8 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/CppUnit/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/CppUnit/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Foundation/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Foundation/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/XML/include
@@ -85,17 +102,25 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Crypto/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/src
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/src
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/MySQL/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Data/MySQL/src
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
+        ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-linux/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/mysqlclient-8.0.30/x64-ubuntu-20.04/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/poco/lib64
-        ${CMAKE_PROJECT_ROOT_DIR}/../vcpkg/vcpkg/packages/openssl_x64-linux/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-linux/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/mysqlclient-8.0.30/x64-ubuntu-20.04/lib
     )
 
     # 依赖库后缀修正
@@ -107,6 +132,7 @@ ELSE()
 
     # 依赖库
     SET(CURRENT_LINK_LIBS
+        -lCppUnit${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoFoundation${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoXML${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoJSON${CURRENT_POCO_LIBS_SUFFIX}
@@ -114,10 +140,14 @@ ELSE()
         -lPocoNet${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoCrypto${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoNetSSL${CURRENT_POCO_LIBS_SUFFIX}
+        -lPocoData${CURRENT_POCO_LIBS_SUFFIX}
+        -lPocoDataMySQL${CURRENT_POCO_LIBS_SUFFIX}
+        -lPocoZip${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoJWT${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoRedis${CURRENT_POCO_LIBS_SUFFIX}
         -lssl
         -lcrypto
+        -lmysqlclient
         -lpthread
         -lm
         -ldl
@@ -125,7 +155,7 @@ ELSE()
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DPOCO_NO_AUTOMATIC_LIBS
     )
 
     # 编译选项
