@@ -5,10 +5,13 @@ Preferences -> Settings
 	"tab_size": 4,
 
 	"default_encoding": "UTF-8",
-	"default_line_ending": "unix",
+	"default_line_ending": "windows",
+
+	"show_encoding": true,
+	"show_line_endings": true,
 
 	"translate_tabs_to_spaces": true,
-	"trim_trailing_white_space_on_save": true,
+	"trim_trailing_white_space_on_save": "all",
 
 	"file_exclude_patterns":
 	[
