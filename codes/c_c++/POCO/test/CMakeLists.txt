@@ -32,6 +32,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/src
+        ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-windows/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd/mysqlclient-8.0.30/x64-windows/include
     )
@@ -76,11 +77,12 @@ IF(MSVC)
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
+        -DFMT_HEADER_ONLY
     )
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        /wd4819
     )
 ELSE()
     # 头文件目录
@@ -112,6 +114,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Redis/src
+        ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-linux/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd/mysqlclient-8.0.30/x64-ubuntu-20.04/include
     )
@@ -156,6 +159,7 @@ ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
+        -DFMT_HEADER_ONLY
     )
 
     # 编译选项

@@ -12,9 +12,13 @@
 #include "Poco/JWT/JWT.h"
 #include "Poco/Redis/Redis.h"
 
+#include "core/core.h"
+
 int main(void)
 {
     static_assert(__cplusplus == 201703);
+
+    test_core_all();
 
     fprintf(stdout, "\nPress \'Enter\' to exit...\n");
     while (std::getchar() != '\n');
