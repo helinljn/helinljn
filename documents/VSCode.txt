@@ -25,6 +25,7 @@
     "workbench.tree.renderIndentGuides": "always",
 
     "workbench.editor.tabSizing": "shrink",
+    "workbench.editor.enablePreview": false,
     "workbench.editor.highlightModifiedTabs": true,
 
     "editor.fontFamily": "Consolas",
