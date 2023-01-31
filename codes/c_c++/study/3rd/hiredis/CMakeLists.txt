@@ -11,7 +11,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
     # 宏定义
@@ -40,7 +40,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd/openssl-1.1.1n/x64-linux/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
     # 宏定义
