@@ -1,7 +1,6 @@
 #include "libevent-config.h"
 
-#include "fmt/core.h"
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 
 #include "event2/event.h"
 #include "event2/thread.h"

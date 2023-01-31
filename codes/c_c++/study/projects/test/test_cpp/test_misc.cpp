@@ -1,7 +1,6 @@
 #include "test_misc.h"
 
-#include "fmt/core.h"
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 
 #include <limits>
 #include <utility>

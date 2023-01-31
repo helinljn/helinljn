@@ -24,16 +24,14 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysqlclient-8.0.30/x64-windows/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/poco/lib64
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/lib
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysqlclient-8.0.30/x64-windows/lib
     )
 
     # 依赖库后缀修正
@@ -56,7 +54,6 @@ IF(MSVC)
         PocoJWT${CURRENT_POCO_LIBS_SUFFIX}
         libssl
         libcrypto
-        mysqlclient
         ws2_32
         crypt32
         iphlpapi
@@ -65,7 +62,6 @@ IF(MSVC)
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
-        -DFMT_HEADER_ONLY
     )
 
     # 编译选项
@@ -94,16 +90,14 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../fmt/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysqlclient-8.0.30/x64-ubuntu-20.04/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/poco/lib64
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/lib
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysqlclient-8.0.30/x64-ubuntu-20.04/lib
     )
 
     # 依赖库后缀修正
@@ -126,7 +120,6 @@ ELSE()
         -lPocoJWT${CURRENT_POCO_LIBS_SUFFIX}
         -lssl
         -lcrypto
-        -lmysqlclient
         -lpthread
         -lm
         -ldl
@@ -135,7 +128,6 @@ ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
-        -DFMT_HEADER_ONLY
     )
 
     # 编译选项

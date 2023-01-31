@@ -1,7 +1,6 @@
 #include "test_protocol.h"
 
-#include "fmt/core.h"
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 
 #include "TestMsgDefine.pb.h"
 #include "TestMsgStruct.pb.h"

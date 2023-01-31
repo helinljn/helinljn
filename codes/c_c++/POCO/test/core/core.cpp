@@ -4,8 +4,7 @@
 #include "Poco/AtomicCounter.h"
 #include "Poco/Ascii.h"
 
-#include "fmt/core.h"
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 
 void test_platform(void)
 {

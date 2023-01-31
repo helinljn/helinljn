@@ -1,7 +1,6 @@
 #include "common.h"
 
-#include "fmt/core.h"
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 
 namespace details {
 
