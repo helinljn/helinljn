@@ -15,6 +15,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../asio/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/../date/date/include
         ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/../sqlpp11/sqlpp11/include
@@ -50,6 +51,7 @@ IF(MSVC)
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DLUABRIDGE_CXX17
+        -DASIO_STANDALONE
     )
 
     # 编译选项
@@ -72,6 +74,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../asio/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/../date/date/include
         ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/../sqlpp11/sqlpp11/include
@@ -107,6 +110,7 @@ ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DLUABRIDGE_CXX17
+        -DASIO_STANDALONE
     )
 
     # 编译选项

@@ -1,5 +1,7 @@
 #include "test_all.h"
 
+#include "asio.hpp"
+#include "asio/ssl.hpp"
 #include "date/date.h"
 #include "spdlog/spdlog.h"
 #include "sqlpp11/sqlpp11.h"
