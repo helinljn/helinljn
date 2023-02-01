@@ -8,8 +8,8 @@
 #include "Poco/Zip/Zip.h"
 #include "Poco/JWT/JWT.h"
 
-#include "core/core.h"
-#include "core/byte_order.h"
+#include "core.h"
+#include "byte_order.h"
 
 int main(void)
 {
