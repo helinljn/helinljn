@@ -55,6 +55,8 @@
     "explorer.autoReveal": false,
 
     "security.workspace.trust.enabled": false,
+
+    "git.openRepositoryInParentFolders": "never",
 }
 
 【键盘设置】
