@@ -10,6 +10,7 @@
 
 #include "core.h"
 #include "byte_order.h"
+#include "poco_string.h"
 
 int main(void)
 {
@@ -17,6 +18,7 @@ int main(void)
 
     test_core_all();
     test_byte_order_all();
+    test_poco_string_all();
 
     fprintf(stdout, "\nPress \'Enter\' to exit...\n");
     while (std::getchar() != '\n');
