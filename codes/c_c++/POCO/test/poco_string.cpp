@@ -652,7 +652,7 @@ void test_split(void)
 
     {
         std::string           s = "#milan , a, b, c, hello# world, this, is# shmilyl#\"nice\" to # meet #you";
-        Poco::StringTokenizer st(s, " ,#", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+        Poco::StringTokenizer st(s, " ,#", Poco::StringTokenizer::TOK_IGNORE_EMPTY);
         poco_assert(st.count() == 13);
         poco_assert(st[0] == "milan");
         poco_assert(st[1] == "a");
@@ -671,7 +671,7 @@ void test_split(void)
 
     {
         std::string           s = "1#2#3#4#5#6#7#8#9####   ,,# , #hello ,#,192.168.111.1";
-        Poco::StringTokenizer st(s, " .,#", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+        Poco::StringTokenizer st(s, " .,#", Poco::StringTokenizer::TOK_IGNORE_EMPTY);
         poco_assert(st.count() == 14);
         poco_assert(st[0] == "1");
         poco_assert(st[1] == "2");
@@ -691,7 +691,7 @@ void test_split(void)
 
     {
         std::string           s = "This is first line.\nThis is second line.\n\n\nThis is third line.\nEnd line.\n";
-        Poco::StringTokenizer st(s, "\n", Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);
+        Poco::StringTokenizer st(s, "\n", Poco::StringTokenizer::TOK_IGNORE_EMPTY);
         poco_assert(st.count() == 4);
         poco_assert(st[0] == "This is first line.");
         poco_assert(st[1] == "This is second line.");
