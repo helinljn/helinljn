@@ -17,6 +17,7 @@
 
 【常用设置】
 {
+    // VSCode Version: VSCodeSetup-x64-1.74.3
     "workbench.colorTheme": "One Dark Pro",
     "workbench.startupEditor": "none",
     "oneDarkPro.italic": false,
@@ -27,6 +28,9 @@
     "workbench.editor.tabSizing": "shrink",
     "workbench.editor.enablePreview": false,
     "workbench.editor.highlightModifiedTabs": true,
+
+    "diffEditor.codeLens": true,
+    "diffEditor.ignoreTrimWhitespace": false,
 
     "editor.fontFamily": "Consolas",
     "editor.fontSize": 16,
@@ -43,23 +47,26 @@
     "editor.minimap.size": "proportional",
     "editor.minimap.showSlider": "mouseover",
 
+    "explorer.autoReveal": false,
+    "explorer.compactFolders": false,
+
     "files.autoSave": "off",
     "files.encoding": "utf8",
     "files.eol": "\r\n",
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
 
-    "diffEditor.codeLens": true,
-    "diffEditor.ignoreTrimWhitespace": false,
-
-    "explorer.autoReveal": false,
-
     "security.workspace.trust.enabled": false,
+    "security.workspace.trust.banner": "never",
+    "security.workspace.trust.startupPrompt": "never",
 
-    "git.openRepositoryInParentFolders": "never",
+    "update.mode": "none",
+    "update.showReleaseNotes": false,
+    "update.enableWindowsBackgroundUpdates": false,
 }
 
 【键盘设置】
+// 将键绑定放在此文件中以覆盖默认值
 [
     {
         "key": "shift+alt+o",
