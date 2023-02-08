@@ -22,12 +22,12 @@
     "workbench.startupEditor": "none",
     "oneDarkPro.italic": false,
 
-    "workbench.tree.indent": 24,
-    "workbench.tree.renderIndentGuides": "always",
-
     "workbench.editor.tabSizing": "shrink",
     "workbench.editor.enablePreview": false,
     "workbench.editor.highlightModifiedTabs": true,
+
+    "workbench.tree.indent": 24,
+    "workbench.tree.renderIndentGuides": "always",
 
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
@@ -55,6 +55,9 @@
     "files.eol": "\r\n",
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
+
+    "git.enabled": false,
+    "git.decorations.enabled": false,
 
     "security.workspace.trust.enabled": false,
     "security.workspace.trust.banner": "never",
