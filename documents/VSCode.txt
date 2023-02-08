@@ -17,7 +17,7 @@
 
 【常用设置】
 {
-    // VSCode Version: VSCodeSetup-x64-1.74.3
+    // VSCode version: VSCodeSetup-x64-1.74.3
     "workbench.colorTheme": "One Dark Pro",
     "workbench.startupEditor": "none",
     "oneDarkPro.italic": false,
@@ -28,6 +28,10 @@
 
     "workbench.tree.indent": 24,
     "workbench.tree.renderIndentGuides": "always",
+
+    // C/C++ cache files
+    "C_Cpp.intelliSenseCachePath": "${workspaceFolder}/.build/cache",
+    "C_Cpp.default.browse.databaseFilename": "${workspaceFolder}/.build/cache/browse.vc.db",
 
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,

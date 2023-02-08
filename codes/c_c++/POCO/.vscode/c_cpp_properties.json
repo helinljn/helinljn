@@ -9,10 +9,7 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-msvc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools",
-            "browse": {
-                "databaseFilename": "${workspaceFolder}/.build/windows/x64-Debug/browse.vc.db"
-            }
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4
