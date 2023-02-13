@@ -29,9 +29,20 @@
     "workbench.tree.indent": 24,
     "workbench.tree.renderIndentGuides": "always",
 
-    // C/C++ cache files
+    // C/C++ cache settings
     "C_Cpp.intelliSenseCachePath": "${workspaceFolder}/.build/cache",
     "C_Cpp.default.browse.databaseFilename": "${workspaceFolder}/.build/cache/browse.vc.db",
+
+    // CMake build settings
+    "cmake.buildTask": true,
+    "cmake.configureOnOpen": false,
+    "cmake.clearOutputBeforeBuild": true,
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.buildDirectory": "${workspaceFolder}/.build/cache",
+    "cmake.configureArgs": [
+        "-DCMAKE_CONFIGURATION_TYPES=Debug",
+        "-DCMAKE_BUILD_TYPE=Debug"
+    ],
 
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
