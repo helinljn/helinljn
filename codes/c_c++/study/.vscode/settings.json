@@ -1,4 +1,17 @@
 {
+    "C_Cpp.intelliSenseCachePath": "${workspaceFolder}/.build/cache",
+    "C_Cpp.default.browse.databaseFilename": "${workspaceFolder}/.build/cache/browse.vc.db",
+
+    "cmake.buildTask": true,
+    "cmake.configureOnOpen": false,
+    "cmake.clearOutputBeforeBuild": true,
+    "cmake.sourceDirectory": "${workspaceFolder}",
+    "cmake.buildDirectory": "${workspaceFolder}/.build/cache",
+    "cmake.configureArgs": [
+        "-DCMAKE_CONFIGURATION_TYPES=Debug",
+        "-DCMAKE_BUILD_TYPE=Debug"
+    ],
+
     "search.exclude": {
         "**/aaa": true,
         "**/bbb": true
