@@ -16,6 +16,12 @@ void test_atomic_counter(void);
 // 功能：测试ASCII
 void test_ascii(void);
 
+// 功能：测试nan & inf
+void test_nan_inf(void);
+
+// 功能：测试NDC
+void test_ndc(void);
+
 // 功能：测试所有接口
 void test_core_all(void);
 

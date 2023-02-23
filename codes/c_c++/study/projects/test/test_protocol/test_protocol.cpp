@@ -2,8 +2,17 @@
 
 #include "spdlog/fmt/fmt.h"
 
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable:4127)
+#endif
+
 #include "TestMsgDefine.pb.h"
 #include "TestMsgStruct.pb.h"
+
+#if defined(_MSC_VER)
+    #pragma warning(pop)
+#endif
 
 class CommonInfo
 {

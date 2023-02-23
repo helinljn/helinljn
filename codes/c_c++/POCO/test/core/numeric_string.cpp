@@ -1,12 +1,27 @@
 #include "numeric_string.h"
 #include "Poco/Poco.h"
-#include "Poco/NumericString.h"
 #include "Poco/Stopwatch.h"
 
 #include "spdlog/fmt/fmt.h"
 
 #include <string>       // for cpp11_numeric_string
 #include <type_traits>  // for cpp11_numeric_string
+
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable:4244)
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
+#include "Poco/NumericString.h"
+
+#if defined(_MSC_VER)
+    #pragma warning(pop)
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic pop
+#endif
 
 namespace cpp11_numeric_string {
 namespace details              {

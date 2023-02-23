@@ -3,6 +3,8 @@
 #include "Poco/Environment.h"
 #include "Poco/AtomicCounter.h"
 #include "Poco/Ascii.h"
+#include "Poco/FPEnvironment.h"
+#include "Poco/NestedDiagnosticContext.h"
 
 #include "spdlog/fmt/fmt.h"
 
@@ -191,6 +193,110 @@ void test_ascii(void)
     poco_assert(Poco::Ascii::toUpper('Z') == 'Z');
 }
 
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable:4723)
+#endif
+
+void test_nan_inf(void)
+{
+    // float
+    {
+        float a   = 0.f;
+        float b   = 0.f;
+        float nan = a / b;
+        float inf = 1.f / b;
+
+        poco_assert(!Poco::FPEnvironment::isNaN(a));
+        poco_assert(!Poco::FPEnvironment::isInfinite(a));
+
+        poco_assert(!Poco::FPEnvironment::isNaN(b));
+        poco_assert(!Poco::FPEnvironment::isInfinite(b));
+
+        poco_assert(Poco::FPEnvironment::isNaN(nan));
+        poco_assert(!Poco::FPEnvironment::isInfinite(nan));
+
+        poco_assert(!Poco::FPEnvironment::isNaN(inf));
+        poco_assert(Poco::FPEnvironment::isInfinite(inf));
+    }
+
+    // double
+    {
+        double a   = 0.0;
+        double b   = 0.0;
+        double nan = a / b;
+        double inf = 1.0 / b;
+
+        poco_assert(!Poco::FPEnvironment::isNaN(a));
+        poco_assert(!Poco::FPEnvironment::isInfinite(a));
+
+        poco_assert(!Poco::FPEnvironment::isNaN(b));
+        poco_assert(!Poco::FPEnvironment::isInfinite(b));
+
+        poco_assert(Poco::FPEnvironment::isNaN(nan));
+        poco_assert(!Poco::FPEnvironment::isInfinite(nan));
+
+        poco_assert(!Poco::FPEnvironment::isNaN(inf));
+        poco_assert(Poco::FPEnvironment::isInfinite(inf));
+    }
+}
+
+#if defined(_MSC_VER)
+    #pragma warning(pop)
+#endif
+
+void test_ndc(void)
+{
+    {
+        Poco::NDC ndc;
+        poco_assert(ndc.depth() == 0);
+        poco_assert(ndc.toString().empty());
+
+        ndc.push("item1");
+        poco_assert(ndc.depth() == 1);
+        poco_assert(ndc.toString() == "item1");
+
+        ndc.push("item2");
+        poco_assert(ndc.depth() == 2);
+        poco_assert(ndc.toString() == "item1:item2");
+
+        ndc.pop();
+        poco_assert(ndc.depth() == 1);
+        poco_assert(ndc.toString() == "item1");
+
+        ndc.pop();
+        poco_assert(ndc.depth() == 0);
+        poco_assert(ndc.toString().empty());
+    }
+
+    poco_assert(Poco::NDC::current().depth() == 0);
+    poco_assert(Poco::NDC::current().toString().empty());
+
+    {
+        poco_assert(Poco::NDC::current().depth() == 0);
+        poco_assert(Poco::NDC::current().toString().empty());
+
+        Poco::NDC::current().push("item1");
+        poco_assert(Poco::NDC::current().depth() == 1);
+        poco_assert(Poco::NDC::current().toString() == "item1");
+
+        Poco::NDC::current().push("item2");
+        poco_assert(Poco::NDC::current().depth() == 2);
+        poco_assert(Poco::NDC::current().toString() == "item1:item2");
+
+        Poco::NDC::current().pop();
+        poco_assert(Poco::NDC::current().depth() == 1);
+        poco_assert(Poco::NDC::current().toString() == "item1");
+
+        Poco::NDC::current().pop();
+        poco_assert(Poco::NDC::current().depth() == 0);
+        poco_assert(Poco::NDC::current().toString().empty());
+    }
+
+    poco_assert(Poco::NDC::current().depth() == 0);
+    poco_assert(Poco::NDC::current().toString().empty());
+}
+
 void test_core_all(void)
 {
     test_platform();
@@ -198,4 +304,6 @@ void test_core_all(void)
     test_environment();
     test_atomic_counter();
     test_ascii();
+    test_nan_inf();
+    test_ndc();
 }

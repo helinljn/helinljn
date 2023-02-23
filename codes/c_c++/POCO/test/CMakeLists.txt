@@ -66,7 +66,6 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4244
         /wd4819
     )
 ELSE()
@@ -133,7 +132,7 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-sign-compare
+        # ...
     )
 ENDIF()
 

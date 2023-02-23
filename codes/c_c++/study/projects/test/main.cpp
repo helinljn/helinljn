@@ -4,8 +4,24 @@
 #include "asio/ssl.hpp"
 #include "date/date.h"
 #include "spdlog/spdlog.h"
+
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable:4018)
+    #pragma warning(disable:4267)
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wsign-compare"
+#endif
+
 #include "sqlpp11/sqlpp11.h"
 #include "sqlpp11/mysql/mysql.h"
+
+#if defined(_MSC_VER)
+    #pragma warning(pop)
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic pop
+#endif
 
 int main(void)
 {
