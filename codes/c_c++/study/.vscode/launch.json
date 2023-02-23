@@ -17,6 +17,12 @@
             "preLaunchTask": "build windows debug"
         },
         {
+            "name": "Attach windows test",
+            "type": "cppvsdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        },
+        {
             "name": "Launch linux test",
             "type": "cppdbg",
             "request": "launch",
