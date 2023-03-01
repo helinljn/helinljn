@@ -31,6 +31,9 @@ void test_starts_ends(void);
 // 功能：拆分字符串
 void test_split(void);
 
+// 功能：测试正则表达式
+void test_regular_expression(void);
+
 // 功能：测试所有接口
 void test_poco_string_all(void);
 

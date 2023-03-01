@@ -2,6 +2,7 @@
 #include "Poco/Poco.h"
 #include "Poco/String.h"
 #include "Poco/StringTokenizer.h"
+#include "Poco/RegularExpression.h"
 
 #include "spdlog/fmt/fmt.h"
 
@@ -700,6 +701,163 @@ void test_split(void)
     }
 }
 
+void test_regular_expression(void)
+{
+    // \            将下一个字符标记为一个特殊字符、或一个原义字符、或一个 后向引用、或一个八进制转义符。
+    //              例如，'n' 匹配字符 "n"。'\n' 匹配一个换行符。序列 '\\' 匹配 "\" 而 "\(" 则匹配 "("。
+    // ^            匹配输入字符串的开始位置。如果设置了 RegExp 对象的 Multiline 属性，^ 也匹配 '\n' 或 '\r'之后的位置。
+    // $            匹配输入字符串的结束位置。如果设置了RegExp 对象的 Multiline 属性，$ 也匹配 '\n' 或 '\r'之前的位置。
+    // *            匹配前面的子表达式零次或多次。例如，zo* 能匹配 "z" 以及 "zoo"。 * 等价于{0,}。
+    // +            匹配前面的子表达式一次或多次。例如，'zo+' 能匹配 "zo" 以及 "zoo"，但不能匹配 "z"。+ 等价于{1,}。
+    // ?            匹配前面的子表达式零次或一次。例如，"do(es)?" 可以匹配 "do" 或 "does" 中的"do" 。? 等价于{0,1}。
+    // .            匹配除 "\n" 之外的任何单个字符。要匹配包括 '\n' 在内的任何字符，请使用象 '[.\n]' 的模式。
+    // (pattern)    匹配pattern 并获取这一匹配。所获取的匹配可以从产生的 Matches 集合得到，在VBScript 中使用 SubMatches 集合
+    //              在Visual Basic Scripting Edition 中则使用 $0…$9 属性。要匹配圆括号字符，请使用 '\(' 或 '\)'。
+    // (?:pattern)  匹配 pattern 但不获取匹配结果，也就是说这是一个非获取匹配，不进行存储供以后使用。
+    //              这在使用"或" 字符 (|) 来组合一个模式的各个部分 是很有用。
+    //              例如， 'industr(?:y|ies) 就是一个比'industry|industries' 更简略的表达式。
+
+    // 匹配由26个英文字母、数字或者下划线组成的字符串
+    {
+        Poco::RegularExpression        re("^[A-Za-z0-9_]+$");
+        Poco::RegularExpression::Match match;
+
+        poco_assert(re.match("AaBbCc"));
+        poco_assert(re.match("AaBbCc", match) == 1);
+
+        poco_assert(re.match("AaBbCc123_"));
+        poco_assert(re.match("AaBbCc123_", match) == 1);
+
+        poco_assert(!re.match("AaBbCc123-_"));
+        poco_assert(re.match("AaBbCc123-_", match) == 0);
+
+        poco_assert(!re.match("a1*"));
+        poco_assert(re.match("a1*", match) == 0);
+    }
+
+    // 匹配以"fab"开头的所有字符串
+    {
+        Poco::RegularExpression        re("^fab.*");
+        Poco::RegularExpression::Match match;
+
+        poco_assert(re.match("fab"));
+        poco_assert(re.match("fab", match) == 1);
+
+        poco_assert(re.match("fabric"));
+        poco_assert(re.match("fabric", match) == 1);
+
+        poco_assert(!re.match("fba"));
+        poco_assert(re.match("fba", match) == 0);
+
+        poco_assert(!re.match(" fab"));
+        poco_assert(re.match(" fab", match) == 0);
+    }
+
+    // 匹配包含"aaa"的所有字符串
+    {
+        Poco::RegularExpression        re(".*aaa.*");
+        Poco::RegularExpression::Match match;
+
+        poco_assert(re.match("aaa"));
+        poco_assert(re.match("aaa", match) == 1);
+
+        poco_assert(re.match("aaaaaa"));
+        poco_assert(re.match("aaaaaa", match) == 1);
+
+        poco_assert(re.match("baaa"));
+        poco_assert(re.match("baaa", match) == 1);
+
+        poco_assert(re.match("baaac"));
+        poco_assert(re.match("baaac", match) == 1);
+
+        poco_assert(!re.match("aa"));
+        poco_assert(re.match("aa", match) == 0);
+
+        poco_assert(!re.match("bbaacc"));
+        poco_assert(re.match("bbaacc", match) == 0);
+    }
+
+    // 匹配以"ish"结尾的所有字符串
+    {
+        Poco::RegularExpression        re(".*ish$");
+        Poco::RegularExpression::Match match;
+
+        poco_assert(re.match("bish"));
+        poco_assert(re.match("bish", match) == 1);
+
+        poco_assert(re.match("rubbish"));
+        poco_assert(re.match("rubbish", match) == 1);
+
+        poco_assert(!re.match("bihs"));
+        poco_assert(re.match("bihs", match) == 0);
+
+        poco_assert(!re.match("rubbihs"));
+        poco_assert(re.match("rubbihs", match) == 0);
+    }
+
+    // 匹配包含"bish"或者"fish"的所有字符串
+    {
+        Poco::RegularExpression        re(".*[bf]ish.*");
+        Poco::RegularExpression::Match match;
+
+        poco_assert(re.match("bish"));
+        poco_assert(re.match("bish", match) == 1);
+
+        poco_assert(re.match("fish"));
+        poco_assert(re.match("fish", match) == 1);
+
+        poco_assert(re.match("abish"));
+        poco_assert(re.match("abish", match) == 1);
+
+        poco_assert(re.match("fisherman"));
+        poco_assert(re.match("fisherman", match) == 1);
+
+        poco_assert(!re.match("ish"));
+        poco_assert(re.match("ish", match) == 0);
+
+        poco_assert(!re.match("fis."));
+        poco_assert(re.match("fis.", match) == 0);
+    }
+
+    // 匹配以任意5个大写字母开头并以任意5个数字结尾的所有字符串
+    {
+        Poco::RegularExpression        re("^[A-Z]{5}.*[0-9]{5}$");
+        Poco::RegularExpression::Match match;
+
+        poco_assert(re.match("ABXYZclf.c*()#$12345"));
+        poco_assert(re.match("ABXYZclf.c*()#$12345", match) == 1);
+
+        poco_assert(re.match("ABXYZ12345"));
+        poco_assert(re.match("ABXYZ12345", match) == 1);
+
+        poco_assert(!re.match("ABXYZclf.c*()#$123"));
+        poco_assert(re.match("ABXYZclf.c*()#$123", match) == 0);
+
+        poco_assert(!re.match("ABXYclf.c*()#$12345"));
+        poco_assert(re.match("ABXYclf.c*()#$12345", match) == 0);
+    }
+
+    // 匹配组数据
+    {
+        Poco::RegularExpression           re("([A-Z]{2}.[0-9]{2}) (?:[0-9]{2}.[0-9]{2}) ([a-z]{2}.[0-9]{2})");
+        Poco::RegularExpression::MatchVec matchVec;
+
+        std::string subject = "XY.00 00.00 xy.00";
+        poco_assert(re.match(subject));
+        poco_assert(re.match(subject, 0, matchVec) == 3);
+        poco_assert(matchVec.size() == 3);
+        poco_assert(matchVec[0].offset == 0);
+        poco_assert(matchVec[0].length == 17);
+        poco_assert(matchVec[1].offset == 0);
+        poco_assert(matchVec[1].length == 5);
+        poco_assert(matchVec[2].offset == 12);
+        poco_assert(matchVec[2].length == 5);
+        poco_assert(subject.substr(matchVec[0].offset, matchVec[0].length) == subject);
+        poco_assert(subject.substr(matchVec[1].offset, matchVec[1].length) == "XY.00");
+        poco_assert(subject.substr(matchVec[2].offset, matchVec[2].length) == "xy.00");
+    }
+}
+
 void test_poco_string_all(void)
 {
     test_trim_left();
@@ -712,4 +870,5 @@ void test_poco_string_all(void)
     test_replace();
     test_starts_ends();
     test_split();
+    test_regular_expression();
 }
