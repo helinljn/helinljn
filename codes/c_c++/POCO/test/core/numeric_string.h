@@ -19,6 +19,12 @@ void test_benchmark_str_to_numeric(void);
 // 功能：测试数值转字符串性能
 void test_benchmark_numeric_to_str(void);
 
+// 功能：测试POCO::NumberFormatter
+void test_number_formatter(void);
+
+// 功能：测试POCO::NumberParser
+void test_number_parser(void);
+
 // 功能：测试所有接口
 void test_numeric_string_all(void);
 
