@@ -5,8 +5,55 @@
 #include "Poco/Ascii.h"
 #include "Poco/FPEnvironment.h"
 #include "Poco/NestedDiagnosticContext.h"
+#include "Poco/DynamicFactory.h"
+#include "Poco/MemoryPool.h"
 
 #include "spdlog/fmt/fmt.h"
+
+#include <memory>
+
+namespace dynamic_factory {
+
+class base_msg
+{
+public:
+    base_msg(void) = default;
+    virtual ~base_msg(void) = default;
+
+    base_msg(const base_msg& msg) = delete;
+    base_msg(base_msg&& msg) = delete;
+
+    base_msg& operator=(const base_msg& msg) = delete;
+    base_msg& operator=(base_msg&& msg) = delete;
+
+    virtual std::string name(void) const = 0;
+};
+
+class player_info : public base_msg
+{
+public:
+    player_info(void) = default;
+    virtual ~player_info(void) = default;
+
+    std::string name(void) const override
+    {
+        return "player_info";
+    }
+};
+
+class friend_info : public base_msg
+{
+public:
+    friend_info(void) = default;
+    virtual ~friend_info(void) = default;
+
+    std::string name(void) const override
+    {
+        return "friend_info";
+    }
+};
+
+} // namespace dynamic_factory
 
 void test_platform(void)
 {
@@ -297,6 +344,59 @@ void test_ndc(void)
     poco_assert(Poco::NDC::current().toString().empty());
 }
 
+void test_dynamic_factory(void)
+{
+    using namespace dynamic_factory;
+
+    Poco::DynamicFactory<base_msg> df;
+
+    df.registerClass<player_info>("player_info");
+    df.registerClass<friend_info>("friend_info");
+
+    poco_assert(df.isClass("player_info"));
+    poco_assert(df.isClass("friend_info"));
+
+    std::unique_ptr<player_info> player_ptr(static_cast<player_info*>(df.createInstance("player_info")));
+    std::unique_ptr<friend_info> friend_ptr(static_cast<friend_info*>(df.createInstance("friend_info")));
+
+    poco_assert(player_ptr && player_ptr.get() && player_ptr->name() == "player_info");
+    poco_assert(friend_ptr && friend_ptr.get() && friend_ptr->name() == "friend_info");
+
+    df.unregisterClass("friend_info");
+
+    poco_assert(df.isClass("player_info"));
+    poco_assert(!df.isClass("friend_info"));
+}
+
+void test_memory_pool(void)
+{
+    Poco::MemoryPool pool(sizeof(int), 32);
+
+    poco_assert(pool.blockSize() == sizeof(int));
+    poco_assert(pool.allocated() == 32);
+
+    std::vector<void*> ptrs;
+    for (int idx = 0; idx != 32; ++idx)
+    {
+        int* pi = static_cast<int*>(pool.get());
+        *pi     = idx + 1;
+
+        ptrs.emplace_back(pi);
+    }
+
+    *static_cast<int*>(pool.get()) = 33;
+
+    poco_assert(pool.blockSize() == sizeof(int));
+    poco_assert(pool.allocated() == 33);
+
+    for (int idx = 0; idx != ptrs.size(); ++idx)
+    {
+        int* pi = static_cast<int*>(ptrs[idx]);
+        poco_assert(*pi == idx + 1);
+        pool.release(pi);
+    }
+}
+
 void test_core_all(void)
 {
     test_platform();
@@ -306,4 +406,6 @@ void test_core_all(void)
     test_ascii();
     test_nan_inf();
     test_ndc();
+    test_dynamic_factory();
+    test_memory_pool();
 }

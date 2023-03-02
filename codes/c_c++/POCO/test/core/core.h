@@ -22,6 +22,12 @@ void test_nan_inf(void);
 // 功能：测试NDC
 void test_ndc(void);
 
+// 功能：测试POCO::DynamicFactory
+void test_dynamic_factory(void);
+
+// 功能：测试POCO::MemoryPool
+void test_memory_pool(void);
+
 // 功能：测试所有接口
 void test_core_all(void);
 
