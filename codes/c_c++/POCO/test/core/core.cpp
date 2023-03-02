@@ -376,10 +376,10 @@ void test_memory_pool(void)
     poco_assert(pool.allocated() == 32);
 
     std::vector<void*> ptrs;
-    for (int idx = 0; idx != 32; ++idx)
+    for (size_t idx = 0; idx != 32; ++idx)
     {
         int* pi = static_cast<int*>(pool.get());
-        *pi     = idx + 1;
+        *pi     = static_cast<int>(idx + 1);
 
         ptrs.emplace_back(pi);
     }
@@ -389,10 +389,10 @@ void test_memory_pool(void)
     poco_assert(pool.blockSize() == sizeof(int));
     poco_assert(pool.allocated() == 33);
 
-    for (int idx = 0; idx != ptrs.size(); ++idx)
+    for (size_t idx = 0; idx != ptrs.size(); ++idx)
     {
         int* pi = static_cast<int*>(ptrs[idx]);
-        poco_assert(*pi == idx + 1);
+        poco_assert(*pi == static_cast<int>(idx + 1));
         pool.release(pi);
     }
 }
