@@ -38,7 +38,9 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        -Wno-unused-parameter
+        -Wno-implicit-fallthrough
+        -Wno-missing-field-initializers
     )
 ENDIF()
 

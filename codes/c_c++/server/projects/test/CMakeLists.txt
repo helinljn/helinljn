@@ -9,6 +9,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
@@ -23,17 +24,15 @@ IF(MSVC)
         libfmt
         libasio
         libcppcommon
+        libcppserver
         libssl
         libcrypto
-        ws2_32
         crypt32
-        iphlpapi
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DASIO_STANDALONE
-        -DASIO_SEPARATE_COMPILATION
+        # ...
     )
 
     # 编译选项
@@ -47,6 +46,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
@@ -61,17 +61,16 @@ ELSE()
         -lfmt
         -lasio
         -lcppcommon
+        -lcppserver
         -lssl
         -lcrypto
         -lpthread
-        -lm
         -ldl
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DASIO_STANDALONE
-        -DASIO_SEPARATE_COMPILATION
+        # ...
     )
 
     # 编译选项
