@@ -8,6 +8,7 @@ IF(MSVC)
         ${PROJECT_SOURCE_DIR}
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
@@ -23,6 +24,7 @@ IF(MSVC)
     SET(CURRENT_LINK_LIBS
         libfmt
         libasio
+        libspdlog
         libcppcommon
         libcppserver
         libssl
@@ -45,6 +47,7 @@ ELSE()
         ${PROJECT_SOURCE_DIR}
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
@@ -60,6 +63,7 @@ ELSE()
     SET(CURRENT_LINK_LIBS
         -lfmt
         -lasio
+        -lspdlog
         -lcppcommon
         -lcppserver
         -lssl

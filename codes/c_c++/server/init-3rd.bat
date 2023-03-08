@@ -3,6 +3,7 @@
 set ROOT_INIT_DIR=%CD%
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set ASIO_INIT_DIR=%ROOT_INIT_DIR%/3rd/asio
+set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set COMMON_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppCommon
 set SERVER_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppServer
 
@@ -19,6 +20,14 @@ if not exist %ASIO_INIT_DIR% (
     git clone -b asio-1-22-2 https://github.com/chriskohlhoff/asio.git %ASIO_INIT_DIR%
 
     cd %ASIO_INIT_DIR%
+    git log -1
+)
+
+cd %ROOT_INIT_DIR%
+if not exist %SPDLOG_INIT_DIR% (
+    git clone -b v1.11.0 https://github.com/gabime/spdlog.git %SPDLOG_INIT_DIR%
+
+    cd %SPDLOG_INIT_DIR%
     git log -1
 )
 

@@ -3,6 +3,7 @@
 ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 ASIO_INIT_DIR=$ROOT_INIT_DIR/3rd/asio
+SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
 SERVER_INIT_DIR=$ROOT_INIT_DIR/3rd/CppServer
 
@@ -19,6 +20,14 @@ if [ ! -d $ASIO_INIT_DIR ]; then
     git clone -b asio-1-22-2 https://github.com/chriskohlhoff/asio.git $ASIO_INIT_DIR
 
     cd $ASIO_INIT_DIR
+    git log -1
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $SPDLOG_INIT_DIR ]; then
+    git clone -b v1.11.0 https://github.com/gabime/spdlog.git $SPDLOG_INIT_DIR
+
+    cd $SPDLOG_INIT_DIR
     git log -1
 fi
 
