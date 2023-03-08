@@ -38,7 +38,8 @@ IF(MSVC)
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DSPDLOG_FMT_EXTERNAL
+        -DSPDLOG_COMPILED_LIB
     )
 
     # 编译选项
@@ -82,7 +83,8 @@ ELSE()
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DSPDLOG_FMT_EXTERNAL
+        -DSPDLOG_COMPILED_LIB
     )
 
     # 编译选项
