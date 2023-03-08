@@ -1,0 +1,7 @@
+INCLUDE(fmt.cmake)
+INCLUDE(asio.cmake)
+INCLUDE(spdlog.cmake)
+INCLUDE(tinyxml2.cmake)
+INCLUDE(jsoncpp.cmake)
+INCLUDE(CppCommon.cmake)
+INCLUDE(CppServer.cmake)

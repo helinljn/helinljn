@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(cppserver)
+PROJECT(tinyxml2)
 
 # 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
 SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}" CACHE STRING INTERNAL FORCE)
@@ -8,12 +8,7 @@ SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}"
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
     )
 
     # 宏定义
@@ -23,17 +18,12 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4100
+        # ...
     )
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
     )
 
     # 宏定义
@@ -43,16 +33,13 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-unused-parameter
+        # ...
     )
 ENDIF()
 
-# 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source]目录下所有源文件(不包括头文件)
-#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source CURRENT_DIR_SRC_LIST)
-FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source/*.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source/*.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source/*.cpp
+# 源文件
+SET(CURRENT_DIR_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/tinyxml2.cpp
 )
 
 # 生成静态库

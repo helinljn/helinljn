@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(jsoncpp)
+PROJECT(cppcommon)
 
 # 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
 SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}" CACHE STRING INTERNAL FORCE)
@@ -8,8 +8,8 @@ SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}"
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
     )
 
     # 宏定义
@@ -19,13 +19,14 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        /wd4100
+        /wd4996
     )
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
     )
 
     # 宏定义
@@ -35,16 +36,18 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        -Wno-unused-parameter
+        -Wno-implicit-fallthrough
+        -Wno-missing-field-initializers
     )
 ENDIF()
 
-# 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json]目录下所有源文件(不包括头文件)
-#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json CURRENT_DIR_SRC_LIST)
+# 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/source]目录下所有源文件(不包括头文件)
+#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/source CURRENT_DIR_SRC_LIST)
 FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/source/*.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/source/*.cc
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/source/*.cpp
 )
 
 # 生成静态库

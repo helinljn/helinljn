@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(tinyxml2)
+PROJECT(spdlog)
 
 # 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
 SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}" CACHE STRING INTERNAL FORCE)
@@ -8,13 +8,14 @@ SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}"
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DSPDLOG_FMT_EXTERNAL
+        -DSPDLOG_COMPILED_LIB
     )
 
     # 编译选项
@@ -24,13 +25,14 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DSPDLOG_FMT_EXTERNAL
+        -DSPDLOG_COMPILED_LIB
     )
 
     # 编译选项
@@ -41,7 +43,12 @@ ENDIF()
 
 # 源文件
 SET(CURRENT_DIR_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2/tinyxml2.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/cfg.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/async.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/spdlog.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/file_sinks.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/color_sinks.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/stdout_sinks.cpp
 )
 
 # 生成静态库

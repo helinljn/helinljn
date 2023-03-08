@@ -8,7 +8,6 @@ SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}"
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     )
 
@@ -24,7 +23,6 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     )
 

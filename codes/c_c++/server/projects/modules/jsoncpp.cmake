@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(asio)
+PROJECT(jsoncpp)
 
 # 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
 SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}" CACHE STRING INTERNAL FORCE)
@@ -8,15 +8,12 @@ SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}"
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DASIO_STANDALONE
-        -DASIO_SEPARATE_COMPILATION
+        # ...
     )
 
     # 编译选项
@@ -26,15 +23,12 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DASIO_STANDALONE
-        -DASIO_SEPARATE_COMPILATION
+        # ...
     )
 
     # 编译选项
@@ -43,10 +37,12 @@ ELSE()
     )
 ENDIF()
 
-# 源文件
-SET(CURRENT_DIR_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/src/asio.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/src/asio_ssl.cpp
+# 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json]目录下所有源文件(不包括头文件)
+#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json CURRENT_DIR_SRC_LIST)
+FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.cc
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.cpp
 )
 
 # 生成静态库

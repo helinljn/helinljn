@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(spdlog)
+PROJECT(asio)
 
 # 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
 SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}" CACHE STRING INTERNAL FORCE)
@@ -8,15 +8,14 @@ SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}"
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DSPDLOG_FMT_EXTERNAL
-        -DSPDLOG_COMPILED_LIB
+        -DASIO_STANDALONE
+        -DASIO_SEPARATE_COMPILATION
     )
 
     # 编译选项
@@ -26,15 +25,14 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DSPDLOG_FMT_EXTERNAL
-        -DSPDLOG_COMPILED_LIB
+        -DASIO_STANDALONE
+        -DASIO_SEPARATE_COMPILATION
     )
 
     # 编译选项
@@ -45,12 +43,8 @@ ENDIF()
 
 # 源文件
 SET(CURRENT_DIR_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/cfg.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/async.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/spdlog.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/file_sinks.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/color_sinks.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/src/stdout_sinks.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/src/asio.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/src/asio_ssl.cpp
 )
 
 # 生成静态库
