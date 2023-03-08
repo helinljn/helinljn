@@ -4,10 +4,9 @@ POCO_INIT_DIR=`pwd`/poco
 POCO_OPENSSL_DIR=$POCO_INIT_DIR/../../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
 
 if [ ! -d $POCO_INIT_DIR ]; then
-    git clone https://github.com/pocoproject/poco.git $POCO_INIT_DIR
-else
+    git clone -b poco-1.12.4-release https://github.com/pocoproject/poco.git $POCO_INIT_DIR
+
     cd $POCO_INIT_DIR
-    git checkout poco-1.12.4-release
     git log -1
 fi
 
