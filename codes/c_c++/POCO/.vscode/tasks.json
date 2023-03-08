@@ -6,7 +6,7 @@
         {
             "label": "build windows debug",
             "type": "shell",
-            "command": ".\\build_test_win.bat debug",
+            "command": ".\\build.test.windows.bat debug",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -15,31 +15,31 @@
         {
             "label": "build windows release",
             "type": "shell",
-            "command": ".\\build_test_win.bat release",
+            "command": ".\\build.test.windows.bat release",
             "group": "build"
         },
         {
             "label": "build windows poco",
             "type": "shell",
-            "command": ".\\build_poco_win.bat",
+            "command": ".\\build.poco.windows.bat",
             "group": "build"
         },
         {
             "label": "build linux debug",
             "type": "shell",
-            "command": "wsl ./build_test_linux.sh debug",
+            "command": "wsl ./build.test.linux.sh debug",
             "group": "build"
         },
         {
             "label": "build linux release",
             "type": "shell",
-            "command": "wsl ./build_test_linux.sh release",
+            "command": "wsl ./build.test.linux.sh release",
             "group": "build"
         },
         {
             "label": "build linux poco",
             "type": "shell",
-            "command": "wsl ./build_poco_linux.sh",
+            "command": "wsl ./build.poco.linux.sh",
             "group": "build"
         }
     ]
