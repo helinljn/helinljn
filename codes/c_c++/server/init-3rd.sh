@@ -4,8 +4,10 @@ ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 ASIO_INIT_DIR=$ROOT_INIT_DIR/3rd/asio
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
-COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
-SERVER_INIT_DIR=$ROOT_INIT_DIR/3rd/CppServer
+TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
+JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
+CPP_COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
+CPP_SERVER_INIT_DIR=$ROOT_INIT_DIR/3rd/CppServer
 
 cd $ROOT_INIT_DIR
 if [ ! -d $FMT_INIT_DIR ]; then
@@ -32,19 +34,36 @@ if [ ! -d $SPDLOG_INIT_DIR ]; then
 fi
 
 cd $ROOT_INIT_DIR
-if [ ! -d $COMMON_INIT_DIR ]; then
-    git clone https://github.com/chronoxor/CppCommon.git $COMMON_INIT_DIR
+if [ ! -d $TINYXML2_INIT_DIR ]; then
+    git clone -b 9.0.0 https://github.com/leethomason/tinyxml2.git $TINYXML2_INIT_DIR
+
+    cd $TINYXML2_INIT_DIR
+    git log -1
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $JSONCPP_INIT_DIR ]; then
+    git clone https://github.com/open-source-parsers/jsoncpp.git $JSONCPP_INIT_DIR
 else
-    cd $COMMON_INIT_DIR
+    cd $JSONCPP_INIT_DIR
     git pull
     git log -1
 fi
 
 cd $ROOT_INIT_DIR
-if [ ! -d $SERVER_INIT_DIR ]; then
-    git clone https://github.com/chronoxor/CppServer.git $SERVER_INIT_DIR
+if [ ! -d $CPP_COMMON_INIT_DIR ]; then
+    git clone https://github.com/chronoxor/CppCommon.git $CPP_COMMON_INIT_DIR
 else
-    cd $SERVER_INIT_DIR
+    cd $CPP_COMMON_INIT_DIR
+    git pull
+    git log -1
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $CPP_SERVER_INIT_DIR ]; then
+    git clone https://github.com/chronoxor/CppServer.git $CPP_SERVER_INIT_DIR
+else
+    cd $CPP_SERVER_INIT_DIR
     git pull
     git log -1
 fi

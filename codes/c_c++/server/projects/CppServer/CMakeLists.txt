@@ -47,8 +47,8 @@ ELSE()
     )
 ENDIF()
 
-# 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source/]目录下所有源文件(不包括头文件)
-#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source/ CURRENT_DIR_SRC_LIST)
+# 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source]目录下所有源文件(不包括头文件)
+#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source CURRENT_DIR_SRC_LIST)
 FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source/*.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/source/*.cc

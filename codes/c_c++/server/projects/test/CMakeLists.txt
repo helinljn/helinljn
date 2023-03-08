@@ -9,6 +9,8 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
@@ -25,6 +27,8 @@ IF(MSVC)
         libfmt
         libasio
         libspdlog
+        libtinyxml2
+        libjsoncpp
         libcppcommon
         libcppserver
         libssl
@@ -48,6 +52,8 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
@@ -64,6 +70,8 @@ ELSE()
         -lfmt
         -lasio
         -lspdlog
+        -ltinyxml2
+        -ljsoncpp
         -lcppcommon
         -lcppserver
         -lssl
