@@ -14,7 +14,7 @@ IF(MSVC)
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DDBGHELP_SUPPORT
     )
 
     # 编译选项
@@ -31,7 +31,7 @@ ELSE()
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DLIBDL_SUPPORT
     )
 
     # 编译选项

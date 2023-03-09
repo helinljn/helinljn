@@ -38,6 +38,7 @@ IF(MSVC)
         libssl
         libcrypto
         crypt32
+        dbghelp
     )
 
     # 宏定义
