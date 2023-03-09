@@ -7,6 +7,22 @@
 #include "server/version.h"
 #include "common/version.h"
 
+#if defined(_MSC_VER)
+    #pragma warning(push)
+    #pragma warning(disable:4200)
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpedantic"
+#endif
+
+#include "hiredis.h"
+
+#if defined(_MSC_VER)
+    #pragma warning(pop)
+#elif defined(__GNUC__)
+    #pragma GCC diagnostic pop
+#endif
+
 int main(void)
 {
     static_assert(__cplusplus == 201703);

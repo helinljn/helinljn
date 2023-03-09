@@ -10,6 +10,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
@@ -28,6 +29,7 @@ IF(MSVC)
         libasio
         libspdlog
         libtinyxml2
+        libhiredis
         libjsoncpp
         libcppcommon
         libcppserver
@@ -54,6 +56,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
@@ -72,6 +75,7 @@ ELSE()
         -lasio
         -lspdlog
         -ltinyxml2
+        -lhiredis
         -ljsoncpp
         -lcppcommon
         -lcppserver

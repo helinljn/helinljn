@@ -5,6 +5,7 @@ set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set ASIO_INIT_DIR=%ROOT_INIT_DIR%/3rd/asio
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set TINYXML2_INIT_DIR=%ROOT_INIT_DIR%/3rd/tinyxml2
+set HIREDIS_INIT_DIR=%ROOT_INIT_DIR%/3rd/hiredis
 set JSONCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/jsoncpp
 set CPP_COMMON_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppCommon
 set CPP_SERVER_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppServer
@@ -38,6 +39,14 @@ if not exist %TINYXML2_INIT_DIR% (
     git clone -b 9.0.0 https://github.com/leethomason/tinyxml2.git %TINYXML2_INIT_DIR%
 
     cd %TINYXML2_INIT_DIR%
+    git log -1
+)
+
+cd %ROOT_INIT_DIR%
+if not exist %HIREDIS_INIT_DIR% (
+    git clone -b v1.0.2 https://github.com/redis/hiredis.git %HIREDIS_INIT_DIR%
+
+    cd %HIREDIS_INIT_DIR%
     git log -1
 )
 
