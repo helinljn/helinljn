@@ -3,6 +3,7 @@
 #include "spdlog/spdlog.h"
 #include "tinyxml2.h"
 #include "json.h"
+#include "zlib.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)

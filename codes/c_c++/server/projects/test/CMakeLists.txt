@@ -7,6 +7,7 @@ IF(MSVC)
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
@@ -26,6 +27,7 @@ IF(MSVC)
     # 依赖库
     SET(CURRENT_LINK_LIBS
         libfmt
+        libzlib
         libasio
         libspdlog
         libtinyxml2
@@ -53,6 +55,7 @@ ELSE()
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
@@ -72,6 +75,7 @@ ELSE()
     # 依赖库
     SET(CURRENT_LINK_LIBS
         -lfmt
+        -lzlib
         -lasio
         -lspdlog
         -ltinyxml2

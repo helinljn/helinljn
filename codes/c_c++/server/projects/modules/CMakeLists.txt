@@ -1,4 +1,5 @@
 INCLUDE(fmt.cmake)
+INCLUDE(zlib.cmake)
 INCLUDE(asio.cmake)
 INCLUDE(spdlog.cmake)
 INCLUDE(tinyxml2.cmake)

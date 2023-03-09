@@ -1,0 +1,77 @@
+# 项目名字
+PROJECT(zlib)
+
+# 将编译目标添加至依赖列表，用于生成可执行文件时的编译依赖
+SET(CURRENT_DEPENDENT_LIBS_LIST "${CURRENT_DEPENDENT_LIBS_LIST};${PROJECT_NAME}" CACHE STRING INTERNAL FORCE)
+
+# 头文件目录、宏定义、编译选项
+IF(MSVC)
+    # 头文件目录
+    SET(CURRENT_INCLUDE_DIR
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
+    )
+
+    # 宏定义
+    SET(CURRENT_COMPILE_DEFINITIONS
+        # ...
+    )
+
+    # 编译选项
+    SET(CURRENT_COMPILE_OPTIONS
+        /wd4127
+        /wd4131
+        /wd4244
+        /wd4996
+    )
+ELSE()
+    # 头文件目录
+    SET(CURRENT_INCLUDE_DIR
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
+    )
+
+    # 宏定义
+    SET(CURRENT_COMPILE_DEFINITIONS
+        # ...
+    )
+
+    # 编译选项
+    SET(CURRENT_COMPILE_OPTIONS
+        -Wno-implicit-function-declaration
+    )
+ENDIF()
+
+# 源文件
+SET(CURRENT_DIR_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/adler32.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/compress.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/crc32.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/deflate.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/gzclose.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/gzlib.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/gzread.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/gzwrite.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/infback.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/inffast.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/inflate.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/inftrees.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/trees.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/uncompr.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib/zutil.c
+)
+
+# 生成静态库
+ADD_LIBRARY(${PROJECT_NAME}                STATIC  ${CURRENT_DIR_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
+TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${PROJECT_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
+
+# 调试信息
+MESSAGE(STATUS "---------------------------------------------------------------------")
+MESSAGE(STATUS "CMAKE_PROJECT_NAME          = ${CMAKE_PROJECT_NAME}")
+MESSAGE(STATUS "PROJECT_NAME                = ${PROJECT_NAME}")
+MESSAGE(STATUS "PROJECT_SOURCE_DIR          = ${PROJECT_SOURCE_DIR}")
+MESSAGE(STATUS "PROJECT_BINARY_DIR          = ${PROJECT_BINARY_DIR}")
+MESSAGE(STATUS "CURRENT_DIR_SRC_LIST        = ${CURRENT_DIR_SRC_LIST}")
+MESSAGE(STATUS "CURRENT_INCLUDE_DIR         = ${CURRENT_INCLUDE_DIR}")
+MESSAGE(STATUS "CURRENT_COMPILE_DEFINITIONS = ${CURRENT_COMPILE_DEFINITIONS}")
+MESSAGE(STATUS "CURRENT_COMPILE_OPTIONS     = ${CURRENT_COMPILE_OPTIONS}")
