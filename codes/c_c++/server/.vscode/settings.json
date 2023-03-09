@@ -104,6 +104,19 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "cinttypes": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "any": "cpp",
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "coroutine": "cpp",
+        "csignal": "cpp",
+        "filesystem": "cpp",
+        "future": "cpp",
+        "random": "cpp",
+        "regex": "cpp",
+        "source_location": "cpp",
+        "span": "cpp",
+        "strstream": "cpp",
+        "variant": "cpp"
     }
 }

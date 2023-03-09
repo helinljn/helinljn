@@ -1,11 +1,8 @@
-#include "fmt/format.h"
-#include "asio.hpp"
-#include "asio/ssl.hpp"
+#include "server/asio/asio.h"
+#include "common/version.h"
 #include "spdlog/spdlog.h"
 #include "tinyxml2.h"
 #include "json.h"
-#include "server/version.h"
-#include "common/version.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)
