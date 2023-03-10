@@ -22,8 +22,6 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
-        ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/include
-        ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
         ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
     )
@@ -51,7 +49,6 @@ IF(MSVC)
         PocoCrypto${CURRENT_POCO_LIBS_SUFFIX}
         PocoNetSSL${CURRENT_POCO_LIBS_SUFFIX}
         PocoZip${CURRENT_POCO_LIBS_SUFFIX}
-        PocoJWT${CURRENT_POCO_LIBS_SUFFIX}
         libssl
         libcrypto
         ws2_32
@@ -88,8 +85,6 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
-        ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/include
-        ${CMAKE_PROJECT_ROOT_DIR}/poco/JWT/src
         ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
@@ -117,7 +112,6 @@ ELSE()
         -lPocoCrypto${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoNetSSL${CURRENT_POCO_LIBS_SUFFIX}
         -lPocoZip${CURRENT_POCO_LIBS_SUFFIX}
-        -lPocoJWT${CURRENT_POCO_LIBS_SUFFIX}
         -lssl
         -lcrypto
         -lpthread

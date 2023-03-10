@@ -6,7 +6,6 @@
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Net/NetSSL.h"
 #include "Poco/Zip/Zip.h"
-#include "Poco/JWT/JWT.h"
 
 #include "core/core.h"
 #include "core/byte_order.h"

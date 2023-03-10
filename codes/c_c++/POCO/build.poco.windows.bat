@@ -23,7 +23,6 @@ xcopy %POCO_OPENSSL_DIR%\openssl %POCO_INIT_DIR%\Crypto\include\openssl /e /i /y
     echo Crypto
     echo NetSSL_OpenSSL
     echo Zip
-    echo JWT
 ) > components
 
 cmd /c "buildwin.cmd 160 build static_mt both x64 nosamples notests msbuild noenv"

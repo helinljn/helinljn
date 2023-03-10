@@ -22,7 +22,6 @@ make Net-libexec -j `nproc`
 make Crypto-libexec -j `nproc`
 make NetSSL_OpenSSL-libexec -j `nproc`
 make Zip-libexec -j `nproc`
-make JWT-libexec -j `nproc`
 
 mkdir -p $POCO_INIT_DIR/lib64
 cp -nf $POCO_INIT_DIR/lib/Linux/x86_64/*.a $POCO_INIT_DIR/lib64
