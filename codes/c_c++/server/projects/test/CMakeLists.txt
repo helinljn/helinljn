@@ -6,18 +6,19 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
@@ -29,16 +30,17 @@ IF(MSVC)
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
-        fmt
-        zlib
         asio
-        spdlog
-        tinyxml2
-        hiredis
-        event
-        jsoncpp
         cppcommon
         cppserver
+        fmt
+        hiredis
+        jsoncpp
+        event
+        lua
+        spdlog
+        tinyxml2
+        zlib
     )
 
     # 链接库
@@ -64,18 +66,19 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
@@ -87,16 +90,17 @@ ELSE()
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
-        fmt
-        zlib
         asio
-        spdlog
-        tinyxml2
-        hiredis
-        event
-        jsoncpp
         cppcommon
         cppserver
+        fmt
+        hiredis
+        jsoncpp
+        event
+        lua
+        spdlog
+        tinyxml2
+        zlib
     )
 
     # 链接库

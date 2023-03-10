@@ -5,6 +5,7 @@
 #include "tinyxml2.h"
 #include "json.h"
 #include "zlib.h"
+#include "lua.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)

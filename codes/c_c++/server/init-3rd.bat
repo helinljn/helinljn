@@ -1,6 +1,7 @@
 @echo off
 
 set ROOT_INIT_DIR=%CD%
+set LUA_INIT_DIR=%ROOT_INIT_DIR%/3rd/lua
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set ZLIB_INIT_DIR=%ROOT_INIT_DIR%/3rd/zlib
 set ASIO_INIT_DIR=%ROOT_INIT_DIR%/3rd/asio
@@ -11,6 +12,14 @@ set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set JSONCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/jsoncpp
 set CPP_COMMON_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppCommon
 set CPP_SERVER_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppServer
+
+cd %ROOT_INIT_DIR%
+if not exist %LUA_INIT_DIR% (
+    git clone -b v5.3.6 https://github.com/lua/lua.git %LUA_INIT_DIR%
+
+    cd %LUA_INIT_DIR%
+    git log -1
+)
 
 cd %ROOT_INIT_DIR%
 if not exist %FMT_INIT_DIR% (
