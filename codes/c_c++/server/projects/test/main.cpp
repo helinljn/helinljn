@@ -6,6 +6,8 @@
 #include "json.h"
 #include "zlib.h"
 #include "lua.h"
+#include "lualib.h"
+#include "lauxlib.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)
