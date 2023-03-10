@@ -7,6 +7,7 @@ ASIO_INIT_DIR=$ROOT_INIT_DIR/3rd/asio
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
 HIREDIS_INIT_DIR=$ROOT_INIT_DIR/3rd/hiredis
+LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
 JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
 CPP_COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
 CPP_SERVER_INIT_DIR=$ROOT_INIT_DIR/3rd/CppServer
@@ -56,6 +57,14 @@ if [ ! -d $HIREDIS_INIT_DIR ]; then
     git clone -b v1.0.2 https://github.com/redis/hiredis.git $HIREDIS_INIT_DIR
 
     cd $HIREDIS_INIT_DIR
+    git log -1
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $LIBEVENT_INIT_DIR ]; then
+    git clone -b release-2.1.12-stable https://github.com/libevent/libevent.git $LIBEVENT_INIT_DIR
+
+    cd $LIBEVENT_INIT_DIR
     git log -1
 fi
 

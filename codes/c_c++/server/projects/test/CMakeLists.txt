@@ -12,6 +12,9 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
@@ -32,6 +35,7 @@ IF(MSVC)
         spdlog
         tinyxml2
         hiredis
+        event
         jsoncpp
         cppcommon
         cppserver
@@ -66,6 +70,9 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
@@ -86,6 +93,7 @@ ELSE()
         spdlog
         tinyxml2
         hiredis
+        event
         jsoncpp
         cppcommon
         cppserver

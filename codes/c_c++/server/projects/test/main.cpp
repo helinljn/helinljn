@@ -1,6 +1,7 @@
 #include "server/asio/asio.h"
 #include "common/version.h"
 #include "spdlog/spdlog.h"
+#include "event2/event.h"
 #include "tinyxml2.h"
 #include "json.h"
 #include "zlib.h"
