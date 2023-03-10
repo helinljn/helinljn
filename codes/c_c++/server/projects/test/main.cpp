@@ -5,9 +5,20 @@
 #include "tinyxml2.h"
 #include "json.h"
 #include "zlib.h"
+
+#if defined(__cplusplus)
+extern "C" {
+#endif // defined(__cplusplus)
+
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
+
+#if defined(__cplusplus)
+}
+#endif // defined(__cplusplus)
+
+#include "LuaBridge/LuaBridge.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)
@@ -15,7 +26,7 @@
 #elif defined(__GNUC__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wpedantic"
-#endif
+#endif // defined(_MSC_VER)
 
 #include "hiredis.h"
 
@@ -23,7 +34,7 @@
     #pragma warning(pop)
 #elif defined(__GNUC__)
     #pragma GCC diagnostic pop
-#endif
+#endif // defined(_MSC_VER)
 
 int main(void)
 {

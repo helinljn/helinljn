@@ -16,6 +16,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
@@ -56,6 +57,7 @@ IF(MSVC)
     SET(CURRENT_COMPILE_DEFINITIONS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
+        -DLUABRIDGE_CXX17
     )
 
     # 编译选项
@@ -76,6 +78,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
@@ -116,6 +119,7 @@ ELSE()
     SET(CURRENT_COMPILE_DEFINITIONS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
+        -DLUABRIDGE_CXX17
     )
 
     # 编译选项

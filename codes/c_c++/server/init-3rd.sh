@@ -10,6 +10,7 @@ TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
 HIREDIS_INIT_DIR=$ROOT_INIT_DIR/3rd/hiredis
 LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
 JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
+LUABRIDGE_INIT_DIR=$ROOT_INIT_DIR/3rd/LuaBridge
 CPP_COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
 CPP_SERVER_INIT_DIR=$ROOT_INIT_DIR/3rd/CppServer
 
@@ -82,6 +83,15 @@ if [ ! -d $JSONCPP_INIT_DIR ]; then
     git clone https://github.com/open-source-parsers/jsoncpp.git $JSONCPP_INIT_DIR
 else
     cd $JSONCPP_INIT_DIR
+    git pull
+    git log -1
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $LUABRIDGE_INIT_DIR ]; then
+    git clone https://github.com/vinniefalco/LuaBridge.git $LUABRIDGE_INIT_DIR
+else
+    cd $LUABRIDGE_INIT_DIR
     git pull
     git log -1
 fi
