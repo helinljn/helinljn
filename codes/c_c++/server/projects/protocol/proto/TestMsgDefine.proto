@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package TestMsg;
+
+enum TestCommonType
+{
+    CT_FLOAT  = 0;
+    CT_DOUBLE = 1;
+    CT_BYTES  = 2;
+    CT_INT32  = 3;
+    CT_SINT32 = 4;
+    CT_UINT32 = 5;
+    CT_INT64  = 6;
+    CT_SINT64 = 7;
+    CT_UINT64 = 8;
+}

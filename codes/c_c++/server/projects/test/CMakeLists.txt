@@ -17,6 +17,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
@@ -39,6 +40,8 @@ IF(MSVC)
         jsoncpp
         event
         lua
+        protobuf
+        protocol
         spdlog
         tinyxml2
         zlib
@@ -79,6 +82,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
@@ -101,6 +105,8 @@ ELSE()
         jsoncpp
         event
         lua
+        protobuf
+        protocol
         spdlog
         tinyxml2
         zlib
