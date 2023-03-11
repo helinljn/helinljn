@@ -36,11 +36,13 @@ extern "C" {
     #pragma GCC diagnostic pop
 #endif // defined(_MSC_VER)
 
+#include "test_protocol/test_protocol.h"
+
 int main(void)
 {
     static_assert(__cplusplus == 201703);
 
-    fmt::print("Hello, I am test project test.\n");
+    test_protocol_all();
 
     fmt::print("\nPress \'Enter\' to exit...\n");
     while (std::getchar() != '\n');

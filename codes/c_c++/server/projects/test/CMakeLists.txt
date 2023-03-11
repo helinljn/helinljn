@@ -18,6 +18,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
@@ -65,7 +66,7 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        /wd4819
     )
 ELSE()
     # 头文件目录
@@ -83,6 +84,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
