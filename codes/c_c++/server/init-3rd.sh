@@ -9,6 +9,7 @@ SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
 HIREDIS_INIT_DIR=$ROOT_INIT_DIR/3rd/hiredis
 LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
+PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
 LUABRIDGE_INIT_DIR=$ROOT_INIT_DIR/3rd/LuaBridge
 CPP_COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
@@ -75,6 +76,15 @@ if [ ! -d $LIBEVENT_INIT_DIR ]; then
     git clone -b release-2.1.12-stable https://github.com/libevent/libevent.git $LIBEVENT_INIT_DIR
 
     cd $LIBEVENT_INIT_DIR
+    git log -1
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $PROTOBUF_INIT_DIR ]; then
+    git clone -b 3.18.x https://github.com/protocolbuffers/protobuf.git $PROTOBUF_INIT_DIR
+else
+    cd $PROTOBUF_INIT_DIR
+    git pull
     git log -1
 fi
 
