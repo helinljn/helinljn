@@ -4,7 +4,7 @@
 #include "Poco/StringTokenizer.h"
 #include "Poco/RegularExpression.h"
 
-#include "spdlog/fmt/fmt.h"
+#include "fmt/format.h"
 
 void test_trim_left(void)
 {

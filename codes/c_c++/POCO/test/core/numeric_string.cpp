@@ -2,7 +2,7 @@
 #include "Poco/Poco.h"
 #include "Poco/Stopwatch.h"
 
-#include "spdlog/fmt/fmt.h"
+#include "fmt/format.h"
 
 #include <string>       // for cpp11_numeric_string
 #include <type_traits>  // for cpp11_numeric_string

@@ -2,7 +2,7 @@
 #include "Poco/Poco.h"
 #include "Poco/ByteOrder.h"
 
-#include "spdlog/fmt/fmt.h"
+#include "fmt/format.h"
 
 void test_flip_bytes(void)
 {

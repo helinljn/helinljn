@@ -22,7 +22,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
@@ -59,6 +59,7 @@ IF(MSVC)
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
+        -DFMT_HEADER_ONLY
     )
 
     # 编译选项
@@ -85,7 +86,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/poco/NetSSL_OpenSSL/src
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
-        ${CMAKE_PROJECT_ROOT_DIR}/../spdlog/spdlog/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
@@ -122,6 +123,7 @@ ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
+        -DFMT_HEADER_ONLY
     )
 
     # 编译选项

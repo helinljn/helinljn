@@ -8,7 +8,7 @@
 #include "Poco/DynamicFactory.h"
 #include "Poco/MemoryPool.h"
 
-#include "spdlog/fmt/fmt.h"
+#include "fmt/format.h"
 
 #include <memory>
 
