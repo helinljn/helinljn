@@ -26,16 +26,11 @@
     #pragma GCC diagnostic pop
 #endif // defined(_MSC_VER)
 
-#include "test_protocol/test_protocol.h"
-
 int main(void)
 {
     static_assert(__cplusplus == 201703);
 
-    test_protocol_all();
+    testing::InitGoogleTest();
 
-    fmt::print("\nPress \'Enter\' to exit...\n");
-    while (std::getchar() != '\n');
-
-    return 0;
+    return RUN_ALL_TESTS();
 }
