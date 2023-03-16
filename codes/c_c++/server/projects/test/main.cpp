@@ -26,11 +26,11 @@
     #pragma GCC diagnostic pop
 #endif // defined(_MSC_VER)
 
-int main(void)
+int main(int argc, char** argv)
 {
     static_assert(__cplusplus == 201703);
 
-    testing::InitGoogleTest();
+    testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();
 }

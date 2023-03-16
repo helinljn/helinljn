@@ -49,7 +49,7 @@ bool operator ==(const TestMsg::TestCommonInfo& pinfo, const CommonInfo& cinfo)
 
 } // unnamed namespace
 
-TEST(ProtobufTest, EnumName)
+GTEST_TEST(ProtobufTest, EnumName)
 {
     // CommonType_Name
     const std::string& str_float    = TestMsg::TestCommonType_Name(TestMsg::CT_FLOAT);
@@ -66,20 +66,20 @@ TEST(ProtobufTest, EnumName)
     const std::string& str_null1    = TestMsg::TestCommonType_Name(TestMsg::TestCommonType(100));
     const std::string& str_null2    = TestMsg::TestCommonType_Name(TestMsg::TestCommonType(-1));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_FLOAT));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_DOUBLE));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_BYTES));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_INT32));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_SINT32));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_UINT32));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_INT64));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_SINT64));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_UINT64));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType{}));
-    EXPECT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(0)));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_FLOAT));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_DOUBLE));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_BYTES));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_INT32));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_SINT32));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_UINT32));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_INT64));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_SINT64));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_UINT64));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType{}));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(0)));
 
-    EXPECT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(100)));
-    EXPECT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(-1)));
+    GTEST_ASSERT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(100)));
+    GTEST_ASSERT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(-1)));
 
     EXPECT_EQ(str_float, "CT_FLOAT");
     EXPECT_EQ(str_double, "CT_DOUBLE");
@@ -93,53 +93,53 @@ TEST(ProtobufTest, EnumName)
     EXPECT_EQ(str_default1, "CT_FLOAT");
     EXPECT_EQ(str_default2, "CT_FLOAT");
 
-    EXPECT_TRUE(str_null1.empty());
-    EXPECT_TRUE(str_null2.empty());
+    GTEST_ASSERT_TRUE(str_null1.empty());
+    GTEST_ASSERT_TRUE(str_null2.empty());
 
     // CommonType_Parse
     TestMsg::TestCommonType val{};
-    EXPECT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_float, &val));
-    EXPECT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_float, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_double, &val));
-    EXPECT_TRUE(TestMsg::CT_DOUBLE == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_double, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_DOUBLE == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_bytes, &val));
-    EXPECT_TRUE(TestMsg::CT_BYTES == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_bytes, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_BYTES == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_int32, &val));
-    EXPECT_TRUE(TestMsg::CT_INT32 == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_int32, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_INT32 == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_sint32, &val));
-    EXPECT_TRUE(TestMsg::CT_SINT32 == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_sint32, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_SINT32 == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_uint32, &val));
-    EXPECT_TRUE(TestMsg::CT_UINT32 == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_uint32, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_UINT32 == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_int64, &val));
-    EXPECT_TRUE(TestMsg::CT_INT64 == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_int64, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_INT64 == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_sint64, &val));
-    EXPECT_TRUE(TestMsg::CT_SINT64 == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_sint64, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_SINT64 == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_uint64, &val));
-    EXPECT_TRUE(TestMsg::CT_UINT64 == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_uint64, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_UINT64 == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_default1, &val));
-    EXPECT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_default1, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_TRUE(TestMsg::TestCommonType_Parse(str_default2, &val));
-    EXPECT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
+    GTEST_ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_default2, &val));
+    GTEST_ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
 
-    EXPECT_FALSE(TestMsg::TestCommonType_Parse(str_null1, &val));
-    EXPECT_FALSE(TestMsg::TestCommonType_Parse(str_null2, &val));
+    GTEST_ASSERT_FALSE(TestMsg::TestCommonType_Parse(str_null1, &val));
+    GTEST_ASSERT_FALSE(TestMsg::TestCommonType_Parse(str_null2, &val));
 }
 
-TEST(ProtobufTest, Serialization)
+GTEST_TEST(ProtobufTest, Serialization)
 {
-    CommonInfo info{1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
+    CommonInfo info{ 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890 };
 
     TestMsg::TestCommonInfo test_info;
     test_info.set_test_float(info.test_float);
@@ -158,36 +158,36 @@ TEST(ProtobufTest, Serialization)
     // SerializeToString & ParseFromString
     {
         std::string info_to_string;
-        EXPECT_TRUE(test_info.SerializeToString(&info_to_string));
-        EXPECT_TRUE(test_info_size == info_to_string.size());
+        GTEST_ASSERT_TRUE(test_info.SerializeToString(&info_to_string));
+        GTEST_ASSERT_TRUE(test_info_size == info_to_string.size());
 
         TestMsg::TestCommonInfo string_to_info;
-        EXPECT_TRUE(string_to_info.ParseFromString(info_to_string));
-        EXPECT_TRUE(string_to_info == info);
-        EXPECT_TRUE(string_to_info.ByteSizeLong() == test_info_size);
+        GTEST_ASSERT_TRUE(string_to_info.ParseFromString(info_to_string));
+        GTEST_ASSERT_TRUE(string_to_info == info);
+        GTEST_ASSERT_TRUE(string_to_info.ByteSizeLong() == test_info_size);
     }
 
     // SerializeToArray & ParseFromArray
     {
-        char info_to_array[128] = {0};
-        EXPECT_TRUE(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
+        char info_to_array[128] = { 0 };
+        GTEST_ASSERT_TRUE(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
 
         TestMsg::TestCommonInfo array_to_info;
-        EXPECT_TRUE(array_to_info.ParseFromArray(info_to_array, static_cast<int>(test_info_size)));
-        EXPECT_TRUE(array_to_info == info);
-        EXPECT_TRUE(array_to_info.ByteSizeLong() == test_info_size);
+        GTEST_ASSERT_TRUE(array_to_info.ParseFromArray(info_to_array, static_cast<int>(test_info_size)));
+        GTEST_ASSERT_TRUE(array_to_info == info);
+        GTEST_ASSERT_TRUE(array_to_info.ByteSizeLong() == test_info_size);
     }
 
     TestMsg::TestCommonInfo test_info_copy = test_info;
-    EXPECT_TRUE(test_info_copy == info);
+    GTEST_ASSERT_TRUE(test_info_copy == info);
 
     TestMsg::TestCommonInfo test_info_move = std::move(test_info);
-    EXPECT_TRUE(test_info_move == info);
+    GTEST_ASSERT_TRUE(test_info_move == info);
 
-    EXPECT_FALSE(test_info == info);
+    GTEST_ASSERT_FALSE(test_info == info);
 }
 
-TEST(ProtobufTest, SerializationList)
+GTEST_TEST(ProtobufTest, SerializationList)
 {
     std::vector<CommonInfo> info_list{
         {1.23f, 4.5678, "CommonInfo1", 123456, -123456, 123456, 567890, -567890, 567890},
@@ -202,12 +202,12 @@ TEST(ProtobufTest, SerializationList)
 
     // common_info_list_size
     TestMsg::TestCommonInfoList test_info_list;
-    EXPECT_TRUE(test_info_list.common_info_list_size() == 0);
-    EXPECT_TRUE(test_info_list.common_type_list_size() == 0);
+    GTEST_ASSERT_TRUE(test_info_list.common_info_list_size() == 0);
+    GTEST_ASSERT_TRUE(test_info_list.common_type_list_size() == 0);
 
     // add_common_info_list
     TestMsg::TestCommonInfo* temp = test_info_list.add_common_info_list();
-    EXPECT_TRUE(temp != nullptr);
+    GTEST_ASSERT_TRUE(temp != nullptr);
     temp->set_test_float(info_list[0].test_float);
     temp->set_test_double(info_list[0].test_double);
     temp->set_test_string(info_list[0].test_string);
@@ -219,7 +219,7 @@ TEST(ProtobufTest, SerializationList)
     temp->set_test_uint64(info_list[0].test_uint64);
 
     temp = test_info_list.add_common_info_list();
-    EXPECT_TRUE(temp != nullptr);
+    GTEST_ASSERT_TRUE(temp != nullptr);
     temp->set_test_float(info_list[1].test_float);
     temp->set_test_double(info_list[1].test_double);
     temp->set_test_string(info_list[1].test_string);
@@ -234,8 +234,8 @@ TEST(ProtobufTest, SerializationList)
     for (auto val : type_list)
         test_info_list.add_common_type_list(val);
 
-    EXPECT_TRUE(test_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
-    EXPECT_TRUE(test_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+    GTEST_ASSERT_TRUE(test_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+    GTEST_ASSERT_TRUE(test_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
 
     // ByteSizeLong
     size_t test_info_list_size = test_info_list.ByteSizeLong();
@@ -243,32 +243,32 @@ TEST(ProtobufTest, SerializationList)
     // SerializeToString & ParseFromString
     {
         std::string info_list_to_string;
-        EXPECT_TRUE(test_info_list.SerializeToString(&info_list_to_string));
-        EXPECT_TRUE(test_info_list_size == info_list_to_string.size());
+        GTEST_ASSERT_TRUE(test_info_list.SerializeToString(&info_list_to_string));
+        GTEST_ASSERT_TRUE(test_info_list_size == info_list_to_string.size());
 
         TestMsg::TestCommonInfoList string_to_info_list;
-        EXPECT_TRUE(string_to_info_list.ParseFromString(info_list_to_string));
-        EXPECT_TRUE(string_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
-        EXPECT_TRUE(string_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
-        EXPECT_TRUE(string_to_info_list.ByteSizeLong() == test_info_list_size);
+        GTEST_ASSERT_TRUE(string_to_info_list.ParseFromString(info_list_to_string));
+        GTEST_ASSERT_TRUE(string_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+        GTEST_ASSERT_TRUE(string_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+        GTEST_ASSERT_TRUE(string_to_info_list.ByteSizeLong() == test_info_list_size);
 
         // foreach
         int idx = 0;
         for (const auto& val : string_to_info_list.common_info_list())
-            EXPECT_TRUE(val == info_list[idx++]);
+            GTEST_ASSERT_TRUE(val == info_list[idx++]);
 
         // foreach
         idx = 0;
         for (const auto& val : string_to_info_list.common_type_list())
-            EXPECT_TRUE(val == type_list[idx++]);
+            GTEST_ASSERT_TRUE(val == type_list[idx++]);
 
         // for
         for (idx = 0; idx != string_to_info_list.common_info_list_size(); ++idx)
-            EXPECT_TRUE(string_to_info_list.common_info_list(idx) == info_list[idx]);
+            GTEST_ASSERT_TRUE(string_to_info_list.common_info_list(idx) == info_list[idx]);
 
         // for
         for (idx = 0; idx != string_to_info_list.common_type_list_size(); ++idx)
-            EXPECT_TRUE(string_to_info_list.common_type_list(idx) == type_list[idx]);
+            GTEST_ASSERT_TRUE(string_to_info_list.common_type_list(idx) == type_list[idx]);
 
         // foreach mutable_common_info_list
         for (auto& val : *string_to_info_list.mutable_common_info_list())
@@ -282,7 +282,7 @@ TEST(ProtobufTest, SerializationList)
         for (idx = 0; idx != string_to_info_list.common_info_list_size(); ++idx)
         {
             temp = string_to_info_list.mutable_common_info_list(idx);
-            EXPECT_TRUE(temp != nullptr);
+            GTEST_ASSERT_TRUE(temp != nullptr);
             temp->set_test_string(temp->test_string() + "CommonInfoString");
         }
 
@@ -295,32 +295,32 @@ TEST(ProtobufTest, SerializationList)
 
     // SerializeToArray & ParseFromArray
     {
-        char info_list_to_array[128] = {0};
-        EXPECT_TRUE(test_info_list.SerializeToArray(info_list_to_array, sizeof(info_list_to_array)));
+        char info_list_to_array[128] = { 0 };
+        GTEST_ASSERT_TRUE(test_info_list.SerializeToArray(info_list_to_array, sizeof(info_list_to_array)));
 
         TestMsg::TestCommonInfoList array_to_info_list;
-        EXPECT_TRUE(array_to_info_list.ParseFromArray(info_list_to_array, static_cast<int>(test_info_list_size)));
-        EXPECT_TRUE(array_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
-        EXPECT_TRUE(array_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
-        EXPECT_TRUE(array_to_info_list.ByteSizeLong() == test_info_list_size);
+        GTEST_ASSERT_TRUE(array_to_info_list.ParseFromArray(info_list_to_array, static_cast<int>(test_info_list_size)));
+        GTEST_ASSERT_TRUE(array_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+        GTEST_ASSERT_TRUE(array_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+        GTEST_ASSERT_TRUE(array_to_info_list.ByteSizeLong() == test_info_list_size);
 
         // foreach
         int idx = 0;
         for (const auto& val : array_to_info_list.common_info_list())
-            EXPECT_TRUE(val == info_list[idx++]);
+            GTEST_ASSERT_TRUE(val == info_list[idx++]);
 
         // foreach
         idx = 0;
         for (const auto& val : array_to_info_list.common_type_list())
-            EXPECT_TRUE(val == type_list[idx++]);
+            GTEST_ASSERT_TRUE(val == type_list[idx++]);
 
         // for
         for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
-            EXPECT_TRUE(array_to_info_list.common_info_list(idx) == info_list[idx]);
+            GTEST_ASSERT_TRUE(array_to_info_list.common_info_list(idx) == info_list[idx]);
 
         // for
         for (idx = 0; idx != array_to_info_list.common_type_list_size(); ++idx)
-            EXPECT_TRUE(array_to_info_list.common_type_list(idx) == type_list[idx]);
+            GTEST_ASSERT_TRUE(array_to_info_list.common_type_list(idx) == type_list[idx]);
 
         // foreach mutable_common_info_list
         for (auto& val : *array_to_info_list.mutable_common_info_list())
@@ -334,7 +334,7 @@ TEST(ProtobufTest, SerializationList)
         for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
         {
             temp = array_to_info_list.mutable_common_info_list(idx);
-            EXPECT_TRUE(temp != nullptr);
+            GTEST_ASSERT_TRUE(temp != nullptr);
             temp->set_test_string(temp->test_string() + "CommonInfoArray");
         }
 
@@ -347,18 +347,18 @@ TEST(ProtobufTest, SerializationList)
 
     TestMsg::TestCommonInfoList test_info_list_copy = test_info_list;
     for (int idx = 0; idx != test_info_list_copy.common_info_list_size(); ++idx)
-        EXPECT_TRUE(test_info_list_copy.common_info_list(idx) == info_list[idx]);
+        GTEST_ASSERT_TRUE(test_info_list_copy.common_info_list(idx) == info_list[idx]);
 
     for (int idx = 0; idx != test_info_list_copy.common_type_list_size(); ++idx)
-        EXPECT_TRUE(test_info_list_copy.common_type_list(idx) == type_list[idx]);
+        GTEST_ASSERT_TRUE(test_info_list_copy.common_type_list(idx) == type_list[idx]);
 
     TestMsg::TestCommonInfoList test_info_list_move = std::move(test_info_list);
     for (int idx = 0; idx != test_info_list_move.common_info_list_size(); ++idx)
-        EXPECT_TRUE(test_info_list_move.common_info_list(idx) == info_list[idx]);
+        GTEST_ASSERT_TRUE(test_info_list_move.common_info_list(idx) == info_list[idx]);
 
     for (int idx = 0; idx != test_info_list_move.common_type_list_size(); ++idx)
-        EXPECT_TRUE(test_info_list_move.common_type_list(idx) == type_list[idx]);
+        GTEST_ASSERT_TRUE(test_info_list_move.common_type_list(idx) == type_list[idx]);
 
-    EXPECT_TRUE(test_info_list.common_info_list_size() == 0);
-    EXPECT_TRUE(test_info_list.common_type_list_size() == 0);
+    GTEST_ASSERT_TRUE(test_info_list.common_info_list_size() == 0);
+    GTEST_ASSERT_TRUE(test_info_list.common_type_list_size() == 0);
 }
