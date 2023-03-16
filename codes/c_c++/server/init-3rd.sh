@@ -10,6 +10,7 @@ TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
 HIREDIS_INIT_DIR=$ROOT_INIT_DIR/3rd/hiredis
 LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
+GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
 JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
 LUABRIDGE_INIT_DIR=$ROOT_INIT_DIR/3rd/LuaBridge
 CPP_COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
@@ -84,6 +85,15 @@ if [ ! -d $PROTOBUF_INIT_DIR ]; then
     git clone -b 3.18.x https://github.com/protocolbuffers/protobuf.git $PROTOBUF_INIT_DIR
 else
     cd $PROTOBUF_INIT_DIR
+    git pull
+    git log -1
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $GOOGLETEST_INIT_DIR ]; then
+    git clone -b release-1.12.1 https://github.com/google/googletest.git $GOOGLETEST_INIT_DIR
+else
+    cd $GOOGLETEST_INIT_DIR
     git pull
     git log -1
 fi

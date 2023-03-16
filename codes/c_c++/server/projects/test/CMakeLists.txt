@@ -10,6 +10,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
@@ -37,6 +38,7 @@ IF(MSVC)
         cppcommon
         cppserver
         fmt
+        gtest
         hiredis
         jsoncpp
         event
@@ -76,6 +78,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
@@ -103,6 +106,7 @@ ELSE()
         cppcommon
         cppserver
         fmt
+        gtest
         hiredis
         jsoncpp
         event
