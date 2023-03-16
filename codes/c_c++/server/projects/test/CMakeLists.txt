@@ -17,6 +17,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
@@ -85,6 +86,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
