@@ -81,17 +81,17 @@ GTEST_TEST(ProtobufTest, EnumName)
     GTEST_ASSERT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(100)));
     GTEST_ASSERT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(-1)));
 
-    EXPECT_EQ(str_float, "CT_FLOAT");
-    EXPECT_EQ(str_double, "CT_DOUBLE");
-    EXPECT_EQ(str_bytes, "CT_BYTES");
-    EXPECT_EQ(str_int32, "CT_INT32");
-    EXPECT_EQ(str_sint32, "CT_SINT32");
-    EXPECT_EQ(str_uint32, "CT_UINT32");
-    EXPECT_EQ(str_int64, "CT_INT64");
-    EXPECT_EQ(str_sint64, "CT_SINT64");
-    EXPECT_EQ(str_uint64, "CT_UINT64");
-    EXPECT_EQ(str_default1, "CT_FLOAT");
-    EXPECT_EQ(str_default2, "CT_FLOAT");
+    GTEST_ASSERT_TRUE(str_float    == "CT_FLOAT");
+    GTEST_ASSERT_TRUE(str_double   == "CT_DOUBLE");
+    GTEST_ASSERT_TRUE(str_bytes    == "CT_BYTES");
+    GTEST_ASSERT_TRUE(str_int32    == "CT_INT32");
+    GTEST_ASSERT_TRUE(str_sint32   == "CT_SINT32");
+    GTEST_ASSERT_TRUE(str_uint32   == "CT_UINT32");
+    GTEST_ASSERT_TRUE(str_int64    == "CT_INT64");
+    GTEST_ASSERT_TRUE(str_sint64   == "CT_SINT64");
+    GTEST_ASSERT_TRUE(str_uint64   == "CT_UINT64");
+    GTEST_ASSERT_TRUE(str_default1 == "CT_FLOAT");
+    GTEST_ASSERT_TRUE(str_default2 == "CT_FLOAT");
 
     GTEST_ASSERT_TRUE(str_null1.empty());
     GTEST_ASSERT_TRUE(str_null2.empty());
