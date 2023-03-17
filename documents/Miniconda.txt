@@ -1,12 +1,12 @@
-# Miniconda下载地址，Win10首选：Miniconda3-py38_4.12.0-Windows-x86_64版本
-https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/
+# Miniconda下载地址，首选：Python 3.10 - Miniconda3 Windows 64-bit
+https://docs.conda.io/en/latest/miniconda.html
 
 # 更换Conda源
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
 conda config --set show_channel_urls yes
 
-# Conda常用命令
+# Conda常用命令(如果更改base环境的话，则需要管理员权限)
 	查看当前系统下的环境
 	conda info -e
 
@@ -33,6 +33,9 @@ conda config --set show_channel_urls yes
 
 	在指定环境下升级包
 	conda update -n env_name xxx
+
+	升级base环境的python版本
+	conda update -n base python
 
 # 临时更改pip源
 pip install <包名> -i https://pypi.tuna.tsinghua.edu.cn/simple
