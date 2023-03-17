@@ -5,12 +5,13 @@ PROJECT(protobuf)
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DHAVE_ZLIB
     )
 
     # 编译选项
@@ -43,11 +44,13 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
+        -DHAVE_ZLIB
         -DHAVE_PTHREAD
     )
 
