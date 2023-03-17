@@ -34,8 +34,8 @@ conda config --set show_channel_urls yes
 	在指定环境下升级包
 	conda update -n env_name xxx
 
-	升级base环境的python版本
-	conda update -n base python
+	升级base环境的conda & python版本
+	conda update -n base conda python
 
 # 临时更改pip源
 pip install <包名> -i https://pypi.tuna.tsinghua.edu.cn/simple
