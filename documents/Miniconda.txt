@@ -1,5 +1,10 @@
 # Miniconda下载地址，首选：Python 3.10 - Miniconda3 Windows 64-bit
+# 安装时选择：Install for all users
 https://docs.conda.io/en/latest/miniconda.html
+
+# 环境变量
+C:\ProgramData\miniconda3
+C:\ProgramData\miniconda3\Scripts
 
 # 更换Conda源
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
