@@ -45,6 +45,9 @@
     "editor.renderWhitespace": "all",
     "editor.trimAutoWhitespace": true,
     "editor.dragAndDrop": false,
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+    "editor.formatOnPaste": false,
 
     "editor.minimap.enabled": true,
     "editor.minimap.renderCharacters": true,
@@ -70,6 +73,36 @@
     "update.mode": "none",
     "update.showReleaseNotes": false,
     "update.enableWindowsBackgroundUpdates": false,
+
+    "[c]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false,
+    },
+
+    "[cpp]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false,
+    },
+
+    "[go]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false,
+    },
+
+    "[lua]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false,
+    },
+
+    "[python]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false,
+    },
 }
 
 【键盘设置】
