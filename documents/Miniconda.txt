@@ -1,4 +1,3 @@
-# Miniconda下载地址，Win7 首选：Miniconda3-py38_4.10.3-Windows-x86_64版本
 # Miniconda下载地址，Win10首选：Miniconda3-py38_4.12.0-Windows-x86_64版本
 https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/
 
@@ -28,6 +27,12 @@ conda config --set show_channel_urls yes
 
 	在指定环境下安装包
 	conda install -n env_name xxx
+
+	在指定环境下卸载包
+	conda uninstall -n env_name xxx
+
+	在指定环境下升级包
+	conda update -n env_name xxx
 
 # 临时更改pip源
 pip install <包名> -i https://pypi.tuna.tsinghua.edu.cn/simple
