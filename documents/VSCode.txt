@@ -74,25 +74,7 @@
     "update.showReleaseNotes": false,
     "update.enableWindowsBackgroundUpdates": false,
 
-    "[c]": {
-        "editor.formatOnSave": false,
-        "editor.formatOnType": false,
-        "editor.formatOnPaste": false,
-    },
-
-    "[cpp]": {
-        "editor.formatOnSave": false,
-        "editor.formatOnType": false,
-        "editor.formatOnPaste": false,
-    },
-
     "[go]": {
-        "editor.formatOnSave": false,
-        "editor.formatOnType": false,
-        "editor.formatOnPaste": false,
-    },
-
-    "[lua]": {
         "editor.formatOnSave": false,
         "editor.formatOnType": false,
         "editor.formatOnPaste": false,
