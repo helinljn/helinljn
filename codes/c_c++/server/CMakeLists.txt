@@ -25,11 +25,11 @@ SET(CMAKE_PROJECT_BUILD_ROOT_DIR ${CMAKE_PROJECT_ROOT_DIR}/.build)
 # 编译选项、优先链接静态库、生成目录、静态库 & 动态库的前缀
 IF(MSVC)
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /W4 /WX /MP")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /WX /MP")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /W4 /WX /MP")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /WX /MP")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
