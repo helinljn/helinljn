@@ -83,18 +83,16 @@ if not exist %LIBEVENT_INIT_DIR% (
 cd %ROOT_INIT_DIR%
 if not exist %PROTOBUF_INIT_DIR% (
     git clone -b 3.18.x https://github.com/protocolbuffers/protobuf.git %PROTOBUF_INIT_DIR%
-) else (
+
     cd %PROTOBUF_INIT_DIR%
-    git pull
     git log -1
 )
 
 cd %ROOT_INIT_DIR%
 if not exist %GOOGLETEST_INIT_DIR% (
     git clone -b release-1.12.1 https://github.com/google/googletest.git %GOOGLETEST_INIT_DIR%
-) else (
+
     cd %GOOGLETEST_INIT_DIR%
-    git pull
     git log -1
 )
 

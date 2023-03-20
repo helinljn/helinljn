@@ -83,18 +83,16 @@ fi
 cd $ROOT_INIT_DIR
 if [ ! -d $PROTOBUF_INIT_DIR ]; then
     git clone -b 3.18.x https://github.com/protocolbuffers/protobuf.git $PROTOBUF_INIT_DIR
-else
+
     cd $PROTOBUF_INIT_DIR
-    git pull
     git log -1
 fi
 
 cd $ROOT_INIT_DIR
 if [ ! -d $GOOGLETEST_INIT_DIR ]; then
     git clone -b release-1.12.1 https://github.com/google/googletest.git $GOOGLETEST_INIT_DIR
-else
+
     cd $GOOGLETEST_INIT_DIR
-    git pull
     git log -1
 fi
 
