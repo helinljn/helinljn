@@ -6,9 +6,9 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
+        #${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
+        #${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
+        #${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
@@ -35,9 +35,9 @@ IF(MSVC)
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
-        asio
-        cppcommon
-        cppserver
+        #asio
+        #cppcommon
+        #cppserver
         fmt
         gtest
         hiredis
@@ -86,9 +86,9 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
+        #${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
+        #${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
+        #${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
@@ -115,9 +115,9 @@ ELSE()
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
-        asio
-        cppcommon
-        cppserver
+        #asio
+        #cppcommon
+        #cppserver
         fmt
         gtest
         hiredis
