@@ -42,3 +42,6 @@
 
 	# 分支提交
 	git push origin feature_xxx
+
+	# 清除远程分支的本地缓存
+	git fetch -p origin
