@@ -2,6 +2,7 @@
 # INCLUDE(CppCommon.cmake)
 # INCLUDE(CppServer.cmake)
 INCLUDE(fmt.cmake)
+INCLUDE(gmock.cmake)
 INCLUDE(gtest.cmake)
 INCLUDE(hiredis.cmake)
 INCLUDE(jsoncpp.cmake)

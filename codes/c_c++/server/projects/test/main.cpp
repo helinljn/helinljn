@@ -1,5 +1,6 @@
 #include "spdlog/spdlog.h"
 #include "event2/event.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "tinyxml2.h"
 #include "json.h"
@@ -28,6 +29,7 @@ int main(int argc, char** argv)
 {
     static_assert(__cplusplus == 201703);
 
+    testing::InitGoogleMock(&argc, argv);
     testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();
