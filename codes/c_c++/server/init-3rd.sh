@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ROOT_INIT_DIR=`pwd`
-LUA_INIT_DIR=$ROOT_INIT_DIR/3rd/lua
+# LUA_INIT_DIR=$ROOT_INIT_DIR/3rd/lua
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 ZLIB_INIT_DIR=$ROOT_INIT_DIR/3rd/zlib
 # ASIO_INIT_DIR=$ROOT_INIT_DIR/3rd/asio
@@ -12,17 +12,17 @@ LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
 JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
-LUABRIDGE_INIT_DIR=$ROOT_INIT_DIR/3rd/LuaBridge
+# LUABRIDGE_INIT_DIR=$ROOT_INIT_DIR/3rd/LuaBridge
 # CPP_COMMON_INIT_DIR=$ROOT_INIT_DIR/3rd/CppCommon
 # CPP_SERVER_INIT_DIR=$ROOT_INIT_DIR/3rd/CppServer
 
-cd $ROOT_INIT_DIR
-if [ ! -d $LUA_INIT_DIR ]; then
-    git clone -b v5.3.6 https://github.com/lua/lua.git $LUA_INIT_DIR
+# cd $ROOT_INIT_DIR
+# if [ ! -d $LUA_INIT_DIR ]; then
+#     git clone -b v5.3.6 https://github.com/lua/lua.git $LUA_INIT_DIR
 
-    cd $LUA_INIT_DIR
-    git log -1
-fi
+#     cd $LUA_INIT_DIR
+#     git log -1
+# fi
 
 cd $ROOT_INIT_DIR
 if [ ! -d $FMT_INIT_DIR ]; then
@@ -105,14 +105,14 @@ else
     git log -1
 fi
 
-cd $ROOT_INIT_DIR
-if [ ! -d $LUABRIDGE_INIT_DIR ]; then
-    git clone https://github.com/vinniefalco/LuaBridge.git $LUABRIDGE_INIT_DIR
-else
-    cd $LUABRIDGE_INIT_DIR
-    git pull
-    git log -1
-fi
+# cd $ROOT_INIT_DIR
+# if [ ! -d $LUABRIDGE_INIT_DIR ]; then
+#     git clone https://github.com/vinniefalco/LuaBridge.git $LUABRIDGE_INIT_DIR
+# else
+#     cd $LUABRIDGE_INIT_DIR
+#     git pull
+#     git log -1
+# fi
 
 # cd $ROOT_INIT_DIR
 # if [ ! -d $CPP_COMMON_INIT_DIR ]; then

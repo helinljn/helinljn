@@ -17,9 +17,9 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
+        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        # ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
+        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
@@ -45,7 +45,7 @@ IF(MSVC)
         hiredis
         jsoncpp
         event
-        lua
+        # lua
         protobuf
         protocol
         spdlog
@@ -66,7 +66,7 @@ IF(MSVC)
     SET(CURRENT_COMPILE_DEFINITIONS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
-        -DLUABRIDGE_CXX17
+        # -DLUABRIDGE_CXX17
     )
 
     # 编译选项
@@ -88,9 +88,9 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
+        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
+        # ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
+        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
@@ -116,7 +116,7 @@ ELSE()
         hiredis
         jsoncpp
         event
-        lua
+        # lua
         protobuf
         protocol
         spdlog
@@ -137,7 +137,7 @@ ELSE()
     SET(CURRENT_COMPILE_DEFINITIONS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
-        -DLUABRIDGE_CXX17
+        # -DLUABRIDGE_CXX17
     )
 
     # 编译选项
