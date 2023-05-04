@@ -11,13 +11,15 @@
 
     6. WSL workspaceFolder
 
-    7. Markdown All in One
+    7. WSL
 
-    8. GBKtoUTF8
+    8. Markdown All in One
 
-    9. Protobuf support
+    9. GBKtoUTF8
 
-    10. One Dark Pro
+    10. Protobuf support
+
+    11. One Dark Pro
 
 【常用设置】
 {

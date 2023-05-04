@@ -8,10 +8,10 @@
             "name": "Launch windows test",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/.build/Debug/test.exe",
+            "program": "${workspaceFolder}/.build/Debug/test.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceRoot}/.build/Debug",
+            "cwd": "${workspaceFolder}/.build/Debug",
             "environment": [],
             "console": "externalTerminal",
             "preLaunchTask": "build windows debug"
