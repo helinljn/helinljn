@@ -1,25 +1,25 @@
 【安装插件】
     1. Chinese (Simplified) (简体中文) Language Pack for Visual Studio Code
 
-    2. C/C++ Extension Pack
+    2. GBKtoUTF8
 
-    3. Python
+    3. C/C++ Extension Pack
 
-    4. Go
+    4. Python
 
-    5. Lua language support for Visual Studio Code
+    5. Go
 
-    6. WSL workspaceFolder
+    6. Lua language support for Visual Studio Code
 
-    7. WSL
+    7. WSL workspaceFolder
 
     8. Markdown All in One
 
-    9. GBKtoUTF8
+    9. Protobuf support
 
-    10. Protobuf support
+    10. One Dark Pro
 
-    11. One Dark Pro
+    11. WSL(安装后，需要把1、2、3重新安装至WSL:Ubuntu中)
 
 【常用设置】
 {
