@@ -23,13 +23,13 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
         ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/poco/lib64
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/3rd-libs/openssl-1.1.1n/x64-windows/lib
     )
 
     # 依赖库后缀修正
@@ -87,13 +87,13 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/poco/Zip/src
         ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
+        ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
     # 依赖库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/poco/lib64
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/../server/3rd/3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/lib
     )
 
     # 依赖库后缀修正
