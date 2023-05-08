@@ -6,9 +6,6 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
@@ -17,14 +14,11 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
-        # ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
@@ -36,21 +30,17 @@ IF(MSVC)
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
-        # asio
-        # cppcommon
-        # cppserver
         fmt
         gmock
         gtest
         hiredis
         jsoncpp
         event
-        # lua
         protobuf
-        protocol
         spdlog
         tinyxml2
         zlib
+        protocol
     )
 
     # 链接库
@@ -66,7 +56,6 @@ IF(MSVC)
     SET(CURRENT_COMPILE_DEFINITIONS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
-        # -DLUABRIDGE_CXX17
     )
 
     # 编译选项
@@ -77,9 +66,6 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/asio/asio/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppCommon/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/CppServer/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
@@ -88,14 +74,11 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/lua
-        # ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/lua/include
-        # ${CMAKE_PROJECT_ROOT_DIR}/3rd/LuaBridge/Source
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
         ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
@@ -107,21 +90,17 @@ ELSE()
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
-        # asio
-        # cppcommon
-        # cppserver
         fmt
         gmock
         gtest
         hiredis
         jsoncpp
         event
-        # lua
         protobuf
-        protocol
         spdlog
         tinyxml2
         zlib
+        protocol
     )
 
     # 链接库
@@ -137,7 +116,6 @@ ELSE()
     SET(CURRENT_COMPILE_DEFINITIONS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
-        # -DLUABRIDGE_CXX17
     )
 
     # 编译选项

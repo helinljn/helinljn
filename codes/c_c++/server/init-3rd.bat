@@ -1,10 +1,8 @@
 @echo off
 
 set ROOT_INIT_DIR=%CD%
-@rem set LUA_INIT_DIR=%ROOT_INIT_DIR%/3rd/lua
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set ZLIB_INIT_DIR=%ROOT_INIT_DIR%/3rd/zlib
-@rem set ASIO_INIT_DIR=%ROOT_INIT_DIR%/3rd/asio
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set TINYXML2_INIT_DIR=%ROOT_INIT_DIR%/3rd/tinyxml2
 set HIREDIS_INIT_DIR=%ROOT_INIT_DIR%/3rd/hiredis
@@ -12,17 +10,6 @@ set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 set JSONCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/jsoncpp
-@rem set LUABRIDGE_INIT_DIR=%ROOT_INIT_DIR%/3rd/LuaBridge
-@rem set CPP_COMMON_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppCommon
-@rem set CPP_SERVER_INIT_DIR=%ROOT_INIT_DIR%/3rd/CppServer
-
-@rem cd %ROOT_INIT_DIR%
-@rem if not exist %LUA_INIT_DIR% (
-@rem     git clone -b v5.3.6 https://github.com/lua/lua.git %LUA_INIT_DIR%
-
-@rem     cd %LUA_INIT_DIR%
-@rem     git log -1
-@rem )
 
 cd %ROOT_INIT_DIR%
 if not exist %FMT_INIT_DIR% (
@@ -39,14 +26,6 @@ if not exist %ZLIB_INIT_DIR% (
     cd %ZLIB_INIT_DIR%
     git log -1
 )
-
-@rem cd %ROOT_INIT_DIR%
-@rem if not exist %ASIO_INIT_DIR% (
-@rem     git clone -b asio-1-22-2 https://github.com/chriskohlhoff/asio.git %ASIO_INIT_DIR%
-
-@rem     cd %ASIO_INIT_DIR%
-@rem     git log -1
-@rem )
 
 cd %ROOT_INIT_DIR%
 if not exist %SPDLOG_INIT_DIR% (
@@ -104,32 +83,5 @@ if not exist %JSONCPP_INIT_DIR% (
     git pull
     git log -1
 )
-
-@rem cd %ROOT_INIT_DIR%
-@rem if not exist %LUABRIDGE_INIT_DIR% (
-@rem     git clone https://github.com/vinniefalco/LuaBridge.git %LUABRIDGE_INIT_DIR%
-@rem ) else (
-@rem     cd %LUABRIDGE_INIT_DIR%
-@rem     git pull
-@rem     git log -1
-@rem )
-
-@rem cd %ROOT_INIT_DIR%
-@rem if not exist %CPP_COMMON_INIT_DIR% (
-@rem     git clone https://github.com/chronoxor/CppCommon.git %CPP_COMMON_INIT_DIR%
-@rem ) else (
-@rem     cd %CPP_COMMON_INIT_DIR%
-@rem     git pull
-@rem     git log -1
-@rem )
-
-@rem cd %ROOT_INIT_DIR%
-@rem if not exist %CPP_SERVER_INIT_DIR% (
-@rem     git clone https://github.com/chronoxor/CppServer.git %CPP_SERVER_INIT_DIR%
-@rem ) else (
-@rem     cd %CPP_SERVER_INIT_DIR%
-@rem     git pull
-@rem     git log -1
-@rem )
 
 pause
