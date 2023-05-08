@@ -9,7 +9,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-windows/include
     )
 
     # 源文件
@@ -72,7 +72,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
     )
 
     # 源文件
