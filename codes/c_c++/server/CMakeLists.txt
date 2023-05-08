@@ -88,6 +88,7 @@ ELSE()
 ENDIF()
 
 # 添加子目录
+ADD_SUBDIRECTORY(3rd)
 ADD_SUBDIRECTORY(projects)
 
 # 调试信息

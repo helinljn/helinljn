@@ -13,7 +13,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
@@ -73,7 +73,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/modules/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
