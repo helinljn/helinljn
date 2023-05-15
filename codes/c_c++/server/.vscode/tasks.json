@@ -30,13 +30,13 @@
         {
             "label": "build linux debug",
             "type": "shell",
-            "command": "chmod +x ./build.linux.sh && ./build.linux.sh debug && git checkout .",
+            "command": "chmod +x ./build.linux.sh && ./build.linux.sh debug && chmod -x ./build.linux.sh",
             "group": "build"
         },
         {
             "label": "build linux release",
             "type": "shell",
-            "command": "chmod +x ./build.linux.sh && ./build.linux.sh release && git checkout .",
+            "command": "chmod +x ./build.linux.sh && ./build.linux.sh release && chmod -x ./build.linux.sh",
             "group": "build"
         }
     ]
