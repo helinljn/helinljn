@@ -43,7 +43,7 @@
             "label": "revert workspace",
             "type": "shell",
             "command": "git checkout .",
-            "group": "none"
+            "group": "build"
         }
     ]
 }
