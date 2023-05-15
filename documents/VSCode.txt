@@ -19,7 +19,7 @@
 
     10. One Dark Pro
 
-    11. Remote - SSH(安装后，需要把1、2、3重新安装至WSL:Ubuntu中)
+    11. Remote - SSH(安装后，需要把1、2、3重新安装至Remote-SSH中)
 
 【常用设置】
 {
