@@ -19,7 +19,7 @@
 
     10. One Dark Pro
 
-    11. WSL(安装后，需要把1、2、3重新安装至WSL:Ubuntu中)
+    11. Remote - SSH(安装后，需要把1、2、3重新安装至WSL:Ubuntu中)
 
 【常用设置】
 {
@@ -81,6 +81,11 @@
     "update.mode": "none",
     "update.showReleaseNotes": false,
     "update.enableWindowsBackgroundUpdates": false,
+
+    "remote.SSH.configFile": "D:\\helinljn\\documents\\ssh_config",
+    "remote.SSH.remotePlatform": {
+        "Aliyun": "linux"
+    },
 
     "[python]": {
         "editor.formatOnSave": false,
