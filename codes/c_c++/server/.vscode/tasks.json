@@ -30,19 +30,13 @@
         {
             "label": "build linux debug",
             "type": "shell",
-            "command": "chmod +x ./build.linux.sh && ./build.linux.sh debug",
+            "command": "chmod +x ./build.linux.sh && ./build.linux.sh debug && git checkout .",
             "group": "build"
         },
         {
             "label": "build linux release",
             "type": "shell",
-            "command": "chmod +x ./build.linux.sh && ./build.linux.sh release",
-            "group": "build"
-        },
-        {
-            "label": "revert workspace",
-            "type": "shell",
-            "command": "git checkout .",
+            "command": "chmod +x ./build.linux.sh && ./build.linux.sh release && git checkout .",
             "group": "build"
         }
     ]
