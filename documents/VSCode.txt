@@ -78,6 +78,9 @@
     "security.workspace.trust.banner": "never",
     "security.workspace.trust.startupPrompt": "never",
 
+    "terminal.integrated.fontFamily": "Consolas",
+    "terminal.integrated.fontSize": 16,
+
     "update.mode": "none",
     "update.showReleaseNotes": false,
     "update.enableWindowsBackgroundUpdates": false,
