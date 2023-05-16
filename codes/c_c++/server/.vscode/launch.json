@@ -13,7 +13,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/.build/Debug",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
+            "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": "build windows debug"
         },
         {
@@ -31,7 +32,8 @@
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/.build/Debug",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
+            "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": "build linux debug by wsl",
             "MIMode": "gdb",
             "setupCommands": [
@@ -81,6 +83,42 @@
                 "/mnt/e": "E:\\",
                 "/mnt/f": "F:\\"
             }
+        },
+        {
+            "name": "Launch linux test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/.build/Debug/test",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/.build/Debug",
+            "environment": [],
+            "externalConsole": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "preLaunchTask": "build linux debug",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Attach linux test",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/.build/Debug/test",
+            "processId":"${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }
