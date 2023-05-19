@@ -18,14 +18,14 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
     )
 
     # 链接库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-windows/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/lib
     )
 
     # 生成依赖库
@@ -78,14 +78,14 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
     )
 
     # 链接库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/lib
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/lib
     )
 
     # 生成依赖库

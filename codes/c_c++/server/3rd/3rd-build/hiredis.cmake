@@ -6,7 +6,7 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-windows/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
     )
 
     # 宏定义
@@ -33,7 +33,7 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1n/x64-ubuntu-20.04/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
     )
 
     # 宏定义
