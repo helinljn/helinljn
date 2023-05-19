@@ -13,13 +13,15 @@
 
     7. WSL workspaceFolder
 
-    8. Markdown All in One
+    8. vscode-drawio
 
-    9. Protobuf support
+    9. Markdown All in One
 
-    10. One Dark Pro
+    10. Protobuf support
 
-    11. Remote - SSH(安装后，需要把1、2、3重新安装至Remote-SSH中)
+    11. One Dark Pro
+
+    12. Remote - SSH(安装后，需要把1、2、3重新安装至Remote-SSH中)
 
 【常用设置】
 {
