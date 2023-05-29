@@ -1,13 +1,18 @@
-#include "spdlog/spdlog.h"
-#include "event2/event.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "tinyxml2.h"
-#include "json.h"
+
+#include "fmt/format.h"
+#include "spdlog/spdlog.h"
+
+#include "event2/event.h"
+
 #include "zlib.h"
+#include "json.h"
+#include "tinyxml2.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)
+    #pragma warning(disable:4127)
     #pragma warning(disable:4200)
 #elif defined(__GNUC__)
     #pragma GCC diagnostic push
@@ -15,6 +20,9 @@
 #endif // defined(_MSC_VER)
 
 #include "hiredis.h"
+
+#include "TestMsgDefine.pb.h"
+#include "TestMsgStruct.pb.h"
 
 #if defined(_MSC_VER)
     #pragma warning(pop)
