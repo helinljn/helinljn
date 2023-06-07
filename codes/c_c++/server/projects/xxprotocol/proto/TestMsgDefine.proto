@@ -2,15 +2,17 @@ syntax = "proto3";
 
 package TestMsg;
 
+// 在 proto3 的语法中，枚举必须从 0 开始
 enum TestCommonType
 {
-    CT_FLOAT  = 0;
-    CT_DOUBLE = 1;
-    CT_BYTES  = 2;
-    CT_INT32  = 3;
-    CT_SINT32 = 4;
-    CT_UINT32 = 5;
-    CT_INT64  = 6;
-    CT_SINT64 = 7;
-    CT_UINT64 = 8;
+    CT_BOOL   = 0;
+    CT_FLOAT  = 1;
+    CT_DOUBLE = 2;
+    CT_BYTES  = 3;
+    CT_INT32  = 4;
+    CT_SINT32 = 5;
+    CT_UINT32 = 6;
+    CT_INT64  = 7;
+    CT_SINT64 = 8;
+    CT_UINT64 = 9;
 }

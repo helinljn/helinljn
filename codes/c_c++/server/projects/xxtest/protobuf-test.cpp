@@ -18,6 +18,7 @@ namespace {
 class CommonInfo
 {
 public:
+    bool        test_bool;
     float       test_float;
     double      test_double;
     std::string test_string;
@@ -31,13 +32,14 @@ public:
 
 bool operator ==(const CommonInfo& cinfo, const TestMsg::TestCommonInfo& pinfo)
 {
-    return cinfo.test_float  == pinfo.test_float()
+    return cinfo.test_bool   == pinfo.test_bool()
+        && cinfo.test_float  == pinfo.test_float()
         && cinfo.test_double == pinfo.test_double()
         && cinfo.test_string == pinfo.test_string()
         && cinfo.test_int32  == pinfo.test_int32()
         && cinfo.test_sint32 == pinfo.test_sint32()
         && cinfo.test_uint32 == pinfo.test_uint32()
-        && cinfo.test_int64 == pinfo.test_int64()
+        && cinfo.test_int64  == pinfo.test_int64()
         && cinfo.test_sint64 == pinfo.test_sint64()
         && cinfo.test_uint64 == pinfo.test_uint64();
 }
@@ -52,6 +54,7 @@ bool operator ==(const TestMsg::TestCommonInfo& pinfo, const CommonInfo& cinfo)
 TEST(ProtobufTest, EnumName)
 {
     // CommonType_Name
+    const std::string& str_bool     = TestMsg::TestCommonType_Name(TestMsg::CT_BOOL);
     const std::string& str_float    = TestMsg::TestCommonType_Name(TestMsg::CT_FLOAT);
     const std::string& str_double   = TestMsg::TestCommonType_Name(TestMsg::CT_DOUBLE);
     const std::string& str_bytes    = TestMsg::TestCommonType_Name(TestMsg::CT_BYTES);
@@ -66,6 +69,7 @@ TEST(ProtobufTest, EnumName)
     const std::string& str_null1    = TestMsg::TestCommonType_Name(TestMsg::TestCommonType(100));
     const std::string& str_null2    = TestMsg::TestCommonType_Name(TestMsg::TestCommonType(-1));
 
+    ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_BOOL));
     ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_FLOAT));
     ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_DOUBLE));
     ASSERT_TRUE(TestMsg::TestCommonType_IsValid(TestMsg::CT_BYTES));
@@ -81,6 +85,7 @@ TEST(ProtobufTest, EnumName)
     ASSERT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(100)));
     ASSERT_FALSE(TestMsg::TestCommonType_IsValid(TestMsg::TestCommonType(-1)));
 
+    ASSERT_TRUE(str_bool     == "CT_BOOL");
     ASSERT_TRUE(str_float    == "CT_FLOAT");
     ASSERT_TRUE(str_double   == "CT_DOUBLE");
     ASSERT_TRUE(str_bytes    == "CT_BYTES");
@@ -90,15 +95,18 @@ TEST(ProtobufTest, EnumName)
     ASSERT_TRUE(str_int64    == "CT_INT64");
     ASSERT_TRUE(str_sint64   == "CT_SINT64");
     ASSERT_TRUE(str_uint64   == "CT_UINT64");
-    ASSERT_TRUE(str_default1 == "CT_FLOAT");
-    ASSERT_TRUE(str_default2 == "CT_FLOAT");
+    ASSERT_TRUE(str_default1 == "CT_BOOL");
+    ASSERT_TRUE(str_default2 == "CT_BOOL");
 
     ASSERT_TRUE(str_null1.empty());
     ASSERT_TRUE(str_null2.empty());
 
     // CommonType_Parse
     TestMsg::TestCommonType val{};
-    ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(TestMsg::CT_BOOL == val && TestMsg::TestCommonType_IsValid(val));
+
+    ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_bool, &val));
+    ASSERT_TRUE(TestMsg::CT_BOOL == val && TestMsg::TestCommonType_IsValid(val));
 
     ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_float, &val));
     ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
@@ -128,10 +136,10 @@ TEST(ProtobufTest, EnumName)
     ASSERT_TRUE(TestMsg::CT_UINT64 == val && TestMsg::TestCommonType_IsValid(val));
 
     ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_default1, &val));
-    ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(TestMsg::CT_BOOL == val && TestMsg::TestCommonType_IsValid(val));
 
     ASSERT_TRUE(TestMsg::TestCommonType_Parse(str_default2, &val));
-    ASSERT_TRUE(TestMsg::CT_FLOAT == val && TestMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(TestMsg::CT_BOOL == val && TestMsg::TestCommonType_IsValid(val));
 
     ASSERT_FALSE(TestMsg::TestCommonType_Parse(str_null1, &val));
     ASSERT_FALSE(TestMsg::TestCommonType_Parse(str_null2, &val));
@@ -139,9 +147,10 @@ TEST(ProtobufTest, EnumName)
 
 TEST(ProtobufTest, Serialization)
 {
-    CommonInfo info{ 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890 };
+    CommonInfo info{true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
 
     TestMsg::TestCommonInfo test_info;
+    test_info.set_test_bool(info.test_bool);
     test_info.set_test_float(info.test_float);
     test_info.set_test_double(info.test_double);
     test_info.set_test_string(info.test_string);
@@ -190,14 +199,13 @@ TEST(ProtobufTest, Serialization)
 TEST(ProtobufTest, SerializationList)
 {
     std::vector<CommonInfo> info_list{
-        {1.23f, 4.5678, "CommonInfo1", 123456, -123456, 123456, 567890, -567890, 567890},
-        {4.56f, 9.0123, "CommonInfo2", 456789, -456789, 456789, 123456, -123456, 123456},
+        {true, 1.23f, 4.5678, "CommonInfo1", 123456, -123456, 123456, 567890, -567890, 567890},
+        {true, 4.56f, 9.0123, "CommonInfo2", 456789, -456789, 456789, 123456, -123456, 123456},
     };
 
     std::vector<TestMsg::TestCommonType> type_list{
-        TestMsg::CT_FLOAT,  TestMsg::CT_DOUBLE, TestMsg::CT_BYTES,
-        TestMsg::CT_INT32,  TestMsg::CT_SINT32, TestMsg::CT_UINT32,
-        TestMsg::CT_INT64,  TestMsg::CT_SINT64, TestMsg::CT_UINT64
+        TestMsg::CT_BOOL,   TestMsg::CT_FLOAT,  TestMsg::CT_DOUBLE, TestMsg::CT_BYTES,  TestMsg::CT_INT32,
+        TestMsg::CT_SINT32, TestMsg::CT_UINT32, TestMsg::CT_INT64,  TestMsg::CT_SINT64, TestMsg::CT_UINT64
     };
 
     // common_info_list_size
@@ -208,6 +216,7 @@ TEST(ProtobufTest, SerializationList)
     // add_common_info_list
     TestMsg::TestCommonInfo* temp = test_info_list.add_common_info_list();
     ASSERT_TRUE(temp != nullptr);
+    temp->set_test_bool(info_list[0].test_bool);
     temp->set_test_float(info_list[0].test_float);
     temp->set_test_double(info_list[0].test_double);
     temp->set_test_string(info_list[0].test_string);
@@ -220,6 +229,7 @@ TEST(ProtobufTest, SerializationList)
 
     temp = test_info_list.add_common_info_list();
     ASSERT_TRUE(temp != nullptr);
+    temp->set_test_bool(info_list[1].test_bool);
     temp->set_test_float(info_list[1].test_float);
     temp->set_test_double(info_list[1].test_double);
     temp->set_test_string(info_list[1].test_string);

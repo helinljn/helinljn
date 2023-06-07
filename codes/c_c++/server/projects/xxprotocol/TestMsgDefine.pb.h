@@ -57,20 +57,21 @@ PROTOBUF_NAMESPACE_CLOSE
 namespace TestMsg {
 
 enum TestCommonType : int {
-  CT_FLOAT = 0,
-  CT_DOUBLE = 1,
-  CT_BYTES = 2,
-  CT_INT32 = 3,
-  CT_SINT32 = 4,
-  CT_UINT32 = 5,
-  CT_INT64 = 6,
-  CT_SINT64 = 7,
-  CT_UINT64 = 8,
+  CT_BOOL = 0,
+  CT_FLOAT = 1,
+  CT_DOUBLE = 2,
+  CT_BYTES = 3,
+  CT_INT32 = 4,
+  CT_SINT32 = 5,
+  CT_UINT32 = 6,
+  CT_INT64 = 7,
+  CT_SINT64 = 8,
+  CT_UINT64 = 9,
   TestCommonType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   TestCommonType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool TestCommonType_IsValid(int value);
-constexpr TestCommonType TestCommonType_MIN = CT_FLOAT;
+constexpr TestCommonType TestCommonType_MIN = CT_BOOL;
 constexpr TestCommonType TestCommonType_MAX = CT_UINT64;
 constexpr int TestCommonType_ARRAYSIZE = TestCommonType_MAX + 1;
 

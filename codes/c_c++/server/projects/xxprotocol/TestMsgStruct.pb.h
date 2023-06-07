@@ -189,17 +189,18 @@ class TestCommonInfo final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTestStringFieldNumber = 3,
-    kTestDoubleFieldNumber = 2,
-    kTestFloatFieldNumber = 1,
-    kTestInt32FieldNumber = 4,
-    kTestSint32FieldNumber = 5,
-    kTestUint32FieldNumber = 6,
-    kTestInt64FieldNumber = 7,
-    kTestSint64FieldNumber = 8,
-    kTestUint64FieldNumber = 9,
+    kTestStringFieldNumber = 4,
+    kTestBoolFieldNumber = 1,
+    kTestFloatFieldNumber = 2,
+    kTestDoubleFieldNumber = 3,
+    kTestInt32FieldNumber = 5,
+    kTestSint32FieldNumber = 6,
+    kTestInt64FieldNumber = 8,
+    kTestSint64FieldNumber = 9,
+    kTestUint64FieldNumber = 10,
+    kTestUint32FieldNumber = 7,
   };
-  // bytes test_string = 3;
+  // bytes test_string = 4;
   void clear_test_string();
   const std::string& test_string() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -213,16 +214,16 @@ class TestCommonInfo final :
   std::string* _internal_mutable_test_string();
   public:
 
-  // double test_double = 2;
-  void clear_test_double();
-  double test_double() const;
-  void set_test_double(double value);
+  // bool test_bool = 1;
+  void clear_test_bool();
+  bool test_bool() const;
+  void set_test_bool(bool value);
   private:
-  double _internal_test_double() const;
-  void _internal_set_test_double(double value);
+  bool _internal_test_bool() const;
+  void _internal_set_test_bool(bool value);
   public:
 
-  // float test_float = 1;
+  // float test_float = 2;
   void clear_test_float();
   float test_float() const;
   void set_test_float(float value);
@@ -231,7 +232,16 @@ class TestCommonInfo final :
   void _internal_set_test_float(float value);
   public:
 
-  // int32 test_int32 = 4;
+  // double test_double = 3;
+  void clear_test_double();
+  double test_double() const;
+  void set_test_double(double value);
+  private:
+  double _internal_test_double() const;
+  void _internal_set_test_double(double value);
+  public:
+
+  // int32 test_int32 = 5;
   void clear_test_int32();
   ::PROTOBUF_NAMESPACE_ID::int32 test_int32() const;
   void set_test_int32(::PROTOBUF_NAMESPACE_ID::int32 value);
@@ -240,7 +250,7 @@ class TestCommonInfo final :
   void _internal_set_test_int32(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // sint32 test_sint32 = 5;
+  // sint32 test_sint32 = 6;
   void clear_test_sint32();
   ::PROTOBUF_NAMESPACE_ID::int32 test_sint32() const;
   void set_test_sint32(::PROTOBUF_NAMESPACE_ID::int32 value);
@@ -249,16 +259,7 @@ class TestCommonInfo final :
   void _internal_set_test_sint32(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // uint32 test_uint32 = 6;
-  void clear_test_uint32();
-  ::PROTOBUF_NAMESPACE_ID::uint32 test_uint32() const;
-  void set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_test_uint32() const;
-  void _internal_set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // int64 test_int64 = 7;
+  // int64 test_int64 = 8;
   void clear_test_int64();
   ::PROTOBUF_NAMESPACE_ID::int64 test_int64() const;
   void set_test_int64(::PROTOBUF_NAMESPACE_ID::int64 value);
@@ -267,7 +268,7 @@ class TestCommonInfo final :
   void _internal_set_test_int64(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // sint64 test_sint64 = 8;
+  // sint64 test_sint64 = 9;
   void clear_test_sint64();
   ::PROTOBUF_NAMESPACE_ID::int64 test_sint64() const;
   void set_test_sint64(::PROTOBUF_NAMESPACE_ID::int64 value);
@@ -276,13 +277,22 @@ class TestCommonInfo final :
   void _internal_set_test_sint64(::PROTOBUF_NAMESPACE_ID::int64 value);
   public:
 
-  // uint64 test_uint64 = 9;
+  // uint64 test_uint64 = 10;
   void clear_test_uint64();
   ::PROTOBUF_NAMESPACE_ID::uint64 test_uint64() const;
   void set_test_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
   ::PROTOBUF_NAMESPACE_ID::uint64 _internal_test_uint64() const;
   void _internal_set_test_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 test_uint32 = 7;
+  void clear_test_uint32();
+  ::PROTOBUF_NAMESPACE_ID::uint32 test_uint32() const;
+  void set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_test_uint32() const;
+  void _internal_set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
   // @@protoc_insertion_point(class_scope:TestMsg.TestCommonInfo)
@@ -293,14 +303,15 @@ class TestCommonInfo final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr test_string_;
-  double test_double_;
+  bool test_bool_;
   float test_float_;
+  double test_double_;
   ::PROTOBUF_NAMESPACE_ID::int32 test_int32_;
   ::PROTOBUF_NAMESPACE_ID::int32 test_sint32_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 test_uint32_;
   ::PROTOBUF_NAMESPACE_ID::int64 test_int64_;
   ::PROTOBUF_NAMESPACE_ID::int64 test_sint64_;
   ::PROTOBUF_NAMESPACE_ID::uint64 test_uint64_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 test_uint32_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_TestMsgStruct_2eproto;
 };
@@ -487,7 +498,27 @@ class TestCommonInfoList final :
 #endif  // __GNUC__
 // TestCommonInfo
 
-// float test_float = 1;
+// bool test_bool = 1;
+inline void TestCommonInfo::clear_test_bool() {
+  test_bool_ = false;
+}
+inline bool TestCommonInfo::_internal_test_bool() const {
+  return test_bool_;
+}
+inline bool TestCommonInfo::test_bool() const {
+  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_bool)
+  return _internal_test_bool();
+}
+inline void TestCommonInfo::_internal_set_test_bool(bool value) {
+
+  test_bool_ = value;
+}
+inline void TestCommonInfo::set_test_bool(bool value) {
+  _internal_set_test_bool(value);
+  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_bool)
+}
+
+// float test_float = 2;
 inline void TestCommonInfo::clear_test_float() {
   test_float_ = 0;
 }
@@ -507,7 +538,7 @@ inline void TestCommonInfo::set_test_float(float value) {
   // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_float)
 }
 
-// double test_double = 2;
+// double test_double = 3;
 inline void TestCommonInfo::clear_test_double() {
   test_double_ = 0;
 }
@@ -527,7 +558,7 @@ inline void TestCommonInfo::set_test_double(double value) {
   // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_double)
 }
 
-// bytes test_string = 3;
+// bytes test_string = 4;
 inline void TestCommonInfo::clear_test_string() {
   test_string_.ClearToEmpty();
 }
@@ -573,7 +604,7 @@ inline void TestCommonInfo::set_allocated_test_string(std::string* test_string) 
   // @@protoc_insertion_point(field_set_allocated:TestMsg.TestCommonInfo.test_string)
 }
 
-// int32 test_int32 = 4;
+// int32 test_int32 = 5;
 inline void TestCommonInfo::clear_test_int32() {
   test_int32_ = 0;
 }
@@ -593,7 +624,7 @@ inline void TestCommonInfo::set_test_int32(::PROTOBUF_NAMESPACE_ID::int32 value)
   // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_int32)
 }
 
-// sint32 test_sint32 = 5;
+// sint32 test_sint32 = 6;
 inline void TestCommonInfo::clear_test_sint32() {
   test_sint32_ = 0;
 }
@@ -613,7 +644,7 @@ inline void TestCommonInfo::set_test_sint32(::PROTOBUF_NAMESPACE_ID::int32 value
   // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_sint32)
 }
 
-// uint32 test_uint32 = 6;
+// uint32 test_uint32 = 7;
 inline void TestCommonInfo::clear_test_uint32() {
   test_uint32_ = 0u;
 }
@@ -633,7 +664,7 @@ inline void TestCommonInfo::set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 valu
   // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_uint32)
 }
 
-// int64 test_int64 = 7;
+// int64 test_int64 = 8;
 inline void TestCommonInfo::clear_test_int64() {
   test_int64_ = int64_t{0};
 }
@@ -653,7 +684,7 @@ inline void TestCommonInfo::set_test_int64(::PROTOBUF_NAMESPACE_ID::int64 value)
   // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_int64)
 }
 
-// sint64 test_sint64 = 8;
+// sint64 test_sint64 = 9;
 inline void TestCommonInfo::clear_test_sint64() {
   test_sint64_ = int64_t{0};
 }
@@ -673,7 +704,7 @@ inline void TestCommonInfo::set_test_sint64(::PROTOBUF_NAMESPACE_ID::int64 value
   // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_sint64)
 }
 
-// uint64 test_uint64 = 9;
+// uint64 test_uint64 = 10;
 inline void TestCommonInfo::clear_test_uint64() {
   test_uint64_ = uint64_t{0u};
 }
