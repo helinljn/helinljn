@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(test)
+PROJECT(xxtest)
 
 # 头文件目录、链接库目录、生成依赖库、链接库、宏定义、编译选项
 IF(MSVC)
@@ -19,7 +19,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
+        ${CMAKE_PROJECT_ROOT_DIR}/projects
     )
 
     # 链接库目录
@@ -40,7 +40,7 @@ IF(MSVC)
         spdlog
         tinyxml2
         zlib
-        protocol
+        xxprotocol
     )
 
     # 链接库
@@ -79,7 +79,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/protocol
+        ${CMAKE_PROJECT_ROOT_DIR}/projects
     )
 
     # 链接库目录
@@ -100,7 +100,7 @@ ELSE()
         spdlog
         tinyxml2
         zlib
-        protocol
+        xxprotocol
     )
 
     # 链接库

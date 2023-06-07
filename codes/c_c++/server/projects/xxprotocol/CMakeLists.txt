@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(protocol)
+PROJECT(xxprotocol)
 
 # 头文件目录、宏定义、编译选项
 IF(MSVC)

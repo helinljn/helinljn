@@ -21,8 +21,8 @@
 
 #include "hiredis.h"
 
-#include "TestMsgDefine.pb.h"
-#include "TestMsgStruct.pb.h"
+#include "xxprotocol/TestMsgDefine.pb.h"
+#include "xxprotocol/TestMsgStruct.pb.h"
 
 #if defined(_MSC_VER)
     #pragma warning(pop)
