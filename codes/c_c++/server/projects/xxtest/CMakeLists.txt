@@ -19,7 +19,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
     )
 
     # 链接库目录
@@ -79,7 +79,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects
+        ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
     )
 
     # 链接库目录
