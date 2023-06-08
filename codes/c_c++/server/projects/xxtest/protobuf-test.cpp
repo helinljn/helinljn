@@ -178,7 +178,7 @@ TEST(ProtobufTest, Serialization)
 
     // SerializeToArray & ParseFromArray
     {
-        char info_to_array[128] = { 0 };
+        char info_to_array[128] = {0};
         ASSERT_TRUE(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
 
         TestMsg::TestCommonInfo array_to_info;
@@ -305,7 +305,7 @@ TEST(ProtobufTest, SerializationList)
 
     // SerializeToArray & ParseFromArray
     {
-        char info_list_to_array[128] = { 0 };
+        char info_list_to_array[128] = {0};
         ASSERT_TRUE(test_info_list.SerializeToArray(info_list_to_array, sizeof(info_list_to_array)));
 
         TestMsg::TestCommonInfoList array_to_info_list;
