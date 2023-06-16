@@ -92,6 +92,10 @@
         "Aliyun": "linux"
     },
 
+    "C_Cpp.intelliSenseCacheSize": 0,
+    "C_Cpp.intelliSenseCachePath": "${workspaceFolder}/.build/cache",
+    "C_Cpp.default.browse.databaseFilename": "${workspaceFolder}/.build/cache/browse.vc.db",
+
     "[python]": {
         "editor.formatOnSave": false,
         "editor.formatOnType": false,
