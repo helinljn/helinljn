@@ -3,8 +3,8 @@
 https://docs.conda.io/en/latest/miniconda.html
 
 # 环境变量(可以不添加，使用：Anaconda Prompt (miniconda3))
-C:\ProgramData\miniconda3
-C:\ProgramData\miniconda3\Scripts
+C:\Program Files\miniconda3
+C:\Program Files\miniconda3\Scripts
 
 # 更换Conda源
 conda config --show channels
