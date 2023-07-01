@@ -2,7 +2,7 @@
 # 安装时选择：Install for all users，勾选所有选项
 https://docs.conda.io/en/latest/miniconda.html
 
-# 环境变量(可以不添加，使用：Anaconda Prompt (miniconda3))
+# 环境变量
 C:\Program Files\miniconda3
 C:\Program Files\miniconda3\Scripts
 

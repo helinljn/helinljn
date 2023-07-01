@@ -9,11 +9,11 @@ https://golang.google.cn/dl/
 
         用户变量中添加：
         GOROOT=C:\Program Files\Go
-        GOPATH=C:\Users\Administrator\go
+        GOPATH=C:\Users\helin\go
 
         用户变量Path中添加：
         C:\Program Files\Go\bin
-        C:\Users\Administrator\go\bin
+        C:\Users\helin\go\bin
 
     Linux:
         vi ~/.bashrc
@@ -21,4 +21,8 @@ https://golang.google.cn/dl/
         # go
         export GOROOT=/usr/local/go
         export GOPATH=$HOME/go
-        export PATH=$GOPATH:$GOPATH/bin:$GOROOT/bin:$PATH
+        export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+# go env
+go env -w GO111MODULE=on
+go env -w GOPROXY=https://proxy.golang.com.cn,direct

@@ -98,6 +98,7 @@
 	执行apt update
 
 【7. ~/.bashrc相关的alias修改】
+	# alias
 	alias cp='cp -i'
 	alias mv='mv -i'
 	alias rm='rm -i'
@@ -132,6 +133,7 @@
 		helin hard nofile 102400
 
 	或者临时修改(WSL2中可以添加到.bashrc中)：
+		# limits
 		ulimit -c unlimited
 		ulimit -n 4096
 
@@ -263,6 +265,7 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 		options = "metadata,umask=22,fmask=11"
 
 	vi ~/.bashrc
+		# umask
 		if [[ "$(umask)" = "0000" ]]; then
 			umask 0022
 		fi
