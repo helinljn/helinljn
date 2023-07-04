@@ -30,6 +30,8 @@
     // VSCode version: VSCodeSetup-x64-1.74.3
     "workbench.colorTheme": "One Dark Pro",
     "workbench.startupEditor": "none",
+
+    "oneDarkPro.bold": false,
     "oneDarkPro.italic": false,
 
     "workbench.editor.tabSizing": "shrink",
@@ -72,6 +74,7 @@
     "files.autoSave": "off",
     "files.encoding": "utf8",
     "files.eol": "\r\n",
+    "files.restoreUndoStack": false,
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
 
