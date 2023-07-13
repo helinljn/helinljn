@@ -35,5 +35,5 @@ if %1 equ debug (
 
     cd ../../../
 ) else (
-    echo "Usage:build_test_win.bat [debug | release | all]"
+    echo "Usage: build.test.windows.bat [debug | release | all]"
 )

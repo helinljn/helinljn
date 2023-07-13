@@ -1,10 +1,5 @@
 #include "Poco/Foundation.h"
-#include "Poco/XML/XML.h"
-#include "Poco/JSON/JSON.h"
-#include "Poco/Util/Util.h"
-#include "Poco/Net/Net.h"
 #include "Poco/Crypto/Crypto.h"
-#include "Poco/Net/NetSSL.h"
 #include "Poco/Zip/Zip.h"
 
 #include "core/core.h"

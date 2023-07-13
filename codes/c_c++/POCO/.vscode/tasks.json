@@ -7,10 +7,7 @@
             "label": "build windows debug",
             "type": "shell",
             "command": ".\\build.test.windows.bat debug",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "build windows release",
@@ -25,19 +22,19 @@
             "group": "build"
         },
         {
-            "label": "build linux debug",
+            "label": "build linux debug by wsl",
             "type": "shell",
             "command": "wsl ./build.test.linux.sh debug",
             "group": "build"
         },
         {
-            "label": "build linux release",
+            "label": "build linux release by wsl",
             "type": "shell",
             "command": "wsl ./build.test.linux.sh release",
             "group": "build"
         },
         {
-            "label": "build linux poco",
+            "label": "build linux poco by wsl",
             "type": "shell",
             "command": "wsl ./build.poco.linux.sh",
             "group": "build"

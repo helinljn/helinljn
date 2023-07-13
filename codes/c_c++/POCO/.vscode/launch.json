@@ -13,7 +13,8 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/.build/Debug",
             "environment": [],
-            "console": "externalTerminal",
+            "externalConsole": false,
+            "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": "build windows debug"
         },
         {
@@ -23,7 +24,7 @@
             "processId": "${command:pickProcess}"
         },
         {
-            "name": "Launch linux test",
+            "name": "Launch linux test by wsl",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/.build/Debug/test",
@@ -31,8 +32,9 @@
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/.build/Debug",
             "environment": [],
-            "externalConsole": true,
-            "preLaunchTask": "build linux debug",
+            "externalConsole": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "preLaunchTask": "build linux debug by wsl",
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -57,7 +59,7 @@
         {
             // 如果attach失败，提示ptrace_scope相关的报错，则需要在wsl中执行以下命令：
             // echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-            "name": "Attach linux test",
+            "name": "Attach linux test by wsl",
             "type": "cppdbg",
             "request": "attach",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/.build/Debug/test",

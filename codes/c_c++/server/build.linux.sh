@@ -33,5 +33,5 @@ elif [ "$1" = "all" ]; then
 
     cd ../../../
 else
-    echo "Usage:./build_linux.sh [debug | release | all]"
+    echo "Usage: ./build.linux.sh [debug | release | all]"
 fi
