@@ -81,14 +81,14 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        -lPocoFoundation${CURRENT_POCO_LIBS_SUFFIX}
-        -lPocoCrypto${CURRENT_POCO_LIBS_SUFFIX}
-        -lPocoZip${CURRENT_POCO_LIBS_SUFFIX}
-        -lssl
-        -lcrypto
-        -lpthread
-        -lm
-        -ldl
+        PocoFoundation${CURRENT_POCO_LIBS_SUFFIX}
+        PocoCrypto${CURRENT_POCO_LIBS_SUFFIX}
+        PocoZip${CURRENT_POCO_LIBS_SUFFIX}
+        ssl
+        crypto
+        pthread
+        m
+        dl
     )
 
     # 宏定义
