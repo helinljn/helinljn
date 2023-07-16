@@ -12,20 +12,24 @@ IF(MSVC)
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DPOCO_NO_AUTOMATIC_LIBS
     )
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
         /wd4100
         /wd4127
+        /wd4131
         /wd4189
         /wd4244
         /wd4267
+        /wd4389
         /wd4456
         /wd4457
         /wd4459
+        /wd4701
         /wd4702
+        /wd4706
     )
 ELSE()
     # 头文件目录
@@ -37,16 +41,16 @@ ELSE()
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DPOCO_NO_AUTOMATIC_LIBS
     )
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
+        -Wno-error
         -Wno-pedantic
         -Wno-type-limits
         -Wno-sign-compare
         -Wno-unused-parameter
-        -Wno-deprecated-copy
         -Wno-ignored-qualifiers
         -Wno-implicit-fallthrough
     )
@@ -91,6 +95,47 @@ ELSE()
     LIST(REMOVE_ITEM CURRENT_DIR_SRC_LIST ${EventLogChannel})
     LIST(REMOVE_ITEM CURRENT_DIR_SRC_LIST ${WindowsConsoleChannel})
 ENDIF()
+
+# zlib
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/adler32.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/compress.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/crc32.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/deflate.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/infback.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/inffast.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/inflate.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/inftrees.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/trees.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/zutil.c)
+
+# pcre2
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_auto_possess.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_chartables.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_compile.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_config.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_context.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_convert.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_dfa_match.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_error.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_extuni.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_find_bracket.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_jit_compile.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_maketables.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_match.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_match_data.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_newline.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_ord2utf.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_pattern_info.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_script_run.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_serialize.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_string_utils.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_study.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_substitute.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_substring.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_tables.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_ucd.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_valid_utf.c)
+LIST(APPEND CURRENT_DIR_SRC_LIST ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pcre2_xclass.c)
 
 # 生成静态库
 ADD_LIBRARY(${PROJECT_NAME}                STATIC  ${CURRENT_DIR_SRC_LIST})
