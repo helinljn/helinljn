@@ -3,6 +3,7 @@
 set ROOT_INIT_DIR=%CD%
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set ZLIB_INIT_DIR=%ROOT_INIT_DIR%/3rd/zlib
+set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set TINYXML2_INIT_DIR=%ROOT_INIT_DIR%/3rd/tinyxml2
 set HIREDIS_INIT_DIR=%ROOT_INIT_DIR%/3rd/hiredis
@@ -24,6 +25,14 @@ if not exist %ZLIB_INIT_DIR% (
     git clone -b v1.2.13 https://github.com/madler/zlib.git %ZLIB_INIT_DIR%
 ) else (
     cd %ZLIB_INIT_DIR%
+    git checkout .
+)
+
+cd %ROOT_INIT_DIR%
+if not exist %POCO_INIT_DIR% (
+    git clone -b poco-1.12.4-release https://github.com/pocoproject/poco.git %POCO_INIT_DIR%
+) else (
+    cd %POCO_INIT_DIR%
     git checkout .
 )
 

@@ -14,6 +14,10 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
@@ -36,6 +40,9 @@ IF(MSVC)
         hiredis
         jsoncpp
         event
+        PocoCrypto
+        PocoFoundation
+        PocoZip
         protobuf
         spdlog
         tinyxml2
@@ -48,12 +55,15 @@ IF(MSVC)
         ${CURRENT_DEPENDENT_LIBS}
         libssl
         libcrypto
+        ws2_32
         crypt32
+        iphlpapi
         dbghelp
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
+        -DPOCO_NO_AUTOMATIC_LIBS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
     )
@@ -74,6 +84,10 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
@@ -96,6 +110,9 @@ ELSE()
         hiredis
         jsoncpp
         event
+        PocoCrypto
+        PocoFoundation
+        PocoZip
         protobuf
         spdlog
         tinyxml2
@@ -109,11 +126,13 @@ ELSE()
         ssl
         crypto
         pthread
+        m
         dl
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
+        -DPOCO_NO_AUTOMATIC_LIBS
         -DSPDLOG_FMT_EXTERNAL
         -DSPDLOG_COMPILED_LIB
     )
