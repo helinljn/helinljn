@@ -6,12 +6,11 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include/Poco
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DHAVE_ZLIB
+        # ...
     )
 
     # 编译选项
@@ -45,12 +44,10 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include/Poco
     )
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DHAVE_ZLIB
         -DHAVE_PTHREAD
     )
 
@@ -116,7 +113,6 @@ SET(CURRENT_PROTOBUF_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_bases.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_reflection.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_table_driven.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/gzip_stream.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/printer.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/tokenizer.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_field.cc
