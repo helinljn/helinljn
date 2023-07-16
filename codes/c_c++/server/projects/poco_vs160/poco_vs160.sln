@@ -4,21 +4,21 @@ VisualStudioVersion = 16.0.33130.400
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "POCOFoundation", "POCOFoundation", "{7B26BBEF-F4E6-429B-9DF1-05E11ED64FB8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Foundation", "..\poco\Foundation\Foundation_vs160.vcxproj", "{B01196CC-B693-4548-8464-2FF60499E73F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Foundation", "..\..\3rd\poco\Foundation\Foundation_vs160.vcxproj", "{B01196CC-B693-4548-8464-2FF60499E73F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\poco\Foundation\testsuite\TestSuite_vs160.vcxproj", "{F1EE93DF-347F-4CB3-B191-C4E63F38E972}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Foundation\testsuite\TestSuite_vs160.vcxproj", "{F1EE93DF-347F-4CB3-B191-C4E63F38E972}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "POCOCrypto", "POCOCrypto", "{D957EBA6-CD0A-445F-8B7E-8E09195267D0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Crypto", "..\poco\Crypto\Crypto_vs160.vcxproj", "{EEEE7259-32E9-4D56-B023-C733940AB2A0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Crypto", "..\..\3rd\poco\Crypto\Crypto_vs160.vcxproj", "{EEEE7259-32E9-4D56-B023-C733940AB2A0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\poco\Crypto\testsuite\TestSuite_vs160.vcxproj", "{C1B1BB96-5198-48EB-AB48-9A0A0B54FB15}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Crypto\testsuite\TestSuite_vs160.vcxproj", "{C1B1BB96-5198-48EB-AB48-9A0A0B54FB15}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "POCOZip", "POCOZip", "{0F71E99C-7EAF-484B-8118-C1F2FCE1EBC5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zip", "..\poco\Zip\Zip_vs160.vcxproj", "{4AC75EAD-BFCF-41E6-AB1F-0DA203CC7C61}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zip", "..\..\3rd\poco\Zip\Zip_vs160.vcxproj", "{4AC75EAD-BFCF-41E6-AB1F-0DA203CC7C61}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\poco\Zip\testsuite\TestSuite_vs160.vcxproj", "{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Zip\testsuite\TestSuite_vs160.vcxproj", "{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
