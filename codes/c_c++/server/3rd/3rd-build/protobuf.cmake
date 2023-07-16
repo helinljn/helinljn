@@ -5,8 +5,8 @@ PROJECT(protobuf)
 IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include/Poco
     )
 
     # 宏定义
@@ -44,8 +44,8 @@ IF(MSVC)
 ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/zlib
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include/Poco
     )
 
     # 宏定义

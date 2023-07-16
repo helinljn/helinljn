@@ -6,13 +6,13 @@
 
 #include "event2/event.h"
 
-#include "zlib.h"
 #include "json.h"
 #include "tinyxml2.h"
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Foundation.h"
 #include "Poco/Zip/Zip.h"
+#include "Poco/zlib.h"
 
 #if defined(_MSC_VER)
     #pragma warning(push)

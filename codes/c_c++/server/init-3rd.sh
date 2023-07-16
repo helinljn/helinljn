@@ -2,7 +2,6 @@
 
 ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
-ZLIB_INIT_DIR=$ROOT_INIT_DIR/3rd/zlib
 POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
@@ -17,14 +16,6 @@ if [ ! -d $FMT_INIT_DIR ]; then
     git clone -b 9.1.0 https://github.com/fmtlib/fmt.git $FMT_INIT_DIR
 else
     cd $FMT_INIT_DIR
-    git checkout .
-fi
-
-cd $ROOT_INIT_DIR
-if [ ! -d $ZLIB_INIT_DIR ]; then
-    git clone -b v1.2.13 https://github.com/madler/zlib.git $ZLIB_INIT_DIR
-else
-    cd $ZLIB_INIT_DIR
     git checkout .
 fi
 
