@@ -7,8 +7,6 @@
 #include "Poco/DynamicFactory.h"
 #include "Poco/MemoryPool.h"
 
-#include "fmt/format.h"
-
 #include <memory>
 
 namespace dynamic_factory {
@@ -115,19 +113,15 @@ TEST(CoreTest, Environment)
 
     Poco::Environment::set(env_key, "milan");
     ASSERT_TRUE(Poco::Environment::has(env_key));
-    fmt::print("env_key: {}, env_val: {}\n", env_key, Poco::Environment::get(env_key));
+    ASSERT_TRUE(Poco::Environment::get(env_key) == "milan");
 
-    std::string env_path = "PATH";
-    if (Poco::Environment::has(env_path))
-        fmt::print("{} {}: {}\n", Poco::Environment::osName(), env_path, Poco::Environment::get(env_path));
-
-    fmt::print("OS Name        : {}\n", Poco::Environment::osName());
-    fmt::print("OS Display Name: {}\n", Poco::Environment::osDisplayName());
-    fmt::print("OS Version     : {}\n", Poco::Environment::osVersion());
-    fmt::print("OS Architecture: {}\n", Poco::Environment::osArchitecture());
-    fmt::print("Node Name      : {}\n", Poco::Environment::nodeName());
-    fmt::print("Node ID        : {}\n", Poco::Environment::nodeId());
-    fmt::print("Number of CPUs : {}\n", Poco::Environment::processorCount());
+    ASSERT_TRUE(!Poco::Environment::osName().empty());
+    ASSERT_TRUE(!Poco::Environment::osDisplayName().empty());
+    ASSERT_TRUE(!Poco::Environment::osVersion().empty());
+    ASSERT_TRUE(!Poco::Environment::osArchitecture().empty());
+    ASSERT_TRUE(!Poco::Environment::nodeName().empty());
+    ASSERT_TRUE(!Poco::Environment::nodeId().empty());
+    ASSERT_TRUE(Poco::Environment::processorCount() > 0);
 }
 
 TEST(CoreTest, AtomicCounter)
