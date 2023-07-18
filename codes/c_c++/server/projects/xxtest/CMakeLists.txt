@@ -6,6 +6,7 @@ IF(MSVC)
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/ccronexpr
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
@@ -33,6 +34,7 @@ IF(MSVC)
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
+        ccronexpr
         fmt
         gmock
         gtest
@@ -74,6 +76,7 @@ ELSE()
     # 头文件目录
     SET(CURRENT_INCLUDE_DIR
         ${PROJECT_SOURCE_DIR}
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/ccronexpr
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
@@ -101,6 +104,7 @@ ELSE()
 
     # 生成依赖库
     SET(CURRENT_DEPENDENT_LIBS
+        ccronexpr
         fmt
         gmock
         gtest

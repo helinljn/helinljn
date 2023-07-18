@@ -8,6 +8,7 @@
 
 #include "json.h"
 #include "tinyxml2.h"
+#include "ccronexpr.h"
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Foundation.h"

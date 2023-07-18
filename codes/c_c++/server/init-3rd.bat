@@ -10,6 +10,7 @@ set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 set JSONCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/jsoncpp
+SET CCRONEXPR_INIT_DIR=%ROOT_INIT_DIR%/3rd/ccronexpr
 
 cd %ROOT_INIT_DIR%
 if not exist %FMT_INIT_DIR% (
@@ -80,6 +81,15 @@ if not exist %JSONCPP_INIT_DIR% (
     git clone https://github.com/open-source-parsers/jsoncpp.git %JSONCPP_INIT_DIR%
 ) else (
     cd %JSONCPP_INIT_DIR%
+    git checkout .
+    git pull
+)
+
+cd %ROOT_INIT_DIR%
+if not exist %CCRONEXPR_INIT_DIR% (
+    git clone https://github.com/staticlibs/ccronexpr.git %CCRONEXPR_INIT_DIR%
+) else (
+    cd %CCRONEXPR_INIT_DIR%
     git checkout .
     git pull
 )
