@@ -113,6 +113,7 @@ SET(CURRENT_PROTOBUF_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_bases.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_reflection.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_table_driven.cc
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/gzip_stream.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/printer.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/tokenizer.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_field.cc
