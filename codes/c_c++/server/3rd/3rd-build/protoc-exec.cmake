@@ -53,7 +53,6 @@ ELSE()
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
-        pthread
     )
 
     # 宏定义
