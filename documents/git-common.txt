@@ -12,6 +12,10 @@
 	# 拒绝提交包含混合换行符的文件
 	git config --global core.safecrlf true
 
+	# 设置最低限制和超时时间
+	git config --global http.lowSpeedTime 10
+	git config --global http.lowSpeedLimit 100
+
 2. 拉取代码
 	git clone https://github.com/helinljn/helinljn.git ./helinljn
 
