@@ -4,12 +4,12 @@ set ROOT_INIT_DIR=%CD%
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
-set TINYXML2_INIT_DIR=%ROOT_INIT_DIR%/3rd/tinyxml2
 set HIREDIS_INIT_DIR=%ROOT_INIT_DIR%/3rd/hiredis
 set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 set JSONCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/jsoncpp
+set TINYXML2_INIT_DIR=%ROOT_INIT_DIR%/3rd/tinyxml2
 SET CCRONEXPR_INIT_DIR=%ROOT_INIT_DIR%/3rd/ccronexpr
 
 cd %ROOT_INIT_DIR%
@@ -33,14 +33,6 @@ if not exist %SPDLOG_INIT_DIR% (
     git clone -b v1.11.0 https://github.com/gabime/spdlog.git %SPDLOG_INIT_DIR%
 ) else (
     cd %SPDLOG_INIT_DIR%
-    git checkout .
-)
-
-cd %ROOT_INIT_DIR%
-if not exist %TINYXML2_INIT_DIR% (
-    git clone -b 9.0.0 https://github.com/leethomason/tinyxml2.git %TINYXML2_INIT_DIR%
-) else (
-    cd %TINYXML2_INIT_DIR%
     git checkout .
 )
 
@@ -81,6 +73,15 @@ if not exist %JSONCPP_INIT_DIR% (
     git clone https://github.com/open-source-parsers/jsoncpp.git %JSONCPP_INIT_DIR%
 ) else (
     cd %JSONCPP_INIT_DIR%
+    git checkout .
+    git pull
+)
+
+cd %ROOT_INIT_DIR%
+if not exist %TINYXML2_INIT_DIR% (
+    git clone https://github.com/leethomason/tinyxml2.git %TINYXML2_INIT_DIR%
+) else (
+    cd %TINYXML2_INIT_DIR%
     git checkout .
     git pull
 )

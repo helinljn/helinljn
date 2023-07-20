@@ -4,12 +4,12 @@ ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
-TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
 HIREDIS_INIT_DIR=$ROOT_INIT_DIR/3rd/hiredis
 LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
 JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
+TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
 CCRONEXPR_INIT_DIR=$ROOT_INIT_DIR/3rd/ccronexpr
 
 cd $ROOT_INIT_DIR
@@ -33,14 +33,6 @@ if [ ! -d $SPDLOG_INIT_DIR ]; then
     git clone -b v1.11.0 https://github.com/gabime/spdlog.git $SPDLOG_INIT_DIR
 else
     cd $SPDLOG_INIT_DIR
-    git checkout .
-fi
-
-cd $ROOT_INIT_DIR
-if [ ! -d $TINYXML2_INIT_DIR ]; then
-    git clone -b 9.0.0 https://github.com/leethomason/tinyxml2.git $TINYXML2_INIT_DIR
-else
-    cd $TINYXML2_INIT_DIR
     git checkout .
 fi
 
@@ -81,6 +73,15 @@ if [ ! -d $JSONCPP_INIT_DIR ]; then
     git clone https://github.com/open-source-parsers/jsoncpp.git $JSONCPP_INIT_DIR
 else
     cd $JSONCPP_INIT_DIR
+    git checkout .
+    git pull
+fi
+
+cd $ROOT_INIT_DIR
+if [ ! -d $TINYXML2_INIT_DIR ]; then
+    git clone https://github.com/leethomason/tinyxml2.git $TINYXML2_INIT_DIR
+else
+    cd $TINYXML2_INIT_DIR
     git checkout .
     git pull
 fi
