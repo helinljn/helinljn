@@ -12,6 +12,7 @@ IF(MSVC)
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
+        -DPOCO_NO_AUTOMATIC_LIB_INIT
     )
 
     # 编译选项
@@ -33,6 +34,7 @@ ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
+        -DPOCO_NO_AUTOMATIC_LIB_INIT
     )
 
     # 编译选项
