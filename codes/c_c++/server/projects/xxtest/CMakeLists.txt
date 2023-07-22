@@ -17,6 +17,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
@@ -43,6 +44,7 @@ IF(MSVC)
         event
         PocoCrypto
         PocoFoundation
+        PocoNet
         PocoZip
         protobuf
         spdlog
@@ -87,6 +89,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
@@ -113,6 +116,7 @@ ELSE()
         event
         PocoCrypto
         PocoFoundation
+        PocoNet
         PocoZip
         protobuf
         spdlog

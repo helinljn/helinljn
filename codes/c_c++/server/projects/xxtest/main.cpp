@@ -12,6 +12,7 @@
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Foundation.h"
+#include "Poco/Net/Net.h"
 #include "Poco/Zip/Zip.h"
 
 #if defined(_MSC_VER)
