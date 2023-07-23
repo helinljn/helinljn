@@ -20,6 +20,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zip", "..\..\3rd\poco\Zip\Z
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Zip\testsuite\TestSuite_vs160.vcxproj", "{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "POCONet", "POCONet", "{DD45198F-E890-4E30-B3D0-083AB5DAF729}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net", "..\..\3rd\poco\Net\Net_vs160.vcxproj", "{B057A1FE-09F7-465E-B8B5-E1B659051D76}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Net\testsuite\TestSuite_vs160.vcxproj", "{D5EFBF27-B934-4B8D-8AE5-6EC00374819C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_static_mt|x64 = debug_static_mt|x64
@@ -50,6 +56,14 @@ Global
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{B057A1FE-09F7-465E-B8B5-E1B659051D76}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{B057A1FE-09F7-465E-B8B5-E1B659051D76}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{B057A1FE-09F7-465E-B8B5-E1B659051D76}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{B057A1FE-09F7-465E-B8B5-E1B659051D76}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{D5EFBF27-B934-4B8D-8AE5-6EC00374819C}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{D5EFBF27-B934-4B8D-8AE5-6EC00374819C}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{D5EFBF27-B934-4B8D-8AE5-6EC00374819C}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{D5EFBF27-B934-4B8D-8AE5-6EC00374819C}.release_static_mt|x64.Build.0 = release_static_mt|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,6 +75,8 @@ Global
 		{C1B1BB96-5198-48EB-AB48-9A0A0B54FB15} = {D957EBA6-CD0A-445F-8B7E-8E09195267D0}
 		{4AC75EAD-BFCF-41E6-AB1F-0DA203CC7C61} = {0F71E99C-7EAF-484B-8118-C1F2FCE1EBC5}
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7} = {0F71E99C-7EAF-484B-8118-C1F2FCE1EBC5}
+		{B057A1FE-09F7-465E-B8B5-E1B659051D76} = {DD45198F-E890-4E30-B3D0-083AB5DAF729}
+		{D5EFBF27-B934-4B8D-8AE5-6EC00374819C} = {DD45198F-E890-4E30-B3D0-083AB5DAF729}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5D8915C-5ADD-4528-B27D-55B010EA76DF}
