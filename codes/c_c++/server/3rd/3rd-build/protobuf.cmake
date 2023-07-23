@@ -53,10 +53,10 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-unused-parameter
-        -Wno-redundant-move
-        -Wno-sign-compare
         -Wno-pedantic
+        -Wno-sign-compare
+        -Wno-redundant-move
+        -Wno-unused-parameter
         -Wno-stringop-overflow
     )
 ENDIF()
