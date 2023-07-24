@@ -9,7 +9,11 @@
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Foundation.h"
+#include "Poco/JSON/JSON.h"
 #include "Poco/Net/Net.h"
+#include "Poco/Net/NetSSL.h"
+#include "Poco/Util/Util.h"
+#include "Poco/XML/XML.h"
 #include "Poco/Zip/Zip.h"
 
 #if defined(_MSC_VER)
