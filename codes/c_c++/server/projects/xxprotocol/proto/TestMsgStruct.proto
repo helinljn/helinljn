@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package TestMsg;
+package XXMsg;
 
 import "TestMsgDefine.proto";
 

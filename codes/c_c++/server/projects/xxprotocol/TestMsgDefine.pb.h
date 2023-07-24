@@ -54,7 +54,7 @@ struct TableStruct_TestMsgDefine_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgDefine_2eproto;
 PROTOBUF_NAMESPACE_OPEN
 PROTOBUF_NAMESPACE_CLOSE
-namespace TestMsg {
+namespace XXMsg {
 
 enum TestCommonType : int {
   CT_BOOL = 0,
@@ -107,14 +107,14 @@ inline bool TestCommonType_Parse(
 
 // @@protoc_insertion_point(namespace_scope)
 
-}  // namespace TestMsg
+}  // namespace XXMsg
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::TestMsg::TestCommonType> : ::std::true_type {};
+template <> struct is_proto_enum< ::XXMsg::TestCommonType> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::TestMsg::TestCommonType>() {
-  return ::TestMsg::TestCommonType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::XXMsg::TestCommonType>() {
+  return ::XXMsg::TestCommonType_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

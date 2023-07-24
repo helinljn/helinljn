@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package TestMsg;
+package XXMsg;
 
-// ÔÚ proto3 µÄÓï·¨ÖÐ£¬Ã¶¾Ù±ØÐë´Ó 0 ¿ªÊ¼
+// åœ¨ proto3 çš„è¯­æ³•ä¸­ï¼Œæžšä¸¾å¿…é¡»ä»Ž 0 å¼€å§‹
 enum TestCommonType
 {
     CT_BOOL   = 0;

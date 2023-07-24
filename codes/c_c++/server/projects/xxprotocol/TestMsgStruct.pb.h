@@ -54,24 +54,24 @@ struct TableStruct_TestMsgStruct_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::uint32 offsets[];
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgStruct_2eproto;
-namespace TestMsg {
+namespace XXMsg {
 class TestCommonInfo;
 struct TestCommonInfoDefaultTypeInternal;
 extern TestCommonInfoDefaultTypeInternal _TestCommonInfo_default_instance_;
 class TestCommonInfoList;
 struct TestCommonInfoListDefaultTypeInternal;
 extern TestCommonInfoListDefaultTypeInternal _TestCommonInfoList_default_instance_;
-}  // namespace TestMsg
+}  // namespace XXMsg
 PROTOBUF_NAMESPACE_OPEN
-template<> ::TestMsg::TestCommonInfo* Arena::CreateMaybeMessage<::TestMsg::TestCommonInfo>(Arena*);
-template<> ::TestMsg::TestCommonInfoList* Arena::CreateMaybeMessage<::TestMsg::TestCommonInfoList>(Arena*);
+template<> ::XXMsg::TestCommonInfo* Arena::CreateMaybeMessage<::XXMsg::TestCommonInfo>(Arena*);
+template<> ::XXMsg::TestCommonInfoList* Arena::CreateMaybeMessage<::XXMsg::TestCommonInfoList>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
-namespace TestMsg {
+namespace XXMsg {
 
 // ===================================================================
 
 class TestCommonInfo final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:TestMsg.TestCommonInfo) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:XXMsg.TestCommonInfo) */ {
  public:
   inline TestCommonInfo() : TestCommonInfo(nullptr) {}
   ~TestCommonInfo() override;
@@ -169,7 +169,7 @@ class TestCommonInfo final :
   void InternalSwap(TestCommonInfo* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "TestMsg.TestCommonInfo";
+    return "XXMsg.TestCommonInfo";
   }
   protected:
   explicit TestCommonInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -295,7 +295,7 @@ class TestCommonInfo final :
   void _internal_set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // @@protoc_insertion_point(class_scope:TestMsg.TestCommonInfo)
+  // @@protoc_insertion_point(class_scope:XXMsg.TestCommonInfo)
  private:
   class _Internal;
 
@@ -318,7 +318,7 @@ class TestCommonInfo final :
 // -------------------------------------------------------------------
 
 class TestCommonInfoList final :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:TestMsg.TestCommonInfoList) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:XXMsg.TestCommonInfoList) */ {
  public:
   inline TestCommonInfoList() : TestCommonInfoList(nullptr) {}
   ~TestCommonInfoList() override;
@@ -416,7 +416,7 @@ class TestCommonInfoList final :
   void InternalSwap(TestCommonInfoList* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "TestMsg.TestCommonInfoList";
+    return "XXMsg.TestCommonInfoList";
   }
   protected:
   explicit TestCommonInfoList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
@@ -439,49 +439,49 @@ class TestCommonInfoList final :
     kCommonInfoListFieldNumber = 1,
     kCommonTypeListFieldNumber = 2,
   };
-  // repeated .TestMsg.TestCommonInfo common_info_list = 1;
+  // repeated .XXMsg.TestCommonInfo common_info_list = 1;
   int common_info_list_size() const;
   private:
   int _internal_common_info_list_size() const;
   public:
   void clear_common_info_list();
-  ::TestMsg::TestCommonInfo* mutable_common_info_list(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::TestMsg::TestCommonInfo >*
+  ::XXMsg::TestCommonInfo* mutable_common_info_list(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::XXMsg::TestCommonInfo >*
       mutable_common_info_list();
   private:
-  const ::TestMsg::TestCommonInfo& _internal_common_info_list(int index) const;
-  ::TestMsg::TestCommonInfo* _internal_add_common_info_list();
+  const ::XXMsg::TestCommonInfo& _internal_common_info_list(int index) const;
+  ::XXMsg::TestCommonInfo* _internal_add_common_info_list();
   public:
-  const ::TestMsg::TestCommonInfo& common_info_list(int index) const;
-  ::TestMsg::TestCommonInfo* add_common_info_list();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::TestMsg::TestCommonInfo >&
+  const ::XXMsg::TestCommonInfo& common_info_list(int index) const;
+  ::XXMsg::TestCommonInfo* add_common_info_list();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::XXMsg::TestCommonInfo >&
       common_info_list() const;
 
-  // repeated .TestMsg.TestCommonType common_type_list = 2;
+  // repeated .XXMsg.TestCommonType common_type_list = 2;
   int common_type_list_size() const;
   private:
   int _internal_common_type_list_size() const;
   public:
   void clear_common_type_list();
   private:
-  ::TestMsg::TestCommonType _internal_common_type_list(int index) const;
-  void _internal_add_common_type_list(::TestMsg::TestCommonType value);
+  ::XXMsg::TestCommonType _internal_common_type_list(int index) const;
+  void _internal_add_common_type_list(::XXMsg::TestCommonType value);
   ::PROTOBUF_NAMESPACE_ID::RepeatedField<int>* _internal_mutable_common_type_list();
   public:
-  ::TestMsg::TestCommonType common_type_list(int index) const;
-  void set_common_type_list(int index, ::TestMsg::TestCommonType value);
-  void add_common_type_list(::TestMsg::TestCommonType value);
+  ::XXMsg::TestCommonType common_type_list(int index) const;
+  void set_common_type_list(int index, ::XXMsg::TestCommonType value);
+  void add_common_type_list(::XXMsg::TestCommonType value);
   const ::PROTOBUF_NAMESPACE_ID::RepeatedField<int>& common_type_list() const;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField<int>* mutable_common_type_list();
 
-  // @@protoc_insertion_point(class_scope:TestMsg.TestCommonInfoList)
+  // @@protoc_insertion_point(class_scope:XXMsg.TestCommonInfoList)
  private:
   class _Internal;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::TestMsg::TestCommonInfo > common_info_list_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::XXMsg::TestCommonInfo > common_info_list_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField<int> common_type_list_;
   mutable std::atomic<int> _common_type_list_cached_byte_size_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -506,7 +506,7 @@ inline bool TestCommonInfo::_internal_test_bool() const {
   return test_bool_;
 }
 inline bool TestCommonInfo::test_bool() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_bool)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_bool)
   return _internal_test_bool();
 }
 inline void TestCommonInfo::_internal_set_test_bool(bool value) {
@@ -515,7 +515,7 @@ inline void TestCommonInfo::_internal_set_test_bool(bool value) {
 }
 inline void TestCommonInfo::set_test_bool(bool value) {
   _internal_set_test_bool(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_bool)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_bool)
 }
 
 // float test_float = 2;
@@ -526,7 +526,7 @@ inline float TestCommonInfo::_internal_test_float() const {
   return test_float_;
 }
 inline float TestCommonInfo::test_float() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_float)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_float)
   return _internal_test_float();
 }
 inline void TestCommonInfo::_internal_set_test_float(float value) {
@@ -535,7 +535,7 @@ inline void TestCommonInfo::_internal_set_test_float(float value) {
 }
 inline void TestCommonInfo::set_test_float(float value) {
   _internal_set_test_float(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_float)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_float)
 }
 
 // double test_double = 3;
@@ -546,7 +546,7 @@ inline double TestCommonInfo::_internal_test_double() const {
   return test_double_;
 }
 inline double TestCommonInfo::test_double() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_double)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_double)
   return _internal_test_double();
 }
 inline void TestCommonInfo::_internal_set_test_double(double value) {
@@ -555,7 +555,7 @@ inline void TestCommonInfo::_internal_set_test_double(double value) {
 }
 inline void TestCommonInfo::set_test_double(double value) {
   _internal_set_test_double(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_double)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_double)
 }
 
 // bytes test_string = 4;
@@ -563,7 +563,7 @@ inline void TestCommonInfo::clear_test_string() {
   test_string_.ClearToEmpty();
 }
 inline const std::string& TestCommonInfo::test_string() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_string)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_string)
   return _internal_test_string();
 }
 template <typename ArgT0, typename... ArgT>
@@ -571,11 +571,11 @@ inline PROTOBUF_ALWAYS_INLINE
 void TestCommonInfo::set_test_string(ArgT0&& arg0, ArgT... args) {
 
  test_string_.SetBytes(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_string)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_string)
 }
 inline std::string* TestCommonInfo::mutable_test_string() {
   std::string* _s = _internal_mutable_test_string();
-  // @@protoc_insertion_point(field_mutable:TestMsg.TestCommonInfo.test_string)
+  // @@protoc_insertion_point(field_mutable:XXMsg.TestCommonInfo.test_string)
   return _s;
 }
 inline const std::string& TestCommonInfo::_internal_test_string() const {
@@ -590,7 +590,7 @@ inline std::string* TestCommonInfo::_internal_mutable_test_string() {
   return test_string_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
 }
 inline std::string* TestCommonInfo::release_test_string() {
-  // @@protoc_insertion_point(field_release:TestMsg.TestCommonInfo.test_string)
+  // @@protoc_insertion_point(field_release:XXMsg.TestCommonInfo.test_string)
   return test_string_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
 }
 inline void TestCommonInfo::set_allocated_test_string(std::string* test_string) {
@@ -601,7 +601,7 @@ inline void TestCommonInfo::set_allocated_test_string(std::string* test_string) 
   }
   test_string_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), test_string,
       GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set_allocated:TestMsg.TestCommonInfo.test_string)
+  // @@protoc_insertion_point(field_set_allocated:XXMsg.TestCommonInfo.test_string)
 }
 
 // int32 test_int32 = 5;
@@ -612,7 +612,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 TestCommonInfo::_internal_test_int32() con
   return test_int32_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 TestCommonInfo::test_int32() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_int32)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_int32)
   return _internal_test_int32();
 }
 inline void TestCommonInfo::_internal_set_test_int32(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -621,7 +621,7 @@ inline void TestCommonInfo::_internal_set_test_int32(::PROTOBUF_NAMESPACE_ID::in
 }
 inline void TestCommonInfo::set_test_int32(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_test_int32(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_int32)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_int32)
 }
 
 // sint32 test_sint32 = 6;
@@ -632,7 +632,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 TestCommonInfo::_internal_test_sint32() co
   return test_sint32_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 TestCommonInfo::test_sint32() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_sint32)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_sint32)
   return _internal_test_sint32();
 }
 inline void TestCommonInfo::_internal_set_test_sint32(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -641,7 +641,7 @@ inline void TestCommonInfo::_internal_set_test_sint32(::PROTOBUF_NAMESPACE_ID::i
 }
 inline void TestCommonInfo::set_test_sint32(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_test_sint32(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_sint32)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_sint32)
 }
 
 // uint32 test_uint32 = 7;
@@ -652,7 +652,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint32 TestCommonInfo::_internal_test_uint32() c
   return test_uint32_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint32 TestCommonInfo::test_uint32() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_uint32)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_uint32)
   return _internal_test_uint32();
 }
 inline void TestCommonInfo::_internal_set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 value) {
@@ -661,7 +661,7 @@ inline void TestCommonInfo::_internal_set_test_uint32(::PROTOBUF_NAMESPACE_ID::u
 }
 inline void TestCommonInfo::set_test_uint32(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_test_uint32(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_uint32)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_uint32)
 }
 
 // int64 test_int64 = 8;
@@ -672,7 +672,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TestCommonInfo::_internal_test_int64() con
   return test_int64_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TestCommonInfo::test_int64() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_int64)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_int64)
   return _internal_test_int64();
 }
 inline void TestCommonInfo::_internal_set_test_int64(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -681,7 +681,7 @@ inline void TestCommonInfo::_internal_set_test_int64(::PROTOBUF_NAMESPACE_ID::in
 }
 inline void TestCommonInfo::set_test_int64(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_test_int64(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_int64)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_int64)
 }
 
 // sint64 test_sint64 = 9;
@@ -692,7 +692,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int64 TestCommonInfo::_internal_test_sint64() co
   return test_sint64_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int64 TestCommonInfo::test_sint64() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_sint64)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_sint64)
   return _internal_test_sint64();
 }
 inline void TestCommonInfo::_internal_set_test_sint64(::PROTOBUF_NAMESPACE_ID::int64 value) {
@@ -701,7 +701,7 @@ inline void TestCommonInfo::_internal_set_test_sint64(::PROTOBUF_NAMESPACE_ID::i
 }
 inline void TestCommonInfo::set_test_sint64(::PROTOBUF_NAMESPACE_ID::int64 value) {
   _internal_set_test_sint64(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_sint64)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_sint64)
 }
 
 // uint64 test_uint64 = 10;
@@ -712,7 +712,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 TestCommonInfo::_internal_test_uint64() c
   return test_uint64_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 TestCommonInfo::test_uint64() const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfo.test_uint64)
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfo.test_uint64)
   return _internal_test_uint64();
 }
 inline void TestCommonInfo::_internal_set_test_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -721,14 +721,14 @@ inline void TestCommonInfo::_internal_set_test_uint64(::PROTOBUF_NAMESPACE_ID::u
 }
 inline void TestCommonInfo::set_test_uint64(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_test_uint64(value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfo.test_uint64)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfo.test_uint64)
 }
 
 // -------------------------------------------------------------------
 
 // TestCommonInfoList
 
-// repeated .TestMsg.TestCommonInfo common_info_list = 1;
+// repeated .XXMsg.TestCommonInfo common_info_list = 1;
 inline int TestCommonInfoList::_internal_common_info_list_size() const {
   return common_info_list_.size();
 }
@@ -738,37 +738,37 @@ inline int TestCommonInfoList::common_info_list_size() const {
 inline void TestCommonInfoList::clear_common_info_list() {
   common_info_list_.Clear();
 }
-inline ::TestMsg::TestCommonInfo* TestCommonInfoList::mutable_common_info_list(int index) {
-  // @@protoc_insertion_point(field_mutable:TestMsg.TestCommonInfoList.common_info_list)
+inline ::XXMsg::TestCommonInfo* TestCommonInfoList::mutable_common_info_list(int index) {
+  // @@protoc_insertion_point(field_mutable:XXMsg.TestCommonInfoList.common_info_list)
   return common_info_list_.Mutable(index);
 }
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::TestMsg::TestCommonInfo >*
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::XXMsg::TestCommonInfo >*
 TestCommonInfoList::mutable_common_info_list() {
-  // @@protoc_insertion_point(field_mutable_list:TestMsg.TestCommonInfoList.common_info_list)
+  // @@protoc_insertion_point(field_mutable_list:XXMsg.TestCommonInfoList.common_info_list)
   return &common_info_list_;
 }
-inline const ::TestMsg::TestCommonInfo& TestCommonInfoList::_internal_common_info_list(int index) const {
+inline const ::XXMsg::TestCommonInfo& TestCommonInfoList::_internal_common_info_list(int index) const {
   return common_info_list_.Get(index);
 }
-inline const ::TestMsg::TestCommonInfo& TestCommonInfoList::common_info_list(int index) const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfoList.common_info_list)
+inline const ::XXMsg::TestCommonInfo& TestCommonInfoList::common_info_list(int index) const {
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfoList.common_info_list)
   return _internal_common_info_list(index);
 }
-inline ::TestMsg::TestCommonInfo* TestCommonInfoList::_internal_add_common_info_list() {
+inline ::XXMsg::TestCommonInfo* TestCommonInfoList::_internal_add_common_info_list() {
   return common_info_list_.Add();
 }
-inline ::TestMsg::TestCommonInfo* TestCommonInfoList::add_common_info_list() {
-  ::TestMsg::TestCommonInfo* _add = _internal_add_common_info_list();
-  // @@protoc_insertion_point(field_add:TestMsg.TestCommonInfoList.common_info_list)
+inline ::XXMsg::TestCommonInfo* TestCommonInfoList::add_common_info_list() {
+  ::XXMsg::TestCommonInfo* _add = _internal_add_common_info_list();
+  // @@protoc_insertion_point(field_add:XXMsg.TestCommonInfoList.common_info_list)
   return _add;
 }
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::TestMsg::TestCommonInfo >&
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::XXMsg::TestCommonInfo >&
 TestCommonInfoList::common_info_list() const {
-  // @@protoc_insertion_point(field_list:TestMsg.TestCommonInfoList.common_info_list)
+  // @@protoc_insertion_point(field_list:XXMsg.TestCommonInfoList.common_info_list)
   return common_info_list_;
 }
 
-// repeated .TestMsg.TestCommonType common_type_list = 2;
+// repeated .XXMsg.TestCommonType common_type_list = 2;
 inline int TestCommonInfoList::_internal_common_type_list_size() const {
   return common_type_list_.size();
 }
@@ -778,27 +778,27 @@ inline int TestCommonInfoList::common_type_list_size() const {
 inline void TestCommonInfoList::clear_common_type_list() {
   common_type_list_.Clear();
 }
-inline ::TestMsg::TestCommonType TestCommonInfoList::_internal_common_type_list(int index) const {
-  return static_cast< ::TestMsg::TestCommonType >(common_type_list_.Get(index));
+inline ::XXMsg::TestCommonType TestCommonInfoList::_internal_common_type_list(int index) const {
+  return static_cast< ::XXMsg::TestCommonType >(common_type_list_.Get(index));
 }
-inline ::TestMsg::TestCommonType TestCommonInfoList::common_type_list(int index) const {
-  // @@protoc_insertion_point(field_get:TestMsg.TestCommonInfoList.common_type_list)
+inline ::XXMsg::TestCommonType TestCommonInfoList::common_type_list(int index) const {
+  // @@protoc_insertion_point(field_get:XXMsg.TestCommonInfoList.common_type_list)
   return _internal_common_type_list(index);
 }
-inline void TestCommonInfoList::set_common_type_list(int index, ::TestMsg::TestCommonType value) {
+inline void TestCommonInfoList::set_common_type_list(int index, ::XXMsg::TestCommonType value) {
   common_type_list_.Set(index, value);
-  // @@protoc_insertion_point(field_set:TestMsg.TestCommonInfoList.common_type_list)
+  // @@protoc_insertion_point(field_set:XXMsg.TestCommonInfoList.common_type_list)
 }
-inline void TestCommonInfoList::_internal_add_common_type_list(::TestMsg::TestCommonType value) {
+inline void TestCommonInfoList::_internal_add_common_type_list(::XXMsg::TestCommonType value) {
   common_type_list_.Add(value);
 }
-inline void TestCommonInfoList::add_common_type_list(::TestMsg::TestCommonType value) {
+inline void TestCommonInfoList::add_common_type_list(::XXMsg::TestCommonType value) {
   _internal_add_common_type_list(value);
-  // @@protoc_insertion_point(field_add:TestMsg.TestCommonInfoList.common_type_list)
+  // @@protoc_insertion_point(field_add:XXMsg.TestCommonInfoList.common_type_list)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField<int>&
 TestCommonInfoList::common_type_list() const {
-  // @@protoc_insertion_point(field_list:TestMsg.TestCommonInfoList.common_type_list)
+  // @@protoc_insertion_point(field_list:XXMsg.TestCommonInfoList.common_type_list)
   return common_type_list_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedField<int>*
@@ -807,7 +807,7 @@ TestCommonInfoList::_internal_mutable_common_type_list() {
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedField<int>*
 TestCommonInfoList::mutable_common_type_list() {
-  // @@protoc_insertion_point(field_mutable_list:TestMsg.TestCommonInfoList.common_type_list)
+  // @@protoc_insertion_point(field_mutable_list:XXMsg.TestCommonInfoList.common_type_list)
   return _internal_mutable_common_type_list();
 }
 
@@ -819,7 +819,7 @@ TestCommonInfoList::mutable_common_type_list() {
 
 // @@protoc_insertion_point(namespace_scope)
 
-}  // namespace TestMsg
+}  // namespace XXMsg
 
 // @@protoc_insertion_point(global_scope)
 
