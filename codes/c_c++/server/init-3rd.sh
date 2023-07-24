@@ -8,8 +8,6 @@ HIREDIS_INIT_DIR=$ROOT_INIT_DIR/3rd/hiredis
 LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
-JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
-TINYXML2_INIT_DIR=$ROOT_INIT_DIR/3rd/tinyxml2
 CCRONEXPR_INIT_DIR=$ROOT_INIT_DIR/3rd/ccronexpr
 
 cd $ROOT_INIT_DIR
@@ -66,24 +64,6 @@ if [ ! -d $GOOGLETEST_INIT_DIR ]; then
 else
     cd $GOOGLETEST_INIT_DIR
     git checkout .
-fi
-
-cd $ROOT_INIT_DIR
-if [ ! -d $JSONCPP_INIT_DIR ]; then
-    git clone https://github.com/open-source-parsers/jsoncpp.git $JSONCPP_INIT_DIR
-else
-    cd $JSONCPP_INIT_DIR
-    git checkout .
-    git pull
-fi
-
-cd $ROOT_INIT_DIR
-if [ ! -d $TINYXML2_INIT_DIR ]; then
-    git clone https://github.com/leethomason/tinyxml2.git $TINYXML2_INIT_DIR
-else
-    cd $TINYXML2_INIT_DIR
-    git checkout .
-    git pull
 fi
 
 cd $ROOT_INIT_DIR

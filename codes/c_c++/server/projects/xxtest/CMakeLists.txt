@@ -11,7 +11,6 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
@@ -22,7 +21,6 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
     )
@@ -40,7 +38,6 @@ IF(MSVC)
         gmock
         gtest
         hiredis
-        jsoncpp
         event
         PocoCrypto
         PocoFoundation
@@ -48,7 +45,6 @@ IF(MSVC)
         PocoZip
         protobuf
         spdlog
-        tinyxml2
         xxprotocol
     )
 
@@ -84,7 +80,6 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/hiredis
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/json
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
@@ -95,7 +90,6 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
     )
@@ -113,7 +107,6 @@ ELSE()
         gmock
         gtest
         hiredis
-        jsoncpp
         event
         PocoCrypto
         PocoFoundation
@@ -121,7 +114,6 @@ ELSE()
         PocoZip
         protobuf
         spdlog
-        tinyxml2
         xxprotocol
     )
 

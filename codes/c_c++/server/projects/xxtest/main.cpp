@@ -4,11 +4,8 @@
 #include "fmt/format.h"
 #include "spdlog/spdlog.h"
 
-#include "event2/event.h"
-
-#include "json.h"
-#include "tinyxml2.h"
 #include "ccronexpr.h"
+#include "event2/event.h"
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Foundation.h"
