@@ -1,8 +1,6 @@
-INCLUDE(ccronexpr.cmake)
 INCLUDE(fmt.cmake)
 INCLUDE(gmock.cmake)
 INCLUDE(gtest.cmake)
-INCLUDE(hiredis.cmake)
 INCLUDE(libevent.cmake)
 INCLUDE(PocoCrypto.cmake)
 INCLUDE(PocoFoundation.cmake)

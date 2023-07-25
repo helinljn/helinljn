@@ -4,11 +4,9 @@ set ROOT_INIT_DIR=%CD%
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
-set HIREDIS_INIT_DIR=%ROOT_INIT_DIR%/3rd/hiredis
 set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
-SET CCRONEXPR_INIT_DIR=%ROOT_INIT_DIR%/3rd/ccronexpr
 
 cd %ROOT_INIT_DIR%
 if not exist %FMT_INIT_DIR% (
@@ -35,14 +33,6 @@ if not exist %SPDLOG_INIT_DIR% (
 )
 
 cd %ROOT_INIT_DIR%
-if not exist %HIREDIS_INIT_DIR% (
-    git clone -b v1.0.2 https://github.com/redis/hiredis.git %HIREDIS_INIT_DIR%
-) else (
-    cd %HIREDIS_INIT_DIR%
-    git checkout .
-)
-
-cd %ROOT_INIT_DIR%
 if not exist %LIBEVENT_INIT_DIR% (
     git clone -b release-2.1.12-stable https://github.com/libevent/libevent.git %LIBEVENT_INIT_DIR%
 ) else (
@@ -64,15 +54,6 @@ if not exist %GOOGLETEST_INIT_DIR% (
 ) else (
     cd %GOOGLETEST_INIT_DIR%
     git checkout .
-)
-
-cd %ROOT_INIT_DIR%
-if not exist %CCRONEXPR_INIT_DIR% (
-    git clone https://github.com/staticlibs/ccronexpr.git %CCRONEXPR_INIT_DIR%
-) else (
-    cd %CCRONEXPR_INIT_DIR%
-    git checkout .
-    git pull
 )
 
 pause
