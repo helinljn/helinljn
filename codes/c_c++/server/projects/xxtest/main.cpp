@@ -11,6 +11,7 @@
 #include "Poco/JSON/JSON.h"
 #include "Poco/Net/Net.h"
 #include "Poco/Net/NetSSL.h"
+#include "Poco/Redis/Redis.h"
 #include "Poco/Util/Util.h"
 #include "Poco/XML/XML.h"
 #include "Poco/Zip/Zip.h"

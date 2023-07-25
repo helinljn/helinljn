@@ -17,6 +17,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
@@ -44,6 +45,7 @@ IF(MSVC)
         PocoJSON
         PocoNet
         PocoNetSSL
+        PocoRedis
         PocoUtil
         PocoXML
         PocoZip
@@ -90,6 +92,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
@@ -117,6 +120,7 @@ ELSE()
         PocoJSON
         PocoNet
         PocoNetSSL
+        PocoRedis
         PocoUtil
         PocoXML
         PocoZip
