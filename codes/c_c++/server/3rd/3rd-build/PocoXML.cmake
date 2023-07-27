@@ -14,6 +14,9 @@ IF(MSVC)
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
         -DPOCO_NO_AUTOMATIC_LIB_INIT
+        -DXML_STATIC
+        -DXML_DTD
+        -DXML_NS
     )
 
     # 编译选项
@@ -32,6 +35,9 @@ ELSE()
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
         -DPOCO_NO_AUTOMATIC_LIB_INIT
+        -DXML_STATIC
+        -DXML_DTD
+        -DXML_NS
     )
 
     # 编译选项
