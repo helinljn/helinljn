@@ -16,8 +16,6 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4125
-        /wd4127
         /wd4244
     )
 ELSE()

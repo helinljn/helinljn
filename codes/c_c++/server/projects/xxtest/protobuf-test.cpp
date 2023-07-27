@@ -1,16 +1,7 @@
 #include "gtest/gtest.h"
 
-#if defined(_MSC_VER)
-    #pragma warning(push)
-    #pragma warning(disable:4127)
-#endif
-
 #include "TestMsgDefine.pb.h"
 #include "TestMsgStruct.pb.h"
-
-#if defined(_MSC_VER)
-    #pragma warning(pop)
-#endif
 
 // Unnamed namespace for internal linkage
 namespace {

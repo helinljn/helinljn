@@ -14,22 +14,13 @@ IF(MSVC)
     SET(CURRENT_COMPILE_DEFINITIONS
         -DPOCO_NO_AUTOMATIC_LIBS
         -DPOCO_NO_AUTOMATIC_LIB_INIT
+        -DMICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS=0
     )
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4100
-        /wd4127
         /wd4244
-        /wd4245
         /wd4267
-        /wd4389
-        /wd4456
-        /wd4457
-        /wd4458
-        /wd4702
-        /wd4706
-        /wd5105
     )
 ELSE()
     # 头文件目录
@@ -47,10 +38,8 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-extra
         -Wno-sign-compare
         -Wno-unused-result
-        -Wno-unused-parameter
     )
 ENDIF()
 

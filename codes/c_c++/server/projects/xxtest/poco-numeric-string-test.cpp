@@ -4,10 +4,7 @@
 #include <string>       // for cpp11_numeric_string
 #include <type_traits>  // for cpp11_numeric_string
 
-#if defined(_MSC_VER)
-    #pragma warning(push)
-    #pragma warning(disable:4244)
-#elif defined(__GNUC__)
+#if defined(__GNUC__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
@@ -16,9 +13,7 @@
 #include "Poco/NumberFormatter.h"
 #include "Poco/NumberParser.h"
 
-#if defined(_MSC_VER)
-    #pragma warning(pop)
-#elif defined(__GNUC__)
+#if defined(__GNUC__)
     #pragma GCC diagnostic pop
 #endif
 

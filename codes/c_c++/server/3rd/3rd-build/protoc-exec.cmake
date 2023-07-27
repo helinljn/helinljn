@@ -31,7 +31,7 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4100
+        # ...
     )
 ELSE()
     # 头文件目录
@@ -62,7 +62,7 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-unused-parameter
+        # ...
     )
 ENDIF()
 

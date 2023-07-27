@@ -21,9 +21,7 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4100
-        /wd4702
-        /wd4706
+        # ...
     )
 ELSE()
     # 头文件目录
@@ -45,7 +43,6 @@ ELSE()
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
         -Wno-sign-compare
-        -Wno-unused-parameter
     )
 ENDIF()
 

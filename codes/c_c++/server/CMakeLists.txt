@@ -22,19 +22,16 @@ PROJECT(server)
 SET(CMAKE_PROJECT_ROOT_DIR       ${PROJECT_SOURCE_DIR})
 SET(CMAKE_PROJECT_BUILD_ROOT_DIR ${CMAKE_PROJECT_ROOT_DIR}/.build)
 
-# 编译选项、优先链接静态库、生成目录、静态库 & 动态库的前缀
+# 编译选项、生成目录、静态库 & 动态库的前缀
 IF(MSVC)
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /WX /MP")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W3 /WX /MP")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /WX /MP")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W3 /WX /MP")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-
-    # 优先链接静态库
-    SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
     # 生成目录
     SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_PROJECT_BUILD_ROOT_DIR})
@@ -66,16 +63,13 @@ IF(MSVC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0A00")
 ELSE()
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -Werror")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Werror")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic -Werror")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Werror")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-
-    # 优先链接静态库
-    SET(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
     # 生成目录
     SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE})
@@ -111,5 +105,4 @@ MESSAGE(STATUS "CMAKE_C_FLAGS_RELEASE          = ${CMAKE_C_FLAGS_RELEASE}")
 MESSAGE(STATUS "CMAKE_CXX_FLAGS                = ${CMAKE_CXX_FLAGS}")
 MESSAGE(STATUS "CMAKE_CXX_FLAGS_DEBUG          = ${CMAKE_CXX_FLAGS_DEBUG}")
 MESSAGE(STATUS "CMAKE_CXX_FLAGS_RELEASE        = ${CMAKE_CXX_FLAGS_RELEASE}")
-MESSAGE(STATUS "CMAKE_FIND_LIBRARY_SUFFIXES    = ${CMAKE_FIND_LIBRARY_SUFFIXES}")
 MESSAGE(STATUS "---------------------------------------------------------------------")

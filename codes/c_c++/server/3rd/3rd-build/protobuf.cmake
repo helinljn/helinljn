@@ -17,27 +17,9 @@ IF(MSVC)
     SET(CURRENT_COMPILE_OPTIONS
         /wd4018
         /wd4065
-        /wd4100
-        /wd4125
-        /wd4127
         /wd4146
         /wd4244
-        /wd4251
         /wd4267
-        /wd4305
-        /wd4307
-        /wd4309
-        /wd4310
-        /wd4334
-        /wd4355
-        /wd4389
-        /wd4456
-        /wd4457
-        /wd4506
-        /wd4701
-        /wd4702
-        /wd4703
-        /wd4800
         /wd4996
     )
 ELSE()
@@ -53,10 +35,7 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-pedantic
         -Wno-sign-compare
-        -Wno-redundant-move
-        -Wno-unused-parameter
         -Wno-stringop-overflow
     )
 ENDIF()

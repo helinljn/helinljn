@@ -18,8 +18,7 @@ IF(MSVC)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4244
-        /wd4458
+        # ...
     )
 ELSE()
     # 头文件目录
