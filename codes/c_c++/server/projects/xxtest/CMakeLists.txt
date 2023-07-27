@@ -63,11 +63,11 @@ IF(MSVC)
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
+        libmysql
         libssl
         libcrypto
-        libmysql
-        ws2_32
         crypt32
+        ws2_32
         iphlpapi
         dbghelp
     )
@@ -148,9 +148,9 @@ ELSE()
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
+        mysqlclient
         ssl
         crypto
-        mysqlclient
         pthread
         m
         dl

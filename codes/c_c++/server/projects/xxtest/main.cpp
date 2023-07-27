@@ -22,7 +22,6 @@
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Data/Data.h"
 #include "Poco/Data/MySQL/MySQL.h"
-#include "Poco/Data/MySQL/Utility.h"
 #include "Poco/Foundation.h"
 #include "Poco/JSON/JSON.h"
 #include "Poco/Net/Net.h"
