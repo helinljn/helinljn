@@ -10,7 +10,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
+        ${CMAKE_3RD_DIR_OPENSSL}/include
     )
 
     # 宏定义
@@ -31,7 +31,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
+        ${CMAKE_3RD_DIR_OPENSSL}/include
     )
 
     # 宏定义

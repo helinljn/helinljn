@@ -7,7 +7,7 @@ IF(MSVC)
     SET(CURRENT_INCLUDE_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
+        ${CMAKE_3RD_DIR_OPENSSL}/include
     )
 
     # 宏定义
@@ -25,7 +25,7 @@ ELSE()
     SET(CURRENT_INCLUDE_DIR
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
+        ${CMAKE_3RD_DIR_OPENSSL}/include
     )
 
     # 宏定义

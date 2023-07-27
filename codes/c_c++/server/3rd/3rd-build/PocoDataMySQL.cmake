@@ -8,7 +8,7 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-windows/include
+        ${CMAKE_3RD_DIR_MYSQL}/include
     )
 
     # 宏定义
@@ -27,7 +27,7 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-ubuntu-20.04/include
+        ${CMAKE_3RD_DIR_MYSQL}/include
     )
 
     # 宏定义

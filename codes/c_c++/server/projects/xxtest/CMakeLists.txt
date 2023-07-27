@@ -26,16 +26,16 @@ IF(MSVC)
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-windows/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/include
+        ${CMAKE_3RD_DIR_MYSQL}/include
+        ${CMAKE_3RD_DIR_OPENSSL}/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
     )
 
     # 链接库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-windows/lib
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/lib
+        ${CMAKE_3RD_DIR_MYSQL}/lib
+        ${CMAKE_3RD_DIR_OPENSSL}/lib
     )
 
     # 生成依赖库
@@ -111,16 +111,16 @@ ELSE()
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-ubuntu-20.04/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/include
+        ${CMAKE_3RD_DIR_MYSQL}/include
+        ${CMAKE_3RD_DIR_OPENSSL}/include
         ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
     )
 
     # 链接库目录
     SET(CURRENT_LINK_LIBS_DIR
         ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-ubuntu-20.04/lib
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04/lib
+        ${CMAKE_3RD_DIR_MYSQL}/lib
+        ${CMAKE_3RD_DIR_OPENSSL}/lib
     )
 
     # 生成依赖库
@@ -194,8 +194,8 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}      PRIVATE ${CURRENT_LINK_LIBS})
 IF(MSVC)
     ADD_CUSTOM_COMMAND(
         TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-windows/lib/libmysql.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/bin/libssl-1_1-x64.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows/bin/libcrypto-1_1-x64.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_3RD_DIR_MYSQL}/lib/libmysql.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_3RD_DIR_OPENSSL}/bin/libssl-1_1-x64.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_3RD_DIR_OPENSSL}/bin/libcrypto-1_1-x64.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
     )
 ENDIF()
