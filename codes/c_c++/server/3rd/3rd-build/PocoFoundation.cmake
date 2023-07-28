@@ -1,15 +1,15 @@
 # 项目名字
 PROJECT(PocoFoundation)
 
-# 头文件目录、宏定义、编译选项
-IF(MSVC)
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
-    )
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
+)
 
+# 宏定义、编译选项
+IF(MSVC)
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         # ...
@@ -26,13 +26,6 @@ IF(MSVC)
         /wd4267
     )
 ELSE()
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
-    )
-
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         # ...
@@ -50,7 +43,6 @@ ELSE()
 ENDIF()
 
 # 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src]目录下所有源文件(不包括头文件)
-#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src CURRENT_DIR_SRC_LIST)
 FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/*.cpp
 )

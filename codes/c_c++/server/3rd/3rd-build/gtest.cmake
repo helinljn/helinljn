@@ -1,14 +1,14 @@
 # 项目名字
 PROJECT(gtest)
 
-# 头文件目录、宏定义、编译选项
-IF(MSVC)
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
-    )
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
+)
 
+# 宏定义、编译选项
+IF(MSVC)
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         # ...
@@ -23,12 +23,6 @@ IF(MSVC)
         # ...
     )
 ELSE()
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
-    )
-
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         # ...

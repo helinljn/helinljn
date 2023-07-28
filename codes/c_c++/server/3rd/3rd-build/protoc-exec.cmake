@@ -1,24 +1,24 @@
 # 项目名字
 PROJECT(protoc-exec)
 
-# 头文件目录、链接库目录、生成依赖库、链接库、宏定义、编译选项
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+)
+
+# 链接库目录
+SET(CURRENT_LINK_LIBS_DIR
+    ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+)
+
+# 生成依赖库
+SET(CURRENT_DEPENDENT_LIBS
+    protoc
+    protobuf
+)
+
+# 链接库、宏定义、编译选项
 IF(MSVC)
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-    )
-
-    # 链接库目录
-    SET(CURRENT_LINK_LIBS_DIR
-        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-    )
-
-    # 生成依赖库
-    SET(CURRENT_DEPENDENT_LIBS
-        protoc
-        protobuf
-    )
-
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
@@ -34,22 +34,6 @@ IF(MSVC)
         # ...
     )
 ELSE()
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-    )
-
-    # 链接库目录
-    SET(CURRENT_LINK_LIBS_DIR
-        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-    )
-
-    # 生成依赖库
-    SET(CURRENT_DEPENDENT_LIBS
-        protoc
-        protobuf
-    )
-
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}

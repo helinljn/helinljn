@@ -1,65 +1,65 @@
 # 项目名字
 PROJECT(xxtest)
 
-# 头文件目录、链接库目录、生成依赖库、链接库、宏定义、编译选项
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${PROJECT_SOURCE_DIR}
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+    ${CMAKE_3RD_DIR_MYSQL}/include
+    ${CMAKE_3RD_DIR_OPENSSL}/include
+    ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
+)
+
+# 链接库目录
+SET(CURRENT_LINK_LIBS_DIR
+    ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+    ${CMAKE_3RD_DIR_MYSQL}/lib
+    ${CMAKE_3RD_DIR_OPENSSL}/lib
+)
+
+# 生成依赖库
+SET(CURRENT_DEPENDENT_LIBS
+    xxprotocol
+    protobuf
+    gmock
+    gtest
+    event
+    spdlog
+    fmt
+    PocoRedis
+    PocoDataMySQL
+    PocoData
+    PocoNetSSL
+    PocoNet
+    PocoUtil
+    PocoZip
+    PocoXML
+    PocoJSON
+    PocoCrypto
+    PocoFoundation
+)
+
+# 链接库、宏定义、编译选项
 IF(MSVC)
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_3RD_DIR_MYSQL}/include
-        ${CMAKE_3RD_DIR_OPENSSL}/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
-    )
-
-    # 链接库目录
-    SET(CURRENT_LINK_LIBS_DIR
-        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_3RD_DIR_MYSQL}/lib
-        ${CMAKE_3RD_DIR_OPENSSL}/lib
-    )
-
-    # 生成依赖库
-    SET(CURRENT_DEPENDENT_LIBS
-        xxprotocol
-        protobuf
-        gmock
-        gtest
-        event
-        spdlog
-        fmt
-        PocoRedis
-        PocoDataMySQL
-        PocoData
-        PocoNetSSL
-        PocoNet
-        PocoUtil
-        PocoZip
-        PocoXML
-        PocoJSON
-        PocoCrypto
-        PocoFoundation
-    )
-
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
@@ -82,63 +82,6 @@ IF(MSVC)
         /wd4819
     )
 ELSE()
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${PROJECT_SOURCE_DIR}
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-        ${CMAKE_3RD_DIR_MYSQL}/include
-        ${CMAKE_3RD_DIR_OPENSSL}/include
-        ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
-    )
-
-    # 链接库目录
-    SET(CURRENT_LINK_LIBS_DIR
-        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        ${CMAKE_3RD_DIR_MYSQL}/lib
-        ${CMAKE_3RD_DIR_OPENSSL}/lib
-    )
-
-    # 生成依赖库
-    SET(CURRENT_DEPENDENT_LIBS
-        xxprotocol
-        protobuf
-        gmock
-        gtest
-        event
-        spdlog
-        fmt
-        PocoRedis
-        PocoDataMySQL
-        PocoData
-        PocoNetSSL
-        PocoNet
-        PocoUtil
-        PocoZip
-        PocoXML
-        PocoJSON
-        PocoCrypto
-        PocoFoundation
-    )
-
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
@@ -162,7 +105,6 @@ ELSE()
 ENDIF()
 
 # 递归添加[./]目录下所有源文件(不包括头文件)
-#AUX_SOURCE_DIRECTORY(./ CURRENT_DIR_SRC_LIST)
 FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ./*.c
     ./*.cc

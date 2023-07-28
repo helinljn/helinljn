@@ -1,17 +1,17 @@
 # 项目名字
 PROJECT(event)
 
-# 头文件目录、源文件、宏定义、编译选项
-IF(MSVC)
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
-        ${CMAKE_3RD_DIR_OPENSSL}/include
-    )
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
+    ${CMAKE_3RD_DIR_OPENSSL}/include
+)
 
+# 源文件、宏定义、编译选项
+IF(MSVC)
     # 源文件
     SET(CURRENT_DIR_SRC_LIST
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/buffer.c
@@ -58,15 +58,6 @@ IF(MSVC)
         /wd4996
     )
 ELSE()
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
-        ${CMAKE_3RD_DIR_OPENSSL}/include
-    )
-
     # 源文件
     SET(CURRENT_DIR_SRC_LIST
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/buffer.c

@@ -1,15 +1,15 @@
 # 项目名字
 PROJECT(PocoNet)
 
-# 头文件目录、宏定义、编译选项
-IF(MSVC)
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/src
-    )
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/src
+)
 
+# 宏定义、编译选项
+IF(MSVC)
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         -DMICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS=0
@@ -25,13 +25,6 @@ IF(MSVC)
         /wd4267
     )
 ELSE()
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/src
-    )
-
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         # ...
@@ -49,7 +42,6 @@ ELSE()
 ENDIF()
 
 # 递归添加[${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/src]目录下所有源文件(不包括头文件)
-#AUX_SOURCE_DIRECTORY(${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/src CURRENT_DIR_SRC_LIST)
 FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/src/*.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/src/*.cc

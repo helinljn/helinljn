@@ -1,13 +1,13 @@
 # 项目名字
 PROJECT(protobuf)
 
-# 头文件目录、宏定义、编译选项
-IF(MSVC)
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-    )
+# 头文件目录
+SET(CURRENT_INCLUDE_DIR
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+)
 
+# 宏定义、编译选项
+IF(MSVC)
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         # ...
@@ -27,11 +27,6 @@ IF(MSVC)
         /wd4996
     )
 ELSE()
-    # 头文件目录
-    SET(CURRENT_INCLUDE_DIR
-        ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-    )
-
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         -DHAVE_PTHREAD
