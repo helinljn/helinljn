@@ -47,9 +47,9 @@ IF(MSVC)
         event
         spdlog
         fmt
+        PocoRedis
         PocoDataMySQL
         PocoData
-        PocoRedis
         PocoNetSSL
         PocoNet
         PocoUtil
@@ -74,13 +74,7 @@ IF(MSVC)
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DPOCO_NO_AUTOMATIC_LIBS
-        -DPOCO_NO_AUTOMATIC_LIB_INIT
-        -DSPDLOG_FMT_EXTERNAL
-        -DSPDLOG_COMPILED_LIB
-        -DXML_STATIC
-        -DXML_DTD
-        -DXML_NS
+        # ...
     )
 
     # 编译选项
@@ -132,9 +126,9 @@ ELSE()
         event
         spdlog
         fmt
+        PocoRedis
         PocoDataMySQL
         PocoData
-        PocoRedis
         PocoNetSSL
         PocoNet
         PocoUtil
@@ -158,13 +152,7 @@ ELSE()
 
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DPOCO_NO_AUTOMATIC_LIBS
-        -DPOCO_NO_AUTOMATIC_LIB_INIT
-        -DSPDLOG_FMT_EXTERNAL
-        -DSPDLOG_COMPILED_LIB
-        -DXML_STATIC
-        -DXML_DTD
-        -DXML_NS
+        # ...
     )
 
     # 编译选项
