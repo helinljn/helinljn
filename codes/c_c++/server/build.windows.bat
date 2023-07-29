@@ -6,7 +6,7 @@ set DEBUG_DIR=%ROOT_DIR%/.build/windows/x64-Debug
 set RELEASE_DIR=%ROOT_DIR%/.build/windows/x64-Release
 
 if %1 equ debug (
-    mkdir %DEBUG_DIR% 2>nul
+    mkdir "%DEBUG_DIR%" 2>nul
     cd %DEBUG_DIR%
 
     cmake -G %VS_VERSION% -A x64 -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
@@ -14,7 +14,7 @@ if %1 equ debug (
 
     cd %ROOT_DIR%
 ) else if %1 equ release (
-    mkdir %RELEASE_DIR% 2>nul
+    mkdir "%RELEASE_DIR%" 2>nul
     cd %RELEASE_DIR%
 
     cmake -G %VS_VERSION% -A x64 -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
@@ -22,7 +22,7 @@ if %1 equ debug (
 
     cd %ROOT_DIR%
 ) else if %1 equ all (
-    mkdir %DEBUG_DIR% 2>nul
+    mkdir "%DEBUG_DIR%" 2>nul
     cd %DEBUG_DIR%
 
     cmake -G %VS_VERSION% -A x64 -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
@@ -33,7 +33,7 @@ if %1 equ debug (
 
     cd %ROOT_DIR%
 
-    mkdir %RELEASE_DIR% 2>nul
+    mkdir "%RELEASE_DIR%" 2>nul
     cd %RELEASE_DIR%
 
     cmake -G %VS_VERSION% -A x64 -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../

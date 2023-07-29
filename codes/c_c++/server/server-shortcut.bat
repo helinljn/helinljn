@@ -11,7 +11,7 @@ if exist %SERVER_D% (
 )
 
 if exist %SERVER_R% (
-    del /f /q %SERVER_R%
+    del /f /q "%SERVER_R%"
 )
 
 if exist %TARGET_D% (
