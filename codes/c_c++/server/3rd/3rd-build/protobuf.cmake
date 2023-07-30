@@ -7,7 +7,7 @@ SET(CURRENT_INCLUDE_DIR
 )
 
 # 宏定义、编译选项
-IF(MSVC)
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         # ...
