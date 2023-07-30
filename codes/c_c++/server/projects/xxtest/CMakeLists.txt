@@ -39,6 +39,7 @@ SET(CURRENT_LINK_LIBS_DIR
 # 生成依赖库
 SET(CURRENT_DEPENDENT_LIBS
     xxprotocol
+    protoc
     protobuf
     gmock
     gtest

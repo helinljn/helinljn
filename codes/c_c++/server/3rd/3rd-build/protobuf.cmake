@@ -43,8 +43,92 @@ ELSE()
     )
 ENDIF()
 
-# 源文件 - protobuf-lite
-SET(CURRENT_PROTO_LITE_SRC_LIST
+# 头文件
+FILE(GLOB_RECURSE CURRENT_DIR_INCLUDE_LIST
+    # protobuf-lite
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/arena.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/arenastring.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/extension_set.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/implicit_weak_message.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/coded_stream.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/strtod.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/zero_copy_stream.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/zero_copy_stream_impl.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/zero_copy_stream_impl_lite.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/message_lite.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/parse_context.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/repeated_field.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/bytestream.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/common.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/int128.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/once.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/status.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/statusor.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/stringpiece.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/stringprintf.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/strutil.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/time.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wire_format_lite.h
+
+    # protobuf
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/api.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/importer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/parser.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/descriptor.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/descriptor.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/descriptor_database.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/duration.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/dynamic_message.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/empty.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/field_access_listener.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/field_mask.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_bases.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_reflection.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/gzip_stream.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/printer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/tokenizer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_field.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/message.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/reflection_ops.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/service.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/source_context.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/struct.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/substitute.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/text_format.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/timestamp.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/type.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/unknown_field_set.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/delimited_message_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/field_comparator.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/field_mask_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/datapiece.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/default_value_objectwriter.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/error_listener.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/field_mask_utility.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/json_escaping.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/json_objectwriter.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/json_stream_parser.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/object_writer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/proto_writer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/protostream_objectsource.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/protostream_objectwriter.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/type_info.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/type_info_test_helper.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/utility.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/json_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/message_differencer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/time_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/type_resolver_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wire_format.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wrappers.pb.h
+)
+
+# 源文件
+FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
+    # protobuf-lite
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any_lite.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/arena.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/arenastring.cc
@@ -75,10 +159,8 @@ SET(CURRENT_PROTO_LITE_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/strutil.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/time.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wire_format_lite.cc
-)
 
-# 源文件 - protobuf
-SET(CURRENT_PROTOBUF_SRC_LIST
+    # protobuf
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any.pb.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/api.pb.cc
@@ -134,122 +216,19 @@ SET(CURRENT_PROTOBUF_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wrappers.pb.cc
 )
 
-# 源文件 - protoc
-SET(CURRENT_PROTOC_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/code_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/command_line_interface.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_enum.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_enum_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_extension.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_file.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_helpers.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_map_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_message.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_message_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_padding_optimizer.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_parse_function_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_primitive_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_service.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/cpp/cpp_string_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_doc_comment.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_enum.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_enum_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_field_base.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_helpers.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_map_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_message.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_message_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_primitive_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_reflection_class.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_repeated_enum_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_repeated_message_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_repeated_primitive_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_source_generator_base.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/csharp/csharp_wrapper_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_context.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_doc_comment.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_enum.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_enum_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_enum_field_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_enum_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_extension.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_extension_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_file.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_generator_factory.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_helpers.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_kotlin_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_map_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_map_field_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_message.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_message_builder.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_message_builder_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_message_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_message_field_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_message_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_name_resolver.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_primitive_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_primitive_field_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_service.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_shared_code_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_string_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/java/java_string_field_lite.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/js/js_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/js/well_known_types_embed.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_enum.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_enum_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_extension.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_file.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_helpers.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_map_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_message.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_message_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_oneof.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/objectivec/objectivec_primitive_field.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/php/php_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/plugin.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/plugin.pb.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/python/python_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/ruby/ruby_generator.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/subprocess.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/zip_writer.cc
-)
-
-# 目标名
-SET(CURRENT_PROTOBUF_LITE_NAME "protobuf-lite")
-SET(CURRENT_PROTOBUF_NAME      "protobuf")
-SET(CURRENT_PROTOC_NAME        "protoc")
-
-# 生成静态库 - protobuf-lite
-ADD_LIBRARY(${CURRENT_PROTOBUF_LITE_NAME}                STATIC  ${CURRENT_PROTO_LITE_SRC_LIST})
-TARGET_INCLUDE_DIRECTORIES(${CURRENT_PROTOBUF_LITE_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOBUF_LITE_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOBUF_LITE_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
-TARGET_COMPILE_OPTIONS(${CURRENT_PROTOBUF_LITE_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
-
-# 生成静态库 - protobuf
-ADD_LIBRARY(${CURRENT_PROTOBUF_NAME}                STATIC  ${CURRENT_PROTO_LITE_SRC_LIST} ${CURRENT_PROTOBUF_SRC_LIST})
-TARGET_INCLUDE_DIRECTORIES(${CURRENT_PROTOBUF_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOBUF_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOBUF_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
-TARGET_COMPILE_OPTIONS(${CURRENT_PROTOBUF_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
-
-# 生成静态库 - protoc
-ADD_LIBRARY(${CURRENT_PROTOC_NAME}                STATIC  ${CURRENT_PROTOC_SRC_LIST})
-TARGET_INCLUDE_DIRECTORIES(${CURRENT_PROTOC_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOC_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_PROTOC_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
-TARGET_COMPILE_OPTIONS(${CURRENT_PROTOC_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
+# 生成静态库
+ADD_LIBRARY(${PROJECT_NAME}                STATIC  ${CURRENT_DIR_INCLUDE_LIST} ${CURRENT_DIR_SRC_LIST})
+TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
+TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${PROJECT_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
 
 # VS工程设置
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    SET_PROPERTY(TARGET ${CURRENT_PROTOBUF_LITE_NAME} PROPERTY FOLDER "3rd")
-    SET_PROPERTY(TARGET ${CURRENT_PROTOBUF_NAME}      PROPERTY FOLDER "3rd")
-    SET_PROPERTY(TARGET ${CURRENT_PROTOC_NAME}        PROPERTY FOLDER "3rd")
+    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY FOLDER "3rd")
+
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf PREFIX "include"
+        FILES ${CURRENT_DIR_INCLUDE_LIST})
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf PREFIX "src"
+        FILES ${CURRENT_DIR_SRC_LIST})
 ENDIF()
