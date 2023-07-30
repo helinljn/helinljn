@@ -61,6 +61,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include PREFIX "include"
         FILES ${CURRENT_DIR_INCLUDE_LIST})
-    SOURCE_GROUP("src"
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/src PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
 ENDIF()
