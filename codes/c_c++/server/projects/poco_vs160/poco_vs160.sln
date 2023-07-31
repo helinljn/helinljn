@@ -50,6 +50,24 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Zip", "..\..\3rd\poco\Zip\Z
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Zip\testsuite\TestSuite_vs160.vcxproj", "{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "POCOData", "POCOData", "{3FF85D36-E108-425C-A81C-7AA327B40479}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Data", "..\..\3rd\poco\Data\Data_vs160.vcxproj", "{240E83C3-368D-11DB-9FBC-00123FC423B5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Data\testsuite\TestSuite_vs160.vcxproj", "{1813A463-E349-4FEA-8A8E-4A41E41C0DC7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "POCODataMySQL", "POCODataMySQL", "{669C417D-C8D6-44B5-BE7C-24582E72078C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MySQL", "..\..\3rd\poco\Data\MySQL\MySQL_vs160.vcxproj", "{73E19FDE-1570-488C-B3DB-72A60FADD408}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Data\MySQL\testsuite\TestSuite_vs160.vcxproj", "{4D6E42AE-EB6A-47EB-A186-B8A183FABCF7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "POCORedis", "POCORedis", "{0B47CADE-7F40-48BC-9ED4-D947A7936C54}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Redis", "..\..\3rd\poco\Redis\Redis_vs160.vcxproj", "{12E39EE2-7049-312D-B390-7568D727CA25}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSuite", "..\..\3rd\poco\Redis\testsuite\TestSuite_vs160.vcxproj", "{B497A4E6-BA9B-4E6A-90BA-04856E25E571}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug_static_mt|x64 = debug_static_mt|x64
@@ -120,6 +138,30 @@ Global
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{240E83C3-368D-11DB-9FBC-00123FC423B5}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{240E83C3-368D-11DB-9FBC-00123FC423B5}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{240E83C3-368D-11DB-9FBC-00123FC423B5}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{240E83C3-368D-11DB-9FBC-00123FC423B5}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{1813A463-E349-4FEA-8A8E-4A41E41C0DC7}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{1813A463-E349-4FEA-8A8E-4A41E41C0DC7}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{1813A463-E349-4FEA-8A8E-4A41E41C0DC7}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{1813A463-E349-4FEA-8A8E-4A41E41C0DC7}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{73E19FDE-1570-488C-B3DB-72A60FADD408}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{73E19FDE-1570-488C-B3DB-72A60FADD408}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{73E19FDE-1570-488C-B3DB-72A60FADD408}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{73E19FDE-1570-488C-B3DB-72A60FADD408}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{4D6E42AE-EB6A-47EB-A186-B8A183FABCF7}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{4D6E42AE-EB6A-47EB-A186-B8A183FABCF7}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{4D6E42AE-EB6A-47EB-A186-B8A183FABCF7}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{4D6E42AE-EB6A-47EB-A186-B8A183FABCF7}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{12E39EE2-7049-312D-B390-7568D727CA25}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{12E39EE2-7049-312D-B390-7568D727CA25}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{12E39EE2-7049-312D-B390-7568D727CA25}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{12E39EE2-7049-312D-B390-7568D727CA25}.release_static_mt|x64.Build.0 = release_static_mt|x64
+		{B497A4E6-BA9B-4E6A-90BA-04856E25E571}.debug_static_mt|x64.ActiveCfg = debug_static_mt|x64
+		{B497A4E6-BA9B-4E6A-90BA-04856E25E571}.debug_static_mt|x64.Build.0 = debug_static_mt|x64
+		{B497A4E6-BA9B-4E6A-90BA-04856E25E571}.release_static_mt|x64.ActiveCfg = release_static_mt|x64
+		{B497A4E6-BA9B-4E6A-90BA-04856E25E571}.release_static_mt|x64.Build.0 = release_static_mt|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -141,6 +183,12 @@ Global
 		{E40E738C-447B-40F4-A878-EBA9A2459270} = {68140F89-DDA8-42B9-90EE-9236924E19B3}
 		{4AC75EAD-BFCF-41E6-AB1F-0DA203CC7C61} = {93D1B856-8932-4BCA-B22A-5EBE3B1E842A}
 		{9665FC3C-DB71-4C6C-AAEE-AAFD73CB31E7} = {93D1B856-8932-4BCA-B22A-5EBE3B1E842A}
+		{240E83C3-368D-11DB-9FBC-00123FC423B5} = {3FF85D36-E108-425C-A81C-7AA327B40479}
+		{1813A463-E349-4FEA-8A8E-4A41E41C0DC7} = {3FF85D36-E108-425C-A81C-7AA327B40479}
+		{73E19FDE-1570-488C-B3DB-72A60FADD408} = {669C417D-C8D6-44B5-BE7C-24582E72078C}
+		{4D6E42AE-EB6A-47EB-A186-B8A183FABCF7} = {669C417D-C8D6-44B5-BE7C-24582E72078C}
+		{12E39EE2-7049-312D-B390-7568D727CA25} = {0B47CADE-7F40-48BC-9ED4-D947A7936C54}
+		{B497A4E6-BA9B-4E6A-90BA-04856E25E571} = {0B47CADE-7F40-48BC-9ED4-D947A7936C54}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D5D8915C-5ADD-4528-B27D-55B010EA76DF}
