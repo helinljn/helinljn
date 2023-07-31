@@ -3,7 +3,6 @@
 ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
-SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 LIBEVENT_INIT_DIR=$ROOT_INIT_DIR/3rd/libevent
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
@@ -21,14 +20,6 @@ if [ ! -d $POCO_INIT_DIR ]; then
     git clone -b poco-1.12.4-release https://github.com/pocoproject/poco.git $POCO_INIT_DIR
 else
     cd $POCO_INIT_DIR
-    git checkout .
-fi
-
-cd $ROOT_INIT_DIR
-if [ ! -d $SPDLOG_INIT_DIR ]; then
-    git clone -b v1.11.0 https://github.com/gabime/spdlog.git $SPDLOG_INIT_DIR
-else
-    cd $SPDLOG_INIT_DIR
     git checkout .
 fi
 

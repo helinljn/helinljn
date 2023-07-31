@@ -1,8 +1,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
 #include "fmt/format.h"
-#include "spdlog/spdlog.h"
 
 #include "event2/event.h"
 #include "openssl/ssl.h"
