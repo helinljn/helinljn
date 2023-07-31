@@ -42,6 +42,7 @@ ENDIF()
 # 头文件
 FILE(GLOB_RECURSE CURRENT_DIR_INCLUDE_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include/*.hpp
 )
 
 # 源文件

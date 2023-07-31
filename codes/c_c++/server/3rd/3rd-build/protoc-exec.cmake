@@ -53,6 +53,7 @@ ENDIF()
 # 头文件
 FILE(GLOB_RECURSE CURRENT_DIR_INCLUDE_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/*.hpp
 )
 
 # 源文件
