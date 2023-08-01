@@ -92,6 +92,8 @@
     "update.showReleaseNotes": false,
     "update.enableWindowsBackgroundUpdates": false,
 
+    "window.restoreWindows": "none",
+
     "remote.SSH.configFile": "D:\\helinljn\\documents\\ssh_config",
     "remote.SSH.remotePlatform": {
         "Aliyun": "linux"
