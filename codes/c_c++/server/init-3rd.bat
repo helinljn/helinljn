@@ -5,7 +5,6 @@ set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
-set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 
 cd %ROOT_INIT_DIR%
 if not exist %FMT_INIT_DIR% (
@@ -36,14 +35,6 @@ if not exist %PROTOBUF_INIT_DIR% (
     git clone -b 3.18.x https://github.com/protocolbuffers/protobuf.git %PROTOBUF_INIT_DIR%
 ) else (
     cd %PROTOBUF_INIT_DIR%
-    git checkout .
-)
-
-cd %ROOT_INIT_DIR%
-if not exist %GOOGLETEST_INIT_DIR% (
-    git clone -b release-1.12.1 https://github.com/google/googletest.git %GOOGLETEST_INIT_DIR%
-) else (
-    cd %GOOGLETEST_INIT_DIR%
     git checkout .
 )
 
