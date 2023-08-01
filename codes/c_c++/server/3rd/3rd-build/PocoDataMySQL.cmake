@@ -17,9 +17,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        THREADSAFE
-        NO_TCL
-        __LCC__
+        # ...
     )
 
     # 编译选项
@@ -33,8 +31,7 @@ ELSE()
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        THREADSAFE
-        NO_TCL
+        # ...
     )
 
     # 编译选项
