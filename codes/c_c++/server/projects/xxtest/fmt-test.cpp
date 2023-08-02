@@ -1,6 +1,51 @@
 #include "gtest/gtest.h"
 
+#include "Poco/Format.h"
 #include "fmt/args.h"
+
+GTEST_TEST(FmtTest, PocoFormat)
+{
+    const bool        bo     = false;
+    const int16_t     i16    = -12321;
+    const uint16_t    u16    = 12345;
+    const int32_t     i32    = -2134567890;
+    const uint32_t    u32    = 4200000000;
+    const int64_t     i64    = -123456787654321;
+    const uint64_t    u64    = 1234567890987654321;
+    // const float       f32    = 1234.321f;
+    const double      f64    = 123456789.87654321;
+    // const char*       cstr   = "this is a c string.";
+    const std::string cppstr = "this is a cpp string.";
+
+    for (int idx = 0; idx != 1000; ++idx)
+    {
+        std::string ret = Poco::format("bo=%b, i16=%hd, u16=%hu, i32=%d, u32=%u, i64=%?i, u64=%?i, f64=%f, cppstr=%s",
+            bo, i16, u16, i32, u32, i64, u64, f64, cppstr);
+        ASSERT_TRUE(!ret.empty());
+    }
+}
+
+GTEST_TEST(FmtTest, FmtFormat)
+{
+    const bool        bo     = false;
+    const int16_t     i16    = -12321;
+    const uint16_t    u16    = 12345;
+    const int32_t     i32    = -2134567890;
+    const uint32_t    u32    = 4200000000;
+    const int64_t     i64    = -123456787654321;
+    const uint64_t    u64    = 1234567890987654321;
+    const float       f32    = 1234.321f;
+    const double      f64    = 123456789.87654321;
+    const char*       cstr   = "this is a c string.";
+    const std::string cppstr = "this is a cpp string.";
+
+    for (int idx = 0; idx != 1000; ++idx)
+    {
+        std::string ret = fmt::format("bo={}, i16={}, u16={}, i32={}, u32={}, i64={}, u64={}, f32={}, f64={}, cstr={}, cppstr={}",
+            bo, i16, u16, i32, u32, i64, u64, f32, f64, cstr, cppstr);
+        ASSERT_TRUE(!ret.empty());
+    }
+}
 
 GTEST_TEST(FmtTest, Args)
 {
