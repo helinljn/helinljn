@@ -40,9 +40,9 @@ SET(CURRENT_DEPENDENT_LIBS
     xxprotocol
     protoc
     protobuf
-    event
     gmock
     gtest
+    event
     fmt
     PocoRedis
     PocoDataMySQL
