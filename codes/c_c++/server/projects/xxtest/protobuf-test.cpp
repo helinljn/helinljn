@@ -1,6 +1,4 @@
-#include "ProtobufTest.h"
-#include "CppUnit/TestSuite.h"
-#include "CppUnit/TestCaller.h"
+#include "gtest/gtest.h"
 
 #include "TestMsgDefine.pb.h"
 #include "TestMsgStruct.pb.h"
@@ -48,27 +46,7 @@ bool operator ==(const XXMsg::TestCommonInfo& pinfo, const CommonInfo& cinfo)
 
 } // unnamed namespace
 
-ProtobufTest::ProtobufTest(const std::string& name)
-    : CppUnit::TestCase(name)
-{
-}
-
-void ProtobufTest::setUp(void)
-{
-    // body
-}
-
-void ProtobufTest::tearDown(void)
-{
-    // body
-}
-
-int ProtobufTest::countTestCases(void) const
-{
-    return 1;
-}
-
-void ProtobufTest::testEnumName(void)
+GTEST_TEST(ProtobufTest, EnumName)
 {
     // CommonType_Name
     const std::string& str_bool     = XXMsg::TestCommonType_Name(XXMsg::CT_BOOL);
@@ -86,83 +64,83 @@ void ProtobufTest::testEnumName(void)
     const std::string& str_null1    = XXMsg::TestCommonType_Name(XXMsg::TestCommonType(100));
     const std::string& str_null2    = XXMsg::TestCommonType_Name(XXMsg::TestCommonType(-1));
 
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_BOOL));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_FLOAT));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_DOUBLE));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_BYTES));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_INT32));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_SINT32));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_UINT32));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_INT64));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_SINT64));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::CT_UINT64));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType{}));
-    assertTrue(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType(0)));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_BOOL));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_FLOAT));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_DOUBLE));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_BYTES));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_INT32));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_SINT32));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_UINT32));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_INT64));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_SINT64));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::CT_UINT64));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType{}));
+    ASSERT_TRUE(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType(0)));
 
-    assertFalse(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType(100)));
-    assertFalse(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType(-1)));
+    ASSERT_FALSE(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType(100)));
+    ASSERT_FALSE(XXMsg::TestCommonType_IsValid(XXMsg::TestCommonType(-1)));
 
-    assertTrue(str_bool     == "CT_BOOL");
-    assertTrue(str_float    == "CT_FLOAT");
-    assertTrue(str_double   == "CT_DOUBLE");
-    assertTrue(str_bytes    == "CT_BYTES");
-    assertTrue(str_int32    == "CT_INT32");
-    assertTrue(str_sint32   == "CT_SINT32");
-    assertTrue(str_uint32   == "CT_UINT32");
-    assertTrue(str_int64    == "CT_INT64");
-    assertTrue(str_sint64   == "CT_SINT64");
-    assertTrue(str_uint64   == "CT_UINT64");
-    assertTrue(str_default1 == "CT_BOOL");
-    assertTrue(str_default2 == "CT_BOOL");
+    ASSERT_TRUE(str_bool     == "CT_BOOL");
+    ASSERT_TRUE(str_float    == "CT_FLOAT");
+    ASSERT_TRUE(str_double   == "CT_DOUBLE");
+    ASSERT_TRUE(str_bytes    == "CT_BYTES");
+    ASSERT_TRUE(str_int32    == "CT_INT32");
+    ASSERT_TRUE(str_sint32   == "CT_SINT32");
+    ASSERT_TRUE(str_uint32   == "CT_UINT32");
+    ASSERT_TRUE(str_int64    == "CT_INT64");
+    ASSERT_TRUE(str_sint64   == "CT_SINT64");
+    ASSERT_TRUE(str_uint64   == "CT_UINT64");
+    ASSERT_TRUE(str_default1 == "CT_BOOL");
+    ASSERT_TRUE(str_default2 == "CT_BOOL");
 
-    assertTrue(str_null1.empty());
-    assertTrue(str_null2.empty());
+    ASSERT_TRUE(str_null1.empty());
+    ASSERT_TRUE(str_null2.empty());
 
     // CommonType_Parse
     XXMsg::TestCommonType val{};
-    assertTrue(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_bool, &val));
-    assertTrue(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_bool, &val));
+    ASSERT_TRUE(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_float, &val));
-    assertTrue(XXMsg::CT_FLOAT == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_float, &val));
+    ASSERT_TRUE(XXMsg::CT_FLOAT == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_double, &val));
-    assertTrue(XXMsg::CT_DOUBLE == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_double, &val));
+    ASSERT_TRUE(XXMsg::CT_DOUBLE == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_bytes, &val));
-    assertTrue(XXMsg::CT_BYTES == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_bytes, &val));
+    ASSERT_TRUE(XXMsg::CT_BYTES == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_int32, &val));
-    assertTrue(XXMsg::CT_INT32 == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_int32, &val));
+    ASSERT_TRUE(XXMsg::CT_INT32 == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_sint32, &val));
-    assertTrue(XXMsg::CT_SINT32 == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_sint32, &val));
+    ASSERT_TRUE(XXMsg::CT_SINT32 == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_uint32, &val));
-    assertTrue(XXMsg::CT_UINT32 == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_uint32, &val));
+    ASSERT_TRUE(XXMsg::CT_UINT32 == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_int64, &val));
-    assertTrue(XXMsg::CT_INT64 == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_int64, &val));
+    ASSERT_TRUE(XXMsg::CT_INT64 == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_sint64, &val));
-    assertTrue(XXMsg::CT_SINT64 == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_sint64, &val));
+    ASSERT_TRUE(XXMsg::CT_SINT64 == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_uint64, &val));
-    assertTrue(XXMsg::CT_UINT64 == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_uint64, &val));
+    ASSERT_TRUE(XXMsg::CT_UINT64 == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_default1, &val));
-    assertTrue(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_default1, &val));
+    ASSERT_TRUE(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertTrue(XXMsg::TestCommonType_Parse(str_default2, &val));
-    assertTrue(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
+    ASSERT_TRUE(XXMsg::TestCommonType_Parse(str_default2, &val));
+    ASSERT_TRUE(XXMsg::CT_BOOL == val && XXMsg::TestCommonType_IsValid(val));
 
-    assertFalse(XXMsg::TestCommonType_Parse(str_null1, &val));
-    assertFalse(XXMsg::TestCommonType_Parse(str_null2, &val));
+    ASSERT_FALSE(XXMsg::TestCommonType_Parse(str_null1, &val));
+    ASSERT_FALSE(XXMsg::TestCommonType_Parse(str_null2, &val));
 }
 
-void ProtobufTest::testSerialization(void)
+GTEST_TEST(ProtobufTest, Serialization)
 {
     CommonInfo info{true, 1.23f, 4.5678, "CommonInfo", 123456, -123456, 123456, 567890, -567890, 567890};
 
@@ -184,36 +162,36 @@ void ProtobufTest::testSerialization(void)
     // SerializeToString & ParseFromString
     {
         std::string info_to_string;
-        assertTrue(test_info.SerializeToString(&info_to_string));
-        assertTrue(test_info_size == info_to_string.size());
+        ASSERT_TRUE(test_info.SerializeToString(&info_to_string));
+        ASSERT_TRUE(test_info_size == info_to_string.size());
 
         XXMsg::TestCommonInfo string_to_info;
-        assertTrue(string_to_info.ParseFromString(info_to_string));
-        assertTrue(string_to_info == info);
-        assertTrue(string_to_info.ByteSizeLong() == test_info_size);
+        ASSERT_TRUE(string_to_info.ParseFromString(info_to_string));
+        ASSERT_TRUE(string_to_info == info);
+        ASSERT_TRUE(string_to_info.ByteSizeLong() == test_info_size);
     }
 
     // SerializeToArray & ParseFromArray
     {
         char info_to_array[128] = {0};
-        assertTrue(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
+        ASSERT_TRUE(test_info.SerializeToArray(info_to_array, sizeof(info_to_array)));
 
         XXMsg::TestCommonInfo array_to_info;
-        assertTrue(array_to_info.ParseFromArray(info_to_array, static_cast<int>(test_info_size)));
-        assertTrue(array_to_info == info);
-        assertTrue(array_to_info.ByteSizeLong() == test_info_size);
+        ASSERT_TRUE(array_to_info.ParseFromArray(info_to_array, static_cast<int>(test_info_size)));
+        ASSERT_TRUE(array_to_info == info);
+        ASSERT_TRUE(array_to_info.ByteSizeLong() == test_info_size);
     }
 
     XXMsg::TestCommonInfo test_info_copy = test_info;
-    assertTrue(test_info_copy == info);
+    ASSERT_TRUE(test_info_copy == info);
 
     XXMsg::TestCommonInfo test_info_move = std::move(test_info);
-    assertTrue(test_info_move == info);
+    ASSERT_TRUE(test_info_move == info);
 
-    assertFalse(test_info == info);
+    ASSERT_FALSE(test_info == info);
 }
 
-void ProtobufTest::testSerializationList(void)
+GTEST_TEST(ProtobufTest, SerializationList)
 {
     std::vector<CommonInfo> info_list{
         {true, 1.23f, 4.5678, "CommonInfo1", 123456, -123456, 123456, 567890, -567890, 567890},
@@ -227,12 +205,12 @@ void ProtobufTest::testSerializationList(void)
 
     // common_info_list_size
     XXMsg::TestCommonInfoList test_info_list;
-    assertTrue(test_info_list.common_info_list_size() == 0);
-    assertTrue(test_info_list.common_type_list_size() == 0);
+    ASSERT_TRUE(test_info_list.common_info_list_size() == 0);
+    ASSERT_TRUE(test_info_list.common_type_list_size() == 0);
 
     // add_common_info_list
     XXMsg::TestCommonInfo* temp = test_info_list.add_common_info_list();
-    assertTrue(temp != nullptr);
+    ASSERT_TRUE(temp != nullptr);
     temp->set_test_bool(info_list[0].test_bool);
     temp->set_test_float(info_list[0].test_float);
     temp->set_test_double(info_list[0].test_double);
@@ -245,7 +223,7 @@ void ProtobufTest::testSerializationList(void)
     temp->set_test_uint64(info_list[0].test_uint64);
 
     temp = test_info_list.add_common_info_list();
-    assertTrue(temp != nullptr);
+    ASSERT_TRUE(temp != nullptr);
     temp->set_test_bool(info_list[1].test_bool);
     temp->set_test_float(info_list[1].test_float);
     temp->set_test_double(info_list[1].test_double);
@@ -261,8 +239,8 @@ void ProtobufTest::testSerializationList(void)
     for (auto val : type_list)
         test_info_list.add_common_type_list(val);
 
-    assertTrue(test_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
-    assertTrue(test_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+    ASSERT_TRUE(test_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+    ASSERT_TRUE(test_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
 
     // ByteSizeLong
     size_t test_info_list_size = test_info_list.ByteSizeLong();
@@ -270,32 +248,32 @@ void ProtobufTest::testSerializationList(void)
     // SerializeToString & ParseFromString
     {
         std::string info_list_to_string;
-        assertTrue(test_info_list.SerializeToString(&info_list_to_string));
-        assertTrue(test_info_list_size == info_list_to_string.size());
+        ASSERT_TRUE(test_info_list.SerializeToString(&info_list_to_string));
+        ASSERT_TRUE(test_info_list_size == info_list_to_string.size());
 
         XXMsg::TestCommonInfoList string_to_info_list;
-        assertTrue(string_to_info_list.ParseFromString(info_list_to_string));
-        assertTrue(string_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
-        assertTrue(string_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
-        assertTrue(string_to_info_list.ByteSizeLong() == test_info_list_size);
+        ASSERT_TRUE(string_to_info_list.ParseFromString(info_list_to_string));
+        ASSERT_TRUE(string_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+        ASSERT_TRUE(string_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+        ASSERT_TRUE(string_to_info_list.ByteSizeLong() == test_info_list_size);
 
         // foreach
         int idx = 0;
         for (const auto& val : string_to_info_list.common_info_list())
-            assertTrue(val == info_list[idx++]);
+            ASSERT_TRUE(val == info_list[idx++]);
 
         // foreach
         idx = 0;
         for (const auto& val : string_to_info_list.common_type_list())
-            assertTrue(val == type_list[idx++]);
+            ASSERT_TRUE(val == type_list[idx++]);
 
         // for
         for (idx = 0; idx != string_to_info_list.common_info_list_size(); ++idx)
-            assertTrue(string_to_info_list.common_info_list(idx) == info_list[idx]);
+            ASSERT_TRUE(string_to_info_list.common_info_list(idx) == info_list[idx]);
 
         // for
         for (idx = 0; idx != string_to_info_list.common_type_list_size(); ++idx)
-            assertTrue(string_to_info_list.common_type_list(idx) == type_list[idx]);
+            ASSERT_TRUE(string_to_info_list.common_type_list(idx) == type_list[idx]);
 
         // foreach mutable_common_info_list
         for (auto& val : *string_to_info_list.mutable_common_info_list())
@@ -309,7 +287,7 @@ void ProtobufTest::testSerializationList(void)
         for (idx = 0; idx != string_to_info_list.common_info_list_size(); ++idx)
         {
             temp = string_to_info_list.mutable_common_info_list(idx);
-            assertTrue(temp != nullptr);
+            ASSERT_TRUE(temp != nullptr);
             temp->set_test_string(temp->test_string() + "CommonInfoString");
         }
 
@@ -323,31 +301,31 @@ void ProtobufTest::testSerializationList(void)
     // SerializeToArray & ParseFromArray
     {
         char info_list_to_array[128] = {0};
-        assertTrue(test_info_list.SerializeToArray(info_list_to_array, sizeof(info_list_to_array)));
+        ASSERT_TRUE(test_info_list.SerializeToArray(info_list_to_array, sizeof(info_list_to_array)));
 
         XXMsg::TestCommonInfoList array_to_info_list;
-        assertTrue(array_to_info_list.ParseFromArray(info_list_to_array, static_cast<int>(test_info_list_size)));
-        assertTrue(array_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
-        assertTrue(array_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
-        assertTrue(array_to_info_list.ByteSizeLong() == test_info_list_size);
+        ASSERT_TRUE(array_to_info_list.ParseFromArray(info_list_to_array, static_cast<int>(test_info_list_size)));
+        ASSERT_TRUE(array_to_info_list.common_info_list_size() == static_cast<int>(info_list.size()));
+        ASSERT_TRUE(array_to_info_list.common_type_list_size() == static_cast<int>(type_list.size()));
+        ASSERT_TRUE(array_to_info_list.ByteSizeLong() == test_info_list_size);
 
         // foreach
         int idx = 0;
         for (const auto& val : array_to_info_list.common_info_list())
-            assertTrue(val == info_list[idx++]);
+            ASSERT_TRUE(val == info_list[idx++]);
 
         // foreach
         idx = 0;
         for (const auto& val : array_to_info_list.common_type_list())
-            assertTrue(val == type_list[idx++]);
+            ASSERT_TRUE(val == type_list[idx++]);
 
         // for
         for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
-            assertTrue(array_to_info_list.common_info_list(idx) == info_list[idx]);
+            ASSERT_TRUE(array_to_info_list.common_info_list(idx) == info_list[idx]);
 
         // for
         for (idx = 0; idx != array_to_info_list.common_type_list_size(); ++idx)
-            assertTrue(array_to_info_list.common_type_list(idx) == type_list[idx]);
+            ASSERT_TRUE(array_to_info_list.common_type_list(idx) == type_list[idx]);
 
         // foreach mutable_common_info_list
         for (auto& val : *array_to_info_list.mutable_common_info_list())
@@ -361,7 +339,7 @@ void ProtobufTest::testSerializationList(void)
         for (idx = 0; idx != array_to_info_list.common_info_list_size(); ++idx)
         {
             temp = array_to_info_list.mutable_common_info_list(idx);
-            assertTrue(temp != nullptr);
+            ASSERT_TRUE(temp != nullptr);
             temp->set_test_string(temp->test_string() + "CommonInfoArray");
         }
 
@@ -374,29 +352,18 @@ void ProtobufTest::testSerializationList(void)
 
     XXMsg::TestCommonInfoList test_info_list_copy = test_info_list;
     for (int idx = 0; idx != test_info_list_copy.common_info_list_size(); ++idx)
-        assertTrue(test_info_list_copy.common_info_list(idx) == info_list[idx]);
+        ASSERT_TRUE(test_info_list_copy.common_info_list(idx) == info_list[idx]);
 
     for (int idx = 0; idx != test_info_list_copy.common_type_list_size(); ++idx)
-        assertTrue(test_info_list_copy.common_type_list(idx) == type_list[idx]);
+        ASSERT_TRUE(test_info_list_copy.common_type_list(idx) == type_list[idx]);
 
     XXMsg::TestCommonInfoList test_info_list_move = std::move(test_info_list);
     for (int idx = 0; idx != test_info_list_move.common_info_list_size(); ++idx)
-        assertTrue(test_info_list_move.common_info_list(idx) == info_list[idx]);
+        ASSERT_TRUE(test_info_list_move.common_info_list(idx) == info_list[idx]);
 
     for (int idx = 0; idx != test_info_list_move.common_type_list_size(); ++idx)
-        assertTrue(test_info_list_move.common_type_list(idx) == type_list[idx]);
+        ASSERT_TRUE(test_info_list_move.common_type_list(idx) == type_list[idx]);
 
-    assertTrue(test_info_list.common_info_list_size() == 0);
-    assertTrue(test_info_list.common_type_list_size() == 0);
-}
-
-CppUnit::Test* ProtobufTest::suite(void)
-{
-    CppUnit::TestSuite* testSuite = new CppUnit::TestSuite("ProtobufTest");
-
-    CppUnit_addTest(testSuite, ProtobufTest, testEnumName);
-    CppUnit_addTest(testSuite, ProtobufTest, testSerialization);
-    CppUnit_addTest(testSuite, ProtobufTest, testSerializationList);
-
-    return testSuite;
+    ASSERT_TRUE(test_info_list.common_info_list_size() == 0);
+    ASSERT_TRUE(test_info_list.common_type_list_size() == 0);
 }

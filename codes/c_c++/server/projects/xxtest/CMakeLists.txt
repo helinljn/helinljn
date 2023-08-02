@@ -5,10 +5,11 @@ PROJECT(xxtest)
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
@@ -22,7 +23,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-    ${CMAKE_3RD_DIR_MYSQL}/include
+    ${CMAKE_3RD_DIR_MYSQL}/include/mysql
     ${CMAKE_3RD_DIR_OPENSSL}/include
     ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
 )
@@ -40,8 +41,9 @@ SET(CURRENT_DEPENDENT_LIBS
     protoc
     protobuf
     event
+    gmock
+    gtest
     fmt
-    CppUnit
     PocoRedis
     PocoDataMySQL
     PocoData

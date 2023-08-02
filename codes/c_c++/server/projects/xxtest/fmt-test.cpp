@@ -1,30 +1,8 @@
-#include "FmtTest.h"
-#include "CppUnit/TestSuite.h"
-#include "CppUnit/TestCaller.h"
+#include "gtest/gtest.h"
 
 #include "fmt/args.h"
 
-FmtTest::FmtTest(const std::string& name)
-    : CppUnit::TestCase(name)
-{
-}
-
-void FmtTest::setUp(void)
-{
-    // body
-}
-
-void FmtTest::tearDown(void)
-{
-    // body
-}
-
-int FmtTest::countTestCases(void) const
-{
-    return 1;
-}
-
-void FmtTest::testArgs(void)
+GTEST_TEST(FmtTest, Args)
 {
     // basic
     {
@@ -34,7 +12,7 @@ void FmtTest::testArgs(void)
         store.push_back(1.5f);
 
         auto result = fmt::vformat("{} and {} and {}", store);
-        assertTrue(result == "42 and abc1 and 1.5");
+        ASSERT_TRUE(result == "42 and abc1 and 1.5");
     }
 
     // strings and refs
@@ -49,7 +27,7 @@ void FmtTest::testArgs(void)
         str[0] = 'X';
 
         auto result = fmt::vformat("{} and {} and {}", store);
-        assertTrue(result == "1234567890 and X234567890 and X234567890");
+        ASSERT_TRUE(result == "1234567890 and X234567890 and X234567890");
     }
 
     // named int
@@ -58,7 +36,7 @@ void FmtTest::testArgs(void)
         store.push_back(fmt::arg("a1", 42));
 
         auto result = fmt::vformat("{a1}", store);
-        assertTrue(result == "42");
+        ASSERT_TRUE(result == "42");
     }
 
     // names string
@@ -72,7 +50,7 @@ void FmtTest::testArgs(void)
         str[0] = 'X';
 
         auto result = fmt::vformat("{a1} and {a2}", store);
-        assertTrue(result == "1234567890 and X234567890");
+        ASSERT_TRUE(result == "1234567890 and X234567890");
     }
 
     // named arg by ref
@@ -85,7 +63,7 @@ void FmtTest::testArgs(void)
         band[9] = 'c';
 
         auto result = fmt::vformat("{band}", store);
-        assertTrue(result == "Rolling Scones");
+        ASSERT_TRUE(result == "Rolling Scones");
     }
 
     // clear
@@ -94,16 +72,16 @@ void FmtTest::testArgs(void)
         store.push_back(42);
 
         auto result = fmt::vformat("{}", store);
-        assertTrue(result == "42");
+        ASSERT_TRUE(result == "42");
 
         store.push_back(43);
         result = fmt::vformat("{} and {}", store);
-        assertTrue(result == "42 and 43");
+        ASSERT_TRUE(result == "42 and 43");
 
         store.clear();
         store.push_back(44);
         result = fmt::vformat("{}", store);
-        assertTrue(result == "44");
+        ASSERT_TRUE(result == "44");
     }
 
     // reserve
@@ -114,15 +92,6 @@ void FmtTest::testArgs(void)
         store.push_back(fmt::arg("a1", 42));
 
         auto result = fmt::vformat("{a1} and {}", store);
-        assertTrue(result == "42 and 1.5");
+        ASSERT_TRUE(result == "42 and 1.5");
     }
-}
-
-CppUnit::Test* FmtTest::suite(void)
-{
-    CppUnit::TestSuite* testSuite = new CppUnit::TestSuite("FmtTest");
-
-    CppUnit_addTest(testSuite, FmtTest, testArgs);
-
-    return testSuite;
 }

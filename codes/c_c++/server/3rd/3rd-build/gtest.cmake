@@ -1,10 +1,10 @@
 # 项目名字
-PROJECT(CppUnit)
+PROJECT(gtest)
 
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
 )
 
 # 宏定义、编译选项
@@ -15,12 +15,15 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
+        -DGTEST_DONT_DEFINE_FAIL
+        -DGTEST_DONT_DEFINE_SUCCEED
+        -DGTEST_DONT_DEFINE_TEST
+        -DGTEST_DONT_DEFINE_TEST_F
     )
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4996
+        # ...
     )
 ELSE()
     # 宏定义
@@ -29,26 +32,27 @@ ELSE()
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
+        -DGTEST_DONT_DEFINE_FAIL
+        -DGTEST_DONT_DEFINE_SUCCEED
+        -DGTEST_DONT_DEFINE_TEST
+        -DGTEST_DONT_DEFINE_TEST_F
     )
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -Wno-sign-compare
+        # ...
     )
 ENDIF()
 
 # 头文件
 FILE(GLOB_RECURSE CURRENT_DIR_INCLUDE_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/include/*.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/include/*.hpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include/*.hpp
 )
 
 # 源文件
-FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/src/*.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/src/*.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/src/*.cpp
+SET(CURRENT_DIR_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/src/gtest-all.cc
 )
 
 # 生成静态库
@@ -57,14 +61,13 @@ TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
 TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
 TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
 TARGET_COMPILE_OPTIONS(${PROJECT_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}      PUBLIC  PocoFoundation)
 
 # VS工程设置
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY FOLDER "3rd")
 
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/include PREFIX "include"
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include PREFIX "include"
         FILES ${CURRENT_DIR_INCLUDE_LIST})
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/CppUnit/src PREFIX "src"
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/src PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
 ENDIF()
