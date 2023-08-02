@@ -1,4 +1,4 @@
-# Go下载地址，首选：go1.19.10.windows-amd64
+# Go下载地址，首选：go1.19.12.windows-amd64
 # 安装时无脑下一步
 https://golang.google.cn/dl/
 
