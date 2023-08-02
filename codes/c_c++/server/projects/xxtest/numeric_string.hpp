@@ -1,8 +1,8 @@
 #include <string>
 #include <type_traits>
 
-namespace cpp11_numeric_string {
-namespace details              {
+namespace numeric_string {
+namespace details        {
 
 template <typename To, typename From>
 struct converter
@@ -293,4 +293,4 @@ bool double_to_str(const double from, std::string& out)
     return true;
 }
 
-} // namespace cpp11_numeric_string
+} // namespace numeric_string

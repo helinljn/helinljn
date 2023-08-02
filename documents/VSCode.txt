@@ -92,7 +92,8 @@
     "update.showReleaseNotes": false,
     "update.enableWindowsBackgroundUpdates": false,
 
-    "window.closeWhenEmpty": true,
+    "window.commandCenter": false,
+    "window.closeWhenEmpty": false,
     "window.restoreWindows": "none",
 
     "remote.SSH.configFile": "D:\\helinljn\\documents\\ssh_config",

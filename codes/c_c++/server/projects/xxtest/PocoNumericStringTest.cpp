@@ -15,7 +15,7 @@
     #pragma GCC diagnostic pop
 #endif
 
-#include "cpp11_numeric_string.hpp"
+#include "numeric_string.hpp"
 
 PocoNumericStringTest::PocoNumericStringTest(const std::string& name)
     : CppUnit::TestCase(name)
@@ -117,70 +117,70 @@ void PocoNumericStringTest::testPocoStrToNumeric(void)
 
 void PocoNumericStringTest::testStdStrToNumeric(void)
 {
-    // cpp11_numeric_string::from_string
+    // numeric_string::from_string
     {
-        assertTrue(cpp11_numeric_string::from_string<int8_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int8_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int8_t>("123") == 123);
-        assertTrue(cpp11_numeric_string::from_string<int8_t>("-123") == -123);
-        assertTrue(cpp11_numeric_string::from_string<int8_t>("1234") == -46);
+        assertTrue(numeric_string::from_string<int8_t>("0") == 0);
+        assertTrue(numeric_string::from_string<int8_t>("000") == 0);
+        assertTrue(numeric_string::from_string<int8_t>("123") == 123);
+        assertTrue(numeric_string::from_string<int8_t>("-123") == -123);
+        assertTrue(numeric_string::from_string<int8_t>("1234") == -46);
 
-        assertTrue(cpp11_numeric_string::from_string<uint8_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint8_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint8_t>("123") == 123);
-        assertTrue(cpp11_numeric_string::from_string<uint8_t>("-123") == 133);
-        assertTrue(cpp11_numeric_string::from_string<uint8_t>("1234") == 210);
+        assertTrue(numeric_string::from_string<uint8_t>("0") == 0);
+        assertTrue(numeric_string::from_string<uint8_t>("000") == 0);
+        assertTrue(numeric_string::from_string<uint8_t>("123") == 123);
+        assertTrue(numeric_string::from_string<uint8_t>("-123") == 133);
+        assertTrue(numeric_string::from_string<uint8_t>("1234") == 210);
 
-        assertTrue(cpp11_numeric_string::from_string<int16_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int16_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int16_t>("12345") == 12345);
-        assertTrue(cpp11_numeric_string::from_string<int16_t>("-12345") == -12345);
-        assertTrue(cpp11_numeric_string::from_string<int16_t>("123456") == -7616);
+        assertTrue(numeric_string::from_string<int16_t>("0") == 0);
+        assertTrue(numeric_string::from_string<int16_t>("000") == 0);
+        assertTrue(numeric_string::from_string<int16_t>("12345") == 12345);
+        assertTrue(numeric_string::from_string<int16_t>("-12345") == -12345);
+        assertTrue(numeric_string::from_string<int16_t>("123456") == -7616);
 
-        assertTrue(cpp11_numeric_string::from_string<uint16_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint16_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint16_t>("12345") == 12345);
-        assertTrue(cpp11_numeric_string::from_string<uint16_t>("-12345") == 53191);
-        assertTrue(cpp11_numeric_string::from_string<uint16_t>("123456") == 57920);
+        assertTrue(numeric_string::from_string<uint16_t>("0") == 0);
+        assertTrue(numeric_string::from_string<uint16_t>("000") == 0);
+        assertTrue(numeric_string::from_string<uint16_t>("12345") == 12345);
+        assertTrue(numeric_string::from_string<uint16_t>("-12345") == 53191);
+        assertTrue(numeric_string::from_string<uint16_t>("123456") == 57920);
 
-        assertTrue(cpp11_numeric_string::from_string<int32_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int32_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int32_t>("1234567890") == 1234567890);
-        assertTrue(cpp11_numeric_string::from_string<int32_t>("-1234567890") == -1234567890);
+        assertTrue(numeric_string::from_string<int32_t>("0") == 0);
+        assertTrue(numeric_string::from_string<int32_t>("000") == 0);
+        assertTrue(numeric_string::from_string<int32_t>("1234567890") == 1234567890);
+        assertTrue(numeric_string::from_string<int32_t>("-1234567890") == -1234567890);
 
-        assertTrue(cpp11_numeric_string::from_string<uint32_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint32_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint32_t>("1234567890") == 1234567890);
-        assertTrue(cpp11_numeric_string::from_string<uint32_t>("-1234567890") == 3060399406);
+        assertTrue(numeric_string::from_string<uint32_t>("0") == 0);
+        assertTrue(numeric_string::from_string<uint32_t>("000") == 0);
+        assertTrue(numeric_string::from_string<uint32_t>("1234567890") == 1234567890);
+        assertTrue(numeric_string::from_string<uint32_t>("-1234567890") == 3060399406);
 
-        assertTrue(cpp11_numeric_string::from_string<int64_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int64_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<int64_t>("1234567890987654321") == 1234567890987654321ll);
-        assertTrue(cpp11_numeric_string::from_string<int64_t>("-1234567890987654321") == -1234567890987654321ll);
+        assertTrue(numeric_string::from_string<int64_t>("0") == 0);
+        assertTrue(numeric_string::from_string<int64_t>("000") == 0);
+        assertTrue(numeric_string::from_string<int64_t>("1234567890987654321") == 1234567890987654321ll);
+        assertTrue(numeric_string::from_string<int64_t>("-1234567890987654321") == -1234567890987654321ll);
 
-        assertTrue(cpp11_numeric_string::from_string<uint64_t>("0") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint64_t>("000") == 0);
-        assertTrue(cpp11_numeric_string::from_string<uint64_t>("1234567890987654321") == 1234567890987654321ull);
-        assertTrue(cpp11_numeric_string::from_string<uint64_t>("-1234567890987654321") == 17212176182721897295ull);
+        assertTrue(numeric_string::from_string<uint64_t>("0") == 0);
+        assertTrue(numeric_string::from_string<uint64_t>("000") == 0);
+        assertTrue(numeric_string::from_string<uint64_t>("1234567890987654321") == 1234567890987654321ull);
+        assertTrue(numeric_string::from_string<uint64_t>("-1234567890987654321") == 17212176182721897295ull);
 
-        assertTrue(cpp11_numeric_string::from_string<float>("0") == 0.f);
-        assertTrue(cpp11_numeric_string::from_string<float>("0.f") == 0.f);
-        assertTrue(cpp11_numeric_string::from_string<float>("0.0f") == 0.f);
-        assertTrue(cpp11_numeric_string::from_string<float>("0.00") == 0.f);
-        assertTrue(cpp11_numeric_string::from_string<float>("0.000001") == 0.000001f);
-        assertTrue(cpp11_numeric_string::from_string<float>("3.141593") == 3.141593f);
-        assertTrue(cpp11_numeric_string::from_string<float>("-1234567") == -1234567.f);
-        assertTrue(cpp11_numeric_string::from_string<float>("1234567") == 1234567.f);
+        assertTrue(numeric_string::from_string<float>("0") == 0.f);
+        assertTrue(numeric_string::from_string<float>("0.f") == 0.f);
+        assertTrue(numeric_string::from_string<float>("0.0f") == 0.f);
+        assertTrue(numeric_string::from_string<float>("0.00") == 0.f);
+        assertTrue(numeric_string::from_string<float>("0.000001") == 0.000001f);
+        assertTrue(numeric_string::from_string<float>("3.141593") == 3.141593f);
+        assertTrue(numeric_string::from_string<float>("-1234567") == -1234567.f);
+        assertTrue(numeric_string::from_string<float>("1234567") == 1234567.f);
 
-        assertTrue(cpp11_numeric_string::from_string<double>("0") == 0.0);
-        assertTrue(cpp11_numeric_string::from_string<double>("0.00") == 0.0);
-        assertTrue(cpp11_numeric_string::from_string<double>("0.000000000000001") == 0.000000000000001);
-        assertTrue(cpp11_numeric_string::from_string<double>("3.141592653589793") == 3.141592653589793);
-        assertTrue(cpp11_numeric_string::from_string<double>("-1234567890123456") == -1234567890123456.0);
-        assertTrue(cpp11_numeric_string::from_string<double>("1234567890123456") == 1234567890123456.0);
+        assertTrue(numeric_string::from_string<double>("0") == 0.0);
+        assertTrue(numeric_string::from_string<double>("0.00") == 0.0);
+        assertTrue(numeric_string::from_string<double>("0.000000000000001") == 0.000000000000001);
+        assertTrue(numeric_string::from_string<double>("3.141592653589793") == 3.141592653589793);
+        assertTrue(numeric_string::from_string<double>("-1234567890123456") == -1234567890123456.0);
+        assertTrue(numeric_string::from_string<double>("1234567890123456") == 1234567890123456.0);
     }
 
-    // cpp11_numeric_string::str_to_*
+    // numeric_string::str_to_*
     {
         int8_t   i8  = 0;
         uint8_t  u8  = 0;
@@ -193,65 +193,65 @@ void PocoNumericStringTest::testStdStrToNumeric(void)
         float    f32 = 0.f;
         double   d64 = 0.0;
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", i8) && i8 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", i8) && i8 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("123", i8) && i8 == 123);
-        assertTrue(cpp11_numeric_string::str_to_int("-123", i8) && i8 == -123);
-        assertTrue(cpp11_numeric_string::str_to_int("1234", i8) && i8 == -46);
+        assertTrue(numeric_string::str_to_int("0", i8) && i8 == 0);
+        assertTrue(numeric_string::str_to_int("000", i8) && i8 == 0);
+        assertTrue(numeric_string::str_to_int("123", i8) && i8 == 123);
+        assertTrue(numeric_string::str_to_int("-123", i8) && i8 == -123);
+        assertTrue(numeric_string::str_to_int("1234", i8) && i8 == -46);
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", u8) && u8 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", u8) && u8 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("123", u8) && u8 == 123);
-        assertTrue(cpp11_numeric_string::str_to_int("-123", u8) && u8 == 133);
-        assertTrue(cpp11_numeric_string::str_to_int("1234", u8) && u8 == 210);
+        assertTrue(numeric_string::str_to_int("0", u8) && u8 == 0);
+        assertTrue(numeric_string::str_to_int("000", u8) && u8 == 0);
+        assertTrue(numeric_string::str_to_int("123", u8) && u8 == 123);
+        assertTrue(numeric_string::str_to_int("-123", u8) && u8 == 133);
+        assertTrue(numeric_string::str_to_int("1234", u8) && u8 == 210);
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", i16) && i16 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", i16) && i16 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("12345", i16) && i16 == 12345);
-        assertTrue(cpp11_numeric_string::str_to_int("-12345", i16) && i16 == -12345);
-        assertTrue(cpp11_numeric_string::str_to_int("123456", i16) && i16 == -7616);
+        assertTrue(numeric_string::str_to_int("0", i16) && i16 == 0);
+        assertTrue(numeric_string::str_to_int("000", i16) && i16 == 0);
+        assertTrue(numeric_string::str_to_int("12345", i16) && i16 == 12345);
+        assertTrue(numeric_string::str_to_int("-12345", i16) && i16 == -12345);
+        assertTrue(numeric_string::str_to_int("123456", i16) && i16 == -7616);
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", u16) && u16 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", u16) && u16 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("12345", u16) && u16 == 12345);
-        assertTrue(cpp11_numeric_string::str_to_int("-12345", u16) && u16 == 53191);
-        assertTrue(cpp11_numeric_string::str_to_int("123456", u16) && u16 == 57920);
+        assertTrue(numeric_string::str_to_int("0", u16) && u16 == 0);
+        assertTrue(numeric_string::str_to_int("000", u16) && u16 == 0);
+        assertTrue(numeric_string::str_to_int("12345", u16) && u16 == 12345);
+        assertTrue(numeric_string::str_to_int("-12345", u16) && u16 == 53191);
+        assertTrue(numeric_string::str_to_int("123456", u16) && u16 == 57920);
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", i32) && i32 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", i32) && i32 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("1234567890", i32) && i32 == 1234567890);
-        assertTrue(cpp11_numeric_string::str_to_int("-1234567890", i32) && i32 == -1234567890);
+        assertTrue(numeric_string::str_to_int("0", i32) && i32 == 0);
+        assertTrue(numeric_string::str_to_int("000", i32) && i32 == 0);
+        assertTrue(numeric_string::str_to_int("1234567890", i32) && i32 == 1234567890);
+        assertTrue(numeric_string::str_to_int("-1234567890", i32) && i32 == -1234567890);
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", u32) && u32 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", u32) && u32 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("1234567890", u32) && u32 == 1234567890);
-        assertTrue(cpp11_numeric_string::str_to_int("-1234567890", u32) && u32 == 3060399406);
+        assertTrue(numeric_string::str_to_int("0", u32) && u32 == 0);
+        assertTrue(numeric_string::str_to_int("000", u32) && u32 == 0);
+        assertTrue(numeric_string::str_to_int("1234567890", u32) && u32 == 1234567890);
+        assertTrue(numeric_string::str_to_int("-1234567890", u32) && u32 == 3060399406);
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", i64) && i64 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", i64) && i64 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("1234567890987654321", i64) && i64 == 1234567890987654321ll);
-        assertTrue(cpp11_numeric_string::str_to_int("-1234567890987654321", i64) && i64 == -1234567890987654321ll);
+        assertTrue(numeric_string::str_to_int("0", i64) && i64 == 0);
+        assertTrue(numeric_string::str_to_int("000", i64) && i64 == 0);
+        assertTrue(numeric_string::str_to_int("1234567890987654321", i64) && i64 == 1234567890987654321ll);
+        assertTrue(numeric_string::str_to_int("-1234567890987654321", i64) && i64 == -1234567890987654321ll);
 
-        assertTrue(cpp11_numeric_string::str_to_int("0", u64) && u64 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("000", u64) && u64 == 0);
-        assertTrue(cpp11_numeric_string::str_to_int("1234567890987654321", u64) && u64 == 1234567890987654321ull);
-        assertTrue(cpp11_numeric_string::str_to_int("-1234567890987654321", u64) && u64 == 17212176182721897295ull);
+        assertTrue(numeric_string::str_to_int("0", u64) && u64 == 0);
+        assertTrue(numeric_string::str_to_int("000", u64) && u64 == 0);
+        assertTrue(numeric_string::str_to_int("1234567890987654321", u64) && u64 == 1234567890987654321ull);
+        assertTrue(numeric_string::str_to_int("-1234567890987654321", u64) && u64 == 17212176182721897295ull);
 
-        assertTrue(cpp11_numeric_string::str_to_float("0", f32) && f32 == 0.f);
-        assertTrue(cpp11_numeric_string::str_to_float("0.f", f32) && f32 == 0.f);
-        assertTrue(cpp11_numeric_string::str_to_float("0.0f", f32) && f32 == 0.f);
-        assertTrue(cpp11_numeric_string::str_to_float("0.00", f32) && f32 == 0.f);
-        assertTrue(cpp11_numeric_string::str_to_float("0.000001", f32) && f32 == 0.000001f);
-        assertTrue(cpp11_numeric_string::str_to_float("3.141593", f32) && f32 == 3.141593f);
-        assertTrue(cpp11_numeric_string::str_to_float("-1234567", f32) && f32 == -1234567.f);
-        assertTrue(cpp11_numeric_string::str_to_float("1234567", f32) && f32 == 1234567.f);
+        assertTrue(numeric_string::str_to_float("0", f32) && f32 == 0.f);
+        assertTrue(numeric_string::str_to_float("0.f", f32) && f32 == 0.f);
+        assertTrue(numeric_string::str_to_float("0.0f", f32) && f32 == 0.f);
+        assertTrue(numeric_string::str_to_float("0.00", f32) && f32 == 0.f);
+        assertTrue(numeric_string::str_to_float("0.000001", f32) && f32 == 0.000001f);
+        assertTrue(numeric_string::str_to_float("3.141593", f32) && f32 == 3.141593f);
+        assertTrue(numeric_string::str_to_float("-1234567", f32) && f32 == -1234567.f);
+        assertTrue(numeric_string::str_to_float("1234567", f32) && f32 == 1234567.f);
 
-        assertTrue(cpp11_numeric_string::str_to_double("0", d64) && d64 == 0.0);
-        assertTrue(cpp11_numeric_string::str_to_double("0.00", d64) && d64 == 0.0);
-        assertTrue(cpp11_numeric_string::str_to_double("0.000000000000001", d64) && d64 == 0.000000000000001);
-        assertTrue(cpp11_numeric_string::str_to_double("3.141592653589793", d64) && d64 == 3.141592653589793);
-        assertTrue(cpp11_numeric_string::str_to_double("-1234567890123456", d64) && d64 == -1234567890123456.0);
-        assertTrue(cpp11_numeric_string::str_to_double("1234567890123456", d64) && d64 == 1234567890123456.0);
+        assertTrue(numeric_string::str_to_double("0", d64) && d64 == 0.0);
+        assertTrue(numeric_string::str_to_double("0.00", d64) && d64 == 0.0);
+        assertTrue(numeric_string::str_to_double("0.000000000000001", d64) && d64 == 0.000000000000001);
+        assertTrue(numeric_string::str_to_double("3.141592653589793", d64) && d64 == 3.141592653589793);
+        assertTrue(numeric_string::str_to_double("-1234567890123456", d64) && d64 == -1234567890123456.0);
+        assertTrue(numeric_string::str_to_double("1234567890123456", d64) && d64 == 1234567890123456.0);
     }
 }
 
@@ -356,150 +356,150 @@ void PocoNumericStringTest::testStdNumericToStr(void)
 
     std::string res;
 
-    // cpp11_numeric_string::to_string
+    // numeric_string::to_string
     {
         i8 = 0;
-        assertTrue(cpp11_numeric_string::to_string(i8) == "0");
+        assertTrue(numeric_string::to_string(i8) == "0");
         i8 = 123;
-        assertTrue(cpp11_numeric_string::to_string(i8) == "123");
+        assertTrue(numeric_string::to_string(i8) == "123");
         i8 = -123;
-        assertTrue(cpp11_numeric_string::to_string(i8) == "-123");
+        assertTrue(numeric_string::to_string(i8) == "-123");
 
         u8 = 0;
-        assertTrue(cpp11_numeric_string::to_string(u8) == "0");
+        assertTrue(numeric_string::to_string(u8) == "0");
         u8 = 123;
-        assertTrue(cpp11_numeric_string::to_string(u8) == "123");
+        assertTrue(numeric_string::to_string(u8) == "123");
 
         i16 = 0;
-        assertTrue(cpp11_numeric_string::to_string(i16) == "0");
+        assertTrue(numeric_string::to_string(i16) == "0");
         i16 = 12345;
-        assertTrue(cpp11_numeric_string::to_string(i16) == "12345");
+        assertTrue(numeric_string::to_string(i16) == "12345");
         i16 = -12345;
-        assertTrue(cpp11_numeric_string::to_string(i16) == "-12345");
+        assertTrue(numeric_string::to_string(i16) == "-12345");
 
         u16 = 0;
-        assertTrue(cpp11_numeric_string::to_string(u16) == "0");
+        assertTrue(numeric_string::to_string(u16) == "0");
         u16 = 12345;
-        assertTrue(cpp11_numeric_string::to_string(u16) == "12345");
+        assertTrue(numeric_string::to_string(u16) == "12345");
 
         i32 = 0;
-        assertTrue(cpp11_numeric_string::to_string(i32) == "0");
+        assertTrue(numeric_string::to_string(i32) == "0");
         i32 = 1234567890;
-        assertTrue(cpp11_numeric_string::to_string(i32) == "1234567890");
+        assertTrue(numeric_string::to_string(i32) == "1234567890");
         i32 = -1234567890;
-        assertTrue(cpp11_numeric_string::to_string(i32) == "-1234567890");
+        assertTrue(numeric_string::to_string(i32) == "-1234567890");
 
         u32 = 0;
-        assertTrue(cpp11_numeric_string::to_string(u32) == "0");
+        assertTrue(numeric_string::to_string(u32) == "0");
         u32 = 1234567890;
-        assertTrue(cpp11_numeric_string::to_string(u32) == "1234567890");
+        assertTrue(numeric_string::to_string(u32) == "1234567890");
 
         i64 = 0;
-        assertTrue(cpp11_numeric_string::to_string(i64) == "0");
+        assertTrue(numeric_string::to_string(i64) == "0");
         i64 = 1234567890987654321;
-        assertTrue(cpp11_numeric_string::to_string(i64) == "1234567890987654321");
+        assertTrue(numeric_string::to_string(i64) == "1234567890987654321");
         i64 = -1234567890987654321;
-        assertTrue(cpp11_numeric_string::to_string(i64) == "-1234567890987654321");
+        assertTrue(numeric_string::to_string(i64) == "-1234567890987654321");
 
         u64 = 0;
-        assertTrue(cpp11_numeric_string::to_string(u64) == "0");
+        assertTrue(numeric_string::to_string(u64) == "0");
         u64 = 1234567890987654321;
-        assertTrue(cpp11_numeric_string::to_string(u64) == "1234567890987654321");
+        assertTrue(numeric_string::to_string(u64) == "1234567890987654321");
 
         f32 = 0.f;
-        assertTrue(!cpp11_numeric_string::to_string(f32).empty());
+        assertTrue(!numeric_string::to_string(f32).empty());
         f32 = 0.000001f;
-        assertTrue(!cpp11_numeric_string::to_string(f32).empty());
+        assertTrue(!numeric_string::to_string(f32).empty());
         f32 = 3.141593f;
-        assertTrue(!cpp11_numeric_string::to_string(f32).empty());
+        assertTrue(!numeric_string::to_string(f32).empty());
         f32 = -1234567.f;
-        assertTrue(!cpp11_numeric_string::to_string(f32).empty());
+        assertTrue(!numeric_string::to_string(f32).empty());
         f32 = 1234567.f;
-        assertTrue(!cpp11_numeric_string::to_string(f32).empty());
+        assertTrue(!numeric_string::to_string(f32).empty());
 
         d64 = 0.0;
-        assertTrue(!cpp11_numeric_string::to_string(d64).empty());
+        assertTrue(!numeric_string::to_string(d64).empty());
         d64 = 0.000000000000001;
-        assertTrue(!cpp11_numeric_string::to_string(d64).empty());
+        assertTrue(!numeric_string::to_string(d64).empty());
         d64 = 3.141592653589793;
-        assertTrue(!cpp11_numeric_string::to_string(d64).empty());
+        assertTrue(!numeric_string::to_string(d64).empty());
         d64 = -1234567890123456.0;
-        assertTrue(!cpp11_numeric_string::to_string(d64).empty());
+        assertTrue(!numeric_string::to_string(d64).empty());
         d64 = 1234567890123456.0;
-        assertTrue(!cpp11_numeric_string::to_string(d64).empty());
+        assertTrue(!numeric_string::to_string(d64).empty());
     }
 
-    // cpp11_numeric_string::*_to_str
+    // numeric_string::*_to_str
     {
         i8 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(i8, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(i8, res) && res == "0");
         i8 = 123;
-        assertTrue(cpp11_numeric_string::int_to_str(i8, res) && res == "123");
+        assertTrue(numeric_string::int_to_str(i8, res) && res == "123");
         i8 = -123;
-        assertTrue(cpp11_numeric_string::int_to_str(i8, res) && res == "-123");
+        assertTrue(numeric_string::int_to_str(i8, res) && res == "-123");
 
         u8 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(u8, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(u8, res) && res == "0");
         u8 = 123;
-        assertTrue(cpp11_numeric_string::int_to_str(u8, res) && res == "123");
+        assertTrue(numeric_string::int_to_str(u8, res) && res == "123");
 
         i16 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(i16, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(i16, res) && res == "0");
         i16 = 12345;
-        assertTrue(cpp11_numeric_string::int_to_str(i16, res) && res == "12345");
+        assertTrue(numeric_string::int_to_str(i16, res) && res == "12345");
         i16 = -12345;
-        assertTrue(cpp11_numeric_string::int_to_str(i16, res) && res == "-12345");
+        assertTrue(numeric_string::int_to_str(i16, res) && res == "-12345");
 
         u16 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(u16, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(u16, res) && res == "0");
         u16 = 12345;
-        assertTrue(cpp11_numeric_string::int_to_str(u16, res) && res == "12345");
+        assertTrue(numeric_string::int_to_str(u16, res) && res == "12345");
 
         i32 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(i32, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(i32, res) && res == "0");
         i32 = 1234567890;
-        assertTrue(cpp11_numeric_string::int_to_str(i32, res) && res == "1234567890");
+        assertTrue(numeric_string::int_to_str(i32, res) && res == "1234567890");
         i32 = -1234567890;
-        assertTrue(cpp11_numeric_string::int_to_str(i32, res) && res == "-1234567890");
+        assertTrue(numeric_string::int_to_str(i32, res) && res == "-1234567890");
 
         u32 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(u32, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(u32, res) && res == "0");
         u32 = 1234567890;
-        assertTrue(cpp11_numeric_string::int_to_str(u32, res) && res == "1234567890");
+        assertTrue(numeric_string::int_to_str(u32, res) && res == "1234567890");
 
         i64 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(i64, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(i64, res) && res == "0");
         i64 = 1234567890987654321;
-        assertTrue(cpp11_numeric_string::int_to_str(i64, res) && res == "1234567890987654321");
+        assertTrue(numeric_string::int_to_str(i64, res) && res == "1234567890987654321");
         i64 = -1234567890987654321;
-        assertTrue(cpp11_numeric_string::int_to_str(i64, res) && res == "-1234567890987654321");
+        assertTrue(numeric_string::int_to_str(i64, res) && res == "-1234567890987654321");
 
         u64 = 0;
-        assertTrue(cpp11_numeric_string::int_to_str(u64, res) && res == "0");
+        assertTrue(numeric_string::int_to_str(u64, res) && res == "0");
         u64 = 1234567890987654321;
-        assertTrue(cpp11_numeric_string::int_to_str(u64, res) && res == "1234567890987654321");
+        assertTrue(numeric_string::int_to_str(u64, res) && res == "1234567890987654321");
 
         f32 = 0.f;
-        assertTrue(cpp11_numeric_string::float_to_str(f32, res) && !res.empty());
+        assertTrue(numeric_string::float_to_str(f32, res) && !res.empty());
         f32 = 0.000001f;
-        assertTrue(cpp11_numeric_string::float_to_str(f32, res) && !res.empty());
+        assertTrue(numeric_string::float_to_str(f32, res) && !res.empty());
         f32 = 3.141593f;
-        assertTrue(cpp11_numeric_string::float_to_str(f32, res) && !res.empty());
+        assertTrue(numeric_string::float_to_str(f32, res) && !res.empty());
         f32 = -1234567.f;
-        assertTrue(cpp11_numeric_string::float_to_str(f32, res) && !res.empty());
+        assertTrue(numeric_string::float_to_str(f32, res) && !res.empty());
         f32 = 1234567.f;
-        assertTrue(cpp11_numeric_string::float_to_str(f32, res) && !res.empty());
+        assertTrue(numeric_string::float_to_str(f32, res) && !res.empty());
 
         d64 = 0.0;
-        assertTrue(cpp11_numeric_string::double_to_str(d64, res) && !res.empty());
+        assertTrue(numeric_string::double_to_str(d64, res) && !res.empty());
         d64 = 0.000000000000001;
-        assertTrue(cpp11_numeric_string::double_to_str(d64, res) && !res.empty());
+        assertTrue(numeric_string::double_to_str(d64, res) && !res.empty());
         d64 = 3.141592653589793;
-        assertTrue(cpp11_numeric_string::double_to_str(d64, res) && !res.empty());
+        assertTrue(numeric_string::double_to_str(d64, res) && !res.empty());
         d64 = -1234567890123456.0;
-        assertTrue(cpp11_numeric_string::double_to_str(d64, res) && !res.empty());
+        assertTrue(numeric_string::double_to_str(d64, res) && !res.empty());
         d64 = 1234567890123456.0;
-        assertTrue(cpp11_numeric_string::double_to_str(d64, res) && !res.empty());
+        assertTrue(numeric_string::double_to_str(d64, res) && !res.empty());
     }
 }
 
