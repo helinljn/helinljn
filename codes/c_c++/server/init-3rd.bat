@@ -47,12 +47,12 @@ echo ------------------
 echo -- protobuf
 cd %ROOT_INIT_DIR%
 if not exist %PROTOBUF_INIT_DIR% (
-    git clone -b 3.18.x https://github.com/protocolbuffers/protobuf.git %PROTOBUF_INIT_DIR%
+    git clone -b 3.19.x https://github.com/protocolbuffers/protobuf.git %PROTOBUF_INIT_DIR%
 ) else (
     cd %PROTOBUF_INIT_DIR%
     git checkout .
     git fetch -p origin
-    git checkout 3.18.x
+    git checkout 3.19.x
 )
 
 echo ------------------

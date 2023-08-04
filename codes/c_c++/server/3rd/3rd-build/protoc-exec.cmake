@@ -78,4 +78,10 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${CURRENT_DIR_INCLUDE_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
+
+    # 将当前可执行文件拷贝至Protobuf生成目录
+    ADD_CUSTOM_COMMAND(
+        TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.exe ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol/proto
+    )
 ENDIF()

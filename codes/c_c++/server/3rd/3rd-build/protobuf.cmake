@@ -21,7 +21,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CURRENT_COMPILE_OPTIONS
         /wd4018
         /wd4065
-        /wd4146
         /wd4244
         /wd4267
         /wd4996
@@ -29,7 +28,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 ELSE()
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
-        -DHAVE_PTHREAD
+        # ...
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
@@ -46,33 +45,59 @@ ENDIF()
 # 头文件
 FILE(GLOB_RECURSE CURRENT_DIR_INCLUDE_LIST
     # protobuf-lite
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/arena.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/arena_impl.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/arenastring.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/explicitly_constructed.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/extension_set.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/extension_set_inl.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_enum_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_table_driven.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_table_driven_lite.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_tctable_decl.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_tctable_impl.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_tctable_impl.inc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/has_bits.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/implicit_weak_message.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/inlined_string_field.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/coded_stream.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/io_win32.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/strtod.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/zero_copy_stream.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/zero_copy_stream_impl.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/zero_copy_stream_impl_lite.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_entry_lite.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_field_lite.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_type_handler.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/message_lite.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/metadata_lite.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/parse_context.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/port.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/repeated_field.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/repeated_ptr_field.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/bytestream.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/callback.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/casts.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/common.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/int128.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/hash.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/logging.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/macros.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/map_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/mutex.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/once.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/platform_macros.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/port.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/status.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/statusor.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/stl_util.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/stringpiece.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/stringprintf.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/strutil.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/time.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/template_util.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wire_format_lite.h
 
     # protobuf
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/any.pb.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/api.pb.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/importer.h
@@ -85,18 +110,22 @@ FILE(GLOB_RECURSE CURRENT_DIR_INCLUDE_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/empty.pb.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/field_access_listener.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/field_mask.pb.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_enum_reflection.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_bases.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_reflection.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/gzip_stream.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/printer.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/tokenizer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_entry.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_field.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/map_field_inl.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/message.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/metadata.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/reflection.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/reflection_ops.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/service.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/source_context.pb.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/struct.pb.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/substitute.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/text_format.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/timestamp.pb.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/type.pb.h
@@ -104,23 +133,10 @@ FILE(GLOB_RECURSE CURRENT_DIR_INCLUDE_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/delimited_message_util.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/field_comparator.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/field_mask_util.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/datapiece.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/default_value_objectwriter.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/error_listener.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/field_mask_utility.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/json_escaping.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/json_objectwriter.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/json_stream_parser.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/object_writer.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/proto_writer.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/protostream_objectsource.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/protostream_objectwriter.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/type_info.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/type_info_test_helper.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/utility.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/json_util.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/message_differencer.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/time_util.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/type_resolver.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/type_resolver_util.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wire_format.h
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/wrappers.pb.h
@@ -135,6 +151,7 @@ FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/extension_set.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_enum_util.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_table_driven_lite.cc
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_tctable_lite.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_util.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/implicit_weak_message.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/inlined_string_field.cc
@@ -148,6 +165,7 @@ FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/message_lite.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/parse_context.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/repeated_field.cc
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/repeated_ptr_field.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/bytestream.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/common.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/stubs/int128.cc
@@ -177,6 +195,7 @@ FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_bases.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_reflection.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_table_driven.cc
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/generated_message_tctable_full.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/gzip_stream.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/printer.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/io/tokenizer.cc
@@ -206,7 +225,6 @@ FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/protostream_objectsource.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/protostream_objectwriter.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/type_info.cc
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/type_info_test_helper.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/internal/utility.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/json_util.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/util/message_differencer.cc
