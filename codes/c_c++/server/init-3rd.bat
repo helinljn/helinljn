@@ -2,10 +2,10 @@
 
 set ROOT_INIT_DIR=%CD%
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
+set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
-set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 
 echo ------------------
 echo -- fmt
@@ -17,6 +17,18 @@ if not exist %FMT_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout 9.1.0
+)
+
+echo ------------------
+echo -- poco
+cd %ROOT_INIT_DIR%
+if not exist %POCO_INIT_DIR% (
+    git clone -b devel https://github.com/pocoproject/poco.git %POCO_INIT_DIR%
+) else (
+    cd %POCO_INIT_DIR%
+    git checkout .
+    git fetch -p origin
+    git checkout devel
 )
 
 echo ------------------
@@ -53,18 +65,6 @@ if not exist %GOOGLETEST_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout release-1.12.1
-)
-
-echo ------------------
-echo -- poco
-cd %ROOT_INIT_DIR%
-if not exist %POCO_INIT_DIR% (
-    git clone https://github.com/pocoproject/poco.git %POCO_INIT_DIR%
-) else (
-    cd %POCO_INIT_DIR%
-    git checkout .
-    git fetch -p origin
-    git pull
 )
 
 pause
