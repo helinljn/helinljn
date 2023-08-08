@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-
 #include "Poco/String.h"
 #include "Poco/StringTokenizer.h"
 #include "Poco/RegularExpression.h"

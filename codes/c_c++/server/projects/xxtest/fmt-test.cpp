@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-
 #include "Poco/Format.h"
 #include "fmt/args.h"
 

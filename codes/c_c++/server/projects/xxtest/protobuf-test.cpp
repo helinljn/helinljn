@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-
 #include "TestMsgDefine.pb.h"
 #include "TestMsgStruct.pb.h"
 

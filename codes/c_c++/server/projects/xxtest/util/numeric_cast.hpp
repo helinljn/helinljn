@@ -1,11 +1,11 @@
-#ifndef __POCO_NUMERIC_CAST_HPP__
-#define __POCO_NUMERIC_CAST_HPP__
+#ifndef __NUMERIC_CAST_HPP__
+#define __NUMERIC_CAST_HPP__
 
-#include "Poco/NumericString.h"
+#include <string>
 #include <type_traits>
 
-namespace poco_numeric_cast {
-namespace details           {
+namespace numeric_cast {
+namespace details      {
 
 template <typename To, typename From>
 struct converter
@@ -18,9 +18,7 @@ struct converter<int8_t, std::string>
 {
     static int8_t convert(const std::string& from)
     {
-        int8_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<int8_t>(std::stoi(from));
     }
 };
 
@@ -30,9 +28,7 @@ struct converter<uint8_t, std::string>
 {
     static uint8_t convert(const std::string& from)
     {
-        uint8_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<uint8_t>(std::stoi(from));
     }
 };
 
@@ -42,9 +38,7 @@ struct converter<int16_t, std::string>
 {
     static int16_t convert(const std::string& from)
     {
-        int16_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<int16_t>(std::stoi(from));
     }
 };
 
@@ -54,9 +48,7 @@ struct converter<uint16_t, std::string>
 {
     static uint16_t convert(const std::string& from)
     {
-        uint16_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<uint16_t>(std::stoi(from));
     }
 };
 
@@ -66,9 +58,7 @@ struct converter<int32_t, std::string>
 {
     static int32_t convert(const std::string& from)
     {
-        int32_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<int32_t>(std::stol(from));
     }
 };
 
@@ -78,9 +68,7 @@ struct converter<uint32_t, std::string>
 {
     static uint32_t convert(const std::string& from)
     {
-        uint32_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<uint32_t>(std::stoul(from));
     }
 };
 
@@ -90,9 +78,7 @@ struct converter<int64_t, std::string>
 {
     static int64_t convert(const std::string& from)
     {
-        int64_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<int64_t>(std::stoll(from));
     }
 };
 
@@ -102,9 +88,7 @@ struct converter<uint64_t, std::string>
 {
     static uint64_t convert(const std::string& from)
     {
-        uint64_t result = 0;
-        Poco::strToInt(from, result, 10);
-        return result;
+        return static_cast<uint64_t>(std::stoull(from));
     }
 };
 
@@ -114,9 +98,7 @@ struct converter<float, std::string>
 {
     static float convert(const std::string& from)
     {
-        float result = 0;
-        Poco::strToFloat(from, result);
-        return result;
+        return std::stof(from);
     }
 };
 
@@ -126,9 +108,7 @@ struct converter<double, std::string>
 {
     static double convert(const std::string& from)
     {
-        double result = 0;
-        Poco::strToDouble(from, result);
-        return result;
+        return std::stod(from);
     }
 };
 
@@ -138,9 +118,7 @@ struct converter<std::string, int8_t>
 {
     static std::string convert(const int8_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -150,9 +128,7 @@ struct converter<std::string, uint8_t>
 {
     static std::string convert(const uint8_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -162,9 +138,7 @@ struct converter<std::string, int16_t>
 {
     static std::string convert(const int16_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -174,9 +148,7 @@ struct converter<std::string, uint16_t>
 {
     static std::string convert(const uint16_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -186,9 +158,7 @@ struct converter<std::string, int32_t>
 {
     static std::string convert(const int32_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -198,9 +168,7 @@ struct converter<std::string, uint32_t>
 {
     static std::string convert(const uint32_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -210,9 +178,7 @@ struct converter<std::string, int64_t>
 {
     static std::string convert(const int64_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -222,9 +188,7 @@ struct converter<std::string, uint64_t>
 {
     static std::string convert(const uint64_t from)
     {
-        std::string result;
-        Poco::intToStr(from, 10, result);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -234,9 +198,7 @@ struct converter<std::string, float>
 {
     static std::string convert(const float from)
     {
-        std::string result;
-        Poco::floatToStr(result, from);
-        return result;
+        return std::to_string(from);
     }
 };
 
@@ -246,16 +208,14 @@ struct converter<std::string, double>
 {
     static std::string convert(const double from)
     {
-        std::string result;
-        Poco::doubleToStr(result, from);
-        return result;
+        return std::to_string(from);
     }
 };
 
 } // namespace details
 
 // string to numeric
-template <typename To, typename Dummy = std::enable_if_t<std::is_integral_v<To> || std::is_floating_point_v<To>>>
+template <typename To, typename Dummy = std::enable_if_t<std::is_arithmetic_v<To>>>
 To from_string(const std::string& from)
 {
     try
@@ -269,19 +229,12 @@ To from_string(const std::string& from)
 }
 
 // numeric to string
-template <typename From, typename Dummy = std::enable_if_t<std::is_integral_v<From> || std::is_floating_point_v<From>>>
+template <typename From, typename Dummy = std::enable_if_t<std::is_arithmetic_v<From>>>
 std::string to_string(const From from)
 {
-    try
-    {
-        return details::converter<std::string, From>::convert(from);
-    }
-    catch(...)
-    {
-        return std::string{};
-    }
+    return details::converter<std::string, From>::convert(from);
 }
 
-} // namespace poco_numeric_cast
+} // namespace numeric_cast
 
-#endif // __POCO_NUMERIC_CAST_HPP__
+#endif // __NUMERIC_CAST_HPP__
