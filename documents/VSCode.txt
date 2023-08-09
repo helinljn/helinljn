@@ -11,19 +11,13 @@
 
     6. Go
 
-    7. Lua language support for Visual Studio Code
+    7. WSL workspaceFolder
 
-    8. WSL workspaceFolder
+    8. Markdown All in One
 
-    9. vscode-drawio
+    9. One Dark Pro
 
-    10. Markdown All in One
-
-    11. Protobuf support
-
-    12. One Dark Pro
-
-    13. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
+    10. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
 
 【常用设置】
 {
