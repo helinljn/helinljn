@@ -102,7 +102,9 @@
     },
 
     "C_Cpp.intelliSenseCacheSize": 0,
+    "C_Cpp.intelliSenseUpdateDelay": 1000,
     "C_Cpp.autoAddFileAssociations": false,
+    "C_Cpp.autocompleteAddParentheses": true,
 
     "[go]": {
         "editor.formatOnSave": false,
