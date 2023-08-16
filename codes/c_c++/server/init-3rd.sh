@@ -28,7 +28,7 @@ else
     cd $POCO_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout devel
+    git checkout remotes/origin/devel
 fi
 
 echo ------------------
@@ -52,7 +52,7 @@ else
     cd $PROTOBUF_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout 3.19.x
+    git checkout remotes/origin/3.19.x
 fi
 
 echo ------------------
