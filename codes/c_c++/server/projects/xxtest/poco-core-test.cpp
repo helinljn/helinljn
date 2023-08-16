@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "Poco/Environment.h"
 #include "Poco/AtomicCounter.h"
+#include "Poco/Nullable.h"
 #include "Poco/Ascii.h"
 #include "Poco/NestedDiagnosticContext.h"
 #include "Poco/DynamicFactory.h"
@@ -9,42 +10,42 @@
 // Unnamed namespace for internal linkage
 namespace {
 
-class base_info
+class BaseInfo
 {
 public:
-    base_info(void) = default;
-    virtual ~base_info(void) = default;
+    BaseInfo(void) = default;
+    virtual ~BaseInfo(void) = default;
 
-    base_info(const base_info& msg) = delete;
-    base_info(base_info&& msg) = delete;
+    BaseInfo(const BaseInfo& msg) = delete;
+    BaseInfo(BaseInfo&& msg) = delete;
 
-    base_info& operator=(const base_info& msg) = delete;
-    base_info& operator=(base_info&& msg) = delete;
+    BaseInfo& operator=(const BaseInfo& msg) = delete;
+    BaseInfo& operator=(BaseInfo&& msg) = delete;
 
     virtual std::string name(void) const = 0;
 };
 
-class player_info : public base_info
+class PlayerInfo : public BaseInfo
 {
 public:
-    player_info(void) = default;
-    virtual ~player_info(void) = default;
+    PlayerInfo(void) = default;
+    virtual ~PlayerInfo(void) = default;
 
     std::string name(void) const override
     {
-        return "player_info";
+        return "PlayerInfo";
     }
 };
 
-class friend_info : public base_info
+class FriendInfo : public BaseInfo
 {
 public:
-    friend_info(void) = default;
-    virtual ~friend_info(void) = default;
+    FriendInfo(void) = default;
+    virtual ~FriendInfo(void) = default;
 
     std::string name(void) const override
     {
-        return "friend_info";
+        return "FriendInfo";
     }
 };
 
@@ -106,12 +107,16 @@ GTEST_TEST(PocoCoreTest, FixedLength)
 
 GTEST_TEST(PocoCoreTest, Environment)
 {
-    std::string env_key = "shmilyl_env_test";
-    ASSERT_TRUE(!Poco::Environment::has(env_key));
-
-    Poco::Environment::set(env_key, "milan");
-    ASSERT_TRUE(Poco::Environment::has(env_key));
-    ASSERT_TRUE(Poco::Environment::get(env_key) == "milan");
+    std::string envKey = "shmilyl_env_test";
+    if (Poco::Environment::has(envKey))
+    {
+        ASSERT_TRUE(Poco::Environment::get(envKey) == "milan");
+    }
+    else
+    {
+        Poco::Environment::set(envKey, "milan");
+        ASSERT_TRUE(Poco::Environment::get(envKey) == "milan");
+    }
 
     ASSERT_TRUE(!Poco::Environment::osName().empty());
     ASSERT_TRUE(!Poco::Environment::osDisplayName().empty());
@@ -149,6 +154,81 @@ GTEST_TEST(PocoCoreTest, AtomicCounter)
     ac = ac2;
     ASSERT_TRUE(ac.value() == 200);
     ASSERT_TRUE(ac.value() == ac2.value());
+}
+
+GTEST_TEST(PocoCoreTest, Nullable)
+{
+    Poco::Nullable<int>         i;
+    Poco::Nullable<double>      f;
+    Poco::Nullable<std::string> s;
+
+    ASSERT_TRUE(i.isNull());
+    ASSERT_TRUE(f.isNull());
+    ASSERT_TRUE(s.isNull());
+
+    i = 1;
+    f = 1.5;
+    s = "abc";
+
+    ASSERT_TRUE(!i.isNull());
+    ASSERT_TRUE(!f.isNull());
+    ASSERT_TRUE(!s.isNull());
+
+    ASSERT_TRUE(i == 1);
+    ASSERT_TRUE(f == 1.5);
+    ASSERT_TRUE(s == "abc");
+
+    i.clear();
+    f.clear();
+    s.clear();
+
+    ASSERT_TRUE(i.isNull());
+    ASSERT_TRUE(f.isNull());
+    ASSERT_TRUE(s.isNull());
+
+    Poco::Nullable<int> n1;
+    ASSERT_TRUE(n1.isNull());
+    ASSERT_TRUE(n1.value(42) == 42);
+    ASSERT_TRUE(n1.isNull());
+
+    ASSERT_TRUE(!(0 == n1));
+    ASSERT_TRUE(0 != n1);
+    ASSERT_TRUE(!(n1 == 0));
+    ASSERT_TRUE(n1 != 0);
+
+    n1 = 1;
+    ASSERT_TRUE(!n1.isNull());
+    ASSERT_TRUE(n1.value() == 1);
+
+    Poco::Nullable<int> n2(42);
+    ASSERT_TRUE(!n2.isNull());
+    ASSERT_TRUE(n2.value() == 42);
+    ASSERT_TRUE(n2.value(99) == 42);
+
+    ASSERT_TRUE(!(0 == n2));
+    ASSERT_TRUE(0 != n2);
+    ASSERT_TRUE(!(n2 == 0));
+    ASSERT_TRUE(n2 != 0);
+
+    n1 = n2;
+    ASSERT_TRUE(!n1.isNull());
+    ASSERT_TRUE(n1.value() == 42);
+
+    n1.clear();
+    n2.clear();
+    ASSERT_TRUE(n1 == n2);
+
+    n1 = 1; n2 = 1;
+    ASSERT_TRUE(n1 == n2);
+
+    n1.clear();
+    ASSERT_TRUE(n1 < n2);
+    ASSERT_TRUE(n2 > n1);
+
+    n2 = -1; n1 = 0;
+    ASSERT_TRUE(n2 < n1);
+    ASSERT_TRUE(n2 != n1);
+    ASSERT_TRUE(n1 > n2);
 }
 
 GTEST_TEST(PocoCoreTest, ASCII)
@@ -279,24 +359,24 @@ GTEST_TEST(PocoCoreTest, NDC)
 
 GTEST_TEST(PocoCoreTest, DynamicFactory)
 {
-    Poco::DynamicFactory<base_info> df;
+    Poco::DynamicFactory<BaseInfo> df;
 
-    df.registerClass<player_info>("player_info");
-    df.registerClass<friend_info>("friend_info");
+    df.registerClass<PlayerInfo>("PlayerInfo");
+    df.registerClass<FriendInfo>("FriendInfo");
 
-    ASSERT_TRUE(df.isClass("player_info"));
-    ASSERT_TRUE(df.isClass("friend_info"));
+    ASSERT_TRUE(df.isClass("PlayerInfo"));
+    ASSERT_TRUE(df.isClass("FriendInfo"));
 
-    std::unique_ptr<player_info> player_ptr(static_cast<player_info*>(df.createInstance("player_info")));
-    std::unique_ptr<friend_info> friend_ptr(static_cast<friend_info*>(df.createInstance("friend_info")));
+    std::unique_ptr<PlayerInfo> player_ptr(static_cast<PlayerInfo*>(df.createInstance("PlayerInfo")));
+    std::unique_ptr<FriendInfo> friend_ptr(static_cast<FriendInfo*>(df.createInstance("FriendInfo")));
 
-    ASSERT_TRUE(player_ptr && player_ptr.get() && player_ptr->name() == "player_info");
-    ASSERT_TRUE(friend_ptr && friend_ptr.get() && friend_ptr->name() == "friend_info");
+    ASSERT_TRUE(player_ptr && player_ptr.get() && player_ptr->name() == "PlayerInfo");
+    ASSERT_TRUE(friend_ptr && friend_ptr.get() && friend_ptr->name() == "FriendInfo");
 
-    df.unregisterClass("friend_info");
+    df.unregisterClass("FriendInfo");
 
-    ASSERT_TRUE(df.isClass("player_info"));
-    ASSERT_TRUE(!df.isClass("friend_info"));
+    ASSERT_TRUE(df.isClass("PlayerInfo"));
+    ASSERT_TRUE(!df.isClass("FriendInfo"));
 }
 
 GTEST_TEST(PocoCoreTest, MemoryPool)
