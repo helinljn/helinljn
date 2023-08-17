@@ -1,10 +1,10 @@
 @echo off
 
-set ABS_PATH=D:\helinljn\codes\c_c++\server
-set SERVER_D=%ABS_PATH%\server_d.sln
-set SERVER_R=%ABS_PATH%\server_r.sln
-set TARGET_D=%ABS_PATH%\.build\windows\x64-Debug\server.sln
-set TARGET_R=%ABS_PATH%\.build\windows\x64-Release\server.sln
+set ROOT_DIR=%~dp0
+set SERVER_D=%ROOT_DIR%\server_d.sln
+set SERVER_R=%ROOT_DIR%\server_r.sln
+set TARGET_D=%ROOT_DIR%\.build\windows\x64-Debug\server.sln
+set TARGET_R=%ROOT_DIR%\.build\windows\x64-Release\server.sln
 
 if exist %SERVER_D% (
     del /f /q "%SERVER_D%"

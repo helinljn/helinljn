@@ -1,6 +1,6 @@
 @echo off
 
-set ROOT_INIT_DIR=%CD%
+set ROOT_INIT_DIR=%~dp0
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
