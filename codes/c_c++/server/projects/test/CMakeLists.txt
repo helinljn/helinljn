@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(xxtest)
+PROJECT(test)
 
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
@@ -25,7 +25,6 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     ${CMAKE_3RD_DIR_MYSQL}/include/mysql
     ${CMAKE_3RD_DIR_OPENSSL}/include
-    ${CMAKE_PROJECT_ROOT_DIR}/projects/xxprotocol
 )
 
 # 链接库目录
@@ -37,7 +36,6 @@ SET(CURRENT_LINK_LIBS_DIR
 
 # 生成依赖库
 SET(CURRENT_DEPENDENT_LIBS
-    xxprotocol
     protoc
     protobuf
     gmock

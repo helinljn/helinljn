@@ -16,7 +16,7 @@
 #include <google/protobuf/port_def.inc>
 
 PROTOBUF_PRAGMA_INIT_SEG
-namespace XXMsg {
+namespace PBMsg {
 constexpr TestCommonInfo::TestCommonInfo(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : test_string_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -52,49 +52,49 @@ struct TestCommonInfoListDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT TestCommonInfoListDefaultTypeInternal _TestCommonInfoList_default_instance_;
-}  // namespace XXMsg
+}  // namespace PBMsg
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_TestMsgStruct_2eproto[2];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_TestMsgStruct_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_TestMsgStruct_2eproto = nullptr;
 
 const uint32_t TableStruct_TestMsgStruct_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_bool_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_float_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_double_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_string_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_int32_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_sint32_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_uint32_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_int64_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_sint64_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfo, test_uint64_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_bool_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_float_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_double_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_string_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_int32_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_sint32_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_uint32_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_int64_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_sint64_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfo, test_uint64_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfoList, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfoList, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfoList, common_info_list_),
-  PROTOBUF_FIELD_OFFSET(::XXMsg::TestCommonInfoList, common_type_list_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfoList, common_info_list_),
+  PROTOBUF_FIELD_OFFSET(::PBMsg::TestCommonInfoList, common_type_list_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::XXMsg::TestCommonInfo)},
-  { 16, -1, -1, sizeof(::XXMsg::TestCommonInfoList)},
+  { 0, -1, -1, sizeof(::PBMsg::TestCommonInfo)},
+  { 16, -1, -1, sizeof(::PBMsg::TestCommonInfoList)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::XXMsg::_TestCommonInfo_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::XXMsg::_TestCommonInfoList_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::PBMsg::_TestCommonInfo_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::PBMsg::_TestCommonInfoList_default_instance_),
 };
 
 const char descriptor_table_protodef_TestMsgStruct_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\023TestMsgStruct.proto\022\005XXMsg\032\023TestMsgDef"
+  "\n\023TestMsgStruct.proto\022\005PBMsg\032\023TestMsgDef"
   "ine.proto\"\335\001\n\016TestCommonInfo\022\021\n\ttest_boo"
   "l\030\001 \001(\010\022\022\n\ntest_float\030\002 \001(\002\022\023\n\013test_doub"
   "le\030\003 \001(\001\022\023\n\013test_string\030\004 \001(\014\022\022\n\ntest_in"
@@ -102,8 +102,8 @@ const char descriptor_table_protodef_TestMsgStruct_2eproto[] PROTOBUF_SECTION_VA
   "int32\030\007 \001(\r\022\022\n\ntest_int64\030\010 \001(\003\022\023\n\013test_"
   "sint64\030\t \001(\022\022\023\n\013test_uint64\030\n \001(\004\"v\n\022Tes"
   "tCommonInfoList\022/\n\020common_info_list\030\001 \003("
-  "\0132\025.XXMsg.TestCommonInfo\022/\n\020common_type_"
-  "list\030\002 \003(\0162\025.XXMsg.TestCommonTypeb\006proto"
+  "\0132\025.PBMsg.TestCommonInfo\022/\n\020common_type_"
+  "list\030\002 \003(\0162\025.PBMsg.TestCommonTypeb\006proto"
   "3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_TestMsgStruct_2eproto_deps[1] = {
@@ -111,7 +111,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_TestMsgStruct_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgStruct_2eproto = {
-  false, false, 401, descriptor_table_protodef_TestMsgStruct_2eproto, "TestMsgStruct.proto",
+  false, false, 401, descriptor_table_protodef_TestMsgStruct_2eproto, "TestMsgStruct.proto", 
   &descriptor_table_TestMsgStruct_2eproto_once, descriptor_table_TestMsgStruct_2eproto_deps, 1, 2,
   schemas, file_default_instances, TableStruct_TestMsgStruct_2eproto::offsets,
   file_level_metadata_TestMsgStruct_2eproto, file_level_enum_descriptors_TestMsgStruct_2eproto, file_level_service_descriptors_TestMsgStruct_2eproto,
@@ -122,7 +122,7 @@ PROTOBUF_ATTRIBUTE_WEAK const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable
 
 // Force running AddDescriptors() at dynamic initialization time.
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_TestMsgStruct_2eproto(&descriptor_table_TestMsgStruct_2eproto);
-namespace XXMsg {
+namespace PBMsg {
 
 // ===================================================================
 
@@ -137,7 +137,7 @@ TestCommonInfo::TestCommonInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:XXMsg.TestCommonInfo)
+  // @@protoc_insertion_point(arena_constructor:PBMsg.TestCommonInfo)
 }
 TestCommonInfo::TestCommonInfo(const TestCommonInfo& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
@@ -147,13 +147,13 @@ TestCommonInfo::TestCommonInfo(const TestCommonInfo& from)
     test_string_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), "", GetArenaForAllocation());
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_test_string().empty()) {
-    test_string_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_test_string(),
+    test_string_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_test_string(), 
       GetArenaForAllocation());
   }
   ::memcpy(&test_bool_, &from.test_bool_,
     static_cast<size_t>(reinterpret_cast<char*>(&test_uint32_) -
     reinterpret_cast<char*>(&test_bool_)) + sizeof(test_uint32_));
-  // @@protoc_insertion_point(copy_constructor:XXMsg.TestCommonInfo)
+  // @@protoc_insertion_point(copy_constructor:PBMsg.TestCommonInfo)
 }
 
 inline void TestCommonInfo::SharedCtor() {
@@ -168,7 +168,7 @@ test_string_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyString
 }
 
 TestCommonInfo::~TestCommonInfo() {
-  // @@protoc_insertion_point(destructor:XXMsg.TestCommonInfo)
+  // @@protoc_insertion_point(destructor:PBMsg.TestCommonInfo)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -190,7 +190,7 @@ void TestCommonInfo::SetCachedSize(int size) const {
 }
 
 void TestCommonInfo::Clear() {
-// @@protoc_insertion_point(message_clear_start:XXMsg.TestCommonInfo)
+// @@protoc_insertion_point(message_clear_start:PBMsg.TestCommonInfo)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -314,7 +314,7 @@ failure:
 
 uint8_t* TestCommonInfo::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:XXMsg.TestCommonInfo)
+  // @@protoc_insertion_point(serialize_to_array_start:PBMsg.TestCommonInfo)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -390,12 +390,12 @@ uint8_t* TestCommonInfo::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:XXMsg.TestCommonInfo)
+  // @@protoc_insertion_point(serialize_to_array_end:PBMsg.TestCommonInfo)
   return target;
 }
 
 size_t TestCommonInfo::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:XXMsg.TestCommonInfo)
+// @@protoc_insertion_point(message_byte_size_start:PBMsg.TestCommonInfo)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
@@ -479,7 +479,7 @@ void TestCommonInfo::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void TestCommonInfo::MergeFrom(const TestCommonInfo& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:XXMsg.TestCommonInfo)
+// @@protoc_insertion_point(class_specific_merge_from_start:PBMsg.TestCommonInfo)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -526,7 +526,7 @@ void TestCommonInfo::MergeFrom(const TestCommonInfo& from) {
 }
 
 void TestCommonInfo::CopyFrom(const TestCommonInfo& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:XXMsg.TestCommonInfo)
+// @@protoc_insertion_point(class_specific_copy_from_start:PBMsg.TestCommonInfo)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -575,21 +575,21 @@ TestCommonInfoList::TestCommonInfoList(::PROTOBUF_NAMESPACE_ID::Arena* arena,
   if (!is_message_owned) {
     RegisterArenaDtor(arena);
   }
-  // @@protoc_insertion_point(arena_constructor:XXMsg.TestCommonInfoList)
+  // @@protoc_insertion_point(arena_constructor:PBMsg.TestCommonInfoList)
 }
 TestCommonInfoList::TestCommonInfoList(const TestCommonInfoList& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       common_info_list_(from.common_info_list_),
       common_type_list_(from.common_type_list_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  // @@protoc_insertion_point(copy_constructor:XXMsg.TestCommonInfoList)
+  // @@protoc_insertion_point(copy_constructor:PBMsg.TestCommonInfoList)
 }
 
 inline void TestCommonInfoList::SharedCtor() {
 }
 
 TestCommonInfoList::~TestCommonInfoList() {
-  // @@protoc_insertion_point(destructor:XXMsg.TestCommonInfoList)
+  // @@protoc_insertion_point(destructor:PBMsg.TestCommonInfoList)
   if (GetArenaForAllocation() != nullptr) return;
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -610,7 +610,7 @@ void TestCommonInfoList::SetCachedSize(int size) const {
 }
 
 void TestCommonInfoList::Clear() {
-// @@protoc_insertion_point(message_clear_start:XXMsg.TestCommonInfoList)
+// @@protoc_insertion_point(message_clear_start:PBMsg.TestCommonInfoList)
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -626,7 +626,7 @@ const char* TestCommonInfoList::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
     uint32_t tag;
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // repeated .XXMsg.TestCommonInfo common_info_list = 1;
+      // repeated .PBMsg.TestCommonInfo common_info_list = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr -= 1;
@@ -639,7 +639,7 @@ const char* TestCommonInfoList::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         } else
           goto handle_unusual;
         continue;
-      // repeated .XXMsg.TestCommonType common_type_list = 2;
+      // repeated .PBMsg.TestCommonType common_type_list = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedEnumParser(_internal_mutable_common_type_list(), ptr, ctx);
@@ -647,7 +647,7 @@ const char* TestCommonInfoList::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         } else if (static_cast<uint8_t>(tag) == 16) {
           uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-          _internal_add_common_type_list(static_cast<::XXMsg::TestCommonType>(val));
+          _internal_add_common_type_list(static_cast<::PBMsg::TestCommonType>(val));
         } else
           goto handle_unusual;
         continue;
@@ -676,11 +676,11 @@ failure:
 
 uint8_t* TestCommonInfoList::_InternalSerialize(
     uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:XXMsg.TestCommonInfoList)
+  // @@protoc_insertion_point(serialize_to_array_start:PBMsg.TestCommonInfoList)
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .XXMsg.TestCommonInfo common_info_list = 1;
+  // repeated .PBMsg.TestCommonInfo common_info_list = 1;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_common_info_list_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -688,7 +688,7 @@ uint8_t* TestCommonInfoList::_InternalSerialize(
       InternalWriteMessage(1, this->_internal_common_info_list(i), target, stream);
   }
 
-  // repeated .XXMsg.TestCommonType common_type_list = 2;
+  // repeated .PBMsg.TestCommonType common_type_list = 2;
   {
     int byte_size = _common_type_list_cached_byte_size_.load(std::memory_order_relaxed);
     if (byte_size > 0) {
@@ -701,26 +701,26 @@ uint8_t* TestCommonInfoList::_InternalSerialize(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:XXMsg.TestCommonInfoList)
+  // @@protoc_insertion_point(serialize_to_array_end:PBMsg.TestCommonInfoList)
   return target;
 }
 
 size_t TestCommonInfoList::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:XXMsg.TestCommonInfoList)
+// @@protoc_insertion_point(message_byte_size_start:PBMsg.TestCommonInfoList)
   size_t total_size = 0;
 
   uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .XXMsg.TestCommonInfo common_info_list = 1;
+  // repeated .PBMsg.TestCommonInfo common_info_list = 1;
   total_size += 1UL * this->_internal_common_info_list_size();
   for (const auto& msg : this->common_info_list_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
-  // repeated .XXMsg.TestCommonType common_type_list = 2;
+  // repeated .PBMsg.TestCommonType common_type_list = 2;
   {
     size_t data_size = 0;
     unsigned int count = static_cast<unsigned int>(this->_internal_common_type_list_size());for (unsigned int i = 0; i < count; i++) {
@@ -755,7 +755,7 @@ void TestCommonInfoList::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
 
 
 void TestCommonInfoList::MergeFrom(const TestCommonInfoList& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:XXMsg.TestCommonInfoList)
+// @@protoc_insertion_point(class_specific_merge_from_start:PBMsg.TestCommonInfoList)
   GOOGLE_DCHECK_NE(&from, this);
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -766,7 +766,7 @@ void TestCommonInfoList::MergeFrom(const TestCommonInfoList& from) {
 }
 
 void TestCommonInfoList::CopyFrom(const TestCommonInfoList& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:XXMsg.TestCommonInfoList)
+// @@protoc_insertion_point(class_specific_copy_from_start:PBMsg.TestCommonInfoList)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
@@ -790,13 +790,13 @@ void TestCommonInfoList::InternalSwap(TestCommonInfoList* other) {
 }
 
 // @@protoc_insertion_point(namespace_scope)
-}  // namespace XXMsg
+}  // namespace PBMsg
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::XXMsg::TestCommonInfo* Arena::CreateMaybeMessage< ::XXMsg::TestCommonInfo >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::XXMsg::TestCommonInfo >(arena);
+template<> PROTOBUF_NOINLINE ::PBMsg::TestCommonInfo* Arena::CreateMaybeMessage< ::PBMsg::TestCommonInfo >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::PBMsg::TestCommonInfo >(arena);
 }
-template<> PROTOBUF_NOINLINE ::XXMsg::TestCommonInfoList* Arena::CreateMaybeMessage< ::XXMsg::TestCommonInfoList >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::XXMsg::TestCommonInfoList >(arena);
+template<> PROTOBUF_NOINLINE ::PBMsg::TestCommonInfoList* Arena::CreateMaybeMessage< ::PBMsg::TestCommonInfoList >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::PBMsg::TestCommonInfoList >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

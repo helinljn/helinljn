@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package XXMsg;
+package PBMsg;
 
 // 在 proto3 的语法中，枚举必须从 0 开始
 enum TestCommonType
