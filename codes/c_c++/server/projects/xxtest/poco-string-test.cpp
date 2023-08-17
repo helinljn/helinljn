@@ -160,6 +160,35 @@ GTEST_TEST(PocoStringTest, ToLower)
     }
 }
 
+GTEST_TEST(PocoStringTest, IString)
+{
+    Poco::istring is1 = "AbC";
+    Poco::istring is2 = "aBc";
+    ASSERT_TRUE(is1 == is2);
+
+    const char c1[] = {'G', 0, (char)0xFC, 'n', 't', 'e', 'r', '\0'};
+    const char c2[] = {'g', 0, (char)0xDC, 'N', 'T', 'E', 'R', '\0'};
+    is1 = c1;
+    is2 = c2;
+    ASSERT_TRUE(is1 == is2);
+    is1[0] = 'f';
+    ASSERT_TRUE(is1 < is2);
+    is1[0] = 'F';
+    ASSERT_TRUE(is1 < is2);
+    is1[0] = 'H';
+    ASSERT_TRUE(is1 > is2);
+    is1[0] = 'h';
+    ASSERT_TRUE(is1 > is2);
+
+    is1 = "aAaBbBcCc";
+    is2 = "bbb";
+    ASSERT_TRUE(isubstr(is1, is2) == 3);
+    is2 = "bC";
+    ASSERT_TRUE(isubstr(is1, is2) == 5);
+    is2 = "xxx";
+    ASSERT_TRUE(isubstr(is1, is2) == Poco::istring::npos);
+}
+
 GTEST_TEST(PocoStringTest, ICompare)
 {
     std::string s1 = "AAA";
@@ -296,52 +325,49 @@ GTEST_TEST(PocoStringTest, Replace)
 
 GTEST_TEST(PocoStringTest, StartsWith)
 {
-    // startsWith
-    {
-        std::string s1("o");
+    std::string s1("o");
 
-        ASSERT_TRUE(Poco::startsWith(s1, std::string("o")));
-        ASSERT_TRUE(Poco::startsWith(s1, std::string("")));
+    ASSERT_TRUE(Poco::startsWith(s1, std::string("o")));
+    ASSERT_TRUE(Poco::startsWith(s1, std::string("")));
 
-        ASSERT_TRUE(!Poco::startsWith(s1, std::string("O")));
-        ASSERT_TRUE(!Poco::startsWith(s1, std::string("1")));
+    ASSERT_TRUE(!Poco::startsWith(s1, std::string("O")));
+    ASSERT_TRUE(!Poco::startsWith(s1, std::string("1")));
 
-        std::string s2("");
+    std::string s2("");
 
-        ASSERT_TRUE(Poco::startsWith(s2, std::string("")));
+    ASSERT_TRUE(Poco::startsWith(s2, std::string("")));
 
-        ASSERT_TRUE(!Poco::startsWith(s2, std::string("o")));
+    ASSERT_TRUE(!Poco::startsWith(s2, std::string("o")));
 
-        std::string s3("oO");
+    std::string s3("oO");
 
-        ASSERT_TRUE(Poco::startsWith(s3, std::string("o")));
+    ASSERT_TRUE(Poco::startsWith(s3, std::string("o")));
 
-        ASSERT_TRUE(!Poco::startsWith(s3, std::string(" o")));
-    }
+    ASSERT_TRUE(!Poco::startsWith(s3, std::string(" o")));
+}
 
-    // endsWith
-    {
-        std::string s1("o");
+GTEST_TEST(PocoStringTest, EndsWith)
+{
+    std::string s1("o");
 
-        ASSERT_TRUE(Poco::endsWith(s1, std::string("o")));
-        ASSERT_TRUE(Poco::endsWith(s1, std::string("")));
+    ASSERT_TRUE(Poco::endsWith(s1, std::string("o")));
+    ASSERT_TRUE(Poco::endsWith(s1, std::string("")));
 
-        ASSERT_TRUE(!Poco::endsWith(s1, std::string("O")));
-        ASSERT_TRUE(!Poco::endsWith(s1, std::string("1")));
+    ASSERT_TRUE(!Poco::endsWith(s1, std::string("O")));
+    ASSERT_TRUE(!Poco::endsWith(s1, std::string("1")));
 
 
-        std::string s2("");
+    std::string s2("");
 
-        ASSERT_TRUE(Poco::endsWith(s2, std::string("")));
+    ASSERT_TRUE(Poco::endsWith(s2, std::string("")));
 
-        ASSERT_TRUE(!Poco::endsWith(s2, std::string("o")));
+    ASSERT_TRUE(!Poco::endsWith(s2, std::string("o")));
 
-        std::string s3("Oo");
+    std::string s3("Oo");
 
-        ASSERT_TRUE(Poco::endsWith(s3, std::string("o")));
+    ASSERT_TRUE(Poco::endsWith(s3, std::string("o")));
 
-        ASSERT_TRUE(!Poco::endsWith(s3, std::string("o ")));
-    }
+    ASSERT_TRUE(!Poco::endsWith(s3, std::string("o ")));
 }
 
 GTEST_TEST(PocoStringTest, Split)
