@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "util/numeric_cast.hpp"
 #include "Poco/Environment.h"
 #include "Poco/AtomicCounter.h"
 #include "Poco/Nullable.h"
@@ -405,5 +406,61 @@ GTEST_TEST(PocoCoreTest, MemoryPool)
         int* pi = static_cast<int*>(ptrs[idx]);
         ASSERT_TRUE(*pi == static_cast<int>(idx + 1));
         pool.release(pi);
+    }
+}
+
+GTEST_TEST(PocoCoreTest, FastMemoryPoolWithFastMutex)
+{
+    Poco::FastMemoryPool<int/* , Poco::FastMutex */>         fastIntPool;
+    Poco::FastMemoryPool<std::string/* , Poco::FastMutex */> fastStringPool;
+
+    std::vector<int*>         intVec;
+    std::vector<std::string*> strVec;
+
+    const int blocks = 1000;
+    for (int idx = 0; idx < blocks; ++idx)
+    {
+        intVec.emplace_back(new(fastIntPool.get()) int(idx));
+        strVec.emplace_back(new(fastStringPool.get()) std::string(numeric_cast::to_string(idx)));
+    }
+
+    for (int idx = 0; idx < blocks; ++idx)
+    {
+        ASSERT_TRUE(intVec[idx] && *intVec[idx] == idx);
+        ASSERT_TRUE(strVec[idx] && *strVec[idx] == numeric_cast::to_string(idx));
+    }
+
+    for (int i = 0; i < blocks; ++i)
+    {
+        fastIntPool.release(intVec[i]);
+        fastStringPool.release(strVec[i]);
+    }
+}
+
+GTEST_TEST(PocoCoreTest, FastMemoryPoolWithNullMutex)
+{
+    Poco::FastMemoryPool<int, Poco::NullMutex>         fastIntPool;
+    Poco::FastMemoryPool<std::string, Poco::NullMutex> fastStringPool;
+
+    std::vector<int*>         intVec;
+    std::vector<std::string*> strVec;
+
+    const int blocks = 1000;
+    for (int idx = 0; idx < blocks; ++idx)
+    {
+        intVec.emplace_back(new(fastIntPool.get()) int(idx));
+        strVec.emplace_back(new(fastStringPool.get()) std::string(numeric_cast::to_string(idx)));
+    }
+
+    for (int idx = 0; idx < blocks; ++idx)
+    {
+        ASSERT_TRUE(intVec[idx] && *intVec[idx] == idx);
+        ASSERT_TRUE(strVec[idx] && *strVec[idx] == numeric_cast::to_string(idx));
+    }
+
+    for (int i = 0; i < blocks; ++i)
+    {
+        fastIntPool.release(intVec[i]);
+        fastStringPool.release(strVec[i]);
     }
 }
