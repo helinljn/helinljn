@@ -35,12 +35,12 @@ echo ------------------
 echo -- libevent
 cd $ROOT_INIT_DIR
 if [ ! -d $LIBEVENT_INIT_DIR ]; then
-    git clone -b release-2.1.12-stable https://github.com/libevent/libevent.git $LIBEVENT_INIT_DIR
+    git clone -b patches-2.1 https://github.com/libevent/libevent.git $LIBEVENT_INIT_DIR
 else
     cd $LIBEVENT_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout release-2.1.12-stable
+    git checkout remotes/origin/patches-2.1
 fi
 
 echo ------------------
@@ -59,10 +59,10 @@ echo ------------------
 echo -- googletest
 cd $ROOT_INIT_DIR
 if [ ! -d $GOOGLETEST_INIT_DIR ]; then
-    git clone -b release-1.12.1 https://github.com/google/googletest.git $GOOGLETEST_INIT_DIR
+    git clone -b v1.12.x https://github.com/google/googletest.git $GOOGLETEST_INIT_DIR
 else
     cd $GOOGLETEST_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout release-1.12.1
+    git checkout remotes/origin/v1.12.x
 fi
