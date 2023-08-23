@@ -16,7 +16,6 @@
 #include "Poco/NumericString.h"
 #include "Poco/Dynamic/Var.h"
 #include "Poco/Dynamic/Pair.h"
-#include "Poco/Dynamic/Struct.h"
 
 #if defined(POCO_COMPILER_MSVC)
     #pragma warning(pop)
