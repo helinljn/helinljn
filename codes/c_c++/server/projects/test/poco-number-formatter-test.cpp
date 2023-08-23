@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "util/poco.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/NumberParser.h"
 

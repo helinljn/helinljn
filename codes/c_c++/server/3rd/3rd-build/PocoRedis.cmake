@@ -21,7 +21,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        /wd4244
+        /wd4458
     )
 ELSE()
     # 宏定义

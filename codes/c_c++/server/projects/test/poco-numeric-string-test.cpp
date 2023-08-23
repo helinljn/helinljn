@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
-#include "Poco/NumberFormatter.h"
 #include "util/numeric_cast.hpp"
+#include "util/poco.h"
+#include "Poco/NumberFormatter.h"
 
 namespace poco_numeric_cast {
 namespace details           {

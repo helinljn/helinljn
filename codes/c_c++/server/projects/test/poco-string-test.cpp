@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "util/poco.h"
 #include "Poco/String.h"
 #include "Poco/StringTokenizer.h"
 #include "Poco/RegularExpression.h"
@@ -166,8 +167,8 @@ GTEST_TEST(PocoStringTest, IString)
     Poco::istring is2 = "aBc";
     ASSERT_TRUE(is1 == is2);
 
-    const char c1[] = {'G', 0, (char)0xFC, 'n', 't', 'e', 'r', '\0'};
-    const char c2[] = {'g', 0, (char)0xDC, 'N', 'T', 'E', 'R', '\0'};
+    const char c1[] = {'G', 0, 'n', 't', 'e', 'r', '\0'};
+    const char c2[] = {'g', 0, 'N', 'T', 'E', 'R', '\0'};
     is1 = c1;
     is2 = c2;
     ASSERT_TRUE(is1 == is2);

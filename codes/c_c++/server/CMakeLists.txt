@@ -25,11 +25,11 @@ SET(CMAKE_PROJECT_BUILD_ROOT_DIR ${CMAKE_SOURCE_DIR}/.build)
 # 编译选项、生成目录、第三方库目录、静态库 & 动态库的前缀
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W3 /WX /MP")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /MP")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W3 /WX /MP")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /MP")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
@@ -67,11 +67,11 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0A00")
 ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Werror")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Werror")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 

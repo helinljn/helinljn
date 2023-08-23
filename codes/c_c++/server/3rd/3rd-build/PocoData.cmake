@@ -20,6 +20,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
+        /wd4100
+        /wd4245
         /wd4996
     )
 ELSE()
@@ -34,7 +36,10 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
+        -Wno-extra
         -Wno-sign-compare
+        -Wno-deprecated-copy
+        -Wno-unused-parameter
     )
 ENDIF()
 

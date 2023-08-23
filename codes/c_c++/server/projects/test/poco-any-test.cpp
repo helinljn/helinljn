@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "util/poco.h"
 #include "Poco/Any.h"
 
 GTEST_TEST(PocoAnyTest, AnyDefaultCtor)

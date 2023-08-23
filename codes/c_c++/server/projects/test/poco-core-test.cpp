@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "util/numeric_cast.hpp"
+#include "util/poco.h"
 #include "Poco/Environment.h"
 #include "Poco/AtomicCounter.h"
 #include "Poco/Nullable.h"

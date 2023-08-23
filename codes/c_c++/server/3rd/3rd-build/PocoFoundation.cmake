@@ -22,8 +22,20 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
+        /wd4100
+        /wd4127
+        /wd4131
+        /wd4189
         /wd4244
+        /wd4245
         /wd4267
+        /wd4389
+        /wd4456
+        /wd4457
+        /wd4459
+        /wd4701
+        /wd4702
+        /wd4706
     )
 ELSE()
     # 宏定义
@@ -38,7 +50,12 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
+        -Wno-pedantic
+        -Wno-type-limits
         -Wno-sign-compare
+        -Wno-unused-parameter
+        -Wno-ignored-qualifiers
+        -Wno-implicit-fallthrough
     )
 ENDIF()
 
@@ -143,4 +160,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${CURRENT_DIR_INCLUDE_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
+ELSE()
+    # 单独为Linux下C++源文件设置额外的编译选项
+    TARGET_COMPILE_OPTIONS(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>: -Wno-deprecated-copy>)
 ENDIF()
