@@ -37,7 +37,7 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        -Wno-sign-compare
     )
 ENDIF()
 
