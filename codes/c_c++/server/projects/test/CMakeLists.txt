@@ -15,6 +15,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JWT/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
@@ -50,6 +51,7 @@ SET(CURRENT_DEPENDENT_LIBS
     PocoUtil
     PocoZip
     PocoXML
+    PocoJWT
     PocoJSON
     PocoCrypto
     PocoFoundation
