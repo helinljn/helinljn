@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "util/poco.h"
 #include "Poco/Dynamic/Var.h"
+#include "Poco/Dynamic/Struct.h"
 
 GTEST_TEST(PocoVarTest, VarInt8)
 {
@@ -1906,4 +1907,189 @@ GTEST_TEST(PocoVarTest, VarArithmeticOperators)
     ASSERT_TRUE(any1-- == 12);
     ASSERT_TRUE(any1 == 11);
     ASSERT_TRUE(--any1 == 10);
+}
+
+GTEST_TEST(PocoVarTest, ArrayToString)
+{
+    std::string s1("string");
+    Poco::Int8  s2(23);
+
+    std::vector<Poco::Dynamic::Var> s16;
+    s16.push_back(s1);
+    s16.push_back(s2);
+
+    Poco::Dynamic::Var a1(s16);
+    ASSERT_TRUE(a1.convert<std::string>() == "[ \"string\", 23 ]");
+}
+
+GTEST_TEST(PocoVarTest, ArrayToStringEscape)
+{
+    std::string s1("\"quoted string\"");
+    Poco::Int8  s2(23);
+
+    std::vector<Poco::Dynamic::Var> s16;
+    s16.push_back(s1);
+    s16.push_back(s2);
+
+    Poco::Dynamic::Var a1(s16);
+    ASSERT_TRUE(a1.convert<std::string>() == "[ \"\\\"quoted string\\\"\", 23 ]");
+}
+
+GTEST_TEST(PocoVarTest, StructToString)
+{
+    Poco::Dynamic::Struct<std::string> aStruct;
+    aStruct["First Name"] = "Junior";
+    aStruct["Last Name"]  = "POCO";
+    aStruct["Age"]        = 1;
+
+    Poco::Dynamic::Var a1(aStruct);
+    const std::string  res      = a1.convert<std::string>();
+    const std::string  expected = "{ \"Age\": 1, \"First Name\": \"Junior\", \"Last Name\": \"POCO\" }";
+    ASSERT_TRUE(res == expected);
+    ASSERT_TRUE(res == aStruct.toString());
+}
+
+GTEST_TEST(PocoVarTest, StructToStringEscape)
+{
+    Poco::Dynamic::Struct<std::string> aStruct;
+    aStruct["Value"] = "Value with \" and \n";
+
+    Poco::Dynamic::Var a1(aStruct);
+    const std::string  res      = a1.convert<std::string>();
+    const std::string  expected = "{ \"Value\": \"Value with \\\" and \\n\" }";
+    ASSERT_TRUE(res == expected);
+    ASSERT_TRUE(res == aStruct.toString());
+}
+
+GTEST_TEST(PocoVarTest, JSONDeserializeString)
+{
+    Poco::Dynamic::Var a("test");
+    std::string        tst;
+
+    {
+        tst = Poco::Dynamic::Var::toString(a);
+
+        Poco::Dynamic::Var b = Poco::Dynamic::Var::parse(tst);
+        ASSERT_TRUE(b.convert<std::string>() == "test");
+    }
+
+    {
+        Poco::Dynamic::Var c('c');
+
+        tst = Poco::Dynamic::Var::toString(c);
+
+        Poco::Dynamic::Var b2 = Poco::Dynamic::Var::parse(tst);
+        ASSERT_TRUE(b2.convert<char>() == 'c');
+    }
+
+    tst = "{ \"a\": \"1\", \"b\": \"2\" \n}";
+    a   = Poco::Dynamic::Var::parse(tst);
+    ASSERT_TRUE(a.toString() == "{ \"a\": \"1\", \"b\": \"2\" }");
+
+    tst = "{ \"a\": \"1\", \"b\": \"2\"\n}";
+    a   = Poco::Dynamic::Var::parse(tst);
+    ASSERT_TRUE(a.toString() == "{ \"a\": \"1\", \"b\": \"2\" }");
+
+    tst = "{ \"message\": \"escape\\b\\f\\n\\r\\t\", \"path\": \"\\/dev\\/null\", \"zero\": null }";
+    a   = Poco::Dynamic::Var::parse(tst);
+    ASSERT_TRUE(a.toString() == "{ \"message\": \"escape\\b\\f\\n\\r\\t\", \"path\": \"/dev/null\", \"zero\": null }");
+}
+
+GTEST_TEST(PocoVarTest, JSONDeserializePrimitives)
+{
+    int8_t   i8{-12};
+    uint16_t u16{2345};
+    int32_t  i32{-24343};
+    uint64_t u64{1234567890};
+    bool     b{false};
+    float    f{3.1415f};
+    double   d{3.1415};
+
+    std::string s8  = Poco::Dynamic::Var::toString(i8);
+    std::string s16 = Poco::Dynamic::Var::toString(u16);
+    std::string s32 = Poco::Dynamic::Var::toString(i32);
+    std::string s64 = Poco::Dynamic::Var::toString(u64);
+    std::string sb  = Poco::Dynamic::Var::toString(b);
+    std::string sf  = Poco::Dynamic::Var::toString(f);
+    std::string sd  = Poco::Dynamic::Var::toString(d);
+
+    Poco::Dynamic::Var a8  = Poco::Dynamic::Var::parse(s8);
+    Poco::Dynamic::Var a16 = Poco::Dynamic::Var::parse(s16);
+    Poco::Dynamic::Var a32 = Poco::Dynamic::Var::parse(s32);
+    Poco::Dynamic::Var a64 = Poco::Dynamic::Var::parse(s64);
+    Poco::Dynamic::Var ab  = Poco::Dynamic::Var::parse(sb);
+    Poco::Dynamic::Var af  = Poco::Dynamic::Var::parse(sf);
+    Poco::Dynamic::Var ad  = Poco::Dynamic::Var::parse(sd);
+
+    ASSERT_TRUE(a8 == i8);
+    ASSERT_TRUE(a16 == u16);
+    ASSERT_TRUE(a32 == i32);
+    ASSERT_TRUE(a64 == u64);
+    ASSERT_TRUE(ab == b);
+    ASSERT_TRUE(af == f);
+    ASSERT_TRUE(ad == d);
+}
+
+GTEST_TEST(PocoVarTest, JSONDeserializeArray)
+{
+    int8_t      i8{-12};
+    uint16_t    u16{2345};
+    int32_t     i32{-24343};
+    uint64_t    u64{1234567890};
+    bool        b{false};
+    float       f{3.1415f};
+    double      d{3.1415};
+    std::string s{"test string"};
+    char        c{'x'};
+
+    std::vector<Poco::Dynamic::Var> aVec;
+    aVec.push_back(i8);
+    aVec.push_back(u16);
+    aVec.push_back(i32);
+    aVec.push_back(u64);
+    aVec.push_back(b);
+    aVec.push_back(f);
+    aVec.push_back(d);
+    aVec.push_back(s);
+    aVec.push_back(c);
+
+    std::string        sVec = Poco::Dynamic::Var::toString(aVec);
+    Poco::Dynamic::Var a    = Poco::Dynamic::Var::parse(sVec);
+
+    ASSERT_TRUE(a[0] == i8);
+    ASSERT_TRUE(a[1] == u16);
+    ASSERT_TRUE(a[2] == i32);
+    ASSERT_TRUE(a[3] == u64);
+    ASSERT_TRUE(a[4] == b);
+    ASSERT_TRUE(a[5] == f);
+    ASSERT_TRUE(a[6] == d);
+    ASSERT_TRUE(a[7] == s);
+    ASSERT_TRUE(a[8] == c);
+}
+
+GTEST_TEST(PocoVarTest, JSONRoundtripStruct)
+{
+    int64_t     i64{-1234567890};
+    uint64_t    u64{1234567890};
+    bool        b{false};
+    double      d{3.1415};
+    std::string s{"test string"};
+
+    Poco::Dynamic::Struct<std::string> aStr;
+    aStr["i64"] = i64;
+    aStr["u64"] = u64;
+    aStr["b"]   = b;
+    aStr["d"]   = d;
+    aStr["s"]   = s;
+
+    std::string        sStr = Poco::Dynamic::Var::toString(aStr);
+    Poco::Dynamic::Var a    = Poco::Dynamic::Var::parse(sStr);
+
+    ASSERT_TRUE(a["i64"].isInteger());
+    ASSERT_TRUE(!a["u64"].isSigned());
+    ASSERT_TRUE(a["b"].isBoolean());
+    ASSERT_TRUE(a["d"].isNumeric());
+    ASSERT_TRUE(a["s"].isString());
+
+    ASSERT_TRUE(Poco::Dynamic::Var::toString(a) == sStr);
 }
