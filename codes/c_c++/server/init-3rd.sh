@@ -28,7 +28,7 @@ else
     cd $POCO_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout remotes/origin/devel
+    git pull
 fi
 
 echo ------------------
@@ -40,7 +40,7 @@ else
     cd $LIBEVENT_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout remotes/origin/patches-2.1
+    git pull
 fi
 
 echo ------------------
@@ -52,7 +52,7 @@ else
     cd $PROTOBUF_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout remotes/origin/3.19.x
+    git pull
 fi
 
 echo ------------------
@@ -64,5 +64,5 @@ else
     cd $GOOGLETEST_INIT_DIR
     git checkout .
     git fetch -p origin
-    git checkout remotes/origin/v1.12.x
+    git pull
 fi
