@@ -1,8 +1,12 @@
 #include "gtest/gtest.h"
+#include "fmt/core.h"
 #include "util/poco.h"
 #include "Poco/Thread.h"
 #include "Poco/Timestamp.h"
+#include "Poco/Timespan.h"
+#include "Poco/Timezone.h"
 #include "Poco/Clock.h"
+#include "Poco/DateTime.h"
 
 GTEST_TEST(PocoTimeTest, Timestamp)
 {
@@ -80,4 +84,207 @@ GTEST_TEST(PocoTimeTest, Clock)
     Poco::Thread::sleep(1);
     ASSERT_TRUE(now.elapsed() >= 1000);
     ASSERT_TRUE(now.isElapsed(1000));
+}
+
+GTEST_TEST(PocoTimeTest, TimespanConversions)
+{
+    Poco::Timespan ts;
+    ASSERT_TRUE(ts.totalMicroseconds() == 0);
+
+    ts = Poco::Timespan::DAYS;
+    ASSERT_TRUE(ts.totalMicroseconds() == Poco::Timespan::DAYS);
+    ASSERT_TRUE(ts.totalMilliseconds() == 86400000);
+    ASSERT_TRUE(ts.totalSeconds() == 86400);
+    ASSERT_TRUE(ts.totalMinutes() == 60 * 24);
+    ASSERT_TRUE(ts.totalHours() == 24);
+    ASSERT_TRUE(ts.days() == 1);
+
+    ASSERT_TRUE(ts.microseconds() == 0);
+    ASSERT_TRUE(ts.milliseconds() == 0);
+    ASSERT_TRUE(ts.seconds() == 0);
+    ASSERT_TRUE(ts.minutes() == 0);
+    ASSERT_TRUE(ts.hours() == 0);
+
+    ts.assign(2, 12, 30, 10, 123456);
+    ASSERT_TRUE(ts.microseconds() == 456);
+    ASSERT_TRUE(ts.milliseconds() == 123);
+    ASSERT_TRUE(ts.seconds() == 10);
+    ASSERT_TRUE(ts.minutes() == 30);
+    ASSERT_TRUE(ts.hours() == 12);
+    ASSERT_TRUE(ts.days() == 2);
+
+    ts.assign(0, 36, 30, 10, 123456);
+    ASSERT_TRUE(ts.microseconds() == 456);
+    ASSERT_TRUE(ts.milliseconds() == 123);
+    ASSERT_TRUE(ts.useconds() == 123456);
+    ASSERT_TRUE(ts.seconds() == 10);
+    ASSERT_TRUE(ts.minutes() == 30);
+    ASSERT_TRUE(ts.hours() == 12);
+    ASSERT_TRUE(ts.days() == 1);
+
+    ts.assign(0, 0, 2190, 10, 123456);
+    ASSERT_TRUE(ts.microseconds() == 456);
+    ASSERT_TRUE(ts.milliseconds() == 123);
+    ASSERT_TRUE(ts.useconds() == 123456);
+    ASSERT_TRUE(ts.seconds() == 10);
+    ASSERT_TRUE(ts.minutes() == 30);
+    ASSERT_TRUE(ts.hours() == 12);
+    ASSERT_TRUE(ts.days() == 1);
+
+    ts.assign(std::chrono::minutes(62));
+    ASSERT_TRUE(ts.hours() == 1);
+    ASSERT_TRUE(ts.minutes() == 2);
+}
+
+GTEST_TEST(PocoTimeTest, TimespanComparisons)
+{
+    Poco::Timespan ts1(10000000);
+    Poco::Timespan ts2(20000000);
+    Poco::Timespan ts3(20000000);
+
+    ASSERT_TRUE(ts1 != ts2);
+    ASSERT_TRUE(!(ts1 == ts2));
+    ASSERT_TRUE(ts1 <= ts2);
+    ASSERT_TRUE(ts1 < ts2);
+    ASSERT_TRUE(ts2 > ts1);
+    ASSERT_TRUE(ts2 >= ts1);
+
+    ASSERT_TRUE(ts2 == ts3);
+    ASSERT_TRUE(!(ts2 != ts3));
+    ASSERT_TRUE(ts2 >= ts3);
+    ASSERT_TRUE(ts2 <= ts3);
+    ASSERT_TRUE(!(ts2 > ts3));
+    ASSERT_TRUE(!(ts2 < ts3));
+
+    ASSERT_TRUE(ts1 == 10000000);
+    ASSERT_TRUE(ts1 != 20000000);
+    ASSERT_TRUE(ts1 <= 10000000);
+    ASSERT_TRUE(ts1 <= 20000000);
+    ASSERT_TRUE(ts1 >= 10000000);
+    ASSERT_TRUE(ts1 >= 5000000);
+    ASSERT_TRUE(ts1 < 20000000);
+    ASSERT_TRUE(ts1 > 5000000);
+}
+
+GTEST_TEST(PocoTimeTest, TimespanArithmetics)
+{
+    Poco::Timespan ts1(100000000);
+    Poco::Timespan ts2(50000000);
+    Poco::Timespan ts3;
+
+    ts3 = ts1 + ts2;
+    ASSERT_TRUE(ts3 == 150000000);
+
+    ts3 = ts1 + 30000000;
+    ASSERT_TRUE(ts3 == 130000000);
+
+    ts3 = ts1 - ts2;
+    ASSERT_TRUE(ts3 == 50000000);
+
+    ts3 = ts1 - 20000000;
+    ASSERT_TRUE(ts3 == 80000000);
+
+    ts3 += 20000000;
+    ASSERT_TRUE(ts3 == ts1);
+
+    ts3 -= ts2;
+    ASSERT_TRUE(ts3 == ts2);
+}
+
+GTEST_TEST(PocoTimeTest, Timezone)
+{
+    fmt::print("Timezone::name         = {}\n", Poco::Timezone::name());
+    fmt::print("Timezone::dstName      = {}\n", Poco::Timezone::dstName());
+    fmt::print("Timezone::standardName = {}\n", Poco::Timezone::standardName());
+    fmt::print("Timezone::utcOffset    = {}\n", Poco::Timezone::utcOffset());
+    fmt::print("Timezone::dst          = {}\n", Poco::Timezone::dst());
+}
+
+GTEST_TEST(PocoTimeTest, DateTime)
+{
+    // Unix epoch 1970-01-01 00:00:00 Thursday
+    Poco::Timestamp ts(0);
+    Poco::DateTime  dt(ts);
+
+    ASSERT_TRUE(dt.year() == 1970);
+    ASSERT_TRUE(dt.month() == 1);
+    ASSERT_TRUE(dt.day() == 1);
+    ASSERT_TRUE(dt.hour() == 0);
+    ASSERT_TRUE(dt.minute() == 0);
+    ASSERT_TRUE(dt.second() == 0);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.dayOfWeek() == 4);
+    ASSERT_TRUE(dt.timestamp().epochTime() == 0);
+
+    // 2001-09-09 01:46:40 Sunday
+    ts = Poco::Timestamp::fromEpochTime(1000000000);
+    dt = ts;
+
+    ASSERT_TRUE(dt.year() == 2001);
+    ASSERT_TRUE(dt.month() == 9);
+    ASSERT_TRUE(dt.day() == 9);
+    ASSERT_TRUE(dt.hour() == 1);
+    ASSERT_TRUE(dt.minute() == 46);
+    ASSERT_TRUE(dt.second() == 40);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.dayOfWeek() == 0);
+    ASSERT_TRUE(dt.timestamp().epochTime() == 1000000000);
+
+    // Test that we can represent down to the microsecond.
+    dt = Poco::DateTime(2010, 1, 31, 17, 30, 15, 800, 3);
+
+    ASSERT_TRUE(dt.year() == 2010);
+    ASSERT_TRUE(dt.month() == 1);
+    ASSERT_TRUE(dt.day() == 31);
+    ASSERT_TRUE(dt.hour() == 17);
+    ASSERT_TRUE(dt.minute() == 30);
+    ASSERT_TRUE(dt.second() == 15);
+    ASSERT_TRUE(dt.millisecond() == 800);
+    ASSERT_TRUE(dt.microsecond() == 3);
+    ASSERT_TRUE(dt.dayOfWeek() == 0);
+    ASSERT_TRUE(dt.timestamp().epochTime() == 1264959015);
+
+    // 2001-09-09 01:46:40 Sunday
+    dt.assign(2001, 9, 9, 1, 46, 40);
+
+    ASSERT_TRUE(dt.year() == 2001);
+    ASSERT_TRUE(dt.month() == 9);
+    ASSERT_TRUE(dt.day() == 9);
+    ASSERT_TRUE(dt.hour() == 1);
+    ASSERT_TRUE(dt.minute() == 46);
+    ASSERT_TRUE(dt.second() == 40);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.dayOfWeek() == 0);
+    ASSERT_TRUE(dt.timestamp().epochTime() == 1000000000);
+
+    // 2001-09-09 09:46:40 Sunday
+    dt.makeLocal(Poco::Timezone::utcOffset());
+
+    ASSERT_TRUE(dt.year() == 2001);
+    ASSERT_TRUE(dt.month() == 9);
+    ASSERT_TRUE(dt.day() == 9);
+    ASSERT_TRUE(dt.hour() == 9);
+    ASSERT_TRUE(dt.minute() == 46);
+    ASSERT_TRUE(dt.second() == 40);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.dayOfWeek() == 0);
+    ASSERT_TRUE(dt.timestamp().epochTime() == static_cast<time_t>(1000000000 + Poco::Timezone::utcOffset()));
+
+    // 2001-09-09 01:46:40 Sunday
+    dt.makeUTC(Poco::Timezone::utcOffset());
+
+    ASSERT_TRUE(dt.year() == 2001);
+    ASSERT_TRUE(dt.month() == 9);
+    ASSERT_TRUE(dt.day() == 9);
+    ASSERT_TRUE(dt.hour() == 1);
+    ASSERT_TRUE(dt.minute() == 46);
+    ASSERT_TRUE(dt.second() == 40);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.dayOfWeek() == 0);
+    ASSERT_TRUE(dt.timestamp().epochTime() == 1000000000);
 }

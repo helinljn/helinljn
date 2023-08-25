@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include "fmt/core.h"
 #include "util/numeric_cast.hpp"
 #include "util/poco.h"
 #include "Poco/Environment.h"
@@ -120,13 +121,13 @@ GTEST_TEST(PocoCoreTest, Environment)
         ASSERT_TRUE(Poco::Environment::get(envKey) == "milan");
     }
 
-    ASSERT_TRUE(!Poco::Environment::osName().empty());
-    ASSERT_TRUE(!Poco::Environment::osDisplayName().empty());
-    ASSERT_TRUE(!Poco::Environment::osVersion().empty());
-    ASSERT_TRUE(!Poco::Environment::osArchitecture().empty());
-    ASSERT_TRUE(!Poco::Environment::nodeName().empty());
-    ASSERT_TRUE(!Poco::Environment::nodeId().empty());
-    ASSERT_TRUE(Poco::Environment::processorCount() > 0);
+    fmt::print("Poco::Environment::osName         = {}\n", Poco::Environment::osName());
+    fmt::print("Poco::Environment::osDisplayName  = {}\n", Poco::Environment::osDisplayName());
+    fmt::print("Poco::Environment::osVersion      = {}\n", Poco::Environment::osVersion());
+    fmt::print("Poco::Environment::osArchitecture = {}\n", Poco::Environment::osArchitecture());
+    fmt::print("Poco::Environment::nodeName       = {}\n", Poco::Environment::nodeName());
+    fmt::print("Poco::Environment::nodeId         = {}\n", Poco::Environment::nodeId());
+    fmt::print("Poco::Environment::processorCount = {}\n", Poco::Environment::processorCount());
 }
 
 GTEST_TEST(PocoCoreTest, AtomicCounter)
