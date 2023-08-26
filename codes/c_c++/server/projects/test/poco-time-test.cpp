@@ -198,6 +198,7 @@ GTEST_TEST(PocoTimeTest, Timezone)
     fmt::print("Timezone::standardName = {}\n", Poco::Timezone::standardName());
     fmt::print("Timezone::utcOffset    = {}\n", Poco::Timezone::utcOffset());
     fmt::print("Timezone::dst          = {}\n", Poco::Timezone::dst());
+    fmt::print("Timezone::tzd          = {}\n", Poco::Timezone::tzd());
 }
 
 GTEST_TEST(PocoTimeTest, DateTime)
@@ -261,7 +262,8 @@ GTEST_TEST(PocoTimeTest, DateTime)
     ASSERT_TRUE(dt.timestamp().epochTime() == 1000000000);
 
     // 2001-09-09 09:46:40 Sunday
-    dt.makeLocal(Poco::Timezone::utcOffset());
+    const int tzd = Poco::Timezone::tzd();
+    dt.makeLocal(tzd);
 
     ASSERT_TRUE(dt.year() == 2001);
     ASSERT_TRUE(dt.month() == 9);
@@ -272,10 +274,10 @@ GTEST_TEST(PocoTimeTest, DateTime)
     ASSERT_TRUE(dt.millisecond() == 0);
     ASSERT_TRUE(dt.microsecond() == 0);
     ASSERT_TRUE(dt.dayOfWeek() == 0);
-    ASSERT_TRUE(dt.timestamp().epochTime() == static_cast<time_t>(1000000000 + Poco::Timezone::utcOffset()));
+    ASSERT_TRUE(dt.timestamp().epochTime() == static_cast<time_t>(1000000000 + tzd));
 
     // 2001-09-09 01:46:40 Sunday
-    dt.makeUTC(Poco::Timezone::utcOffset());
+    dt.makeUTC(tzd);
 
     ASSERT_TRUE(dt.year() == 2001);
     ASSERT_TRUE(dt.month() == 9);
