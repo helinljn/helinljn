@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "fmt/core.h"
 #include "util/poco.h"
+#include "util/DateTimeEx.h"
 #include "Poco/Thread.h"
 #include "Poco/Timestamp.h"
 #include "Poco/Timespan.h"
@@ -289,4 +290,10 @@ GTEST_TEST(PocoTimeTest, DateTime)
     ASSERT_TRUE(dt.microsecond() == 0);
     ASSERT_TRUE(dt.dayOfWeek() == 0);
     ASSERT_TRUE(dt.timestamp().epochTime() == 1000000000);
+}
+
+GTEST_TEST(PocoTimeTest, DateTimeEx)
+{
+    Poco::DateTimeEx dt;
+    ASSERT_TRUE(dt._ts.epochTime() == dt._dt.timestamp().epochTime());
 }
