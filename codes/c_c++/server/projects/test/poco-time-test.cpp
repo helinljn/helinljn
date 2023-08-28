@@ -8,6 +8,9 @@
 #include "Poco/Timezone.h"
 #include "Poco/Clock.h"
 #include "Poco/DateTime.h"
+#include "Poco/DateTimeFormat.h"
+#include "Poco/DateTimeFormatter.h"
+#include "Poco/DateTimeParser.h"
 
 GTEST_TEST(PocoTimeTest, Timestamp)
 {
@@ -539,4 +542,109 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
     ASSERT_TRUE(dt.microsecond() == 0);
     ASSERT_TRUE(dt.dayOfWeek() == 0);
     ASSERT_TRUE(dt.timestamp().epochTime() == 1314521000);
+}
+
+GTEST_TEST(PocoTimeTest, DateTimeFormatter)
+{
+    Poco::DateTimeEx dt(2020, 2, 2, 13, 14, 52);
+
+    Poco::DateTime utc      = dt.utc();
+    Poco::DateTime utcLocal = dt.utcLocal();
+
+    // ASCTIME_FORMAT
+    std::string str = Poco::DateTimeFormatter::format(utc, Poco::DateTimeFormat::ASCTIME_FORMAT);
+    ASSERT_TRUE(str == "Sun Feb  2 05:14:52 2020");
+
+    str = Poco::DateTimeFormatter::format(utcLocal, Poco::DateTimeFormat::ASCTIME_FORMAT);
+    ASSERT_TRUE(str == "Sun Feb  2 13:14:52 2020");
+
+    // SORTABLE_FORMAT
+    str = Poco::DateTimeFormatter::format(utc, Poco::DateTimeFormat::SORTABLE_FORMAT);
+    ASSERT_TRUE(str == "2020-02-02 05:14:52");
+
+    str = Poco::DateTimeFormatter::format(utcLocal, Poco::DateTimeFormat::SORTABLE_FORMAT);
+    ASSERT_TRUE(str == "2020-02-02 13:14:52");
+}
+
+GTEST_TEST(PocoTimeTest, DateTimeParser)
+{
+    Poco::DateTime   dt;
+    Poco::DateTimeEx dtex;
+    int              tzd;
+
+    // ASCTIME_FORMAT
+    dt = Poco::DateTimeParser::parse(Poco::DateTimeFormat::ASCTIME_FORMAT, "Sun Feb  2 05:14:52 2020", tzd);
+    ASSERT_TRUE(dt.year() == 2020);
+    ASSERT_TRUE(dt.month() == 2);
+    ASSERT_TRUE(dt.day() == 2);
+    ASSERT_TRUE(dt.hour() == 5);
+    ASSERT_TRUE(dt.minute() == 14);
+    ASSERT_TRUE(dt.second() == 52);
+    ASSERT_TRUE(tzd == 0);
+
+    dtex = dt;
+    ASSERT_TRUE(dtex.year() == 2020);
+    ASSERT_TRUE(dtex.month() == 2);
+    ASSERT_TRUE(dtex.day() == 2);
+    ASSERT_TRUE(dtex.hour() == 13);
+    ASSERT_TRUE(dtex.minute() == 14);
+    ASSERT_TRUE(dtex.second() == 52);
+    ASSERT_TRUE(tzd == 0);
+    ASSERT_TRUE(dtex.operator-(dt).microseconds() == 0);
+
+    dt = Poco::DateTimeParser::parse(Poco::DateTimeFormat::ASCTIME_FORMAT, "Sun Feb  2 13:14:52 2020", tzd);
+    ASSERT_TRUE(dt.year() == 2020);
+    ASSERT_TRUE(dt.month() == 2);
+    ASSERT_TRUE(dt.day() == 2);
+    ASSERT_TRUE(dt.hour() == 13);
+    ASSERT_TRUE(dt.minute() == 14);
+    ASSERT_TRUE(dt.second() == 52);
+    ASSERT_TRUE(tzd == 0);
+
+    dtex = dt.makeTM();
+    ASSERT_TRUE(dtex.year() == 2020);
+    ASSERT_TRUE(dtex.month() == 2);
+    ASSERT_TRUE(dtex.day() == 2);
+    ASSERT_TRUE(dtex.hour() == 13);
+    ASSERT_TRUE(dtex.minute() == 14);
+    ASSERT_TRUE(dtex.second() == 52);
+    ASSERT_TRUE(tzd == 0);
+
+    // SORTABLE_FORMAT
+    dt = Poco::DateTimeParser::parse(Poco::DateTimeFormat::SORTABLE_FORMAT, "2020-02-02 05:14:52", tzd);
+    ASSERT_TRUE(dt.year() == 2020);
+    ASSERT_TRUE(dt.month() == 2);
+    ASSERT_TRUE(dt.day() == 2);
+    ASSERT_TRUE(dt.hour() == 5);
+    ASSERT_TRUE(dt.minute() == 14);
+    ASSERT_TRUE(dt.second() == 52);
+    ASSERT_TRUE(tzd == 0);
+
+    dtex = dt;
+    ASSERT_TRUE(dtex.year() == 2020);
+    ASSERT_TRUE(dtex.month() == 2);
+    ASSERT_TRUE(dtex.day() == 2);
+    ASSERT_TRUE(dtex.hour() == 13);
+    ASSERT_TRUE(dtex.minute() == 14);
+    ASSERT_TRUE(dtex.second() == 52);
+    ASSERT_TRUE(tzd == 0);
+    ASSERT_TRUE(dtex.operator-(dt).microseconds() == 0);
+
+    dt = Poco::DateTimeParser::parse(Poco::DateTimeFormat::SORTABLE_FORMAT, "2020-02-02 13:14:52", tzd);
+    ASSERT_TRUE(dt.year() == 2020);
+    ASSERT_TRUE(dt.month() == 2);
+    ASSERT_TRUE(dt.day() == 2);
+    ASSERT_TRUE(dt.hour() == 13);
+    ASSERT_TRUE(dt.minute() == 14);
+    ASSERT_TRUE(dt.second() == 52);
+    ASSERT_TRUE(tzd == 0);
+
+    dtex = dt.makeTM();
+    ASSERT_TRUE(dtex.year() == 2020);
+    ASSERT_TRUE(dtex.month() == 2);
+    ASSERT_TRUE(dtex.day() == 2);
+    ASSERT_TRUE(dtex.hour() == 13);
+    ASSERT_TRUE(dtex.minute() == 14);
+    ASSERT_TRUE(dtex.second() == 52);
+    ASSERT_TRUE(tzd == 0);
 }

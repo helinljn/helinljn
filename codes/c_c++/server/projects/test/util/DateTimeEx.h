@@ -60,7 +60,7 @@ public:
         ///
         /// Throws an InvalidArgumentException if an argument date is out of range.
 
-    DateTimeEx& operator =(const DateTimeEx& dateTime) {return this != &dateTime ? assign(dateTime) : *this;}
+    DateTimeEx& operator =(const DateTimeEx& dateTime) {return assign(dateTime);}
         /// Assigns another DateTimeEx.
 
     DateTimeEx& operator =(const DateTime& dateTime) {return assign(dateTime);}

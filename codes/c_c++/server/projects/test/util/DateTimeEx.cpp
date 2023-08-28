@@ -50,9 +50,12 @@ DateTimeEx::DateTimeEx(int year, int month, int day, int hour, int minute, int s
 
 DateTimeEx& DateTimeEx::assign(const DateTimeEx& dateTime)
 {
-    _tzd = dateTime._tzd;
-    _ts  = dateTime._ts;
-    _dt  = dateTime._dt;
+    if (this != &dateTime)
+    {
+        _tzd = dateTime._tzd;
+        _ts  = dateTime._ts;
+        _dt  = dateTime._dt;
+    }
 
     return *this;
 }
