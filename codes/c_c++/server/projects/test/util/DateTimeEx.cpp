@@ -17,6 +17,14 @@ DateTimeEx::DateTimeEx(const DateTimeEx& dateTime)
 {
 }
 
+DateTimeEx::DateTimeEx(const DateTime& dateTime)
+    : _tzd(Timezone::tzd())
+    , _ts(0)
+    , _dt(dateTime.utcTime(), Timestamp::TimeDiff(_tzd) * Timespan::SECONDS)
+{
+    _ts = _dt.timestamp() - Timespan(_tzd, 0);
+}
+
 DateTimeEx::DateTimeEx(const Timestamp& timestamp)
     : _tzd(Timezone::tzd())
     , _ts(timestamp)
@@ -45,6 +53,18 @@ DateTimeEx& DateTimeEx::assign(const DateTimeEx& dateTime)
     _tzd = dateTime._tzd;
     _ts  = dateTime._ts;
     _dt  = dateTime._dt;
+
+    return *this;
+}
+
+DateTimeEx& DateTimeEx::assign(const DateTime& dateTime)
+{
+    if (utcTime() != dateTime.utcTime())
+    {
+        _dt  = dateTime;
+        _dt += Timespan(_tzd, 0);
+        _ts  = _dt.timestamp() - Timespan(_tzd, 0);
+    }
 
     return *this;
 }

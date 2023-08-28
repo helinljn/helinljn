@@ -36,6 +36,10 @@ public:
     explicit DateTimeEx(const DateTimeEx& dateTime);
         /// Copy constructor. Creates the DateTimeEx from another one.
 
+    explicit DateTimeEx(const DateTime& dateTime);
+        /// Creates a DateTimeEx from the UTC time given in dateTime,
+        /// using the time zone differential of the current time zone.
+
     explicit DateTimeEx(const Timestamp& timestamp);
         /// Creates a DateTimeEx for the date and time given in
         /// a Timestamp.
@@ -59,6 +63,9 @@ public:
     DateTimeEx& operator =(const DateTimeEx& dateTime) {return this != &dateTime ? assign(dateTime) : *this;}
         /// Assigns another DateTimeEx.
 
+    DateTimeEx& operator =(const DateTime& dateTime) {return assign(dateTime);}
+        /// Assigns a DateTime.
+
     DateTimeEx& operator =(const Timestamp& timestamp) {return assign(timestamp);}
         /// Assigns a Timestamp.
 
@@ -67,6 +74,9 @@ public:
 
     DateTimeEx& assign(const DateTimeEx& dateTime);
         /// Assigns another DateTimeEx.
+
+    DateTimeEx& assign(const DateTime& dateTime);
+        /// Assigns a DateTime.
 
     DateTimeEx& assign(const Timestamp& timestamp);
         /// Assigns a Timestamp.
@@ -145,6 +155,18 @@ public:
     Timestamp timestamp(void) const {return _ts;}
         /// Returns the date and time expressed as a Timestamp.
 
+    DateTime utc(void) const {return DateTime(_dt.utcTime(), -(Timestamp::TimeDiff(_tzd) * Timespan::SECONDS));}
+        /// Returns the UTC equivalent for the local date and time.
+
+    DateTime utcLocal(void) const {return _dt;}
+        /// Returns the local date and time computed as (_ts + _tzd).
+
+    Timestamp::UtcTimeVal utcTime(void) const {return _dt.utcTime() - Timestamp::TimeDiff(_tzd) * Timespan::SECONDS * 10;}
+        /// Returns the UTC equivalent for the local date and time.
+
+    Timestamp::UtcTimeVal utcLocalTime(void) const {return _dt.utcTime();}
+        /// Returns the local date and time computed as (_ts + _tzd).
+
     tm makeTM(void) const {return _dt.makeTM();}
         /// Converts DateTime to tm struct.
 
@@ -160,6 +182,7 @@ public:
     DateTimeEx& operator +=(const Timespan& span) {return assign(_ts + span);}
     DateTimeEx& operator -=(const Timespan& span) {return assign(_ts - span);}
 
+    Timespan operator -(const DateTime&   dateTime) const {return utc() - dateTime;}
     Timespan operator -(const DateTimeEx& dateTime) const {return Timespan((_dt.utcTime() - dateTime._dt.utcTime()) / 10);}
 
 private:

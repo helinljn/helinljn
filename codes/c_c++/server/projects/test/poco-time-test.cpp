@@ -421,8 +421,68 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
         ASSERT_TRUE(diff.totalSeconds() == 5211314);
     }
 
+    {
+        // 1970-01-01 00:00:00 Thursday
+        Poco::DateTime dt(Poco::Timestamp::fromEpochTime(0));
+        ASSERT_TRUE(dt.year() == 1970);
+        ASSERT_TRUE(dt.month() == 1);
+        ASSERT_TRUE(dt.day() == 1);
+        ASSERT_TRUE(dt.hour() == 0);
+        ASSERT_TRUE(dt.minute() == 0);
+        ASSERT_TRUE(dt.second() == 0);
+        ASSERT_TRUE(dt.millisecond() == 0);
+        ASSERT_TRUE(dt.microsecond() == 0);
+        ASSERT_TRUE(dt.dayOfWeek() == 4);
+        ASSERT_TRUE(dt.timestamp().epochTime() == 0);
+
+        // 1970-01-01 08:00:00 Thursday
+        Poco::DateTimeEx dtex(dt);
+        ASSERT_TRUE(dtex.year() == 1970);
+        ASSERT_TRUE(dtex.month() == 1);
+        ASSERT_TRUE(dtex.day() == 1);
+        ASSERT_TRUE(dtex.hour() == 8);
+        ASSERT_TRUE(dtex.minute() == 0);
+        ASSERT_TRUE(dtex.second() == 0);
+        ASSERT_TRUE(dtex.millisecond() == 0);
+        ASSERT_TRUE(dtex.microsecond() == 0);
+        ASSERT_TRUE(dtex.dayOfWeek() == 4);
+        ASSERT_TRUE(dtex.timestamp().epochTime() == 0);
+
+        dtex += Poco::Timespan(std::chrono::hours(1));
+        dtex  = dt;
+        ASSERT_TRUE(dtex.year() == 1970);
+        ASSERT_TRUE(dtex.month() == 1);
+        ASSERT_TRUE(dtex.day() == 1);
+        ASSERT_TRUE(dtex.hour() == 8);
+        ASSERT_TRUE(dtex.minute() == 0);
+        ASSERT_TRUE(dtex.second() == 0);
+        ASSERT_TRUE(dtex.millisecond() == 0);
+        ASSERT_TRUE(dtex.microsecond() == 0);
+        ASSERT_TRUE(dtex.dayOfWeek() == 4);
+        ASSERT_TRUE(dtex.timestamp().epochTime() == 0);
+
+        dtex += Poco::Timespan(std::chrono::hours(1));
+        dtex.assign(dt);
+        ASSERT_TRUE(dtex.year() == 1970);
+        ASSERT_TRUE(dtex.month() == 1);
+        ASSERT_TRUE(dtex.day() == 1);
+        ASSERT_TRUE(dtex.hour() == 8);
+        ASSERT_TRUE(dtex.minute() == 0);
+        ASSERT_TRUE(dtex.second() == 0);
+        ASSERT_TRUE(dtex.millisecond() == 0);
+        ASSERT_TRUE(dtex.microsecond() == 0);
+        ASSERT_TRUE(dtex.dayOfWeek() == 4);
+        ASSERT_TRUE(dtex.timestamp().epochTime() == 0);
+
+        ASSERT_TRUE(dtex.utc() == dt);
+        ASSERT_TRUE(dtex.utcLocal() == dt + Poco::Timespan(dtex.tzd(), 0));
+        ASSERT_TRUE(dtex.utcTime() == dt.utcTime());
+        ASSERT_TRUE(dtex.utcLocalTime() == dt.utcTime() + Poco::Timespan(dtex.tzd(), 0).totalMicroseconds() * 10);
+        ASSERT_TRUE(dtex.operator-(dt).totalMicroseconds() == 0);
+    }
+
     // 1970-01-01 08:00:00 Thursday
-    Poco::DateTimeEx dt(Poco::Timestamp(0));
+    Poco::DateTimeEx dt(Poco::Timestamp::fromEpochTime(0));
     ASSERT_TRUE(dt.year() == 1970);
     ASSERT_TRUE(dt.month() == 1);
     ASSERT_TRUE(dt.day() == 1);
