@@ -22,12 +22,16 @@ public:
         /// Returns the number of days in the given month
         /// and year. Month is from 1 to 12.
 
-    static bool isValid(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0)
-    {return DateTime::isValid(year, month, day, hour, minute, second, millisecond, microsecond);}
+    static bool isValid(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0);
         /// Checks if the given date and time is valid
         /// (all arguments are within a proper range).
         ///
         /// Returns true if all arguments are valid, false otherwise.
+
+    static int tzd(void);
+        /// Returns the time zone differential for the current timezone.
+        /// The timezone differential is computed as utcOffset() + dst()
+        /// and is expressed in seconds.
 
 public:
     explicit DateTimeEx(void);
@@ -57,8 +61,6 @@ public:
         ///   * second is from 0 to 60.
         ///   * millisecond is from 0 to 999.
         ///   * microsecond is from 0 to 999.
-        ///
-        /// Throws an InvalidArgumentException if an argument date is out of range.
 
     DateTimeEx& operator =(const DateTimeEx& dateTime) {return assign(dateTime);}
         /// Assigns another DateTimeEx.
@@ -94,6 +96,9 @@ public:
         ///   * second is from 0 to 60 (allowing leap seconds).
         ///   * millisecond is from 0 to 999.
         ///   * microsecond is from 0 to 999.
+
+    void update(void);
+        /// Updates the DateTimeEx with the current time.
 
     int year(void) const {return _dt.year();}
         /// Returns the year (0 to 9999).
@@ -149,26 +154,37 @@ public:
     int microsecond(void) const {return _dt.microsecond();}
         /// Returns the microsecond (0 to 999)
 
-    int tzd(void) const {return _tzd;}
-        /// Returns the time zone differential.
+    time_t elapsed(void) const {return _ts.elapsed();}
+        /// Returns the time elapsed since the time denoted by
+        /// the timestamp. Equivalent to DateTimeEx() - *this.
+
+    bool isElapsed(const time_t interval) const {return _ts.isElapsed(interval);}
+        /// Returns true iff the given interval has passed
+        /// since the time denoted by the timestamp.
+
+    time_t epochTime(void) const {return _ts.epochTime();}
+        /// Returns the timestamp expressed in time_t.
+
+    time_t epochMicroseconds(void) const {return _ts.epochMicroseconds();}
+        /// Returns the timestamp expressed in microseconds.
 
     Timestamp timestamp(void) const {return _ts;}
         /// Returns the date and time expressed as a Timestamp.
 
-    DateTime utc(void) const {return DateTime(_dt.utcTime(), -(Timestamp::TimeDiff(_tzd) * Timespan::SECONDS));}
+    DateTime utc(void) const {return DateTime(_dt.utcTime(), -(Timestamp::TimeDiff(tzd()) * Timespan::SECONDS));}
         /// Returns the UTC equivalent for the local date and time.
 
     DateTime utcLocal(void) const {return _dt;}
-        /// Returns the local date and time computed as (_ts + _tzd).
+        /// Returns the local date and time computed as (_ts + tzd()).
 
-    Timestamp::UtcTimeVal utcTime(void) const {return _dt.utcTime() - Timestamp::TimeDiff(_tzd) * Timespan::SECONDS * 10;}
+    Timestamp::UtcTimeVal utcTime(void) const {return _dt.utcTime() - Timestamp::TimeDiff(tzd()) * Timespan::SECONDS * 10;}
         /// Returns the UTC equivalent for the local date and time.
 
     Timestamp::UtcTimeVal utcLocalTime(void) const {return _dt.utcTime();}
-        /// Returns the local date and time computed as (_ts + _tzd).
+        /// Returns the local date and time computed as (_ts + tzd()).
 
     tm makeTM(void) const {return _dt.makeTM();}
-        /// Converts DateTime to tm struct.
+        /// Converts DateTimeEx to tm struct.
 
     bool operator ==(const DateTimeEx& dateTime) const {return _dt == dateTime._dt;}
     bool operator !=(const DateTimeEx& dateTime) const {return _dt != dateTime._dt;}
@@ -186,9 +202,8 @@ public:
     Timespan operator -(const DateTimeEx& dateTime) const {return Timespan((_dt.utcTime() - dateTime._dt.utcTime()) / 10);}
 
 private:
-    int             _tzd;  /// Time zone differential for the current timezone
     Poco::Timestamp _ts;   /// Current timestamp with [local time]
-    Poco::DateTime  _dt;   /// Local datetime is computed as (_ts + _tzd)
+    Poco::DateTime  _dt;   /// Local datetime is computed as (_ts + tzd())
 };
 
 } // namespace Poco

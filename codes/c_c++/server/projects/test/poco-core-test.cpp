@@ -105,6 +105,7 @@ GTEST_TEST(PocoCoreTest, FixedLength)
     static_assert(sizeof(double) == 8);
 
     static_assert(sizeof(size_t) == 8);
+    static_assert(sizeof(time_t) == 8);
     static_assert(sizeof(ptrdiff_t) == 8);
 }
 
