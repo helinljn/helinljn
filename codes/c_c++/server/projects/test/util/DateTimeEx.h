@@ -171,13 +171,13 @@ public:
     Timestamp timestamp(void) const {return _ts;}
         /// Returns the date and time expressed as a Timestamp.
 
-    DateTime utc(void) const {return DateTime(_dt.utcTime(), -(Timestamp::TimeDiff(tzd()) * Timespan::SECONDS));}
+    DateTime utc(void) const {return DateTime(_dt.utcTime(), -(Timespan(tzd(), 0).totalMicroseconds()));}
         /// Returns the UTC equivalent for the local date and time.
 
     DateTime utcLocal(void) const {return _dt;}
         /// Returns the local date and time computed as (_ts + tzd()).
 
-    Timestamp::UtcTimeVal utcTime(void) const {return _dt.utcTime() - Timestamp::TimeDiff(tzd()) * Timespan::SECONDS * 10;}
+    Timestamp::UtcTimeVal utcTime(void) const {return _dt.utcTime() - Timespan(tzd(), 0).totalMicroseconds() * 10;}
         /// Returns the UTC equivalent for the local date and time.
 
     Timestamp::UtcTimeVal utcLocalTime(void) const {return _dt.utcTime();}
