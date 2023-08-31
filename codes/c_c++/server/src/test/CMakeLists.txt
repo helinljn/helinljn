@@ -7,9 +7,6 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/compat
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/libevent/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/libevent/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
@@ -41,7 +38,6 @@ SET(CURRENT_DEPENDENT_LIBS
     protobuf
     gmock
     gtest
-    event
     fmt
     PocoRedis
     PocoDataMySQL

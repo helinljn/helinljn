@@ -3,7 +3,6 @@
 set ROOT_INIT_DIR=%~dp0
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
-set LIBEVENT_INIT_DIR=%ROOT_INIT_DIR%/3rd/libevent
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 
@@ -26,18 +25,6 @@ if not exist %POCO_INIT_DIR% (
     git clone -b devel https://github.com/pocoproject/poco.git %POCO_INIT_DIR%
 ) else (
     cd %POCO_INIT_DIR%
-    git checkout .
-    git fetch -p origin
-    git pull
-)
-
-echo ------------------
-echo -- libevent
-cd %ROOT_INIT_DIR%
-if not exist %LIBEVENT_INIT_DIR% (
-    git clone -b patches-2.1 https://github.com/libevent/libevent.git %LIBEVENT_INIT_DIR%
-) else (
-    cd %LIBEVENT_INIT_DIR%
     git checkout .
     git fetch -p origin
     git pull

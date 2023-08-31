@@ -1,10 +1,9 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "event2/event.h"
 #include "fmt/format.h"
-
 #include "util/poco.h"
+
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Data/Data.h"
 #include "Poco/Data/MySQL/MySQL.h"
