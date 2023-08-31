@@ -21,6 +21,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+    ${CMAKE_PROJECT_ROOT_DIR}/src/common
     ${CMAKE_3RD_DIR_MYSQL}/include/mysql
     ${CMAKE_3RD_DIR_OPENSSL}/include
 )
@@ -34,6 +35,7 @@ SET(CURRENT_LINK_LIBS_DIR
 
 # 生成依赖库
 SET(CURRENT_DEPENDENT_LIBS
+    common
     protoc
     protobuf
     gmock
