@@ -138,6 +138,8 @@ void TimestampEx::updateTM(void)
     if (!localtime_r(&t, &_tmStruct))
         throw SystemException("cannot get tm struct of timestamp");
 #endif
+
+    _tmStruct.tm_isdst = -1;
 }
 
 } // namespace Poco
