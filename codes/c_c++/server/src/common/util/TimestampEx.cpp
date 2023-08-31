@@ -1,5 +1,5 @@
-#include "util/TimestampEx.h"
-#include "util/DateTimeEx.h"
+#include "TimestampEx.h"
+#include "DateTimeEx.h"
 #include "Poco/Exception.h"
 
 namespace Poco {
