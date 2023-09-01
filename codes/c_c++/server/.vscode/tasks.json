@@ -16,27 +16,15 @@
             "group": "build"
         },
         {
-            "label": "build linux debug by wsl",
-            "type": "shell",
-            "command": "wsl ./build.linux.sh debug",
-            "group": "build"
-        },
-        {
-            "label": "build linux release by wsl",
-            "type": "shell",
-            "command": "wsl ./build.linux.sh release",
-            "group": "build"
-        },
-        {
             "label": "build linux debug",
             "type": "shell",
-            "command": "chmod +x ./build.linux.sh && ./build.linux.sh debug && chmod -x ./build.linux.sh",
+            "command": "./build.linux.sh debug",
             "group": "build"
         },
         {
             "label": "build linux release",
             "type": "shell",
-            "command": "chmod +x ./build.linux.sh && ./build.linux.sh release && chmod -x ./build.linux.sh",
+            "command": "./build.linux.sh release",
             "group": "build"
         }
     ]

@@ -92,7 +92,7 @@
 
     "remote.SSH.configFile": "D:\\helinljn\\documents\\ssh_config",
     "remote.SSH.remotePlatform": {
-        "Aliyun": "linux"
+        "WSL": "linux"
     },
 
     "C_Cpp.intelliSenseCacheSize": 0,
