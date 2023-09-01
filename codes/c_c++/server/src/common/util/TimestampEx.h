@@ -3,6 +3,7 @@
 
 #include "Poco/Timestamp.h"
 #include "Poco/Timespan.h"
+#include "Poco/DateTime.h"
 
 namespace Poco {
 
@@ -21,6 +22,9 @@ public:
 
     explicit TimestampEx(const TimestampEx& timestamp);
         /// Copy constructor. Creates the TimestampEx from another one.
+
+    explicit TimestampEx(const DateTime& dateTime);
+        /// Creates a TimestampEx from DateTime.
 
     explicit TimestampEx(const Timestamp& timestamp);
         /// Creates a TimestampEx from Timestamp.
@@ -45,6 +49,9 @@ public:
     TimestampEx& operator =(const TimestampEx& timestamp) {return assign(timestamp);}
         /// Assigns another TimestampEx.
 
+    TimestampEx& operator =(const DateTime& dateTime) {return assign(dateTime);}
+        /// Assigns a DateTime.
+
     TimestampEx& operator =(const Timestamp& timestamp) {return assign(timestamp);}
         /// Assigns a Timestamp.
 
@@ -56,6 +63,9 @@ public:
 
     TimestampEx& assign(const TimestampEx& timestamp);
         /// Assigns another TimestampEx.
+
+    TimestampEx& assign(const DateTime& dateTime);
+        /// Assigns a DateTime.
 
     TimestampEx& assign(const Timestamp& timestamp);
         /// Assigns a Timestamp.

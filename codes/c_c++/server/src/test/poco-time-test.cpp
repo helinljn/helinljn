@@ -283,6 +283,20 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
         ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
     }
 
+    // 1970-01-01 00:00:00 Thursday
+    Poco::DateTime ds(Poco::Timestamp::fromEpochTime(0));
+    ASSERT_TRUE(ds.year() == 1970);
+    ASSERT_TRUE(ds.month() == 1);
+    ASSERT_TRUE(ds.day() == 1);
+    ASSERT_TRUE(ds.dayOfWeek() == 4);
+    ASSERT_TRUE(ds.dayOfYear() == 1);
+    ASSERT_TRUE(ds.hour() == 0);
+    ASSERT_TRUE(ds.minute() == 0);
+    ASSERT_TRUE(ds.second() == 0);
+    ASSERT_TRUE(ds.millisecond() == 0);
+    ASSERT_TRUE(ds.microsecond() == 0);
+    ASSERT_TRUE(ds.timestamp().epochTime() == 0);
+
     // 1970-01-01 08:00:00 Thursday
     Poco::TimestampEx ts(Poco::Timestamp::fromEpochTime(0));
     ASSERT_TRUE(ts.year() == 1970);
@@ -310,6 +324,21 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
     ASSERT_TRUE(tmStruct.tm_yday == 0);
 
     ts = tmStruct;
+    ASSERT_TRUE(ts.year() == 1970);
+    ASSERT_TRUE(ts.month() == 1);
+    ASSERT_TRUE(ts.day() == 1);
+    ASSERT_TRUE(ts.dayOfWeek() == 4);
+    ASSERT_TRUE(ts.dayOfYear() == 1);
+    ASSERT_TRUE(ts.hour() == 8);
+    ASSERT_TRUE(ts.minute() == 0);
+    ASSERT_TRUE(ts.second() == 0);
+    ASSERT_TRUE(ts.millisecond() == 0);
+    ASSERT_TRUE(ts.microsecond() == 0);
+    ASSERT_TRUE(ts.epochTime() == 0);
+    ASSERT_TRUE(ts.epochMicroseconds() == 0);
+    ASSERT_TRUE(ts.timestamp().epochTime() == 0);
+
+    ts = ds;
     ASSERT_TRUE(ts.year() == 1970);
     ASSERT_TRUE(ts.month() == 1);
     ASSERT_TRUE(ts.day() == 1);

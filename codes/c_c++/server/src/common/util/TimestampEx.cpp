@@ -17,6 +17,13 @@ TimestampEx::TimestampEx(const TimestampEx& timestamp)
 {
 }
 
+TimestampEx::TimestampEx(const DateTime& dateTime)
+    : _ts(0)
+    , _tmStruct()
+{
+    assign(dateTime);
+}
+
 TimestampEx::TimestampEx(const Timestamp& timestamp)
     : _ts(timestamp)
     , _tmStruct()
@@ -49,6 +56,17 @@ TimestampEx& TimestampEx::assign(const TimestampEx& timestamp)
     {
         _ts       = timestamp._ts;
         _tmStruct = timestamp._tmStruct;
+    }
+
+    return *this;
+}
+
+TimestampEx& TimestampEx::assign(const DateTime& dateTime)
+{
+    if (Timestamp tempTs = dateTime.timestamp(); _ts != tempTs)
+    {
+        _ts = tempTs;
+        updateTM();
     }
 
     return *this;
