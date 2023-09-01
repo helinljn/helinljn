@@ -1,13 +1,15 @@
 @echo off
 
-mkdir out 2>nul
+mkdir pbmsg 2>nul
 
 for %%f in (*.proto) do (
     echo %%f
-    protoc-exec.exe %%f --cpp_out=./out
+    protoc-exec.exe %%f --cpp_out=./pbmsg
 )
 
-wsl bash -c "find ./out -name '*.pb.h' | xargs unix2dos"
-wsl bash -c "find ./out -name '*.pb.cc' | xargs unix2dos"
+echo.
+
+wsl bash -c "find ./pbmsg -name '*.pb.h' | xargs unix2dos"
+wsl bash -c "find ./pbmsg -name '*.pb.cc' | xargs unix2dos"
 
 pause
