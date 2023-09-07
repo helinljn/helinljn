@@ -424,13 +424,13 @@ GTEST_TEST(PocoCoreTest, FastMemoryPoolWithFastMutex)
     for (int idx = 0; idx < blocks; ++idx)
     {
         intVec.emplace_back(new(fastIntPool.get()) int(idx));
-        strVec.emplace_back(new(fastStringPool.get()) std::string(numeric_cast::to_string(idx)));
+        strVec.emplace_back(new(fastStringPool.get()) std::string(common::to_string(idx)));
     }
 
     for (int idx = 0; idx < blocks; ++idx)
     {
         ASSERT_TRUE(intVec[idx] && *intVec[idx] == idx);
-        ASSERT_TRUE(strVec[idx] && *strVec[idx] == numeric_cast::to_string(idx));
+        ASSERT_TRUE(strVec[idx] && *strVec[idx] == common::to_string(idx));
     }
 
     for (int i = 0; i < blocks; ++i)
@@ -452,13 +452,13 @@ GTEST_TEST(PocoCoreTest, FastMemoryPoolWithNullMutex)
     for (int idx = 0; idx < blocks; ++idx)
     {
         intVec.emplace_back(new(fastIntPool.get()) int(idx));
-        strVec.emplace_back(new(fastStringPool.get()) std::string(numeric_cast::to_string(idx)));
+        strVec.emplace_back(new(fastStringPool.get()) std::string(common::to_string(idx)));
     }
 
     for (int idx = 0; idx < blocks; ++idx)
     {
         ASSERT_TRUE(intVec[idx] && *intVec[idx] == idx);
-        ASSERT_TRUE(strVec[idx] && *strVec[idx] == numeric_cast::to_string(idx));
+        ASSERT_TRUE(strVec[idx] && *strVec[idx] == common::to_string(idx));
     }
 
     for (int i = 0; i < blocks; ++i)

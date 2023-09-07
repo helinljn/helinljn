@@ -4,8 +4,8 @@
 #include <string>
 #include <type_traits>
 
-namespace numeric_cast {
-namespace details      {
+namespace common  {
+namespace details {
 
 template <typename To, typename From>
 struct converter
@@ -235,6 +235,6 @@ std::string to_string(const From from)
     return details::converter<std::string, From>::convert(from);
 }
 
-} // namespace numeric_cast
+} // namespace common
 
 #endif // __NUMERIC_CAST_HPP__
