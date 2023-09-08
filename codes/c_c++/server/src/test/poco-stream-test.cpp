@@ -36,15 +36,11 @@ GTEST_TEST(PocoStreamTest, Base32)
 
         std::string str;
         char        buff[128];
-        while (true)
+        while (decoder.good())
         {
             decoder.read(buff, 128);
-
             if (decoder.gcount() > 0)
                 str.append(buff, decoder.gcount());
-
-            if (!decoder.good())
-                break;
         }
 
         ASSERT_TRUE(str == text);
@@ -79,15 +75,11 @@ GTEST_TEST(PocoStreamTest, Base64)
 
         std::string str;
         char        buff[128];
-        while (true)
+        while (decoder.good())
         {
             decoder.read(buff, 128);
-
             if (decoder.gcount() > 0)
                 str.append(buff, decoder.gcount());
-
-            if (!decoder.good())
-                break;
         }
 
         ASSERT_TRUE(str == text);
@@ -144,18 +136,14 @@ GTEST_TEST(PocoStreamTest, HexBinary)
 
         std::streamsize readSize = 0;
         char     buff[2];
-        while (true)
+        while (decoder.good())
         {
             decoder.read(reinterpret_cast<char*>(&buff), 2);
-
             if (decoder.gcount() > 0)
             {
                 memcpy(reinterpret_cast<char*>(&temp) + readSize, buff, decoder.gcount());
                 readSize += decoder.gcount();
             }
-
-            if (!decoder.good())
-                break;
         }
 
         ASSERT_TRUE(temp == data);
@@ -169,24 +157,19 @@ GTEST_TEST(PocoStreamTest, HexBinary)
 
         std::streamsize readSize = 0;
         char     buff[2];
-        while (true)
+        while (decoder.good())
         {
             decoder.read(reinterpret_cast<char*>(&buff), 2);
-
             if (decoder.gcount() > 0)
             {
                 memcpy(reinterpret_cast<char*>(&temp) + readSize, buff, decoder.gcount());
                 readSize += decoder.gcount();
             }
-
-            if (!decoder.good())
-                break;
         }
 
         ASSERT_TRUE(temp == data);
         ASSERT_TRUE(iss.good() && decoder.eof());
     }
-
 
     ASSERT_TRUE(common::to_hex_string(data, hexUpper, true)  && hexUpper == "11111111");
     ASSERT_TRUE(common::to_hex_string(data, hexLower, false) && hexLower == "11111111");

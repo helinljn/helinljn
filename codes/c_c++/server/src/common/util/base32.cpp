@@ -28,7 +28,8 @@ std::string base32_decode(const std::string_view data)
     std::istringstream  iss(data.data());
     Poco::Base32Decoder decoder(iss);
 
-    std::array<char, 256> buf;
+    std::array<char, 1024> buf;
+    ret.reserve(data.size());
     while (decoder.good())
     {
         decoder.read(buf.data(), buf.size());
