@@ -29,14 +29,11 @@ std::string base32_decode(const std::string_view data)
     Poco::Base32Decoder decoder(iss);
 
     std::array<char, 256> buf;
-    while (true)
+    while (decoder.good())
     {
         decoder.read(buf.data(), buf.size());
         if (decoder.gcount() > 0)
             ret.append(buf.data(), decoder.gcount());
-
-        if (!decoder.good())
-            break;
     }
 
     if (!iss.good() || !decoder.eof())

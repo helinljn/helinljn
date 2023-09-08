@@ -215,9 +215,11 @@ struct converter<std::string, double>
 } // namespace details
 
 // string to numeric
-template <typename To, typename Dummy = std::enable_if_t<std::is_arithmetic_v<To>>>
+template <typename To>
 To from_string(const std::string& from)
 {
+    static_assert(std::is_arithmetic_v<To>, "Invalid type!");
+
     try
     {
         return details::converter<To, std::string>::convert(from);
@@ -229,9 +231,10 @@ To from_string(const std::string& from)
 }
 
 // numeric to string
-template <typename From, typename Dummy = std::enable_if_t<std::is_arithmetic_v<From>>>
+template <typename From>
 std::string to_string(const From from)
 {
+    static_assert(std::is_arithmetic_v<From>, "Invalid type!");
     return details::converter<std::string, From>::convert(from);
 }
 
