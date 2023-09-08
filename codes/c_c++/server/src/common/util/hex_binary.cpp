@@ -19,7 +19,7 @@ bool to_hex_string(const void* mem, const size_t memlen, std::string& outstr, co
     encoder.write(text.data(), text.size());
     encoder.close();
 
-    if (oss.good() && encoder.good())
+    if (oss.good() && encoder.good() && oss.tellp() == static_cast<std::streamoff>(memlen * 2))
     {
         outstr = oss.str();
         return true;
@@ -48,7 +48,7 @@ bool from_hex_string(const std::string_view hexstr, void* outbuf, size_t outbufl
         }
     }
 
-    if (iss.good() && decoder.eof())
+    if (iss.good() && decoder.eof() && hexstr.size() / 2 == static_cast<size_t>(count))
         return true;
 
     return false;
