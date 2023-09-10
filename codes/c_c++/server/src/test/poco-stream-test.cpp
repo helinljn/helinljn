@@ -9,6 +9,10 @@
 #include "Poco/Base64Decoder.h"
 #include "Poco/HexBinaryEncoder.h"
 #include "Poco/HexBinaryDecoder.h"
+#include "Poco/StreamCopier.h"
+#include "Poco/CountingStream.h"
+#include "Poco/FileStream.h"
+#include "Poco/File.h"
 
 #include <string_view>
 
@@ -175,4 +179,110 @@ GTEST_TEST(PocoStreamTest, HexBinary)
     ASSERT_TRUE(common::to_hex_string(data, hexLower, false) && hexLower == "11111111");
     ASSERT_TRUE(common::from_hex_string(hexUpper, temp) && temp == data);
     ASSERT_TRUE(common::from_hex_string(hexLower, temp) && temp == data);
+}
+
+GTEST_TEST(PocoStreamTest, StreamCopier)
+{
+    const std::string_view text("hello world! 1234567890");
+
+    std::istringstream iss(text.data());
+    ASSERT_TRUE(iss.good() && iss.str() == text);
+
+    std::ostringstream oss;
+    ASSERT_TRUE(oss.good() && oss.str().empty());
+
+    // copyStream
+    {
+        std::streamsize sz = Poco::StreamCopier::copyStream(iss, oss);
+        ASSERT_TRUE(oss.good() && oss.str() == text && static_cast<size_t>(sz) == text.size());
+    }
+
+    ASSERT_TRUE(iss.eof() && iss.str() == text);
+    iss.clear();
+    ASSERT_TRUE(iss.rdbuf()->pubseekpos(0) == 0 && iss.good() && iss.str() == text);
+
+    oss.clear();
+    oss.str("");
+    ASSERT_TRUE(oss.good() && oss.str().empty());
+
+    // copyStreamUnbuffered
+    {
+        std::streamsize sz = Poco::StreamCopier::copyStreamUnbuffered(iss, oss);
+        ASSERT_TRUE(oss.good() && oss.str() == text && static_cast<size_t>(sz) == text.size());
+    }
+}
+
+GTEST_TEST(PocoStreamTest, CountingStream)
+{
+    // input
+    {
+        std::istringstream        iss("foo\nbar\n");
+        Poco::CountingInputStream ci(iss);
+
+        char ch = '\0';
+        while (ci.good()) ci.get(ch);
+
+        ASSERT_TRUE(iss.eof() && iss.str() == "foo\nbar\n");
+        ASSERT_TRUE(ci.chars() == 8);
+        ASSERT_TRUE(ci.lines() == 2);
+        ASSERT_TRUE(ci.pos() == 0);
+
+        iss.clear();
+        iss.rdbuf()->pubseekpos(0);
+        ASSERT_TRUE(iss.good() && iss.str() == "foo\nbar\n");
+    }
+
+    // output
+    {
+        std::ostringstream         oss;
+        Poco::CountingOutputStream co(oss);
+
+        co << "foo\nbar";
+
+        ASSERT_TRUE(oss.good() && oss.str() == "foo\nbar");
+        ASSERT_TRUE(co.chars() == 7);
+        ASSERT_TRUE(co.lines() == 2);
+        ASSERT_TRUE(co.pos() == 3);
+
+        oss.clear();
+        oss.str("");
+        ASSERT_TRUE(oss.good() && oss.str().empty());
+    }
+}
+
+GTEST_TEST(PocoStreamTest, FileStream)
+{
+    Poco::File  test("test.txt");
+    std::string data(4096, '1');
+
+    // write to file
+    {
+        Poco::FileOutputStream fos(test.path());
+        ASSERT_TRUE(fos.good());
+
+        fos << data;
+        ASSERT_TRUE(fos.good());
+
+        fos << '1';
+        ASSERT_TRUE(fos.good());
+
+        fos.close();
+        ASSERT_TRUE(fos.good());
+    }
+
+    // read from file
+    {
+        Poco::FileInputStream fis(test.path());
+        ASSERT_TRUE(fis.good());
+
+        std::string str;
+        fis >> str;
+        ASSERT_TRUE(str.size() - 1 == data.size() && fis.eof());
+
+        fis.close();
+        ASSERT_TRUE(fis.eof());
+    }
+
+    if (test.exists() && test.isFile())
+        test.remove();
 }
