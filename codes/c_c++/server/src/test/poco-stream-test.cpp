@@ -255,12 +255,12 @@ GTEST_TEST(PocoStreamTest, FileStream)
     Poco::File  test("test.txt");
     std::string data(4096, '1');
 
-    // write to file
+    // FileOutputStream
     {
         Poco::FileOutputStream fos(test.path());
         ASSERT_TRUE(fos.good());
 
-        fos << data;
+        fos.write(data.data(), data.size());
         ASSERT_TRUE(fos.good());
 
         fos << '1';
@@ -270,7 +270,7 @@ GTEST_TEST(PocoStreamTest, FileStream)
         ASSERT_TRUE(fos.good());
     }
 
-    // read from file
+    // FileInputStream
     {
         Poco::FileInputStream fis(test.path());
         ASSERT_TRUE(fis.good());
@@ -283,6 +283,63 @@ GTEST_TEST(PocoStreamTest, FileStream)
         ASSERT_TRUE(fis.eof());
     }
 
-    if (test.exists() && test.isFile())
+    // FileStream
+    {
+        if (test.exists())
+            test.remove();
+
+        Poco::FileStream fs(test.path());
+        ASSERT_TRUE(fs.good());
+
+        std::string_view data1 = {"hello"};
+        fs.write(data1.data(), data1.size());
+        ASSERT_TRUE(fs.good());
+
+        fs.seekg(0, std::ios::beg);
+        ASSERT_TRUE(fs.good());
+
+        std::string str;
+        fs >> str;
+        ASSERT_TRUE(str == data1 && fs.eof());
+    }
+
+    // test open mode in
+    {
+        if (test.exists())
+            test.remove();
+
+        Poco::FileInputStream ifs;
+        ASSERT_THROW(ifs.open(test.path(), std::ios::in), Poco::FileNotFoundException);
+
+        test.createFile();
+        ifs.open(test.path(), std::ios::in);
+        ASSERT_TRUE(ifs.good());
+    }
+
+    // test open mode out
+    {
+        if (test.exists())
+            test.remove();
+
+        Poco::FileOutputStream fos(test.path());
+        ASSERT_TRUE(fos.good());
+
+        fos.write(data.data(), data.size());
+        ASSERT_TRUE(fos.good());
+
+        fos.close();
+        ASSERT_TRUE(fos.good());
+        ASSERT_TRUE(test.getSize() == data.size());
+
+        Poco::FileOutputStream fos1(test.path());
+        ASSERT_TRUE(fos1.good());
+
+        fos1.close();
+        ASSERT_TRUE(fos1.good());
+
+        ASSERT_TRUE(test.exists() && test.getSize() == 0);
+    }
+
+    if (test.exists())
         test.remove();
 }
