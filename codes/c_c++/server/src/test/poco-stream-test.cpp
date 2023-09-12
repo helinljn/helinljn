@@ -13,7 +13,9 @@
 #include "Poco/CountingStream.h"
 #include "Poco/FileStream.h"
 #include "Poco/File.h"
+#include "Poco/MemoryStream.h"
 
+#include <array>
 #include <string_view>
 
 GTEST_TEST(PocoStreamTest, Base32)
@@ -342,4 +344,127 @@ GTEST_TEST(PocoStreamTest, FileStream)
 
     if (test.exists())
         test.remove();
+}
+
+GTEST_TEST(PocoStreamTest, MemoryStream)
+{
+    // MemoryInputStream
+    {
+        std::string_view        data = "This is a test";
+        Poco::MemoryInputStream mis(data.data(), data.size());
+        ASSERT_TRUE(mis.good());
+
+        ASSERT_TRUE(mis.get() == 'T' && mis.gcount() == 1 && mis.good());
+        ASSERT_TRUE(mis.get() == 'h' && mis.gcount() == 1 && mis.good());
+
+        std::string str;
+        mis >> str;
+        ASSERT_TRUE(str == "is" && mis.good());
+
+        std::array<char, 32> buf = {0};
+        mis.read(buf.data(), buf.size());
+        ASSERT_TRUE(std::string(" is a test") == buf.data() && mis.gcount() == 10 && mis.eof());
+    }
+
+    // MemoryOutputStream
+    {
+        std::array<char, 32>     buf;
+        Poco::MemoryOutputStream mos(buf.data(), buf.size());
+        ASSERT_TRUE(mos.good());
+
+        mos << "This is a test " << 42 << std::ends;
+        ASSERT_TRUE(std::string("This is a test 42") == buf.data() && mos.good());
+    }
+
+    // tell
+    {
+        std::array<char, 32>     buf;
+        Poco::MemoryOutputStream mos(buf.data(), buf.size());
+        ASSERT_TRUE(mos.good());
+
+        mos << "This is a test " << 42 << std::ends;
+        ASSERT_TRUE(std::string("This is a test 42") == buf.data() && mos.tellp() == 18 && mos.charsWritten() == 18 && mos.good());
+
+        Poco::MemoryInputStream mis(buf.data(), buf.size());
+        ASSERT_TRUE(mis.good());
+
+        ASSERT_TRUE(mis.get() == 'T' && mis.gcount() == 1 && mis.good());
+
+        char ch = '\0';
+        mis >> ch;
+        ASSERT_TRUE(ch == 'h' && mis.gcount() == 1 && mis.tellg() == 2 && mis.good());
+    }
+
+    // input seek
+    {
+        std::string_view        data = "123456789";
+        Poco::MemoryInputStream mis(data.data(), data.size());
+        ASSERT_TRUE(mis.good());
+
+        ASSERT_TRUE(mis.get() == '1' && mis.good() && mis.gcount() == 1 && mis.tellg() == 1);
+
+        mis.seekg(3, std::ios::beg);
+        ASSERT_TRUE(mis.get() == '4' && mis.good() && mis.gcount() == 1 && mis.tellg() == 4);
+        ASSERT_TRUE(mis.get() == '5' && mis.good() && mis.gcount() == 1 && mis.tellg() == 5);
+
+        mis.seekg(2, std::ios::cur);
+        ASSERT_TRUE(mis.get() == '8' && mis.good() && mis.gcount() == 1 && mis.tellg() == 8);
+
+        mis.seekg(-7, std::ios::end);
+        ASSERT_TRUE(mis.get() == '3' && mis.good() && mis.gcount() == 1 && mis.tellg() == 3);
+
+        mis.seekg(data.size(), std::ios::beg);
+        ASSERT_TRUE(mis.good() && mis.gcount() == 1 && mis.tellg() == 9);
+
+        mis.seekg(100, std::ios::beg);
+        ASSERT_TRUE(mis.fail() && mis.gcount() == 1 && mis.tellg() == -1);
+
+        mis.clear();
+        mis.seekg(data.size(), std::ios::beg);
+        ASSERT_TRUE(mis.get() == -1 && mis.eof() && mis.gcount() == 0 && mis.tellg() == -1);
+
+        mis.clear();
+        mis.seekg(0, std::ios::beg);
+        ASSERT_TRUE(mis.get() == '1' && mis.good() && mis.gcount() == 1 && mis.tellg() == 1);
+    }
+
+    // output seek
+    {
+        std::string_view         data = {"123456789"};
+        std::array<char, 16>     buf  = {0};
+        Poco::MemoryOutputStream mos(buf.data(), buf.size());
+        ASSERT_TRUE(mos.good());
+
+        mos << data;
+        ASSERT_TRUE(mos.good() && mos.tellp() == 9 && mos.charsWritten() == 9);
+
+        mos.seekp(3, std::ios::beg);
+        mos.put('a');
+        mos.put('b');
+        ASSERT_TRUE(mos.good() && mos.tellp() == 5 && mos.charsWritten() == 5 && buf[3] == 'a' && buf[4] == 'b');
+
+        mos.seekp(2, std::ios::cur);
+        mos.put('c');
+        ASSERT_TRUE(mos.good() && mos.tellp() == 8 && mos.charsWritten() == 8 && buf[7] == 'c');
+
+        mos.seekp(-7, std::ios::end);
+        mos.put('d');
+        ASSERT_TRUE(mos.good() && mos.tellp() == 10 && mos.charsWritten() == 10 && buf[9] == 'd');
+
+        mos.seekp(buf.size(), std::ios::beg);
+        ASSERT_TRUE(mos.good() && mos.tellp() == 16 && mos.charsWritten() == 16);
+
+        mos.seekp(100, std::ios::beg);
+        ASSERT_TRUE(mos.fail() && mos.tellp() == -1 && mos.charsWritten() == 16);
+
+        mos.clear();
+        mos.seekp(buf.size(), std::ios::beg);
+        mos.put('e');
+        ASSERT_TRUE(mos.fail() && mos.tellp() == -1 && mos.charsWritten() == 16);
+
+        mos.clear();
+        mos.seekp(9, std::ios::beg);
+        mos.put('e');
+        ASSERT_TRUE(mos.good() && mos.tellp() == 10 && mos.charsWritten() == 10 && buf[9] == 'e');
+    }
 }
