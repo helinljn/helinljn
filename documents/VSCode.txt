@@ -11,13 +11,11 @@
 
     6. Go
 
-    7. WSL workspaceFolder
+    7. Markdown All in One
 
-    8. Markdown All in One
+    8. One Dark Pro
 
-    9. One Dark Pro
-
-    10. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
+    9. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
 
 【常用设置】
 {
