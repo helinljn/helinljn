@@ -28,7 +28,7 @@ bool to_hex_string(const void* mem, const size_t memlen, std::string& outstr, co
     return false;
 }
 
-bool from_hex_string(const std::string_view hexstr, void* outbuf, size_t outbuflen)
+bool from_hex_string(const std::string_view& hexstr, void* outbuf, size_t outbuflen)
 {
     const size_t srclen = hexstr.size() / 2;
     if (srclen > outbuflen)

@@ -7,7 +7,7 @@
 
 namespace Poco {
 
-class Foundation_API TimestampEx final
+class TimestampEx final
     /// A TimestampEx stores a monotonic* time value
     /// with (theoretical) microseconds resolution.
     /// Timestamps can be compared with each other

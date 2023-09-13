@@ -7,7 +7,7 @@
 
 namespace common {
 
-std::string base32_encode(const std::string_view data)
+std::string base32_encode(const std::string_view& data)
 {
     std::string         ret;
     std::ostringstream  oss;
@@ -22,7 +22,7 @@ std::string base32_encode(const std::string_view data)
     return ret;
 }
 
-std::string base32_decode(const std::string_view data)
+std::string base32_decode(const std::string_view& data)
 {
     std::string         ret;
     std::istringstream  iss(data.data());

@@ -7,7 +7,7 @@
 
 namespace Poco {
 
-class Foundation_API DateTimeEx final
+class DateTimeEx final
     /// This class represents an instant in [local time]
     /// (as opposed to UTC), expressed in years, months, days,
     /// hours, minutes, seconds and milliseconds based on the

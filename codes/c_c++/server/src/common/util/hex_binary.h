@@ -26,7 +26,7 @@ bool to_hex_string(const void* mem, const size_t memlen, std::string& outstr, co
  * @param outbuflen 输出缓冲区的长度
  * @return 成功返回true，失败返回false
  */
-bool from_hex_string(const std::string_view hexstr, void* outbuf, size_t outbuflen);
+bool from_hex_string(const std::string_view& hexstr, void* outbuf, size_t outbuflen);
 
 // binary to hex string
 template <typename T>
@@ -38,7 +38,7 @@ bool to_hex_string(const T& t, std::string& outstr, const bool uppercase = true)
 
 // hex string to binary
 template <typename T>
-bool from_hex_string(const std::string_view hexstr, T& t)
+bool from_hex_string(const std::string_view& hexstr, T& t)
 {
     static_assert(!std::is_const_v<T>, "Invalid type!");
     static_assert(std::is_arithmetic_v<T> || std::is_aggregate_v<T>, "Invalid type!");
