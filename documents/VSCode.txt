@@ -93,8 +93,10 @@
         "WSL": "linux"
     },
 
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.intelliSenseCacheSize": 0,
-    "C_Cpp.intelliSenseUpdateDelay": 1000,
+    "C_Cpp.intelliSenseUpdateDelay": 500,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
 
