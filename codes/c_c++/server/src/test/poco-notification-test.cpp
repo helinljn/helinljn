@@ -9,9 +9,11 @@
 #include "Poco/Notification.h"
 #include "Poco/NotificationCenter.h"
 #include "Poco/NotificationQueue.h"
+#include "Poco/PriorityNotificationQueue.h"
 
 #include <map>
 #include <string>
+#include <atomic>
 
 class TestNotification : public Poco::Notification
 {
@@ -190,7 +192,7 @@ GTEST_TEST_F(PocoNotificationTest, NotificationQueue)
     // threads
     {
         Poco::FastMutex    mutex;
-        bool               stopFlag   = false;
+        std::atomic_bool   stopFlag   = false;
         Poco::WrapCallable workerFunc = [this, &nq, &mutex, &stopFlag]()
         {
             Poco::Thread* curThread = Poco::Thread::current();
@@ -200,9 +202,9 @@ GTEST_TEST_F(PocoNotificationTest, NotificationQueue)
             fmt::print("thread({}) started\n", threadName);
 
             Poco::AutoPtr<TestNotification> pn;
-            while (!stopFlag)
+            while (!stopFlag.load() || !nq.empty())
             {
-                pn = dynamic_cast<TestNotification*>(nq.waitDequeueNotification(3000));
+                pn = dynamic_cast<TestNotification*>(nq.waitDequeueNotification(1000));
                 if (pn.isNull())
                     continue;
 
@@ -245,7 +247,111 @@ GTEST_TEST_F(PocoNotificationTest, NotificationQueue)
             Poco::Thread::sleep(1);
         }
 
-        stopFlag = true;
+        stopFlag.store(true);
+        nq.wakeUpAll();
+
+        th1.join();
+        th2.join();
+        th3.join();
+        th4.join();
+        th5.join();
+
+        ASSERT_TRUE(!th1.isRunning() && !th2.isRunning() && !th3.isRunning() && !th4.isRunning() && !th5.isRunning());
+        ASSERT_TRUE(nq.empty() && nq.size() == 0 && !nq.hasIdleThreads() && !_handleList.empty() && TestNotification::count() == 0);
+
+        for (const auto& [id, count] : _handleList)
+        {
+            ASSERT_TRUE(count > 0);
+            fmt::print("thread({}) count({})\n", id, count);
+        }
+    }
+}
+
+GTEST_TEST_F(PocoNotificationTest, PriorityNotificationQueue)
+{
+    Poco::PriorityNotificationQueue nq;
+
+    // enqueue & dequeue
+    {
+        nq.enqueueNotification(new TestNotification("first"), 2);
+        nq.enqueueNotification(new TestNotification("second"), 3);
+        nq.enqueueNotification(new TestNotification("third"), 1);
+        ASSERT_TRUE(!nq.empty() && nq.size() == 3 && !nq.hasIdleThreads());
+
+        Poco::AutoPtr<TestNotification> pn = dynamic_cast<TestNotification*>(nq.dequeueNotification());
+        ASSERT_TRUE(pn && pn->referenceCount() == 1 && pn->data() == "third");
+        ASSERT_TRUE(!nq.empty() && nq.size() == 2 && !nq.hasIdleThreads());
+
+        pn = dynamic_cast<TestNotification*>(nq.dequeueNotification());
+        ASSERT_TRUE(pn && pn->referenceCount() == 1 && pn->data() == "first");
+        ASSERT_TRUE(!nq.empty() && nq.size() == 1 && !nq.hasIdleThreads());
+
+        pn = dynamic_cast<TestNotification*>(nq.dequeueNotification());
+        ASSERT_TRUE(pn && pn->referenceCount() == 1 && pn->data() == "second");
+        ASSERT_TRUE(nq.empty() && nq.size() == 0 && !nq.hasIdleThreads());
+    }
+
+    ASSERT_TRUE(Poco::Thread::current() == nullptr);
+
+    // threads
+    {
+        Poco::FastMutex    mutex;
+        std::atomic_bool   stopFlag   = false;
+        Poco::WrapCallable workerFunc = [this, &nq, &mutex, &stopFlag]()
+        {
+            Poco::Thread* curThread = Poco::Thread::current();
+            ASSERT_TRUE(curThread);
+
+            const std::string threadName = curThread->getName();
+            fmt::print("thread({}) started\n", threadName);
+
+            Poco::AutoPtr<TestNotification> pn;
+            while (!stopFlag.load() || !nq.empty())
+            {
+                pn = dynamic_cast<TestNotification*>(nq.waitDequeueNotification(1000));
+                if (pn.isNull())
+                    continue;
+
+                {
+                    Poco::FastMutex::ScopedLock holder(mutex);
+                    if (auto iter = _handleList.find(threadName); iter != _handleList.end())
+                        iter->second += 1;
+                    else
+                        _handleList.emplace(threadName, 1);
+                }
+            }
+
+            fmt::print("thread({}) finished\n", threadName);
+        };
+
+        static_assert(std::is_copy_constructible_v<decltype(workerFunc)>);
+        static_assert(std::is_move_constructible_v<decltype(workerFunc)>);
+        static_assert(std::is_copy_assignable_v<decltype(workerFunc)>);
+        static_assert(std::is_move_assignable_v<decltype(workerFunc)>);
+
+        Poco::Thread th1("thread_1");
+        Poco::Thread th2("thread_2");
+        Poco::Thread th3("thread_3");
+        Poco::Thread th4("thread_4");
+        Poco::Thread th5("thread_5");
+
+        th1.start(workerFunc);
+        th2.start(workerFunc);
+        th3.start(workerFunc);
+        th4.start(workerFunc);
+        th5.start(workerFunc);
+
+        for (int idx = 0; idx != 2000; ++idx)
+        {
+            nq.enqueueNotification(new TestNotification(fmt::format("{}_{}", "Notification", idx + 1)), idx);
+        }
+
+        while (!nq.empty())
+        {
+            Poco::Thread::sleep(1);
+        }
+
+        stopFlag.store(true);
         nq.wakeUpAll();
 
         th1.join();
