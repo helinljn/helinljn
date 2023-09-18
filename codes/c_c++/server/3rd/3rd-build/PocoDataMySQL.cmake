@@ -76,10 +76,46 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${CURRENT_DIR_SRC_LIST})
 
     # Windows平台下的MySQL和OpenSSL使用的都是动态库，所以需要将其对应的动态库拷贝至生成目录
-    ADD_CUSTOM_COMMAND(
-        TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_3RD_DIR_MYSQL}/lib/libmysql.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libssl-1_1-x64.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libcrypto-1_1-x64.dll ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+    EXECUTE_PROCESS(
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_3RD_DIR_MYSQL}/lib/libmysql.lib
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_3RD_DIR_MYSQL}/lib/libmysql.dll
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_3RD_DIR_OPENSSL}/lib/libssl.lib
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.lib
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libssl-1_1-x64.dll
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libcrypto-1_1-x64.dll
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+    )
+ELSE()
+    # Linux平台下的MySQL和OpenSSL使用的都是动态库，所以需要将其对应的动态库拷贝至生成目录
+    EXECUTE_PROCESS(
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_3RD_DIR_MYSQL}/lib/libmysqlclient.so.21.2.33
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_3RD_DIR_OPENSSL}/lib/libssl.so.1.1
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.so.1.1
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libmysqlclient.so.21.2.33
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libmysqlclient.so
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libssl.so.1.1
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libssl.so
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libcrypto.so.1.1
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libcrypto.so
     )
 ENDIF()
