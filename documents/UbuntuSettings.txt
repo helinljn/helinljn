@@ -199,6 +199,8 @@ apt -y install zlib1g
 apt -y install zlib1g-dev
 apt -y install manpages
 apt -y install manpages-dev
+apt -y install readelf
+apt -y install patchelf
 
 【13. 时间同步】
 ntpdate time.windows.com

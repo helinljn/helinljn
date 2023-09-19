@@ -76,18 +76,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${CURRENT_DIR_SRC_LIST})
 
     # Windows平台下的MySQL和OpenSSL使用的都是动态库，所以需要将其对应的动态库拷贝至生成目录
-    EXECUTE_PROCESS(
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_3RD_DIR_MYSQL}/lib/libmysql.lib
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_3RD_DIR_MYSQL}/lib/libmysql.dll
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/libssl.lib
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.lib
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libssl-1_1-x64.dll
@@ -98,7 +89,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     )
 ELSE()
     # Linux平台下的MySQL和OpenSSL使用的都是动态库，所以需要将其对应的动态库拷贝至生成目录
-    EXECUTE_PROCESS(
+    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_3RD_DIR_MYSQL}/lib/libmysqlclient.so.21
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
@@ -108,25 +99,18 @@ ELSE()
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.so.1.1
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libmysqlclient.so.21
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libmysqlclient.so
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libssl.so.1.1
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libssl.so
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libcrypto.so.1.1
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libcrypto.so
+        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libmysqlclient.so.21 libmysqlclient.so && cd -
+        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libssl.so.1.1        libssl.so         && cd -
+        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libcrypto.so.1.1     libcrypto.so      && cd -
     )
 
     # Linux平台下rpath动态库运行路径修改，优先查找当前目录下的动态库
-    ADD_CUSTOM_COMMAND(
-        TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND patchelf --set-rpath ./
-                ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libmysqlclient.so
-            COMMAND patchelf --set-rpath ./
-                ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libssl.so
-            COMMAND patchelf --set-rpath ./
-                ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libcrypto.so
+    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND patchelf --set-rpath ./
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libmysqlclient.so
+        COMMAND patchelf --set-rpath ./
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libssl.so
+        COMMAND patchelf --set-rpath ./
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libcrypto.so
     )
 ENDIF()
