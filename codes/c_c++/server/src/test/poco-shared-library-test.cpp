@@ -4,7 +4,6 @@
 #include "Poco/Exception.h"
 #include "Poco/SharedLibrary.h"
 #include "Poco/SHA1Engine.h"
-#include "Poco/Path.h"
 #include "openssl/sha.h"
 #include "mysql.h"
 
