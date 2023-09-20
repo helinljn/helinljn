@@ -13,51 +13,51 @@ public:
     static_assert(std::is_invocable_r_v<void, Callable>, "Callable must be a callable type (function, lambda, functor, etc.)");
 
 public:
-    WrapCallable(const Callable& functor)
+    WrapCallable(const Callable& call)
         : Runnable()
-        , _functor(functor)
+        , _call(call)
     {
     }
 
-    WrapCallable(Callable&& functor)
+    WrapCallable(Callable&& call)
         : Runnable()
-        , _functor(std::move(functor))
+        , _call(std::move(call))
     {
     }
 
     WrapCallable(const WrapCallable& wc)
         : Runnable()
-        , _functor(wc._functor)
+        , _call(wc._call)
     {
     }
 
     WrapCallable(WrapCallable&& wc)
         : Runnable()
-        , _functor(std::move(wc._functor))
+        , _call(std::move(wc._call))
     {
     }
 
     WrapCallable& operator=(const WrapCallable& wc)
     {
         if (this != &wc)
-            _functor = wc._functor;
+            _call = wc._call;
         return *this;
     }
 
     WrapCallable& operator=(WrapCallable&& wc)
     {
         if (this != &wc)
-            _functor = std::move(wc._functor);
+            _call = std::move(wc._call);
         return *this;
     }
 
     void run(void) override
     {
-        return _functor();
+        return _call();
     }
 
 private:
-    Callable _functor;
+    Callable _call;
 };
 
 } // namespace Poco
