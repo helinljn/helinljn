@@ -43,7 +43,7 @@
 
 	22. 工具 -> 选项 -> 文本编辑器 -> C/C++(所有语言) -> 制表符 -> 智能(勾选)、制表符大小(4)、 缩进大小(4)、插入空格(勾选)
 
-	23. 工具 -> 选项 -> 文本编辑器 -> C/C++ -> 代码样式 -> 格式设置 -> 常规 -> 键入制表符自动缩进(禁用)、键入';'和'}'时自动设置格式(禁用)
+	23. 工具 -> 选项 -> 文本编辑器 -> C/C++(所有语言) -> CodeLens -> 启用CodeLens(禁用)
 
 	24. 打开 C:\Users\Administrator\AppData\Local\Microsoft\VisualStudio\16.0_361f00da\OpenFolder\VSWorkspaceSettings.json，添加下面内容：
 		"ExcludedItems": [
@@ -55,11 +55,13 @@
 		],
 
 【安装插件】
-	1. Trailing Whitespace Visualizer
+	1. One Dark Pro
 
-	2. FileEncoding
+	2. VSColorOutput
 
-	3. One Dark Pro
+	3. Force UTF-8 (No BOM)
+
+	4. Trailing Whitespace Visualizer
 
 【设置Visual Assist X快捷键，如果安装了此插件则只需要设置 视图.向后导航 即可】
 	1. 打开VS -> 工具 -> 选项 -> 环境 -> 键盘 -> 应用 (Visual Studio Code) 键盘方案
