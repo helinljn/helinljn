@@ -841,6 +841,71 @@ GTEST_TEST(PocoFilesystemTest, RenameFile)
     }
 }
 
+GTEST_TEST(PocoFilesystemTest, RenameDir)
+{
+    // move and rename
+    {
+        const Poco::Path destDir     = "../testdir111";
+        const Poco::Path srcDir      = "testdir";
+        const Poco::Path srcDirFile1 = "testdir/file1";
+        const Poco::Path srcDirFile2 = "testdir/file2";
+
+        Poco::File sd = srcDir, dd = destDir;
+        ASSERT_TRUE(!sd.exists() && !dd.exists());
+        ASSERT_TRUE(sd.createDirectory());
+        {
+            Poco::File f = srcDirFile1;
+            ASSERT_TRUE(!f.exists());
+            ASSERT_TRUE(f.createFile());
+
+            f = srcDirFile2;
+            ASSERT_TRUE(!f.exists());
+            ASSERT_TRUE(f.createFile());
+        }
+
+        sd.renameTo(dd.path());
+        ASSERT_TRUE(sd.path() == dd.path());
+        ASSERT_TRUE(sd.exists());
+
+        sd.remove(true);
+        ASSERT_TRUE(!sd.exists());
+
+        sd = srcDir;
+        ASSERT_TRUE(!sd.exists());
+    }
+
+    // move and keep name
+    {
+        const Poco::Path destDir     = "../testdir";
+        const Poco::Path srcDir      = "testdir";
+        const Poco::Path srcDirFile1 = "testdir/file1";
+        const Poco::Path srcDirFile2 = "testdir/file2";
+
+        Poco::File sd = srcDir, dd = destDir;
+        ASSERT_TRUE(!sd.exists() && !dd.exists());
+        ASSERT_TRUE(sd.createDirectory());
+        {
+            Poco::File f = srcDirFile1;
+            ASSERT_TRUE(!f.exists());
+            ASSERT_TRUE(f.createFile());
+
+            f = srcDirFile2;
+            ASSERT_TRUE(!f.exists());
+            ASSERT_TRUE(f.createFile());
+        }
+
+        sd.renameTo(dd.path());
+        ASSERT_TRUE(sd.path() == dd.path());
+        ASSERT_TRUE(sd.exists());
+
+        sd.remove(true);
+        ASSERT_TRUE(!sd.exists());
+
+        sd = srcDir;
+        ASSERT_TRUE(!sd.exists());
+    }
+}
+
 GTEST_TEST(PocoFilesystemTest, SymbolicLinkDir)
 {
     // Windows下需要管理员权限才能创建软链接
@@ -1070,7 +1135,7 @@ GTEST_TEST(PocoFilesystemTest, MoveDir)
 {
     // move and rename
     {
-        const Poco::Path destDir     = "../testdir";
+        const Poco::Path destDir     = "../testdir111";
         const Poco::Path srcDir      = "testdir";
         const Poco::Path srcDirFile1 = "testdir/file1";
         const Poco::Path srcDirFile2 = "testdir/file2";
