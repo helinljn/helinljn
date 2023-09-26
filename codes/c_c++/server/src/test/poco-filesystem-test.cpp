@@ -906,29 +906,52 @@ GTEST_TEST(PocoFilesystemTest, RenameDir)
     }
 }
 
-GTEST_TEST(PocoFilesystemTest, SymbolicLinkDir)
+GTEST_TEST(PocoFilesystemTest, SymbolicLink)
 {
     // Windows下需要管理员权限才能创建软链接
 #if POCO_OS != POCO_OS_WINDOWS_NT
-    const Poco::Path src  = "testfile.dat";
-    const Poco::Path dest = "testfile.dat.slink";
+    // file
+    {
+        const Poco::Path src  = "testfile.dat";
+        const Poco::Path dest = "testfile.dat.slink";
 
-    Poco::File f1 = src, f2 = dest;
-    ASSERT_TRUE(!f1.exists() && !f2.exists());
+        Poco::File f1 = src, f2 = dest;
+        ASSERT_TRUE(!f1.exists() && !f2.exists());
 
-    Poco::FileOutputStream fos;
-    fos.open(f1.path(), std::ios::app);
-    fos << "0123456789";
-    fos.close();
+        Poco::FileOutputStream fos;
+        fos.open(f1.path(), std::ios::app);
+        fos << "0123456789";
+        fos.close();
 
-    f1.linkTo(f2.path());
-    ASSERT_THROW(f1.linkTo(f2.path()), Poco::FileExistsException);
-    ASSERT_TRUE(f1.exists() && f2.exists());
-    ASSERT_TRUE(f1.isFile() && f2.isLink());
+        f1.linkTo(f2.path());
+        ASSERT_THROW(f1.linkTo(f2.path()), Poco::FileExistsException);
+        ASSERT_TRUE(f1.exists() && f2.exists());
+        ASSERT_TRUE(f1.isFile() && f2.isLink() && f2.isFile());
 
-    f1.remove();
-    f2.remove();
-    ASSERT_TRUE(!f1.exists() && !f2.exists());
+        f1.remove();
+        f2.remove();
+        ASSERT_TRUE(!f1.exists() && !f2.exists());
+    }
+
+    // dir
+    {
+        const Poco::Path src  = "testdir";
+        const Poco::Path dest = "testdir.slink";
+
+        Poco::File d1 = src, d2 = dest;
+        ASSERT_TRUE(!d1.exists() && !d2.exists());
+
+        ASSERT_TRUE(d1.createDirectory());
+
+        d1.linkTo(d2.path());
+        ASSERT_THROW(d1.linkTo(d2.path()), Poco::FileExistsException);
+        ASSERT_TRUE(d1.exists() && d2.exists());
+        ASSERT_TRUE(d1.isDirectory() && d2.isLink() && d2.isDirectory());
+
+        d1.remove();
+        d2.remove();
+        ASSERT_TRUE(!d1.exists() && !d2.exists());
+    }
 #endif
 }
 

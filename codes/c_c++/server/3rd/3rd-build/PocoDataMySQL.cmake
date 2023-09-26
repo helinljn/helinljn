@@ -99,9 +99,9 @@ ELSE()
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.so.1.1
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libmysqlclient.so.21 libmysqlclient.so && cd -
-        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libssl.so.1.1        libssl.so         && cd -
-        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libcrypto.so.1.1     libcrypto.so      && cd -
+        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libmysqlclient.so.21 libmysqlclient.so
+        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libssl.so.1.1        libssl.so
+        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libcrypto.so.1.1     libcrypto.so
     )
 
     # Linux平台下rpath动态库运行路径修改，优先查找当前目录下的动态库
