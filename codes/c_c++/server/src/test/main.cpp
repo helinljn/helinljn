@@ -21,6 +21,7 @@
 #include "util/DateTimeEx.h"
 #include "Poco/FileStream.h"
 #include "Poco/DateTimeFormatter.h"
+#include "Poco/Mutex.h"
 #include "Poco/Thread.h"
 #include "Poco/Process.h"
 #include <csignal>
@@ -33,6 +34,9 @@ void signal_handler(int sig)
 {
     // 保存当前调用栈信息
     {
+        static Poco::FastMutex      mutex;
+        Poco::FastMutex::ScopedLock holder(mutex);
+
         Poco::FileOutputStream fos;
         fos.open("crash.log", std::ios::app);
         fos << "-------------------------"
@@ -57,7 +61,7 @@ void signal_handler(int sig)
         fos.close();
     }
 
-    // 恢复该信号默认处理，并重新发送该信号
+    // 恢复信号默认处理，然后重新发送
     ::signal(sig, SIG_DFL);
     ::raise(sig);
 }
