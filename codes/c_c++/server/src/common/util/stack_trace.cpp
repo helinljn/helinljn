@@ -3,6 +3,7 @@
 #include "Poco/Exception.h"
 #include "Poco/Mutex.h"
 
+#include <iomanip>
 #include <cstring>
 #include <sstream>
 #include <array>
@@ -77,7 +78,7 @@ void stack_trace::cleanup(void)
 stack_trace::stack_trace(void)
     : _frames()
 {
-    const int capacity         = 1024;
+    const int capacity         = 64;
     void*     frames[capacity] = {0};
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
@@ -139,7 +140,8 @@ stack_trace::stack_trace(void)
     }
 #else
     // Capture the current stack trace
-    int captured = backtrace(frames, capacity);
+    int    captured   = backtrace(frames, capacity);
+    char** stacktrace = backtrace_symbols(frames, captured);
 
     // Resize stack trace frames vector
     _frames.resize(captured, frame{});
@@ -184,23 +186,37 @@ stack_trace::stack_trace(void)
                 f.function = info.dli_sname;
             }
         }
+
+        if (f.function.empty())
+            f.function = stacktrace[idx];
     }
+
+    free(stacktrace);
 #endif
 }
 
 std::string stack_trace::to_string(void) const
 {
-    auto frame_to_string = [](const size_t idx, const frame& f) -> std::string
+    std::string ret;
+    if (!_frames.empty())
+        ret.reserve(_frames.size() * 256);
+
+    auto frame_to_string = [this](const size_t idx, const frame& f) -> std::string
     {
         std::string hexAddress;
         Poco::uIntToStr(reinterpret_cast<uint64_t>(f.address), 16, hexAddress, true, 18, '0');
 
         std::ostringstream ostr;
-        ostr << '[' << idx << "] ";
-        ostr << hexAddress << ": ";
-        ostr << (f.module.empty() ? "<unknown>" : f.module) << '!';
-        ostr << (f.function.empty() ? "???" : f.function) << ' ';
-        ostr << f.filename;
+        if (_frames.size() > 10)
+            ostr << '[' << std::setw(2) << std::setfill('0') << idx << "] ";
+        else
+            ostr << '[' << idx << "] ";
+
+        ostr << hexAddress << ": "
+             << (f.module.empty() ? "<unknown>" : f.module) << '!'
+             << (f.function.empty() ? "???" : f.function) << ' '
+             << f.filename;
+
         if (f.line > 0)
             ostr << '(' << f.line << ')';
 
@@ -208,10 +224,6 @@ std::string stack_trace::to_string(void) const
 
         return ostr.str();
     };
-
-    std::string ret;
-    if (!_frames.empty())
-        ret.reserve(_frames.size() * 256);
 
     for (size_t idx = 0; idx != _frames.size(); ++idx)
     {

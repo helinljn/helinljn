@@ -52,6 +52,14 @@ public:
     stack_trace& operator=(stack_trace&&) = default;
 
     ////////////////////////////////////////////////////////////////
+    // @brief Get frames
+    //
+    // @param
+    // @return
+    ////////////////////////////////////////////////////////////////
+    const std::vector<frame>& get_frames(void) const {return _frames;}
+
+    ////////////////////////////////////////////////////////////////
     // @brief Get string from the current stack trace snapshot
     //
     // @param
