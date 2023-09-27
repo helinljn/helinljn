@@ -3,6 +3,7 @@
 
 #include "fmt/format.h"
 #include "util/poco.h"
+#include "util/stack_trace.h"
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Data/Data.h"
@@ -21,6 +22,7 @@ int main(int argc, char** argv)
 {
     static_assert(__cplusplus == 201703);
 
+    common::stack_trace::initialize();
     Poco::Net::initializeNetwork();
     Poco::Net::initializeSSL();
 
@@ -31,6 +33,7 @@ int main(int argc, char** argv)
 
     Poco::Net::uninitializeSSL();
     Poco::Net::uninitializeNetwork();
+    common::stack_trace::cleanup();
 
     return ret;
 }

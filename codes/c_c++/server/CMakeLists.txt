@@ -67,11 +67,11 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0A00")
 ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -rdynamic")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic -rdynamic")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
