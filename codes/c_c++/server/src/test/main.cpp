@@ -24,12 +24,15 @@
 #include "Poco/Mutex.h"
 #include "Poco/Thread.h"
 #include "Poco/Process.h"
+#include "Poco/String.h"
+#include "Poco/Path.h"
 #include <csignal>
 
 #define REGISTER_SIGNAL(sig)                             \
     if (::signal(sig, signal_handler) != signal_handler) \
         ::signal(sig, signal_handler)
 
+static std::string exec_name;
 void signal_handler(int sig)
 {
     // 保存当前调用栈信息
@@ -38,7 +41,7 @@ void signal_handler(int sig)
         Poco::FastMutex::ScopedLock holder(mutex);
 
         Poco::FileOutputStream fos;
-        fos.open("crash.log", std::ios::app);
+        fos.open(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
         fos << "-------------------------"
             << POCO_DEFAULT_NEWLINE_CHARS
             << "sig:  " << sig
@@ -47,7 +50,7 @@ void signal_handler(int sig)
             << POCO_DEFAULT_NEWLINE_CHARS
             << "pid:  " << Poco::Process::id()
             << POCO_DEFAULT_NEWLINE_CHARS
-            << "time: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%S")
+            << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%S")
             << POCO_DEFAULT_NEWLINE_CHARS
             << "-------------------------"
             << POCO_DEFAULT_NEWLINE_CHARS
@@ -82,6 +85,14 @@ int main(int argc, char** argv)
     REGISTER_SIGNAL(SIGFPE);
     REGISTER_SIGNAL(SIGSEGV);
     REGISTER_SIGNAL(SIGABRT);
+
+    // 设置exec_name
+    [argv]() -> void
+    {
+        exec_name = Poco::Path(argv[0]).getBaseName();
+        Poco::toLowerInPlace(exec_name);
+        ASSERT_TRUE(!exec_name.empty());
+    }();
 
     const int ret = RUN_ALL_TESTS();
 
