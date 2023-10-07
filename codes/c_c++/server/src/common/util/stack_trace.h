@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#include <mutex>
 
 namespace common {
 
@@ -70,6 +71,7 @@ public:
 private:
     std::vector<frame>      _frames;
     static std::atomic_bool _initialized;
+    static std::mutex       _capture_mutex;
 };
 
 } // namespace common

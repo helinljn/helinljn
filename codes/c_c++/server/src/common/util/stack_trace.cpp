@@ -1,13 +1,11 @@
 #include "util/stack_trace.h"
 #include "util/poco.h"
+#include "Poco/String.h"
 #include "Poco/Exception.h"
-#include "Poco/Mutex.h"
 
 #include <iomanip>
 #include <cstring>
 #include <sstream>
-#include <array>
-#include <string_view>
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
     #include <windows.h>
@@ -24,6 +22,7 @@
 namespace common {
 
 std::atomic_bool stack_trace::_initialized;
+std::mutex       stack_trace::_capture_mutex;
 
 void stack_trace::initialize(void)
 {
@@ -81,19 +80,17 @@ void stack_trace::cleanup(void)
 stack_trace::stack_trace(void)
     : _frames()
 {
-    const int capacity         = 64;
+    const int capacity         = 32;
     void*     frames[capacity] = {0};
+
+    // Capture stack trace snapshot under the critical section
+    std::lock_guard holder(_capture_mutex);
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
     // Capture the current stack trace
     const USHORT captured = CaptureStackBackTrace(1, capacity, frames, nullptr);
-
-    // Resize stack trace frames vector
-    _frames.resize(captured, frame{});
-
-    // Capture stack trace snapshot under the critical section
-    static Poco::FastMutex      mutex;
-    Poco::FastMutex::ScopedLock holder(mutex);
+    if (captured > 0)
+        _frames.resize(captured, frame{});
 
     // Fill all captured frames with symbol information
     for (int idx = 0; idx != captured; ++idx)
@@ -145,13 +142,8 @@ stack_trace::stack_trace(void)
     // Capture the current stack trace
     const int captured   = backtrace(frames, capacity);
     char**    stacktrace = backtrace_symbols(frames, captured);
-
-    // Resize stack trace frames vector
-    _frames.resize(captured, frame{});
-
-    // Capture stack trace snapshot under the critical section
-    static Poco::FastMutex      mutex;
-    Poco::FastMutex::ScopedLock holder(mutex);
+    if (captured > 0)
+        _frames.resize(captured, frame{});
 
     // Fill all captured frames with symbol information
     for (int idx = 0; idx != captured; ++idx)
@@ -281,12 +273,17 @@ std::string stack_trace::to_string(void) const
     if (!_frames.empty())
         ret.reserve(_frames.size() * 256);
 
-    auto frame_to_string = [this](const size_t idx, const frame& f) -> std::string
+    std::ostringstream ostr;
+    std::string        hexAddress;
+    auto frame_to_string = [this, &ostr, &hexAddress](const size_t idx, const frame& f) -> std::string
     {
-        std::string hexAddress;
-        Poco::uIntToStr(reinterpret_cast<uint64_t>(f.address), 16, hexAddress, true, 18, '0');
+        ostr.str("");
+        ostr.clear();
+        hexAddress.clear();
 
-        std::ostringstream ostr;
+        Poco::uIntToStr(reinterpret_cast<uint64_t>(f.address), 16, hexAddress, true, 18, '0');
+        Poco::toLowerInPlace(hexAddress);
+
         if (_frames.size() > 10)
             ostr << '[' << std::setw(2) << std::setfill('0') << idx << "] ";
         else
