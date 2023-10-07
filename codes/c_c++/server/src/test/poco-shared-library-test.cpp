@@ -5,7 +5,7 @@
 #include "Poco/SharedLibrary.h"
 #include "Poco/SHA1Engine.h"
 #include "openssl/sha.h"
-#include "mysql.h"
+#include "mysql/mysql.h"
 
 #include <string_view>
 #include <string>

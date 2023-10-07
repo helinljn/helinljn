@@ -6,7 +6,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
-    ${CMAKE_3RD_DIR_MYSQL}/include/mysql
+    ${CMAKE_3RD_DIR_MYSQL}/include
 )
 
 # 宏定义、编译选项

@@ -19,7 +19,6 @@
 
 #include "util/stack_trace.h"
 #include "util/DateTimeEx.h"
-#include "Poco/FileStream.h"
 #include "Poco/DateTimeFormatter.h"
 #include "Poco/Thread.h"
 #include "Poco/Process.h"
@@ -28,6 +27,7 @@
 
 #include <csignal>
 #include <sstream>
+#include <fstream>
 
 #define REGISTER_SIGNAL(sig, handler)      \
     if (::signal(sig, handler) != handler) \
@@ -172,10 +172,10 @@ void signal_common_handler(int sig)
 
     // 保存信息至文件
     {
-        std::lock_guard        holder(file_mutex);
-        Poco::FileOutputStream fos(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
-        fos << format_info;
-        fos.close();
+        std::lock_guard holder(file_mutex);
+        std::ofstream   ofs(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
+        ofs << format_info;
+        ofs.close();
     }
 
     // 输出信息

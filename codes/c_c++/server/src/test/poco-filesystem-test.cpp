@@ -409,7 +409,7 @@ GTEST_TEST(PocoFilesystemTest, File)
     ASSERT_TRUE(!f.exists());
 
     Poco::FileOutputStream fos;
-    fos.open(f.path(), std::ios::app);
+    fos.open(f.path(), std::ios::out | std::ios::app);
     fos << "0123456789";
     fos.close();
 
@@ -435,7 +435,7 @@ GTEST_TEST(PocoFilesystemTest, TemporaryFile)
         fmt::print("temp file: {}\n", tmpFile);
 
         Poco::FileOutputStream fos;
-        fos.open(tf.path(), std::ios::trunc);
+        fos.open(tf.path(), std::ios::out | std::ios::trunc);
         fos << "0123456789";
         fos.close();
 
@@ -456,7 +456,7 @@ GTEST_TEST(PocoFilesystemTest, TemporaryFile)
         fmt::print("temp file: {}\n", tmpFile);
 
         Poco::FileOutputStream fos;
-        fos.open(tf.path(), std::ios::trunc);
+        fos.open(tf.path(), std::ios::out | std::ios::trunc);
         fos << "0123456789";
         fos.close();
 
@@ -479,7 +479,7 @@ GTEST_TEST(PocoFilesystemTest, TemporaryFile)
         fmt::print("temp file: {}\n", tmpFile);
 
         Poco::FileOutputStream fos;
-        fos.open(tf.path(), std::ios::trunc);
+        fos.open(tf.path(), std::ios::out | std::ios::trunc);
         fos << "0123456789";
         fos.close();
 
@@ -534,7 +534,7 @@ GTEST_TEST(PocoFilesystemTest, CopyFile)
         ASSERT_TRUE(!f1.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -556,7 +556,7 @@ GTEST_TEST(PocoFilesystemTest, CopyFile)
         ASSERT_TRUE(!f1.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -578,7 +578,7 @@ GTEST_TEST(PocoFilesystemTest, CopyFile)
         ASSERT_TRUE(!f1.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -589,7 +589,7 @@ GTEST_TEST(PocoFilesystemTest, CopyFile)
         ASSERT_TRUE(f1.exists() && f2.exists());
         ASSERT_TRUE(f1.getSize() == 10 && f2.getSize() == 10);
 
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -608,7 +608,7 @@ GTEST_TEST(PocoFilesystemTest, CopyFile)
         ASSERT_TRUE(!f1.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -638,7 +638,7 @@ GTEST_TEST(PocoFilesystemTest, MoveFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -662,7 +662,7 @@ GTEST_TEST(PocoFilesystemTest, MoveFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -686,7 +686,7 @@ GTEST_TEST(PocoFilesystemTest, MoveFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -694,7 +694,7 @@ GTEST_TEST(PocoFilesystemTest, MoveFile)
         ASSERT_TRUE(f1.exists() && f2.exists());
         ASSERT_TRUE(f1.getSize() == 10 && f2.getSize() == 10);
 
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -718,7 +718,7 @@ GTEST_TEST(PocoFilesystemTest, MoveFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -745,7 +745,7 @@ GTEST_TEST(PocoFilesystemTest, RenameFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -769,7 +769,7 @@ GTEST_TEST(PocoFilesystemTest, RenameFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -793,7 +793,7 @@ GTEST_TEST(PocoFilesystemTest, RenameFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -801,7 +801,7 @@ GTEST_TEST(PocoFilesystemTest, RenameFile)
         ASSERT_TRUE(f1.exists() && f2.exists());
         ASSERT_TRUE(f1.getSize() == 10 && f2.getSize() == 10);
 
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -825,7 +825,7 @@ GTEST_TEST(PocoFilesystemTest, RenameFile)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -919,7 +919,7 @@ GTEST_TEST(PocoFilesystemTest, SymbolicLink)
         ASSERT_TRUE(!f1.exists() && !f2.exists());
 
         Poco::FileOutputStream fos;
-        fos.open(f1.path(), std::ios::app);
+        fos.open(f1.path(), std::ios::out | std::ios::app);
         fos << "0123456789";
         fos.close();
 
@@ -1059,11 +1059,11 @@ GTEST_TEST(PocoFilesystemTest, CopyDir)
         ASSERT_TRUE(sd.isDirectory() && dd.isDirectory());
         {
             Poco::FileOutputStream fos;
-            fos.open(srcDirFile1.toString(), std::ios::app);
+            fos.open(srcDirFile1.toString(), std::ios::out | std::ios::app);
             fos << "0123456789";
             fos.close();
 
-            fos.open(srcDirFile2.toString(), std::ios::app);
+            fos.open(srcDirFile2.toString(), std::ios::out | std::ios::app);
             fos << "0123456789";
             fos.close();
 
@@ -1258,11 +1258,11 @@ GTEST_TEST(PocoFilesystemTest, MoveDir)
             ASSERT_TRUE(!f1.exists() && !f3.exists());
 
             Poco::FileOutputStream fos;
-            fos.open(srcDirFile1.toString(), std::ios::app);
+            fos.open(srcDirFile1.toString(), std::ios::out | std::ios::app);
             fos << "0123456789";
             fos.close();
 
-            fos.open(srcDirFile3.toString(), std::ios::app);
+            fos.open(srcDirFile3.toString(), std::ios::out | std::ios::app);
             fos << "0123456789";
             fos.close();
 
@@ -1338,11 +1338,11 @@ GTEST_TEST(PocoFilesystemTest, MoveDir)
             ASSERT_TRUE(!f1.exists() && !f3.exists());
 
             Poco::FileOutputStream fos;
-            fos.open(srcDirFile1.toString(), std::ios::app);
+            fos.open(srcDirFile1.toString(), std::ios::out | std::ios::app);
             fos << "0123456789";
             fos.close();
 
-            fos.open(srcDirFile3.toString(), std::ios::app);
+            fos.open(srcDirFile3.toString(), std::ios::out | std::ios::app);
             fos << "0123456789";
             fos.close();
 
