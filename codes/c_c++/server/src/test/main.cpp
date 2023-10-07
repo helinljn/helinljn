@@ -26,48 +26,18 @@
 #include "Poco/Process.h"
 #include "Poco/String.h"
 #include "Poco/Path.h"
-#include <csignal>
 
-#define REGISTER_SIGNAL(sig)                             \
-    if (::signal(sig, signal_handler) != signal_handler) \
-        ::signal(sig, signal_handler)
+#include <csignal>
+#include <sstream>
+
+#define REGISTER_SIGNAL(sig, handler)      \
+    if (::signal(sig, handler) != handler) \
+        ::signal(sig, handler)
 
 static std::string exec_name;
-void signal_handler(int sig)
-{
-    // 保存当前调用栈信息
-    {
-        static Poco::FastMutex      mutex;
-        Poco::FastMutex::ScopedLock holder(mutex);
-
-        Poco::FileOutputStream fos;
-        fos.open(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
-        fos << "-------------------------"
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << "sig:  " << sig
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << "tid:  " << Poco::Thread::currentOsTid()
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << "pid:  " << Poco::Process::id()
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%S")
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << "-------------------------"
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << "------ stack trace ------"
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << common::stack_trace().to_string()
-            << "-------------------------"
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << POCO_DEFAULT_NEWLINE_CHARS;
-        fos.close();
-    }
-
-    // 恢复信号默认处理，然后重新发送
-    ::signal(sig, SIG_DFL);
-    ::raise(sig);
-}
+static const char* signal_to_string(int sig);
+static void signal_ignore_handler(int sig);
+static void signal_dump_handler(int sig);
 
 int main(int argc, char** argv)
 {
@@ -81,10 +51,11 @@ int main(int argc, char** argv)
     testing::InitGoogleTest(&argc, argv);
 
     // 注册信号处理
-    REGISTER_SIGNAL(SIGILL);
-    REGISTER_SIGNAL(SIGFPE);
-    REGISTER_SIGNAL(SIGSEGV);
-    REGISTER_SIGNAL(SIGABRT);
+    REGISTER_SIGNAL(SIGINT, signal_ignore_handler);
+    REGISTER_SIGNAL(SIGILL, signal_dump_handler);
+    REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
+    REGISTER_SIGNAL(SIGSEGV, signal_dump_handler);
+    REGISTER_SIGNAL(SIGABRT, signal_dump_handler);
 
     // 设置exec_name
     [argv]() -> void
@@ -101,4 +72,133 @@ int main(int argc, char** argv)
     common::stack_trace::cleanup();
 
     return ret;
+}
+
+const char* signal_to_string(int sig)
+{
+    switch (sig)
+    {
+    case SIGINT:
+        return "SIGINT";
+    case SIGILL:
+        return "SIGILL";
+    case SIGABRT:
+        return "SIGABRT";
+    case SIGFPE:
+        return "SIGFPE";
+    case SIGSEGV:
+        return "SIGSEGV";
+    case SIGTERM:
+        return "SIGTERM";
+#if POCO_OS == POCO_OS_WINDOWS_NT
+    case SIGBREAK:
+        return "SIGBREAK";
+#else
+    case SIGHUP:
+        return "SIGHUP";
+    case SIGQUIT:
+        return "SIGQUIT";
+    case SIGTRAP:
+        return "SIGTRAP";
+    case SIGKILL:
+        return "SIGKILL";
+    case SIGBUS:
+        return "SIGBUS";
+    case SIGSYS:
+        return "SIGSYS";
+    case SIGPIPE:
+        return "SIGPIPE";
+    case SIGALRM:
+        return "SIGALRM";
+    case SIGURG:
+        return "SIGURG";
+    case SIGSTOP:
+        return "SIGSTOP";
+    case SIGTSTP:
+        return "SIGTSTP";
+    case SIGCONT:
+        return "SIGCONT";
+    case SIGCHLD:
+        return "SIGCHLD";
+    case SIGTTIN:
+        return "SIGTTIN";
+    case SIGTTOU:
+        return "SIGTTOU";
+    case SIGPOLL:
+        return "SIGPOLL";
+    case SIGXCPU:
+        return "SIGXCPU";
+    case SIGXFSZ:
+        return "SIGXFSZ";
+    case SIGVTALRM:
+        return "SIGVTALRM";
+    case SIGPROF:
+        return "SIGPROF";
+    case SIGUSR1:
+        return "SIGUSR1";
+    case SIGUSR2:
+        return "SIGUSR2";
+#endif
+    default:
+        return "UNKNOWN";
+    }
+}
+
+void signal_ignore_handler(int sig)
+{
+    std::ostringstream oss;
+    oss << "-------------------------"
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << "tid:  " << Poco::Thread::currentOsTid()
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << "pid:  " << Poco::Process::id()
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << "-------------------------"
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << "------ stack trace ------"
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << common::stack_trace().to_string()
+        << "-------------------------"
+        << POCO_DEFAULT_NEWLINE_CHARS
+        << POCO_DEFAULT_NEWLINE_CHARS;
+    fmt::print("{}", oss.str());
+}
+
+void signal_dump_handler(int sig)
+{
+    // 保存当前调用栈信息
+    {
+        static Poco::FastMutex      mutex;
+        Poco::FastMutex::ScopedLock holder(mutex);
+
+        Poco::FileOutputStream fos;
+        fos.open(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
+        fos << "-------------------------"
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << "tid:  " << Poco::Thread::currentOsTid()
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << "pid:  " << Poco::Process::id()
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << "-------------------------"
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << "------ stack trace ------"
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << common::stack_trace().to_string()
+            << "-------------------------"
+            << POCO_DEFAULT_NEWLINE_CHARS
+            << POCO_DEFAULT_NEWLINE_CHARS;
+        fos.close();
+    }
+
+    // 恢复信号默认处理，然后重新发送
+    ::signal(sig, SIG_DFL);
+    ::raise(sig);
 }

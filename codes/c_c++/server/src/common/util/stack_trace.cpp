@@ -16,6 +16,9 @@
     #include <execinfo.h>
     #include <cxxabi.h>
     #include <dlfcn.h>
+    #if LIBBFD_SUPPORT
+        #include <bfd.h>
+    #endif
 #endif
 
 namespace common {
@@ -133,15 +136,15 @@ stack_trace::stack_trace(void)
         line.SizeOfStruct = sizeof(line);
         if (SymGetLineFromAddr64(hProcess, (DWORD64)f.address, &offset, &line))
         {
-            if (line.FileName != nullptr)
+            if (line.FileName)
                 f.filename = line.FileName;
             f.line = line.LineNumber;
         }
     }
 #else
     // Capture the current stack trace
-    int    captured   = backtrace(frames, capacity);
-    char** stacktrace = backtrace_symbols(frames, captured);
+    const int captured   = backtrace(frames, capacity);
+    char**    stacktrace = backtrace_symbols(frames, captured);
 
     // Resize stack trace frames vector
     _frames.resize(captured, frame{});
@@ -163,20 +166,20 @@ stack_trace::stack_trace(void)
             continue;
 
         // Get the frame module
-        if (info.dli_fname != nullptr)
+        if (info.dli_fname)
         {
             const char* module = std::strrchr(info.dli_fname, '/');
-            if (module != nullptr)
+            if (module)
                 f.module = module + 1;
         }
 
         // Get the frame function
-        if (info.dli_sname != nullptr)
+        if (info.dli_sname)
         {
             // Demangle symbol name if need
             int   status    = 0;
             char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, 0, &status);
-            if ((status == 0) && (demangled != nullptr))
+            if (status == 0 && demangled)
             {
                 f.function = demangled;
                 free(demangled);
@@ -189,6 +192,83 @@ stack_trace::stack_trace(void)
 
         if (f.function.empty())
             f.function = stacktrace[idx];
+
+        if (!f.address || !info.dli_fname)
+            continue;
+
+#if LIBBFD_SUPPORT
+        ////////////////////////////////
+        // libbfd support begin
+        bfd*      abfd     = nullptr;
+        char**    matching = nullptr;
+        void*     symsptr  = nullptr;
+        asymbol** syms     = nullptr;
+
+        unsigned int symsize  = 0;
+        long         symcount = 0;
+        bfd_boolean  found    = false;
+        bfd_vma      pc       = 0;
+
+        const char*  filename     = nullptr;
+        const char*  functionname = nullptr;
+        unsigned int line         = 0;
+
+        abfd = bfd_openr(info.dli_fname, nullptr);
+        if (!abfd)
+            continue;
+
+        if (bfd_check_format(abfd, bfd_archive))
+            goto cleanup;
+
+        if (!bfd_check_format_matches(abfd, bfd_object, &matching))
+            goto cleanup;
+
+        if ((bfd_get_file_flags(abfd) & HAS_SYMS) == 0)
+            goto cleanup;
+
+        symcount = bfd_read_minisymbols(abfd, FALSE, &symsptr, &symsize);
+        if (symcount == 0)
+            symcount = bfd_read_minisymbols(abfd, TRUE, &symsptr, &symsize);
+        if (symcount < 0)
+            goto cleanup;
+
+        syms = (asymbol**)symsptr;
+        pc   = (bfd_vma)f.address;
+        for (asection* section = abfd->sections; section != nullptr; section = section->next)
+        {
+            if (found)
+                break;
+
+            if ((bfd_section_flags(section) & SEC_ALLOC) == 0)
+                continue;
+
+            bfd_vma vma = bfd_section_vma(section);
+            if (pc < vma)
+                continue;
+
+            bfd_size_type secsize = bfd_section_size(section);
+            if (pc >= vma + secsize)
+                continue;
+
+            found = bfd_find_nearest_line(abfd, section, syms, pc - vma, &filename, &functionname, &line);
+        }
+
+        if (!found)
+            goto cleanup;
+
+        if (filename)
+            f.filename = filename;
+        f.line = line;
+
+cleanup:
+        if (symsptr)
+            free(symsptr);
+
+        if (abfd)
+            bfd_close(abfd);
+        // libbfd support end
+        ////////////////////////////////
+#endif
     }
 
     free(stacktrace);
