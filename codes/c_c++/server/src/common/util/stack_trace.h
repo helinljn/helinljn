@@ -26,7 +26,7 @@ public:
 
 public:
     ////////////////////////////////////////////////////////////////
-    // @brief Initialize stack trace(This method should be called
+    // @brief Initialize the stack trace(This method should be called
     //        before you start capture any stack trace snapshots!)
     //
     // @param
@@ -35,13 +35,13 @@ public:
     static void initialize(void);
 
     ////////////////////////////////////////////////////////////////
-    // @brief Cleanup stack trace(This method should be called just
+    // @brief Uninitialize the stack trace(This method should be called
     //        before the current process exits!
     //
     // @param
     // @return
     ////////////////////////////////////////////////////////////////
-    static void cleanup(void);
+    static void uninitialize(void);
 
 public:
     stack_trace(void);

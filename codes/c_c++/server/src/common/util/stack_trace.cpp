@@ -59,7 +59,7 @@ void stack_trace::initialize(void)
     _initialized.store(true);
 }
 
-void stack_trace::cleanup(void)
+void stack_trace::uninitialize(void)
 {
     if (!_initialized.load())
         return;
@@ -71,7 +71,7 @@ void stack_trace::cleanup(void)
         success = true;
 
     if (!success)
-        throw Poco::SystemException("Cannot cleanup symbol handler for the current process!");
+        throw Poco::SystemException("Cannot uninitialize symbol handler for the current process!");
 #endif
 
     _initialized.store(false);

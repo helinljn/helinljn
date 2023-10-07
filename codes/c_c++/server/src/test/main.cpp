@@ -21,7 +21,6 @@
 #include "util/DateTimeEx.h"
 #include "Poco/FileStream.h"
 #include "Poco/DateTimeFormatter.h"
-#include "Poco/Mutex.h"
 #include "Poco/Thread.h"
 #include "Poco/Process.h"
 #include "Poco/String.h"
@@ -35,8 +34,9 @@
         ::signal(sig, handler)
 
 static std::string exec_name;
+static std::mutex  file_mutex;
 static const char* signal_to_string(int sig);
-static void signal_ignore_handler(int sig);
+static void signal_common_handler(int sig);
 static void signal_dump_handler(int sig);
 
 int main(int argc, char** argv)
@@ -51,7 +51,8 @@ int main(int argc, char** argv)
     testing::InitGoogleTest(&argc, argv);
 
     // 注册信号处理
-    REGISTER_SIGNAL(SIGINT, signal_ignore_handler);
+    REGISTER_SIGNAL(SIGINT, signal_common_handler);
+    REGISTER_SIGNAL(SIGTERM, signal_common_handler);
     REGISTER_SIGNAL(SIGILL, signal_dump_handler);
     REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
     REGISTER_SIGNAL(SIGSEGV, signal_dump_handler);
@@ -69,7 +70,7 @@ int main(int argc, char** argv)
 
     Poco::Net::uninitializeSSL();
     Poco::Net::uninitializeNetwork();
-    common::stack_trace::cleanup();
+    common::stack_trace::uninitialize();
 
     return ret;
 }
@@ -144,40 +145,13 @@ const char* signal_to_string(int sig)
     }
 }
 
-void signal_ignore_handler(int sig)
+void signal_common_handler(int sig)
 {
-    std::ostringstream oss;
-    oss << "-------------------------"
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << "tid:  " << Poco::Thread::currentOsTid()
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << "pid:  " << Poco::Process::id()
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << "-------------------------"
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << "------ stack trace ------"
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << common::stack_trace().to_string()
-        << "-------------------------"
-        << POCO_DEFAULT_NEWLINE_CHARS
-        << POCO_DEFAULT_NEWLINE_CHARS;
-    fmt::print("{}", oss.str());
-}
-
-void signal_dump_handler(int sig)
-{
-    // 保存当前调用栈信息
+    // 格式化当前堆栈信息
+    std::string format_info;
     {
-        static Poco::FastMutex      mutex;
-        Poco::FastMutex::ScopedLock holder(mutex);
-
-        Poco::FileOutputStream fos;
-        fos.open(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
-        fos << "-------------------------"
+        std::ostringstream oss;
+        oss << "-------------------------------"
             << POCO_DEFAULT_NEWLINE_CHARS
             << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
             << POCO_DEFAULT_NEWLINE_CHARS
@@ -187,16 +161,31 @@ void signal_dump_handler(int sig)
             << POCO_DEFAULT_NEWLINE_CHARS
             << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
             << POCO_DEFAULT_NEWLINE_CHARS
-            << "-------------------------"
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << "------ stack trace ------"
+            << "--------- stack trace ---------"
             << POCO_DEFAULT_NEWLINE_CHARS
             << common::stack_trace().to_string()
-            << "-------------------------"
+            << "-------------------------------"
             << POCO_DEFAULT_NEWLINE_CHARS
             << POCO_DEFAULT_NEWLINE_CHARS;
+        format_info = std::move(oss.str());
+    }
+
+    // 保存信息至文件
+    {
+        std::lock_guard        holder(file_mutex);
+        Poco::FileOutputStream fos(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
+        fos << format_info;
         fos.close();
     }
+
+    // 输出信息
+    fmt::print("{}", format_info);
+}
+
+void signal_dump_handler(int sig)
+{
+    // 获取当前堆栈信息并保存至文件，然后输出
+    signal_common_handler(sig);
 
     // 恢复信号默认处理，然后重新发送
     ::signal(sig, SIG_DFL);
