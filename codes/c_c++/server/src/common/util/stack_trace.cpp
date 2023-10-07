@@ -297,7 +297,7 @@ std::string stack_trace::to_string(void) const
         if (f.line > 0)
             ostr << '(' << f.line << ')';
 
-        ostr << std::ends;
+        ostr << std::endl;
 
         return ostr.str();
     };
@@ -305,7 +305,6 @@ std::string stack_trace::to_string(void) const
     for (size_t idx = 0; idx != _frames.size(); ++idx)
     {
         ret += frame_to_string(idx, _frames[idx]);
-        ret += POCO_DEFAULT_NEWLINE_CHARS;
     }
 
     return ret;

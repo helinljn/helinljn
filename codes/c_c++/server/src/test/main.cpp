@@ -152,21 +152,21 @@ void signal_common_handler(int sig)
     {
         std::ostringstream oss;
         oss << "-------------------------------"
-            << POCO_DEFAULT_NEWLINE_CHARS
+            << std::endl
             << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
-            << POCO_DEFAULT_NEWLINE_CHARS
+            << std::endl
             << "tid:  " << Poco::Thread::currentOsTid()
-            << POCO_DEFAULT_NEWLINE_CHARS
+            << std::endl
             << "pid:  " << Poco::Process::id()
-            << POCO_DEFAULT_NEWLINE_CHARS
+            << std::endl
             << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
-            << POCO_DEFAULT_NEWLINE_CHARS
+            << std::endl
             << "--------- stack trace ---------"
-            << POCO_DEFAULT_NEWLINE_CHARS
+            << std::endl
             << common::stack_trace().to_string()
             << "-------------------------------"
-            << POCO_DEFAULT_NEWLINE_CHARS
-            << POCO_DEFAULT_NEWLINE_CHARS;
+            << std::endl
+            << std::endl;
         format_info = std::move(oss.str());
     }
 
