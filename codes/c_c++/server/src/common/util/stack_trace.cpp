@@ -80,7 +80,7 @@ void stack_trace::uninitialize(void)
 stack_trace::stack_trace(void)
     : _frames()
 {
-    const int capacity         = 32;
+    const int capacity         = 64;
     void*     frames[capacity] = {0};
 
     // Capture stack trace snapshot under the critical section
@@ -275,7 +275,7 @@ std::string stack_trace::to_string(void) const
 
     std::ostringstream ostr;
     std::string        hexAddress;
-    auto frame_to_string = [this, &ostr, &hexAddress](const size_t idx, const frame& f) -> std::string
+    auto frame_to_string = [&ostr, &hexAddress](const size_t idx, const frame& f) -> std::string
     {
         ostr.str("");
         ostr.clear();
@@ -284,12 +284,8 @@ std::string stack_trace::to_string(void) const
         Poco::uIntToStr(reinterpret_cast<uint64_t>(f.address), 16, hexAddress, true, 18, '0');
         Poco::toLowerInPlace(hexAddress);
 
-        if (_frames.size() > 10)
-            ostr << '[' << std::setw(2) << std::setfill('0') << idx << "] ";
-        else
-            ostr << '[' << idx << "] ";
-
-        ostr << hexAddress << ": "
+        ostr << '#' << std::setw(4) << std::left << idx << std::right
+             << hexAddress << ": "
              << (f.module.empty() ? "<unknown>" : f.module) << '!'
              << (f.function.empty() ? "???" : f.function) << ' '
              << f.filename;

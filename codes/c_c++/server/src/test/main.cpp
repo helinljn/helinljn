@@ -26,6 +26,7 @@
 #include "Poco/Path.h"
 
 #include <csignal>
+#include <cstdlib>
 #include <sstream>
 #include <fstream>
 
@@ -35,8 +36,106 @@
 
 static std::string exec_name;
 static std::mutex  file_mutex;
-static const char* signal_to_string(int sig);
-static void signal_dump_handler(int sig);
+static void signal_dump_handler(int sig)
+{
+    auto signal_to_string = [](int sig) -> const char*
+    {
+        switch (sig)
+        {
+        case SIGINT:    return "SIGINT";
+        case SIGILL:    return "SIGILL";
+        case SIGABRT:   return "SIGABRT";
+        case SIGFPE:    return "SIGFPE";
+        case SIGSEGV:   return "SIGSEGV";
+        case SIGTERM:   return "SIGTERM";
+#if POCO_OS == POCO_OS_WINDOWS_NT
+        case SIGBREAK:  return "SIGBREAK";
+#else
+        case SIGHUP:    return "SIGHUP";
+        case SIGQUIT:   return "SIGQUIT";
+        case SIGTRAP:   return "SIGTRAP";
+        case SIGKILL:   return "SIGKILL";
+        case SIGBUS:    return "SIGBUS";
+        case SIGSYS:    return "SIGSYS";
+        case SIGPIPE:   return "SIGPIPE";
+        case SIGALRM:   return "SIGALRM";
+        case SIGURG:    return "SIGURG";
+        case SIGSTOP:   return "SIGSTOP";
+        case SIGTSTP:   return "SIGTSTP";
+        case SIGCONT:   return "SIGCONT";
+        case SIGCHLD:   return "SIGCHLD";
+        case SIGTTIN:   return "SIGTTIN";
+        case SIGTTOU:   return "SIGTTOU";
+        case SIGPOLL:   return "SIGPOLL";
+        case SIGXCPU:   return "SIGXCPU";
+        case SIGXFSZ:   return "SIGXFSZ";
+        case SIGVTALRM: return "SIGVTALRM";
+        case SIGPROF:   return "SIGPROF";
+        case SIGUSR1:   return "SIGUSR1";
+        case SIGUSR2:   return "SIGUSR2";
+#endif
+        default:        return "UNKNOWN";
+        }
+    };
+
+    // 格式化当前堆栈信息
+    std::string info;
+    {
+        std::ostringstream oss;
+
+        oss << "---------------------------------" << std::endl;
+        if (sig > 0)
+            oss << "sig:  " << sig << '(' << signal_to_string(sig) << ')' << std::endl;
+
+        oss << "tid:  " << Poco::Thread::currentOsTid() << std::endl;
+        if (Poco::Thread* curThread = Poco::Thread::current(); curThread)
+            oss << "tnm:  " << curThread->getName() << std::endl;
+
+        oss << "pid:  " << Poco::Process::id()
+            << std::endl
+            << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
+            << std::endl
+            << "---------- stack trace ----------"
+            << std::endl
+            << common::stack_trace().to_string()
+            << "---------------------------------"
+            << std::endl
+            << std::endl;
+        info = std::move(oss.str());
+    }
+
+    // 保存信息至文件
+    {
+        std::lock_guard holder(file_mutex);
+        std::ofstream   ofs(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
+        ofs << info;
+        ofs.close();
+    }
+
+    // 输出信息
+    fmt::print("{}", info);
+
+    // 恢复信号默认处理，然后重新发送
+    ::signal(sig, SIG_DFL);
+    ::raise(sig);
+}
+
+#if POCO_OS == POCO_OS_WINDOWS_NT
+static void win_terminate_handler(void)
+{
+    abort();
+}
+
+static void win_invalid_parameter_handler(const wchar_t*, const wchar_t*, const wchar_t*, unsigned int, uintptr_t)
+{
+    abort();
+}
+
+static LONG win_unhandled_exception_handler(EXCEPTION_POINTERS*)
+{
+    abort();
+}
+#endif
 
 int main(int argc, char** argv)
 {
@@ -51,17 +150,23 @@ int main(int argc, char** argv)
 
     // 设置exec_name
     exec_name = std::move(Poco::Path(argv[0]).getBaseName());
+    poco_assert(!exec_name.empty());
     Poco::toLowerInPlace(exec_name);
 
     // 注册信号处理
     REGISTER_SIGNAL(SIGINT, SIG_IGN);
     REGISTER_SIGNAL(SIGTERM, SIG_IGN);
-
 #if POCO_OS == POCO_OS_WINDOWS_NT
-    REGISTER_SIGNAL(SIGILL, signal_dump_handler);
-    REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
-    REGISTER_SIGNAL(SIGSEGV, signal_dump_handler);
     REGISTER_SIGNAL(SIGABRT, signal_dump_handler);
+    _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+
+    std::set_terminate(win_terminate_handler);
+    _set_purecall_handler(win_terminate_handler);
+
+    _set_invalid_parameter_handler(win_invalid_parameter_handler);
+    _set_thread_local_invalid_parameter_handler(win_invalid_parameter_handler);
+
+    SetUnhandledExceptionFilter(win_unhandled_exception_handler);
 #else
     REGISTER_SIGNAL(SIGILL, signal_dump_handler);
     REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
@@ -82,119 +187,4 @@ int main(int argc, char** argv)
     common::stack_trace::uninitialize();
 
     return ret;
-}
-
-const char* signal_to_string(int sig)
-{
-    switch (sig)
-    {
-    case SIGINT:
-        return "SIGINT";
-    case SIGILL:
-        return "SIGILL";
-    case SIGABRT:
-        return "SIGABRT";
-    case SIGFPE:
-        return "SIGFPE";
-    case SIGSEGV:
-        return "SIGSEGV";
-    case SIGTERM:
-        return "SIGTERM";
-#if POCO_OS == POCO_OS_WINDOWS_NT
-    case SIGBREAK:
-        return "SIGBREAK";
-#else
-    case SIGHUP:
-        return "SIGHUP";
-    case SIGQUIT:
-        return "SIGQUIT";
-    case SIGTRAP:
-        return "SIGTRAP";
-    case SIGKILL:
-        return "SIGKILL";
-    case SIGBUS:
-        return "SIGBUS";
-    case SIGSYS:
-        return "SIGSYS";
-    case SIGPIPE:
-        return "SIGPIPE";
-    case SIGALRM:
-        return "SIGALRM";
-    case SIGURG:
-        return "SIGURG";
-    case SIGSTOP:
-        return "SIGSTOP";
-    case SIGTSTP:
-        return "SIGTSTP";
-    case SIGCONT:
-        return "SIGCONT";
-    case SIGCHLD:
-        return "SIGCHLD";
-    case SIGTTIN:
-        return "SIGTTIN";
-    case SIGTTOU:
-        return "SIGTTOU";
-    case SIGPOLL:
-        return "SIGPOLL";
-    case SIGXCPU:
-        return "SIGXCPU";
-    case SIGXFSZ:
-        return "SIGXFSZ";
-    case SIGVTALRM:
-        return "SIGVTALRM";
-    case SIGPROF:
-        return "SIGPROF";
-    case SIGUSR1:
-        return "SIGUSR1";
-    case SIGUSR2:
-        return "SIGUSR2";
-#endif
-    default:
-        return "UNKNOWN";
-    }
-}
-
-void signal_dump_handler(int sig)
-{
-    // 格式化当前堆栈信息
-    std::string format_info;
-    {
-        std::ostringstream oss;
-        oss << "---------------------------------"
-            << std::endl
-            << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
-            << std::endl
-            << "tid:  " << Poco::Thread::currentOsTid()
-            << std::endl;
-
-        if (Poco::Thread* curThread = Poco::Thread::current(); curThread)
-            oss << "tnm:  " << curThread->getName() << std::endl;
-
-        oss << "pid:  " << Poco::Process::id()
-            << std::endl
-            << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
-            << std::endl
-            << "---------- stack trace ----------"
-            << std::endl
-            << common::stack_trace().to_string()
-            << "---------------------------------"
-            << std::endl
-            << std::endl;
-        format_info = std::move(oss.str());
-    }
-
-    // 保存信息至文件
-    {
-        std::lock_guard holder(file_mutex);
-        std::ofstream   ofs(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
-        ofs << format_info;
-        ofs.close();
-    }
-
-    // 输出信息
-    fmt::print("{}", format_info);
-
-    // 恢复信号默认处理，然后重新发送
-    ::signal(sig, SIG_DFL);
-    ::raise(sig);
 }
