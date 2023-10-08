@@ -49,21 +49,31 @@ int main(int argc, char** argv)
     testing::InitGoogleMock(&argc, argv);
     testing::InitGoogleTest(&argc, argv);
 
+    // 设置exec_name
+    exec_name = std::move(Poco::Path(argv[0]).getBaseName());
+    Poco::toLowerInPlace(exec_name);
+
     // 注册信号处理
     REGISTER_SIGNAL(SIGINT, SIG_IGN);
     REGISTER_SIGNAL(SIGTERM, SIG_IGN);
+
+#if POCO_OS == POCO_OS_WINDOWS_NT
     REGISTER_SIGNAL(SIGILL, signal_dump_handler);
     REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
     REGISTER_SIGNAL(SIGSEGV, signal_dump_handler);
     REGISTER_SIGNAL(SIGABRT, signal_dump_handler);
-
-    // 设置exec_name
-    [argv]() -> void
-    {
-        exec_name = Poco::Path(argv[0]).getBaseName();
-        Poco::toLowerInPlace(exec_name);
-        ASSERT_TRUE(!exec_name.empty());
-    }();
+#else
+    REGISTER_SIGNAL(SIGILL, signal_dump_handler);
+    REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
+    REGISTER_SIGNAL(SIGSEGV, signal_dump_handler);
+    REGISTER_SIGNAL(SIGABRT, signal_dump_handler);
+    REGISTER_SIGNAL(SIGBUS, signal_dump_handler);
+    REGISTER_SIGNAL(SIGQUIT, signal_dump_handler);
+    REGISTER_SIGNAL(SIGSYS, signal_dump_handler);
+    REGISTER_SIGNAL(SIGTRAP, signal_dump_handler);
+    REGISTER_SIGNAL(SIGXCPU, signal_dump_handler);
+    REGISTER_SIGNAL(SIGXFSZ, signal_dump_handler);
+#endif
 
     const int ret = RUN_ALL_TESTS();
 
