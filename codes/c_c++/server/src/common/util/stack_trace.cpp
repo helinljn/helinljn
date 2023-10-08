@@ -40,7 +40,7 @@ void stack_trace::initialize(void)
         // Initializes symbol handler for the current process
         const int attempts = 10;
         const int sleep    = 100;
-        for (int attempt = 0; attempt < attempts; ++attempt)
+        for (int attempt = 0; attempt != attempts; ++attempt)
         {
             if (SymInitialize(hProcess, nullptr, TRUE))
             {
@@ -109,7 +109,7 @@ stack_trace::stack_trace(void)
         if (SymGetModuleInfo64(hProcess, (DWORD64)f.address, &module))
         {
             const char* image = std::strrchr(module.ImageName, '\\');
-            if (image != nullptr)
+            if (image)
                 f.module = image + 1;
         }
 
@@ -226,7 +226,7 @@ stack_trace::stack_trace(void)
 
         syms = (asymbol**)symsptr;
         pc   = (bfd_vma)f.address;
-        for (asection* section = abfd->sections; section != nullptr; section = section->next)
+        for (asection* section = abfd->sections; section; section = section->next)
         {
             if (found)
                 break;
@@ -296,7 +296,6 @@ std::string stack_trace::to_string(void) const
 
         if (f.line > 0)
             ostr << '(' << f.line << ')';
-
         ostr << std::endl;
 
         return ostr.str();

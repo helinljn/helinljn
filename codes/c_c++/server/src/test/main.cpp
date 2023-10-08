@@ -36,7 +36,6 @@
 static std::string exec_name;
 static std::mutex  file_mutex;
 static const char* signal_to_string(int sig);
-static void signal_common_handler(int sig);
 static void signal_dump_handler(int sig);
 
 int main(int argc, char** argv)
@@ -51,8 +50,8 @@ int main(int argc, char** argv)
     testing::InitGoogleTest(&argc, argv);
 
     // 注册信号处理
-    REGISTER_SIGNAL(SIGINT, signal_common_handler);
-    REGISTER_SIGNAL(SIGTERM, signal_common_handler);
+    REGISTER_SIGNAL(SIGINT, SIG_IGN);
+    REGISTER_SIGNAL(SIGTERM, SIG_IGN);
     REGISTER_SIGNAL(SIGILL, signal_dump_handler);
     REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
     REGISTER_SIGNAL(SIGSEGV, signal_dump_handler);
@@ -145,26 +144,30 @@ const char* signal_to_string(int sig)
     }
 }
 
-void signal_common_handler(int sig)
+void signal_dump_handler(int sig)
 {
     // 格式化当前堆栈信息
     std::string format_info;
     {
         std::ostringstream oss;
-        oss << "-------------------------------"
+        oss << "---------------------------------"
             << std::endl
             << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
             << std::endl
             << "tid:  " << Poco::Thread::currentOsTid()
-            << std::endl
-            << "pid:  " << Poco::Process::id()
+            << std::endl;
+
+        if (Poco::Thread* curThread = Poco::Thread::current(); curThread)
+            oss << "tnm:  " << curThread->getName() << std::endl;
+
+        oss << "pid:  " << Poco::Process::id()
             << std::endl
             << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
             << std::endl
-            << "--------- stack trace ---------"
+            << "---------- stack trace ----------"
             << std::endl
             << common::stack_trace().to_string()
-            << "-------------------------------"
+            << "---------------------------------"
             << std::endl
             << std::endl;
         format_info = std::move(oss.str());
@@ -180,12 +183,6 @@ void signal_common_handler(int sig)
 
     // 输出信息
     fmt::print("{}", format_info);
-}
-
-void signal_dump_handler(int sig)
-{
-    // 获取当前堆栈信息并保存至文件，然后输出
-    signal_common_handler(sig);
 
     // 恢复信号默认处理，然后重新发送
     ::signal(sig, SIG_DFL);
