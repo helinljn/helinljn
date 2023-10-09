@@ -4,33 +4,33 @@ PROJECT(test)
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JWT/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
-    ${CMAKE_PROJECT_ROOT_DIR}/src/common
     ${CMAKE_3RD_DIR_MYSQL}/include
     ${CMAKE_3RD_DIR_OPENSSL}/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JWT/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
+    ${CMAKE_PROJECT_ROOT_DIR}/src/common
 )
 
 # 链接库目录
 SET(CURRENT_LINK_LIBS_DIR
-    ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
     ${CMAKE_3RD_DIR_MYSQL}/lib
     ${CMAKE_3RD_DIR_OPENSSL}/lib
+    ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
 )
 
 # 生成依赖库

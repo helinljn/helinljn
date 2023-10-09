@@ -4,8 +4,8 @@ PROJECT(common)
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
 )
 
 # 宏定义、编译选项
