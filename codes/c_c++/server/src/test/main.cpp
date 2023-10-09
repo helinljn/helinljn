@@ -30,14 +30,11 @@
 #include <sstream>
 #include <fstream>
 
-#define REGISTER_SIGNAL(sig, handler)      \
-    if (::signal(sig, handler) != handler) \
-        ::signal(sig, handler)
-
 static std::string exec_name;
 static std::mutex  file_mutex;
 static void signal_dump_handler(int sig)
 {
+    // 将信号转换为其对应的字符串形式
     auto signal_to_string = [](int sig) -> const char*
     {
         switch (sig)
@@ -78,18 +75,19 @@ static void signal_dump_handler(int sig)
         }
     };
 
-    // 格式化当前堆栈信息
+    // 格式化当前调用栈信息
     std::string info;
     {
         std::ostringstream oss;
+        oss << "---------------------------------"
+            << std::endl
+            << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
+            << std::endl
+            << "tid:  " << Poco::Thread::currentOsTid()
+            << std::endl;
 
-        oss << "---------------------------------" << std::endl;
-        if (sig > 0)
-            oss << "sig:  " << sig << '(' << signal_to_string(sig) << ')' << std::endl;
-
-        oss << "tid:  " << Poco::Thread::currentOsTid() << std::endl;
-        if (Poco::Thread* curThread = Poco::Thread::current(); curThread)
-            oss << "tnm:  " << curThread->getName() << std::endl;
+        if (Poco::Thread* th = Poco::Thread::current(); th)
+            oss << "tnm:  " << th->getName() << std::endl;
 
         oss << "pid:  " << Poco::Process::id()
             << std::endl
@@ -104,7 +102,7 @@ static void signal_dump_handler(int sig)
         info = std::move(oss.str());
     }
 
-    // 保存信息至文件
+    // 保存信息
     {
         std::lock_guard holder(file_mutex);
         std::ofstream   ofs(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
@@ -115,25 +113,25 @@ static void signal_dump_handler(int sig)
     // 输出信息
     fmt::print("{}", info);
 
-    // 恢复信号默认处理，然后重新发送
-    ::signal(sig, SIG_DFL);
-    ::raise(sig);
+    // 恢复信号默认处理
+    std::signal(sig, SIG_DFL);
+    std::raise(sig);
 }
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
 static void win_terminate_handler(void)
 {
-    abort();
+    std::abort();
 }
 
 static void win_invalid_parameter_handler(const wchar_t*, const wchar_t*, const wchar_t*, unsigned int, uintptr_t)
 {
-    abort();
+    std::abort();
 }
 
 static LONG win_unhandled_exception_handler(EXCEPTION_POINTERS*)
 {
-    abort();
+    std::abort();
 }
 #endif
 
@@ -154,10 +152,10 @@ int main(int argc, char** argv)
     Poco::toLowerInPlace(exec_name);
 
     // 注册信号处理
-    REGISTER_SIGNAL(SIGINT, SIG_IGN);
-    REGISTER_SIGNAL(SIGTERM, SIG_IGN);
+    std::signal(SIGINT, SIG_IGN);
+    std::signal(SIGTERM, SIG_IGN);
 #if POCO_OS == POCO_OS_WINDOWS_NT
-    REGISTER_SIGNAL(SIGABRT, signal_dump_handler);
+    std::signal(SIGABRT, signal_dump_handler);
     _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
     std::set_terminate(win_terminate_handler);
@@ -168,16 +166,16 @@ int main(int argc, char** argv)
 
     SetUnhandledExceptionFilter(win_unhandled_exception_handler);
 #else
-    REGISTER_SIGNAL(SIGILL, signal_dump_handler);
-    REGISTER_SIGNAL(SIGFPE, signal_dump_handler);
-    REGISTER_SIGNAL(SIGSEGV, signal_dump_handler);
-    REGISTER_SIGNAL(SIGABRT, signal_dump_handler);
-    REGISTER_SIGNAL(SIGBUS, signal_dump_handler);
-    REGISTER_SIGNAL(SIGQUIT, signal_dump_handler);
-    REGISTER_SIGNAL(SIGSYS, signal_dump_handler);
-    REGISTER_SIGNAL(SIGTRAP, signal_dump_handler);
-    REGISTER_SIGNAL(SIGXCPU, signal_dump_handler);
-    REGISTER_SIGNAL(SIGXFSZ, signal_dump_handler);
+    std::signal(SIGILL, signal_dump_handler);
+    std::signal(SIGFPE, signal_dump_handler);
+    std::signal(SIGSEGV, signal_dump_handler);
+    std::signal(SIGABRT, signal_dump_handler);
+    std::signal(SIGBUS, signal_dump_handler);
+    std::signal(SIGQUIT, signal_dump_handler);
+    std::signal(SIGSYS, signal_dump_handler);
+    std::signal(SIGTRAP, signal_dump_handler);
+    std::signal(SIGXCPU, signal_dump_handler);
+    std::signal(SIGXFSZ, signal_dump_handler);
 #endif
 
     const int ret = RUN_ALL_TESTS();
