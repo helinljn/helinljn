@@ -1,6 +1,5 @@
 #include "util/stack_trace.h"
 #include "util/poco.h"
-#include "Poco/String.h"
 #include "Poco/Exception.h"
 
 #include <iomanip>
@@ -194,18 +193,13 @@ std::string stack_trace::to_string(void) const
         ret.reserve(_frames.size() * 256);
 
     std::ostringstream ostr;
-    std::string        hexAddress;
-    auto frame_to_string = [&ostr, &hexAddress](const size_t idx, const frame& f) -> std::string
+    auto frame_to_string = [&ostr](const size_t idx, const frame& f) -> std::string
     {
         ostr.str("");
         ostr.clear();
-        hexAddress.clear();
-
-        Poco::uIntToStr(reinterpret_cast<uint64_t>(f.address), 16, hexAddress, true, 18, '0');
-        Poco::toLowerInPlace(hexAddress);
-
-        ostr << '#' << std::setw(4) << std::left << idx << std::right
-             << hexAddress << ": "
+        ostr << '#' << std::setw(4) << std::left << idx << std::setw(0) << std::right
+             << "0x" << std::hex << std::setw(16) << std::setfill('0') << reinterpret_cast<uint64_t>(f.address)
+             << std::dec << std::setw(0) << std::setfill(' ') << ": "
              << (f.module.empty() ? "<unknown>" : f.module) << '!'
              << (f.function.empty() ? "???" : f.function) << ' '
              << f.filename;
