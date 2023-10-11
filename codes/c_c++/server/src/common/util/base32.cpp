@@ -1,4 +1,4 @@
-#include "util/Base32.h"
+#include "util/base32.h"
 #include "Poco/Base32Encoder.h"
 #include "Poco/Base32Decoder.h"
 
