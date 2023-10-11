@@ -2,64 +2,12 @@
 -- Ubuntu 系统设置 --
 ---------------------
 
-【1. 修改boot菜单和启动时间】
-	sudo su
-	vi /boot/grub/grub.cfg
-	timeout=0
-
-【2. 开启root用户并设置密码】
-	sudo passwd root
-
-【3. 静态IP配置】
-	vi /etc/network/interfaces
-
-	-- begin --
-	# This file describes the network interfaces available on your system
-	# and how to activate them. For more information, see interfaces(5).
-
-	source /etc/network/interfaces.d/*
-
-	# The loopback network interface
-	auto lo
-	iface lo inet loopback
-
-	# The primary network interface
-	auto ens32
-	iface ens32 inet static
-	address 192.168.1.100
-	netmask 255.255.255.0
-	gateway 192.168.1.1
-	dns-nameservers 114.114.114.114
-	dns-nameservers 114.114.115.115
-	-- end --
-
-	service networking restart
-
-【4. 动态IP配置】
-	vi /etc/network/interfaces
-
-	-- begin --
-	# This file describes the network interfaces available on your system
-	# and how to activate them. For more information, see interfaces(5).
-
-	source /etc/network/interfaces.d/*
-
-	# The loopback network interface
-	auto lo
-	iface lo inet loopback
-
-	# The primary network interface
-	auto ens32
-	iface ens32 inet dhcp
-	-- end --
-
-	service networking restart
-
-【5. 修改ssh配置禁止root用户远程登录】
+【1. 修改ssh配置禁止root用户远程登录】
 	vi /etc/ssh/sshd_config
-	查找“#PermitRootLogin yes”，将前面的“#”去掉，短尾“yes”改为“no”，并保存文件
+		PermitRootLogin no
+		PasswordAuthentication yes
 
-【6. 修改更新源为aliyun】
+【2. 修改更新源为aliyun】
 	cp /etc/apt/sources.list /etc/apt/sources.list.bak
 	vi /etc/apt/sources.list
 
@@ -97,18 +45,14 @@
 
 	执行apt update
 
-【7. ~/.bashrc相关的alias修改】
+【3. ~/.bashrc相关的alias修改】
 	# alias
 	alias cp='cp -i'
 	alias mv='mv -i'
 	alias rm='rm -i'
 	alias lla='ls -Alh'
 
-【8. coredump相关设置】
-	将默认的shell改成bash：
-		dpkg-reconfigure dash 然后选择no
-
-	在/etc/rc.local中加入以下内容，要放在exit 0的上面
+【4. coredump相关设置】
 	# format the name of core file.
 	# %% – 符号%
 	# %p – 进程号
@@ -118,31 +62,33 @@
 	# %t – 生成core文件的时间戳(seconds since 0:00h, 1 Jan 1970)
 	# %h – 主机名
 	# %e – 程序文件名
-	echo "./core-%e-%s-%u-%g-%p-%t" > /proc/sys/kernel/core_pattern
+	echo "core_%e_%p" > /proc/sys/kernel/core_pattern
 
-【9. 优化系统设置】
+【5. 优化系统设置】
 	打开/etc/security/limits.conf文件，加入以下选项
 		root soft core   unlimited
 		root hard core   unlimited
 		root soft nofile 102400
 		root hard nofile 102400
 
-		helin soft core   unlimited
-		helin hard core   unlimited
-		helin soft nofile 102400
-		helin hard nofile 102400
+		* soft core   unlimited
+		* hard core   unlimited
+		* soft nofile 102400
+		* hard nofile 102400
 
 	或者临时修改(WSL2中可以添加到.bashrc中)：
 		# limits
 		ulimit -c unlimited
 		ulimit -n 4096
 
-【10. ufw防火墙相关】
+【6. ufw防火墙相关】
 	开启防火墙：
 		ufw enable
 		ufw default deny
 	关闭防火墙：
 		ufw disable
+	查看端口：
+		ufw status verbose
 	开放端口：
 		ufw allow 22
 		ufw allow 3690
@@ -150,7 +96,7 @@
 	关闭端口：
 		ufw delete allow 8088
 
-【11. svn搭建】
+【7. svn搭建】
 su root
 mkdir -p /mydata/svn
 cd /mydata/svn
@@ -180,7 +126,7 @@ svnserve -d -r /mydata/svn
 测试：
 svn co svn://127.0.0.1/hedalin ./shmilyl --username hedalin --password xxx
 
-【12. 常用工具安装】
+【8. 常用工具安装】
 apt -y install lrzsz
 apt -y install dos2unix
 apt -y install ntpdate
@@ -203,16 +149,12 @@ apt -y install binutils-dev
 apt -y install readelf
 apt -y install patchelf
 
-【13. 时间同步】
-ntpdate time.windows.com
-hwclock -w
-
-【14. 最后清理动作】
+【9. 最后清理动作】
 apt autoremove
 apt clean
 apt autoclean
 
-【15. VS2019 + WSL gdb调试环境】
+【10. VS2019 + WSL gdb调试环境】
 apt -y install openssh-server
 
 如果提示"ptrace:Operation not permitted"类似或相关的错误提示，则执行以下命令：
@@ -236,7 +178,7 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 	touch make_symble_for_vs_gdb.sh
 		ln -sf /mnt/d/aaa/bbb/*.so ./
 
-【16. WSL 升级 WSL2】
+【11. WSL 升级 WSL2】
 1. 务必保证当前操作系统更新了最新的补丁
 
 2. BIOS中开启CPU虚拟化支持
