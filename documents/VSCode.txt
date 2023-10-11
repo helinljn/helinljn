@@ -90,7 +90,8 @@
 
     "remote.SSH.configFile": "D:\\helinljn\\documents\\ssh_config",
     "remote.SSH.remotePlatform": {
-        "WSL": "linux"
+        "WSL": "linux",
+        "Aliyun": "linux"
     },
 
     "C_Cpp.default.cStandard": "c11",
