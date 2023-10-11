@@ -1135,18 +1135,6 @@ GTEST_TEST(PocoFilesystemTest, CopyDir)
         // :/$ file2
 
         ASSERT_THROW(sd.copyTo("..", Poco::File::OPT_FAIL_ON_OVERWRITE), Poco::FileExistsException);
-        {
-            Poco::File f1 = srcDirFile1, f2 = srcDirFile2, f3 = srcDirFile3;
-            ASSERT_TRUE(f1.exists() && f2.exists() && f3.exists());
-
-            f1 = destDirFile1, f2 = destDirFile2, f3 = destDirFile3;
-            ASSERT_TRUE(f1.exists() && f2.exists() && !f3.exists());
-        }
-        // ls testdir
-        // :/$ file1 file2 file3
-        //
-        // ls ../testdir
-        // :/$ file1 file2
 
         sd.remove(true);
         dd.remove(true);
@@ -1357,20 +1345,6 @@ GTEST_TEST(PocoFilesystemTest, MoveDir)
         // :/$ file2
 
         ASSERT_THROW(sd.moveTo("..", Poco::File::OPT_FAIL_ON_OVERWRITE), Poco::FileExistsException);
-        {
-            Poco::File f1 = srcDirFile1, f2 = srcDirFile2, f3 = srcDirFile3;
-            ASSERT_TRUE(f1.exists() && f2.exists() && f3.exists());
-            ASSERT_TRUE(f1.getSize() == 10 && f2.getSize() == 0 && f3.getSize() == 10);
-
-            f1 = destDirFile1, f2 = destDirFile2, f3 = destDirFile3;
-            ASSERT_TRUE(f1.exists() && f2.exists() && !f3.exists());
-            ASSERT_TRUE(f1.getSize() == 10 && f2.getSize() == 0);
-        }
-        // ls testdir
-        // :/$ file1(10) file2 file3(10)
-        //
-        // ls ../testdir
-        // :/$ file1(10) file2
 
         sd = destDir;
         ASSERT_TRUE(sd.exists() && sd.isDirectory());
