@@ -32,10 +32,10 @@
 
 static std::string exec_name;
 static std::mutex  file_mutex;
-static void signal_dump_handler(int sig)
+static void signal_handler(int sig)
 {
     // 将信号转换为其对应的字符串形式
-    auto signal_to_string = [](int sig) -> const char*
+    auto sig2str = [](const int sig) -> const char*
     {
         switch (sig)
         {
@@ -81,7 +81,7 @@ static void signal_dump_handler(int sig)
         std::ostringstream oss;
         oss << "---------------------------------"
             << std::endl
-            << "sig:  " << sig << '(' << signal_to_string(sig) << ')'
+            << "sig:  " << sig << '(' << sig2str(sig) << ')'
             << std::endl
             << "tid:  " << Poco::Thread::currentOsTid()
             << std::endl;
@@ -105,7 +105,7 @@ static void signal_dump_handler(int sig)
     // 保存信息
     {
         std::lock_guard holder(file_mutex);
-        std::ofstream   ofs(fmt::format("dump_{}_{}.log", exec_name, Poco::Process::id()), std::ios::app);
+        std::ofstream   ofs(fmt::format("dump_{}_{}.log", Poco::toLower(exec_name), Poco::Process::id()), std::ios::app);
         ofs << info;
         ofs.close();
     }
@@ -149,13 +149,13 @@ int main(int argc, char** argv)
     // 设置exec_name
     exec_name = std::move(Poco::Path(argv[0]).getBaseName());
     poco_assert(!exec_name.empty());
-    Poco::toLowerInPlace(exec_name);
 
     // 注册信号处理
 #if POCO_OS == POCO_OS_WINDOWS_NT
     std::signal(SIGINT, SIG_IGN);
     std::signal(SIGTERM, SIG_IGN);
-    std::signal(SIGABRT, signal_dump_handler);
+    std::signal(SIGBREAK, SIG_IGN);
+    std::signal(SIGABRT, signal_handler);
     _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
     std::set_terminate(win_terminate_handler);
@@ -166,21 +166,20 @@ int main(int argc, char** argv)
 
     SetUnhandledExceptionFilter(win_unhandled_exception_handler);
 #else
-    std::signal(SIGHUP, SIG_IGN);
     std::signal(SIGINT, SIG_IGN);
-    std::signal(SIGQUIT, SIG_IGN);
-    std::signal(SIGPIPE, SIG_IGN);
     std::signal(SIGTERM, SIG_IGN);
-    std::signal(SIGILL, signal_dump_handler);
-    std::signal(SIGFPE, signal_dump_handler);
-    std::signal(SIGSEGV, signal_dump_handler);
-    std::signal(SIGABRT, signal_dump_handler);
-    std::signal(SIGBUS, signal_dump_handler);
-    std::signal(SIGQUIT, signal_dump_handler);
-    std::signal(SIGSYS, signal_dump_handler);
-    std::signal(SIGTRAP, signal_dump_handler);
-    std::signal(SIGXCPU, signal_dump_handler);
-    std::signal(SIGXFSZ, signal_dump_handler);
+    std::signal(SIGHUP, SIG_IGN);
+    std::signal(SIGPIPE, SIG_IGN);
+    std::signal(SIGILL, signal_handler);
+    std::signal(SIGFPE, signal_handler);
+    std::signal(SIGSEGV, signal_handler);
+    std::signal(SIGABRT, signal_handler);
+    std::signal(SIGBUS, signal_handler);
+    std::signal(SIGQUIT, signal_handler);
+    std::signal(SIGSYS, signal_handler);
+    std::signal(SIGTRAP, signal_handler);
+    std::signal(SIGXCPU, signal_handler);
+    std::signal(SIGXFSZ, signal_handler);
 #endif
 
     const int ret = RUN_ALL_TESTS();
