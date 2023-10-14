@@ -179,7 +179,18 @@ stack_trace::stack_trace(void)
         }
 
         if (f.function.empty())
+        {
             f.function = stacktrace[idx];
+            continue;
+        }
+
+        // Get addr fix
+        const char* ps = std::strrchr(stacktrace[idx], '+');
+        const char* rb = std::strrchr(stacktrace[idx], ')');
+        if (!ps || !rb || rb - ps <= 0)
+            continue;
+        else
+            f.function.append(ps, rb - ps);
     }
 
     free(stacktrace);
@@ -197,6 +208,7 @@ std::string stack_trace::to_string(void) const
     {
         ostr.str("");
         ostr.clear();
+
         ostr << '#' << std::setw(4) << std::left << idx << std::setw(0) << std::right
              << "0x" << std::hex << std::setw(16) << std::setfill('0') << reinterpret_cast<uint64_t>(f.address)
              << std::dec << std::setw(0) << std::setfill(' ') << ": "
