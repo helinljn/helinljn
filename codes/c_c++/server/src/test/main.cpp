@@ -152,9 +152,9 @@ int main(int argc, char** argv)
     Poco::toLowerInPlace(exec_name);
 
     // 注册信号处理
+#if POCO_OS == POCO_OS_WINDOWS_NT
     std::signal(SIGINT, SIG_IGN);
     std::signal(SIGTERM, SIG_IGN);
-#if POCO_OS == POCO_OS_WINDOWS_NT
     std::signal(SIGABRT, signal_dump_handler);
     _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
@@ -166,6 +166,11 @@ int main(int argc, char** argv)
 
     SetUnhandledExceptionFilter(win_unhandled_exception_handler);
 #else
+    std::signal(SIGHUP, SIG_IGN);
+    std::signal(SIGINT, SIG_IGN);
+    std::signal(SIGQUIT, SIG_IGN);
+    std::signal(SIGPIPE, SIG_IGN);
+    std::signal(SIGTERM, SIG_IGN);
     std::signal(SIGILL, signal_dump_handler);
     std::signal(SIGFPE, signal_dump_handler);
     std::signal(SIGSEGV, signal_dump_handler);
