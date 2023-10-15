@@ -187,9 +187,7 @@ stack_trace::stack_trace(void)
         // Get addr fix
         const char* ps = std::strrchr(stacktrace[idx], '+');
         const char* rb = std::strrchr(stacktrace[idx], ')');
-        if (!ps || !rb || rb - ps <= 0)
-            continue;
-        else
+        if (ps && rb && rb - ps > 0)
             f.function.append(ps, rb - ps);
     }
 
