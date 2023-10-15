@@ -84,7 +84,7 @@ stack_trace::stack_trace(void)
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
     // Capture the current stack trace
-    const USHORT captured = CaptureStackBackTrace(1, capacity, frames, nullptr);
+    const USHORT captured = CaptureStackBackTrace(0, capacity, frames, nullptr);
     if (captured > 0)
         _frames.resize(captured, frame{});
 
