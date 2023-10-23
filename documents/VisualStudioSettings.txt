@@ -57,11 +57,9 @@
 【安装插件】
 	1. One Dark Pro
 
-	2. VSColorOutput
+	2. Force UTF-8 (No BOM)
 
-	3. Force UTF-8 (No BOM)
-
-	4. Trailing Whitespace Visualizer
+	3. Trailing Whitespace Visualizer
 
 【设置Visual Assist X快捷键，如果安装了此插件则只需要设置 视图.向后导航 即可】
 	1. 打开VS -> 工具 -> 选项 -> 环境 -> 键盘 -> 应用 (Visual Studio Code) 键盘方案
