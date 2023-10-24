@@ -25,6 +25,8 @@
 
 	git submodule update
 
+	git remote set-url origin https://521github.com/helinljn/helinljn.git
+
 3. 分支相关
 	# 显示所有标签
 	git tag
