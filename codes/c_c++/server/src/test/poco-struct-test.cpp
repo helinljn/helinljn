@@ -38,14 +38,14 @@ GTEST_TEST(PocoStructTest, EmptyString)
     Poco::Dynamic::Struct<std::string> aStruct;
     aStruct["Empty"] = "";
     aStruct["Space"] = " ";
-    ASSERT_TRUE(aStruct.toString(true) == "{ \"Empty\": \"\", \"Space\": \" \" }");
+    ASSERT_TRUE(aStruct.toString() == "{ \"Empty\": \"\", \"Space\": \" \" }");
 }
 
 GTEST_TEST(PocoStructTest, NoEscapeString)
 {
     Poco::Dynamic::Struct<std::string> aStruct;
     aStruct["Birthday"] = "{ \"Day\": 12, \"Month\": \"May\", \"Year\": 2005 }";
-    ASSERT_TRUE(aStruct.toString(false) == "{ \"Birthday\": { \"Day\": 12, \"Month\": \"May\", \"Year\": 2005 } }");
+    ASSERT_TRUE(aStruct.toString() == "{ \"Birthday\": \"{ \\\"Day\\\": 12, \\\"Month\\\": \\\"May\\\", \\\"Year\\\": 2005 }\" }");
 }
 
 GTEST_TEST(PocoStructTest, StructString)

@@ -24,7 +24,7 @@ echo ------------------
 echo -- poco
 cd $ROOT_INIT_DIR
 if [ ! -d $POCO_INIT_DIR ]; then
-    git clone -b devel https://521github.com/pocoproject/poco.git $POCO_INIT_DIR
+    git clone -b poco-1.12.5 https://521github.com/pocoproject/poco.git $POCO_INIT_DIR
 else
     cd $POCO_INIT_DIR
     git remote set-url origin https://521github.com/pocoproject/poco.git

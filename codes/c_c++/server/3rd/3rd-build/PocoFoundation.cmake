@@ -27,10 +27,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CURRENT_COMPILE_OPTIONS
         /wd4100
         /wd4127
-        /wd4131
         /wd4189
         /wd4244
-        /wd4245
         /wd4267
         /wd4389
         /wd4456

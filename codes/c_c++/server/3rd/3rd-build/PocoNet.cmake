@@ -46,7 +46,6 @@ ELSE()
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
         -Wno-extra
-        -Wno-sign-compare
         -Wno-unused-result
         -Wno-unused-parameter
     )
