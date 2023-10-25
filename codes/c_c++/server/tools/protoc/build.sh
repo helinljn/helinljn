@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PBMSG_DIR=../../src/common/pbmsg
-KERNEL_VERSION=`uname -r`
+KERNEL_VERSION=$(uname -r)
 
 mkdir -p $PBMSG_DIR
 
