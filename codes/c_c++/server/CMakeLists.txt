@@ -54,9 +54,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CMAKE_STATIC_LIBRARY_PREFIX "lib")
     SET(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 
-    # 设置MTd & MT
-    SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
     # 设置项目支持的最低操作系统版本
     # _WIN32_WINNT_NT4          0x0400 // Windows NT 4.0
     # _WIN32_WINNT_WIN2K        0x0500 // Windows 2000
