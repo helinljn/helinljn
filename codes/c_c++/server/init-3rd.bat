@@ -3,7 +3,6 @@
 set ROOT_INIT_DIR=%~dp0
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
-set HOTPATCH_INIT_DIR=%ROOT_INIT_DIR%/3rd/hotpatch
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 
@@ -29,20 +28,6 @@ if not exist %POCO_INIT_DIR% (
 ) else (
     cd %POCO_INIT_DIR%
     git remote set-url origin https://hub.nuaa.cf/pocoproject/poco.git
-    git remote -v
-    git checkout .
-    git fetch -p origin
-    git pull
-)
-
-echo ------------------
-echo -- hotpatch
-cd %ROOT_INIT_DIR%
-if not exist %HOTPATCH_INIT_DIR% (
-    git clone -b master https://hub.nuaa.cf/vikasnkumar/hotpatch.git %HOTPATCH_INIT_DIR%
-) else (
-    cd %HOTPATCH_INIT_DIR%
-    git remote set-url origin https://hub.nuaa.cf/vikasnkumar/hotpatch.git
     git remote -v
     git checkout .
     git fetch -p origin

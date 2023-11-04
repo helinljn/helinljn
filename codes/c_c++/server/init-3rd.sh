@@ -3,7 +3,6 @@
 ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
-HOTPATCH_INIT_DIR=$ROOT_INIT_DIR/3rd/hotpatch
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
 
@@ -29,20 +28,6 @@ if [ ! -d $POCO_INIT_DIR ]; then
 else
     cd $POCO_INIT_DIR
     git remote set-url origin https://hub.nuaa.cf/pocoproject/poco.git
-    git remote -v
-    git checkout .
-    git fetch -p origin
-    git pull
-fi
-
-echo ------------------
-echo -- hotpatch
-cd $ROOT_INIT_DIR
-if [ ! -d $HOTPATCH_INIT_DIR ]; then
-    git clone -b master https://hub.nuaa.cf/vikasnkumar/hotpatch.git $HOTPATCH_INIT_DIR
-else
-    cd $HOTPATCH_INIT_DIR
-    git remote set-url origin https://hub.nuaa.cf/vikasnkumar/hotpatch.git
     git remote -v
     git checkout .
     git fetch -p origin
