@@ -63,7 +63,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         libmysql
         libssl
         libcrypto
-        crypt32
         ws2_32
         iphlpapi
         dbghelp
