@@ -55,8 +55,18 @@ SET(CURRENT_DEPENDENT_LIBS
     PocoFoundation
 )
 
-# 链接库、宏定义、编译选项
+# 宏定义、编译选项、链接库
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    # 宏定义
+    SET(CURRENT_COMPILE_DEFINITIONS
+        # ...
+    )
+
+    # 编译选项
+    SET(CURRENT_COMPILE_OPTIONS
+        /wd4819
+    )
+
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
@@ -67,7 +77,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         iphlpapi
         dbghelp
     )
-
+ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         # ...
@@ -75,9 +85,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4819
+        # ...
     )
-ELSE()
+
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
@@ -87,16 +97,6 @@ ELSE()
         pthread
         m
         dl
-    )
-
-    # 宏定义
-    SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
-    )
-
-    # 编译选项
-    SET(CURRENT_COMPILE_OPTIONS
-        # ...
     )
 ENDIF()
 

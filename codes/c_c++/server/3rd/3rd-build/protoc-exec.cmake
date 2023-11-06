@@ -17,13 +17,8 @@ SET(CURRENT_DEPENDENT_LIBS
     protobuf
 )
 
-# 链接库、宏定义、编译选项
+# 宏定义、编译选项、链接库
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    # 链接库
-    SET(CURRENT_LINK_LIBS
-        ${CURRENT_DEPENDENT_LIBS}
-    )
-
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         # ...
@@ -33,14 +28,12 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CURRENT_COMPILE_OPTIONS
         /wd4100
     )
-ELSE()
+
     # 链接库
     SET(CURRENT_LINK_LIBS
         ${CURRENT_DEPENDENT_LIBS}
-        pthread
-        m
     )
-
+ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
         # ...
@@ -49,6 +42,13 @@ ELSE()
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
         -Wno-unused-parameter
+    )
+
+    # 链接库
+    SET(CURRENT_LINK_LIBS
+        ${CURRENT_DEPENDENT_LIBS}
+        pthread
+        m
     )
 ENDIF()
 
@@ -85,14 +85,14 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
 
-    # 将当前可执行文件拷贝至Protobuf生成目录
+    # 将当前可执行文件拷贝至protobuf生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.exe
             ${CMAKE_PROJECT_ROOT_DIR}/tools/protoc
     )
 ELSE()
-    # 将当前可执行文件拷贝至Protobuf生成目录
+    # 将当前可执行文件拷贝至protobuf生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}
