@@ -1,5 +1,5 @@
 # 项目名字
-PROJECT(test)
+PROJECT(hotfix)
 
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
@@ -18,10 +18,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     ${CMAKE_PROJECT_ROOT_DIR}/src/common
 )
@@ -36,10 +33,7 @@ SET(CURRENT_LINK_LIBS_DIR
 # 生成依赖库
 SET(CURRENT_DEPENDENT_LIBS
     common
-    protoc
     protobuf
-    gmock
-    gtest
     fmt
     PocoRedis
     PocoDataMySQL
@@ -59,7 +53,7 @@ SET(CURRENT_DEPENDENT_LIBS
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DHOTFIX_EXPORT
     )
 
     # 编译选项
@@ -73,14 +67,11 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         libmysql
         libssl
         libcrypto
-        ws2_32
-        iphlpapi
-        dbghelp
     )
 ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        # ...
+        -DHOTFIX_EXPORT
     )
 
     # 编译选项
@@ -94,9 +85,6 @@ ELSE()
         mysqlclient
         ssl
         crypto
-        pthread
-        m
-        dl
     )
 ENDIF()
 
@@ -113,8 +101,8 @@ FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${PROJECT_SOURCE_DIR}/*.cpp
 )
 
-# 生成目标可执行文件
-ADD_EXECUTABLE(${PROJECT_NAME}                     ${CURRENT_DIR_INCLUDE_LIST} ${CURRENT_DIR_SRC_LIST})
+# 生成动态库
+ADD_LIBRARY(${PROJECT_NAME}                SHARED  ${CURRENT_DIR_INCLUDE_LIST} ${CURRENT_DIR_SRC_LIST})
 ADD_DEPENDENCIES(${PROJECT_NAME}                   ${CURRENT_DEPENDENT_LIBS})
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
 TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
@@ -129,8 +117,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # VS工程设置
     SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY FOLDER "projects")
-    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "--gtest_brief")
-    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}")
 
     SOURCE_GROUP(TREE ${PROJECT_SOURCE_DIR} PREFIX "include"
         FILES ${CURRENT_DIR_INCLUDE_LIST})
@@ -140,6 +126,6 @@ ELSE()
     # Linux平台下rpath动态库运行路径修改，优先查找当前目录下的动态库
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND patchelf --set-rpath ./
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/lib${PROJECT_NAME}.so
     )
 ENDIF()

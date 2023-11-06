@@ -38,6 +38,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         -DXML_STATIC
         -DXML_DTD
         -DXML_NS
+        # poco-zlib
+        -D_LARGEFILE64_SOURCE=1
+        -D_FILE_OFFSET_BITS=64
         # gtest
         -DGTEST_DONT_DEFINE_FAIL
         -DGTEST_DONT_DEFINE_SUCCEED
@@ -46,11 +49,11 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     )
 
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /MP")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4819")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /Zi")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /MP")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4819")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 
@@ -106,6 +109,9 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         -DXML_STATIC
         -DXML_DTD
         -DXML_NS
+        # poco-zlib
+        -D_LARGEFILE64_SOURCE=1
+        -D_FILE_OFFSET_BITS=64
         # gtest
         -DGTEST_DONT_DEFINE_FAIL
         -DGTEST_DONT_DEFINE_SUCCEED
@@ -114,11 +120,11 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     )
 
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -rdynamic")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -fPIC -rdynamic")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic -rdynamic")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic -fPIC -rdynamic")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
