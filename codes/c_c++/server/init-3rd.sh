@@ -3,6 +3,8 @@
 ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
+ELFHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/hook/ELF-Hook
+MINHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/hook/minhook
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
 
@@ -28,6 +30,34 @@ if [ ! -d $POCO_INIT_DIR ]; then
 else
     cd $POCO_INIT_DIR
     git remote set-url origin https://hub.nuaa.cf/pocoproject/poco.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- ELF-Hook
+cd $ROOT_INIT_DIR
+if [ ! -d $ELFHOOK_INIT_DIR ]; then
+    git clone -b master https://hub.nuaa.cf/shoumikhin/ELF-Hook.git $ELFHOOK_INIT_DIR
+else
+    cd $ELFHOOK_INIT_DIR
+    git remote set-url origin https://hub.nuaa.cf/shoumikhin/ELF-Hook.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- minhook
+cd $ROOT_INIT_DIR
+if [ ! -d $MINHOOK_INIT_DIR ]; then
+    git clone -b master https://hub.nuaa.cf/TsudaKageyu/minhook.git $MINHOOK_INIT_DIR
+else
+    cd $MINHOOK_INIT_DIR
+    git remote set-url origin https://hub.nuaa.cf/TsudaKageyu/minhook.git
     git remote -v
     git checkout .
     git fetch -p origin
