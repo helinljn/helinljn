@@ -1,13 +1,14 @@
 #ifndef __DATE_TIME_EX_H__
 #define __DATE_TIME_EX_H__
 
+#include "util/common.h"
 #include "Poco/Timestamp.h"
 #include "Poco/Timespan.h"
 #include "Poco/DateTime.h"
 
 namespace Poco {
 
-class DateTimeEx final
+class COMMON_API DateTimeEx final
     /// This class represents an instant in [local time]
     /// (as opposed to UTC), expressed in years, months, days,
     /// hours, minutes, seconds and milliseconds based on the

@@ -1,13 +1,14 @@
 #ifndef __TIMESTAMP_EX_H__
 #define __TIMESTAMP_EX_H__
 
+#include "util/common.h"
 #include "Poco/Timestamp.h"
 #include "Poco/Timespan.h"
 #include "Poco/DateTime.h"
 
 namespace Poco {
 
-class TimestampEx final
+class COMMON_API TimestampEx final
     /// A TimestampEx stores a monotonic* time value
     /// with (theoretical) microseconds resolution.
     /// Timestamps can be compared with each other

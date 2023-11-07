@@ -1,6 +1,7 @@
 #ifndef __HEX_BINARY_H__
 #define __HEX_BINARY_H__
 
+#include "util/common.h"
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -17,7 +18,7 @@ namespace common {
 // @param uppercase 十六进制字符是否大写(默认为大写形式)
 // @return 成功返回true，失败返回false
 ////////////////////////////////////////////////////////////////
-bool to_hex_string(const void* mem, const size_t memlen, std::string& outstr, const bool uppercase = true);
+COMMON_API bool to_hex_string(const void* mem, const size_t memlen, std::string& outstr, const bool uppercase = true);
 
 ////////////////////////////////////////////////////////////////
 // @brief 将十六进制字符串转换为内存数据
@@ -28,7 +29,7 @@ bool to_hex_string(const void* mem, const size_t memlen, std::string& outstr, co
 // @param outbuflen 输出缓冲区的长度
 // @return 成功返回true，失败返回false
 ////////////////////////////////////////////////////////////////
-bool from_hex_string(const std::string_view& hexstr, void* outbuf, size_t outbuflen);
+COMMON_API bool from_hex_string(const std::string_view& hexstr, void* outbuf, size_t outbuflen);
 
 // binary to hex string
 template <typename T>

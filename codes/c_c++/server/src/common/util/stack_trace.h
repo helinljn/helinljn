@@ -1,6 +1,7 @@
 #ifndef __STACK_TRACE_H__
 #define __STACK_TRACE_H__
 
+#include "util/common.h"
 #include <string>
 #include <vector>
 #include <atomic>
@@ -12,7 +13,7 @@ namespace common {
 // Stack trace snapshot provider
 // Capture the current stack trace snapshot
 ////////////////////////////////////////////////////////////////
-class stack_trace final
+class COMMON_API stack_trace final
 {
 public:
     struct frame

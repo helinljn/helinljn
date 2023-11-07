@@ -8,13 +8,9 @@ SET(CURRENT_INCLUDE_DIR
 
 # 链接库目录
 SET(CURRENT_LINK_LIBS_DIR
+    ${CMAKE_3RD_DIR_MYSQL}/lib
+    ${CMAKE_3RD_DIR_OPENSSL}/lib
     ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-)
-
-# 生成依赖库
-SET(CURRENT_DEPENDENT_LIBS
-    protoc
-    protobuf
 )
 
 # 宏定义、编译选项、链接库
@@ -31,7 +27,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        ${CURRENT_DEPENDENT_LIBS}
+        protoc
+        protobuf
     )
 ELSE()
     # 宏定义
@@ -46,9 +43,9 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        ${CURRENT_DEPENDENT_LIBS}
+        protoc
+        protobuf
         pthread
-        m
     )
 ENDIF()
 
@@ -63,9 +60,8 @@ SET(CURRENT_DIR_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src/google/protobuf/compiler/main.cc
 )
 
-# 生成目标可执行文件
+# 生成可执行文件
 ADD_EXECUTABLE(${PROJECT_NAME}                     ${CURRENT_DIR_INCLUDE_LIST} ${CURRENT_DIR_SRC_LIST})
-ADD_DEPENDENCIES(${PROJECT_NAME}                   ${CURRENT_DEPENDENT_LIBS})
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
 TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
 TARGET_COMPILE_OPTIONS(${PROJECT_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
@@ -75,7 +71,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}      PRIVATE ${CURRENT_LINK_LIBS})
 # 其它设置
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # MSVC运行库设置
-    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
     # VS工程设置
     SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY FOLDER "3rd")
@@ -90,12 +86,30 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}.exe
             ${CMAKE_PROJECT_ROOT_DIR}/tools/protoc
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libprotoc.dll
+            ${CMAKE_PROJECT_ROOT_DIR}/tools/protoc
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libprotobuf.dll
+            ${CMAKE_PROJECT_ROOT_DIR}/tools/protoc
     )
 ELSE()
+    # Linux平台下rpath动态库运行路径修改，优先查找当前目录下的动态库
+    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND patchelf --set-rpath ./
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}
+    )
+
     # 将当前可执行文件拷贝至protobuf生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/${PROJECT_NAME}
+            ${CMAKE_PROJECT_ROOT_DIR}/tools/protoc
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libprotoc.so
+            ${CMAKE_PROJECT_ROOT_DIR}/tools/protoc
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libprotobuf.so
             ${CMAKE_PROJECT_ROOT_DIR}/tools/protoc
     )
 ENDIF()

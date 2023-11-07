@@ -22,38 +22,14 @@ PROJECT(server)
 SET(CMAKE_PROJECT_ROOT_DIR       ${CMAKE_SOURCE_DIR})
 SET(CMAKE_PROJECT_BUILD_ROOT_DIR ${CMAKE_SOURCE_DIR}/.build)
 
-# 宏定义、编译选项、链接选项、生成目录、第三方库目录、静态库 & 动态库的前缀
+# 编译选项、链接选项、生成目录、第三方库目录、静态库 & 动态库的前缀
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    # 宏定义
-    ADD_DEFINITIONS(
-        # poco
-        -DPOCO_STATIC
-        -DPOCO_NO_AUTOMATIC_LIBS
-        -DPOCO_NO_AUTOMATIC_LIB_INIT
-        -DPOCO_NEW_STATE_ON_MOVE
-        -DPOCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX
-        -DPOCO_NO_SIGNAL_HANDLER
-        # poco-xml
-        -DHAVE_EXPAT_CONFIG_H
-        -DXML_STATIC
-        -DXML_DTD
-        -DXML_NS
-        # poco-zlib
-        -D_LARGEFILE64_SOURCE=1
-        -D_FILE_OFFSET_BITS=64
-        # gtest
-        -DGTEST_DONT_DEFINE_FAIL
-        -DGTEST_DONT_DEFINE_SUCCEED
-        -DGTEST_DONT_DEFINE_TEST
-        -DGTEST_DONT_DEFINE_TEST_F
-    )
-
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4819")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4251 /wd4819")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /Zi")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4819")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4251 /wd4819")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 
@@ -95,30 +71,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -D_WIN32_WINNT=0x0A00")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0A00")
 ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    # 宏定义
-    ADD_DEFINITIONS(
-        # poco
-        -DPOCO_STATIC
-        -DPOCO_NO_AUTOMATIC_LIBS
-        -DPOCO_NO_AUTOMATIC_LIB_INIT
-        -DPOCO_NEW_STATE_ON_MOVE
-        -DPOCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX
-        -DPOCO_NO_SIGNAL_HANDLER
-        # poco-xml
-        -DHAVE_EXPAT_CONFIG_H
-        -DXML_STATIC
-        -DXML_DTD
-        -DXML_NS
-        # poco-zlib
-        -D_LARGEFILE64_SOURCE=1
-        -D_FILE_OFFSET_BITS=64
-        # gtest
-        -DGTEST_DONT_DEFINE_FAIL
-        -DGTEST_DONT_DEFINE_SUCCEED
-        -DGTEST_DONT_DEFINE_TEST
-        -DGTEST_DONT_DEFINE_TEST_F
-    )
-
     # 编译选项
     SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -fPIC -rdynamic")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")

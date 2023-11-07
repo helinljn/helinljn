@@ -30,30 +30,15 @@ SET(CURRENT_LINK_LIBS_DIR
     ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
 )
 
-# 生成依赖库
-SET(CURRENT_DEPENDENT_LIBS
-    common
-    protobuf
-    fmt
-    PocoRedis
-    PocoDataMySQL
-    PocoData
-    PocoNetSSL
-    PocoNet
-    PocoUtil
-    PocoZip
-    PocoXML
-    PocoJWT
-    PocoJSON
-    PocoCrypto
-    PocoFoundation
-)
-
 # 宏定义、编译选项、链接库
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 宏定义
-    SET(CURRENT_COMPILE_DEFINITIONS
-        -DHOTFIX_EXPORT
+    SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
+        -DHOTFIX_EXPORTS
+    )
+
+    SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
+        # ...
     )
 
     # 编译选项
@@ -63,15 +48,30 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        ${CURRENT_DEPENDENT_LIBS}
-        libmysql
-        libssl
-        libcrypto
+        common
+        protobuf
+        fmt
+        PocoRedis
+        PocoDataMySQL
+        PocoData
+        PocoNetSSL
+        PocoNet
+        PocoUtil
+        PocoZip
+        PocoXML
+        PocoJWT
+        PocoJSON
+        PocoCrypto
+        PocoFoundation
     )
 ELSE()
     # 宏定义
-    SET(CURRENT_COMPILE_DEFINITIONS
-        -DHOTFIX_EXPORT
+    SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
+        -DHOTFIX_EXPORTS
+    )
+
+    SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
+        # ...
     )
 
     # 编译选项
@@ -81,10 +81,21 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        ${CURRENT_DEPENDENT_LIBS}
-        mysqlclient
-        ssl
-        crypto
+        common
+        protobuf
+        fmt
+        PocoRedis
+        PocoDataMySQL
+        PocoData
+        PocoNetSSL
+        PocoNet
+        PocoUtil
+        PocoZip
+        PocoXML
+        PocoJWT
+        PocoJSON
+        PocoCrypto
+        PocoFoundation
     )
 ENDIF()
 
@@ -103,17 +114,17 @@ FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
 
 # 生成动态库
 ADD_LIBRARY(${PROJECT_NAME}                SHARED  ${CURRENT_DIR_INCLUDE_LIST} ${CURRENT_DIR_SRC_LIST})
-ADD_DEPENDENCIES(${PROJECT_NAME}                   ${CURRENT_DEPENDENT_LIBS})
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
-TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
 TARGET_COMPILE_OPTIONS(${PROJECT_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
 TARGET_LINK_DIRECTORIES(${PROJECT_NAME}    PRIVATE ${CURRENT_LINK_LIBS_DIR})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}      PRIVATE ${CURRENT_LINK_LIBS})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}      PUBLIC  ${CURRENT_LINK_LIBS})
 
 # 其它设置
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # MSVC运行库设置
-    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
     # VS工程设置
     SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY FOLDER "projects")

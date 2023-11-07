@@ -34,7 +34,7 @@
 #include "TestMsgDefine.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-#define PROTOBUF_INTERNAL_EXPORT_TestMsgStruct_2eproto
+#define PROTOBUF_INTERNAL_EXPORT_TestMsgStruct_2eproto PROTOC_EXPORT
 PROTOBUF_NAMESPACE_OPEN
 namespace internal {
 class AnyMetadata;
@@ -42,7 +42,7 @@ class AnyMetadata;
 PROTOBUF_NAMESPACE_CLOSE
 
 // Internal implementation detail -- do not use these members.
-struct TableStruct_TestMsgStruct_2eproto {
+struct PROTOC_EXPORT TableStruct_TestMsgStruct_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTableField entries[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
@@ -53,24 +53,24 @@ struct TableStruct_TestMsgStruct_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
   static const uint32_t offsets[];
 };
-extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgStruct_2eproto;
+PROTOC_EXPORT extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgStruct_2eproto;
 namespace PBMsg {
 class TestCommonInfo;
 struct TestCommonInfoDefaultTypeInternal;
-extern TestCommonInfoDefaultTypeInternal _TestCommonInfo_default_instance_;
+PROTOC_EXPORT extern TestCommonInfoDefaultTypeInternal _TestCommonInfo_default_instance_;
 class TestCommonInfoList;
 struct TestCommonInfoListDefaultTypeInternal;
-extern TestCommonInfoListDefaultTypeInternal _TestCommonInfoList_default_instance_;
+PROTOC_EXPORT extern TestCommonInfoListDefaultTypeInternal _TestCommonInfoList_default_instance_;
 }  // namespace PBMsg
 PROTOBUF_NAMESPACE_OPEN
-template<> ::PBMsg::TestCommonInfo* Arena::CreateMaybeMessage<::PBMsg::TestCommonInfo>(Arena*);
-template<> ::PBMsg::TestCommonInfoList* Arena::CreateMaybeMessage<::PBMsg::TestCommonInfoList>(Arena*);
+template<> PROTOC_EXPORT ::PBMsg::TestCommonInfo* Arena::CreateMaybeMessage<::PBMsg::TestCommonInfo>(Arena*);
+template<> PROTOC_EXPORT ::PBMsg::TestCommonInfoList* Arena::CreateMaybeMessage<::PBMsg::TestCommonInfoList>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace PBMsg {
 
 // ===================================================================
 
-class TestCommonInfo final :
+class PROTOC_EXPORT TestCommonInfo final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:PBMsg.TestCommonInfo) */ {
  public:
   inline TestCommonInfo() : TestCommonInfo(nullptr) {}
@@ -320,7 +320,7 @@ class TestCommonInfo final :
 };
 // -------------------------------------------------------------------
 
-class TestCommonInfoList final :
+class PROTOC_EXPORT TestCommonInfoList final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:PBMsg.TestCommonInfoList) */ {
  public:
   inline TestCommonInfoList() : TestCommonInfoList(nullptr) {}

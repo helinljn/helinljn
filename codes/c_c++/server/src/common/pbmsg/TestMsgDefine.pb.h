@@ -32,7 +32,7 @@
 #include <google/protobuf/generated_enum_reflection.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-#define PROTOBUF_INTERNAL_EXPORT_TestMsgDefine_2eproto
+#define PROTOBUF_INTERNAL_EXPORT_TestMsgDefine_2eproto PROTOC_EXPORT
 PROTOBUF_NAMESPACE_OPEN
 namespace internal {
 class AnyMetadata;
@@ -40,7 +40,7 @@ class AnyMetadata;
 PROTOBUF_NAMESPACE_CLOSE
 
 // Internal implementation detail -- do not use these members.
-struct TableStruct_TestMsgDefine_2eproto {
+struct PROTOC_EXPORT TableStruct_TestMsgDefine_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTableField entries[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
@@ -51,7 +51,7 @@ struct TableStruct_TestMsgDefine_2eproto {
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
   static const uint32_t offsets[];
 };
-extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgDefine_2eproto;
+PROTOC_EXPORT extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_TestMsgDefine_2eproto;
 PROTOBUF_NAMESPACE_OPEN
 PROTOBUF_NAMESPACE_CLOSE
 namespace PBMsg {
@@ -70,12 +70,12 @@ enum TestCommonType : int {
   TestCommonType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
   TestCommonType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
-bool TestCommonType_IsValid(int value);
+PROTOC_EXPORT bool TestCommonType_IsValid(int value);
 constexpr TestCommonType TestCommonType_MIN = CT_BOOL;
 constexpr TestCommonType TestCommonType_MAX = CT_UINT64;
 constexpr int TestCommonType_ARRAYSIZE = TestCommonType_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* TestCommonType_descriptor();
+PROTOC_EXPORT const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* TestCommonType_descriptor();
 template<typename T>
 inline const std::string& TestCommonType_Name(T enum_t_value) {
   static_assert(::std::is_same<T, TestCommonType>::value ||
