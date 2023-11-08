@@ -3,8 +3,6 @@
 set ROOT_INIT_DIR=%~dp0
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
-set ELFHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/hook/ELF-Hook
-set MINHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/hook/minhook
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 
@@ -30,34 +28,6 @@ if not exist %POCO_INIT_DIR% (
 ) else (
     cd %POCO_INIT_DIR%
     git remote set-url origin https://hub.nuaa.cf/pocoproject/poco.git
-    git remote -v
-    git checkout .
-    git fetch -p origin
-    git pull
-)
-
-echo ------------------
-echo -- ELF-Hook
-cd %ROOT_INIT_DIR%
-if not exist %ELFHOOK_INIT_DIR% (
-    git clone -b master https://hub.nuaa.cf/shoumikhin/ELF-Hook.git %ELFHOOK_INIT_DIR%
-) else (
-    cd %ELFHOOK_INIT_DIR%
-    git remote set-url origin https://hub.nuaa.cf/shoumikhin/ELF-Hook.git
-    git remote -v
-    git checkout .
-    git fetch -p origin
-    git pull
-)
-
-echo ------------------
-echo -- minhook
-cd %ROOT_INIT_DIR%
-if not exist %MINHOOK_INIT_DIR% (
-    git clone -b master https://hub.nuaa.cf/TsudaKageyu/minhook.git %MINHOOK_INIT_DIR%
-) else (
-    cd %MINHOOK_INIT_DIR%
-    git remote set-url origin https://hub.nuaa.cf/TsudaKageyu/minhook.git
     git remote -v
     git checkout .
     git fetch -p origin
