@@ -5,6 +5,7 @@ set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set PROTOBUF_INIT_DIR=%ROOT_INIT_DIR%/3rd/protobuf
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
+set PLTHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/plthook
 
 echo ------------------
 echo -- fmt
@@ -56,6 +57,20 @@ if not exist %GOOGLETEST_INIT_DIR% (
 ) else (
     cd %GOOGLETEST_INIT_DIR%
     git remote set-url origin https://hub.nuaa.cf/google/googletest.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+)
+
+echo ------------------
+echo -- plthook
+cd %ROOT_INIT_DIR%
+if not exist %PLTHOOK_INIT_DIR% (
+    git clone https://hub.nuaa.cf/kubo/plthook.git %PLTHOOK_INIT_DIR%
+) else (
+    cd %PLTHOOK_INIT_DIR%
+    git remote set-url origin https://hub.nuaa.cf/kubo/plthook.git
     git remote -v
     git checkout .
     git fetch -p origin

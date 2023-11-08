@@ -1,6 +1,7 @@
 INCLUDE(fmt.cmake)
 INCLUDE(gmock.cmake)
 INCLUDE(gtest.cmake)
+INCLUDE(plthook.cmake)
 INCLUDE(PocoCrypto.cmake)
 INCLUDE(PocoData.cmake)
 INCLUDE(PocoDataMySQL.cmake)
