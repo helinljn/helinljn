@@ -23,7 +23,7 @@ IF(NOT EXISTS ${CMAKE_PROJECT_ROOT_DIR}/3rd/plthook/plthook.def)
         "    plthook_enum\n"
         "    plthook_replace\n"
         "    plthook_close\n"
-        "    plthook_error"
+        "    plthook_error\n"
     )
 ENDIF()
 
