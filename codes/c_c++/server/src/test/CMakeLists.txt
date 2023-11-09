@@ -23,6 +23,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     ${CMAKE_PROJECT_ROOT_DIR}/src/common
+    ${CMAKE_PROJECT_ROOT_DIR}/src/hotfix
 )
 
 # 链接库目录
@@ -48,6 +49,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        hotfix
         common
         protobuf
         gmock
@@ -81,6 +83,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        hotfix
         common
         protobuf
         gmock

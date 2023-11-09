@@ -37,7 +37,7 @@ public:
 
     ////////////////////////////////////////////////////////////////
     // @brief Uninitialize the stack trace(This method should be called
-    //        before the current process exits!
+    //        before the current process exits!）
     //
     // @param
     // @return
