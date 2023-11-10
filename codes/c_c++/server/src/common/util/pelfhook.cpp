@@ -24,9 +24,9 @@ bool pelfhook::load(const char* mname)
     return plthook_open(reinterpret_cast<plthook_t**>(&_hook), mname) == PLTHOOK_SUCCESS;
 }
 
-bool pelfhook::replace(const char* oldfname, void* newfaddr)
+bool pelfhook::replace(const char* oldfname, void* newfaddr, void** oldfaddr)
 {
-    return plthook_replace(reinterpret_cast<plthook_t*>(_hook), oldfname, newfaddr, nullptr) == PLTHOOK_SUCCESS;
+    return plthook_replace(reinterpret_cast<plthook_t*>(_hook), oldfname, newfaddr, oldfaddr) == PLTHOOK_SUCCESS;
 }
 
 std::vector<std::string> pelfhook::all_entries(void) const

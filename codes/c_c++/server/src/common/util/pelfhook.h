@@ -15,7 +15,11 @@ namespace common {
 //        调用，则需要分别进行hook
 //     2. 同个源文件内的函数互相调用多使用相对地址进行跳转，此种情况下
 //        无法hook这些调用
-//     3. 不支持hook虚函数(严格来讲，仅支持hook未被重写的虚函数)
+//     3. 同个模块内的函数互相调用时，一般在编译、链接时就已经确定了
+//        符号，此种情况下无法hook这些调用
+//     4. 只支持全局函数、普通类成员函数、普通类静态成员函数
+//     5. 不支持hook虚函数
+//     6. hook之后无法还原，只能使用replace返回的旧函数地址
 ////////////////////////////////////////////////////////////////
 class COMMON_API pelfhook final
 {
@@ -42,12 +46,13 @@ public:
     //
     // @param oldfname 被替换的旧函数名字(该名字是经过mangling修饰的)
     // @param newfaddr 新函数地址
+    // @param oldfaddr 旧函数地址
     // @return 成功返回true，失败返回false
     ////////////////////////////////////////////////////////////////
-    bool replace(const char* oldfname, void* newfaddr);
+    bool replace(const char* oldfname, void* newfaddr, void** oldfaddr = nullptr);
 
     ////////////////////////////////////////////////////////////////
-    // @brief 获取当前load模块的所有PLT/IAT入口
+    // @brief 获取当前load模块的所有PLT或者IAT入口
     //
     // @param
     // @return

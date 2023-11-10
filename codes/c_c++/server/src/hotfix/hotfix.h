@@ -18,7 +18,27 @@
     #endif
 #endif
 
+////////////////////////////////////////////////////////////////
+// 测试hook普通函数
+////////////////////////////////////////////////////////////////
+HOTFIX_API std::string test_func(int32_t val);
 HOTFIX_API std::string hotfix_test_func(int32_t val);
-HOTFIX_API std::string hotfix_test_func_patch(int32_t val);
+
+////////////////////////////////////////////////////////////////
+// 测试hook成员函数
+////////////////////////////////////////////////////////////////
+class HOTFIX_API foo
+{
+public:
+    std::string func1(const std::string& val) const;
+    static std::string func2(const std::string& val);
+};
+
+class HOTFIX_API hotfix_foo
+{
+public:
+    std::string hotfix_func1(const std::string& val) const;
+    static std::string hotfix_func2(const std::string& val);
+};
 
 #endif // __HOTFIX_H__
