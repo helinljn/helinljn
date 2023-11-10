@@ -21,7 +21,19 @@ bool pelfhook::load(const char* mname)
 {
     if (_hook)
         return true;
+
     return plthook_open(reinterpret_cast<plthook_t**>(&_hook), mname) == PLTHOOK_SUCCESS;
+}
+
+bool pelfhook::reload(const char* mname)
+{
+    if (_hook)
+    {
+        plthook_close(reinterpret_cast<plthook_t*>(_hook));
+        _hook = nullptr;
+    }
+
+    return load(mname);
 }
 
 bool pelfhook::replace(const char* oldfname, void* newfaddr, void** oldfaddr)

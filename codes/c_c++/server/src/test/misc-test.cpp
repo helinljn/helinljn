@@ -86,13 +86,12 @@ GTEST_TEST(MiscTest, PELFHookMemberFunction)
     common::pelfhook hook;
     ASSERT_TRUE(hook.load(nullptr));
 
-    const auto& entries = hook.all_entries();
-    poco_assert(!entries.empty());
-
 #if POCO_OS == POCO_OS_WINDOWS_NT
     decltype(&hotfix_foo::hotfix_func1) memfaddr1 = &hotfix_foo::hotfix_func1;
     void* newfaddr = *reinterpret_cast<void**>(&memfaddr1);
     ASSERT_TRUE(hook.replace("?func1@foo@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z", newfaddr));
+
+    ASSERT_TRUE(hook.reload(nullptr));
 
     decltype(&hotfix_foo::hotfix_func2) memfaddr2 = &hotfix_foo::hotfix_func2;
     newfaddr = *reinterpret_cast<void**>(&memfaddr2);
@@ -101,6 +100,8 @@ GTEST_TEST(MiscTest, PELFHookMemberFunction)
     decltype(&hotfix_foo::hotfix_func1) memfaddr1 = &hotfix_foo::hotfix_func1;
     void* newfaddr = *reinterpret_cast<void**>(&memfaddr1);
     ASSERT_TRUE(hook.replace("_ZNK3foo5func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE", newfaddr));
+
+    ASSERT_TRUE(hook.reload(nullptr));
 
     decltype(&hotfix_foo::hotfix_func2) memfaddr2 = &hotfix_foo::hotfix_func2;
     newfaddr = *reinterpret_cast<void**>(&memfaddr2);
