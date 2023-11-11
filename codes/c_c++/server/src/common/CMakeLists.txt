@@ -7,6 +7,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/plthook
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include
 )
 
 # 链接库目录
@@ -35,6 +36,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        funchook
         plthook
         protobuf
         PocoFoundation
@@ -58,9 +60,11 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        funchook
         plthook
         protobuf
         PocoFoundation
+        dl
     )
 ENDIF()
 

@@ -17,6 +17,8 @@ SET(CURRENT_LINK_LIBS_DIR
 # 创建配置文件
 IF(NOT EXISTS ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/config.h)
     FILE(WRITE ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/config.h
+        "#define _GNU_SOURCE\n"
+        "#define GNU_SPECIFIC_STRERROR_R 1\n"
         "#define DISASM_DISTORM 1\n"
         "#define SIZEOF_VOID_P 8\n"
     )
@@ -53,8 +55,6 @@ ELSE()
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         -DFUNCHOOK_EXPORTS
-        -D_GNU_SOURCE
-        -DGNU_SPECIFIC_STRERROR_R
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
