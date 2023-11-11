@@ -94,6 +94,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/prehook-x86_64-ms.asm
     )
 ELSE()
+    ENABLE_LANGUAGE(ASM)
     SET(CURRENT_DIR_SRC_LIST
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/funchook.c
         ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/arch_x86.c
