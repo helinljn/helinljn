@@ -6,6 +6,8 @@ POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
 PROTOBUF_INIT_DIR=$ROOT_INIT_DIR/3rd/protobuf
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
 PLTHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/plthook
+DISTORM_INIT_DIR=$ROOT_INIT_DIR/3rd/distorm
+FUNCHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/funchook
 
 echo ------------------
 echo -- fmt
@@ -71,6 +73,34 @@ if [ ! -d $PLTHOOK_INIT_DIR ]; then
 else
     cd $PLTHOOK_INIT_DIR
     git remote set-url origin https://hub.nuaa.cf/kubo/plthook.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- distorm
+cd $ROOT_INIT_DIR
+if [ ! -d $DISTORM_INIT_DIR ]; then
+    git clone https://hub.nuaa.cf/gdabah/distorm.git $DISTORM_INIT_DIR
+else
+    cd $DISTORM_INIT_DIR
+    git remote set-url origin https://hub.nuaa.cf/gdabah/distorm.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- funchook
+cd $ROOT_INIT_DIR
+if [ ! -d $FUNCHOOK_INIT_DIR ]; then
+    git clone https://hub.nuaa.cf/kubo/funchook.git $FUNCHOOK_INIT_DIR
+else
+    cd $FUNCHOOK_INIT_DIR
+    git remote set-url origin https://hub.nuaa.cf/kubo/funchook.git
     git remote -v
     git checkout .
     git fetch -p origin

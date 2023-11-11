@@ -1,4 +1,6 @@
+INCLUDE(distorm.cmake)
 INCLUDE(fmt.cmake)
+INCLUDE(funchook.cmake)
 INCLUDE(gmock.cmake)
 INCLUDE(gtest.cmake)
 INCLUDE(plthook.cmake)
