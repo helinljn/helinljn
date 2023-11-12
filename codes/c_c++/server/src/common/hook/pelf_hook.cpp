@@ -1,4 +1,4 @@
-#include "util/pelfhook.h"
+#include "hook/pelf_hook.h"
 #include "plthook.h"
 
 #include <iomanip>
@@ -6,18 +6,18 @@
 
 namespace common {
 
-pelfhook::pelfhook(void)
+pelf_hook::pelf_hook(void)
     : _hook(nullptr)
 {
 }
 
-pelfhook::~pelfhook(void)
+pelf_hook::~pelf_hook(void)
 {
     if (_hook)
         plthook_close(reinterpret_cast<plthook_t*>(_hook));
 }
 
-bool pelfhook::load(const char* mname)
+bool pelf_hook::load(const char* mname)
 {
     if (_hook)
         return true;
@@ -25,7 +25,7 @@ bool pelfhook::load(const char* mname)
     return plthook_open(reinterpret_cast<plthook_t**>(&_hook), mname) == PLTHOOK_SUCCESS;
 }
 
-bool pelfhook::reload(const char* mname)
+bool pelf_hook::reload(const char* mname)
 {
     if (_hook)
     {
@@ -36,12 +36,12 @@ bool pelfhook::reload(const char* mname)
     return load(mname);
 }
 
-bool pelfhook::replace(const char* oldfname, void* newfaddr, void** oldfaddr)
+bool pelf_hook::replace(const char* oldfname, void* newfaddr, void** oldfaddr)
 {
     return plthook_replace(reinterpret_cast<plthook_t*>(_hook), oldfname, newfaddr, oldfaddr) == PLTHOOK_SUCCESS;
 }
 
-std::vector<std::string> pelfhook::all_entries(void) const
+std::vector<std::string> pelf_hook::all_entries(void) const
 {
     std::vector<std::string> entries;
     if (!_hook)

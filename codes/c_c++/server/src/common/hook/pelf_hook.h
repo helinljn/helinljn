@@ -9,7 +9,7 @@ namespace common {
 
 ////////////////////////////////////////////////////////////////
 // 通过hook掉以PLT(Linux)或者IAT(Windows)进行的动态库调用，来达到
-// 动态热更新部分函数的目的
+// 热更新部分函数的目的
 // 使用限制：
 //     1. 只可以hook掉当前load模块的调用，假如多个模块都存在对func的
 //        调用，则需要分别进行hook
@@ -21,17 +21,17 @@ namespace common {
 //     5. 不支持hook虚函数
 //     6. hook之后无法还原，只能使用replace返回的旧函数地址
 ////////////////////////////////////////////////////////////////
-class COMMON_API pelfhook final
+class COMMON_API pelf_hook final
 {
 public:
-    pelfhook(void);
-    ~pelfhook(void);
+    pelf_hook(void);
+    ~pelf_hook(void);
 
-    pelfhook(const pelfhook&) = delete;
-    pelfhook& operator=(const pelfhook&) = delete;
+    pelf_hook(const pelf_hook&) = delete;
+    pelf_hook& operator=(const pelf_hook&) = delete;
 
-    pelfhook(pelfhook&&) = delete;
-    pelfhook& operator=(pelfhook&&) = delete;
+    pelf_hook(pelf_hook&&) = delete;
+    pelf_hook& operator=(pelf_hook&&) = delete;
 
     ////////////////////////////////////////////////////////////////
     // @brief 加载模块(*.dll, *.so, *executable)
