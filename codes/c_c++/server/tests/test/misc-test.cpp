@@ -8,7 +8,6 @@
 #include "Poco/SharedLibrary.h"
 #include "bar.h"
 #include "foo.h"
-#include "fooex.h"
 
 #include <string>
 #include <type_traits>
@@ -64,25 +63,37 @@ GTEST_TEST(MiscTest, StackTrace)
 
 GTEST_TEST(MiscTest, PELFHookFunction)
 {
+    Poco::SharedLibrary barlib;
+    barlib.load(std::string{"libbar"} + Poco::SharedLibrary::suffix());
+    ASSERT_TRUE(barlib.isLoaded());
+
     ASSERT_TRUE(test_bar(1000) == "test_bar(1000)");
-    ASSERT_TRUE(hotfix_test_bar(1000) == "hotfix_test_bar(1000)");
+    ASSERT_TRUE(patch_test_bar(1000) == "patch_test_bar(1000)");
 
     common::pelf_hook hook;
     ASSERT_TRUE(hook.load(nullptr));
 
-    void* newfaddr = reinterpret_cast<void*>(&hotfix_test_bar);
 #if POCO_OS == POCO_OS_WINDOWS_NT
+    void* newfaddr = barlib.getSymbol("?patch_test_bar@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
     ASSERT_TRUE(hook.replace("?test_bar@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z", newfaddr));
 #else
+    void* newfaddr = barlib.getSymbol("_Z14patch_test_barB5cxx11i");
     ASSERT_TRUE(hook.replace("_Z8test_barB5cxx11i", newfaddr));
 #endif
 
-    ASSERT_TRUE(test_bar(1000) == "hotfix_test_bar(1000)");
-    ASSERT_TRUE(hotfix_test_bar(1000) == "hotfix_test_bar(1000)");
+    ASSERT_TRUE(test_bar(1000) == "patch_test_bar(1000)");
+    ASSERT_TRUE(patch_test_bar(1000) == "patch_test_bar(1000)");
+
+    barlib.unload();
+    ASSERT_TRUE(!barlib.isLoaded());
 }
 
 GTEST_TEST(MiscTest, PELFHookMemberFunction)
 {
+    Poco::SharedLibrary barlib;
+    barlib.load(std::string{"libbar"} + Poco::SharedLibrary::suffix());
+    ASSERT_TRUE(barlib.isLoaded());
+
     bar tb;
     ASSERT_TRUE(tb.func1("test") == "bar::func1(test)");
     ASSERT_TRUE(tb.func2("test") == "bar::func2(test)");
@@ -91,179 +102,105 @@ GTEST_TEST(MiscTest, PELFHookMemberFunction)
     ASSERT_TRUE(hook.load(nullptr));
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
-    decltype(&hotfix_bar::hotfix_func1) memfaddr1 = &hotfix_bar::hotfix_func1;
-    void* newfaddr = *reinterpret_cast<void**>(&memfaddr1);
-    ASSERT_TRUE(hook.replace("?func1@bar@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z", newfaddr));
+    void* symbol1 = barlib.getSymbol("?patch_func1@patch_bar@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol2 = barlib.getSymbol("?patch_func2@patch_bar@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
 
-    ASSERT_TRUE(hook.reload(nullptr));
-
-    decltype(&hotfix_bar::hotfix_func2) memfaddr2 = &hotfix_bar::hotfix_func2;
-    newfaddr = *reinterpret_cast<void**>(&memfaddr2);
-    ASSERT_TRUE(hook.replace("?func2@bar@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z", newfaddr));
+    ASSERT_TRUE(hook.replace("?func1@bar@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z", symbol1));
+    ASSERT_TRUE(hook.replace("?func2@bar@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z", symbol2));
 #else
-    decltype(&hotfix_bar::hotfix_func1) memfaddr1 = &hotfix_bar::hotfix_func1;
-    void* newfaddr = *reinterpret_cast<void**>(&memfaddr1);
-    ASSERT_TRUE(hook.replace("_ZNK3bar5func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE", newfaddr));
+    void* symbol1 = barlib.getSymbol("_ZNK9patch_bar11patch_func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol2 = barlib.getSymbol("_ZN9patch_bar11patch_func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
 
-    ASSERT_TRUE(hook.reload(nullptr));
-
-    decltype(&hotfix_bar::hotfix_func2) memfaddr2 = &hotfix_bar::hotfix_func2;
-    newfaddr = *reinterpret_cast<void**>(&memfaddr2);
-    ASSERT_TRUE(hook.replace("_ZN3bar5func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE", newfaddr));
+    ASSERT_TRUE(hook.replace("_ZNK3bar5func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE", symbol1));
+    ASSERT_TRUE(hook.replace("_ZN3bar5func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE", symbol2));
 #endif
 
-    ASSERT_TRUE(tb.func1("test") == "hotfix_bar::hotfix_func1(test)");
-    ASSERT_TRUE(tb.func2("test") == "hotfix_bar::hotfix_func2(test)");
+    ASSERT_TRUE(tb.func1("test") == "patch_bar::patch_func1(test)");
+    ASSERT_TRUE(tb.func2("test") == "patch_bar::patch_func2(test)");
+
+    barlib.unload();
+    ASSERT_TRUE(!barlib.isLoaded());
 }
 
-GTEST_TEST(MiscTest, InjectHookFunctionInShared)
+GTEST_TEST(MiscTest, InjectHookFunction)
 {
     Poco::SharedLibrary foolib;
-#if POCO_OS == POCO_OS_WINDOWS_NT
-    foolib.load("libfoo.dll");
+    foolib.load(std::string{"libfoo"} + Poco::SharedLibrary::suffix());
     ASSERT_TRUE(foolib.isLoaded());
-#else
-    foolib.load("libfoo.so");
-    ASSERT_TRUE(foolib.isLoaded());
-#endif
 
-    // hook function
-    {
-        using foofunc = std::string (*)(int32_t);
-        void* symbol1 = nullptr;
-        void* symbol2 = nullptr;
+    ASSERT_TRUE(test_foo(1000) == "test_foo(1000)");
+    ASSERT_TRUE(patch_test_foo(1000) == "patch_test_foo(1000)");
+
+    common::inject_hook hook;
+    ASSERT_TRUE(hook.load());
+
 #if POCO_OS == POCO_OS_WINDOWS_NT
-        symbol1 = foolib.getSymbol("?test_foo@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
-        symbol2 = foolib.getSymbol("?hotfix_test_foo@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
+    void* symbol1 = foolib.getSymbol("?test_foo@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
+    void* symbol2 = foolib.getSymbol("?patch_test_foo@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
 #else
-        symbol1 = foolib.getSymbol("_Z8test_fooB5cxx11i");
-        symbol2 = foolib.getSymbol("_Z15hotfix_test_fooB5cxx11i");
+    void* symbol1 = foolib.getSymbol("_Z8test_fooB5cxx11i");
+    void* symbol2 = foolib.getSymbol("_Z14patch_test_fooB5cxx11i");
 #endif
 
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol1)(1000) == "test_foo(1000)");
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol2)(1000) == "hotfix_test_foo(1000)");
+    ASSERT_TRUE(hook.replace(symbol1, symbol2));
 
-        common::inject_hook hook;
-        ASSERT_TRUE(hook.load());
+    ASSERT_TRUE(hook.install());
+    ASSERT_TRUE(test_foo(1000) == "patch_test_foo(1000)");
+    ASSERT_TRUE(patch_test_foo(1000) == "patch_test_foo(1000)");
 
-        ASSERT_TRUE(hook.replace(symbol1, symbol2));
+    ASSERT_TRUE(hook.uninstall());
+    ASSERT_TRUE(test_foo(1000) == "test_foo(1000)");
+    ASSERT_TRUE(patch_test_foo(1000) == "patch_test_foo(1000)");
 
-        ASSERT_TRUE(hook.install());
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol1)(1000) == "hotfix_test_foo(1000)");
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol2)(1000) == "hotfix_test_foo(1000)");
-
-        ASSERT_TRUE(hook.uninstall());
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol1)(1000) == "test_foo(1000)");
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol2)(1000) == "hotfix_test_foo(1000)");
-    }
-
-    // hook member function
-    {
-        foo tf;
-        ASSERT_TRUE(tf.func1("1000") == "foo::func1(1000)");
-        ASSERT_TRUE(tf.func2("1000") == "foo::func2(1000)");
-
-        void* symbol1 = nullptr;
-        void* symbol2 = nullptr;
-#if POCO_OS == POCO_OS_WINDOWS_NT
-        symbol1 = foolib.getSymbol("?hotfix_func1@hotfix_foo@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
-        symbol2 = foolib.getSymbol("?hotfix_func2@hotfix_foo@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
-#else
-        symbol1 = foolib.getSymbol("_ZNK10hotfix_foo12hotfix_func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
-        symbol2 = foolib.getSymbol("_ZN10hotfix_foo12hotfix_func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
-#endif
-
-        common::inject_hook hook;
-        ASSERT_TRUE(hook.load());
-
-        decltype(&foo::func1) memfaddr1 = &foo::func1;
-        void* oldfaddr1 = *reinterpret_cast<void**>(&memfaddr1);
-        ASSERT_TRUE(hook.replace(oldfaddr1, symbol1));
-
-        decltype(&foo::func2) memfaddr2 = &foo::func2;
-        void* oldfaddr2 = *reinterpret_cast<void**>(&memfaddr2);
-        ASSERT_TRUE(hook.replace(oldfaddr2, symbol2));
-
-        ASSERT_TRUE(hook.install());
-        ASSERT_TRUE(tf.func1("1000") == "hotfix_foo::hotfix_func1(1000)");
-        ASSERT_TRUE(tf.func2("1000") == "hotfix_foo::hotfix_func2(1000)");
-
-        ASSERT_TRUE(hook.uninstall());
-        ASSERT_TRUE(tf.func1("1000") == "foo::func1(1000)");
-        ASSERT_TRUE(tf.func2("1000") == "foo::func2(1000)");
-    }
+    foolib.unload();
+    ASSERT_TRUE(!foolib.isLoaded());
 }
 
-GTEST_TEST(MiscTest, InjectHookFunctionInExecutable)
+GTEST_TEST(MiscTest, InjectHookMemberFunction)
 {
     Poco::SharedLibrary foolib;
-#if POCO_OS == POCO_OS_WINDOWS_NT
-    foolib.load("libfoo.dll");
+    foolib.load(std::string{"libfoo"} + Poco::SharedLibrary::suffix());
     ASSERT_TRUE(foolib.isLoaded());
-#else
-    foolib.load("libfoo.so");
-    ASSERT_TRUE(foolib.isLoaded());
-#endif
 
-    // hook function
-    {
-        using foofunc = std::string (*)(int32_t);
+    foo       tf;
+    foo_base& rf = tf;
+    ASSERT_TRUE(rf.func1("1000") == "foo::func1(1000)");
+    ASSERT_TRUE(tf.func2("1000") == "foo::func2(1000)");
+    ASSERT_TRUE(tf.func3("1000") == "foo::func3(1000)");
+
+    common::inject_hook hook;
+    ASSERT_TRUE(hook.load());
+
 #if POCO_OS == POCO_OS_WINDOWS_NT
-        void* symbol = foolib.getSymbol("?hotfix_test_foo@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
+    void* symbol1 = foolib.getSymbol("?func1@foo@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol2 = foolib.getSymbol("?func2@foo@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol3 = foolib.getSymbol("?func3@foo@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol4 = foolib.getSymbol("?patch_func1@patch_foo@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol5 = foolib.getSymbol("?patch_func2@patch_foo@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol6 = foolib.getSymbol("?patch_func3@patch_foo@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
 #else
-        void* symbol = foolib.getSymbol("_Z15hotfix_test_fooB5cxx11i");
+    void* symbol1 = foolib.getSymbol("_ZNK3foo5func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol2 = foolib.getSymbol("_ZNK3foo5func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol3 = foolib.getSymbol("_ZN3foo5func3ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol4 = foolib.getSymbol("_ZNK9patch_foo11patch_func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol5 = foolib.getSymbol("_ZNK9patch_foo11patch_func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol6 = foolib.getSymbol("_ZN9patch_foo11patch_func3ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
 #endif
 
-        ASSERT_TRUE(test_fooex(1000) == "test_fooex(1000)");
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol)(1000) == "hotfix_test_foo(1000)");
+    ASSERT_TRUE(hook.replace(symbol1, symbol4));
+    ASSERT_TRUE(hook.replace(symbol2, symbol5));
+    ASSERT_TRUE(hook.replace(symbol3, symbol6));
 
-        common::inject_hook hook;
-        ASSERT_TRUE(hook.load());
+    ASSERT_TRUE(hook.install());
+    ASSERT_TRUE(rf.func1("1000") == "patch_foo::patch_func1(1000)");
+    ASSERT_TRUE(tf.func2("1000") == "patch_foo::patch_func2(1000)");
+    ASSERT_TRUE(tf.func3("1000") == "patch_foo::patch_func3(1000)");
 
-        ASSERT_TRUE(hook.replace(reinterpret_cast<void*>(&test_fooex), symbol));
+    ASSERT_TRUE(hook.uninstall());
+    ASSERT_TRUE(rf.func1("1000") == "foo::func1(1000)");
+    ASSERT_TRUE(tf.func2("1000") == "foo::func2(1000)");
+    ASSERT_TRUE(tf.func3("1000") == "foo::func3(1000)");
 
-        ASSERT_TRUE(hook.install());
-        ASSERT_TRUE(test_fooex(1000) == "hotfix_test_foo(1000)");
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol)(1000) == "hotfix_test_foo(1000)");
-
-        ASSERT_TRUE(hook.uninstall());
-        ASSERT_TRUE(test_fooex(1000) == "test_fooex(1000)");
-        ASSERT_TRUE(reinterpret_cast<foofunc>(symbol)(1000) == "hotfix_test_foo(1000)");
-    }
-
-    // hook member function
-    {
-        fooex tf;
-        ASSERT_TRUE(tf.func1("1000") == "fooex::func1(1000)");
-        ASSERT_TRUE(tf.func2("1000") == "fooex::func2(1000)");
-
-        void* symbol1 = nullptr;
-        void* symbol2 = nullptr;
-#if POCO_OS == POCO_OS_WINDOWS_NT
-        symbol1 = foolib.getSymbol("?hotfix_func1@hotfix_foo@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
-        symbol2 = foolib.getSymbol("?hotfix_func2@hotfix_foo@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
-#else
-        symbol1 = foolib.getSymbol("_ZNK10hotfix_foo12hotfix_func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
-        symbol2 = foolib.getSymbol("_ZN10hotfix_foo12hotfix_func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
-#endif
-
-        common::inject_hook hook;
-        ASSERT_TRUE(hook.load());
-
-        decltype(&fooex::func1) memfaddr1 = &fooex::func1;
-        void* oldfaddr1 = *reinterpret_cast<void**>(&memfaddr1);
-        ASSERT_TRUE(hook.replace(oldfaddr1, symbol1));
-
-        decltype(&fooex::func2) memfaddr2 = &fooex::func2;
-        void* oldfaddr2 = *reinterpret_cast<void**>(&memfaddr2);
-        ASSERT_TRUE(hook.replace(oldfaddr2, symbol2));
-
-        ASSERT_TRUE(hook.install());
-        ASSERT_TRUE(tf.func1("1000") == "hotfix_foo::hotfix_func1(1000)");
-        ASSERT_TRUE(tf.func2("1000") == "hotfix_foo::hotfix_func2(1000)");
-
-        ASSERT_TRUE(hook.uninstall());
-        ASSERT_TRUE(tf.func1("1000") == "fooex::func1(1000)");
-        ASSERT_TRUE(tf.func2("1000") == "fooex::func2(1000)");
-    }
+    foolib.unload();
+    ASSERT_TRUE(!foolib.isLoaded());
 }

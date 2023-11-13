@@ -22,23 +22,31 @@
 // 测试hook普通函数
 ////////////////////////////////////////////////////////////////
 FOO_API std::string test_foo(int32_t val);
-FOO_API std::string hotfix_test_foo(int32_t val);
+FOO_API std::string patch_test_foo(int32_t val);
 
 ////////////////////////////////////////////////////////////////
 // 测试hook成员函数
 ////////////////////////////////////////////////////////////////
-class FOO_API foo
+class FOO_API foo_base
 {
 public:
-    std::string func1(const std::string& val) const;
-    static std::string func2(const std::string& val);
+    virtual std::string func1(const std::string& val) const;
 };
 
-class FOO_API hotfix_foo
+class FOO_API foo : public foo_base
 {
 public:
-    std::string hotfix_func1(const std::string& val) const;
-    static std::string hotfix_func2(const std::string& val);
+    std::string func1(const std::string& val) const override;
+    std::string func2(const std::string& val) const;
+    static std::string func3(const std::string& val);
+};
+
+class FOO_API patch_foo : public foo
+{
+public:
+    std::string patch_func1(const std::string& val) const;
+    std::string patch_func2(const std::string& val) const;
+    static std::string patch_func3(const std::string& val);
 };
 
 #endif // __FOO_H__

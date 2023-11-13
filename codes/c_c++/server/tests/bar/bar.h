@@ -22,7 +22,7 @@
 // 测试hook普通函数
 ////////////////////////////////////////////////////////////////
 BAR_API std::string test_bar(int32_t val);
-BAR_API std::string hotfix_test_bar(int32_t val);
+BAR_API std::string patch_test_bar(int32_t val);
 
 ////////////////////////////////////////////////////////////////
 // 测试hook成员函数
@@ -34,11 +34,11 @@ public:
     static std::string func2(const std::string& val);
 };
 
-class BAR_API hotfix_bar
+class BAR_API patch_bar : public bar
 {
 public:
-    std::string hotfix_func1(const std::string& val) const;
-    static std::string hotfix_func2(const std::string& val);
+    std::string patch_func1(const std::string& val) const;
+    static std::string patch_func2(const std::string& val);
 };
 
 #endif // __BAR_H__

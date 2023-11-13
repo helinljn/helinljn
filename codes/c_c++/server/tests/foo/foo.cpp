@@ -14,13 +14,25 @@ std::string test_foo(int32_t val)
     return std::string(buf.data());
 }
 
-std::string hotfix_test_foo(int32_t val)
+std::string patch_test_foo(int32_t val)
 {
     Poco::Array<char, 1024>  buf;
     Poco::MemoryOutputStream mos(buf.data(), buf.size());
     poco_assert(mos.good());
 
-    mos << "hotfix_test_foo(" << val << ")" << std::ends;
+    mos << "patch_test_foo(" << val << ")" << std::ends;
+    poco_assert(mos.good());
+
+    return std::string(buf.data());
+}
+
+std::string foo_base::func1(const std::string& val) const
+{
+    Poco::Array<char, 1024>  buf;
+    Poco::MemoryOutputStream mos(buf.data(), buf.size());
+    poco_assert(mos.good());
+
+    mos << "foo_base::func1(" << val << ")" << std::ends;
     poco_assert(mos.good());
 
     return std::string(buf.data());
@@ -38,7 +50,7 @@ std::string foo::func1(const std::string& val) const
     return std::string(buf.data());
 }
 
-std::string foo::func2(const std::string& val)
+std::string foo::func2(const std::string& val) const
 {
     Poco::Array<char, 1024>  buf;
     Poco::MemoryOutputStream mos(buf.data(), buf.size());
@@ -50,25 +62,49 @@ std::string foo::func2(const std::string& val)
     return std::string(buf.data());
 }
 
-std::string hotfix_foo::hotfix_func1(const std::string& val) const
+std::string foo::func3(const std::string& val)
 {
     Poco::Array<char, 1024>  buf;
     Poco::MemoryOutputStream mos(buf.data(), buf.size());
     poco_assert(mos.good());
 
-    mos << "hotfix_foo::hotfix_func1(" << val << ")" << std::ends;
+    mos << "foo::func3(" << val << ")" << std::ends;
     poco_assert(mos.good());
 
     return std::string(buf.data());
 }
 
-std::string hotfix_foo::hotfix_func2(const std::string& val)
+std::string patch_foo::patch_func1(const std::string& val) const
 {
     Poco::Array<char, 1024>  buf;
     Poco::MemoryOutputStream mos(buf.data(), buf.size());
     poco_assert(mos.good());
 
-    mos << "hotfix_foo::hotfix_func2(" << val << ")" << std::ends;
+    mos << "patch_foo::patch_func1(" << val << ")" << std::ends;
+    poco_assert(mos.good());
+
+    return std::string(buf.data());
+}
+
+std::string patch_foo::patch_func2(const std::string& val) const
+{
+    Poco::Array<char, 1024>  buf;
+    Poco::MemoryOutputStream mos(buf.data(), buf.size());
+    poco_assert(mos.good());
+
+    mos << "patch_foo::patch_func2(" << val << ")" << std::ends;
+    poco_assert(mos.good());
+
+    return std::string(buf.data());
+}
+
+std::string patch_foo::patch_func3(const std::string& val)
+{
+    Poco::Array<char, 1024>  buf;
+    Poco::MemoryOutputStream mos(buf.data(), buf.size());
+    poco_assert(mos.good());
+
+    mos << "patch_foo::patch_func3(" << val << ")" << std::ends;
     poco_assert(mos.good());
 
     return std::string(buf.data());
