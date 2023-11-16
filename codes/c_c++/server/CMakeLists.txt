@@ -15,6 +15,9 @@ IF(NOT ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug") AND NOT ("${CMAKE_BUILD_TYPE}" S
     MESSAGE(STATUS "CMAKE_BUILD_TYPE is invalid, must be one of 'Debug | Release', set default build type to 'Release'.")
 ENDIF()
 
+# rpath选项
+SET(CMAKE_SKIP_BUILD_RPATH True)
+
 # 项目名字
 PROJECT(server)
 
@@ -72,11 +75,11 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0A00")
 ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -fPIC -rdynamic")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} -std=c11 -Wall -Wextra -Wpedantic -fPIC -rdynamic -Wl,-rpath=./")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE}")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic -fPIC -rdynamic")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wextra -Wpedantic -fPIC -rdynamic -Wl,-rpath=./")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
@@ -135,6 +138,7 @@ MESSAGE(STATUS "CMAKE_SYSTEM_VERSION              = C${CMAKE_SYSTEM_VERSION}")
 MESSAGE(STATUS "CMAKE_C_STANDARD                  = C${CMAKE_C_STANDARD}")
 MESSAGE(STATUS "CMAKE_CXX_STANDARD                = C++${CMAKE_CXX_STANDARD}")
 MESSAGE(STATUS "CMAKE_BUILD_TYPE                  = ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "CMAKE_SKIP_BUILD_RPATH            = ${CMAKE_SKIP_BUILD_RPATH}")
 MESSAGE(STATUS "CMAKE_C_FLAGS                     = ${CMAKE_C_FLAGS}")
 MESSAGE(STATUS "CMAKE_C_FLAGS_DEBUG               = ${CMAKE_C_FLAGS_DEBUG}")
 MESSAGE(STATUS "CMAKE_C_FLAGS_RELEASE             = ${CMAKE_C_FLAGS_RELEASE}")

@@ -121,14 +121,4 @@ ELSE()
         COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libssl.so.1.1    libssl.so
         COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libcrypto.so.1.1 libcrypto.so
     )
-
-    # Linux平台下rpath动态库运行路径修改，优先查找当前目录下的动态库
-    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND patchelf --set-rpath ./
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/lib${PROJECT_NAME}.so
-        COMMAND patchelf --set-rpath ./
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libssl.so
-        COMMAND patchelf --set-rpath ./
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/libcrypto.so
-    )
 ENDIF()

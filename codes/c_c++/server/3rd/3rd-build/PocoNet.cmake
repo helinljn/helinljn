@@ -116,10 +116,4 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 单独为Windows下C++源文件设置额外的编译选项
     TARGET_COMPILE_OPTIONS(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>: /Zc:strictStrings->)
-ELSE()
-    # Linux平台下rpath动态库运行路径修改，优先查找当前目录下的动态库
-    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND patchelf --set-rpath ./
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/lib${PROJECT_NAME}.so
-    )
 ENDIF()

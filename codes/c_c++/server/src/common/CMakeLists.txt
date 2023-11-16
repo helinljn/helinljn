@@ -109,10 +109,4 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${CURRENT_DIR_PROTO_LIST})
     SOURCE_GROUP(TREE ${PROJECT_SOURCE_DIR} PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
-ELSE()
-    # Linux平台下rpath动态库运行路径修改，优先查找当前目录下的动态库
-    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND patchelf --set-rpath ./
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}/lib${PROJECT_NAME}.so
-    )
 ENDIF()
