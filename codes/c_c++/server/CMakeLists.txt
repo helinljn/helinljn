@@ -25,7 +25,7 @@ PROJECT(server)
 SET(CMAKE_PROJECT_ROOT_DIR       ${CMAKE_SOURCE_DIR})
 SET(CMAKE_PROJECT_BUILD_ROOT_DIR ${CMAKE_SOURCE_DIR}/.build)
 
-# 编译选项、链接选项、生成目录、第三方库目录、静态库 & 动态库的前缀
+# 编译选项、链接选项、生成目录、第三方库目录、链接库目录、静态库 & 动态库的前缀
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 编译选项
     SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4251 /wd4819")
@@ -52,6 +52,13 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 第三方库目录
     SET(CMAKE_3RD_DIR_MYSQL   ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-windows)
     SET(CMAKE_3RD_DIR_OPENSSL ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-windows)
+
+    # 链接库目录
+    SET(CMAKE_LINK_LIBS_DIR
+        ${CMAKE_3RD_DIR_MYSQL}/lib
+        ${CMAKE_3RD_DIR_OPENSSL}/lib
+        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+    )
 
     # 静态库 & 动态库的前缀
     SET(CMAKE_STATIC_LIBRARY_PREFIX "lib")
@@ -99,6 +106,13 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # 第三方库目录
     SET(CMAKE_3RD_DIR_MYSQL   ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/mysql-8.0.33/x64-ubuntu-20.04)
     SET(CMAKE_3RD_DIR_OPENSSL ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04)
+
+    # 链接库目录
+    SET(CMAKE_LINK_LIBS_DIR
+        ${CMAKE_3RD_DIR_MYSQL}/lib
+        ${CMAKE_3RD_DIR_OPENSSL}/lib
+        ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+    )
 
     # 静态库 & 动态库的前缀
     SET(CMAKE_STATIC_LIBRARY_PREFIX "lib")
