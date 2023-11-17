@@ -118,7 +118,9 @@ ELSE()
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.so.1.1
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libssl.so.1.1    libssl.so
-        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libcrypto.so.1.1 libcrypto.so
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libssl.so.1.1 libssl.so
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libcrypto.so.1.1 libcrypto.so
     )
 ENDIF()

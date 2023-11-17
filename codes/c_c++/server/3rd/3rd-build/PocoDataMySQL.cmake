@@ -113,6 +113,7 @@ ELSE()
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_3RD_DIR_MYSQL}/lib/libmysqlclient.so.21
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND cd ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE} && ln -sf libmysqlclient.so.21 libmysqlclient.so
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libmysqlclient.so.21 libmysqlclient.so
     )
 ENDIF()
