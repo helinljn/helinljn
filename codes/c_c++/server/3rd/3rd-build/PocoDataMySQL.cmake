@@ -38,7 +38,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SET(CURRENT_LINK_LIBS
         PocoData
         PocoFoundation
-        mysql
+        libmysql
     )
 ELSE()
     # 宏定义
@@ -103,9 +103,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # Windows平台下的MySQL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_3RD_DIR_MYSQL}/lib/mysql.lib
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_3RD_DIR_MYSQL}/lib/libmysql.dll
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}

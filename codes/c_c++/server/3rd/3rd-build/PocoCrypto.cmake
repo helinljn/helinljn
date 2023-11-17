@@ -38,8 +38,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 链接库
     SET(CURRENT_LINK_LIBS
         PocoFoundation
-        ssl
-        crypto
+        libssl
+        libcrypto
     )
 ELSE()
     # 宏定义
@@ -102,12 +102,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # Windows平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/ssl.lib
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/crypto.lib
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
         COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libssl-1_1-x64.dll
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
