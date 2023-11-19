@@ -1,10 +1,7 @@
 #include "gtest/gtest.h"
+#include "util/types.h"
 #include "pbmsg/TestMsgDefine.pb.h"
 #include "pbmsg/TestMsgStruct.pb.h"
-
-#include <string>
-#include <vector>
-#include <utility>
 
 // Unnamed namespace for internal linkage
 namespace {

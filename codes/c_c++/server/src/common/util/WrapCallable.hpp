@@ -1,8 +1,8 @@
 #ifndef __WRAP_CALLABLE_H__
 #define __WRAP_CALLABLE_H__
 
+#include "util/types.h"
 #include "Poco/Runnable.h"
-#include <type_traits>
 
 namespace Poco {
 

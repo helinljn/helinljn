@@ -1,9 +1,7 @@
 #ifndef __STACK_TRACE_H__
 #define __STACK_TRACE_H__
 
-#include "util/common.h"
-#include <string>
-#include <vector>
+#include "util/types.h"
 #include <atomic>
 #include <mutex>
 

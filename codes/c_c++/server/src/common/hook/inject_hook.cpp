@@ -1,4 +1,4 @@
-#include "hook/inject_hook.h"
+#include "inject_hook.h"
 #include "funchook.h"
 
 namespace common {

@@ -1,4 +1,4 @@
-#include "util/hex_binary.h"
+#include "hex_binary.h"
 #include "Poco/HexBinaryEncoder.h"
 #include "Poco/HexBinaryDecoder.h"
 

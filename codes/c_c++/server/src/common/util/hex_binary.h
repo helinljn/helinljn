@@ -1,10 +1,7 @@
 #ifndef __HEX_BINARY_H__
 #define __HEX_BINARY_H__
 
-#include "util/common.h"
-#include <string>
-#include <string_view>
-#include <type_traits>
+#include "util/types.h"
 
 namespace common {
 

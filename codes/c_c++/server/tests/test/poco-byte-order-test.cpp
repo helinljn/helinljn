@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "util/poco.h"
+#include "util/types.h"
 #include "Poco/ByteOrder.h"
 
 GTEST_TEST(ByteOrderTest, FlipBytes)

@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "util/poco.h"
+#include "util/types.h"
 #include "util/WrapCallable.hpp"
 #include "Poco/Event.h"
 #include "Poco/Thread.h"

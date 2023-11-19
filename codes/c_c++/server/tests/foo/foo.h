@@ -1,8 +1,7 @@
 #ifndef __FOO_H__
 #define __FOO_H__
 
-#include "util/poco.h"
-#include "Poco/Foundation.h"
+#include "util/types.h"
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
     #ifdef FOO_EXPORTS

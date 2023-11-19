@@ -1,8 +1,7 @@
 #ifndef __NUMERIC_CAST_HPP__
 #define __NUMERIC_CAST_HPP__
 
-#include <string>
-#include <type_traits>
+#include "util/types.h"
 
 namespace common  {
 namespace details {

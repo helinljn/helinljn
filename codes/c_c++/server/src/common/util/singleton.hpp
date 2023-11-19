@@ -1,7 +1,7 @@
 #ifndef __SINGLETON_HPP__
 #define __SINGLETON_HPP__
 
-#include <type_traits>
+#include "util/types.h"
 
 namespace common {
 

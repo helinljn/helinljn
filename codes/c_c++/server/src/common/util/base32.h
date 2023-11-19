@@ -1,9 +1,7 @@
 #ifndef __BASE_32_H__
 #define __BASE_32_H__
 
-#include "util/common.h"
-#include <string>
-#include <string_view>
+#include "util/types.h"
 
 namespace common {
 

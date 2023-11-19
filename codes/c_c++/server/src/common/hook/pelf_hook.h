@@ -1,9 +1,7 @@
 #ifndef __PELF_HOOK_H__
 #define __PELF_HOOK_H__
 
-#include "util/common.h"
-#include <string>
-#include <vector>
+#include "util/types.h"
 
 namespace common {
 

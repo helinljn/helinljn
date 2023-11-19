@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "util/poco.h"
+#include "util/types.h"
 #include "util/hex_binary.h"
 #include "Poco/Exception.h"
 #include "Poco/SharedLibrary.h"

@@ -1,7 +1,7 @@
 #ifndef __INJECT_HOOK_H__
 #define __INJECT_HOOK_H__
 
-#include "util/common.h"
+#include "util/types.h"
 
 namespace common {
 

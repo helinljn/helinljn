@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "util/poco.h"
+#include "util/types.h"
 #include "Poco/String.h"
 #include "Poco/MD4Engine.h"
 #include "Poco/MD5Engine.h"

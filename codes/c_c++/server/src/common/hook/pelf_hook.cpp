@@ -1,4 +1,4 @@
-#include "hook/pelf_hook.h"
+#include "pelf_hook.h"
 #include "plthook.h"
 
 #include <iomanip>
