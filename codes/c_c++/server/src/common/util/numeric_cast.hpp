@@ -11,83 +11,83 @@ struct converter
 {
 };
 
-// string to int8_t
+// string to int8
 template <>
-struct converter<int8_t, std::string>
+struct converter<int8, std::string>
 {
-    static int8_t convert(const std::string& from)
+    static int8 convert(const std::string& from)
     {
-        return static_cast<int8_t>(std::stoi(from));
+        return static_cast<int8>(std::stoi(from));
     }
 };
 
-// string to uint8_t
+// string to uint8
 template <>
-struct converter<uint8_t, std::string>
+struct converter<uint8, std::string>
 {
-    static uint8_t convert(const std::string& from)
+    static uint8 convert(const std::string& from)
     {
-        return static_cast<uint8_t>(std::stoi(from));
+        return static_cast<uint8>(std::stoi(from));
     }
 };
 
-// string to int16_t
+// string to int16
 template <>
-struct converter<int16_t, std::string>
+struct converter<int16, std::string>
 {
-    static int16_t convert(const std::string& from)
+    static int16 convert(const std::string& from)
     {
-        return static_cast<int16_t>(std::stoi(from));
+        return static_cast<int16>(std::stoi(from));
     }
 };
 
-// string to uint16_t
+// string to uint16
 template <>
-struct converter<uint16_t, std::string>
+struct converter<uint16, std::string>
 {
-    static uint16_t convert(const std::string& from)
+    static uint16 convert(const std::string& from)
     {
-        return static_cast<uint16_t>(std::stoi(from));
+        return static_cast<uint16>(std::stoi(from));
     }
 };
 
-// string to int32_t
+// string to int32
 template <>
-struct converter<int32_t, std::string>
+struct converter<int32, std::string>
 {
-    static int32_t convert(const std::string& from)
+    static int32 convert(const std::string& from)
     {
-        return static_cast<int32_t>(std::stol(from));
+        return static_cast<int32>(std::stol(from));
     }
 };
 
-// string to uint32_t
+// string to uint32
 template <>
-struct converter<uint32_t, std::string>
+struct converter<uint32, std::string>
 {
-    static uint32_t convert(const std::string& from)
+    static uint32 convert(const std::string& from)
     {
-        return static_cast<uint32_t>(std::stoul(from));
+        return static_cast<uint32>(std::stoul(from));
     }
 };
 
-// string to int64_t
+// string to int64
 template <>
-struct converter<int64_t, std::string>
+struct converter<int64, std::string>
 {
-    static int64_t convert(const std::string& from)
+    static int64 convert(const std::string& from)
     {
-        return static_cast<int64_t>(std::stoll(from));
+        return static_cast<int64>(std::stoll(from));
     }
 };
 
-// string to uint64_t
+// string to uint64
 template <>
-struct converter<uint64_t, std::string>
+struct converter<uint64, std::string>
 {
-    static uint64_t convert(const std::string& from)
+    static uint64 convert(const std::string& from)
     {
-        return static_cast<uint64_t>(std::stoull(from));
+        return static_cast<uint64>(std::stoull(from));
     }
 };
 
@@ -111,81 +111,81 @@ struct converter<double, std::string>
     }
 };
 
-// int8_t to string
+// int8 to string
 template<>
-struct converter<std::string, int8_t>
+struct converter<std::string, int8>
 {
-    static std::string convert(const int8_t from)
+    static std::string convert(const int8 from)
     {
         return std::to_string(from);
     }
 };
 
-// uint8_t to string
+// uint8 to string
 template<>
-struct converter<std::string, uint8_t>
+struct converter<std::string, uint8>
 {
-    static std::string convert(const uint8_t from)
+    static std::string convert(const uint8 from)
     {
         return std::to_string(from);
     }
 };
 
-// int16_t to string
+// int16 to string
 template<>
-struct converter<std::string, int16_t>
+struct converter<std::string, int16>
 {
-    static std::string convert(const int16_t from)
+    static std::string convert(const int16 from)
     {
         return std::to_string(from);
     }
 };
 
-// uint16_t to string
+// uint16 to string
 template<>
-struct converter<std::string, uint16_t>
+struct converter<std::string, uint16>
 {
-    static std::string convert(const uint16_t from)
+    static std::string convert(const uint16 from)
     {
         return std::to_string(from);
     }
 };
 
-// int32_t to string
+// int32 to string
 template<>
-struct converter<std::string, int32_t>
+struct converter<std::string, int32>
 {
-    static std::string convert(const int32_t from)
+    static std::string convert(const int32 from)
     {
         return std::to_string(from);
     }
 };
 
-// uint32_t to string
+// uint32 to string
 template<>
-struct converter<std::string, uint32_t>
+struct converter<std::string, uint32>
 {
-    static std::string convert(const uint32_t from)
+    static std::string convert(const uint32 from)
     {
         return std::to_string(from);
     }
 };
 
-// int64_t to string
+// int64 to string
 template<>
-struct converter<std::string, int64_t>
+struct converter<std::string, int64>
 {
-    static std::string convert(const int64_t from)
+    static std::string convert(const int64 from)
     {
         return std::to_string(from);
     }
 };
 
-// uint64_t to string
+// uint64 to string
 template<>
-struct converter<std::string, uint64_t>
+struct converter<std::string, uint64>
 {
-    static std::string convert(const uint64_t from)
+    static std::string convert(const uint64 from)
     {
         return std::to_string(from);
     }

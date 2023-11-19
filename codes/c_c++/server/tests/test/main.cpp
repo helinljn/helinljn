@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "util/types.h"
 #include "fmt/format.h"
+#include "util/types.h"
 
 #include "Poco/Crypto/Crypto.h"
 #include "Poco/Data/Data.h"
