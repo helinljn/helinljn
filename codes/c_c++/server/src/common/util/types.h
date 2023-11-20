@@ -30,6 +30,7 @@
 #include "Poco/NumericString.h"
 #include "Poco/Dynamic/Var.h"
 #include "Poco/Dynamic/Pair.h"
+#include "Poco/Dynamic/Struct.h"
 
 #if defined(POCO_COMPILER_MSVC)
     #pragma warning(pop)
@@ -37,9 +38,12 @@
     #pragma GCC diagnostic pop
 #endif
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <array>
-#include <deque>
 #include <vector>
+#include <deque>
 #include <string>
 #include <string_view>
 #include <map>
@@ -48,12 +52,24 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <forward_list>
+#include <any>
+#include <tuple>
+#include <chrono>
+#include <limits>
+#include <random>
+#include <memory>
+#include <utility>
 #include <numeric>
+#include <variant>
+#include <optional>
 #include <algorithm>
 #include <functional>
 #include <iomanip>
 #include <sstream>
 #include <fstream>
+#include <typeinfo>
+#include <typeindex>
+#include <type_traits>
 
 namespace common {
 
