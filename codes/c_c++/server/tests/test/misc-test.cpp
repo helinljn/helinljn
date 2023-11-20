@@ -9,9 +9,6 @@
 #include "bar.h"
 #include "foo.h"
 
-#include <string>
-#include <type_traits>
-
 // Unnamed namespace for internal linkage
 namespace {
 

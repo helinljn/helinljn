@@ -2,8 +2,6 @@
 #include "util/types.h"
 #include "Poco/Random.h"
 
-#include <numeric>
-
 GTEST_TEST(PocoRandomTest, Random)
 {
     {

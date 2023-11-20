@@ -1,10 +1,6 @@
 #include "stack_trace.h"
 #include "Poco/Exception.h"
 
-#include <iomanip>
-#include <cstring>
-#include <sstream>
-
 #if POCO_OS == POCO_OS_WINDOWS_NT
     #include <windows.h>
     #include <dbghelp.h>
@@ -16,12 +12,12 @@
 
 namespace common {
 
-std::atomic_bool stack_trace::_initialized;
-std::mutex       stack_trace::_capture_mutex;
+Poco::Mutex         stack_trace::_capture_mutex;
+Poco::AtomicCounter stack_trace::_initialized;
 
 void stack_trace::initialize(void)
 {
-    if (_initialized.load())
+    if (_initialized.value())
         return;
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
@@ -51,12 +47,13 @@ void stack_trace::initialize(void)
         throw Poco::SystemException("Cannot initialize symbol handler for the current process!");
 #endif
 
-    _initialized.store(true);
+    ++_initialized;
+    poco_assert(_initialized.value() == 1);
 }
 
 void stack_trace::uninitialize(void)
 {
-    if (!_initialized.load())
+    if (!_initialized.value())
         return;
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
@@ -69,7 +66,8 @@ void stack_trace::uninitialize(void)
         throw Poco::SystemException("Cannot uninitialize symbol handler for the current process!");
 #endif
 
-    _initialized.store(false);
+    --_initialized;
+    poco_assert(_initialized.value() == 0);
 }
 
 stack_trace::stack_trace(void)
@@ -79,7 +77,7 @@ stack_trace::stack_trace(void)
     void*     frames[capacity] = {0};
 
     // Capture stack trace snapshot under the critical section
-    std::lock_guard holder(_capture_mutex);
+    Poco::Mutex::ScopedLock holder(_capture_mutex);
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
     // Capture the current stack trace

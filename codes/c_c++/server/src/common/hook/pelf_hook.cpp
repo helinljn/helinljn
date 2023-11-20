@@ -1,9 +1,6 @@
 #include "pelf_hook.h"
 #include "plthook.h"
 
-#include <iomanip>
-#include <sstream>
-
 namespace common {
 
 pelf_hook::pelf_hook(void)

@@ -37,6 +37,24 @@
     #pragma GCC diagnostic pop
 #endif
 
+#include <array>
+#include <deque>
+#include <vector>
+#include <string>
+#include <string_view>
+#include <map>
+#include <set>
+#include <list>
+#include <unordered_map>
+#include <unordered_set>
+#include <forward_list>
+#include <numeric>
+#include <algorithm>
+#include <functional>
+#include <iomanip>
+#include <sstream>
+#include <fstream>
+
 namespace common {
 
 using int8    = Poco::Int8;

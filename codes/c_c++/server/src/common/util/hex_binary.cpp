@@ -2,10 +2,6 @@
 #include "Poco/HexBinaryEncoder.h"
 #include "Poco/HexBinaryDecoder.h"
 
-#include <array>
-#include <sstream>
-#include <cstring>
-
 namespace common {
 
 bool to_hex_string(const void* mem, const size_t memlen, std::string& outstr, const bool uppercase)

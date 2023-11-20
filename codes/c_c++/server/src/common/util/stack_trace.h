@@ -2,8 +2,8 @@
 #define __STACK_TRACE_H__
 
 #include "util/types.h"
-#include <atomic>
-#include <mutex>
+#include "Poco/Mutex.h"
+#include "Poco/AtomicCounter.h"
 
 namespace common {
 
@@ -60,9 +60,9 @@ public:
     std::string to_string(void) const;
 
 private:
-    std::vector<frame>      _frames;
-    static std::atomic_bool _initialized;
-    static std::mutex       _capture_mutex;
+    std::vector<frame>         _frames;
+    static Poco::Mutex         _capture_mutex;
+    static Poco::AtomicCounter _initialized;
 };
 
 } // namespace common

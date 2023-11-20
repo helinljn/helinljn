@@ -15,9 +15,6 @@
 #include "Poco/File.h"
 #include "Poco/MemoryStream.h"
 
-#include <array>
-#include <string_view>
-
 GTEST_TEST(PocoStreamTest, Base32)
 {
     const std::string_view text   = {"!@#$%^&*()_~<>"};

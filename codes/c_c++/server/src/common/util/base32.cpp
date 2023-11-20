@@ -2,9 +2,6 @@
 #include "Poco/Base32Encoder.h"
 #include "Poco/Base32Decoder.h"
 
-#include <array>
-#include <sstream>
-
 namespace common {
 
 std::string base32_encode(const std::string_view& data)

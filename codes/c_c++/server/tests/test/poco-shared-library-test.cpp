@@ -7,10 +7,6 @@
 #include "openssl/sha.h"
 #include "mysql/mysql.h"
 
-#include <string_view>
-#include <string>
-#include <array>
-
 GTEST_TEST(PocoSharedLibraryTest, OpenSSL_MySQL)
 {
     // OpenSSL

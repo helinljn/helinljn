@@ -11,10 +11,6 @@
 #include "Poco/NotificationQueue.h"
 #include "Poco/PriorityNotificationQueue.h"
 
-#include <map>
-#include <string>
-#include <atomic>
-
 class TestNotification : public Poco::Notification
 {
 public:

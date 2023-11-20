@@ -2,9 +2,6 @@
 #include "Poco/Base64Encoder.h"
 #include "Poco/Base64Decoder.h"
 
-#include <array>
-#include <sstream>
-
 namespace common {
 
 std::string base64_encode(const std::string_view& data)

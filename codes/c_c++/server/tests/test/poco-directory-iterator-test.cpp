@@ -8,11 +8,6 @@
 #include "Poco/SortedDirectoryIterator.h"
 #include "Poco/RecursiveDirectoryIterator.h"
 
-#include <map>
-#include <set>
-#include <vector>
-#include <algorithm>
-
 class PocoDirectoryIteratorTest : public testing::Test
 {
 public:
