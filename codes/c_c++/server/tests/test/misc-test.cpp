@@ -3,11 +3,13 @@
 #include "util/types.h"
 #include "util/singleton.hpp"
 #include "util/stack_trace.h"
+#include "hook/exe_symbol.h"
 #include "hook/pelf_hook.h"
 #include "hook/inject_hook.h"
 #include "Poco/SharedLibrary.h"
 #include "bar.h"
 #include "foo.h"
+#include "fooex.h"
 
 // Unnamed namespace for internal linkage
 namespace {
@@ -200,4 +202,83 @@ GTEST_TEST(MiscTest, InjectHookMemberFunction)
 
     foolib.unload();
     ASSERT_TRUE(!foolib.isLoaded());
+}
+
+GTEST_TEST(MiscTest, InjectHookFunctionInExe)
+{
+    common::exe_symbol exe;
+    ASSERT_TRUE(exe.load());
+
+    ASSERT_TRUE(test_fooex(1000) == "test_fooex(1000)");
+    ASSERT_TRUE(patch_test_fooex(1000) == "patch_test_fooex(1000)");
+
+    common::inject_hook hook;
+    ASSERT_TRUE(hook.load());
+
+#if POCO_OS == POCO_OS_WINDOWS_NT
+    void* symbol1 = exe.get_symbol("?test_fooex@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
+    void* symbol2 = exe.get_symbol("?patch_test_fooex@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
+#else
+    void* symbol1 = exe.get_symbol("_Z10test_fooexB5cxx11i");
+    void* symbol2 = exe.get_symbol("_Z16patch_test_fooexB5cxx11i");
+#endif
+
+    ASSERT_TRUE(hook.replace(symbol1, symbol2));
+
+    ASSERT_TRUE(hook.install());
+    ASSERT_TRUE(test_fooex(1000) == "patch_test_fooex(1000)");
+    ASSERT_TRUE(patch_test_fooex(1000) == "patch_test_fooex(1000)");
+
+    ASSERT_TRUE(hook.uninstall());
+    ASSERT_TRUE(test_fooex(1000) == "test_fooex(1000)");
+    ASSERT_TRUE(patch_test_fooex(1000) == "patch_test_fooex(1000)");
+
+    ASSERT_TRUE(exe.unload());
+}
+
+GTEST_TEST(MiscTest, InjectHookMemberFunctionInExe)
+{
+    common::exe_symbol exe;
+    ASSERT_TRUE(exe.load());
+
+    fooex       tf;
+    fooex_base& rf = tf;
+    ASSERT_TRUE(rf.func1("1000") == "fooex::func1(1000)");
+    ASSERT_TRUE(tf.func2("1000") == "fooex::func2(1000)");
+    ASSERT_TRUE(tf.func3("1000") == "fooex::func3(1000)");
+
+    common::inject_hook hook;
+    ASSERT_TRUE(hook.load());
+
+#if POCO_OS == POCO_OS_WINDOWS_NT
+    void* symbol1 = exe.get_symbol("?func1@fooex@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol2 = exe.get_symbol("?func2@fooex@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol3 = exe.get_symbol("?func3@fooex@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol4 = exe.get_symbol("?patch_func1@patch_fooex@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol5 = exe.get_symbol("?patch_func2@patch_fooex@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+    void* symbol6 = exe.get_symbol("?patch_func3@patch_fooex@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z");
+#else
+    void* symbol1 = exe.get_symbol("_ZNK5fooex5func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol2 = exe.get_symbol("_ZNK5fooex5func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol3 = exe.get_symbol("_ZN5fooex5func3ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol4 = exe.get_symbol("_ZNK11patch_fooex11patch_func1ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol5 = exe.get_symbol("_ZNK11patch_fooex11patch_func2ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    void* symbol6 = exe.get_symbol("_ZN11patch_fooex11patch_func3ERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+#endif
+
+    ASSERT_TRUE(hook.replace(symbol1, symbol4));
+    ASSERT_TRUE(hook.replace(symbol2, symbol5));
+    ASSERT_TRUE(hook.replace(symbol3, symbol6));
+
+    ASSERT_TRUE(hook.install());
+    ASSERT_TRUE(rf.func1("1000") == "patch_fooex::patch_func1(1000)");
+    ASSERT_TRUE(tf.func2("1000") == "patch_fooex::patch_func2(1000)");
+    ASSERT_TRUE(tf.func3("1000") == "patch_fooex::patch_func3(1000)");
+
+    ASSERT_TRUE(hook.uninstall());
+    ASSERT_TRUE(rf.func1("1000") == "fooex::func1(1000)");
+    ASSERT_TRUE(tf.func2("1000") == "fooex::func2(1000)");
+    ASSERT_TRUE(tf.func3("1000") == "fooex::func3(1000)");
+
+    ASSERT_TRUE(exe.unload());
 }

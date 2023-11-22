@@ -35,7 +35,7 @@ bool inject_hook::reload(void)
 
 bool inject_hook::replace(void* oldfaddr, void* newfaddr)
 {
-    if (!_hook)
+    if (!_hook || !oldfaddr || !newfaddr)
         return false;
 
     void** origin = &oldfaddr;

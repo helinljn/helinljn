@@ -35,6 +35,9 @@ bool pelf_hook::reload(const char* mname)
 
 bool pelf_hook::replace(const char* oldfname, void* newfaddr, void** oldfaddr)
 {
+    if (!_hook || !oldfname || !newfaddr)
+        return false;
+
     return plthook_replace(reinterpret_cast<plthook_t*>(_hook), oldfname, newfaddr, oldfaddr) == PLTHOOK_SUCCESS;
 }
 
