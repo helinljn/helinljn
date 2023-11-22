@@ -34,15 +34,15 @@ bool exe_symbol::load(void)
     return true;
 }
 
-void* exe_symbol::get_symbol(const std::string_view& name) const
+void* exe_symbol::get_symbol(const char* sname) const
 {
-    if (!_handle)
+    if (!_handle || !sname)
         return nullptr;
 
 #if POCO_OS == POCO_OS_WINDOWS_NT
-    return reinterpret_cast<void*>(GetProcAddress(reinterpret_cast<HMODULE>(_handle), name.data()));
+    return reinterpret_cast<void*>(GetProcAddress(reinterpret_cast<HMODULE>(_handle), sname));
 #else
-    return dlsym(_handle, name.data());
+    return dlsym(_handle, sname);
 #endif
 }
 
