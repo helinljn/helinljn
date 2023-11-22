@@ -5,8 +5,22 @@ PROJECT(PocoFoundation)
 SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-build/poco/include
 )
+
+# 创建配置文件
+IF(NOT EXISTS ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pocomsg.h)
+    FILE(WRITE ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/src/pocomsg.h
+        "#define POCO_CTG_FATAL       0x00000001L\n"
+        "#define POCO_CTG_CRITICAL    0x00000002L\n"
+        "#define POCO_CTG_ERROR       0x00000003L\n"
+        "#define POCO_CTG_WARNING     0x00000004L\n"
+        "#define POCO_CTG_NOTICE      0x00000005L\n"
+        "#define POCO_CTG_INFORMATION 0x00000006L\n"
+        "#define POCO_CTG_DEBUG       0x00000007L\n"
+        "#define POCO_CTG_TRACE       0x00000008L\n"
+        "#define POCO_MSG_LOG         0x00001000L\n"
+    )
+ENDIF()
 
 # 宏定义、编译选项、链接库
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
