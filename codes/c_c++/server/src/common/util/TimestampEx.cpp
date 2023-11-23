@@ -149,7 +149,7 @@ void TimestampEx::updateTM(void)
     const time_t t = _ts.epochTime();
     poco_assert(t >= 0);
 
-#if defined(POCO_OS_FAMILY_WINDOWS)
+#if POCO_OS == POCO_OS_WINDOWS_NT
     if (localtime_s(&_tmStruct, &t) != 0)
         throw SystemException("cannot get tm struct of timestamp");
 #else
