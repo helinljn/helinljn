@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "fmt/core.h"
 #include "util/types.h"
-#include "util/WrapCallable.hpp"
+#include "util/wrap_runnable.hpp"
 #include "Poco/AtomicCounter.h"
 #include "Poco/Thread.h"
 #include "Poco/Observer.h"
@@ -187,9 +187,9 @@ GTEST_TEST_F(PocoNotificationTest, NotificationQueue)
 
     // threads
     {
-        Poco::FastMutex    mutex;
-        std::atomic_bool   stopFlag   = false;
-        Poco::WrapCallable workerFunc = [this, &nq, &mutex, &stopFlag]()
+        Poco::FastMutex       mutex;
+        std::atomic_bool      stopFlag   = false;
+        common::wrap_runnable workerFunc = [this, &nq, &mutex, &stopFlag]()
         {
             Poco::Thread* curThread = Poco::Thread::current();
             ASSERT_TRUE(curThread);
@@ -291,9 +291,9 @@ GTEST_TEST_F(PocoNotificationTest, PriorityNotificationQueue)
 
     // threads
     {
-        Poco::FastMutex    mutex;
-        std::atomic_bool   stopFlag   = false;
-        Poco::WrapCallable workerFunc = [this, &nq, &mutex, &stopFlag]()
+        Poco::FastMutex       mutex;
+        std::atomic_bool      stopFlag   = false;
+        common::wrap_runnable workerFunc = [this, &nq, &mutex, &stopFlag]()
         {
             Poco::Thread* curThread = Poco::Thread::current();
             ASSERT_TRUE(curThread);

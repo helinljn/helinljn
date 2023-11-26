@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 #include "fmt/core.h"
 #include "util/types.h"
-#include "util/DateTimeEx.h"
-#include "util/TimestampEx.h"
+#include "util/date_time_ex.h"
+#include "util/timestamp_ex.h"
 #include "Poco/Thread.h"
 #include "Poco/Timestamp.h"
 #include "Poco/Timespan.h"
@@ -59,100 +59,100 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
 {
     {
         // default constructor
-        Poco::TimestampEx ts1;
+        common::timestamp_ex ts1;
 
-        // copy constructor from TimestampEx
-        Poco::TimestampEx ts2(ts1);
+        // copy constructor from timestamp_ex
+        common::timestamp_ex ts2(ts1);
         ASSERT_TRUE(ts1.year() == ts2.year());
         ASSERT_TRUE(ts1.month() == ts2.month());
         ASSERT_TRUE(ts1.day() == ts2.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts2.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts2.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts2.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts2.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts2.hour());
         ASSERT_TRUE(ts1.minute() == ts2.minute());
         ASSERT_TRUE(ts1.second() == ts2.second());
         ASSERT_TRUE(ts1 == ts2);
         ASSERT_TRUE(ts1.timestamp() == ts2.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts2.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts2.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts2.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts2.epoch_microseconds());
 
         // copy constructor from Timestamp
-        Poco::TimestampEx ts3(ts1.timestamp());
+        common::timestamp_ex ts3(ts1.timestamp());
         ASSERT_TRUE(ts1.year() == ts3.year());
         ASSERT_TRUE(ts1.month() == ts3.month());
         ASSERT_TRUE(ts1.day() == ts3.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts3.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts3.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts3.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts3.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts3.hour());
         ASSERT_TRUE(ts1.minute() == ts3.minute());
         ASSERT_TRUE(ts1.second() == ts3.second());
         ASSERT_TRUE(ts1 == ts3);
         ASSERT_TRUE(ts1.timestamp() == ts3.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts3.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts3.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts3.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts3.epoch_microseconds());
 
         // copy constructor from Unix epoch
-        Poco::TimestampEx ts4(ts1.epochTime());
+        common::timestamp_ex ts4(ts1.epoch_time());
         ASSERT_TRUE(ts1.year() == ts4.year());
         ASSERT_TRUE(ts1.month() == ts4.month());
         ASSERT_TRUE(ts1.day() == ts4.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts4.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts4.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts4.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts4.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts4.hour());
         ASSERT_TRUE(ts1.minute() == ts4.minute());
         ASSERT_TRUE(ts1.second() == ts4.second());
         //ASSERT_TRUE(ts1 == ts4);
         //ASSERT_TRUE(ts1.timestamp() == ts4.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts4.epochTime());
-        //ASSERT_TRUE(ts1.epochMicroseconds() == ts4.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts4.epoch_time());
+        //ASSERT_TRUE(ts1.epoch_microseconds() == ts4.epoch_microseconds());
 
         // copy constructor from tm struct
-        Poco::TimestampEx ts5(ts1.epochTime());
+        common::timestamp_ex ts5(ts1.epoch_time());
         ASSERT_TRUE(ts1.year() == ts5.year());
         ASSERT_TRUE(ts1.month() == ts5.month());
         ASSERT_TRUE(ts1.day() == ts5.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts5.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts5.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts5.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts5.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts5.hour());
         ASSERT_TRUE(ts1.minute() == ts5.minute());
         ASSERT_TRUE(ts1.second() == ts5.second());
         //ASSERT_TRUE(ts1 == ts5);
         //ASSERT_TRUE(ts1.timestamp() == ts5.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts5.epochTime());
-        //ASSERT_TRUE(ts1.epochMicroseconds() == ts5.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts5.epoch_time());
+        //ASSERT_TRUE(ts1.epoch_microseconds() == ts5.epoch_microseconds());
 
         // copy constructor from the given Gregorian local date and time
-        Poco::TimestampEx ts6(ts1.year(), ts1.month(), ts1.day(), ts1.hour(), ts1.minute(), ts1.second(), ts1.millisecond(), ts1.microsecond());
+        common::timestamp_ex ts6(ts1.year(), ts1.month(), ts1.day(), ts1.hour(), ts1.minute(), ts1.second(), ts1.millisecond(), ts1.microsecond());
         ASSERT_TRUE(ts1.year() == ts6.year());
         ASSERT_TRUE(ts1.month() == ts6.month());
         ASSERT_TRUE(ts1.day() == ts6.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts6.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts6.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts6.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts6.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts6.hour());
         ASSERT_TRUE(ts1.minute() == ts6.minute());
         ASSERT_TRUE(ts1.second() == ts6.second());
         ASSERT_TRUE(ts1 == ts6);
         ASSERT_TRUE(ts1.timestamp() == ts6.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts6.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts6.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts6.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts6.epoch_microseconds());
 
-        Poco::TimestampEx ts7;
+        common::timestamp_ex ts7;
 
-        // assigns a TimestampEx
+        // assigns a timestamp_ex
         ts7 += Poco::Timespan(std::chrono::hours(1));
         ts7  = ts1;
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         ASSERT_TRUE(ts1 == ts7);
         ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
         // assigns a Timestamp
         ts7 += Poco::Timespan(std::chrono::hours(1));
@@ -160,63 +160,63 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         ASSERT_TRUE(ts1 == ts7);
         ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
         // assigns a Unix epoch
         ts7 += Poco::Timespan(std::chrono::hours(1));
-        ts7  = ts1.epochTime();
+        ts7  = ts1.epoch_time();
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         //ASSERT_TRUE(ts1 == ts7);
         //ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        //ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        //ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
         // assigns a tm struct
         ts7 += Poco::Timespan(std::chrono::hours(1));
-        ts7  = ts1.makeTM();
+        ts7  = ts1.make_tm();
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         //ASSERT_TRUE(ts1 == ts7);
         //ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        //ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        //ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
-        // assigns a TimestampEx
+        // assigns a timestamp_ex
         ts7 += Poco::Timespan(std::chrono::hours(1));
         ts7.assign(ts1);
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         ASSERT_TRUE(ts1 == ts7);
         ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
         // assigns a Timestamp
         ts7 += Poco::Timespan(std::chrono::hours(1));
@@ -224,47 +224,47 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         ASSERT_TRUE(ts1 == ts7);
         ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
         // assigns a Unix epoch
         ts7 += Poco::Timespan(std::chrono::hours(1));
-        ts7.assign(ts1.epochTime());
+        ts7.assign(ts1.epoch_time());
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         //ASSERT_TRUE(ts1 == ts7);
         //ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        //ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        //ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
         // assigns a tm struct
         ts7 += Poco::Timespan(std::chrono::hours(1));
-        ts7.assign(ts1.makeTM());
+        ts7.assign(ts1.make_tm());
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         //ASSERT_TRUE(ts1 == ts7);
         //ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        //ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        //ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
 
         // assigns a Gregorian local date and time
         ts7 += Poco::Timespan(std::chrono::hours(1));
@@ -272,15 +272,15 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
         ASSERT_TRUE(ts1.year() == ts7.year());
         ASSERT_TRUE(ts1.month() == ts7.month());
         ASSERT_TRUE(ts1.day() == ts7.day());
-        ASSERT_TRUE(ts1.dayOfWeek() == ts7.dayOfWeek());
-        ASSERT_TRUE(ts1.dayOfYear() == ts7.dayOfYear());
+        ASSERT_TRUE(ts1.day_of_week() == ts7.day_of_week());
+        ASSERT_TRUE(ts1.day_of_year() == ts7.day_of_year());
         ASSERT_TRUE(ts1.hour() == ts7.hour());
         ASSERT_TRUE(ts1.minute() == ts7.minute());
         ASSERT_TRUE(ts1.second() == ts7.second());
         ASSERT_TRUE(ts1 == ts7);
         ASSERT_TRUE(ts1.timestamp() == ts7.timestamp());
-        ASSERT_TRUE(ts1.epochTime() == ts7.epochTime());
-        ASSERT_TRUE(ts1.epochMicroseconds() == ts7.epochMicroseconds());
+        ASSERT_TRUE(ts1.epoch_time() == ts7.epoch_time());
+        ASSERT_TRUE(ts1.epoch_microseconds() == ts7.epoch_microseconds());
     }
 
     // 1970-01-01 00:00:00 Thursday
@@ -298,22 +298,22 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
     ASSERT_TRUE(ds.timestamp().epochTime() == 0);
 
     // 1970-01-01 08:00:00 Thursday
-    Poco::TimestampEx ts(Poco::Timestamp::fromEpochTime(0));
+    common::timestamp_ex ts(Poco::Timestamp::fromEpochTime(0));
     ASSERT_TRUE(ts.year() == 1970);
     ASSERT_TRUE(ts.month() == 1);
     ASSERT_TRUE(ts.day() == 1);
-    ASSERT_TRUE(ts.dayOfWeek() == 4);
-    ASSERT_TRUE(ts.dayOfYear() == 1);
+    ASSERT_TRUE(ts.day_of_week() == 4);
+    ASSERT_TRUE(ts.day_of_year() == 1);
     ASSERT_TRUE(ts.hour() == 8);
     ASSERT_TRUE(ts.minute() == 0);
     ASSERT_TRUE(ts.second() == 0);
     ASSERT_TRUE(ts.millisecond() == 0);
     ASSERT_TRUE(ts.microsecond() == 0);
-    ASSERT_TRUE(ts.epochTime() == 0);
-    ASSERT_TRUE(ts.epochMicroseconds() == 0);
+    ASSERT_TRUE(ts.epoch_time() == 0);
+    ASSERT_TRUE(ts.epoch_microseconds() == 0);
     ASSERT_TRUE(ts.timestamp().epochTime() == 0);
 
-    tm tmStruct = ts.makeTM();
+    tm tmStruct = ts.make_tm();
     ASSERT_TRUE(tmStruct.tm_year == 70);
     ASSERT_TRUE(tmStruct.tm_mon == 0);
     ASSERT_TRUE(tmStruct.tm_mday == 1);
@@ -327,30 +327,30 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
     ASSERT_TRUE(ts.year() == 1970);
     ASSERT_TRUE(ts.month() == 1);
     ASSERT_TRUE(ts.day() == 1);
-    ASSERT_TRUE(ts.dayOfWeek() == 4);
-    ASSERT_TRUE(ts.dayOfYear() == 1);
+    ASSERT_TRUE(ts.day_of_week() == 4);
+    ASSERT_TRUE(ts.day_of_year() == 1);
     ASSERT_TRUE(ts.hour() == 8);
     ASSERT_TRUE(ts.minute() == 0);
     ASSERT_TRUE(ts.second() == 0);
     ASSERT_TRUE(ts.millisecond() == 0);
     ASSERT_TRUE(ts.microsecond() == 0);
-    ASSERT_TRUE(ts.epochTime() == 0);
-    ASSERT_TRUE(ts.epochMicroseconds() == 0);
+    ASSERT_TRUE(ts.epoch_time() == 0);
+    ASSERT_TRUE(ts.epoch_microseconds() == 0);
     ASSERT_TRUE(ts.timestamp().epochTime() == 0);
 
     ts = ds;
     ASSERT_TRUE(ts.year() == 1970);
     ASSERT_TRUE(ts.month() == 1);
     ASSERT_TRUE(ts.day() == 1);
-    ASSERT_TRUE(ts.dayOfWeek() == 4);
-    ASSERT_TRUE(ts.dayOfYear() == 1);
+    ASSERT_TRUE(ts.day_of_week() == 4);
+    ASSERT_TRUE(ts.day_of_year() == 1);
     ASSERT_TRUE(ts.hour() == 8);
     ASSERT_TRUE(ts.minute() == 0);
     ASSERT_TRUE(ts.second() == 0);
     ASSERT_TRUE(ts.millisecond() == 0);
     ASSERT_TRUE(ts.microsecond() == 0);
-    ASSERT_TRUE(ts.epochTime() == 0);
-    ASSERT_TRUE(ts.epochMicroseconds() == 0);
+    ASSERT_TRUE(ts.epoch_time() == 0);
+    ASSERT_TRUE(ts.epoch_microseconds() == 0);
     ASSERT_TRUE(ts.timestamp().epochTime() == 0);
 
     // 2001-09-09 09:46:40 Sunday
@@ -358,15 +358,15 @@ GTEST_TEST(PocoTimeTest, TimestampEx)
     ASSERT_TRUE(ts.year() == 2001);
     ASSERT_TRUE(ts.month() == 9);
     ASSERT_TRUE(ts.day() == 9);
-    ASSERT_TRUE(ts.dayOfWeek() == 0);
-    ASSERT_TRUE(ts.dayOfYear() == 252);
+    ASSERT_TRUE(ts.day_of_week() == 0);
+    ASSERT_TRUE(ts.day_of_year() == 252);
     ASSERT_TRUE(ts.hour() == 9);
     ASSERT_TRUE(ts.minute() == 46);
     ASSERT_TRUE(ts.second() == 40);
     ASSERT_TRUE(ts.millisecond() == 0);
     ASSERT_TRUE(ts.microsecond() == 0);
-    ASSERT_TRUE(ts.epochTime() == 1000000000);
-    ASSERT_TRUE(ts.epochMicroseconds() == Poco::Timespan(1000000000, 0).totalMicroseconds());
+    ASSERT_TRUE(ts.epoch_time() == 1000000000);
+    ASSERT_TRUE(ts.epoch_microseconds() == Poco::Timespan(1000000000, 0).totalMicroseconds());
     ASSERT_TRUE(ts.timestamp().epochTime() == 1000000000);
 }
 
@@ -615,39 +615,39 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
 {
     {
         // default constructor
-        Poco::DateTimeEx dt1;
+        common::date_time_ex dt1;
 
         // copy constructor from DateTimeEx
-        Poco::DateTimeEx dt2(dt1);
+        common::date_time_ex dt2(dt1);
         ASSERT_TRUE(dt1 == dt2);
         ASSERT_TRUE(dt1.timestamp() == dt2.timestamp());
 
         // copy constructor from Timestamp
-        Poco::DateTimeEx dt3(dt1.timestamp());
+        common::date_time_ex dt3(dt1.timestamp());
         ASSERT_TRUE(dt1 == dt3);
         ASSERT_TRUE(dt1.timestamp() == dt3.timestamp());
 
         // copy constructor from tm struct
-        Poco::DateTimeEx dt4(dt1.makeTM());
+        common::date_time_ex dt4(dt1.make_tm());
         ASSERT_TRUE(dt1.year() == dt4.year());
         ASSERT_TRUE(dt1.month() == dt4.month());
         ASSERT_TRUE(dt1.week() == dt4.week());
         ASSERT_TRUE(dt1.day() == dt4.day());
-        ASSERT_TRUE(dt1.dayOfWeek() == dt4.dayOfWeek());
-        ASSERT_TRUE(dt1.dayOfYear() == dt4.dayOfYear());
+        ASSERT_TRUE(dt1.day_of_week() == dt4.day_of_week());
+        ASSERT_TRUE(dt1.day_of_year() == dt4.day_of_year());
         ASSERT_TRUE(dt1.hour() == dt4.hour());
-        ASSERT_TRUE(dt1.hourAMPM() == dt4.hourAMPM());
-        ASSERT_TRUE(dt1.isAM() == dt4.isAM());
-        ASSERT_TRUE(dt1.isPM() == dt4.isPM());
+        ASSERT_TRUE(dt1.hour_am_pm() == dt4.hour_am_pm());
+        ASSERT_TRUE(dt1.is_am() == dt4.is_am());
+        ASSERT_TRUE(dt1.is_pm() == dt4.is_pm());
         ASSERT_TRUE(dt1.minute() == dt4.minute());
         ASSERT_TRUE(dt1.second() == dt4.second());
 
         // copy constructor from the given Gregorian local date and time
-        Poco::DateTimeEx dt5(dt1.year(), dt1.month(), dt1.day(), dt1.hour(), dt1.minute(), dt1.second(), dt1.millisecond(), dt1.microsecond());
+        common::date_time_ex dt5(dt1.year(), dt1.month(), dt1.day(), dt1.hour(), dt1.minute(), dt1.second(), dt1.millisecond(), dt1.microsecond());
         ASSERT_TRUE(dt1 == dt5);
         ASSERT_TRUE(dt1.timestamp() == dt5.timestamp());
 
-        Poco::DateTimeEx dt6;
+        common::date_time_ex dt6;
 
         // assigns a DateTimeEx
         dt6 += Poco::Timespan(std::chrono::hours(1));
@@ -663,17 +663,17 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
 
         // assigns a tm struct
         dt6 += Poco::Timespan(std::chrono::hours(1));
-        dt6  = dt1.makeTM();
+        dt6  = dt1.make_tm();
         ASSERT_TRUE(dt1.year() == dt6.year());
         ASSERT_TRUE(dt1.month() == dt6.month());
         ASSERT_TRUE(dt1.week() == dt6.week());
         ASSERT_TRUE(dt1.day() == dt6.day());
-        ASSERT_TRUE(dt1.dayOfWeek() == dt6.dayOfWeek());
-        ASSERT_TRUE(dt1.dayOfYear() == dt6.dayOfYear());
+        ASSERT_TRUE(dt1.day_of_week() == dt6.day_of_week());
+        ASSERT_TRUE(dt1.day_of_year() == dt6.day_of_year());
         ASSERT_TRUE(dt1.hour() == dt6.hour());
-        ASSERT_TRUE(dt1.hourAMPM() == dt6.hourAMPM());
-        ASSERT_TRUE(dt1.isAM() == dt6.isAM());
-        ASSERT_TRUE(dt1.isPM() == dt6.isPM());
+        ASSERT_TRUE(dt1.hour_am_pm() == dt6.hour_am_pm());
+        ASSERT_TRUE(dt1.is_am() == dt6.is_am());
+        ASSERT_TRUE(dt1.is_pm() == dt6.is_pm());
         ASSERT_TRUE(dt1.minute() == dt6.minute());
         ASSERT_TRUE(dt1.second() == dt6.second());
 
@@ -691,17 +691,17 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
 
         // assigns a tm struct
         dt6 += Poco::Timespan(std::chrono::hours(1));
-        dt6.assign(dt1.makeTM());
+        dt6.assign(dt1.make_tm());
         ASSERT_TRUE(dt1.year() == dt6.year());
         ASSERT_TRUE(dt1.month() == dt6.month());
         ASSERT_TRUE(dt1.week() == dt6.week());
         ASSERT_TRUE(dt1.day() == dt6.day());
-        ASSERT_TRUE(dt1.dayOfWeek() == dt6.dayOfWeek());
-        ASSERT_TRUE(dt1.dayOfYear() == dt6.dayOfYear());
+        ASSERT_TRUE(dt1.day_of_week() == dt6.day_of_week());
+        ASSERT_TRUE(dt1.day_of_year() == dt6.day_of_year());
         ASSERT_TRUE(dt1.hour() == dt6.hour());
-        ASSERT_TRUE(dt1.hourAMPM() == dt6.hourAMPM());
-        ASSERT_TRUE(dt1.isAM() == dt6.isAM());
-        ASSERT_TRUE(dt1.isPM() == dt6.isPM());
+        ASSERT_TRUE(dt1.hour_am_pm() == dt6.hour_am_pm());
+        ASSERT_TRUE(dt1.is_am() == dt6.is_am());
+        ASSERT_TRUE(dt1.is_pm() == dt6.is_pm());
         ASSERT_TRUE(dt1.minute() == dt6.minute());
         ASSERT_TRUE(dt1.second() == dt6.second());
 
@@ -744,7 +744,7 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
         ASSERT_TRUE(dt.timestamp().epochTime() == 0);
 
         // 1970-01-01 08:00:00 Thursday
-        Poco::DateTimeEx dtex(dt);
+        common::date_time_ex dtex(dt);
         ASSERT_TRUE(dtex.year() == 1970);
         ASSERT_TRUE(dtex.month() == 1);
         ASSERT_TRUE(dtex.day() == 1);
@@ -753,7 +753,7 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
         ASSERT_TRUE(dtex.second() == 0);
         ASSERT_TRUE(dtex.millisecond() == 0);
         ASSERT_TRUE(dtex.microsecond() == 0);
-        ASSERT_TRUE(dtex.dayOfWeek() == 4);
+        ASSERT_TRUE(dtex.day_of_week() == 4);
         ASSERT_TRUE(dtex.timestamp().epochTime() == 0);
 
         dtex += Poco::Timespan(std::chrono::hours(1));
@@ -766,7 +766,7 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
         ASSERT_TRUE(dtex.second() == 0);
         ASSERT_TRUE(dtex.millisecond() == 0);
         ASSERT_TRUE(dtex.microsecond() == 0);
-        ASSERT_TRUE(dtex.dayOfWeek() == 4);
+        ASSERT_TRUE(dtex.day_of_week() == 4);
         ASSERT_TRUE(dtex.timestamp().epochTime() == 0);
 
         dtex += Poco::Timespan(std::chrono::hours(1));
@@ -779,18 +779,18 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
         ASSERT_TRUE(dtex.second() == 0);
         ASSERT_TRUE(dtex.millisecond() == 0);
         ASSERT_TRUE(dtex.microsecond() == 0);
-        ASSERT_TRUE(dtex.dayOfWeek() == 4);
+        ASSERT_TRUE(dtex.day_of_week() == 4);
         ASSERT_TRUE(dtex.timestamp().epochTime() == 0);
 
         ASSERT_TRUE(dtex.utc() == dt);
-        ASSERT_TRUE(dtex.utcLocal() == dt + Poco::Timespan(dtex.tzd(), 0));
-        ASSERT_TRUE(dtex.utcTime() == dt.utcTime());
-        ASSERT_TRUE(dtex.utcLocalTime() == dt.utcTime() + Poco::Timespan(dtex.tzd(), 0).totalMicroseconds() * 10);
+        ASSERT_TRUE(dtex.utc_local() == dt + Poco::Timespan(dtex.tzd(), 0));
+        ASSERT_TRUE(dtex.utc_time() == dt.utcTime());
+        ASSERT_TRUE(dtex.utc_local_time() == dt.utcTime() + Poco::Timespan(dtex.tzd(), 0).totalMicroseconds() * 10);
         ASSERT_TRUE(dtex.operator-(dt).totalMicroseconds() == 0);
     }
 
     // 1970-01-01 08:00:00 Thursday
-    Poco::DateTimeEx dt(Poco::Timestamp::fromEpochTime(0));
+    common::date_time_ex dt(Poco::Timestamp::fromEpochTime(0));
     ASSERT_TRUE(dt.year() == 1970);
     ASSERT_TRUE(dt.month() == 1);
     ASSERT_TRUE(dt.day() == 1);
@@ -799,10 +799,10 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
     ASSERT_TRUE(dt.second() == 0);
     ASSERT_TRUE(dt.millisecond() == 0);
     ASSERT_TRUE(dt.microsecond() == 0);
-    ASSERT_TRUE(dt.dayOfWeek() == 4);
+    ASSERT_TRUE(dt.day_of_week() == 4);
     ASSERT_TRUE(dt.timestamp().epochTime() == 0);
 
-    tm tmStruct = dt.makeTM();
+    tm tmStruct = dt.make_tm();
     ASSERT_TRUE(tmStruct.tm_year == 70);
     ASSERT_TRUE(tmStruct.tm_mon == 0);
     ASSERT_TRUE(tmStruct.tm_mday == 1);
@@ -819,7 +819,7 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
     ASSERT_TRUE(dt.second() == 0);
     ASSERT_TRUE(dt.millisecond() == 0);
     ASSERT_TRUE(dt.microsecond() == 0);
-    ASSERT_TRUE(dt.dayOfWeek() == 4);
+    ASSERT_TRUE(dt.day_of_week() == 4);
     ASSERT_TRUE(dt.timestamp().epochTime() == 0);
 
     // 2001-09-09 09:46:40 Sunday
@@ -832,11 +832,11 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
     ASSERT_TRUE(dt.second() == 40);
     ASSERT_TRUE(dt.millisecond() == 0);
     ASSERT_TRUE(dt.microsecond() == 0);
-    ASSERT_TRUE(dt.dayOfWeek() == 0);
+    ASSERT_TRUE(dt.day_of_week() == 0);
     ASSERT_TRUE(dt.timestamp().epochTime() == 1000000000);
 
     // 2011-08-28 16:43:20 Sunday
-    dt = Poco::DateTimeEx(2011, 8, 28, 16, 43, 20);
+    dt = common::date_time_ex(2011, 8, 28, 16, 43, 20);
     ASSERT_TRUE(dt.year() == 2011);
     ASSERT_TRUE(dt.month() == 8);
     ASSERT_TRUE(dt.day() == 28);
@@ -845,16 +845,16 @@ GTEST_TEST(PocoTimeTest, DateTimeEx)
     ASSERT_TRUE(dt.second() == 20);
     ASSERT_TRUE(dt.millisecond() == 0);
     ASSERT_TRUE(dt.microsecond() == 0);
-    ASSERT_TRUE(dt.dayOfWeek() == 0);
+    ASSERT_TRUE(dt.day_of_week() == 0);
     ASSERT_TRUE(dt.timestamp().epochTime() == 1314521000);
 }
 
 GTEST_TEST(PocoTimeTest, DateTimeFormatter)
 {
-    Poco::DateTimeEx dt(2020, 2, 2, 13, 14, 52);
+    common::date_time_ex dt(2020, 2, 2, 13, 14, 52);
 
     Poco::DateTime utc      = dt.utc();
-    Poco::DateTime utcLocal = dt.utcLocal();
+    Poco::DateTime utcLocal = dt.utc_local();
 
     // ASCTIME_FORMAT
     std::string str = Poco::DateTimeFormatter::format(utc, Poco::DateTimeFormat::ASCTIME_FORMAT);
@@ -873,9 +873,9 @@ GTEST_TEST(PocoTimeTest, DateTimeFormatter)
 
 GTEST_TEST(PocoTimeTest, DateTimeParser)
 {
-    Poco::DateTime   dt;
-    Poco::DateTimeEx dtex;
-    int              tzd;
+    Poco::DateTime       dt;
+    common::date_time_ex dtex;
+    int                  tzd;
 
     // ASCTIME_FORMAT
     dt = Poco::DateTimeParser::parse(Poco::DateTimeFormat::ASCTIME_FORMAT, "Sun Feb  2 05:14:52 2020", tzd);
@@ -960,12 +960,12 @@ GTEST_TEST(PocoTimeTest, TimestampExBenckmark)
     for (int idx = 0; idx != total; ++idx)
     {
         // 1970-01-01 08:00:00 Thursday
-        Poco::TimestampEx ts(Poco::Timestamp::fromEpochTime(0));
+        common::timestamp_ex ts(Poco::Timestamp::fromEpochTime(0));
         ASSERT_TRUE(ts.year() == 1970);
         ASSERT_TRUE(ts.month() == 1);
         ASSERT_TRUE(ts.day() == 1);
-        ASSERT_TRUE(ts.dayOfWeek() == 4);
-        ASSERT_TRUE(ts.dayOfYear() == 1);
+        ASSERT_TRUE(ts.day_of_week() == 4);
+        ASSERT_TRUE(ts.day_of_year() == 1);
         ASSERT_TRUE(ts.hour() == 8);
         ASSERT_TRUE(ts.minute() == 0);
         ASSERT_TRUE(ts.second() == 0);
@@ -981,12 +981,12 @@ GTEST_TEST(PocoTimeTest, DateTimeExBenckmark)
     for (int idx = 0; idx != total; ++idx)
     {
         // 1970-01-01 08:00:00 Thursday
-        Poco::DateTimeEx dt(Poco::Timestamp::fromEpochTime(0));
+        common::date_time_ex dt(Poco::Timestamp::fromEpochTime(0));
         ASSERT_TRUE(dt.year() == 1970);
         ASSERT_TRUE(dt.month() == 1);
         ASSERT_TRUE(dt.day() == 1);
-        ASSERT_TRUE(dt.dayOfWeek() == 4);
-        ASSERT_TRUE(dt.dayOfYear() == 1);
+        ASSERT_TRUE(dt.day_of_week() == 4);
+        ASSERT_TRUE(dt.day_of_year() == 1);
         ASSERT_TRUE(dt.hour() == 8);
         ASSERT_TRUE(dt.minute() == 0);
         ASSERT_TRUE(dt.second() == 0);

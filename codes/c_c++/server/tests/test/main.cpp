@@ -18,7 +18,7 @@
 #include "Poco/Zip/Zip.h"
 
 #include "util/stack_trace.h"
-#include "util/DateTimeEx.h"
+#include "util/date_time_ex.h"
 #include "Poco/DateTimeFormatter.h"
 #include "Poco/Thread.h"
 #include "Poco/Process.h"
@@ -91,7 +91,7 @@ static void signal_handler(int sig)
 
         oss << "pid:  " << Poco::Process::id()
             << std::endl
-            << "date: " << Poco::DateTimeFormatter::format(Poco::DateTimeEx().utcLocal(), "%Y-%m-%d %H:%M:%s")
+            << "date: " << Poco::DateTimeFormatter::format(common::date_time_ex().utc_local(), "%Y-%m-%d %H:%M:%s")
             << std::endl
             << "---------- stack trace ----------"
             << std::endl

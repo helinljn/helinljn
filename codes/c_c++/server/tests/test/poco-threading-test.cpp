@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "util/types.h"
-#include "util/WrapCallable.hpp"
+#include "util/wrap_runnable.hpp"
 #include "Poco/Event.h"
 #include "Poco/Thread.h"
 #include "Poco/Semaphore.h"
@@ -20,7 +20,7 @@ GTEST_TEST(PocoThreadingTest, Thread)
 
     // start
     {
-        Poco::WrapCallable call = [&runFlag, &threadName, &waitFinish]()
+        common::wrap_runnable call = [&runFlag, &threadName, &waitFinish]()
         {
             Poco::Thread* curThread = Poco::Thread::current();
             ASSERT_TRUE(curThread);
@@ -160,7 +160,7 @@ GTEST_TEST(PocoThreadingTest, RWLock)
     // lock
     {
         counter = 0;
-        Poco::WrapCallable call = [&lock, &counter]()
+        common::wrap_runnable call = [&lock, &counter]()
         {
             int  lastCount = 0;
             bool success   = true;
@@ -222,7 +222,7 @@ GTEST_TEST(PocoThreadingTest, RWLock)
     // tryLock
     {
         counter = 0;
-        Poco::WrapCallable call = [&lock, &counter]()
+        common::wrap_runnable call = [&lock, &counter]()
         {
             int  lastCount = 0;
             bool success   = true;
@@ -302,7 +302,7 @@ GTEST_TEST(PocoThreadingTest, ThreadPool)
     Poco::FastMutex mutex{};
     volatile int    counter{};
 
-    Poco::WrapCallable call = [&ready, &mutex, &counter]()
+    common::wrap_runnable call = [&ready, &mutex, &counter]()
     {
         Poco::Thread* curThread = Poco::Thread::current();
         ASSERT_TRUE(curThread);
@@ -362,7 +362,7 @@ GTEST_TEST(PocoThreadingTest, Condition)
     Poco::Condition cond{};
     volatile int    counter{};
 
-    Poco::WrapCallable call = [&mutex, &cond, &counter]()
+    common::wrap_runnable call = [&mutex, &cond, &counter]()
     {
         Poco::Thread* curThread = Poco::Thread::current();
         ASSERT_TRUE(curThread);

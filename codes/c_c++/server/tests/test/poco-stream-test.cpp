@@ -1,7 +1,5 @@
 #include "gtest/gtest.h"
 #include "util/types.h"
-#include "util/base32.h"
-#include "util/base64.h"
 #include "util/hex_binary.h"
 #include "Poco/Base32Encoder.h"
 #include "Poco/Base32Decoder.h"
@@ -49,9 +47,6 @@ GTEST_TEST(PocoStreamTest, Base32)
         ASSERT_TRUE(str == text);
         ASSERT_TRUE(iss.good() && decoder.eof());
     }
-
-    ASSERT_TRUE(common::base32_encode(text) == base32);
-    ASSERT_TRUE(common::base32_decode(base32) == text);
 }
 
 GTEST_TEST(PocoStreamTest, Base64)
@@ -88,9 +83,6 @@ GTEST_TEST(PocoStreamTest, Base64)
         ASSERT_TRUE(str == text);
         ASSERT_TRUE(iss.good() && decoder.eof());
     }
-
-    ASSERT_TRUE(common::base64_encode(text) == base64);
-    ASSERT_TRUE(common::base64_decode(base64) == text);
 }
 
 GTEST_TEST(PocoStreamTest, HexBinary)
