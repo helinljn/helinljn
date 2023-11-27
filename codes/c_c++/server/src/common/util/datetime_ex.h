@@ -1,5 +1,5 @@
-#ifndef __DATE_TIME_EX_H__
-#define __DATE_TIME_EX_H__
+#ifndef __DATETIME_EX_H__
+#define __DATETIME_EX_H__
 
 #include "util/types.h"
 #include "Poco/Timestamp.h"
@@ -14,14 +14,14 @@ namespace common {
 // hours, minutes, seconds and milliseconds based on the
 // Gregorian calendar.
 ////////////////////////////////////////////////////////////////
-class COMMON_API date_time_ex final
+class COMMON_API datetime_ex final
 {
 public:
     // Returns true if the given year is a leap year, false otherwise.
-    static bool is_leap_year(int year);
+    static bool is_leap_year(const int year);
 
     // Returns the number of days in the given month and year. Month is from 1 to 12.
-    static int days_of_month(int year, int month);
+    static int days_of_month(const int year, const int month);
 
     // Checks if the given date and time is valid(all arguments are within a proper range).
     // Returns true if all arguments are valid, false otherwise.
@@ -32,23 +32,23 @@ public:
     static int tzd(void);
 
 public:
-    // Creates a date_time_ex for the current date and time.
-    explicit date_time_ex(void);
+    // Creates a datetime_ex for the current date and time.
+    explicit datetime_ex(void);
 
-    // Copy constructor. Creates the date_time_ex from another one.
-    explicit date_time_ex(const date_time_ex& dtime);
+    // Copy constructor. Creates the datetime_ex from another one.
+    explicit datetime_ex(const datetime_ex& dtime);
 
-    // Creates a date_time_ex from the UTC time given in dtime,
+    // Creates a datetime_ex from the UTC time given in dtime,
     // using the time zone differential of the current time zone.
-    explicit date_time_ex(const Poco::DateTime& dtime);
+    explicit datetime_ex(const Poco::DateTime& dtime);
 
-    // Creates a date_time_ex for the date and time given in a Poco::Timestamp.
-    explicit date_time_ex(const Poco::Timestamp& ts);
+    // Creates a datetime_ex for the date and time given in a Poco::Timestamp.
+    explicit datetime_ex(const Poco::Timestamp& ts);
 
-    // Creates a date_time_ex from tm struct.
-    explicit date_time_ex(const tm& tmval);
+    // Creates a datetime_ex from tm struct.
+    explicit datetime_ex(const tm& tmval);
 
-    // Creates a date_time_ex for the given Gregorian local date and time.
+    // Creates a datetime_ex for the given Gregorian local date and time.
     //   * year is from 0 to 9999.
     //   * month is from 1 to 12.
     //   * day is from 1 to 31.
@@ -57,31 +57,31 @@ public:
     //   * second is from 0 to 60.
     //   * millisecond is from 0 to 999.
     //   * microsecond is from 0 to 999.
-    explicit date_time_ex(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0);
+    explicit datetime_ex(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0);
 
-    // Assigns another date_time_ex.
-    date_time_ex& operator =(const date_time_ex& dtime) {return assign(dtime);}
-
-    // Assigns a Poco::DateTime.
-    date_time_ex& operator =(const Poco::DateTime& dtime) {return assign(dtime);}
-
-    // Assigns a Poco::Timestamp.
-    date_time_ex& operator =(const Poco::Timestamp& ts) {return assign(ts);}
-
-    // Assigns a tm struct.
-    date_time_ex& operator =(const tm& tmval) {return assign(tmval);}
-
-    // Assigns another date_time_ex.
-    date_time_ex& assign(const date_time_ex& dtime);
+    // Assigns another datetime_ex.
+    datetime_ex& operator =(const datetime_ex& dtime) {return assign(dtime);}
 
     // Assigns a Poco::DateTime.
-    date_time_ex& assign(const Poco::DateTime& dtime);
+    datetime_ex& operator =(const Poco::DateTime& dtime) {return assign(dtime);}
 
     // Assigns a Poco::Timestamp.
-    date_time_ex& assign(const Poco::Timestamp& ts);
+    datetime_ex& operator =(const Poco::Timestamp& ts) {return assign(ts);}
 
     // Assigns a tm struct.
-    date_time_ex& assign(const tm& tmval);
+    datetime_ex& operator =(const tm& tmval) {return assign(tmval);}
+
+    // Assigns another datetime_ex.
+    datetime_ex& assign(const datetime_ex& dtime);
+
+    // Assigns a Poco::DateTime.
+    datetime_ex& assign(const Poco::DateTime& dtime);
+
+    // Assigns a Poco::Timestamp.
+    datetime_ex& assign(const Poco::Timestamp& ts);
+
+    // Assigns a tm struct.
+    datetime_ex& assign(const tm& tmval);
 
     // Assigns a Gregorian local date and time.
     //   * year is from 0 to 9999.
@@ -92,9 +92,9 @@ public:
     //   * second is from 0 to 60 (allowing leap seconds).
     //   * millisecond is from 0 to 999.
     //   * microsecond is from 0 to 999.
-    date_time_ex& assign(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0);
+    datetime_ex& assign(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0);
 
-    // Updates the date_time_ex with the current time.
+    // Updates the datetime_ex with the current time.
     void update(void);
 
     // Returns the year (0 to 9999).
@@ -108,13 +108,13 @@ public:
     // The returned week number will be from 0 to 53. Week number 1 is the week
     // containing January 4. This is in accordance to ISO 8601.
     //
-    // The following example assumes that firstDayOfWeek is MONDAY. For 2005, which started
+    // The following example assumes that first_day_of_week is MONDAY. For 2005, which started
     // on a Saturday, week 1 will be the week starting on Monday, January 3.
     // January 1 and 2 will fall within week 0 (or the last week of the previous year).
     //
     // For 2007, which starts on a Monday, week 1 will be the week starting on Monday, January 1.
     // There will be no week 0 in 2007.
-    int week(int firstDayOfWeek = Poco::DateTime::MONDAY) const {return _dt.week(firstDayOfWeek);}
+    int week(const int first_day_of_week = Poco::DateTime::MONDAY) const {return _dt.week(first_day_of_week);}
 
     // Returns the day within the month (1 to 31).
     int day(void) const {return _dt.day();}
@@ -149,7 +149,7 @@ public:
     // Returns the microsecond (0 to 999)
     int microsecond(void) const {return _dt.microsecond();}
 
-    // Returns the time elapsed since the time denoted by the timestamp. Equivalent to date_time_ex() - *this.
+    // Returns the time elapsed since the time denoted by the timestamp. Equivalent to datetime_ex() - *this.
     time_t elapsed(void) const {return _ts.elapsed();}
 
     // Returns true iff the given interval has passed since the time denoted by the timestamp.
@@ -176,23 +176,23 @@ public:
     // Returns the local date and time computed as (_ts + tzd()).
     Poco::Timestamp::UtcTimeVal utc_local_time(void) const {return _dt.utcTime();}
 
-    // Converts date_time_ex to tm struct.
+    // Converts datetime_ex to tm struct.
     tm make_tm(void) const {return _dt.makeTM();}
 
-    bool operator ==(const date_time_ex& dtime) const {return _dt == dtime._dt;}
-    bool operator !=(const date_time_ex& dtime) const {return _dt != dtime._dt;}
-    bool operator < (const date_time_ex& dtime) const {return _dt <  dtime._dt;}
-    bool operator <=(const date_time_ex& dtime) const {return _dt <= dtime._dt;}
-    bool operator > (const date_time_ex& dtime) const {return _dt >  dtime._dt;}
-    bool operator >=(const date_time_ex& dtime) const {return _dt >= dtime._dt;}
+    bool operator ==(const datetime_ex& dtime) const {return _dt == dtime._dt;}
+    bool operator !=(const datetime_ex& dtime) const {return _dt != dtime._dt;}
+    bool operator < (const datetime_ex& dtime) const {return _dt <  dtime._dt;}
+    bool operator <=(const datetime_ex& dtime) const {return _dt <= dtime._dt;}
+    bool operator > (const datetime_ex& dtime) const {return _dt >  dtime._dt;}
+    bool operator >=(const datetime_ex& dtime) const {return _dt >= dtime._dt;}
 
-    date_time_ex  operator + (const Poco::Timespan& span) const {return date_time_ex(_ts + span);}
-    date_time_ex  operator - (const Poco::Timespan& span) const {return date_time_ex(_ts - span);}
-    date_time_ex& operator +=(const Poco::Timespan& span) {return assign(_ts + span);}
-    date_time_ex& operator -=(const Poco::Timespan& span) {return assign(_ts - span);}
+    datetime_ex  operator + (const Poco::Timespan& span) const {return datetime_ex(_ts + span);}
+    datetime_ex  operator - (const Poco::Timespan& span) const {return datetime_ex(_ts - span);}
+    datetime_ex& operator +=(const Poco::Timespan& span) {return assign(_ts + span);}
+    datetime_ex& operator -=(const Poco::Timespan& span) {return assign(_ts - span);}
 
     Poco::Timespan operator -(const Poco::DateTime& dtime) const {return utc() - dtime;}
-    Poco::Timespan operator -(const date_time_ex&   dtime) const {return Poco::Timespan((_dt.utcTime() - dtime._dt.utcTime()) / 10);}
+    Poco::Timespan operator -(const datetime_ex&    dtime) const {return utc_local() - dtime._dt;}
 
 private:
     Poco::Timestamp _ts;  // Current timestamp with [local time]
@@ -201,4 +201,4 @@ private:
 
 } // namespace common
 
-#endif // __DATE_TIME_EX_H__
+#endif // __DATETIME_EX_H__

@@ -1,69 +1,69 @@
-#include "date_time_ex.h"
+#include "datetime_ex.h"
 #include "Poco/Timezone.h"
 
 namespace common {
 
-bool date_time_ex::is_leap_year(int year)
+bool datetime_ex::is_leap_year(const int year)
 {
     return Poco::DateTime::isLeapYear(year);
 }
 
-int date_time_ex::days_of_month(int year, int month)
+int datetime_ex::days_of_month(const int year, const int month)
 {
     return Poco::DateTime::daysOfMonth(year, month);
 }
 
-bool date_time_ex::is_valid(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
+bool datetime_ex::is_valid(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
 {
     return Poco::DateTime::isValid(year, month, day, hour, minute, second, millisecond, microsecond);
 }
 
-int date_time_ex::tzd(void)
+int datetime_ex::tzd(void)
 {
     static int tzd = Poco::Timezone::tzd();
     return tzd;
 }
 
-date_time_ex::date_time_ex(void)
+datetime_ex::datetime_ex(void)
     : _ts()
     , _dt(_ts + Poco::Timespan(tzd(), 0))
 {
 }
 
-date_time_ex::date_time_ex(const date_time_ex& dtime)
+datetime_ex::datetime_ex(const datetime_ex& dtime)
     : _ts(dtime._ts)
     , _dt(dtime._dt)
 {
 }
 
-date_time_ex::date_time_ex(const Poco::DateTime& dtime)
+datetime_ex::datetime_ex(const Poco::DateTime& dtime)
     : _ts(0)
     , _dt(dtime.utcTime(), Poco::Timespan(tzd(), 0).totalMicroseconds())
 {
     _ts = _dt.timestamp() - Poco::Timespan(tzd(), 0);
 }
 
-date_time_ex::date_time_ex(const Poco::Timestamp& ts)
+datetime_ex::datetime_ex(const Poco::Timestamp& ts)
     : _ts(ts)
     , _dt(_ts + Poco::Timespan(tzd(), 0))
 {
 }
 
-date_time_ex::date_time_ex(const tm& tmval)
+datetime_ex::datetime_ex(const tm& tmval)
     : _ts(0)
     , _dt(tmval)
 {
     _ts = _dt.timestamp() - Poco::Timespan(tzd(), 0);
 }
 
-date_time_ex::date_time_ex(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
+datetime_ex::datetime_ex(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
     : _ts(0)
     , _dt(year, month, day, hour, minute, second, millisecond, microsecond)
 {
     _ts = _dt.timestamp() - Poco::Timespan(tzd(), 0);
 }
 
-date_time_ex& date_time_ex::assign(const date_time_ex& dtime)
+datetime_ex& datetime_ex::assign(const datetime_ex& dtime)
 {
     if (this != &dtime)
     {
@@ -74,21 +74,21 @@ date_time_ex& date_time_ex::assign(const date_time_ex& dtime)
     return *this;
 }
 
-date_time_ex& date_time_ex::assign(const Poco::DateTime& dtime)
+datetime_ex& datetime_ex::assign(const Poco::DateTime& dtime)
 {
     if (utc_time() != dtime.utcTime())
     {
-        Poco::Timespan tzdSpan(tzd(), 0);
+        Poco::Timespan tzd_span(tzd(), 0);
 
         _dt  = dtime;
-        _dt += tzdSpan;
-        _ts  = _dt.timestamp() - tzdSpan;
+        _dt += tzd_span;
+        _ts  = _dt.timestamp() - tzd_span;
     }
 
     return *this;
 }
 
-date_time_ex& date_time_ex::assign(const Poco::Timestamp& ts)
+datetime_ex& datetime_ex::assign(const Poco::Timestamp& ts)
 {
     if (_ts != ts)
     {
@@ -99,12 +99,12 @@ date_time_ex& date_time_ex::assign(const Poco::Timestamp& ts)
     return *this;
 }
 
-date_time_ex& date_time_ex::assign(const tm& tmval)
+datetime_ex& datetime_ex::assign(const tm& tmval)
 {
     return assign(tmval.tm_year + 1900, tmval.tm_mon + 1, tmval.tm_mday, tmval.tm_hour, tmval.tm_min, tmval.tm_sec);
 }
 
-date_time_ex& date_time_ex::assign(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
+datetime_ex& datetime_ex::assign(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
 {
     if (   this->year()        != year
         || this->month()       != month
@@ -122,7 +122,7 @@ date_time_ex& date_time_ex::assign(int year, int month, int day, int hour, int m
     return *this;
 }
 
-void date_time_ex::update(void)
+void datetime_ex::update(void)
 {
     _ts.update();
     _dt = _ts + Poco::Timespan(tzd(), 0);

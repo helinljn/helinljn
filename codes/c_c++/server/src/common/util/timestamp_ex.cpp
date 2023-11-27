@@ -1,5 +1,5 @@
 #include "timestamp_ex.h"
-#include "util/date_time_ex.h"
+#include "util/datetime_ex.h"
 #include "Poco/Exception.h"
 
 namespace common {
@@ -63,9 +63,9 @@ timestamp_ex& timestamp_ex::assign(const timestamp_ex& ts)
 
 timestamp_ex& timestamp_ex::assign(const Poco::DateTime& dtime)
 {
-    if (Poco::Timestamp tempTs = dtime.timestamp(); _ts != tempTs)
+    if (Poco::Timestamp tempts = dtime.timestamp(); _ts != tempts)
     {
-        _ts = tempTs;
+        _ts = tempts;
         update_tm();
     }
 
@@ -103,7 +103,7 @@ timestamp_ex& timestamp_ex::assign(int year, int month, int day, int hour, int m
 {
     poco_assert(year >= 1970 && year <= 9999);
     poco_assert(month >= 1 && month <= 12);
-    poco_assert(day >= 1 && day <= date_time_ex::days_of_month(year, month));
+    poco_assert(day >= 1 && day <= datetime_ex::days_of_month(year, month));
     poco_assert(hour >= 0 && hour <= 23);
     poco_assert(minute >= 0 && minute <= 59);
     poco_assert(second >= 0 && second <= 60);
@@ -119,16 +119,16 @@ timestamp_ex& timestamp_ex::assign(int year, int month, int day, int hour, int m
         || this->millisecond() != millisecond
         || this->microsecond() != microsecond)
     {
-        tm tmStruct{};
-        tmStruct.tm_year  = year - 1900;
-        tmStruct.tm_mon   = month - 1;
-        tmStruct.tm_mday  = day;
-        tmStruct.tm_hour  = hour;
-        tmStruct.tm_min   = minute;
-        tmStruct.tm_sec   = second;
-        tmStruct.tm_isdst = -1;
+        tm tmval{};
+        tmval.tm_year  = year - 1900;
+        tmval.tm_mon   = month - 1;
+        tmval.tm_mday  = day;
+        tmval.tm_hour  = hour;
+        tmval.tm_min   = minute;
+        tmval.tm_sec   = second;
+        tmval.tm_isdst = -1;
 
-        _ts  = Poco::Timestamp::fromEpochTime(mktime(&tmStruct));
+        _ts  = Poco::Timestamp::fromEpochTime(mktime(&tmval));
         _ts += Poco::Timespan::TimeDiff(millisecond) * Poco::Timespan::MILLISECONDS;
         _ts += microsecond;
 

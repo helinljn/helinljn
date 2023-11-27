@@ -161,8 +161,8 @@ private:
     void update_tm(void);
 
 private:
-    Poco::Timestamp _ts;
-    tm              _tmval;
+    Poco::Timestamp _ts;     // Current timestamp with [local time]
+    tm              _tmval;  // Struct tm
 };
 
 } // namespace common
