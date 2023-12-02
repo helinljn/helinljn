@@ -181,4 +181,23 @@ GTEST_TEST_F(PocoDirectoryWatcherTest, DirectoryWatcher)
         _event.wait();
         _eventList.clear();
     }
+
+    // move file
+    {
+        Poco::Path p1(_curDir);
+        p1.setFileName("test1.txt");
+
+        std::ofstream ofs(p1.toString(), std::ios::app);
+        ofs << "Hello, world!";
+        ofs.close();
+
+        Poco::Path p2(_curDir);
+        p2.setFileName("test2.txt");
+
+        Poco::File f(p1);
+        f.renameTo(p2.toString());
+
+        _event.wait();
+        _eventList.clear();
+    }
 }
