@@ -3,12 +3,22 @@
 #include "util/types.h"
 #include "Poco/Path.h"
 #include "Poco/Mutex.h"
+#include "Poco/Event.h"
 #include "Poco/Thread.h"
 #include "Poco/Delegate.h"
 #include "Poco/DirectoryWatcher.h"
 
 struct DirEvent
 {
+public:
+    DirEvent(void)
+        : type(Poco::DirectoryWatcher::DirectoryEventType::DW_ITEM_ADDED)
+        , callback()
+        , path()
+    {
+    }
+
+public:
     Poco::DirectoryWatcher::DirectoryEventType type;
     std::string                                callback;
     std::string                                path;
@@ -21,6 +31,7 @@ public:
         : Test()
         , _curDir()
         , _mutex()
+        , _event()
         , _eventList()
     {
     }
@@ -34,6 +45,7 @@ public:
 
         Poco::Mutex::ScopedLock holder(_mutex);
         _eventList.emplace_back(std::move(de));
+        _event.set();
     }
 
     void OnItemRemoved(const Poco::DirectoryWatcher::DirectoryEvent& ev)
@@ -45,6 +57,7 @@ public:
 
         Poco::Mutex::ScopedLock holder(_mutex);
         _eventList.emplace_back(std::move(de));
+        _event.set();
     }
 
     void OnItemModified(const Poco::DirectoryWatcher::DirectoryEvent& ev)
@@ -56,6 +69,7 @@ public:
 
         Poco::Mutex::ScopedLock holder(_mutex);
         _eventList.emplace_back(std::move(de));
+        _event.set();
     }
 
     void OnItemMovedFrom(const Poco::DirectoryWatcher::DirectoryEvent& ev)
@@ -67,6 +81,7 @@ public:
 
         Poco::Mutex::ScopedLock holder(_mutex);
         _eventList.emplace_back(std::move(de));
+        _event.set();
     }
 
     void OnItemMovedTo(const Poco::DirectoryWatcher::DirectoryEvent& ev)
@@ -78,6 +93,7 @@ public:
 
         Poco::Mutex::ScopedLock holder(_mutex);
         _eventList.emplace_back(std::move(de));
+        _event.set();
     }
 
     void OnItemScanError(const Poco::Exception& exc)
@@ -110,21 +126,59 @@ protected:
 protected:
     Poco::Path            _curDir;
     Poco::Mutex           _mutex;
+    Poco::Event           _event;
     std::vector<DirEvent> _eventList;
 };
 
 GTEST_TEST_F(PocoDirectoryWatcherTest, DirectoryWatcher)
 {
-    Poco::DirectoryWatcher dw(_curDir.toString());
+    Poco::DirectoryWatcher dw(_curDir.toString(), Poco::DirectoryWatcher::DW_FILTER_ENABLE_ALL, 1);
 
-    dw.itemAdded     += Poco::delegate(static_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemAdded);
-    dw.itemRemoved   += Poco::delegate(static_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemRemoved);
-    dw.itemModified  += Poco::delegate(static_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemModified);
-    dw.itemMovedFrom += Poco::delegate(static_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemMovedFrom);
-    dw.itemMovedTo   += Poco::delegate(static_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemMovedTo);
-    dw.scanError     += Poco::delegate(static_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemScanError);
+    dw.itemAdded     += Poco::delegate(dynamic_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemAdded);
+    dw.itemRemoved   += Poco::delegate(dynamic_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemRemoved);
+    dw.itemModified  += Poco::delegate(dynamic_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemModified);
+    dw.itemMovedFrom += Poco::delegate(dynamic_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemMovedFrom);
+    dw.itemMovedTo   += Poco::delegate(dynamic_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemMovedTo);
+    dw.scanError     += Poco::delegate(dynamic_cast<PocoDirectoryWatcherTest*>(this), &PocoDirectoryWatcherTest::OnItemScanError);
 
-    Poco::Thread::sleep(100);
+    Poco::Thread::sleep(1);
 
-    Poco::Path p(_curDir);
+    // add file
+    {
+        Poco::Path p(_curDir);
+        p.setFileName("test.txt");
+
+        std::ofstream ofs(p.toString(), std::ios::app);
+        ofs << "Hello, world!";
+        ofs.close();
+
+        _event.wait();
+        _eventList.clear();
+    }
+
+    // modified file
+    {
+        Poco::Path p(_curDir);
+        p.setFileName("test.txt");
+
+        std::ofstream ofs(p.toString(), std::ios::app);
+        ofs << "Hello, world!";
+        ofs.close();
+
+        _event.wait();
+        _eventList.clear();
+    }
+
+    // remove file
+    {
+        Poco::Path p(_curDir);
+        p.setFileName("test.txt");
+
+        Poco::File f(p);
+        ASSERT_TRUE(f.exists() && f.isFile());
+        f.remove();
+
+        _event.wait();
+        _eventList.clear();
+    }
 }
