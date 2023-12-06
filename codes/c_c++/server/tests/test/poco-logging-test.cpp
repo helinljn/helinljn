@@ -7,6 +7,7 @@
 #include "Poco/SplitterChannel.h"
 #include "Poco/FormattingChannel.h"
 #include "Poco/AsyncChannel.h"
+#include "Poco/Stopwatch.h"
 
 using MsgList = std::list<Poco::Message>;
 
@@ -134,6 +135,7 @@ GTEST_TEST(PocoLoggingTest, LoggerAsync)
 {
     auto&             logger      = Poco::Logger::root();
     const std::string testLogName = "log_test.log";
+    Poco::Stopwatch   watch;
 
     {
         auto& logFactory = Poco::LoggingFactory::defaultFactory();
@@ -227,13 +229,19 @@ GTEST_TEST(PocoLoggingTest, LoggerAsync)
             if (auto splitterChannel = formattingChannel->getChannel().cast<Poco::SplitterChannel>(); splitterChannel)
                 splitterChannel->removeChannel(consoleChannel);
 
-            for (int idx = 1; idx <= 1000; ++idx)
+            watch.start();
+            for (int idx = 1; idx <= 100000; ++idx)
                 poco_information(logger, fmt::format("Hello, this is an information msg! idx = {}", idx));
+            watch.stop();
+            fmt::print("Write to memory, elapsed {} microseconds .\n", watch.elapsed());
         }
     }
 
     // 清空当前异步channel
+    watch.restart();
     logger.setChannel(nullptr);
+    watch.stop();
+    fmt::print("Write to file, elapsed {} microseconds .\n", watch.elapsed());
 
     Poco::File f(testLogName);
     if (f.exists() && f.isFile())
