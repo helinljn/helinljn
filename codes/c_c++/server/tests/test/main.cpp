@@ -156,6 +156,9 @@ int main(int argc, char** argv)
     std::signal(SIGINT, SIG_IGN);
     std::signal(SIGTERM, SIG_IGN);
     std::signal(SIGBREAK, SIG_IGN);
+    std::signal(SIGILL, signal_handler);
+    std::signal(SIGFPE, signal_handler);
+    std::signal(SIGSEGV, signal_handler);
     std::signal(SIGABRT, signal_handler);
     _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 
