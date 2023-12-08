@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 #include "fmt/format.h"
 #include "util/types.h"
+#include "util/file_channel.h"
+#include "Poco/Path.h"
 #include "Poco/File.h"
 #include "Poco/Logger.h"
 #include "Poco/LoggingFactory.h"
@@ -233,7 +235,7 @@ GTEST_TEST(PocoLoggingTest, LoggerAsync)
             for (int idx = 1; idx <= 100000; ++idx)
                 poco_information(logger, fmt::format("Hello, this is an information msg! idx = {}", idx));
             watch.stop();
-            fmt::print("Write to memory, elapsed {} microseconds .\n", watch.elapsed());
+            fmt::print("Write to memory, elapsed {} microseconds.\n", watch.elapsed());
         }
     }
 
@@ -241,9 +243,125 @@ GTEST_TEST(PocoLoggingTest, LoggerAsync)
     watch.restart();
     logger.setChannel(nullptr);
     watch.stop();
-    fmt::print("Write to file, elapsed {} microseconds .\n", watch.elapsed());
+    fmt::print("Write to file, elapsed {} microseconds.\n", watch.elapsed());
 
     Poco::File f(testLogName);
     if (f.exists() && f.isFile())
         f.remove();
+}
+
+GTEST_TEST(PocoLoggingTest, CommonLoggerAsync)
+{
+    auto&             logger      = Poco::Logger::root();
+    const std::string testLogName = "logs/log_test.log";
+    Poco::Stopwatch   watch;
+
+    {
+        auto& logFactory = Poco::LoggingFactory::defaultFactory();
+
+        // 创建格式化器，设置日志输出格式
+        auto formatter = logFactory.createFormatter("PatternFormatter");
+        ASSERT_TRUE(formatter);
+        if (formatter)
+        {
+            formatter->setProperty("pattern", "%Y-%m-%d %H:%M:%S.%F [%q]: %t [tid:%J,%O:%u]");
+            formatter->setProperty("times",   "local");
+        }
+
+        // 创建文件channel，设置日志名和滚动属性
+        auto fileChannel = Poco::Channel::Ptr(new common::file_channel());
+        ASSERT_TRUE(fileChannel);
+        if (fileChannel)
+        {
+            fileChannel->setProperty("path",          testLogName);
+            fileChannel->setProperty("rotation_size", "200 M");
+            fileChannel->setProperty("rotation_date", "hourly");
+            fileChannel->setProperty("flush",         "false");
+        }
+
+        // 创建控制台channel，设置日志输出颜色
+        auto consoleChannel = logFactory.createChannel("ColorConsoleChannel");
+        ASSERT_TRUE(consoleChannel);
+        if (consoleChannel)
+        {
+            consoleChannel->setProperty("enableColors",     "True");
+            consoleChannel->setProperty("traceColor",       "LightGreen");
+            consoleChannel->setProperty("debugColor",       "LightGreen");
+            consoleChannel->setProperty("informationColor", "White");
+            consoleChannel->setProperty("noticeColor",      "LightBlue");
+            consoleChannel->setProperty("warningColor",     "Yellow");
+            consoleChannel->setProperty("errorColor",       "LightRed");
+            consoleChannel->setProperty("criticalColor",    "LightRed");
+            consoleChannel->setProperty("fatalColor",       "LightRed");
+        }
+
+        // 格式化输出
+        auto formattingChannel = logFactory.createChannel("FormattingChannel").cast<Poco::FormattingChannel>();
+        ASSERT_TRUE(formattingChannel);
+        if (formattingChannel)
+        {
+            // 合并文件channel和控制台channel
+            auto splitterChannel = logFactory.createChannel("SplitterChannel").cast<Poco::SplitterChannel>();
+            ASSERT_TRUE(splitterChannel);
+            if (splitterChannel)
+            {
+                splitterChannel->addChannel(fileChannel);
+                splitterChannel->addChannel(consoleChannel);
+            }
+
+            formattingChannel->setFormatter(formatter);
+            formattingChannel->setChannel(splitterChannel);
+        }
+
+        // 同步输出
+        {
+            logger.setChannel(formattingChannel);
+            logger.setLevel(Poco::Message::PRIO_TRACE);
+
+            poco_trace(logger, "this is a trace msg!!!");
+            poco_debug(logger, "this is a debug msg!!!");
+            poco_information(logger, "this is an information msg!!!");
+            poco_notice(logger, "this is a notice msg!!!");
+            poco_warning(logger, "this is a warning msg!!!");
+            poco_error(logger, "this is an error msg!!!");
+            poco_critical(logger, "this is a critical msg!!!");
+            poco_fatal(logger, "this is a fatal msg!!!");
+        }
+
+        // 异步输出
+        {
+            // 创建异步channel
+            auto asyncChannel = logFactory.createChannel("AsyncChannel").cast<Poco::AsyncChannel>();
+            ASSERT_TRUE(asyncChannel);
+            if (asyncChannel)
+                asyncChannel->setChannel(formattingChannel);
+
+            logger.setChannel(asyncChannel);
+            logger.setLevel(Poco::Message::PRIO_TRACE);
+
+            // 移除控制台channel
+            if (auto splitterChannel = formattingChannel->getChannel().cast<Poco::SplitterChannel>(); splitterChannel)
+                splitterChannel->removeChannel(consoleChannel);
+
+            watch.start();
+            for (int idx = 1; idx <= 1000; ++idx)
+                poco_information(logger, fmt::format("Hello, this is an information msg! idx = {}", idx));
+            watch.stop();
+            fmt::print("Write to memory, elapsed {} microseconds.\n", watch.elapsed());
+        }
+    }
+
+    // 清空当前异步channel
+    watch.restart();
+    logger.setChannel(nullptr);
+    watch.stop();
+    fmt::print("Write to file, elapsed {} microseconds.\n", watch.elapsed());
+
+    Poco::Path p(testLogName);
+    p.setFileName("");
+    p.makeDirectory();
+
+    Poco::File f(p);
+    if (f.exists() && f.isDirectory())
+        f.remove(true);
 }
