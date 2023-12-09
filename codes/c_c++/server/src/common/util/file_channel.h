@@ -4,19 +4,20 @@
 #include "util/types.h"
 #include "Poco/Mutex.h"
 #include "Poco/Channel.h"
+#include "Poco/Message.h"
 #include "Poco/LogFile.h"
 #include "Poco/RotateStrategy.h"
 
 namespace common {
 
 ////////////////////////////////////////////////////////////////
-// 文件写入Channel，支持按文件大小和时间(本地时间)进行归档
+// 文件写入Channel，支持按文件大小和本地时间归档
 ////////////////////////////////////////////////////////////////
 class COMMON_API file_channel final : public Poco::Channel
 {
 public:
     file_channel(void);
-    file_channel(std::string path);
+    file_channel(std::string fpath);
 
     file_channel(const file_channel&) = delete;
     file_channel& operator=(const file_channel&) = delete;
@@ -50,8 +51,7 @@ public:
 
     ////////////////////////////////////////////////////////////////
     // @brief 设置属性，支持以下属性：
-    //        * path:          日志文件名(可包含相对或绝对路径)，最后会被
-    //                         拼接为：xxxx-20200202[-20].log[.0 ~ n]
+    //        * path: 日志文件名(可包含相对路径或绝对路径)
     //        * rotation_size: 按大小滚动
     //            * <n> K:  当文件的大小超过<n> KB时，将滚动文件
     //            * <n> M:  当文件的大小超过<n> MB时，将滚动文件
@@ -84,18 +84,18 @@ private:
     //        输入2：get_archive_name("./logs/server.log")
     //        输出2：./logs/server-20200202[-20].log
     //
-    // @param file_path 可包含相对路径或绝对路径的文件名
+    // @param fpath 文件名
     // @return
     ////////////////////////////////////////////////////////////////
-    std::string get_archive_name(const std::string& file_path) const;
+    std::string get_archive_name(const std::string& fpath) const;
 
     ////////////////////////////////////////////////////////////////
     // @brief 为归档的文件编号，会被拼接为：xxxx-20200202[-20].log[.0 ~ n]
     //
-    // @param path 文件名
+    // @param fpath 文件名
     // @return
     ////////////////////////////////////////////////////////////////
-    std::string archive_by_number(const std::string& path) const;
+    std::string archive_by_number(const std::string& fpath) const;
 
 private:
     std::string                            _path;

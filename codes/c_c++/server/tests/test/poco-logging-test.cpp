@@ -274,7 +274,7 @@ GTEST_TEST(PocoLoggingTest, CommonLoggerAsync)
         if (fileChannel)
         {
             fileChannel->setProperty("path",          testLogName);
-            fileChannel->setProperty("rotation_size", "200 M");
+            fileChannel->setProperty("rotation_size", "1 M");
             fileChannel->setProperty("rotation_date", "hourly");
             fileChannel->setProperty("flush",         "false");
         }
@@ -344,7 +344,7 @@ GTEST_TEST(PocoLoggingTest, CommonLoggerAsync)
                 splitterChannel->removeChannel(consoleChannel);
 
             watch.start();
-            for (int idx = 1; idx <= 1000; ++idx)
+            for (int idx = 1; idx <= 10000; ++idx)
                 poco_information(logger, fmt::format("Hello, this is an information msg! idx = {}", idx));
             watch.stop();
             fmt::print("Write to memory, elapsed {} microseconds.\n", watch.elapsed());

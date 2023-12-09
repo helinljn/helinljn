@@ -4,7 +4,6 @@
 #include "Poco/Path.h"
 #include "Poco/File.h"
 #include "Poco/String.h"
-#include "Poco/Message.h"
 #include "Poco/NumberFormatter.h"
 
 namespace Poco {
@@ -49,7 +48,7 @@ public:
             {
                 // 每次累加一小时
                 _threshold += Timespan(0, 1, 0, 0, 0);
-            } while (!(_hour != 0 || _hour == _threshold.hour()));
+            } while (!(_hour == -1 || _hour == _threshold.hour()));
 
             _threshold.assign(_threshold.year(), _threshold.month(), _threshold.day(), _threshold.hour());
 
@@ -74,8 +73,8 @@ file_channel::file_channel(void)
 {
 }
 
-file_channel::file_channel(std::string path)
-    : _path(std::move(path))
+file_channel::file_channel(std::string fpath)
+    : _path(std::move(fpath))
     , _rotation_size()
     , _rotation_date()
     , _flush()
@@ -130,7 +129,7 @@ void file_channel::log(const Poco::Message& msg)
 
     if (_rotate_by_date_strategy->mustRotate(_file.get()) || _rotate_by_size_strategy->mustRotate(_file.get()))
     {
-        std::string path = get_archive_name(_path);
+        auto path = get_archive_name(_path);
         if (Poco::File f(path); f.exists())
             path = archive_by_number(path);
 
@@ -172,6 +171,9 @@ void file_channel::setProperty(const std::string& name, const std::string& value
     }
     else if (name == "flush")
     {
+        if (Poco::icompare(value, "true") != 0 && Poco::icompare(value, "false") != 0)
+            throw Poco::InvalidArgumentException("value", value);
+
         _flush = Poco::icompare(value, "true") == 0 ? "true" : "false";
     }
     else
@@ -196,10 +198,10 @@ std::string file_channel::getProperty(const std::string& name) const
         return Channel::getProperty(name);
 }
 
-std::string file_channel::get_archive_name(const std::string& file_path) const
+std::string file_channel::get_archive_name(const std::string& fpath) const
 {
     std::string name;
-    Poco::Path  path(file_path);
+    Poco::Path  path(fpath);
 
     name  = path.getBaseName();
     name += '-';
@@ -216,14 +218,14 @@ std::string file_channel::get_archive_name(const std::string& file_path) const
     return name;
 }
 
-std::string file_channel::archive_by_number(const std::string& path) const
+std::string file_channel::archive_by_number(const std::string& fpath) const
 {
     std::string ret;
-    int64       idx = -1;
+    int32       idx = -1;
 
     do
     {
-        ret.assign(path);
+        ret.assign(fpath);
         ret.append(".");
         Poco::NumberFormatter::append(ret, ++idx);
 
