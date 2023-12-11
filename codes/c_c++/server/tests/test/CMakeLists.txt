@@ -31,7 +31,6 @@ SET(CURRENT_INCLUDE_DIR
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DFMT_SHARED
         -DGTEST_LINKED_AS_SHARED_LIBRARY
     )
 
@@ -45,10 +44,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         foo
         bar
         common
-        protobuf
         gmock
         gtest
-        fmt
         PocoRedis
         PocoDataMySQL
         PocoData
@@ -65,7 +62,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DFMT_SHARED
         -DGTEST_LINKED_AS_SHARED_LIBRARY
     )
 
@@ -79,10 +75,8 @@ ELSE()
         foo
         bar
         common
-        protobuf
         gmock
         gtest
-        fmt
         PocoRedis
         PocoDataMySQL
         PocoData

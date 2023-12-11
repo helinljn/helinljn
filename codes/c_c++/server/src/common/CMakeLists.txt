@@ -8,6 +8,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/protobuf/src
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/plthook
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
 )
 
 # 宏定义、编译选项、链接库
@@ -19,7 +20,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
+        -DFMT_SHARED
     )
 
     # 编译选项
@@ -29,6 +30,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        fmt
         funchook
         plthook
         protobuf
@@ -43,7 +45,7 @@ ELSE()
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
+        -DFMT_SHARED
     )
 
     # 编译选项
@@ -53,6 +55,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        fmt
         funchook
         plthook
         protobuf

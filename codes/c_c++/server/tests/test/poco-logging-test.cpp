@@ -2,6 +2,7 @@
 #include "fmt/format.h"
 #include "util/types.h"
 #include "util/file_channel.h"
+#include "util/logger.h"
 #include "Poco/Path.h"
 #include "Poco/File.h"
 #include "Poco/Logger.h"
@@ -318,14 +319,14 @@ GTEST_TEST(PocoLoggingTest, CommonLoggerAsync)
             logger.setChannel(formattingChannel);
             logger.setLevel(Poco::Message::PRIO_TRACE);
 
-            poco_trace(logger, "this is a trace msg!!!");
-            poco_debug(logger, "this is a debug msg!!!");
-            poco_information(logger, "this is an information msg!!!");
-            poco_notice(logger, "this is a notice msg!!!");
-            poco_warning(logger, "this is a warning msg!!!");
-            poco_error(logger, "this is an error msg!!!");
-            poco_critical(logger, "this is a critical msg!!!");
-            poco_fatal(logger, "this is a fatal msg!!!");
+            log_trace(logger,    "{}, func={}", "this is a trace msg!!!",    __func__);
+            log_debug(logger,    "{}, func={}", "this is a debug msg!!!",    __func__);
+            log_info(logger,     "{}, func={}", "this is an info msg!!!",    __func__);
+            log_notice(logger,   "{}, func={}", "this is a notice msg!!!",   __func__);
+            log_warning(logger,  "{}, func={}", "this is a warning msg!!!",  __func__);
+            log_error(logger,    "{}, func={}", "this is an error msg!!!",   __func__);
+            log_critical(logger, "{}, func={}", "this is a critical msg!!!", __func__);
+            log_fatal(logger,    "{}, func={}", "this is a fatal msg!!!",    __func__);
         }
 
         // 异步输出
@@ -345,7 +346,7 @@ GTEST_TEST(PocoLoggingTest, CommonLoggerAsync)
 
             watch.start();
             for (int idx = 1; idx <= 10000; ++idx)
-                poco_information(logger, fmt::format("Hello, this is an information msg! idx = {}", idx));
+                log_info(logger, "Hello, this is an info msg! idx = {}", idx);
             watch.stop();
             fmt::print("Write to memory, elapsed {} microseconds.\n", watch.elapsed());
         }
