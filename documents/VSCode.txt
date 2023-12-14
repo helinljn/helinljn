@@ -98,6 +98,12 @@
     "C_Cpp.intelliSenseUpdateDelay": 500,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
+
+    "[go]": {
+        "editor.formatOnSave": false,
+        "editor.formatOnType": false,
+        "editor.formatOnPaste": false,
+    },
 }
 
 【键盘设置】
