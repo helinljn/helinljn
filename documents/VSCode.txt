@@ -7,15 +7,13 @@
 
     4. C/C++ Extension Pack
 
-    5. Python
+    5. Go
 
-    6. Go
+    6. Markdown All in One
 
-    7. Markdown All in One
+    7. One Dark Pro
 
-    8. One Dark Pro
-
-    9. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
+    8. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
 
 【常用设置】
 {
@@ -100,18 +98,6 @@
     "C_Cpp.intelliSenseUpdateDelay": 500,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
-
-    "[go]": {
-        "editor.formatOnSave": false,
-        "editor.formatOnType": false,
-        "editor.formatOnPaste": false,
-    },
-
-    "[python]": {
-        "editor.formatOnSave": false,
-        "editor.formatOnType": false,
-        "editor.formatOnPaste": false,
-    },
 }
 
 【键盘设置】

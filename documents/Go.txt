@@ -1,18 +1,14 @@
-# Go下载地址，首选：go1.19.12.windows-amd64
-# 安装时无脑下一步
+# Go下载地址，首选：go1.20.12.windows-amd64.zip & go1.20.12.linux-amd64.tar.gz
 https://golang.google.cn/dl/
 
 # 环境变量
     Windows:
-        删除用户变量Path中Go相关
-        删除系统变量Path中Go相关
-
         用户变量中添加：
-        GOROOT=C:\Program Files\Go
+        GOROOT=C:\Program Files\go
         GOPATH=C:\Users\helin\go
 
         用户变量Path中添加：
-        C:\Program Files\Go\bin
+        C:\Program Files\go\bin
         C:\Users\helin\go\bin
 
     Linux:
@@ -23,6 +19,6 @@ https://golang.google.cn/dl/
         export GOPATH=$HOME/go
         export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
-# go env
+# go env(可选)
 go env -w GO111MODULE=on
 go env -w GOPROXY=https://proxy.golang.com.cn,direct
