@@ -17,14 +17,15 @@
 #include "Poco/XML/XML.h"
 #include "Poco/Zip/Zip.h"
 
-#include "util/stack_trace.h"
 #include "util/datetime.h"
+#include "util/stack_trace.h"
 #include "Poco/DateTimeFormat.h"
 #include "Poco/DateTimeFormatter.h"
 #include "Poco/Thread.h"
 #include "Poco/Process.h"
 #include "Poco/String.h"
 #include "Poco/Path.h"
+#include "Poco/Logger.h"
 
 #include <csignal>
 #include <cstdlib>
@@ -111,6 +112,9 @@ static void signal_handler(int sig)
         ofs.close();
     }
 
+    // 保存异步日志信息
+    Poco::Logger::shutdown();
+
     // 输出信息
     fmt::print("{}", info);
 
@@ -153,9 +157,9 @@ int main(int argc, char** argv)
 
     // 注册信号处理
 #if POCO_OS == POCO_OS_WINDOWS_NT
-    std::signal(SIGINT, SIG_IGN);
-    std::signal(SIGTERM, SIG_IGN);
-    std::signal(SIGBREAK, SIG_IGN);
+    //std::signal(SIGINT, SIG_IGN);
+    //std::signal(SIGTERM, SIG_IGN);
+    //std::signal(SIGBREAK, SIG_IGN);
     std::signal(SIGILL, signal_handler);
     std::signal(SIGFPE, signal_handler);
     std::signal(SIGSEGV, signal_handler);
@@ -170,10 +174,10 @@ int main(int argc, char** argv)
 
     SetUnhandledExceptionFilter(win_unhandled_exception_handler);
 #else
-    std::signal(SIGINT, SIG_IGN);
-    std::signal(SIGTERM, SIG_IGN);
-    std::signal(SIGHUP, SIG_IGN);
-    std::signal(SIGPIPE, SIG_IGN);
+    //std::signal(SIGINT, SIG_IGN);
+    //std::signal(SIGTERM, SIG_IGN);
+    //std::signal(SIGHUP, SIG_IGN);
+    //std::signal(SIGPIPE, SIG_IGN);
     std::signal(SIGILL, signal_handler);
     std::signal(SIGFPE, signal_handler);
     std::signal(SIGSEGV, signal_handler);
