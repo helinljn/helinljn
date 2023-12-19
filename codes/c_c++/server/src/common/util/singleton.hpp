@@ -48,13 +48,13 @@ protected:
 // class example : public common::singleton<example>
 // {
 // public:
-//     int32 get_int(void)   const {return int_data_;}
-//     float get_float(void) const {return float_data_;}
+//     int32 get_int(void)   const {return _int_data;}
+//     float get_float(void) const {return _float_data;}
 //
 // private:
 //     example(void)
-//         : int_data_(0)
-//         , float_data_(0.f)
+//         : _int_data(0)
+//         , _float_data(0.f)
 //     {
 //     }
 //
@@ -62,8 +62,8 @@ protected:
 //     COMMON_SINGLETON_HELPER;
 //
 // private:
-//     int32 int_data_;
-//     float float_data_;
+//     int32 _int_data;
+//     float _float_data;
 // };
 //
 // example& ex = example::instance();
