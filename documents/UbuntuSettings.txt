@@ -154,7 +154,21 @@ apt autoremove
 apt clean
 apt autoclean
 
-【10. VS2019 + WSL gdb调试环境】
+【10. 文件权限问题】
+	sudo vi /etc/wsl.conf
+		[automount]
+		enabled    = true
+		options    = "metadata,dmask=022,fmask=133"
+		root       = /mnt/
+		mountFsTab = false
+
+	vi ~/.bashrc
+		# umask
+		if [[ "$(umask)" == '000' ]]; then
+			umask 022
+		fi
+
+【11. VS2019 + WSL gdb调试环境】
 apt -y install openssh-server
 
 如果提示"ptrace:Operation not permitted"类似或相关的错误提示，则执行以下命令：
@@ -178,7 +192,7 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 	touch make_symble_for_vs_gdb.sh
 		ln -sf /mnt/d/aaa/bbb/*.so ./
 
-【11. WSL 升级 WSL2】
+【12. WSL 升级 WSL2】
 1. 务必保证当前操作系统更新了最新的补丁
 
 2. BIOS中开启CPU虚拟化支持
@@ -203,19 +217,7 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 	检查是否已经成功更新为WSL2版本
 		WSL -l -v
 
-6. 使用WSL2新建的一切类型的文件，其默认权限都是777
-	sudo vi /etc/wsl.conf
-		[automount]
-		enabled = true
-		options = "metadata,umask=22,fmask=11"
-
-	vi ~/.bashrc
-		# umask
-		if [[ "$(umask)" = "0000" ]]; then
-			umask 0022
-		fi
-
-7. 从WSL升级到WSL2后，启动WSL2报错
+6. 从WSL升级到WSL2后，启动WSL2报错
 	- 启动Ubuntu-20.04时出现错误0x80070780
 	- [process exited with code 4294967295]
 
@@ -223,7 +225,7 @@ gdb调试时，因为加载不到对应的.so导致的断点无法挂上，则�
 		netsh winsock reset
 	之后重启windows系统，再打开Terminal则可以正常启动WSL2
 
-8. 解决宿主机局域网无法访问WSL2特定端口的服务
+7. 解决宿主机局域网无法访问WSL2特定端口的服务
 	- WSL2是基于Hyper-V的独立虚机环境，网络和Windows宿主机是相互独立的。在WSL2上运行的服务，在宿主机的局域网中无法直接访问，需要在宿主机上添加Windows防火墙端口转发规则，即设置一个入站和出站规则，将局域网中对宿主机相同端口的请求转发到WSL2上。
 	- 需要注意的是，WSL2的IP地址会随着宿主机重启而发生变化，入站和出站规则需要指定目标IP地址才能生效，所以需要有一个脚本来读取WSL2的IP地址，并自动更新宿主机的入站和出站规则。
 
