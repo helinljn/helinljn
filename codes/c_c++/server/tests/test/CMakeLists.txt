@@ -8,10 +8,6 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_3RD_DIR_OPENSSL}/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Crypto/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JWT/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Zip/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
@@ -52,10 +48,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         PocoNetSSL
         PocoNet
         PocoUtil
-        PocoZip
-        PocoXML
-        PocoJWT
-        PocoJSON
         PocoCrypto
         PocoFoundation
     )
@@ -83,10 +75,6 @@ ELSE()
         PocoNetSSL
         PocoNet
         PocoUtil
-        PocoZip
-        PocoXML
-        PocoJWT
-        PocoJSON
         PocoCrypto
         PocoFoundation
     )

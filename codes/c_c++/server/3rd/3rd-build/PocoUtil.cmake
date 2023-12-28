@@ -4,8 +4,6 @@ PROJECT(PocoUtil)
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Foundation/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/JSON/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/XML/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
 )
 
@@ -14,6 +12,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         -DUtil_EXPORTS
+        -DPOCO_UTIL_NO_JSONCONFIGURATION
+        -DPOCO_UTIL_NO_XMLCONFIGURATION
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
@@ -29,14 +29,14 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        PocoXML
-        PocoJSON
         PocoFoundation
     )
 ELSE()
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
         -DUtil_EXPORTS
+        -DPOCO_UTIL_NO_JSONCONFIGURATION
+        -DPOCO_UTIL_NO_XMLCONFIGURATION
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
@@ -51,8 +51,6 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        PocoXML
-        PocoJSON
         PocoFoundation
     )
 ENDIF()
