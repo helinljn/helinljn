@@ -27,7 +27,7 @@ echo ------------------
 echo -- poco
 cd %ROOT_INIT_DIR%
 if not exist %POCO_INIT_DIR% (
-    git clone -b poco-1.12.5 https://hub.yzuu.cf/pocoproject/poco.git %POCO_INIT_DIR%
+    git clone -b poco-1.12.6 https://hub.yzuu.cf/pocoproject/poco.git %POCO_INIT_DIR%
 ) else (
     cd %POCO_INIT_DIR%
     git remote set-url origin https://hub.yzuu.cf/pocoproject/poco.git
