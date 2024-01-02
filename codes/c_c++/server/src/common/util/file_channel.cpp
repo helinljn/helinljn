@@ -91,8 +91,7 @@ void file_channel::open(void)
     if (!_file)
     {
         const auto& path = get_archive_name(_path);
-        Poco::Path  p    = path;
-        if (p.depth() > 0)
+        if (Poco::Path p = path; p.depth() > 0)
         {
             p.setFileName("");
             p.makeDirectory();
