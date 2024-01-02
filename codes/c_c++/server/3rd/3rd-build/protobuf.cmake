@@ -58,7 +58,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        # ...
+        pthread
     )
 ENDIF()
 

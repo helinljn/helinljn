@@ -38,7 +38,6 @@ ELSE()
     SET(CURRENT_LINK_LIBS
         protoc
         protobuf
-        pthread
     )
 ENDIF()
 
