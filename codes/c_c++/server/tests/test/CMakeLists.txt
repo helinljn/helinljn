@@ -11,9 +11,6 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Util/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Net/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/NetSSL_OpenSSL/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Data/MySQL/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/Redis/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googlemock/include
@@ -42,9 +39,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         common
         gmock
         gtest
-        PocoRedis
-        PocoDataMySQL
-        PocoData
         PocoNetSSL
         PocoNet
         PocoUtil
@@ -69,9 +63,6 @@ ELSE()
         common
         gmock
         gtest
-        PocoRedis
-        PocoDataMySQL
-        PocoData
         PocoNetSSL
         PocoNet
         PocoUtil
