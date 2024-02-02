@@ -3,21 +3,19 @@
 
     2. GBKtoUTF8
 
-    3. Diff
+    3. C/C++ Extension Pack
 
-    4. C/C++ Extension Pack
+    4. Go
 
-    5. Go
+    5. Markdown All in One
 
-    6. Markdown All in One
+    6. One Dark Pro
 
-    7. One Dark Pro
-
-    8. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
+    7. Remote - SSH(安装后，需要把1、2、3重新安装至Remote-SSH中)
 
 【常用设置】
 {
-    // VSCode version: VSCodeSetup-x64-1.74.3
+    // VSCode version: VSCodeSetup-x64-1.85.2
     "workbench.colorTheme": "One Dark Pro",
     "workbench.startupEditor": "none",
 
@@ -47,7 +45,7 @@
     "editor.trimAutoWhitespace": true,
     "editor.smoothScrolling": true,
     "editor.cursorBlinking": "smooth",
-    "editor.cursorSmoothCaretAnimation": true,
+    "editor.cursorSmoothCaretAnimation": "on",
     "editor.dragAndDrop": false,
     "editor.formatOnSave": false,
     "editor.formatOnType": false,
