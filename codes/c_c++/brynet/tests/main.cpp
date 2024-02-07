@@ -46,7 +46,7 @@ int main(void)
                 socket.setNodelay();
             })
             .WithMaxRecvBufferSize(1024)
-            .WithAddr(false, "0.0.0.0", 8080)
+            .WithAddr(false, "0.0.0.0", 8088)
             .WithReusePort()
             .WithEnterCallback([httpEnterCallback, wsEnterCallback](const net::http::HttpSession::Ptr& httpSession, net::http::HttpSessionHandlers& handlers) {
                 std::ignore = httpSession;

@@ -7,6 +7,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_3RD_DIR_OPENSSL}/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
 )
 
 # 宏定义、编译选项、链接库
@@ -61,8 +62,14 @@ FILE(GLOB_RECURSE CURRENT_DIR_SRC_LIST
     ${PROJECT_SOURCE_DIR}/*.cpp
 )
 
+# brynet源文件
+FILE(GLOB_RECURSE BRYNET_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet/*.hpp
+)
+
 # 生成可执行文件
-ADD_EXECUTABLE(${PROJECT_NAME}                     ${CURRENT_DIR_INCLUDE_LIST} ${CURRENT_DIR_SRC_LIST})
+ADD_EXECUTABLE(${PROJECT_NAME}                     ${CURRENT_DIR_INCLUDE_LIST} ${CURRENT_DIR_SRC_LIST} ${BRYNET_SRC_LIST})
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
 TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
 TARGET_COMPILE_OPTIONS(${PROJECT_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
@@ -86,15 +93,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${CURRENT_DIR_INCLUDE_LIST})
     SOURCE_GROUP(TREE ${PROJECT_SOURCE_DIR} PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
-
-    # 将brynet代码拷贝至本工程目录
-    IF(NOT EXISTS ${PROJECT_SOURCE_DIR}/brynet)
-        ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
-                ${PROJECT_SOURCE_DIR}
-        )
-    ENDIF()
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet PREFIX "brynet"
+        FILES ${BRYNET_SRC_LIST})
 
     # Windows平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
@@ -112,15 +112,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
     )
 ELSE()
-    # 将brynet代码拷贝至本工程目录
-    IF(NOT EXISTS ${PROJECT_SOURCE_DIR}/brynet)
-        ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
-                ${PROJECT_SOURCE_DIR}
-        )
-    ENDIF()
-
     # Linux平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
