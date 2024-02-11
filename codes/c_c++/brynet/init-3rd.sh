@@ -9,10 +9,10 @@ echo ------------------
 echo -- fmt
 cd $ROOT_INIT_DIR
 if [ ! -d $FMT_INIT_DIR ]; then
-    git clone -b 9.1.0 https://github.com/fmtlib/fmt.git $FMT_INIT_DIR
+    git clone -b 9.1.0 https://github.hscsec.cn/fmtlib/fmt.git $FMT_INIT_DIR
 else
     cd $FMT_INIT_DIR
-    git remote set-url origin https://github.com/fmtlib/fmt.git
+    git remote set-url origin https://github.hscsec.cn/fmtlib/fmt.git
     git remote -v
     git checkout .
     git fetch -p origin
@@ -23,10 +23,10 @@ echo ------------------
 echo -- spdlog
 cd $ROOT_INIT_DIR
 if [ ! -d $SPDLOG_INIT_DIR ]; then
-    git clone -b v1.11.0 https://github.com/gabime/spdlog.git $SPDLOG_INIT_DIR
+    git clone -b v1.11.0 https://github.hscsec.cn/gabime/spdlog.git $SPDLOG_INIT_DIR
 else
     cd $SPDLOG_INIT_DIR
-    git remote set-url origin https://github.com/gabime/spdlog.git
+    git remote set-url origin https://github.hscsec.cn/gabime/spdlog.git
     git remote -v
     git checkout .
     git fetch -p origin
@@ -37,10 +37,10 @@ echo ------------------
 echo -- brynet
 cd $ROOT_INIT_DIR
 if [ ! -d $BRYNET_INIT_DIR ]; then
-    git clone https://github.com/IronsDu/brynet.git $BRYNET_INIT_DIR
+    git clone https://github.hscsec.cn/IronsDu/brynet.git $BRYNET_INIT_DIR
 else
     cd $BRYNET_INIT_DIR
-    git remote set-url origin https://github.com/IronsDu/brynet.git
+    git remote set-url origin https://github.hscsec.cn/IronsDu/brynet.git
     git remote -v
     git checkout .
     git fetch -p origin
