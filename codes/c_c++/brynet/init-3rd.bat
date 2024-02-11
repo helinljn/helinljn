@@ -23,14 +23,14 @@ echo ------------------
 echo -- spdlog
 cd %ROOT_INIT_DIR%
 if not exist %SPDLOG_INIT_DIR% (
-    git clone -b v1.11.0 https://github.hscsec.cn/gabime/spdlog.git %SPDLOG_INIT_DIR%
+    git clone -b v1.13.0 https://github.hscsec.cn/gabime/spdlog.git %SPDLOG_INIT_DIR%
 ) else (
     cd %SPDLOG_INIT_DIR%
     git remote set-url origin https://github.hscsec.cn/gabime/spdlog.git
     git remote -v
     git checkout .
     git fetch -p origin
-    git checkout v1.11.0
+    git checkout v1.13.0
 )
 
 echo ------------------
