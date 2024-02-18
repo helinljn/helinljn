@@ -30,4 +30,4 @@
     #pragma GCC diagnostic pop
 #endif
 
-#endif // !__BRYNET_H__
+#endif // __BRYNET_H__

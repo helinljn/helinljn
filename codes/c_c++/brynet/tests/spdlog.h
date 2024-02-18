@@ -16,4 +16,4 @@
     #pragma warning(pop)
 #endif
 
-#endif // !__SPDLOG_H__
+#endif // __SPDLOG_H__
