@@ -1,1 +1,0 @@
-ADD_SUBDIRECTORY(3rd-build)
