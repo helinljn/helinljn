@@ -1,5 +1,4 @@
 #include "brynet.h"
-#include "spdlog/spdlog.h"
 
 namespace bnet  = brynet::net;
 namespace bbase = brynet::base;

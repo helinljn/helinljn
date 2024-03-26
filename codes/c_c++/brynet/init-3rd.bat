@@ -1,21 +1,36 @@
 @echo off
 
 set ROOT_INIT_DIR=%~dp0
-set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
+set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
+set QUILL_INIT_DIR=%ROOT_INIT_DIR%/3rd/quill
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
 
 echo ------------------
-echo -- spdlog
+echo -- fmt
 cd %ROOT_INIT_DIR%
-if not exist %SPDLOG_INIT_DIR% (
-    git clone -b v1.13.0 https://github.hscsec.cn/gabime/spdlog.git %SPDLOG_INIT_DIR%
+if not exist %FMT_INIT_DIR% (
+    git clone -b 10.2.1 https://github.hscsec.cn/fmtlib/fmt.git %FMT_INIT_DIR%
 ) else (
-    cd %SPDLOG_INIT_DIR%
-    git remote set-url origin https://github.hscsec.cn/gabime/spdlog.git
+    cd %FMT_INIT_DIR%
+    git remote set-url origin https://github.hscsec.cn/fmtlib/fmt.git
     git remote -v
     git checkout .
     git fetch -p origin
-    git checkout v1.13.0
+    git checkout 10.2.1
+)
+
+echo ------------------
+echo -- quill
+cd %ROOT_INIT_DIR%
+if not exist %QUILL_INIT_DIR% (
+    git clone -b v3.8.0 https://github.hscsec.cn/odygrd/quill.git %QUILL_INIT_DIR%
+) else (
+    cd %QUILL_INIT_DIR%
+    git remote set-url origin https://github.hscsec.cn/odygrd/quill.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v3.8.0
 )
 
 echo ------------------

@@ -1,21 +1,36 @@
 #!/bin/bash
 
 ROOT_INIT_DIR=`pwd`
-SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
+FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
+QUILL_INIT_DIR=$ROOT_INIT_DIR/3rd/quill
 BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
 
 echo ------------------
-echo -- spdlog
+echo -- fmt
 cd $ROOT_INIT_DIR
-if [ ! -d $SPDLOG_INIT_DIR ]; then
-    git clone -b v1.13.0 https://github.hscsec.cn/gabime/spdlog.git $SPDLOG_INIT_DIR
+if [ ! -d $FMT_INIT_DIR ]; then
+    git clone -b 10.2.1 https://github.hscsec.cn/fmtlib/fmt.git $FMT_INIT_DIR
 else
-    cd $SPDLOG_INIT_DIR
-    git remote set-url origin https://github.hscsec.cn/gabime/spdlog.git
+    cd $FMT_INIT_DIR
+    git remote set-url origin https://github.hscsec.cn/fmtlib/fmt.git
     git remote -v
     git checkout .
     git fetch -p origin
-    git checkout v1.13.0
+    git checkout 10.2.1
+fi
+
+echo ------------------
+echo -- quill
+cd $ROOT_INIT_DIR
+if [ ! -d $QUILL_INIT_DIR ]; then
+    git clone -b v3.8.0 https://github.hscsec.cn/odygrd/quill.git $QUILL_INIT_DIR
+else
+    cd $QUILL_INIT_DIR
+    git remote set-url origin https://github.hscsec.cn/odygrd/quill.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v3.8.0
 fi
 
 echo ------------------
