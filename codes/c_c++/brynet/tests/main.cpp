@@ -1,4 +1,5 @@
 #include "brynet.h"
+#include "quill.h"
 
 namespace bnet  = brynet::net;
 namespace bbase = brynet::base;

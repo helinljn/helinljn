@@ -14,7 +14,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
+        -DFMT_SHARED
     )
 
     # 编译选项
@@ -33,7 +33,7 @@ ELSE()
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
+        -DFMT_SHARED
     )
 
     # 编译选项
