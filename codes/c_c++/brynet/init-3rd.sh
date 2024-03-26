@@ -9,10 +9,10 @@ echo ------------------
 echo -- fmt
 cd $ROOT_INIT_DIR
 if [ ! -d $FMT_INIT_DIR ]; then
-    git clone -b 10.2.1 https://github.hscsec.cn/fmtlib/fmt.git $FMT_INIT_DIR
+    git clone -b 10.2.1 https://kkgithub.com/fmtlib/fmt.git $FMT_INIT_DIR
 else
     cd $FMT_INIT_DIR
-    git remote set-url origin https://github.hscsec.cn/fmtlib/fmt.git
+    git remote set-url origin https://kkgithub.com/fmtlib/fmt.git
     git remote -v
     git checkout .
     git fetch -p origin
@@ -23,10 +23,10 @@ echo ------------------
 echo -- quill
 cd $ROOT_INIT_DIR
 if [ ! -d $QUILL_INIT_DIR ]; then
-    git clone -b v3.8.0 https://github.hscsec.cn/odygrd/quill.git $QUILL_INIT_DIR
+    git clone -b v3.8.0 https://kkgithub.com/odygrd/quill.git $QUILL_INIT_DIR
 else
     cd $QUILL_INIT_DIR
-    git remote set-url origin https://github.hscsec.cn/odygrd/quill.git
+    git remote set-url origin https://kkgithub.com/odygrd/quill.git
     git remote -v
     git checkout .
     git fetch -p origin
@@ -37,10 +37,10 @@ echo ------------------
 echo -- brynet
 cd $ROOT_INIT_DIR
 if [ ! -d $BRYNET_INIT_DIR ]; then
-    git clone https://github.hscsec.cn/IronsDu/brynet.git $BRYNET_INIT_DIR
+    git clone https://kkgithub.com/IronsDu/brynet.git $BRYNET_INIT_DIR
 else
     cd $BRYNET_INIT_DIR
-    git remote set-url origin https://github.hscsec.cn/IronsDu/brynet.git
+    git remote set-url origin https://kkgithub.com/IronsDu/brynet.git
     git remote -v
     git checkout .
     git fetch -p origin
