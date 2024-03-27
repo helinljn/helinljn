@@ -4,6 +4,7 @@ ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 QUILL_INIT_DIR=$ROOT_INIT_DIR/3rd/quill
 BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
+GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
 
 echo ------------------
 echo -- fmt
@@ -41,6 +42,20 @@ if [ ! -d $BRYNET_INIT_DIR ]; then
 else
     cd $BRYNET_INIT_DIR
     git remote set-url origin https://kkgithub.com/IronsDu/brynet.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- googletest
+cd $ROOT_INIT_DIR
+if [ ! -d $GOOGLETEST_INIT_DIR ]; then
+    git clone -b v1.14.x https://kkgithub.com/google/googletest.git $GOOGLETEST_INIT_DIR
+else
+    cd $GOOGLETEST_INIT_DIR
+    git remote set-url origin https://kkgithub.com/google/googletest.git
     git remote -v
     git checkout .
     git fetch -p origin

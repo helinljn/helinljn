@@ -4,6 +4,7 @@ set ROOT_INIT_DIR=%~dp0
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set QUILL_INIT_DIR=%ROOT_INIT_DIR%/3rd/quill
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
+set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
 
 echo ------------------
 echo -- fmt
@@ -41,6 +42,20 @@ if not exist %BRYNET_INIT_DIR% (
 ) else (
     cd %BRYNET_INIT_DIR%
     git remote set-url origin https://kkgithub.com/IronsDu/brynet.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+)
+
+echo ------------------
+echo -- googletest
+cd %ROOT_INIT_DIR%
+if not exist %GOOGLETEST_INIT_DIR% (
+    git clone -b v1.14.x https://kkgithub.com/google/googletest.git %GOOGLETEST_INIT_DIR%
+) else (
+    cd %GOOGLETEST_INIT_DIR%
+    git remote set-url origin https://kkgithub.com/google/googletest.git
     git remote -v
     git checkout .
     git fetch -p origin
