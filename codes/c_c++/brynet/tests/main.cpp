@@ -1,12 +1,19 @@
-#include "brynet.h"
-#include "quill.h"
+#include "util/brynet.h"
+#include "util/quill.h"
+#include "util/stack_trace.h"
 #include "gtest/gtest.h"
 
 int main(int argc, char** argv)
 {
     static_assert(__cplusplus == 201703);
 
+    core::stack_trace::initialize();
+
     testing::InitGoogleTest(&argc, argv);
 
-    return RUN_ALL_TESTS();
+    const auto ret = RUN_ALL_TESTS();
+
+    core::stack_trace::uninitialize();
+
+    return ret;
 }

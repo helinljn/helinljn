@@ -107,6 +107,7 @@ ENDIF()
 
 # 添加子目录
 ADD_SUBDIRECTORY(3rd)
+ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
 
 # VS工程设置
