@@ -1,9 +1,9 @@
 #ifndef __BRYNET_H__
 #define __BRYNET_H__
 
-#include "brynet/base/Platform.hpp"
+#include "core_port.h"
 
-#if defined(BRYNET_PLATFORM_WINDOWS)
+#if defined(CORE_PLATFORM_WINDOWS)
     #pragma warning(push)
     #pragma warning(disable:4244)
     #pragma warning(disable:4245)
@@ -11,7 +11,7 @@
     #pragma warning(disable:4456)
     #pragma warning(disable:4505)
     #pragma warning(disable:4996)
-#elif defined(BRYNET_PLATFORM_LINUX)
+#elif defined(CORE_PLATFORM_LINUX)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
@@ -24,9 +24,9 @@
 #include "brynet/net/wrapper/HttpConnectionBuilder.hpp"
 #include "brynet/net/wrapper/HttpServiceBuilder.hpp"
 
-#if defined(BRYNET_PLATFORM_WINDOWS)
+#if defined(CORE_PLATFORM_WINDOWS)
     #pragma warning(pop)
-#elif defined(BRYNET_PLATFORM_LINUX)
+#elif defined(CORE_PLATFORM_LINUX)
     #pragma GCC diagnostic pop
 #endif
 

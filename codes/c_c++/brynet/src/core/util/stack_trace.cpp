@@ -2,10 +2,10 @@
 #include "quill/Fmt.h"
 #include <stdexcept>
 
-#if defined(BRYNET_PLATFORM_WINDOWS)
+#if defined(CORE_PLATFORM_WINDOWS)
     #include <windows.h>
     #include <dbghelp.h>
-#else
+#elif defined(CORE_PLATFORM_LINUX)
     #include <execinfo.h>
     #include <cxxabi.h>
     #include <dlfcn.h>
@@ -21,7 +21,7 @@ void stack_trace::initialize(void)
     if (_initialized)
         return;
 
-#if defined(BRYNET_PLATFORM_WINDOWS)
+#if defined(CORE_PLATFORM_WINDOWS)
     // Provide required symbol options
     SymSetOptions(SYMOPT_PUBLICS_ONLY);
 
@@ -56,7 +56,7 @@ void stack_trace::uninitialize(void)
     if (!_initialized)
         return;
 
-#if defined(BRYNET_PLATFORM_WINDOWS)
+#if defined(CORE_PLATFORM_WINDOWS)
     // Get the current process handle
     bool success = false;
     if (HANDLE hProcess = GetCurrentProcess(); hProcess && SymCleanup(hProcess))
@@ -78,7 +78,7 @@ stack_trace::stack_trace(void)
     // Capture stack trace snapshot under the critical section
     std::lock_guard holder(_capture_mutex);
 
-#if defined(BRYNET_PLATFORM_WINDOWS)
+#if defined(CORE_PLATFORM_WINDOWS)
     // Capture the current stack trace
     const USHORT captured = CaptureStackBackTrace(0, capacity, frames, nullptr);
     if (captured > 0)
@@ -130,7 +130,7 @@ stack_trace::stack_trace(void)
             f.line = line.LineNumber;
         }
     }
-#else
+#elif defined(CORE_PLATFORM_LINUX)
     // Capture the current stack trace
     const int captured   = backtrace(frames, capacity);
     char**    stacktrace = backtrace_symbols(frames, captured);
