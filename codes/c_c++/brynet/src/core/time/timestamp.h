@@ -14,7 +14,7 @@ namespace core {
 // The internal reference time is the Unix epoch,
 // microseconds midnight, January 1, 1970.
 ////////////////////////////////////////////////////////////////
-class CORE_API timestamp final
+class timestamp final
 {
 public:
     // Resolution in units per second. Since the timestamp
@@ -37,20 +37,24 @@ public:
     timestamp& operator =(timestamp&&) = default;
 
     // Assigns a Unix epoch(expressed in microseconds).
-    timestamp& operator =(const time_t epoch_time) {return assign(epoch_time);}
+    timestamp& operator =(time_t epoch_time) {return assign(epoch_time);}
 
     // Assigns a Unix epoch(expressed in microseconds).
-    timestamp& assign(const time_t epoch_time) {_tsval = epoch_time; return *this;}
+    timestamp& assign(time_t epoch_time) {_tsval = epoch_time; return *this;}
 
     // Updates the timestamp with the current time.
-    void update(void);
+    void update(void)
+    {
+        const auto duration = std::chrono::system_clock::now().time_since_epoch();
+        _tsval = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+    }
 
     // Returns the time elapsed since the time denoted by the timestamp. Equivalent to timestamp() - *this.
     time_t elapsed(void) const {return timestamp() - *this;}
 
     // Returns true iff the given interval(expressed in microseconds)
     // has passed since the time denoted by the timestamp.
-    bool is_elapsed(const time_t interval) const {return elapsed() >= interval;}
+    bool is_elapsed(time_t interval) const {return elapsed() >= interval;}
 
     // Returns the timestamp expressed in seconds.
     time_t epoch_time(void) const {return _tsval / resolution;}

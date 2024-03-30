@@ -2,6 +2,7 @@
 #include "quill/Fmt.h"
 #include "util/singleton.hpp"
 #include "util/stack_trace.h"
+#include "time/timespan.h"
 #include "time/timestamp.h"
 
 // Unnamed namespace for internal linkage
@@ -127,9 +128,22 @@ GTEST_TEST(MiscTest, Timespan)
 
 GTEST_TEST(MiscTest, Timestamp)
 {
-    core::timestamp ts;
-    ASSERT_TRUE(ts.epoch_time() > 0);
+    core::timestamp ts1(100 * core::timestamp::resolution);
+    core::timestamp ts2(101 * core::timestamp::resolution);
+    ASSERT_TRUE(ts1 + core::timestamp::resolution == ts2);
+    ASSERT_TRUE(ts2 - core::timestamp::resolution == ts1);
+    ASSERT_TRUE(ts1 + core::timespan(core::timestamp::resolution) == ts2);
+    ASSERT_TRUE(ts2 - core::timespan(core::timestamp::resolution) == ts1);
 
-    fmt::print("Current timestamp expressed in seconds: {}\n", ts.epoch_time());
-    fmt::print("Current timestamp expressed in microseconds: {}\n", ts.epoch_microseconds());
+    ts1 += core::timestamp::resolution;
+    ASSERT_TRUE(ts1 == ts2);
+
+    ts1 -= core::timestamp::resolution;
+    ASSERT_TRUE(ts1 == ts2 - core::timestamp::resolution);
+
+    ts1 += core::timespan(core::timestamp::resolution);
+    ASSERT_TRUE(ts1 == ts2);
+
+    ts1 -= core::timespan(core::timestamp::resolution);
+    ASSERT_TRUE(ts1 == ts2 - core::timestamp::resolution);
 }

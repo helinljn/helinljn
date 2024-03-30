@@ -1,7 +1,6 @@
 #ifndef __TIMESPAN_H__
 #define __TIMESPAN_H__
 
-#include "core_port.h"
 #include <chrono>
 
 namespace core    {
@@ -19,7 +18,7 @@ inline constexpr time_t days         =   24 * hours;         // The number of mi
 // A class that represents time spans up to
 // microsecond resolution.
 ////////////////////////////////////////////////////////////////
-class CORE_API timespan
+class timespan final
 {
 public:
     static_assert(sizeof(time_t) == 8 && std::is_signed_v<time_t>, "Invalid time_t!");
@@ -54,11 +53,7 @@ public:
     timespan& operator =(timespan&&) = default;
 
     // Assigns a new timespan.
-    timespan& operator =(time_t microseconds)
-    {
-        _span = microseconds;
-        return *this;
-    }
+    timespan& operator =(time_t microseconds) {_span = microseconds; return *this;}
 
     // Assigns a new timespan.
     constexpr timespan& assign(int days, int hours, int minutes, int seconds, int microseconds)
