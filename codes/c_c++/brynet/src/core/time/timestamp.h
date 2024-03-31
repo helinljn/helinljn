@@ -26,7 +26,7 @@ public:
     explicit timestamp(void) : _tsval(0) {update();}
 
     // Creates a timestamp from Unix epoch(expressed in microseconds).
-    explicit timestamp(time_t epoch_time) : _tsval(epoch_time) {}
+    explicit timestamp(time_t epoch_microseconds) : _tsval(epoch_microseconds) {}
 
     // Copy & Move constructors.
     timestamp(const timestamp&) = default;
@@ -37,10 +37,10 @@ public:
     timestamp& operator =(timestamp&&) = default;
 
     // Assigns a Unix epoch(expressed in microseconds).
-    timestamp& operator =(time_t epoch_time) {return assign(epoch_time);}
+    timestamp& operator =(time_t epoch_microseconds) {return assign(epoch_microseconds);}
 
     // Assigns a Unix epoch(expressed in microseconds).
-    timestamp& assign(time_t epoch_time) {_tsval = epoch_time; return *this;}
+    timestamp& assign(time_t epoch_microseconds) {_tsval = epoch_microseconds; return *this;}
 
     // Updates the timestamp with the current time.
     void update(void)

@@ -4,6 +4,7 @@
 #include "util/stack_trace.h"
 #include "time/timespan.h"
 #include "time/timestamp.h"
+#include "time/datetime.h"
 
 // Unnamed namespace for internal linkage
 namespace {
@@ -146,4 +147,268 @@ GTEST_TEST(MiscTest, Timestamp)
 
     ts1 -= core::timespan(core::timestamp::resolution);
     ASSERT_TRUE(ts1 == ts2 - core::timestamp::resolution);
+}
+
+GTEST_TEST(MiscTest, DateTime)
+{
+    {
+        // default constructor
+        core::datetime dt1;
+
+        // copy constructor from DateTimeEx
+        core::datetime dt2(dt1);
+        ASSERT_TRUE(dt1 == dt2);
+        ASSERT_TRUE(dt1.make_timestamp() == dt2.make_timestamp());
+
+        // copy constructor from Timestamp
+        core::datetime dt3(dt1.make_timestamp());
+        ASSERT_TRUE(dt1 == dt3);
+        ASSERT_TRUE(dt1.make_timestamp() == dt3.make_timestamp());
+
+        // copy constructor from tm struct
+        core::datetime dt4(dt1.make_tm());
+        ASSERT_TRUE(dt1.year() == dt4.year());
+        ASSERT_TRUE(dt1.month() == dt4.month());
+        ASSERT_TRUE(dt1.day() == dt4.day());
+        ASSERT_TRUE(dt1.day_of_week() == dt4.day_of_week());
+        ASSERT_TRUE(dt1.day_of_year() == dt4.day_of_year());
+        ASSERT_TRUE(dt1.hour() == dt4.hour());
+        ASSERT_TRUE(dt1.minute() == dt4.minute());
+        ASSERT_TRUE(dt1.second() == dt4.second());
+
+        // copy constructor from the given local date and time
+        core::datetime dt5(dt1.year(), dt1.month(), dt1.day(), dt1.hour(), dt1.minute(), dt1.second(), dt1.millisecond(), dt1.microsecond());
+        ASSERT_TRUE(dt1 == dt5);
+        ASSERT_TRUE(dt1.make_timestamp() == dt5.make_timestamp());
+
+        core::datetime dt6;
+
+        // assigns a datetime
+        dt6 += core::timespan(std::chrono::hours(1));
+        dt6  = dt1;
+        ASSERT_TRUE(dt1 == dt6);
+        ASSERT_TRUE(dt1.make_timestamp() == dt6.make_timestamp());
+
+        // assigns a timestamp
+        dt6 += core::timespan(std::chrono::hours(1));
+        dt6  = dt1.make_timestamp();
+        ASSERT_TRUE(dt1 == dt6);
+        ASSERT_TRUE(dt1.make_timestamp() == dt6.make_timestamp());
+
+        // assigns a tm struct
+        dt6 += core::timespan(std::chrono::hours(1));
+        dt6  = dt1.make_tm();
+        ASSERT_TRUE(dt1.year() == dt6.year());
+        ASSERT_TRUE(dt1.month() == dt6.month());
+        ASSERT_TRUE(dt1.day() == dt6.day());
+        ASSERT_TRUE(dt1.day_of_week() == dt6.day_of_week());
+        ASSERT_TRUE(dt1.day_of_year() == dt6.day_of_year());
+        ASSERT_TRUE(dt1.hour() == dt6.hour());
+        ASSERT_TRUE(dt1.minute() == dt6.minute());
+        ASSERT_TRUE(dt1.second() == dt6.second());
+
+        // assigns a Timestamp
+        dt6 += core::timespan(std::chrono::hours(1));
+        dt6.assign(dt1.make_timestamp());
+        ASSERT_TRUE(dt1 == dt6);
+        ASSERT_TRUE(dt1.make_timestamp() == dt6.make_timestamp());
+
+        // assigns a tm struct
+        dt6 += core::timespan(std::chrono::hours(1));
+        dt6.assign(dt1.make_tm());
+        ASSERT_TRUE(dt1.year() == dt6.year());
+        ASSERT_TRUE(dt1.month() == dt6.month());
+        ASSERT_TRUE(dt1.day() == dt6.day());
+        ASSERT_TRUE(dt1.day_of_week() == dt6.day_of_week());
+        ASSERT_TRUE(dt1.day_of_year() == dt6.day_of_year());
+        ASSERT_TRUE(dt1.hour() == dt6.hour());
+        ASSERT_TRUE(dt1.minute() == dt6.minute());
+        ASSERT_TRUE(dt1.second() == dt6.second());
+
+        // assigns a local date and time
+        dt6 += core::timespan(std::chrono::hours(1));
+        dt6.assign(dt1.year(), dt1.month(), dt1.day(), dt1.hour(), dt1.minute(), dt1.second(), dt1.millisecond(), dt1.microsecond());
+        ASSERT_TRUE(dt1 == dt6);
+        ASSERT_TRUE(dt1.make_timestamp() == dt6.make_timestamp());
+
+        dt6 += core::timespan(std::chrono::hours(1));
+        ASSERT_TRUE(dt1 != dt6);
+        ASSERT_TRUE(dt1 <  dt6);
+        ASSERT_TRUE(dt1 <= dt6);
+        ASSERT_TRUE(dt6 >  dt1);
+        ASSERT_TRUE(dt6 >= dt1);
+
+        ASSERT_TRUE(dt6 == dt1 + core::timespan(std::chrono::hours(1)));
+        ASSERT_TRUE(dt1 == dt6 - core::timespan(std::chrono::hours(1)));
+
+        core::timestamp ts(1314521000 * core::timestamp::resolution);
+        dt5 = ts;
+        dt6 = ts + core::timespan(std::chrono::seconds(5211314));
+
+        const auto diff = dt6 - dt5;
+        ASSERT_TRUE(diff.total_seconds() == 5211314);
+    }
+
+    {
+        // 1970-01-01 08:00:00 Thursday
+        core::datetime dt(core::timestamp(0));
+        ASSERT_TRUE(dt.year() == 1970);
+        ASSERT_TRUE(dt.month() == 1);
+        ASSERT_TRUE(dt.day() == 1);
+        ASSERT_TRUE(dt.hour() == 8);
+        ASSERT_TRUE(dt.minute() == 0);
+        ASSERT_TRUE(dt.second() == 0);
+        ASSERT_TRUE(dt.millisecond() == 0);
+        ASSERT_TRUE(dt.microsecond() == 0);
+        ASSERT_TRUE(dt.day_of_week() == 4);
+        ASSERT_TRUE(dt.make_timestamp().epoch_time() == 0);
+
+        // 1970-01-01 08:00:00 Thursday
+        core::datetime dtex(dt);
+        ASSERT_TRUE(dtex.year() == 1970);
+        ASSERT_TRUE(dtex.month() == 1);
+        ASSERT_TRUE(dtex.day() == 1);
+        ASSERT_TRUE(dtex.hour() == 8);
+        ASSERT_TRUE(dtex.minute() == 0);
+        ASSERT_TRUE(dtex.second() == 0);
+        ASSERT_TRUE(dtex.millisecond() == 0);
+        ASSERT_TRUE(dtex.microsecond() == 0);
+        ASSERT_TRUE(dtex.day_of_week() == 4);
+        ASSERT_TRUE(dtex.make_timestamp().epoch_time() == 0);
+
+        dtex += core::timespan(std::chrono::hours(1));
+        dtex  = dt;
+        ASSERT_TRUE(dtex.year() == 1970);
+        ASSERT_TRUE(dtex.month() == 1);
+        ASSERT_TRUE(dtex.day() == 1);
+        ASSERT_TRUE(dtex.hour() == 8);
+        ASSERT_TRUE(dtex.minute() == 0);
+        ASSERT_TRUE(dtex.second() == 0);
+        ASSERT_TRUE(dtex.millisecond() == 0);
+        ASSERT_TRUE(dtex.microsecond() == 0);
+        ASSERT_TRUE(dtex.day_of_week() == 4);
+        ASSERT_TRUE(dtex.make_timestamp().epoch_time() == 0);
+
+        dtex += core::timespan(std::chrono::hours(1));
+        dtex  = dt;
+        ASSERT_TRUE(dtex.year() == 1970);
+        ASSERT_TRUE(dtex.month() == 1);
+        ASSERT_TRUE(dtex.day() == 1);
+        ASSERT_TRUE(dtex.hour() == 8);
+        ASSERT_TRUE(dtex.minute() == 0);
+        ASSERT_TRUE(dtex.second() == 0);
+        ASSERT_TRUE(dtex.millisecond() == 0);
+        ASSERT_TRUE(dtex.microsecond() == 0);
+        ASSERT_TRUE(dtex.day_of_week() == 4);
+        ASSERT_TRUE(dtex.make_timestamp().epoch_time() == 0);
+
+        ASSERT_TRUE(dtex - dt == 0);
+    }
+
+    // 1970-01-01 08:00:00 Thursday
+    core::datetime dt(core::timestamp(0));
+    ASSERT_TRUE(dt.year() == 1970);
+    ASSERT_TRUE(dt.month() == 1);
+    ASSERT_TRUE(dt.day() == 1);
+    ASSERT_TRUE(dt.hour() == 8);
+    ASSERT_TRUE(dt.minute() == 0);
+    ASSERT_TRUE(dt.second() == 0);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.day_of_week() == 4);
+    ASSERT_TRUE(dt.make_timestamp().epoch_time() == 0);
+
+    tm tmStruct = dt.make_tm();
+    ASSERT_TRUE(tmStruct.tm_year == 70);
+    ASSERT_TRUE(tmStruct.tm_mon == 0);
+    ASSERT_TRUE(tmStruct.tm_mday == 1);
+    ASSERT_TRUE(tmStruct.tm_hour == 8);
+    ASSERT_TRUE(tmStruct.tm_min == 0);
+    ASSERT_TRUE(tmStruct.tm_sec == 0);
+
+    dt = tmStruct;
+    ASSERT_TRUE(dt.year() == 1970);
+    ASSERT_TRUE(dt.month() == 1);
+    ASSERT_TRUE(dt.day() == 1);
+    ASSERT_TRUE(dt.hour() == 8);
+    ASSERT_TRUE(dt.minute() == 0);
+    ASSERT_TRUE(dt.second() == 0);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.day_of_week() == 4);
+    ASSERT_TRUE(dt.make_timestamp().epoch_time() == 0);
+
+    // 2001-09-09 09:46:40 Sunday
+    dt = core::timestamp(1000000000 * core::timestamp::resolution);
+    ASSERT_TRUE(dt.year() == 2001);
+    ASSERT_TRUE(dt.month() == 9);
+    ASSERT_TRUE(dt.day() == 9);
+    ASSERT_TRUE(dt.hour() == 9);
+    ASSERT_TRUE(dt.minute() == 46);
+    ASSERT_TRUE(dt.second() == 40);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.day_of_week() == 0);
+    ASSERT_TRUE(dt.make_timestamp().epoch_time() == 1000000000);
+
+    // 3000-12-31 23:59:59 Friday
+    dt = core::datetime(3000, 12, 31, 23, 59, 59);
+    ASSERT_TRUE(dt.year() == 3000);
+    ASSERT_TRUE(dt.month() == 12);
+    ASSERT_TRUE(dt.day() == 31);
+    ASSERT_TRUE(dt.hour() == 23);
+    ASSERT_TRUE(dt.minute() == 59);
+    ASSERT_TRUE(dt.second() == 59);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.day_of_week() == 3);
+    ASSERT_TRUE(dt.make_timestamp().epoch_time() == time_t{32535187199});
+
+    // 2011-08-28 16:43:20 Sunday
+    dt = core::datetime(2011, 8, 28, 16, 43, 20);
+    ASSERT_TRUE(dt.year() == 2011);
+    ASSERT_TRUE(dt.month() == 8);
+    ASSERT_TRUE(dt.day() == 28);
+    ASSERT_TRUE(dt.hour() == 16);
+    ASSERT_TRUE(dt.minute() == 43);
+    ASSERT_TRUE(dt.second() == 20);
+    ASSERT_TRUE(dt.millisecond() == 0);
+    ASSERT_TRUE(dt.microsecond() == 0);
+    ASSERT_TRUE(dt.day_of_week() == 0);
+    ASSERT_TRUE(dt.make_timestamp().epoch_time() == 1314521000);
+
+    core::datetime dt1 = dt + core::timespan(std::chrono::hours(1));
+    ASSERT_TRUE(dt1.year() == 2011);
+    ASSERT_TRUE(dt1.month() == 8);
+    ASSERT_TRUE(dt1.day() == 28);
+    ASSERT_TRUE(dt1.hour() == 17);
+    ASSERT_TRUE(dt1.minute() == 43);
+    ASSERT_TRUE(dt1.second() == 20);
+    ASSERT_TRUE(dt1.millisecond() == 0);
+    ASSERT_TRUE(dt1.microsecond() == 0);
+    ASSERT_TRUE(dt1.day_of_week() == 0);
+    ASSERT_TRUE(dt1.make_timestamp().epoch_time() == 1314524600);
+
+    core::datetime dt2 = dt1 - core::timespan(std::chrono::hours(1));
+    ASSERT_TRUE(dt2.year() == 2011);
+    ASSERT_TRUE(dt2.month() == 8);
+    ASSERT_TRUE(dt2.day() == 28);
+    ASSERT_TRUE(dt2.hour() == 16);
+    ASSERT_TRUE(dt2.minute() == 43);
+    ASSERT_TRUE(dt2.second() == 20);
+    ASSERT_TRUE(dt2.millisecond() == 0);
+    ASSERT_TRUE(dt2.microsecond() == 0);
+    ASSERT_TRUE(dt2.day_of_week() == 0);
+    ASSERT_TRUE(dt2.make_timestamp().epoch_time() == 1314521000);
+
+    const auto span = dt1 - dt2;
+    ASSERT_TRUE(span.days() == 0);
+    ASSERT_TRUE(span.hours() == 1);
+    ASSERT_TRUE(span.total_hours() == 1);
+    ASSERT_TRUE(span.minutes() == 0);
+    ASSERT_TRUE(span.total_minutes() == 60);
+    ASSERT_TRUE(span.seconds() == 0);
+    ASSERT_TRUE(span.total_seconds() == 3600);
+    ASSERT_TRUE(span.milliseconds() == 0);
+    ASSERT_TRUE(span.total_milliseconds() == 3600000);
 }
