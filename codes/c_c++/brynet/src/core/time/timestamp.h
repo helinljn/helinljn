@@ -7,7 +7,7 @@ namespace core {
 
 ////////////////////////////////////////////////////////////////
 // A timestamp stores a monotonic* time value
-// with (theoretical) microseconds resolution.
+// with(theoretical) microseconds resolution.
 // Timestamps can be compared with each other
 // and simple arithmetic is supported.
 //

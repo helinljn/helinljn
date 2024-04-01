@@ -86,7 +86,7 @@ void datetime::update(void)
 
 void datetime::update_tm(void)
 {
-    const time_t t = _ts.epoch_time();
+    const auto t = _ts.epoch_time();
     if (t < 0)
         throw std::runtime_error("cannot get epoch time!");
 

@@ -40,7 +40,7 @@ inline constexpr bool is_datetime_valid(int year, int month, int day, int hour, 
 ////////////////////////////////////////////////////////////////
 // This class represents an instant in local time, expressed in
 // years, months, days, hours, minutes, seconds, milliseconds
-// and microsecond.
+// and microseconds.
 //
 // Windows:
 // _mktime64 will return -1 cast to type __time64_t if timeptr
@@ -64,7 +64,7 @@ public:
     //   * day is from 1 to 31.
     //   * hour is from 0 to 23.
     //   * minute is from 0 to 59.
-    //   * second is from 0 to 60 (allowing leap seconds).
+    //   * second is from 0 to 60(allowing leap seconds).
     //   * millisecond is from 0 to 999.
     //   * microsecond is from 0 to 999.
     explicit datetime(int year, int month, int day, int hour, int minute, int second, int millisecond = 0, int microsecond = 0);
@@ -95,7 +95,7 @@ public:
     //   * day is from 1 to 31.
     //   * hour is from 0 to 23.
     //   * minute is from 0 to 59.
-    //   * second is from 0 to 60 (allowing leap seconds).
+    //   * second is from 0 to 60(allowing leap seconds).
     //   * millisecond is from 0 to 999.
     //   * microsecond is from 0 to 999.
     datetime& assign(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, int millisecond = 0, int microsecond = 0);
@@ -103,53 +103,54 @@ public:
     // Updates the datetime with the current time.
     void update(void);
 
-    // Returns the year (1970 to 3000).
+    // Returns the year(1970 to 3000).
     int year(void) const {return _tmval.tm_year + 1900;}
 
-    // Returns the month (1 to 12).
+    // Returns the month(1 to 12).
     int month(void) const {return _tmval.tm_mon + 1;}
 
-    // Returns the day within the month (1 to 31).
+    // Returns the day within the month(1 to 31).
     int day(void) const {return _tmval.tm_mday;}
 
-    // Returns the weekday (0 to 6, where 0=Sunday, 1=Monday, ..., 6=Saturday).
+    // Returns the weekday(0 to 6, where 0=Sunday, 1=Monday, ..., 6=Saturday).
     int day_of_week(void) const {return _tmval.tm_wday;}
 
     // Returns the number of the day in the year. January 1 is 1, February 1 is 32, etc.
     int day_of_year(void) const {return _tmval.tm_yday + 1;}
 
-    // Returns the hour (0 to 23).
+    // Returns the hour(0 to 23).
     int hour(void) const {return _tmval.tm_hour;}
 
-    // Returns the minute (0 to 59).
+    // Returns the minute(0 to 59).
     int minute(void) const {return _tmval.tm_min;}
 
-    // Returns the second (0 to 59).
+    // Returns the second(0 to 60, including leap second).
     int second(void) const {return _tmval.tm_sec;}
 
-    // Returns the millisecond (0 to 999)
+    // Returns the millisecond(0 to 999)
     int millisecond(void) const {return static_cast<int>((epoch_microseconds() % timestamp::resolution) / 1000);}
 
-    // Returns the microsecond (0 to 999)
+    // Returns the microsecond(0 to 999)
     int microsecond(void) const {return static_cast<int>((epoch_microseconds() % timestamp::resolution) % 1000);}
 
     // Returns the time elapsed since the time denoted by the timestamp. Equivalent to datetime() - *this.
     time_t elapsed(void) const {return _ts.elapsed();}
 
-    // Returns true iff the given interval has passed since the time denoted by the timestamp.
+    // Returns true iff the given interval(expressed in microseconds)
+    // has passed since the time denoted by the datetime.
     bool is_elapsed(time_t interval) const {return _ts.is_elapsed(interval);}
 
-    // Returns the timestamp expressed in time_t.
+    // Returns the timestamp expressed in seconds.
     time_t epoch_time(void) const {return _ts.epoch_time();}
 
     // Returns the timestamp expressed in microseconds.
     time_t epoch_microseconds(void) const {return _ts.epoch_microseconds();}
 
     // Converts datetime to timestamp.
-    timestamp make_timestamp(void) const {return _ts;}
+    timestamp to_timestamp(void) const {return _ts;}
 
     // Converts datetime to tm struct.
-    tm make_tm(void) const {return _tmval;}
+    tm to_tm(void) const {return _tmval;}
 
     bool operator ==(const datetime& ts) const {return _ts == ts._ts;}
     bool operator !=(const datetime& ts) const {return _ts != ts._ts;}
