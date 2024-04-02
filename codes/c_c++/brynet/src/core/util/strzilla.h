@@ -1,5 +1,5 @@
-#ifndef __STRING_ZILLA_H__
-#define __STRING_ZILLA_H__
+#ifndef __STRZILLA_H__
+#define __STRZILLA_H__
 
 #include "core_port.h"
 
@@ -26,4 +26,4 @@
 
 namespace strzilla = ashvardanian::stringzilla;
 
-#endif // __STRING_ZILLA_H__
+#endif // __STRZILLA_H__
