@@ -5,6 +5,7 @@ PROJECT(test)
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
     ${CMAKE_3RD_DIR_OPENSSL}/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/sz/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/quill/quill/include

@@ -1,5 +1,6 @@
 #include "util/brynet.h"
 #include "util/quill.h"
+#include "util/stringzilla.h"
 #include "util/stack_trace.h"
 #include "gtest/gtest.h"
 
