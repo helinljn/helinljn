@@ -1,25 +1,10 @@
 @echo off
 
 set ROOT_INIT_DIR=%~dp0
-set SZ_INIT_DIR=%ROOT_INIT_DIR%/3rd/sz
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set QUILL_INIT_DIR=%ROOT_INIT_DIR%/3rd/quill
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
 set GOOGLETEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/googletest
-
-echo ------------------
-echo -- sz
-cd %ROOT_INIT_DIR%
-if not exist %SZ_INIT_DIR% (
-    git clone -b v3.7.1 https://kkgithub.com/ashvardanian/StringZilla.git %SZ_INIT_DIR%
-) else (
-    cd %SZ_INIT_DIR%
-    git remote set-url origin https://kkgithub.com/ashvardanian/StringZilla.git
-    git remote -v
-    git checkout .
-    git fetch -p origin
-    git checkout v3.7.1
-)
 
 echo ------------------
 echo -- fmt

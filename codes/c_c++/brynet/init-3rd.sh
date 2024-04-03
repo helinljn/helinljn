@@ -1,25 +1,10 @@
 #!/bin/bash
 
 ROOT_INIT_DIR=`pwd`
-SZ_INIT_DIR=$ROOT_INIT_DIR/3rd/sz
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 QUILL_INIT_DIR=$ROOT_INIT_DIR/3rd/quill
 BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
 GOOGLETEST_INIT_DIR=$ROOT_INIT_DIR/3rd/googletest
-
-echo ------------------
-echo -- sz
-cd $ROOT_INIT_DIR
-if [ ! -d $SZ_INIT_DIR ]; then
-    git clone -b v3.7.1 https://kkgithub.com/ashvardanian/StringZilla.git $SZ_INIT_DIR
-else
-    cd $SZ_INIT_DIR
-    git remote set-url origin https://kkgithub.com/ashvardanian/StringZilla.git
-    git remote -v
-    git checkout .
-    git fetch -p origin
-    git checkout v3.7.1
-fi
 
 echo ------------------
 echo -- fmt

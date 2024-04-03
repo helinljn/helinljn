@@ -1,4 +1,3 @@
-#include "util/strzilla.h"
 #include "util/brynet.h"
 #include "util/quill.h"
 #include "util/stack_trace.h"
