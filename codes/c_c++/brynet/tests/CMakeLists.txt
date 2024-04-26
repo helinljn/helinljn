@@ -86,34 +86,4 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${CURRENT_DIR_INCLUDE_LIST})
     SOURCE_GROUP(TREE ${PROJECT_SOURCE_DIR} PREFIX "src"
         FILES ${CURRENT_DIR_SRC_LIST})
-
-    # Windows平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
-    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/libssl.lib
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.lib
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libssl-1_1-x64.dll
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_PROJECT_ROOT_DIR}/tools/openssl/libcrypto-1_1-x64.dll
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-    )
-ELSE()
-    # Linux平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
-    ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/libssl.so.1.1
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_3RD_DIR_OPENSSL}/lib/libcrypto.so.1.1
-            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-            ln -sf libssl.so.1.1 libssl.so
-        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
-            ln -sf libcrypto.so.1.1 libcrypto.so
-    )
 ENDIF()
