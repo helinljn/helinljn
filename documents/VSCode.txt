@@ -5,7 +5,7 @@
 
     3. C/C++ Extension Pack
 
-    4. Go
+    4. Python
 
     5. One Dark Pro
 
@@ -96,12 +96,6 @@
     "C_Cpp.intelliSenseUpdateDelay": 500,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
-
-    "[go]": {
-        "editor.formatOnSave": true,
-        "editor.formatOnType": true,
-        "editor.formatOnPaste": true,
-    },
 }
 
 【键盘设置】

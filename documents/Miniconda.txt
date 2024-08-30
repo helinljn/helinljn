@@ -1,32 +1,44 @@
-# Miniconda下载地址，首选：Python 3.10 - Miniconda3 Windows 64-bit
+# Miniconda下载地址，首选：Miniconda3-py38_23.11.0-2-Windows-x86_64
 # 安装时选择：Install for all users，勾选所有选项
-https://docs.conda.io/en/latest/miniconda.html
-
-# 环境变量
-C:\Program Files\miniconda3
-C:\Program Files\miniconda3\Scripts
+https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D
 
 # 更换Conda源
 conda config --show channels
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
 conda config --set show_channel_urls yes
 
-# Conda常用命令(如果更改base环境的话，则需要管理员权限)
-	查看当前系统下的环境
-	conda info -e
+# 更换pip源
+pip配置文件位置：~/.pip/pip.conf (Windows路径为：C:\Users\<UserName>\pip\pip.ini)
 
+[global]
+trusted-host = mirrors.aliyun.com
+index-url = https://mirrors.aliyun.com/pypi/simple/
+timeout = 120
+
+# 临时更换pip源
+pip install <包名> -i https://mirrors.aliyun.com/pypi/simple/
+
+# Conda常用命令(如果更改base环境的话，则需要管理员权限)
 	创建指定python版本的环境
 	conda create -n env_name python=3.8.10
+
+	删除指定python版本的环境
+	conda env remove -n env_name
+
+	查看当前系统下的环境
+	conda info -e
 
 	激活某个环境
 	conda activate env_name
 
 	退出某个环境
 	conda deactivate
-
-	删除某个环境
-	conda remove env_name
 
 	查看指定环境下的包
 	conda list -n env_name
@@ -40,22 +52,7 @@ conda config --set show_channel_urls yes
 	在指定环境下升级包
 	conda update -n env_name xxx
 
-	升级base环境的conda & python版本
-	conda update -n base conda python
-
-# 临时更改pip源
-pip install <包名> -i https://pypi.tuna.tsinghua.edu.cn/simple
+	更新指定环境下的所有包
+	conda update -n env_name --all
 
 如果遇到：raise ValueError("check_hostname requires server_hostname")报错，需要关闭翻墙代理
-
-# 常用包pip安装
-pip install requests -i https://pypi.tuna.tsinghua.edu.cn/simple
-pip install tornado  -i https://pypi.tuna.tsinghua.edu.cn/simple
-pip install pymysql  -i https://pypi.tuna.tsinghua.edu.cn/simple
-pip install redis    -i https://pypi.tuna.tsinghua.edu.cn/simple
-
-# 常用包conda安装
-conda install -n env_name requests
-conda install -n env_name tornado
-conda install -n env_name pymysql
-conda install -n env_name redis
