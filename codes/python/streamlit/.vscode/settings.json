@@ -1,0 +1,13 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\helin\\.conda\\envs\\py311\\python.exe",
+
+    "search.exclude": {
+        "**/aaa": true,
+        "**/bbb": true
+    },
+
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true
+    }
+}
