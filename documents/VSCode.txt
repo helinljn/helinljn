@@ -13,9 +13,12 @@
 
     7. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
 
+【下载地址】
+    https://update.code.visualstudio.com/1.95.3/win32-x64/stable
+
 【常用设置】
 {
-    // VSCode version: VSCodeSetup-x64-1.85.2
+    // VSCode version: VSCodeSetup-x64-1.95.3
     "workbench.colorTheme": "One Dark Pro",
     "workbench.startupEditor": "none",
 
