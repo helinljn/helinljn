@@ -5,11 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Streamlit",
+            "name": "Python",
             "type": "debugpy",
             "request": "launch",
-            "module": "streamlit",
-            "args": ["run", "${file}"],
+            "program": "${file}",
             "console": "integratedTerminal"
         }
     ]
