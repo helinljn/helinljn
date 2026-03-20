@@ -28,11 +28,11 @@ SET(CMAKE_PROJECT_BUILD_ROOT_DIR ${CMAKE_SOURCE_DIR}/.build)
 # 编译选项、链接选项、生成目录、第三方库目录、静态库 & 动态库的前缀
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 编译选项
-    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4251 /wd4819")
+    SET(CMAKE_C_FLAGS           "${CMAKE_C_FLAGS} /std:c11 /utf-8 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4251")
     SET(CMAKE_C_FLAGS_DEBUG     "${CMAKE_C_FLAGS_DEBUG}")
     SET(CMAKE_C_FLAGS_RELEASE   "${CMAKE_C_FLAGS_RELEASE} /Zi")
 
-    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4251 /wd4819")
+    SET(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /std:c++17 /utf-8 /permissive- /Zc:__cplusplus /bigobj /W4 /MP /wd4251")
     SET(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}")
     SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
 
@@ -106,7 +106,6 @@ ELSE()
 ENDIF()
 
 # 添加子目录
-ADD_SUBDIRECTORY(3rd)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
 

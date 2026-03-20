@@ -1,5 +1,5 @@
 #include "stack_trace.h"
-#include "quill/Fmt.h"
+#include "fmt/format.h"
 #include <stdexcept>
 
 #if defined(CORE_PLATFORM_WINDOWS)

@@ -6,9 +6,8 @@ SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
     ${CMAKE_3RD_DIR_OPENSSL}/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/quill/quill/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/googletest/googletest/include
     ${CMAKE_PROJECT_ROOT_DIR}/src/core
 )
 
@@ -16,7 +15,7 @@ SET(CURRENT_INCLUDE_DIR
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DGTEST_LINKED_AS_SHARED_LIBRARY
+        # ...
     )
 
     # 编译选项
@@ -26,13 +25,12 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        gtest
         core
     )
 ELSE()
     # 宏定义
     SET(CURRENT_COMPILE_DEFINITIONS
-        -DGTEST_LINKED_AS_SHARED_LIBRARY
+        # ...
     )
 
     # 编译选项
@@ -42,7 +40,6 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        gtest
         core
     )
 ENDIF()
@@ -79,7 +76,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # VS工程设置
     SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY FOLDER "tests")
-    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "--gtest_brief")
+    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_COMMAND_ARGUMENTS "")
     SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}")
 
     SOURCE_GROUP(TREE ${PROJECT_SOURCE_DIR} PREFIX "include"
