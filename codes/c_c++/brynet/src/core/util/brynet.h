@@ -16,13 +16,17 @@
     #pragma GCC diagnostic ignored "-Wunused-function"
 #endif
 
+#include "brynet/Version.hpp"
 #include "brynet/base/AppStatus.hpp"
+#include "brynet/base/WaitGroup.hpp"
+#include "brynet/net/AsyncConnector.hpp"
+#include <brynet/net/PromiseReceive.hpp>
 #include "brynet/net/http/HttpFormat.hpp"
 #include "brynet/net/http/HttpService.hpp"
-#include "brynet/net/wrapper/ConnectionBuilder.hpp"
 #include "brynet/net/wrapper/ServiceBuilder.hpp"
-#include "brynet/net/wrapper/HttpConnectionBuilder.hpp"
+#include "brynet/net/wrapper/ConnectionBuilder.hpp"
 #include "brynet/net/wrapper/HttpServiceBuilder.hpp"
+#include "brynet/net/wrapper/HttpConnectionBuilder.hpp"
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #pragma warning(pop)
