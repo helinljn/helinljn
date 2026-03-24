@@ -1,6 +1,7 @@
 #ifndef __NUMERIC_CAST_HPP__
 #define __NUMERIC_CAST_HPP__
 
+#include "core_port.h"
 #include <string>
 #include <type_traits>
 
@@ -12,211 +13,76 @@ struct converter
 {
 };
 
-// string to int8_t
-template <>
-struct converter<int8_t, std::string>
-{
-    static int8_t convert(const std::string& from)
-    {
-        return static_cast<int8_t>(std::stoi(from));
-    }
+// numeric to string converter
+#define DECLARE_INT_TO_STRING_CONVERTER(Type) \
+template<>                                    \
+struct converter<std::string, Type>           \
+{                                             \
+    static std::string convert(Type from)     \
+    {                                         \
+        return std::to_string(from);          \
+    }                                         \
 };
 
-// string to uint8_t
-template <>
-struct converter<uint8_t, std::string>
-{
-    static uint8_t convert(const std::string& from)
-    {
-        return static_cast<uint8_t>(std::stoi(from));
-    }
+// string to numeric converter
+#define DECLARE_STRING_TO_INT_CONVERTER(IntType, StoxFunc) \
+template<>                                                 \
+struct converter<IntType, std::string>                     \
+{                                                          \
+    static IntType convert(const std::string& from)        \
+    {                                                      \
+        return static_cast<IntType>(StoxFunc(from));       \
+    }                                                      \
 };
 
-// string to int16_t
-template <>
-struct converter<int16_t, std::string>
-{
-    static int16_t convert(const std::string& from)
-    {
-        return static_cast<int16_t>(std::stoi(from));
-    }
-};
+// numeric to string
+DECLARE_INT_TO_STRING_CONVERTER(int8_t)
+DECLARE_INT_TO_STRING_CONVERTER(uint8_t)
+DECLARE_INT_TO_STRING_CONVERTER(int16_t)
+DECLARE_INT_TO_STRING_CONVERTER(uint16_t)
+DECLARE_INT_TO_STRING_CONVERTER(int32_t)
+DECLARE_INT_TO_STRING_CONVERTER(uint32_t)
+DECLARE_INT_TO_STRING_CONVERTER(int64_t)
+DECLARE_INT_TO_STRING_CONVERTER(uint64_t)
+DECLARE_INT_TO_STRING_CONVERTER(float)
+DECLARE_INT_TO_STRING_CONVERTER(double)
+DECLARE_INT_TO_STRING_CONVERTER(long double)
 
-// string to uint16_t
-template <>
-struct converter<uint16_t, std::string>
-{
-    static uint16_t convert(const std::string& from)
-    {
-        return static_cast<uint16_t>(std::stoi(from));
-    }
-};
+// string to numeric
+DECLARE_STRING_TO_INT_CONVERTER(int8_t,      std::stoi)
+DECLARE_STRING_TO_INT_CONVERTER(uint8_t,     std::stoul)
+DECLARE_STRING_TO_INT_CONVERTER(int16_t,     std::stoi)
+DECLARE_STRING_TO_INT_CONVERTER(uint16_t,    std::stoul)
+DECLARE_STRING_TO_INT_CONVERTER(int32_t,     std::stol)
+DECLARE_STRING_TO_INT_CONVERTER(uint32_t,    std::stoul)
+DECLARE_STRING_TO_INT_CONVERTER(int64_t,     std::stoll)
+DECLARE_STRING_TO_INT_CONVERTER(uint64_t,    std::stoull)
+DECLARE_STRING_TO_INT_CONVERTER(float,       std::stof)
+DECLARE_STRING_TO_INT_CONVERTER(double,      std::stod)
+DECLARE_STRING_TO_INT_CONVERTER(long double, std::stold)
 
-// string to int32_t
-template <>
-struct converter<int32_t, std::string>
-{
-    static int32_t convert(const std::string& from)
-    {
-        return static_cast<int32_t>(std::stol(from));
-    }
-};
+#if defined(CORE_PLATFORM_WINDOWS)
+    DECLARE_INT_TO_STRING_CONVERTER(long)
+    DECLARE_INT_TO_STRING_CONVERTER(unsigned long)
 
-// string to uint32_t
-template <>
-struct converter<uint32_t, std::string>
-{
-    static uint32_t convert(const std::string& from)
-    {
-        return static_cast<uint32_t>(std::stoul(from));
-    }
-};
+    DECLARE_STRING_TO_INT_CONVERTER(long,          std::stol)
+    DECLARE_STRING_TO_INT_CONVERTER(unsigned long, std::stoul)
+#elif defined(CORE_PLATFORM_LINUX)
+    DECLARE_INT_TO_STRING_CONVERTER(long long)
+    DECLARE_INT_TO_STRING_CONVERTER(unsigned long long)
 
-// string to int64_t
-template <>
-struct converter<int64_t, std::string>
-{
-    static int64_t convert(const std::string& from)
-    {
-        return static_cast<int64_t>(std::stoll(from));
-    }
-};
+    DECLARE_STRING_TO_INT_CONVERTER(long long,          std::stoll)
+    DECLARE_STRING_TO_INT_CONVERTER(unsigned long long, std::stoull)
+#endif // defined(CORE_PLATFORM_LINUX)
 
-// string to uint64_t
-template <>
-struct converter<uint64_t, std::string>
-{
-    static uint64_t convert(const std::string& from)
-    {
-        return static_cast<uint64_t>(std::stoull(from));
-    }
-};
-
-// string to float
-template <>
-struct converter<float, std::string>
-{
-    static float convert(const std::string& from)
-    {
-        return std::stof(from);
-    }
-};
-
-// string to double
-template <>
-struct converter<double, std::string>
-{
-    static double convert(const std::string& from)
-    {
-        return std::stod(from);
-    }
-};
-
-// int8_t to string
-template<>
-struct converter<std::string, int8_t>
-{
-    static std::string convert(const int8_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// uint8_t to string
-template<>
-struct converter<std::string, uint8_t>
-{
-    static std::string convert(const uint8_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// int16_t to string
-template<>
-struct converter<std::string, int16_t>
-{
-    static std::string convert(const int16_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// uint16_t to string
-template<>
-struct converter<std::string, uint16_t>
-{
-    static std::string convert(const uint16_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// int32_t to string
-template<>
-struct converter<std::string, int32_t>
-{
-    static std::string convert(const int32_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// uint32_t to string
-template<>
-struct converter<std::string, uint32_t>
-{
-    static std::string convert(const uint32_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// int64_t to string
-template<>
-struct converter<std::string, int64_t>
-{
-    static std::string convert(const int64_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// uint64_t to string
-template<>
-struct converter<std::string, uint64_t>
-{
-    static std::string convert(const uint64_t from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// float to string
-template<>
-struct converter<std::string, float>
-{
-    static std::string convert(const float from)
-    {
-        return std::to_string(from);
-    }
-};
-
-// double to string
-template<>
-struct converter<std::string, double>
-{
-    static std::string convert(const double from)
-    {
-        return std::to_string(from);
-    }
-};
+#undef DECLARE_INT_TO_STRING_CONVERTER
+#undef DECLARE_STRING_TO_INT_CONVERTER
 
 } // namespace details
 
 // string to numeric
 template <typename To>
-To from_string(const std::string& from)
+To to_numeric(const std::string& from)
 {
     static_assert(std::is_arithmetic_v<To>, "Invalid type!");
 
