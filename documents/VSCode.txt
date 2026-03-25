@@ -11,14 +11,14 @@
 
     6. Markdown All in One
 
-    7. Remote - SSH(安装后，需要把1、2、3、4重新安装至Remote-SSH中)
+    7. TRAE AI
 
 【下载地址】
-    https://update.code.visualstudio.com/1.95.3/win32-x64/stable
+    https://update.code.visualstudio.com/1.110.1/win32-x64/stable
 
 【常用设置】
 {
-    // VSCode version: VSCodeSetup-x64-1.95.3
+    // VSCode version: VSCodeSetup-x64-1.110.1
     "workbench.colorTheme": "One Dark Pro",
     "workbench.startupEditor": "none",
 
@@ -31,6 +31,8 @@
 
     "workbench.tree.indent": 24,
     "workbench.tree.renderIndentGuides": "always",
+
+    "chat.disableAIFeatures": true,
 
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
@@ -86,12 +88,6 @@
     "window.commandCenter": false,
     "window.closeWhenEmpty": false,
     "window.restoreWindows": "none",
-
-    "remote.SSH.configFile": "D:\\helinljn\\documents\\ssh_config",
-    "remote.SSH.remotePlatform": {
-        "WSL": "linux",
-        "Aliyun": "linux"
-    },
 
     "C_Cpp.default.cStandard": "c11",
     "C_Cpp.default.cppStandard": "c++17",
