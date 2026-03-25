@@ -677,6 +677,8 @@ DOCTEST_TEST_SUITE("Misc")
         std::string exepath_str = core::get_exepath();
         DOCTEST_CHECK(!exepath_str.empty());
 
+        fmt::print("exepath: {}\n", exepath_str);
+
         // 测试 get_exedir 函数
         char exedir_buf[2048];
         uint32_t exedir_len = sizeof(exedir_buf);
@@ -685,6 +687,8 @@ DOCTEST_TEST_SUITE("Misc")
 
         std::string exedir_str = core::get_exedir();
         DOCTEST_CHECK(!exedir_str.empty());
+
+        fmt::print("exedir: {}\n", exedir_str);
     }
 
     DOCTEST_TEST_CASE("SystemInfo")
