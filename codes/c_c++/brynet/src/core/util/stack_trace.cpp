@@ -23,7 +23,7 @@ void stack_trace::initialize(void)
 
 #if defined(CORE_PLATFORM_WINDOWS)
     // Provide required symbol options
-    SymSetOptions(SYMOPT_PUBLICS_ONLY);
+    SymSetOptions(SYMOPT_PUBLICS_ONLY | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS);
 
     // Get the current process handle
     bool success = false;
@@ -72,6 +72,9 @@ void stack_trace::uninitialize(void)
 stack_trace::stack_trace(void)
     : _frames()
 {
+    if (!_initialized)
+        throw std::runtime_error("stack_trace not initialized. Call stack_trace::initialize() first!");
+
     const int capacity         = 64;
     void*     frames[capacity] = {0};
 
@@ -116,6 +119,8 @@ stack_trace::stack_trace(void)
             char buffer[4096];
             if (UnDecorateSymbolName(pSymbol->Name, buffer, (DWORD)sizeof(buffer), UNDNAME_NAME_ONLY) > 0)
                 f.function = buffer;
+            else
+                f.function = pSymbol->Name;
         }
 
         // Get the frame file name and line number

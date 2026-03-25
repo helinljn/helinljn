@@ -11,8 +11,8 @@ int main(int argc, char** argv)
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     // Windows下设置控制台编码
-    SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
     static_assert(__cplusplus == 201703);
