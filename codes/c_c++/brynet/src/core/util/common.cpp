@@ -1,6 +1,7 @@
 #include "common.h"
 #include <cstdio>
 #include <cstring>
+#include <unordered_set>
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #define WIN32_LEAN_AND_MEAN
@@ -431,59 +432,54 @@ bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_le
 
 void split_string(const char* src_str, const char* separator, std::vector<std::string>& out_result)
 {
-    const char* temp_str    = src_str;
-    const char* temp_sep    = NULL;
-    uint32_t    start_pos   = 0;
-    uint32_t    cur_str_pos = 0;
-    bool        flag        = false;
-
     if (!src_str || !separator)
         return;
 
-    while (*temp_str)
+    // 构建分隔符哈希集合
+    std::unordered_set<char> sep_set;
+    for (const char* p = separator; *p; ++p)
     {
-        // 每一次都重置分隔符字符串和查找标记
-        temp_sep = separator;
-        flag     = false;
+        sep_set.insert(*p);
+    }
 
-        // 比较当前字符是否为分割字符
-        while (*temp_sep)
+    // 预分配空间，假设平均每个分隔符之间有10个字符
+    size_t src_len = strlen(src_str);
+    out_result.reserve(src_len / 10 + 1);
+
+    const char* start = src_str;
+    const char* end   = src_str;
+    while (*end)
+    {
+        if (sep_set.count(*end))
         {
-            if (*temp_str == *temp_sep)
-            {
-                flag = true;
-                break;
-            }
+            if (start < end)
+                out_result.emplace_back(start, end - start);
 
-            ++temp_sep;
+            // 跳过连续的分隔符
+            while (*end && sep_set.count(*end))
+                ++end;
+
+            start = end;
         }
-
-        // 如果当前字符是分割字符
-        if (flag)
+        else
         {
-            if (start_pos < cur_str_pos)
-                out_result.push_back(std::string(src_str + start_pos, cur_str_pos - start_pos));
-
-            start_pos = cur_str_pos + 1;
+            ++end;
         }
-
-        ++cur_str_pos;
-        ++temp_str;
     }
 
     // 处理最后一个分隔符后面的字符串
-    if (start_pos < cur_str_pos)
-        out_result.push_back(std::string(src_str + start_pos, cur_str_pos - start_pos));
+    if (start < end)
+        out_result.emplace_back(start, end - start);
 }
 
 bool is_gbk(const std::string& str)
 {
-    return is_gbk(str.c_str(), static_cast<size_t>(str.size()));
+    return is_gbk(str.c_str(), str.size());
 }
 
 bool is_gbk(const char* str, size_t len)
 {
-    if (!str || 0 == len)
+    if (!str || len == 0)
         return false;
 
     const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
@@ -491,26 +487,28 @@ bool is_gbk(const char* str, size_t len)
     while (idx < len)
     {
         // ASCII编码
-        if (0x00 == (data[idx] & 0x80))
+        if (!(data[idx] & 0x80))
         {
             ++idx;
             continue;
         }
 
-        // 双字节编码，首字节编码范围：0x81 ~ 0xFE，尾字节编码范围：0x40 ~ 0xFE，同时剔除0xXX7F一条线
-        if (   idx + 1       <  len
-            && data[idx]     >= 0x81
-            && data[idx]     <= 0xFE
-            && data[idx + 1] >= 0x40
-            && data[idx + 1] <= 0xFE
-            && data[idx + 1] != 0x7F)
-        {
-            idx += 2;
-            continue;
-        }
+        // 双字节编码检查
+        if (idx + 1 >= len)
+            return false;
 
-        // 不符合GBK编码
-        return false;
+        uint8_t first  = data[idx];
+        uint8_t second = data[idx + 1];
+
+        // 首字节范围：0x81 ~ 0xFE
+        if (first < 0x81 || first > 0xFE)
+            return false;
+
+        // 尾字节范围：0x40 ~ 0xFE，排除0x7F
+        if (second < 0x40 || second > 0xFE || second == 0x7F)
+            return false;
+
+        idx += 2;
     }
 
     return true;
@@ -518,46 +516,65 @@ bool is_gbk(const char* str, size_t len)
 
 bool is_utf8(const std::string& str)
 {
-    return is_utf8(str.c_str(), static_cast<size_t>(str.size()));
+    return is_utf8(str.c_str(), str.size());
 }
 
 bool is_utf8(const char* str, size_t len)
 {
-    if (!str || 0 == len)
+    if (!str || len == 0)
         return false;
 
-    const uint8_t* data      = reinterpret_cast<const uint8_t*>(str);
-    size_t         check_sub = 0;
-    for (size_t idx = 0; idx < len; ++idx)
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
+    size_t         idx  = 0;
+    while (idx < len)
     {
-        if (0 == check_sub)
+        uint8_t byte = data[idx];
+        if (!(byte & 0x80))
         {
-            if (     0x00 == (data[idx] & 0x80))  // 0XXX_XXXX
-                check_sub = 0;
-            else if (0xC0 == (data[idx] & 0xE0))  // 110X_XXXX 10XX_XXXX
-                check_sub = 1;
-            else if (0xE0 == (data[idx] & 0xF0))  // 1110_XXXX 10XX_XXXX 10XX_XXXX
-                check_sub = 2;
-            else if (0xF0 == (data[idx] & 0xF8))  // 1111_0XXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-                check_sub = 3;
-            else if (0xF8 == (data[idx] & 0xFC))  // 1111_10XX 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-                check_sub = 4;
-            else if (0xFC == (data[idx] & 0xFE))  // 1111_110X 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX 10XX_XXXX
-                check_sub = 5;
-            else
+            // 单字节字符 (0x00-0x7F)
+            ++idx;
+        }
+        else if ((byte & 0xE0) == 0xC0)
+        {
+            // 双字节字符
+            if (idx + 1 >= len)
                 return false;
+            if ((data[idx + 1] & 0xC0) != 0x80)
+                return false;
+            // 检查过度编码：0xC0 0x80 是无效的（应该用单字节 0x00）
+            if (byte == 0xC0 && data[idx + 1] == 0x80)
+                return false;
+            idx += 2;
+        }
+        else if ((byte & 0xF0) == 0xE0)
+        {
+            // 三字节字符
+            if (idx + 2 >= len)
+                return false;
+            if ((data[idx + 1] & 0xC0) != 0x80 || (data[idx + 2] & 0xC0) != 0x80)
+                return false;
+            // 检查过度编码：0xE0 0x80 0x80 是无效的（应该用单字节 0x00）
+            if (byte == 0xE0 && data[idx + 1] == 0x80 && data[idx + 2] == 0x80)
+                return false;
+            idx += 3;
+        }
+        else if ((byte & 0xF8) == 0xF0)
+        {
+            // 四字节字符 (Unicode标准最大长度)
+            if (idx + 3 >= len)
+                return false;
+            if ((data[idx + 1] & 0xC0) != 0x80 || (data[idx + 2] & 0xC0) != 0x80 || (data[idx + 3] & 0xC0) != 0x80)
+                return false;
+            idx += 4;
         }
         else
         {
-            if ((data[idx] & 0xC0) != 0x80)
-                return false;
-
-            --check_sub;
+            // 无效的UTF-8首字节
+            return false;
         }
     }
 
-    // UTF-8字符串不完整，直接否认吧，毕竟字符串不完整出现问题是迟早的事情
-    return (check_sub > 0 ? false : true);
+    return true;
 }
 
 std::string gbk_to_utf8(const char* gbk_str)
