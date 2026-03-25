@@ -5,6 +5,8 @@
 #include "time/timestamp.h"
 #include "time/datetime.h"
 #include "fmt/format.h"
+#include <cpptrace/cpptrace.hpp>
+#include <sstream>
 
 // Unnamed namespace for internal linkage
 namespace {
@@ -49,12 +51,25 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(st.GetLine() == 10);
     }
 
-    DOCTEST_TEST_CASE("StackTrace")
+    DOCTEST_TEST_CASE("StackTrace.stack_trace")
     {
         const std::string callstack = core::stack_trace().to_string();
         DOCTEST_CHECK(!callstack.empty());
 
-        fmt::print("-- stack trace --\n{}-----------------\n", callstack);
+        fmt::print("-- stack_trace --\n{}", callstack);
+    }
+
+    DOCTEST_TEST_CASE("StackTrace.cpptrace")
+    {
+        // 这个库目前只能这么用，也就是用st.print将结果输出至std::ostringstream中
+        const cpptrace::stacktrace st = cpptrace::stacktrace::current();
+        std::ostringstream         ostr;
+        st.print(ostr);
+
+        const std::string callstack = ostr.str();
+        DOCTEST_CHECK(!callstack.empty());
+
+        fmt::print("-- stack_trace --\n{}", callstack);
     }
 
     DOCTEST_TEST_CASE("Timespan")

@@ -4,6 +4,7 @@ PROJECT(core)
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
+    ${CMAKE_3RD_DIR_CPPTRACE}/include
     ${CMAKE_3RD_DIR_OPENSSL}/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
@@ -31,6 +32,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        cpptrace
         libssl
         libcrypto
         ws2_32
@@ -56,6 +58,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        cpptrace
         ssl
         crypto
         pthread
@@ -122,8 +125,15 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest PREFIX "doctest"
         FILES ${DOCTEST_SRC_LIST})
 
-    # Windows平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
+        # Windows平台下的cpptrace使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_3RD_DIR_CPPTRACE}/lib/cpptrace.lib
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_3RD_DIR_CPPTRACE}/lib/cpptrace.dll
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        # Windows平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_3RD_DIR_OPENSSL}/lib/libssl.lib
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
@@ -138,8 +148,37 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
     )
 ELSE()
-    # Linux平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} PRE_BUILD
+        # Linux平台下的cpptrace使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_3RD_DIR_CPPTRACE}/lib/libcpptrace.so.1.0.4
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_3RD_DIR_CPPTRACE}/lib/libdwarf.so.2.3.1
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_3RD_DIR_CPPTRACE}/lib/libz.so.1.3.1
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_3RD_DIR_CPPTRACE}/lib/libzstd.so.1.5.7
+            ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libcpptrace.so.1.0.4 libcpptrace.so.1
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libcpptrace.so.1 libcpptrace.so
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libdwarf.so.2.3.1 libdwarf.so.2
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libdwarf.so.2 libdwarf.so
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libz.so.1.3.1 libz.so.1
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libz.so.1 libz.so
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libzstd.so.1.5.7 libzstd.so.1
+        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}
+            ln -sf libzstd.so.1 libzstd.so
+        # Linux平台下的OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_3RD_DIR_OPENSSL}/lib/libssl.so.1.1
             ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE}

@@ -4,6 +4,7 @@ PROJECT(test)
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
+    ${CMAKE_3RD_DIR_CPPTRACE}/include
     ${CMAKE_3RD_DIR_OPENSSL}/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
