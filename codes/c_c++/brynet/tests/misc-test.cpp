@@ -445,82 +445,6 @@ DOCTEST_TEST_SUITE("Misc")
         }
     }
 
-    DOCTEST_TEST_CASE("SplitString")
-    {
-        std::vector<std::string> result;
-
-        // 测试基本功能
-        result.clear();
-        core::split_string("a,b,c,d", ",", result);
-        DOCTEST_CHECK(result.size() == 4);
-        DOCTEST_CHECK(result[0] == "a");
-        DOCTEST_CHECK(result[1] == "b");
-        DOCTEST_CHECK(result[2] == "c");
-        DOCTEST_CHECK(result[3] == "d");
-
-        // 测试多个分隔符
-        result.clear();
-        core::split_string("a,b;c,d", ",;", result);
-        DOCTEST_CHECK(result.size() == 4);
-        DOCTEST_CHECK(result[0] == "a");
-        DOCTEST_CHECK(result[1] == "b");
-        DOCTEST_CHECK(result[2] == "c");
-        DOCTEST_CHECK(result[3] == "d");
-
-        // 测试连续分隔符
-        result.clear();
-        core::split_string("a,,b;;c", ",;", result);
-        DOCTEST_CHECK(result.size() == 3);
-        DOCTEST_CHECK(result[0] == "a");
-        DOCTEST_CHECK(result[1] == "b");
-        DOCTEST_CHECK(result[2] == "c");
-
-        // 测试开头和结尾的分隔符
-        result.clear();
-        core::split_string(",,a,b,c,,", ",", result);
-        DOCTEST_CHECK(result.size() == 3);
-        DOCTEST_CHECK(result[0] == "a");
-        DOCTEST_CHECK(result[1] == "b");
-        DOCTEST_CHECK(result[2] == "c");
-
-        // 测试空字符串
-        result.clear();
-        core::split_string("", ",", result);
-        DOCTEST_CHECK(result.empty());
-
-        // 测试只有分隔符的字符串
-        result.clear();
-        core::split_string(",,,", ",", result);
-        DOCTEST_CHECK(result.empty());
-
-        // 测试没有分隔符的字符串
-        result.clear();
-        core::split_string("hello", ",", result);
-        DOCTEST_CHECK(result.size() == 1);
-        DOCTEST_CHECK(result[0] == "hello");
-
-        // 测试单个字符
-        result.clear();
-        core::split_string("a", ",", result);
-        DOCTEST_CHECK(result.size() == 1);
-        DOCTEST_CHECK(result[0] == "a");
-
-        // 测试长字符串
-        result.clear();
-        std::string long_str;
-        for (int i = 0; i < 1000; ++i)
-        {
-            long_str += core::to_string(i);
-            if (i < 999) long_str += ",";
-        }
-        core::split_string(long_str.c_str(), ",", result);
-        DOCTEST_CHECK(result.size() == 1000);
-        for (int i = 0; i < 1000; ++i)
-        {
-            DOCTEST_CHECK(result[i] == core::to_string(i));
-        }
-    }
-
     DOCTEST_TEST_CASE("IsGBK")
     {
         // 测试空字符串
@@ -814,5 +738,147 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(!exedir_str.empty());
 
         fmt::print("exepath: {}, exedir: {}\n", exepath_str, exedir_str);
+    }
+
+    DOCTEST_TEST_CASE("StringOperations")
+    {
+        // 测试 trim 函数
+        DOCTEST_CHECK(core::trim("  hello world  ") == "hello world");
+        DOCTEST_CHECK(core::trim("hello world") == "hello world");
+        DOCTEST_CHECK(core::trim("   ") == "");
+        DOCTEST_CHECK(core::trim("") == "");
+
+        // 测试 ltrim 函数
+        DOCTEST_CHECK(core::ltrim("  hello world  ") == "hello world  ");
+        DOCTEST_CHECK(core::ltrim("hello world") == "hello world");
+        DOCTEST_CHECK(core::ltrim("   ") == "");
+        DOCTEST_CHECK(core::ltrim("") == "");
+
+        // 测试 rtrim 函数
+        DOCTEST_CHECK(core::rtrim("  hello world  ") == "  hello world");
+        DOCTEST_CHECK(core::rtrim("hello world") == "hello world");
+        DOCTEST_CHECK(core::rtrim("   ") == "");
+        DOCTEST_CHECK(core::rtrim("") == "");
+
+        // 测试 starts_with 函数
+        DOCTEST_CHECK(core::starts_with("hello world", "hello"));
+        DOCTEST_CHECK(!core::starts_with("hello world", "world"));
+        DOCTEST_CHECK(core::starts_with("hello", ""));
+        DOCTEST_CHECK(!core::starts_with("", "hello"));
+
+        // 测试 ends_with 函数
+        DOCTEST_CHECK(core::ends_with("hello world", "world"));
+        DOCTEST_CHECK(!core::ends_with("hello world", "hello"));
+        DOCTEST_CHECK(core::ends_with("hello", ""));
+        DOCTEST_CHECK(!core::ends_with("", "hello"));
+
+        // 测试 contains 函数
+        DOCTEST_CHECK(core::contains("hello world", "world"));
+        DOCTEST_CHECK(core::contains("hello world", "hello"));
+        DOCTEST_CHECK(core::contains("hello world", "lo wo"));
+        DOCTEST_CHECK(!core::contains("hello world", "test"));
+        DOCTEST_CHECK(!core::contains("hello", "hello world"));
+        DOCTEST_CHECK(core::contains("hello", ""));
+        DOCTEST_CHECK(!core::contains("", "hello"));
+
+        // 测试 to_upper 函数
+        DOCTEST_CHECK(core::to_upper("hello world") == "HELLO WORLD");
+        DOCTEST_CHECK(core::to_upper("HELLO WORLD") == "HELLO WORLD");
+        DOCTEST_CHECK(core::to_upper("") == "");
+
+        // 测试 to_lower 函数
+        DOCTEST_CHECK(core::to_lower("HELLO WORLD") == "hello world");
+        DOCTEST_CHECK(core::to_lower("hello world") == "hello world");
+        DOCTEST_CHECK(core::to_lower("") == "");
+
+        // 测试 replace 函数
+        DOCTEST_CHECK(core::replace("hello world", "world", "test") == "hello test");
+        DOCTEST_CHECK(core::replace("hello hello", "hello", "hi") == "hi hi");
+        DOCTEST_CHECK(core::replace("hello", "", "test") == "hello");
+        DOCTEST_CHECK(core::replace("", "hello", "test") == "");
+
+        // 测试 join 函数
+        std::vector<std::string> parts = {"hello", "world", "test"};
+        DOCTEST_CHECK(core::join(parts, ", ") == "hello, world, test");
+        DOCTEST_CHECK(core::join(parts, "") == "helloworldtest");
+        DOCTEST_CHECK(core::join({}, ", ") == "");
+        parts = {"hello"};
+        DOCTEST_CHECK(core::join(parts, ", ") == "hello");
+    }
+
+    DOCTEST_TEST_CASE("SplitString")
+    {
+        std::vector<std::string> result;
+
+        // 测试基本功能
+        result.clear();
+        core::split_string("a,b,c,d", ",", result);
+        DOCTEST_CHECK(result.size() == 4);
+        DOCTEST_CHECK(result[0] == "a");
+        DOCTEST_CHECK(result[1] == "b");
+        DOCTEST_CHECK(result[2] == "c");
+        DOCTEST_CHECK(result[3] == "d");
+
+        // 测试多个分隔符
+        result.clear();
+        core::split_string("a,b;c,d", ",;", result);
+        DOCTEST_CHECK(result.size() == 4);
+        DOCTEST_CHECK(result[0] == "a");
+        DOCTEST_CHECK(result[1] == "b");
+        DOCTEST_CHECK(result[2] == "c");
+        DOCTEST_CHECK(result[3] == "d");
+
+        // 测试连续分隔符
+        result.clear();
+        core::split_string("a,,b;;c", ",;", result);
+        DOCTEST_CHECK(result.size() == 3);
+        DOCTEST_CHECK(result[0] == "a");
+        DOCTEST_CHECK(result[1] == "b");
+        DOCTEST_CHECK(result[2] == "c");
+
+        // 测试开头和结尾的分隔符
+        result.clear();
+        core::split_string(",,a,b,c,,", ",", result);
+        DOCTEST_CHECK(result.size() == 3);
+        DOCTEST_CHECK(result[0] == "a");
+        DOCTEST_CHECK(result[1] == "b");
+        DOCTEST_CHECK(result[2] == "c");
+
+        // 测试空字符串
+        result.clear();
+        core::split_string("", ",", result);
+        DOCTEST_CHECK(result.empty());
+
+        // 测试只有分隔符的字符串
+        result.clear();
+        core::split_string(",,,", ",", result);
+        DOCTEST_CHECK(result.empty());
+
+        // 测试没有分隔符的字符串
+        result.clear();
+        core::split_string("hello", ",", result);
+        DOCTEST_CHECK(result.size() == 1);
+        DOCTEST_CHECK(result[0] == "hello");
+
+        // 测试单个字符
+        result.clear();
+        core::split_string("a", ",", result);
+        DOCTEST_CHECK(result.size() == 1);
+        DOCTEST_CHECK(result[0] == "a");
+
+        // 测试长字符串
+        result.clear();
+        std::string long_str;
+        for (int i = 0; i < 1000; ++i)
+        {
+            long_str += core::to_string(i);
+            if (i < 999) long_str += ",";
+        }
+        core::split_string(long_str.c_str(), ",", result);
+        DOCTEST_CHECK(result.size() == 1000);
+        for (int i = 0; i < 1000; ++i)
+        {
+            DOCTEST_CHECK(result[i] == core::to_string(i));
+        }
     }
 }

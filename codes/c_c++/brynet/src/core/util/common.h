@@ -71,6 +71,82 @@ CORE_API bool memory_to_hex_string(const void* mem, size_t memlen, char* outbuf,
 CORE_API bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len);
 
 /**
+ * @brief 去除字符串两端的空白字符
+ * @param str 待处理的字符串
+ * @return 处理后的字符串
+ */
+CORE_API std::string trim(std::string_view str);
+
+/**
+ * @brief 去除字符串左侧的空白字符
+ * @param str 待处理的字符串
+ * @return 处理后的字符串
+ */
+CORE_API std::string ltrim(std::string_view str);
+
+/**
+ * @brief 去除字符串右侧的空白字符
+ * @param str 待处理的字符串
+ * @return 处理后的字符串
+ */
+CORE_API std::string rtrim(std::string_view str);
+
+/**
+ * @brief 判断字符串是否以指定前缀开头
+ * @param str    待检查的字符串
+ * @param prefix 前缀字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool starts_with(std::string_view str, std::string_view prefix);
+
+/**
+ * @brief 判断字符串是否以指定后缀结尾
+ * @param str    待检查的字符串
+ * @param suffix 后缀字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool ends_with(std::string_view str, std::string_view suffix);
+
+/**
+ * @brief 判断字符串是否包含指定子串
+ * @param str    待检查的字符串
+ * @param substr 子串
+ * @return 包含返回true，不包含返回false
+ */
+CORE_API bool contains(std::string_view str, std::string_view substr);
+
+/**
+ * @brief 将字符串转换为大写
+ * @param str 待处理的字符串
+ * @return 转换后的字符串
+ */
+CORE_API std::string to_upper(std::string_view str);
+
+/**
+ * @brief 将字符串转换为小写
+ * @param str 待处理的字符串
+ * @return 转换后的字符串
+ */
+CORE_API std::string to_lower(std::string_view str);
+
+/**
+ * @brief 替换字符串中的子串
+ * @param str      待处理的字符串
+ * @param old_str  要替换的子串
+ * @param new_str  替换后的子串
+ * @return 替换后的字符串
+ */
+CORE_API std::string replace(std::string_view str, std::string_view old_str, std::string_view new_str);
+
+/**
+ * @brief 用分隔符连接字符串列表
+ * @param parts     字符串列表
+ * @param delimiter 分隔符
+ * @return 连接后的字符串
+ */
+CORE_API std::string join(const std::vector<std::string>& parts, std::string_view delimiter);
+
+/**
  * @brief 以多分隔符为基准拆分一个字符串，并将拆分结果放入result中
  * @param src_str    待拆分的字符串
  * @param separator  多分隔符字符串

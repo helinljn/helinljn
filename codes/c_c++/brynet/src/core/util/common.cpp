@@ -310,6 +310,144 @@ bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_le
     return true;
 }
 
+std::string trim(std::string_view str)
+{
+    size_t start = 0;
+    while (start < str.size() && std::isspace(static_cast<unsigned char>(str[start])))
+    {
+        ++start;
+    }
+
+    size_t end = str.size();
+    while (end > start && std::isspace(static_cast<unsigned char>(str[end - 1])))
+    {
+        --end;
+    }
+
+    return std::string(str.substr(start, end - start));
+}
+
+std::string ltrim(std::string_view str)
+{
+    size_t start = 0;
+    while (start < str.size() && std::isspace(static_cast<unsigned char>(str[start])))
+    {
+        ++start;
+    }
+
+    return std::string(str.substr(start));
+}
+
+std::string rtrim(std::string_view str)
+{
+    size_t end = str.size();
+    while (end > 0 && std::isspace(static_cast<unsigned char>(str[end - 1])))
+    {
+        --end;
+    }
+
+    return std::string(str.substr(0, end));
+}
+
+bool starts_with(std::string_view str, std::string_view prefix)
+{
+    if (prefix.size() > str.size())
+        return false;
+
+    return str.substr(0, prefix.size()) == prefix;
+}
+
+bool ends_with(std::string_view str, std::string_view suffix)
+{
+    if (suffix.size() > str.size())
+        return false;
+
+    return str.substr(str.size() - suffix.size()) == suffix;
+}
+
+bool contains(std::string_view str, std::string_view substr)
+{
+    return str.find(substr) != std::string_view::npos;
+}
+
+std::string to_upper(std::string_view str)
+{
+    std::string result;
+    result.reserve(str.size());
+
+    for (char c : str)
+    {
+        result.push_back(static_cast<char>(std::toupper(c)));
+    }
+
+    return result;
+}
+
+std::string to_lower(std::string_view str)
+{
+    std::string result;
+    result.reserve(str.size());
+
+    for (char c : str)
+    {
+        result.push_back(static_cast<char>(std::tolower(c)));
+    }
+
+    return result;
+}
+
+std::string replace(std::string_view str, std::string_view old_str, std::string_view new_str)
+{
+    if (old_str.empty())
+        return std::string(str);
+
+    std::string result;
+    result.reserve(str.size());
+
+    size_t pos     = 0;
+    size_t old_len = old_str.size();
+    while (pos < str.size())
+    {
+        size_t found = str.find(old_str, pos);
+        if (found == std::string_view::npos)
+        {
+            result.append(str.substr(pos));
+            break;
+        }
+
+        result.append(str.substr(pos, found - pos));
+        result.append(new_str);
+        pos = found + old_len;
+    }
+
+    return result;
+}
+
+std::string join(const std::vector<std::string>& parts, std::string_view delimiter)
+{
+    std::string result;
+    if (parts.empty())
+        return result;
+
+    size_t total_size = 0;
+    for (const auto& part : parts)
+    {
+        total_size += part.size();
+    }
+    total_size += delimiter.size() * (parts.size() - 1);
+
+    result.reserve(total_size);
+    result.append(parts[0]);
+
+    for (size_t i = 1; i < parts.size(); ++i)
+    {
+        result.append(delimiter);
+        result.append(parts[i]);
+    }
+
+    return result;
+}
+
 void split_string(const char* src_str, const char* separator, std::vector<std::string>& out_result)
 {
     if (!src_str || !separator)
