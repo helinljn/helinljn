@@ -1,7 +1,10 @@
 #include "doctest/doctest.h"
 #include "fmt/format.h"
+#include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <iomanip>
+#include <locale>
 
 namespace fs = std::filesystem;
 
@@ -312,6 +315,404 @@ DOCTEST_TEST_SUITE("FileSystem")
         // 调整文件大小
         fs::resize_file(test_file, 100);
         DOCTEST_CHECK(fs::file_size(test_file) == 100);
+
+        // 清理
+        fs::remove(test_file);
+    }
+
+    DOCTEST_TEST_CASE("FStreamOperations")
+    {
+        // 测试文件路径
+        fs::path test_file("test_fstream.txt");
+
+        // 1. 测试 ofstream 写入
+        {
+            std::ofstream out_file(test_file.string());
+            DOCTEST_CHECK(out_file.is_open());
+
+            // 测试写入操作
+            out_file << "Hello, fstream!" << std::endl;
+            out_file << 123 << " " << 3.14 << std::endl;
+
+            // 测试文件状态
+            DOCTEST_CHECK(out_file.good());
+
+            // 测试关闭文件
+            out_file.close();
+            DOCTEST_CHECK(!out_file.is_open());
+        }
+
+        // 2. 测试 ifstream 读取
+        {
+            std::ifstream in_file(test_file.string());
+            DOCTEST_CHECK(in_file.is_open());
+
+            // 测试读取操作
+            std::string line;
+            DOCTEST_CHECK(std::getline(in_file, line));
+            DOCTEST_CHECK(line == "Hello, fstream!");
+
+            // 测试格式化读取
+            int int_val;
+            double double_val;
+            in_file >> int_val >> double_val;
+            DOCTEST_CHECK(int_val == 123);
+            DOCTEST_CHECK(double_val == 3.14);
+
+            // 尝试读取更多内容，直到文件结束
+            std::string dummy;
+            in_file >> dummy;
+
+            // 测试文件状态
+            DOCTEST_CHECK(in_file.eof());
+            // 当读取超出文件末尾时，fail() 会被设置，这是正常的
+            // DOCTEST_CHECK(!in_file.fail());
+
+            // 测试关闭文件
+            in_file.close();
+            DOCTEST_CHECK(!in_file.is_open());
+        }
+
+        // 3. 测试 fstream 读写
+        {
+            std::fstream file(test_file.string(), std::ios::in | std::ios::out);
+            DOCTEST_CHECK(file.is_open());
+
+            // 测试定位到文件末尾
+            file.seekp(0, std::ios::end);
+
+            // 测试追加写入
+            file << "Appended content" << std::endl;
+
+            // 测试定位到文件开头
+            file.seekg(0, std::ios::beg);
+
+            // 测试读取整个文件
+            std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            DOCTEST_CHECK(content.find("Hello, fstream!") != std::string::npos);
+            DOCTEST_CHECK(content.find("Appended content") != std::string::npos);
+
+            // 测试文件状态
+            DOCTEST_CHECK(file.good());
+
+            // 测试关闭文件
+            file.close();
+            DOCTEST_CHECK(!file.is_open());
+        }
+
+        // 4. 测试二进制模式
+        {
+            // 写入二进制数据
+            std::ofstream bin_out(test_file.string(), std::ios::binary);
+            DOCTEST_CHECK(bin_out.is_open());
+
+            int bin_data[] = {1, 2, 3, 4, 5};
+            bin_out.write(reinterpret_cast<const char*>(bin_data), sizeof(bin_data));
+            bin_out.close();
+
+            // 读取二进制数据
+            std::ifstream bin_in(test_file.string(), std::ios::binary);
+            DOCTEST_CHECK(bin_in.is_open());
+
+            int read_data[5];
+            bin_in.read(reinterpret_cast<char*>(read_data), sizeof(read_data));
+            DOCTEST_CHECK(bin_in.gcount() == sizeof(read_data));
+
+            for (int i = 0; i < 5; ++i)
+            {
+                DOCTEST_CHECK(read_data[i] == bin_data[i]);
+            }
+
+            bin_in.close();
+        }
+
+        // 5. 测试文件状态标志
+        {
+            std::ifstream in_file(test_file.string());
+            DOCTEST_CHECK(in_file.is_open());
+
+            // 测试 good()
+            DOCTEST_CHECK(in_file.good());
+
+            // 测试 eof()
+            in_file.seekg(0, std::ios::end);
+            DOCTEST_CHECK(!in_file.eof());
+            char c;
+            in_file >> c;
+            DOCTEST_CHECK(in_file.eof());
+
+            // 测试 fail()
+            in_file.clear();
+            DOCTEST_CHECK(!in_file.fail());
+
+            in_file.close();
+        }
+
+        // 6. 测试异常处理
+        {
+            std::ifstream in_file("non_existent_file.txt");
+            DOCTEST_CHECK(!in_file.is_open());
+            DOCTEST_CHECK(in_file.fail());
+        }
+
+        // 7. 测试文件缓冲区操作
+        {
+            std::ofstream out_file(test_file.string());
+            DOCTEST_CHECK(out_file.is_open());
+
+            // 测试 flush()
+            out_file << "Test flush";
+            out_file.flush();
+            DOCTEST_CHECK(out_file.good());
+
+            out_file.close();
+        }
+
+        // 8. 测试文件打开模式
+        {
+            // 测试 trunc 模式
+            std::ofstream trunc_file(test_file.string(), std::ios::trunc);
+            DOCTEST_CHECK(trunc_file.is_open());
+            trunc_file << "Truncated content";
+            trunc_file.close();
+
+            // 测试 app 模式
+            std::ofstream app_file(test_file.string(), std::ios::app);
+            DOCTEST_CHECK(app_file.is_open());
+            app_file << " Appended";
+            app_file.close();
+
+            // 验证内容
+            std::ifstream check_file(test_file.string());
+            std::string content((std::istreambuf_iterator<char>(check_file)), std::istreambuf_iterator<char>());
+            DOCTEST_CHECK(content == "Truncated content Appended");
+            check_file.close();
+        }
+
+        // 9. 测试文件大小和位置
+        {
+            std::fstream file(test_file.string(), std::ios::in | std::ios::out | std::ios::binary);
+            DOCTEST_CHECK(file.is_open());
+
+            // 获取文件大小
+            file.seekg(0, std::ios::end);
+            std::streampos file_size = file.tellg();
+            DOCTEST_CHECK(file_size > 0);
+
+            // 测试定位
+            file.seekg(0, std::ios::beg);
+            DOCTEST_CHECK(file.tellg() == 0);
+
+            file.seekg(file_size / 2);
+            DOCTEST_CHECK(file.tellg() == file_size / 2);
+
+            file.close();
+        }
+
+        // 10. 测试移动语义
+        {
+            // 测试移动构造函数
+            std::ofstream out1(test_file.string());
+            DOCTEST_CHECK(out1.is_open());
+
+            std::ofstream out2(std::move(out1));
+            DOCTEST_CHECK(!out1.is_open());
+            DOCTEST_CHECK(out2.is_open());
+
+            out2 << "Test move semantics";
+            out2.close();
+
+            // 测试移动赋值运算符
+            std::ifstream in1(test_file.string());
+            DOCTEST_CHECK(in1.is_open());
+
+            std::ifstream in2;
+            in2 = std::move(in1);
+            DOCTEST_CHECK(!in1.is_open());
+            DOCTEST_CHECK(in2.is_open());
+
+            in2.close();
+        }
+
+        // 11. 测试 rdbuf 操作
+        {
+            // 测试获取 rdbuf
+            std::ifstream in_file(test_file.string());
+            DOCTEST_CHECK(in_file.is_open());
+
+            std::streambuf* buf = in_file.rdbuf();
+            DOCTEST_CHECK(buf != nullptr);
+
+            // 测试 rdbuf 的 in_avail() 方法
+            std::streamsize avail = buf->in_avail();
+            DOCTEST_CHECK(avail >= 0);
+
+            // 测试 rdbuf 的 sgetc() 方法
+            int c = buf->sgetc();
+            DOCTEST_CHECK(c != EOF);
+
+            // 测试 rdbuf 的 sbumpc() 方法
+            int c2 = buf->sbumpc();
+            DOCTEST_CHECK(c2 == c);
+
+            // 测试 rdbuf 的 sgetn() 方法
+            char buffer[100];
+            std::streamsize n = buf->sgetn(buffer, 10);
+            DOCTEST_CHECK(n > 0);
+
+            // 测试 rdbuf 的 sputbackc() 方法
+            int putback_result = buf->sputbackc('A');
+            DOCTEST_CHECK(putback_result == 'A');
+
+            // 测试 rdbuf 的 sungetc() 方法
+            int unget_result = buf->sungetc();
+            DOCTEST_CHECK(unget_result != EOF);
+
+            // 测试 rdbuf 的 pubsetbuf() 方法
+            char custom_buf[256];
+            buf->pubsetbuf(custom_buf, sizeof(custom_buf));
+
+            // 测试 rdbuf 的 pubseekpos() 方法
+            std::streampos pos = buf->pubseekpos(0);
+            DOCTEST_CHECK(pos != static_cast<std::streampos>(-1));
+
+            // 测试 rdbuf 的 pubseekoff() 方法
+            std::streampos off_pos = buf->pubseekoff(5, std::ios::cur);
+            DOCTEST_CHECK(off_pos != static_cast<std::streampos>(-1));
+
+            // 测试 rdbuf 的 pubsync() 方法
+            int sync_result = buf->pubsync();
+            bool sync_valid = (sync_result == 0 || sync_result == -1); // -1 表示不支持
+            DOCTEST_CHECK(sync_valid);
+
+            in_file.close();
+        }
+
+        // 12. 测试其他 fstream 接口
+        {
+            // 测试 swap() 方法
+            std::ifstream in1(test_file.string());
+            std::ifstream in2;
+            DOCTEST_CHECK(in1.is_open());
+            DOCTEST_CHECK(!in2.is_open());
+
+            in1.swap(in2);
+            DOCTEST_CHECK(!in1.is_open());
+            DOCTEST_CHECK(in2.is_open());
+
+            in2.close();
+
+            // 测试 copyfmt() 方法
+            std::ofstream out1(test_file.string());
+            std::ofstream out2;
+
+            // 设置一些格式标志
+            out1 << std::hex << std::setw(8) << std::setfill('0');
+
+            // 复制格式
+            out2.copyfmt(out1);
+
+            // 测试 imbue() 方法
+            std::locale loc = std::locale();
+            out1.imbue(loc);
+
+            out1.close();
+            out2.close();
+
+            // 测试 tie() 方法
+            std::ofstream out3(test_file.string());
+            std::ostream* tied = out3.tie();
+            DOCTEST_CHECK(tied == nullptr); // 默认未绑定
+
+            // 绑定到 cout
+            out3.tie(&std::cout);
+            tied = out3.tie();
+            DOCTEST_CHECK(tied == &std::cout);
+
+            out3.close();
+        }
+
+        // 13. 测试 wide stream 操作
+        {
+            // 测试 wofstream 写入
+            std::wofstream wout(test_file.string());
+            DOCTEST_CHECK(wout.is_open());
+
+            wout << L"Hello, wide fstream!" << std::endl;
+            wout.close();
+
+            // 测试 wifstream 读取
+            std::wifstream win(test_file.string());
+            DOCTEST_CHECK(win.is_open());
+
+            std::wstring wline;
+            DOCTEST_CHECK(std::getline(win, wline));
+            DOCTEST_CHECK(wline == L"Hello, wide fstream!");
+
+            win.close();
+        }
+
+        // 14. 测试格式化操作
+        {
+            std::ofstream out_file(test_file.string());
+            DOCTEST_CHECK(out_file.is_open());
+
+            // 测试 fill() 方法
+            char old_fill = out_file.fill('*');
+            DOCTEST_CHECK(old_fill == ' ');
+
+            // 测试 width() 方法
+            out_file.width(10);
+            DOCTEST_CHECK(out_file.width() == 10);
+
+            // 测试 precision() 方法
+            out_file.precision(5);
+            DOCTEST_CHECK(out_file.precision() == 5);
+
+            // 测试 setf() 方法
+            std::ios_base::fmtflags old_flags = out_file.setf(std::ios::hex | std::ios::showbase);
+            std::ignore = old_flags;
+
+            // 测试 unsetf() 方法
+            out_file.unsetf(std::ios::hex);
+
+            // 测试 flags() 方法
+            std::ios_base::fmtflags current_flags = out_file.flags();
+            DOCTEST_CHECK((current_flags & std::ios::showbase) != 0);
+
+            out_file.close();
+        }
+
+        // 15. 测试流状态操作
+        {
+            // 先创建一个有内容的文件
+            {
+                std::ofstream out_file(test_file.string());
+                DOCTEST_CHECK(out_file.is_open());
+                out_file << "Test content";
+                out_file.close();
+            }
+
+            std::ifstream in_file(test_file.string());
+            DOCTEST_CHECK(in_file.is_open());
+
+            // 测试 rdstate() 方法
+            std::ios_base::iostate state = in_file.rdstate();
+            // goodbit 是默认状态，值为 0，所以应该检查 state == 0
+            DOCTEST_CHECK(state == std::ios::goodbit);
+
+            // 测试 setstate() 方法
+            in_file.setstate(std::ios::eofbit);
+            state = in_file.rdstate();
+            DOCTEST_CHECK((state & std::ios::eofbit) != 0);
+
+            // 测试 clear() 方法
+            in_file.clear();
+            state = in_file.rdstate();
+            DOCTEST_CHECK(state == std::ios::goodbit);
+
+            in_file.close();
+        }
 
         // 清理
         fs::remove(test_file);

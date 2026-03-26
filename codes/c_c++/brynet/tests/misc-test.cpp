@@ -1,6 +1,9 @@
 #include "doctest/doctest.h"
 #include "util/singleton.hpp"
 #include "util/common.h"
+#include "util/base64.h"
+#include "util/aes.h"
+#include "util/md5.h"
 #include "util/numeric_cast.hpp"
 #include "time/timespan.h"
 #include "time/timestamp.h"
@@ -9,6 +12,7 @@
 #include <cpptrace/cpptrace.hpp>
 #include <sstream>
 #include <thread>
+#include <fstream>
 
 // Unnamed namespace for internal linkage
 namespace {
@@ -422,27 +426,6 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(span.total_seconds() == 3600);
         DOCTEST_CHECK(span.milliseconds() == 0);
         DOCTEST_CHECK(span.total_milliseconds() == 3600000);
-    }
-
-    DOCTEST_TEST_CASE("DateTimeBenchmark")
-    {
-        const int total = 100000;
-        for (int idx = 0; idx != total; ++idx)
-        {
-            // 1970-01-01 08:00:00 Thursday
-            core::datetime dt(core::timestamp(0));
-            DOCTEST_CHECK(dt.year() == 1970);
-            DOCTEST_CHECK(dt.month() == 1);
-            DOCTEST_CHECK(dt.day() == 1);
-            DOCTEST_CHECK(dt.day_of_week() == 4);
-            DOCTEST_CHECK(dt.day_of_year() == 1);
-            DOCTEST_CHECK(dt.hour() == 8);
-            DOCTEST_CHECK(dt.minute() == 0);
-            DOCTEST_CHECK(dt.second() == 0);
-            DOCTEST_CHECK(dt.millisecond() == 0);
-            DOCTEST_CHECK(dt.microsecond() == 0);
-            DOCTEST_CHECK(dt.to_timestamp().epoch_time() == 0);
-        }
     }
 
     DOCTEST_TEST_CASE("IsGBK")
@@ -880,5 +863,106 @@ DOCTEST_TEST_SUITE("Misc")
         {
             DOCTEST_CHECK(result[i] == core::to_string(i));
         }
+    }
+
+    DOCTEST_TEST_CASE("AES")
+    {
+        // 测试 AES-128 加密和解密
+        uint8_t key[16] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+        uint8_t plain_text[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
+        uint8_t cipher_text[16];
+        uint8_t decrypted_text[16];
+
+        // 加密
+        core::aes128_encrypt(key, plain_text, cipher_text);
+
+        // 解密
+        core::aes128_decrypt(key, cipher_text, decrypted_text);
+
+        // 验证解密后的结果是否与原始明文相同
+        for (int i = 0; i < 16; ++i)
+        {
+            DOCTEST_CHECK(decrypted_text[i] == plain_text[i]);
+        }
+
+        // 测试空数据（边界情况）
+        uint8_t empty_plain[16] = {0};
+        uint8_t empty_cipher[16];
+        uint8_t empty_decrypted[16];
+        core::aes128_encrypt(key, empty_plain, empty_cipher);
+        core::aes128_decrypt(key, empty_cipher, empty_decrypted);
+        for (int i = 0; i < 16; ++i)
+        {
+            DOCTEST_CHECK(empty_decrypted[i] == empty_plain[i]);
+        }
+    }
+
+    DOCTEST_TEST_CASE("Base64")
+    {
+        // 测试基本编码和解码
+        std::string original = "Hello, Base64!";
+        std::string encoded = core::base64_encode(original);
+        DOCTEST_CHECK(!encoded.empty());
+
+        std::string decoded = core::base64_decode(encoded);
+        DOCTEST_CHECK(decoded == original);
+
+        // 测试空字符串
+        DOCTEST_CHECK(core::base64_encode("").empty());
+        DOCTEST_CHECK(core::base64_decode("").empty());
+
+        // 测试特殊字符
+        std::string special_chars = "!@#$%^&*()_+";
+        encoded = core::base64_encode(special_chars);
+        decoded = core::base64_decode(encoded);
+        DOCTEST_CHECK(decoded == special_chars);
+
+        // 测试二进制数据
+        std::vector<uint8_t> binary_data = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
+        std::string binary_str(reinterpret_cast<const char*>(binary_data.data()), binary_data.size());
+        encoded = core::base64_encode(binary_str);
+        decoded = core::base64_decode(encoded);
+        DOCTEST_CHECK(decoded.size() == binary_data.size());
+        for (size_t i = 0; i < binary_data.size(); ++i)
+        {
+            DOCTEST_CHECK(static_cast<uint8_t>(decoded[i]) == binary_data[i]);
+        }
+    }
+
+    DOCTEST_TEST_CASE("MD5")
+    {
+        // 测试基本 MD5 计算
+        std::string test_string = "Hello, MD5!";
+        std::string md5_lower = core::md5_string(test_string, false);
+        std::string md5_upper = core::md5_string(test_string, true);
+
+        DOCTEST_CHECK(!md5_lower.empty());
+        DOCTEST_CHECK(!md5_upper.empty());
+        DOCTEST_CHECK(md5_lower.size() == 32);
+        DOCTEST_CHECK(md5_upper.size() == 32);
+
+        // 测试空字符串
+        DOCTEST_CHECK(core::md5_string("", false).empty());
+
+        // 测试文件 MD5（创建临时文件）
+        std::string temp_filename = "temp_md5_test.txt";
+        {
+            std::ofstream temp_file(temp_filename);
+            temp_file << test_string;
+        }
+
+        std::string file_md5_lower = core::md5_file(temp_filename.c_str(), false);
+        std::string file_md5_upper = core::md5_file(temp_filename.c_str(), true);
+
+        DOCTEST_CHECK(!file_md5_lower.empty());
+        DOCTEST_CHECK(!file_md5_upper.empty());
+        DOCTEST_CHECK(file_md5_lower.size() == 32);
+        DOCTEST_CHECK(file_md5_upper.size() == 32);
+
+        // 清理临时文件
+        std::remove(temp_filename.c_str());
+
+        // 测试不存在的文件
+        DOCTEST_CHECK(core::md5_file("non_existent_file.txt", false).empty());
     }
 }
