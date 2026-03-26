@@ -448,7 +448,7 @@ std::string join(const std::vector<std::string>& parts, std::string_view delimit
     return result;
 }
 
-void split_string(const char* src_str, const char* separator, std::vector<std::string>& out_result)
+void split(const char* src_str, const char* separator, std::vector<std::string>& out_result)
 {
     if (!src_str || !separator)
         return;

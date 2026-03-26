@@ -5,7 +5,7 @@
 
 namespace fs = std::filesystem;
 
-DOCTEST_TEST_SUITE("File")
+DOCTEST_TEST_SUITE("FileSystem")
 {
     DOCTEST_TEST_CASE("FilesystemPath")
     {

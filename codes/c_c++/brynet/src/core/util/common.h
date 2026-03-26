@@ -153,7 +153,7 @@ CORE_API std::string join(const std::vector<std::string>& parts, std::string_vie
  * @param out_result 存放最终的拆分结果
  * @return
  */
-CORE_API void split_string(const char* src_str, const char* separator, std::vector<std::string>& out_result);
+CORE_API void split(const char* src_str, const char* separator, std::vector<std::string>& out_result);
 
 /**
  * @brief 判断给定字符串的字符集是否为GBK(如果全部是ASCII，那么也算是GBK)

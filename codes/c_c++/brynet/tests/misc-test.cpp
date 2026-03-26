@@ -812,7 +812,7 @@ DOCTEST_TEST_SUITE("Misc")
 
         // 测试基本功能
         result.clear();
-        core::split_string("a,b,c,d", ",", result);
+        core::split("a,b,c,d", ",", result);
         DOCTEST_CHECK(result.size() == 4);
         DOCTEST_CHECK(result[0] == "a");
         DOCTEST_CHECK(result[1] == "b");
@@ -821,7 +821,7 @@ DOCTEST_TEST_SUITE("Misc")
 
         // 测试多个分隔符
         result.clear();
-        core::split_string("a,b;c,d", ",;", result);
+        core::split("a,b;c,d", ",;", result);
         DOCTEST_CHECK(result.size() == 4);
         DOCTEST_CHECK(result[0] == "a");
         DOCTEST_CHECK(result[1] == "b");
@@ -830,7 +830,7 @@ DOCTEST_TEST_SUITE("Misc")
 
         // 测试连续分隔符
         result.clear();
-        core::split_string("a,,b;;c", ",;", result);
+        core::split("a,,b;;c", ",;", result);
         DOCTEST_CHECK(result.size() == 3);
         DOCTEST_CHECK(result[0] == "a");
         DOCTEST_CHECK(result[1] == "b");
@@ -838,7 +838,7 @@ DOCTEST_TEST_SUITE("Misc")
 
         // 测试开头和结尾的分隔符
         result.clear();
-        core::split_string(",,a,b,c,,", ",", result);
+        core::split(",,a,b,c,,", ",", result);
         DOCTEST_CHECK(result.size() == 3);
         DOCTEST_CHECK(result[0] == "a");
         DOCTEST_CHECK(result[1] == "b");
@@ -846,23 +846,23 @@ DOCTEST_TEST_SUITE("Misc")
 
         // 测试空字符串
         result.clear();
-        core::split_string("", ",", result);
+        core::split("", ",", result);
         DOCTEST_CHECK(result.empty());
 
         // 测试只有分隔符的字符串
         result.clear();
-        core::split_string(",,,", ",", result);
+        core::split(",,,", ",", result);
         DOCTEST_CHECK(result.empty());
 
         // 测试没有分隔符的字符串
         result.clear();
-        core::split_string("hello", ",", result);
+        core::split("hello", ",", result);
         DOCTEST_CHECK(result.size() == 1);
         DOCTEST_CHECK(result[0] == "hello");
 
         // 测试单个字符
         result.clear();
-        core::split_string("a", ",", result);
+        core::split("a", ",", result);
         DOCTEST_CHECK(result.size() == 1);
         DOCTEST_CHECK(result[0] == "a");
 
@@ -874,7 +874,7 @@ DOCTEST_TEST_SUITE("Misc")
             long_str += core::to_string(i);
             if (i < 999) long_str += ",";
         }
-        core::split_string(long_str.c_str(), ",", result);
+        core::split(long_str.c_str(), ",", result);
         DOCTEST_CHECK(result.size() == 1000);
         for (int i = 0; i < 1000; ++i)
         {
