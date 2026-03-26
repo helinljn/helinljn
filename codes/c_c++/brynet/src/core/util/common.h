@@ -142,6 +142,52 @@ CORE_API double random_double(void);
  */
 CORE_API int32_t random_range(int32_t upper_bound);
 
+/**
+ * @brief 判断是否存在指定的环境变量
+ * @param name 环境变量名称
+ * @return 存在返回true，不存在返回false
+ */
+CORE_API bool env_has(std::string_view name);
+
+/**
+ * @brief 获取指定环境变量的值
+ * @param name 环境变量名称
+ * @return 环境变量的值，如果不存在返回空字符串
+ */
+CORE_API std::string env_get(std::string_view name);
+
+/**
+ * @brief 设置指定环境变量的值
+ * @param name 环境变量名称
+ * @param value 环境变量的值
+ * @return 设置成功返回true，失败返回false
+ */
+CORE_API bool env_set(std::string_view name, std::string_view value);
+
+/**
+ * @brief 获取当前执行文件的绝对路径(【包含】执行文件名)
+ *        如：C:\test\test.exe
+ *        如：/home/shmilyl/test/a.out
+ *        自动追加'\0'字符串结束符，buflen不包含'\0'
+ * @param buf    存放路径的缓冲区
+ * @param buflen 缓冲区的大小(成功时，会修改为实际占用大小)
+ * @return 成功返回true，失败返回false
+ */
+CORE_API bool        get_exepath(char* buf, uint32_t* buflen);
+CORE_API std::string get_exepath(void);
+
+/**
+ * @brief 获取当前执行文件所在目录的绝对路径(【不包含】执行文件名)
+ *        如：C:\test
+ *        如：/home/shmilyl/test
+ *        自动追加'\0'字符串结束符，buflen不包含'\0'
+ * @param buf    存放路径的缓冲区
+ * @param buflen 缓冲区的大小(成功时，会修改为实际占用大小)
+ * @return 成功返回true，失败返回false
+ */
+CORE_API bool        get_exedir(char* buf, uint32_t* buflen);
+CORE_API std::string get_exedir(void);
+
 } // namespace core
 
 #endif // __COMMON_H__

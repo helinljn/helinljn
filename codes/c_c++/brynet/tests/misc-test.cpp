@@ -771,4 +771,48 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(core::random_range(0) == 0);
         DOCTEST_CHECK(core::random_range(-10) == 0);
     }
+
+    DOCTEST_TEST_CASE("EnvironmentVariables")
+    {
+        // 测试设置环境变量
+        DOCTEST_CHECK(core::env_set("TEST_ENV_VAR", "test_value"));
+
+        // 测试判断环境变量是否存在
+        DOCTEST_CHECK(core::env_has("TEST_ENV_VAR"));
+
+        // 测试获取环境变量的值
+        DOCTEST_CHECK(core::env_get("TEST_ENV_VAR") == "test_value");
+
+        // 测试获取不存在的环境变量
+        DOCTEST_CHECK(!core::env_has("NON_EXISTENT_ENV_VAR"));
+        DOCTEST_CHECK(core::env_get("NON_EXISTENT_ENV_VAR").empty());
+
+        // 测试空环境变量名
+        DOCTEST_CHECK(!core::env_has(""));
+        DOCTEST_CHECK(core::env_get("").empty());
+        DOCTEST_CHECK(!core::env_set("", "value"));
+    }
+
+    DOCTEST_TEST_CASE("PathOperations")
+    {
+        // 测试 get_exepath 函数
+        char exepath_buf[2048];
+        uint32_t exepath_len = sizeof(exepath_buf);
+        DOCTEST_CHECK(core::get_exepath(exepath_buf, &exepath_len));
+        DOCTEST_CHECK(exepath_len > 0);
+
+        std::string exepath_str = core::get_exepath();
+        DOCTEST_CHECK(!exepath_str.empty());
+
+        // 测试 get_exedir 函数
+        char exedir_buf[2048];
+        uint32_t exedir_len = sizeof(exedir_buf);
+        DOCTEST_CHECK(core::get_exedir(exedir_buf, &exedir_len));
+        DOCTEST_CHECK(exedir_len > 0);
+
+        std::string exedir_str = core::get_exedir();
+        DOCTEST_CHECK(!exedir_str.empty());
+
+        fmt::print("exepath: {}, exedir: {}\n", exepath_str, exedir_str);
+    }
 }

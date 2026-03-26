@@ -1,25 +1,18 @@
 #include "common.h"
-#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <random>
-#include <vector>
 #include <thread>
-#include <stdexcept>
-#include <string_view>
 #include <unordered_set>
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #define WIN32_LEAN_AND_MEAN
     #include <Windows.h>
-    #include <direct.h>
-    #include <io.h>
     #undef WIN32_LEAN_AND_MEAN
 #elif defined(CORE_PLATFORM_LINUX)
     #include <unistd.h>
     #include <time.h>
     #include <iconv.h>
-    #include <sys/stat.h>
-    #include <sys/types.h>
     #include <sys/sysinfo.h>
 #else
     #error "Error! I don't know what to do..."
@@ -130,6 +123,51 @@ exit_handle:
 }
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
+/**
+ * @brief 获取当前执行文件的绝对路径(【包含】执行文件名)
+ *        如：C:\test\test.exe
+ *        如：/home/helin/test/a.out
+ * @param buf    存放路径的缓冲区
+ * @param buflen 缓冲区的大小(成功时，会修改为实际占用大小)
+ * @return 成功返回0，失败返回-1
+ */
+static inline int32_t get_exepath_internal(char* buf, uint32_t* buflen)
+{
+    if (!buf || !buflen || *buflen == 0)
+        return -1;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    const uint32_t     utf16_buflen = (*buflen > 32768 ? 32768 : *buflen);
+    std::vector<WCHAR> utf16_buf(utf16_buflen);
+
+    int32_t ret = GetModuleFileNameW(NULL, utf16_buf.data(), static_cast<int>(utf16_buflen));
+    if (ret <= 0)
+        return -1;
+
+    utf16_buf[ret] = L'\0';
+
+    // Convert to UTF-8
+    ret = WideCharToMultiByte(CP_UTF8, 0, utf16_buf.data(), -1, buf, (int)*buflen, NULL, NULL);
+    if (ret == 0)
+        return -1;
+
+    *buflen = ret - 1;
+    return 0;
+#elif defined(CORE_PLATFORM_LINUX)
+    ssize_t n = *buflen - 1;
+    if (n > 0)
+        n = readlink("/proc/self/exe", buf, n);
+
+    if (n == -1)
+        return -1;
+
+    buf[n]  = '\0';
+    *buflen = static_cast<uint32_t>(n);
+
+    return 0;
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
 } // namespace details
 
 uint32_t get_free_memory(void)
@@ -138,21 +176,18 @@ uint32_t get_free_memory(void)
     MEMORYSTATUSEX memory_status;
     memory_status.dwLength = sizeof(memory_status);
 
-    BOOL ret = GlobalMemoryStatusEx(&memory_status);
-    if (!ret)
+    if (!GlobalMemoryStatusEx(&memory_status))
         return 0;
 
     return static_cast<uint32_t>(memory_status.ullAvailPhys / 1024);
 #elif defined(CORE_PLATFORM_LINUX)
     struct sysinfo info;
 
-    int32_t ret = sysinfo(&info);
+    const int32_t ret = sysinfo(&info);
     if (ret)
         return 0;
 
     return static_cast<uint32_t>(info.freeram * info.mem_unit / 1024);
-#else
-    #error "Error! I don't know what to do..."
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
@@ -162,21 +197,18 @@ uint32_t get_total_memory(void)
     MEMORYSTATUSEX memory_status;
     memory_status.dwLength = sizeof(memory_status);
 
-    BOOL ret = GlobalMemoryStatusEx(&memory_status);
-    if (!ret)
+    if (!GlobalMemoryStatusEx(&memory_status))
         return 0;
 
     return static_cast<uint32_t>(memory_status.ullTotalPhys / 1024);
 #elif defined(CORE_PLATFORM_LINUX)
     struct sysinfo info;
 
-    int32_t ret = sysinfo(&info);
+    const int32_t ret = sysinfo(&info);
     if (ret)
         return 0;
 
     return static_cast<uint32_t>(info.totalram * info.mem_unit / 1024);
-#else
-    #error "Error! I don't know what to do..."
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
@@ -228,8 +260,6 @@ uint32_t get_process_id(void)
     return static_cast<uint32_t>(GetCurrentProcessId());
 #elif defined(CORE_PLATFORM_LINUX)
     return static_cast<uint32_t>(getpid());
-#else
-    #error "Error! I don't know what to do..."
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
@@ -343,8 +373,8 @@ bool is_gbk(std::string_view str)
         if (idx + 1 >= len)
             return false;
 
-        uint8_t first  = data[idx];
-        uint8_t second = data[idx + 1];
+        const uint8_t first  = data[idx];
+        const uint8_t second = data[idx + 1];
 
         // 首字节范围：0x81 ~ 0xFE
         if (first < 0x81 || first > 0xFE)
@@ -370,7 +400,7 @@ bool is_utf8(std::string_view str)
     size_t         idx  = 0;
     while (idx < len)
     {
-        uint8_t byte = data[idx];
+        const uint8_t byte = data[idx];
         if (!(byte & 0x80))
         {
             // 单字节字符 (0x00-0x7F)
@@ -452,8 +482,6 @@ std::string gbk_to_utf8(std::string_view gbk_str)
             buf[buf_size - outlen - 1] = '\0';
             ret_str = buf.data();
             return ret_str;
-        #else
-            #error "Error! I don't know what to do..."
         #endif // defined(CORE_PLATFORM_WINDOWS)
     });
 }
@@ -491,8 +519,6 @@ std::string utf8_to_gbk(std::string_view utf8_str)
             buf[buf_size - outlen - 1] = '\0';
             ret_str = buf.data();
             return ret_str;
-        #else
-            #error "Error! I don't know what to do..."
         #endif // defined(CORE_PLATFORM_WINDOWS)
     });
 }
@@ -545,6 +571,119 @@ int32_t random_range(int32_t upper_bound)
     const uint32_t result       = static_cast<uint32_t>(product / (UINT32_MAX + 1ULL));
 
     return static_cast<int32_t>(result);
+}
+
+bool env_has(std::string_view name)
+{
+    if (name.empty())
+        return false;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    char buffer[1];
+    DWORD result = GetEnvironmentVariableA(name.data(), buffer, sizeof(buffer));
+    return result > 0;
+#elif defined(CORE_PLATFORM_LINUX)
+    return getenv(name.data()) != nullptr;
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+std::string env_get(std::string_view name)
+{
+    if (name.empty())
+        return std::string{};
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    // 先获取环境变量的大小
+    DWORD size = GetEnvironmentVariableA(name.data(), nullptr, 0);
+    if (size == 0)
+        return std::string{};
+
+    // 分配足够的缓冲区
+    std::string result(size - 1, '\0');
+    GetEnvironmentVariableA(name.data(), &result[0], size);
+    return result;
+#elif defined(CORE_PLATFORM_LINUX)
+    const char* value = getenv(name.data());
+    return value ? std::string(value) : std::string{};
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+bool env_set(std::string_view name, std::string_view value)
+{
+    if (name.empty())
+        return false;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    return SetEnvironmentVariableA(name.data(), value.data()) != 0;
+#elif defined(CORE_PLATFORM_LINUX)
+    return setenv(name.data(), value.data(), 1) == 0;
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+bool get_exepath(char* buf, uint32_t* buflen)
+{
+    if (!buf || !buflen)
+        return false;
+
+    const int32_t ret = details::get_exepath_internal(buf, buflen);
+    return ret == 0;
+}
+
+std::string get_exepath(void)
+{
+    char     buf[4096];
+    uint32_t len = sizeof(buf);
+    if (!get_exepath(buf, &len))
+        return std::string{};
+
+    return std::string(buf, len);
+}
+
+bool get_exedir(char* buf, uint32_t* buflen)
+{
+    if (!buf || !buflen)
+        return false;
+
+    const int32_t ret = details::get_exepath_internal(buf, buflen);
+    if (ret == -1)
+        return false;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    const char* slash = strrchr(buf, '\\');
+#else
+    const char* slash = strrchr(buf, '/');
+#endif // defined(CORE_PLATFORM_WINDOWS)
+    if (!slash || slash - buf < 0)
+    {
+        buf[0]  = '\0';
+        *buflen = 0;
+        return false;
+    }
+
+    // 考虑以下特殊情况：
+    //   /a.out(非Windows平台)
+    if (slash == buf)
+    {
+        buf[1]  = '\0';
+        *buflen = 1;
+        return true;
+    }
+
+    uint32_t pos = static_cast<uint32_t>(slash - buf);
+    buf[pos]     = '\0';
+    *buflen      = pos;
+
+    return true;
+}
+
+std::string get_exedir(void)
+{
+    char     buf[4096];
+    uint32_t len = sizeof(buf);
+    if (!get_exedir(buf, &len))
+        return std::string{};
+
+    return std::string(buf, len);
 }
 
 } // namespace core
