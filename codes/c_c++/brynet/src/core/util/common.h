@@ -2,8 +2,9 @@
 #define __COMMON_H__
 
 #include "core_port.h"
-#include <string>
 #include <vector>
+#include <string>
+#include <string_view>
 
 namespace core {
 
@@ -27,6 +28,13 @@ CORE_API uint32_t get_total_memory(void);
  * @return
  */
 CORE_API uint32_t get_cpu_logic_count(void);
+
+/**
+ * @brief 获取当前程序已经运行的时间（毫秒）
+ * @param
+ * @return 程序运行时间，单位为毫秒
+ */
+CORE_API uint64_t get_program_running_time(void);
 
 /**
  * @brief 获取进程Id
@@ -74,34 +82,30 @@ CORE_API void split_string(const char* src_str, const char* separator, std::vect
 /**
  * @brief 判断给定字符串的字符集是否为GBK(如果全部是ASCII，那么也算是GBK)
  * @param str 待判定字符串
- * @param len 字符串长度
  * @return 是返回true，否返回false
  */
-CORE_API bool is_gbk(const std::string& str);
-CORE_API bool is_gbk(const char* str, size_t len);
+CORE_API bool is_gbk(std::string_view str);
 
 /**
  * @brief 判断给定字符串的字符集是否为UTF-8(如果全部是ASCII，那么也算是UTF-8)
  * @param str 待判定字符串
- * @param len 字符串长度
  * @return 是返回true，否返回false
  */
-CORE_API bool is_utf8(const std::string& str);
-CORE_API bool is_utf8(const char* str, size_t len);
+CORE_API bool is_utf8(std::string_view str);
 
 /**
  * @brief GBK转UTF-8
  * @param gbk_str GBK字符串
  * @return 成功返回UTF-8字符串，失败返回空字符串
  */
-CORE_API std::string gbk_to_utf8(const char* gbk_str);
+CORE_API std::string gbk_to_utf8(std::string_view gbk_str);
 
 /**
  * @brief UTF-8转GBK
  * @param utf8_str UTF-8字符串
  * @return 成功返回GBK字符串，失败返回空字符串
  */
-CORE_API std::string utf8_to_gbk(const char* utf8_str);
+CORE_API std::string utf8_to_gbk(std::string_view utf8_str);
 
 /**
  * @brief 随机uint32_t整数，生成[0, UINT32_MAX]之间的uint32_t

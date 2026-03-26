@@ -3,8 +3,10 @@
 #include <cstring>
 #include <random>
 #include <vector>
-#include <unordered_set>
+#include <thread>
 #include <stdexcept>
+#include <string_view>
+#include <unordered_set>
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #define WIN32_LEAN_AND_MEAN
@@ -14,6 +16,7 @@
     #undef WIN32_LEAN_AND_MEAN
 #elif defined(CORE_PLATFORM_LINUX)
     #include <unistd.h>
+    #include <time.h>
     #include <iconv.h>
     #include <sys/stat.h>
     #include <sys/types.h>
@@ -179,16 +182,44 @@ uint32_t get_total_memory(void)
 
 uint32_t get_cpu_logic_count(void)
 {
+    // 使用 C++11 标准库的 std::thread::hardware_concurrency() 函数
+    // 该函数返回系统中可用的硬件线程数
+    unsigned int count = std::thread::hardware_concurrency();
+    // 如果获取失败（返回 0），则返回默认值 1
+    return count > 0 ? static_cast<uint32_t>(count) : 1;
+}
+
+uint64_t get_program_running_time(void)
+{
+    // 静态变量，记录程序启动时间
+    static uint64_t start_time = 0;
+
+    // 首次调用时初始化启动时间
+    if (start_time == 0)
+    {
 #if defined(CORE_PLATFORM_WINDOWS)
-    SYSTEM_INFO sys_info;
-    GetSystemInfo(&sys_info);
-    return static_cast<uint32_t>(sys_info.dwNumberOfProcessors);
+        // Windows 平台使用 GetTickCount64() 函数
+        start_time = GetTickCount64();
 #elif defined(CORE_PLATFORM_LINUX)
-    long count = sysconf(_SC_NPROCESSORS_ONLN);
-    return static_cast<uint32_t>(count > 0 ? count : 1);
-#else
-    #error "Error! I don't know what to do..."
+        // Linux 平台使用 clock_gettime() 函数
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        start_time = ts.tv_sec * 1000ULL + ts.tv_nsec / 1000000ULL;
 #endif // defined(CORE_PLATFORM_WINDOWS)
+    }
+
+    // 获取当前时间
+    uint64_t current_time = 0;
+#if defined(CORE_PLATFORM_WINDOWS)
+    current_time = GetTickCount64();
+#elif defined(CORE_PLATFORM_LINUX)
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    current_time = ts.tv_sec * 1000ULL + ts.tv_nsec / 1000000ULL;
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+    // 返回程序运行时间（毫秒）
+    return current_time - start_time;
 }
 
 uint32_t get_process_id(void)
@@ -291,17 +322,13 @@ void split_string(const char* src_str, const char* separator, std::vector<std::s
         out_result.emplace_back(start, end - start);
 }
 
-bool is_gbk(const std::string& str)
+bool is_gbk(std::string_view str)
 {
-    return is_gbk(str.c_str(), str.size());
-}
-
-bool is_gbk(const char* str, size_t len)
-{
-    if (!str || len == 0)
+    if (str.empty())
         return false;
 
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(str.data());
+    size_t         len  = str.size();
     size_t         idx  = 0;
     while (idx < len)
     {
@@ -333,17 +360,13 @@ bool is_gbk(const char* str, size_t len)
     return true;
 }
 
-bool is_utf8(const std::string& str)
+bool is_utf8(std::string_view str)
 {
-    return is_utf8(str.c_str(), str.size());
-}
-
-bool is_utf8(const char* str, size_t len)
-{
-    if (!str || len == 0)
+    if (str.empty())
         return false;
 
-    const uint8_t* data = reinterpret_cast<const uint8_t*>(str);
+    const uint8_t* data = reinterpret_cast<const uint8_t*>(str.data());
+    size_t         len  = str.size();
     size_t         idx  = 0;
     while (idx < len)
     {
@@ -396,9 +419,9 @@ bool is_utf8(const char* str, size_t len)
     return true;
 }
 
-std::string gbk_to_utf8(const char* gbk_str)
+std::string gbk_to_utf8(std::string_view gbk_str)
 {
-    return details::code_convert(gbk_str, [](const char* str) -> std::string {
+    return details::code_convert(gbk_str.data(), [](const char* str) -> std::string {
         #if defined(CORE_PLATFORM_WINDOWS)
             // 使用 CP936 明确指定 GBK 编码
             return details::code_convert_internal_windows(str, 936, CP_UTF8);
@@ -431,13 +454,13 @@ std::string gbk_to_utf8(const char* gbk_str)
             return ret_str;
         #else
             #error "Error! I don't know what to do..."
-        #endif
+        #endif // defined(CORE_PLATFORM_WINDOWS)
     });
 }
 
-std::string utf8_to_gbk(const char* utf8_str)
+std::string utf8_to_gbk(std::string_view utf8_str)
 {
-    return details::code_convert(utf8_str, [](const char* str) -> std::string {
+    return details::code_convert(utf8_str.data(), [](const char* str) -> std::string {
         #if defined(CORE_PLATFORM_WINDOWS)
             // 使用 CP936 明确指定 GBK 编码
             return details::code_convert_internal_windows(str, CP_UTF8, 936);
@@ -470,7 +493,7 @@ std::string utf8_to_gbk(const char* utf8_str)
             return ret_str;
         #else
             #error "Error! I don't know what to do..."
-        #endif
+        #endif // defined(CORE_PLATFORM_WINDOWS)
     });
 }
 
@@ -515,11 +538,13 @@ int32_t random_range(int32_t upper_bound)
     if (upper_bound <= 0)
         return 0;
 
-    // 使用线程本地存储的随机数生成器，确保线程安全
-    thread_local std::mt19937 generator(std::random_device{}());
-    std::uniform_int_distribution<int32_t> distribution(0, upper_bound - 1);
+    // 使用 random_uint32 生成随机数，并通过乘法和除法实现均匀分布
+    // 这种方法可以避免取模运算可能导致的分布不均匀问题
+    const uint32_t random_value = random_uint32();
+    const uint64_t product      = static_cast<uint64_t>(random_value) * static_cast<uint64_t>(upper_bound);
+    const uint32_t result       = static_cast<uint32_t>(product / (UINT32_MAX + 1ULL));
 
-    return distribution(generator);
+    return static_cast<int32_t>(result);
 }
 
 } // namespace core

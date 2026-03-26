@@ -8,6 +8,7 @@
 #include "fmt/format.h"
 #include <cpptrace/cpptrace.hpp>
 #include <sstream>
+#include <thread>
 
 // Unnamed namespace for internal linkage
 namespace {
@@ -523,68 +524,68 @@ DOCTEST_TEST_SUITE("Misc")
     DOCTEST_TEST_CASE("IsGBK")
     {
         // 测试空字符串
-        DOCTEST_CHECK(!core::is_gbk("", 0));
+        DOCTEST_CHECK(!core::is_gbk(""));
         DOCTEST_CHECK(!core::is_gbk(std::string()));
 
         // 测试ASCII字符串
-        DOCTEST_CHECK(core::is_gbk("hello", 5));
+        DOCTEST_CHECK(core::is_gbk(std::string_view("hello", 5)));
         DOCTEST_CHECK(core::is_gbk("hello"));
 
         // 测试GBK字符串（中文）
         // 注意：这里需要确保字符串是GBK编码
         // 由于编码环境可能不同，这里使用十六进制表示
         const uint8_t gbk_chinese[] = {0xD6, 0xD0, 0xCE, 0xC4}; // "中文"的GBK编码
-        DOCTEST_CHECK(core::is_gbk(reinterpret_cast<const char*>(gbk_chinese), sizeof(gbk_chinese)));
+        DOCTEST_CHECK(core::is_gbk(std::string_view(reinterpret_cast<const char*>(gbk_chinese), sizeof(gbk_chinese))));
 
         // 测试混合ASCII和GBK
         const uint8_t mixed[] = {0x68, 0x65, 0x6C, 0x6C, 0x6F, 0xD6, 0xD0, 0xCE, 0xC4}; // "hello中文"
-        DOCTEST_CHECK(core::is_gbk(reinterpret_cast<const char*>(mixed), sizeof(mixed)));
+        DOCTEST_CHECK(core::is_gbk(std::string_view(reinterpret_cast<const char*>(mixed), sizeof(mixed))));
 
         // 测试无效的GBK编码
         const uint8_t invalid_gbk1[] = {0x80}; // 无效的首字节
-        DOCTEST_CHECK(!core::is_gbk(reinterpret_cast<const char*>(invalid_gbk1), sizeof(invalid_gbk1)));
+        DOCTEST_CHECK(!core::is_gbk(std::string_view(reinterpret_cast<const char*>(invalid_gbk1), sizeof(invalid_gbk1))));
 
         const uint8_t invalid_gbk2[] = {0x81, 0x3F}; // 无效的尾字节
-        DOCTEST_CHECK(!core::is_gbk(reinterpret_cast<const char*>(invalid_gbk2), sizeof(invalid_gbk2)));
+        DOCTEST_CHECK(!core::is_gbk(std::string_view(reinterpret_cast<const char*>(invalid_gbk2), sizeof(invalid_gbk2))));
 
         const uint8_t invalid_gbk3[] = {0x81}; // 不完整的GBK编码
-        DOCTEST_CHECK(!core::is_gbk(reinterpret_cast<const char*>(invalid_gbk3), sizeof(invalid_gbk3)));
+        DOCTEST_CHECK(!core::is_gbk(std::string_view(reinterpret_cast<const char*>(invalid_gbk3), sizeof(invalid_gbk3))));
     }
 
     DOCTEST_TEST_CASE("IsUTF8")
     {
         // 测试空字符串
-        DOCTEST_CHECK(!core::is_utf8("", 0));
+        DOCTEST_CHECK(!core::is_utf8(""));
         DOCTEST_CHECK(!core::is_utf8(std::string()));
 
         // 测试ASCII字符串
-        DOCTEST_CHECK(core::is_utf8("hello", 5));
+        DOCTEST_CHECK(core::is_utf8(std::string_view("hello", 5)));
         DOCTEST_CHECK(core::is_utf8("hello"));
 
         // 测试UTF-8字符串（中文）
         const uint8_t utf8_chinese[] = {0xE4, 0xB8, 0xAD, 0xE6, 0x96, 0x87}; // "中文"的UTF-8编码
-        DOCTEST_CHECK(core::is_utf8(reinterpret_cast<const char*>(utf8_chinese), sizeof(utf8_chinese)));
+        DOCTEST_CHECK(core::is_utf8(std::string_view(reinterpret_cast<const char*>(utf8_chinese), sizeof(utf8_chinese))));
 
         // 测试混合ASCII和UTF-8
         const uint8_t mixed[] = {0x68, 0x65, 0x6C, 0x6C, 0x6F, 0xE4, 0xB8, 0xAD, 0xE6, 0x96, 0x87}; // "hello中文"
-        DOCTEST_CHECK(core::is_utf8(reinterpret_cast<const char*>(mixed), sizeof(mixed)));
+        DOCTEST_CHECK(core::is_utf8(std::string_view(reinterpret_cast<const char*>(mixed), sizeof(mixed))));
 
         // 测试多字节UTF-8字符
         const uint8_t multi_byte[] = {0xF0, 0x9F, 0x98, 0x83}; // 😃 表情符号的UTF-8编码
-        DOCTEST_CHECK(core::is_utf8(reinterpret_cast<const char*>(multi_byte), sizeof(multi_byte)));
+        DOCTEST_CHECK(core::is_utf8(std::string_view(reinterpret_cast<const char*>(multi_byte), sizeof(multi_byte))));
 
         // 测试无效的UTF-8编码
         const uint8_t invalid_utf8_1[] = {0xC0}; // 不完整的双字节编码
-        DOCTEST_CHECK(!core::is_utf8(reinterpret_cast<const char*>(invalid_utf8_1), sizeof(invalid_utf8_1)));
+        DOCTEST_CHECK(!core::is_utf8(std::string_view(reinterpret_cast<const char*>(invalid_utf8_1), sizeof(invalid_utf8_1))));
 
         const uint8_t invalid_utf8_2[] = {0xC0, 0x80}; // 过度编码的ASCII
-        DOCTEST_CHECK(!core::is_utf8(reinterpret_cast<const char*>(invalid_utf8_2), sizeof(invalid_utf8_2)));
+        DOCTEST_CHECK(!core::is_utf8(std::string_view(reinterpret_cast<const char*>(invalid_utf8_2), sizeof(invalid_utf8_2))));
 
         const uint8_t invalid_utf8_3[] = {0xE0, 0x80, 0x80}; // 不完整的三字节编码
-        DOCTEST_CHECK(!core::is_utf8(reinterpret_cast<const char*>(invalid_utf8_3), sizeof(invalid_utf8_3)));
+        DOCTEST_CHECK(!core::is_utf8(std::string_view(reinterpret_cast<const char*>(invalid_utf8_3), sizeof(invalid_utf8_3))));
 
         const uint8_t invalid_utf8_4[] = {0xF8, 0x80, 0x80, 0x80, 0x80}; // 超过4字节的编码
-        DOCTEST_CHECK(!core::is_utf8(reinterpret_cast<const char*>(invalid_utf8_4), sizeof(invalid_utf8_4)));
+        DOCTEST_CHECK(!core::is_utf8(std::string_view(reinterpret_cast<const char*>(invalid_utf8_4), sizeof(invalid_utf8_4))));
     }
 
     DOCTEST_TEST_CASE("MemoryToHexString")
@@ -670,30 +671,40 @@ DOCTEST_TEST_SUITE("Misc")
             free_memory, total_memory, process_id, cpu_count);
     }
 
+    DOCTEST_TEST_CASE("ProgramRunningTime")
+    {
+        // 测试 get_program_running_time 函数
+        uint64_t start_time = core::get_program_running_time();
+        DOCTEST_CHECK(start_time >= 0);
+
+        // 等待一段时间后再次获取
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        uint64_t end_time = core::get_program_running_time();
+        DOCTEST_CHECK(end_time >= start_time);
+        DOCTEST_CHECK(end_time - start_time >= 90); // 允许一定的误差
+    }
+
     DOCTEST_TEST_CASE("EncodingConversion")
     {
-        // 测试空字符串
-        DOCTEST_CHECK(core::gbk_to_utf8(nullptr).empty());
-        DOCTEST_CHECK(core::utf8_to_gbk(nullptr).empty());
-
         // 测试空字符串
         DOCTEST_CHECK(core::gbk_to_utf8("").empty());
         DOCTEST_CHECK(core::utf8_to_gbk("").empty());
 
         // 测试 ASCII 字符串
         std::string ascii_str = "hello world";
-        DOCTEST_CHECK(core::gbk_to_utf8(ascii_str.c_str()) == ascii_str);
-        DOCTEST_CHECK(core::utf8_to_gbk(ascii_str.c_str()) == ascii_str);
+        DOCTEST_CHECK(core::gbk_to_utf8(ascii_str) == ascii_str);
+        DOCTEST_CHECK(core::utf8_to_gbk(ascii_str) == ascii_str);
 
         // 测试中文转换（注意：这里的测试依赖于系统编码环境）
         // 测试 GBK 到 UTF-8 转换
-        // std::string gbk_chinese = "中文";
-        // std::string utf8_chinese = core::gbk_to_utf8(gbk_chinese.c_str());
+        // std::string gbk_chinese  = "中文";
+        // std::string utf8_chinese = core::gbk_to_utf8(gbk_chinese);
         // DOCTEST_CHECK(!utf8_chinese.empty());
 
         // 测试 UTF-8 到 GBK 转换
-        std::string utf8_chinese = "中文";
-        std::string converted_back = core::utf8_to_gbk(utf8_chinese.c_str());
+        std::string utf8_chinese   = "中文";
+        std::string converted_back = core::utf8_to_gbk(utf8_chinese);
         DOCTEST_CHECK(!converted_back.empty());
 
         // 测试转换的可逆性（在支持 GBK 的环境中应该成立）
