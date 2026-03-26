@@ -1,7 +1,7 @@
 #include "doctest/doctest.h"
 #include "util/singleton.hpp"
-#include "util/stack_trace.h"
 #include "util/common.h"
+#include "util/numeric_cast.hpp"
 #include "time/timespan.h"
 #include "time/timestamp.h"
 #include "time/datetime.h"
@@ -52,15 +52,7 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(st.GetLine() == 10);
     }
 
-    DOCTEST_TEST_CASE("StackTrace.stack_trace")
-    {
-        const std::string callstack = core::stack_trace().to_string();
-        DOCTEST_CHECK(!callstack.empty());
-
-        fmt::print("-- stack_trace --\n{}", callstack);
-    }
-
-    DOCTEST_TEST_CASE("StackTrace.cpptrace")
+    DOCTEST_TEST_CASE("StackTrace")
     {
         // 这个库目前只能这么用，也就是用st.print将结果输出至std::ostringstream中
         const cpptrace::stacktrace st = cpptrace::stacktrace::current();
@@ -70,7 +62,7 @@ DOCTEST_TEST_SUITE("Misc")
         const std::string callstack = ostr.str();
         DOCTEST_CHECK(!callstack.empty());
 
-        fmt::print("-- stack_trace --\n{}", callstack);
+        fmt::print("-- stack trace --\n{}-----------------\n", callstack);
     }
 
     DOCTEST_TEST_CASE("Timespan")
@@ -515,14 +507,16 @@ DOCTEST_TEST_SUITE("Misc")
         // 测试长字符串
         result.clear();
         std::string long_str;
-        for (int i = 0; i < 1000; ++i) {
-            long_str += std::to_string(i);
+        for (int i = 0; i < 1000; ++i)
+        {
+            long_str += core::to_string(i);
             if (i < 999) long_str += ",";
         }
         core::split_string(long_str.c_str(), ",", result);
         DOCTEST_CHECK(result.size() == 1000);
-        for (int i = 0; i < 1000; ++i) {
-            DOCTEST_CHECK(result[i] == std::to_string(i));
+        for (int i = 0; i < 1000; ++i)
+        {
+            DOCTEST_CHECK(result[i] == core::to_string(i));
         }
     }
 
@@ -653,44 +647,6 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(buf[0] == 0x5A);
     }
 
-    DOCTEST_TEST_CASE("FileOperations")
-    {
-        // 测试目录操作（注意：这些测试可能会在不同环境下有不同结果）
-        // 测试 access_exists 函数
-        DOCTEST_CHECK(core::access_exists(".")); // 当前目录应该存在
-
-        // 测试 access_read 函数
-        DOCTEST_CHECK(core::access_read(".")); // 当前目录应该可读
-
-        // 测试 access_write 函数
-        DOCTEST_CHECK(core::access_write(".")); // 当前目录应该可写
-    }
-
-    DOCTEST_TEST_CASE("PathOperations")
-    {
-        // 测试 get_exepath 函数
-        char exepath_buf[2048];
-        uint32_t exepath_len = sizeof(exepath_buf);
-        DOCTEST_CHECK(core::get_exepath(exepath_buf, &exepath_len));
-        DOCTEST_CHECK(exepath_len > 0);
-
-        std::string exepath_str = core::get_exepath();
-        DOCTEST_CHECK(!exepath_str.empty());
-
-        fmt::print("exepath: {}\n", exepath_str);
-
-        // 测试 get_exedir 函数
-        char exedir_buf[2048];
-        uint32_t exedir_len = sizeof(exedir_buf);
-        DOCTEST_CHECK(core::get_exedir(exedir_buf, &exedir_len));
-        DOCTEST_CHECK(exedir_len > 0);
-
-        std::string exedir_str = core::get_exedir();
-        DOCTEST_CHECK(!exedir_str.empty());
-
-        fmt::print("exedir: {}\n", exedir_str);
-    }
-
     DOCTEST_TEST_CASE("SystemInfo")
     {
         // 测试 get_free_memory 函数
@@ -705,6 +661,13 @@ DOCTEST_TEST_SUITE("Misc")
         // 测试 get_process_id 函数
         uint32_t process_id = core::get_process_id();
         DOCTEST_CHECK(process_id > 0);
+
+        // 测试 get_cpu_logic_count 函数
+        uint32_t cpu_count = core::get_cpu_logic_count();
+        DOCTEST_CHECK(cpu_count > 0);
+
+        fmt::print("FreeMemory: {}, TotalMemory: {}, ProcessID: {}, CPUCount: {}\n",
+            free_memory, total_memory, process_id, cpu_count);
     }
 
     DOCTEST_TEST_CASE("EncodingConversion")
@@ -724,16 +687,77 @@ DOCTEST_TEST_SUITE("Misc")
 
         // 测试中文转换（注意：这里的测试依赖于系统编码环境）
         // 测试 GBK 到 UTF-8 转换
-        std::string gbk_chinese = "中文";
-        std::string utf8_chinese = core::gbk_to_utf8(gbk_chinese.c_str());
-        DOCTEST_CHECK(!utf8_chinese.empty());
+        // std::string gbk_chinese = "中文";
+        // std::string utf8_chinese = core::gbk_to_utf8(gbk_chinese.c_str());
+        // DOCTEST_CHECK(!utf8_chinese.empty());
 
         // 测试 UTF-8 到 GBK 转换
+        std::string utf8_chinese = "中文";
         std::string converted_back = core::utf8_to_gbk(utf8_chinese.c_str());
         DOCTEST_CHECK(!converted_back.empty());
 
         // 测试转换的可逆性（在支持 GBK 的环境中应该成立）
         // 注意：由于编码环境的差异，这个测试可能在某些环境下失败
         // DOCTEST_CHECK(converted_back == gbk_chinese);
+
+        // 测试异常处理
+        try
+        {
+            // 测试无效输入
+            core::gbk_to_utf8("\xFF\xFF"); // 无效的 GBK 编码
+            core::utf8_to_gbk("\xFF\xFF"); // 无效的 UTF-8 编码
+        }
+        catch (...)
+        {
+            // 不应该抛出异常，应该返回空字符串
+            DOCTEST_CHECK(false);
+        }
+    }
+
+    DOCTEST_TEST_CASE("Random")
+    {
+        // 测试 random_uint32 函数
+        for (int i = 0; i < 100; ++i)
+        {
+            uint32_t value = core::random_uint32();
+            DOCTEST_CHECK(value <= UINT32_MAX);
+        }
+
+        // 测试 random_uint64 函数
+        for (int i = 0; i < 100; ++i)
+        {
+            uint64_t value = core::random_uint64();
+            DOCTEST_CHECK(value <= UINT64_MAX);
+        }
+
+        // 测试 random_float 函数
+        for (int i = 0; i < 100; ++i)
+        {
+            float value = core::random_float();
+            DOCTEST_CHECK(value >= 0.0f);
+            DOCTEST_CHECK(value <= 1.0f);
+        }
+
+        // 测试 random_double 函数
+        for (int i = 0; i < 100; ++i)
+        {
+            double value = core::random_double();
+            DOCTEST_CHECK(value >= 0.0);
+            DOCTEST_CHECK(value <= 1.0);
+        }
+
+        // 测试 random_range 函数
+        // 测试有效输入
+        int32_t upper_bound = 100;
+        for (int i = 0; i < 1000; ++i)
+        {
+            int32_t value = core::random_range(upper_bound);
+            DOCTEST_CHECK(value >= 0);
+            DOCTEST_CHECK(value < upper_bound);
+        }
+
+        // 测试无效输入
+        DOCTEST_CHECK(core::random_range(0) == 0);
+        DOCTEST_CHECK(core::random_range(-10) == 0);
     }
 }

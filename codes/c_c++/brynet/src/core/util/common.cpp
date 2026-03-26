@@ -1,7 +1,10 @@
 #include "common.h"
 #include <cstdio>
 #include <cstring>
+#include <random>
+#include <vector>
 #include <unordered_set>
+#include <stdexcept>
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #define WIN32_LEAN_AND_MEAN
@@ -21,63 +24,6 @@
 
 namespace core    {
 namespace details {
-
-/**
- * @brief 获取当前执行文件的绝对路径(【包含】执行文件名)
- *        如：C:\test\test.exe
- *        如：/home/helin/test/a.out
- * @param buf    存放路径的缓冲区
- * @param buflen 缓冲区的大小(成功时，会修改为实际占用大小)
- * @return 成功返回0，失败返回-1
- */
-static inline int32_t get_exepath_internal(char* buf, uint32_t* buflen)
-{
-    if (!buf || !buflen || *buflen == 0)
-        return -1;
-
-#if defined(CORE_PLATFORM_WINDOWS)
-    uint32_t utf16_buflen = (*buflen > 32768 ? 32768 : *buflen);
-    WCHAR*   utf16_buf    = (WCHAR*)malloc(sizeof(WCHAR) * utf16_buflen);
-    if (!utf16_buf)
-        return -1;
-
-    int32_t ret = GetModuleFileNameW(NULL, utf16_buf, utf16_buflen);
-    if (ret <= 0)
-    {
-        free(utf16_buf);
-        return -1;
-    }
-
-    utf16_buf[ret] = L'\0';
-
-    // Convert to UTF-8
-    ret = WideCharToMultiByte(CP_UTF8, 0, utf16_buf, -1, buf, (int)*buflen, NULL, NULL);
-    if (ret == 0)
-    {
-        free(utf16_buf);
-        return -1;
-    }
-
-    free(utf16_buf);
-
-    *buflen = ret - 1;
-    return 0;
-#elif defined(CORE_PLATFORM_LINUX)
-    ssize_t n = *buflen - 1;
-    if (n > 0)
-        n = readlink("/proc/self/exe", buf, n);
-
-    if (n == -1)
-        return -1;
-
-    buf[n]  = '\0';
-    *buflen = n;
-
-    return 0;
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
-}
 
 /**
  * @brief 16进制字符转换为数字
@@ -114,6 +60,28 @@ static inline uint8_t hex_string_to_num_internal(char ch)
     }
 }
 
+/**
+ * @brief 通用编码转换包装函数
+ * @param str          待转换的字符串
+ * @param convert_func 具体的转换函数
+ * @return 转换后的字符串，失败时返回空字符串
+ */
+template <typename Func>
+static inline std::string code_convert(const char* str, Func convert_func)
+{
+    if (!str)
+        return std::string{};
+
+    try
+    {
+        return convert_func(str);
+    }
+    catch (...)
+    {
+        return std::string{};
+    }
+}
+
 #if defined(CORE_PLATFORM_WINDOWS)
 /**
  * @brief Windows下字符编码转换
@@ -122,7 +90,7 @@ static inline uint8_t hex_string_to_num_internal(char ch)
  * @param dest_code 目标字符编码代码页
  * @return 成功返回对应转换的符串，失败返回空字符串
  */
-static inline std::string code_convert_internal(const char* str, uint32_t src_code, uint32_t dest_code)
+static inline std::string code_convert_internal_windows(const char* str, uint32_t src_code, uint32_t dest_code)
 {
     std::string ret_str;
     wchar_t*    temp_wstr = NULL;
@@ -157,172 +125,9 @@ exit_handle:
 
     return ret_str;
 }
-#elif defined(CORE_PLATFORM_LINUX)
-/**
- * @brief Linux下字符编码转换
- * @param src_charset  源字符编码
- * @param dest_charset 目标字符编码
- * @param src_str      待转换编码的源字符串
- * @param src_strlen   源字符串长度
- * @param buf          输出缓冲区
- * @param buflen       输出缓冲区长度
- * @return
- */
-static inline void code_convert_internal(const char* src_charset, const char* dest_charset,
-                                            const char* src_str, size_t src_strlen, char* buf, size_t buflen)
-{
-    char**  pi = NULL;
-    char**  po = NULL;
-    iconv_t cd = (iconv_t)-1;
-
-    if (!src_charset || !dest_charset || !src_str || !buf)
-        goto exit_handle;
-
-    pi = (char**)&src_str;
-    po = &buf;
-    cd = iconv_open(dest_charset, src_charset);
-    if ((iconv_t)-1 == cd)
-        goto exit_handle;
-
-    if ((size_t)-1 == iconv(cd, pi, &src_strlen, po, &buflen))
-        goto exit_handle;
-
-exit_handle:
-    if (cd != (iconv_t)-1)
-        iconv_close(cd);
-}
-#else
-    #error "Error! I don't know what to do..."
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
 } // namespace details
-
-bool mkdir(const char* dirname, uint32_t mode)
-{
-#if defined(CORE_PLATFORM_WINDOWS)
-    std::ignore = mode;
-    return (0 == _mkdir(dirname));
-#elif defined(CORE_PLATFORM_LINUX)
-    return (0 == mkdir(dirname, static_cast<mode_t>(mode)));
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
-}
-
-bool rmdir(const char* dirname)
-{
-#if defined(CORE_PLATFORM_WINDOWS)
-    return (0 == _rmdir(dirname));
-#elif defined(CORE_PLATFORM_LINUX)
-    return (0 == rmdir(dirname));
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
-}
-
-bool chdir(const char* path)
-{
-#if defined(CORE_PLATFORM_WINDOWS)
-    return (0 == _chdir(path));
-#elif defined(CORE_PLATFORM_LINUX)
-    return (0 == chdir(path));
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
-}
-
-bool access_exists(const char* path)
-{
-#if defined(CORE_PLATFORM_WINDOWS)
-    return (0 == _access(path, 0));
-#elif defined(CORE_PLATFORM_LINUX)
-    return (0 == access(path, F_OK));
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
-}
-
-bool access_read(const char* path)
-{
-#if defined(CORE_PLATFORM_WINDOWS)
-    return (0 == _access(path, 4));
-#elif defined(CORE_PLATFORM_LINUX)
-    return (0 == access(path, R_OK));
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
-}
-
-bool access_write(const char* path)
-{
-#if defined(CORE_PLATFORM_WINDOWS)
-    return (0 == _access(path, 2));
-#elif defined(CORE_PLATFORM_LINUX)
-    return (0 == access(path, W_OK));
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
-}
-
-bool get_exepath(char* buf, uint32_t* buflen)
-{
-    int32_t ret = details::get_exepath_internal(buf, buflen);
-    return (0 == ret);
-}
-
-std::string get_exepath(void)
-{
-    char     buf[2048];
-    uint32_t len = sizeof(buf);
-    if (!get_exepath(buf, &len))
-        return std::string{};
-
-    return std::string(buf, len);
-}
-
-bool get_exedir(char* buf, uint32_t* buflen)
-{
-    int32_t ret = details::get_exepath_internal(buf, buflen);
-    if (-1 == ret)
-        return false;
-
-#if defined(CORE_PLATFORM_WINDOWS)
-    const char* slash = strrchr(buf, '\\');
-#else
-    const char* slash = strrchr(buf, '/');
-#endif // defined(CORE_PLATFORM_WINDOWS)
-    if (!slash && slash - buf < 0)
-    {
-        buf[0]  = '\0';
-        *buflen = 0;
-        return false;
-    }
-
-    // 考虑以下特殊情况：
-    //   /a.out(非Windows平台)
-    if (slash == buf)
-    {
-        buf[1]  = '\0';
-        *buflen = 1;
-        return true;
-    }
-
-    uint32_t pos = static_cast<uint32_t>(slash - buf);
-    buf[pos]     = '\0';
-    *buflen      = pos;
-
-    return true;
-}
-
-std::string get_exedir(void)
-{
-    char     buf[2048];
-    uint32_t len = sizeof(buf);
-    if (!get_exedir(buf, &len))
-        return std::string{};
-
-    return std::string(buf, len);
-}
 
 uint32_t get_free_memory(void)
 {
@@ -367,6 +172,20 @@ uint32_t get_total_memory(void)
         return 0;
 
     return static_cast<uint32_t>(info.totalram * info.mem_unit / 1024);
+#else
+    #error "Error! I don't know what to do..."
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+uint32_t get_cpu_logic_count(void)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    SYSTEM_INFO sys_info;
+    GetSystemInfo(&sys_info);
+    return static_cast<uint32_t>(sys_info.dwNumberOfProcessors);
+#elif defined(CORE_PLATFORM_LINUX)
+    long count = sysconf(_SC_NPROCESSORS_ONLN);
+    return static_cast<uint32_t>(count > 0 ? count : 1);
 #else
     #error "Error! I don't know what to do..."
 #endif // defined(CORE_PLATFORM_WINDOWS)
@@ -579,68 +398,128 @@ bool is_utf8(const char* str, size_t len)
 
 std::string gbk_to_utf8(const char* gbk_str)
 {
-#if defined(CORE_PLATFORM_WINDOWS)
-    return details::code_convert_internal(gbk_str, CP_ACP, CP_UTF8);
-#elif defined(CORE_PLATFORM_LINUX)
-    std::string ret_str;
-    char*       temp_str    = NULL;
-    size_t      temp_strlen = 0;
-    size_t      gbk_strlen  = 0;
+    return details::code_convert(gbk_str, [](const char* str) -> std::string {
+        #if defined(CORE_PLATFORM_WINDOWS)
+            // 使用 CP936 明确指定 GBK 编码
+            return details::code_convert_internal_windows(str, 936, CP_UTF8);
+        #elif defined(CORE_PLATFORM_LINUX)
+            std::string ret_str;
+            size_t gbk_strlen = strlen(str);
+            // 预分配足够的缓冲区
+            size_t buf_size = gbk_strlen * 3 + 1;
+            std::vector<char> buf(buf_size);
 
-    if (!gbk_str)
-        goto exit_handle;
+            // 尝试转换
+            iconv_t cd = iconv_open("UTF-8", "GBK");
+            if (cd == (iconv_t)-1)
+                return std::string{};
 
-    gbk_strlen  = strlen(gbk_str);
-    temp_strlen = gbk_strlen * 3;
-    temp_str    = static_cast<char*>(calloc(temp_strlen + 1, sizeof(char)));
-    if (!temp_str)
-        goto exit_handle;
+            char*  inbuf  = const_cast<char*>(str);
+            size_t inlen  = gbk_strlen;
+            char*  outbuf = buf.data();
+            size_t outlen = buf_size - 1;
 
-    details::code_convert_internal("GBK", "UTF-8", gbk_str, gbk_strlen, temp_str, temp_strlen);
+            size_t result = iconv(cd, &inbuf, &inlen, &outbuf, &outlen);
+            iconv_close(cd);
 
-    ret_str = temp_str;
+            if (result == (size_t)-1)
+                return std::string{};
 
-exit_handle:
-    if (temp_str)
-        free(temp_str);
-
-    return ret_str;
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
+            // 正确设置字符串长度
+            buf[buf_size - outlen - 1] = '\0';
+            ret_str = buf.data();
+            return ret_str;
+        #else
+            #error "Error! I don't know what to do..."
+        #endif
+    });
 }
 
 std::string utf8_to_gbk(const char* utf8_str)
 {
-#if defined(CORE_PLATFORM_WINDOWS)
-    return details::code_convert_internal(utf8_str, CP_UTF8, CP_ACP);
-#elif defined(CORE_PLATFORM_LINUX)
-    std::string ret_str;
-    char*       temp_str    = NULL;
-    size_t      temp_strlen = 0;
-    size_t      utf8_strlen = 0;
+    return details::code_convert(utf8_str, [](const char* str) -> std::string {
+        #if defined(CORE_PLATFORM_WINDOWS)
+            // 使用 CP936 明确指定 GBK 编码
+            return details::code_convert_internal_windows(str, CP_UTF8, 936);
+        #elif defined(CORE_PLATFORM_LINUX)
+            std::string ret_str;
+            size_t utf8_strlen = strlen(str);
+            // 预分配足够的缓冲区
+            size_t buf_size = utf8_strlen + 1;
+            std::vector<char> buf(buf_size);
 
-    if (!utf8_str)
-        goto exit_handle;
+            // 尝试转换
+            iconv_t cd = iconv_open("GBK", "UTF-8");
+            if (cd == (iconv_t)-1)
+                return std::string{};
 
-    utf8_strlen = strlen(utf8_str);
-    temp_strlen = utf8_strlen;
-    temp_str    = static_cast<char*>(calloc(temp_strlen + 1, sizeof(char)));
-    if (!temp_str)
-        goto exit_handle;
+            char*  inbuf  = const_cast<char*>(str);
+            size_t inlen  = utf8_strlen;
+            char*  outbuf = buf.data();
+            size_t outlen = buf_size - 1;
 
-    details::code_convert_internal("UTF-8", "GBK", utf8_str, utf8_strlen, temp_str, temp_strlen);
+            size_t result = iconv(cd, &inbuf, &inlen, &outbuf, &outlen);
+            iconv_close(cd);
 
-    ret_str = temp_str;
+            if (result == (size_t)-1)
+                return std::string{};
 
-exit_handle:
-    if (temp_str)
-        free(temp_str);
+            // 正确设置字符串长度
+            buf[buf_size - outlen - 1] = '\0';
+            ret_str = buf.data();
+            return ret_str;
+        #else
+            #error "Error! I don't know what to do..."
+        #endif
+    });
+}
 
-    return ret_str;
-#else
-    #error "Error! I don't know what to do..."
-#endif // defined(CORE_PLATFORM_WINDOWS)
+uint32_t random_uint32(void)
+{
+    // 使用线程本地存储的随机数生成器，确保线程安全
+    thread_local std::mt19937 generator(std::random_device{}());
+    thread_local std::uniform_int_distribution<uint32_t> distribution;
+
+    return distribution(generator);
+}
+
+uint64_t random_uint64(void)
+{
+    // 使用线程本地存储的随机数生成器，确保线程安全
+    thread_local std::mt19937_64 generator(std::random_device{}());
+    thread_local std::uniform_int_distribution<uint64_t> distribution;
+
+    return distribution(generator);
+}
+
+float random_float(void)
+{
+    // 使用线程本地存储的随机数生成器，确保线程安全
+    thread_local std::mt19937 generator(std::random_device{}());
+    thread_local std::uniform_real_distribution<float> distribution(0.f, 1.f);
+
+    return distribution(generator);
+}
+
+double random_double(void)
+{
+    // 使用线程本地存储的随机数生成器，确保线程安全
+    thread_local std::mt19937_64 generator(std::random_device{}());
+    thread_local std::uniform_real_distribution<double> distribution(0.0, 1.0);
+
+    return distribution(generator);
+}
+
+int32_t random_range(int32_t upper_bound)
+{
+    if (upper_bound <= 0)
+        return 0;
+
+    // 使用线程本地存储的随机数生成器，确保线程安全
+    thread_local std::mt19937 generator(std::random_device{}());
+    std::uniform_int_distribution<int32_t> distribution(0, upper_bound - 1);
+
+    return distribution(generator);
 }
 
 } // namespace core
