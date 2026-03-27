@@ -39,7 +39,7 @@ static void write_crash_log(const char* sig_name, const std::string& stacktrace)
     if (fd != -1)
     {
         const char header[] = "\n=== CRASH DUMP ===\nSignal: ";
-        const char middle[] = "\nStack Trace:\n";
+        const char middle[] = "\n";
         const char footer[] = "\n=== END DUMP ===\n\n";
 
 #if defined(CORE_PLATFORM_WINDOWS)
@@ -62,29 +62,31 @@ static void write_crash_log(const char* sig_name, const std::string& stacktrace)
 
 /**
  * @brief 信号处理函数
+ * @param signo 信号编号
+ * @return
  */
 static void signal_handler(int signo)
 {
     const char* sig_name = "UNKNOWN";
     switch (signo)
     {
-        case SIGSEGV: sig_name = "SIGSEGV"; break;
-        case SIGABRT: sig_name = "SIGABRT"; break;
-        case SIGFPE:  sig_name = "SIGFPE";  break;
-        case SIGILL:  sig_name = "SIGILL";  break;
-        case SIGTERM: sig_name = "SIGTERM"; break;
-        case SIGINT:  sig_name = "SIGINT";  break;
+        case SIGSEGV:  sig_name = "SIGSEGV";  break;
+        case SIGABRT:  sig_name = "SIGABRT";  break;
+        case SIGFPE:   sig_name = "SIGFPE";   break;
+        case SIGILL:   sig_name = "SIGILL";   break;
+        case SIGTERM:  sig_name = "SIGTERM";  break;
+        case SIGINT:   sig_name = "SIGINT";   break;
 #if defined(CORE_PLATFORM_WINDOWS)
         case SIGBREAK: sig_name = "SIGBREAK"; break;
 #elif defined(CORE_PLATFORM_LINUX)
-        case SIGBUS:  sig_name = "SIGBUS";  break;
-        case SIGQUIT: sig_name = "SIGQUIT"; break;
-        case SIGSYS:  sig_name = "SIGSYS";  break;
-        case SIGTRAP: sig_name = "SIGTRAP"; break;
-        case SIGXCPU: sig_name = "SIGXCPU"; break;
-        case SIGXFSZ: sig_name = "SIGXFSZ"; break;
+        case SIGBUS:   sig_name = "SIGBUS";   break;
+        case SIGQUIT:  sig_name = "SIGQUIT";  break;
+        case SIGSYS:   sig_name = "SIGSYS";   break;
+        case SIGTRAP:  sig_name = "SIGTRAP";  break;
+        case SIGXCPU:  sig_name = "SIGXCPU";  break;
+        case SIGXFSZ:  sig_name = "SIGXFSZ";  break;
 #endif // defined(CORE_PLATFORM_WINDOWS)
-        default:      sig_name = "UNKNOWN"; break;
+        default:       sig_name = "UNKNOWN";  break;
     }
 
     const std::string stacktrace = core::current_stacktrace(true, 2);
