@@ -9,8 +9,6 @@
 #include "time/timestamp.h"
 #include "time/datetime.h"
 #include "fmt/format.h"
-#include <cpptrace/cpptrace.hpp>
-#include <sstream>
 #include <thread>
 #include <fstream>
 
@@ -59,15 +57,15 @@ DOCTEST_TEST_SUITE("Misc")
 
     DOCTEST_TEST_CASE("StackTrace")
     {
-        // 这个库目前只能这么用，也就是用st.print将结果输出至std::ostringstream中
-        const cpptrace::stacktrace st = cpptrace::stacktrace::current();
-        std::ostringstream         ostr;
-        st.print(ostr);
-
-        const std::string callstack = ostr.str();
+        const std::string callstack = core::current_stacktrace(false);
         DOCTEST_CHECK(!callstack.empty());
 
-        fmt::print("-- stack trace --\n{}-----------------\n", callstack);
+        fmt::print("-- stack trace --\n{}", callstack);
+
+        const std::string callstack_with_snippets = core::current_stacktrace(true);
+        DOCTEST_CHECK(!callstack_with_snippets.empty());
+
+        fmt::print("-- stack trace with snippets --\n{}", callstack_with_snippets);
     }
 
     DOCTEST_TEST_CASE("Timespan")

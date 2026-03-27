@@ -3,7 +3,9 @@
 #include <cstring>
 #include <random>
 #include <thread>
+#include <sstream>
 #include <unordered_set>
+#include <cpptrace/cpptrace.hpp>
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #define WIN32_LEAN_AND_MEAN
@@ -788,7 +790,7 @@ bool get_exedir(char* buf, uint32_t* buflen)
 
 #if defined(CORE_PLATFORM_WINDOWS)
     const char* slash = strrchr(buf, '\\');
-#else
+#elif defined(CORE_PLATFORM_LINUX)
     const char* slash = strrchr(buf, '/');
 #endif // defined(CORE_PLATFORM_WINDOWS)
     if (!slash || slash - buf < 0)
@@ -822,6 +824,19 @@ std::string get_exedir(void)
         return std::string{};
 
     return std::string(buf, len);
+}
+
+std::string current_stacktrace(bool with_snippets, size_t skip, size_t max_depth)
+{
+    // 这个库目前只能这么用，其它用法要么空字符串，要么宕机
+    cpptrace::stacktrace st = cpptrace::stacktrace::current(skip, max_depth);
+    std::ostringstream   ostr;
+    if (with_snippets)
+        st.print_with_snippets(ostr);
+    else
+        st.print(ostr);
+
+    return ostr.str();
 }
 
 } // namespace core

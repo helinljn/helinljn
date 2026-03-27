@@ -264,6 +264,15 @@ CORE_API std::string get_exepath(void);
 CORE_API bool        get_exedir(char* buf, uint32_t* buflen);
 CORE_API std::string get_exedir(void);
 
+/**
+ * @brief 获取当前栈跟踪信息
+ * @param with_snippets 是否包含代码片段
+ * @param skip          跳过的栈帧数
+ * @param max_depth     最大栈帧数
+ * @return
+ */
+CORE_API std::string current_stacktrace(bool with_snippets, size_t skip = 1, size_t max_depth = 128);
+
 } // namespace core
 
 #endif // __COMMON_H__
