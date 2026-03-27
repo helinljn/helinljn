@@ -55,4 +55,10 @@ pip install <包名> -i https://mirrors.aliyun.com/pypi/simple/
     更新指定环境下的所有包
     conda update -n py311 --all
 
+    导出当前环境的所有依赖到文件(不导出构建号)
+    conda env export --no-builds > environment.yml
+
+    一键安装(重建环境)，根据yml文件创建新环境
+    conda env create -f environment.yml
+
 如果遇到：raise ValueError("check_hostname requires server_hostname")报错，需要关闭翻墙代理
