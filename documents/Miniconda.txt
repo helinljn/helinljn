@@ -25,34 +25,34 @@ timeout = 120
 pip install <包名> -i https://mirrors.aliyun.com/pypi/simple/
 
 # Conda常用命令(如果更改base环境的话，则需要管理员权限)
-	创建指定python版本的环境
-	conda create -n env_name python=3.8.10
+    创建指定python版本的环境
+    conda create -n py311 python=3.11.15
 
-	删除指定python版本的环境
-	conda env remove -n env_name
+    删除指定python版本的环境
+    conda env remove -n py311
 
-	查看当前系统下的环境
-	conda info -e
+    查看当前系统下的环境
+    conda info -e
 
-	激活某个环境
-	conda activate env_name
+    激活某个环境
+    conda activate py311
 
-	退出某个环境
-	conda deactivate
+    退出某个环境
+    conda deactivate
 
-	查看指定环境下的包
-	conda list -n env_name
+    查看指定环境下的包
+    conda list -n py311
 
-	在指定环境下安装包
-	conda install -n env_name xxx
+    在指定环境下安装包
+    conda install -n py311 xxx
 
-	在指定环境下卸载包
-	conda uninstall -n env_name xxx
+    在指定环境下卸载包
+    conda uninstall -n py311 xxx
 
-	在指定环境下升级包
-	conda update -n env_name xxx
+    在指定环境下升级包
+    conda update -n py311 xxx
 
-	更新指定环境下的所有包
-	conda update -n env_name --all
+    更新指定环境下的所有包
+    conda update -n py311 --all
 
 如果遇到：raise ValueError("check_hostname requires server_hostname")报错，需要关闭翻墙代理

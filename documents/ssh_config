@@ -1,8 +1,0 @@
-Host WSL
-    HostName 127.0.0.1
-    Port 23
-    User helin
-Host Aliyun
-    HostName 59.110.61.103
-    Port 818
-    User hedalin

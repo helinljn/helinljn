@@ -1,53 +1,53 @@
 1. 全局配置
-	git config --global user.name xxx
-	git config --global user.email xxx@xxx.com
+    git config --global user.name xxx
+    git config --global user.email xxx@xxx.com
 
-	Windows:
-		# 签出时将换行符转换成CRLF，签入时转换回LF
-		git config --global core.autocrlf true
-	Linux or Mac:
-		# 签出时不转换换行符，签入时转换回LF
-		git config --global core.autocrlf input
+    Windows:
+        # 签出时将换行符转换成CRLF，签入时转换回LF
+        git config --global core.autocrlf true
+    Linux or Mac:
+        # 签出时不转换换行符，签入时转换回LF
+        git config --global core.autocrlf input
 
-	# 拒绝提交包含混合换行符的文件
-	git config --global core.safecrlf true
+    # 拒绝提交包含混合换行符的文件
+    git config --global core.safecrlf true
 
-	# 设置最低限制和超时时间
-	git config --global http.lowSpeedTime 10
-	git config --global http.lowSpeedLimit 100
+    # 设置最低限制和超时时间
+    git config --global http.lowSpeedTime 10
+    git config --global http.lowSpeedLimit 100
 
 2. 拉取代码
-	git clone https://github.com/helinljn/helinljn.git ./helinljn
+    git clone https://github.com/helinljn/helinljn.git ./helinljn
 
-	git pull --rebase
+    git pull --rebase
 
-	git submodule init
+    git submodule init
 
-	git submodule update
+    git submodule update
 
-	git remote set-url origin https://521github.com/helinljn/helinljn.git
+    git remote set-url origin https://521github.com/helinljn/helinljn.git
 
 3. 分支相关
-	# 显示所有标签
-	git tag
+    # 显示所有标签
+    git tag
 
-	# 显示所有分支
-	git branch -a
+    # 显示所有分支
+    git branch -a
 
-	# 切换分支
-	git checkout feature_xxx
+    # 切换分支
+    git checkout feature_xxx
 
-	# 创建 + 切换分支
-	git checkout -b feature_xxx
+    # 创建 + 切换分支
+    git checkout -b feature_xxx
 
-	# 删除本地分支
-	git branch -D feature_xxx
+    # 删除本地分支
+    git branch -D feature_xxx
 
-	# 删除远端分支
-	git push origin --delete feature_xxx
+    # 删除远端分支
+    git push origin --delete feature_xxx
 
-	# 分支提交
-	git push origin feature_xxx
+    # 分支提交
+    git push origin feature_xxx
 
-	# 清除远程分支的本地缓存
-	git fetch -p origin
+    # 清除远程分支的本地缓存
+    git fetch -p origin
