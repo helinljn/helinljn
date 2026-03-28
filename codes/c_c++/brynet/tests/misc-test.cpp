@@ -553,6 +553,98 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(buf[0] == 0x5A);
     }
 
+    DOCTEST_TEST_CASE("HexStringConversion")
+    {
+        // 测试基本功能
+        {
+            // uint8_t
+            uint8_t u8_value = 0xAB;
+            std::string hex_str;
+            DOCTEST_CHECK(core::to_hex_string(u8_value, hex_str));
+            DOCTEST_CHECK(hex_str == "AB");
+
+            uint8_t u8_result = 0;
+            DOCTEST_CHECK(core::from_hex_string(hex_str, u8_result));
+            DOCTEST_CHECK(u8_result == u8_value);
+        }
+
+        // int
+        {
+            int value = 0x12345678;
+            std::string hex_str;
+            DOCTEST_CHECK(core::to_hex_string(value, hex_str));
+
+            int result = 0;
+            DOCTEST_CHECK(core::from_hex_string(hex_str, result));
+            DOCTEST_CHECK(result == value);
+        }
+
+        // float
+        {
+            float value = 123.456f;
+            std::string hex_str;
+            DOCTEST_CHECK(core::to_hex_string(value, hex_str));
+
+            float result = 0.f;
+            DOCTEST_CHECK(core::from_hex_string(hex_str, result));
+            // 测试精度误差
+            DOCTEST_CHECK(std::abs(result - value) < 0.0001f);
+        }
+
+        // double
+        {
+            double value = 123.456;
+            std::string hex_str;
+            DOCTEST_CHECK(core::to_hex_string(value, hex_str));
+
+            double result = 0.0;
+            DOCTEST_CHECK(core::from_hex_string(hex_str, result));
+            // 测试精度误差
+            DOCTEST_CHECK(std::abs(result - value) < 0.0001);
+        }
+
+        // 测试结构体转换
+        {
+            struct TestStruct {
+                int a;
+                char b;
+                float c;
+            } value = {123, 'A', 45.67f};
+
+            std::string hex_str;
+            DOCTEST_CHECK(core::to_hex_string(value, hex_str));
+
+            TestStruct result{};
+            DOCTEST_CHECK(core::from_hex_string(hex_str, result));
+            DOCTEST_CHECK(result.a == value.a);
+            DOCTEST_CHECK(result.b == value.b);
+            DOCTEST_CHECK(std::abs(result.c - value.c) < 0.0001f);
+        }
+
+        // 测试小写转换
+        {
+            int value = 0x12345678;
+            std::string hex_str;
+            DOCTEST_CHECK(core::to_hex_string(value, hex_str, false));
+
+            int result = 0;
+            DOCTEST_CHECK(core::from_hex_string(hex_str, result));
+            DOCTEST_CHECK(result == value);
+        }
+
+        // 测试空指针
+        {
+            char buf[10] = {0};
+            DOCTEST_CHECK(!core::memory_to_hex_string(nullptr, 0, buf, sizeof(buf)));
+        }
+
+        // 测试无效的十六进制字符串
+        {
+            int value = 0;
+            DOCTEST_CHECK(!core::from_hex_string("123", value));
+        }
+    }
+
     DOCTEST_TEST_CASE("SystemInfo")
     {
         // 测试 get_free_memory 函数

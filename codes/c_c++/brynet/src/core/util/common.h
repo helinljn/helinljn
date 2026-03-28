@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace core {
 
@@ -50,12 +51,14 @@ CORE_API uint32_t get_process_id(void);
  *        outbuf_len >= memlen * 2 + 1，因为字符串最后会自动以'\0'结束
  * @param mem        需要转换的内存地址
  * @param memlen     内存长度
+ * @param outstr     输出的十六进制字符串
  * @param outbuf     输出缓冲区
  * @param outbuf_len 输出缓冲区的长度
  * @param uppercase  十六进制字符是否大写
  * @return 成功返回true，失败返回false
  */
 CORE_API bool memory_to_hex_string(const void* mem, size_t memlen, char* outbuf, size_t outbuf_len, bool uppercase = true);
+CORE_API bool to_hex_string(const void* mem, size_t memlen, std::string& outstr, bool uppercase = true);
 
 /**
  * @brief 将16进制字符串转换为内存数据
@@ -69,6 +72,36 @@ CORE_API bool memory_to_hex_string(const void* mem, size_t memlen, char* outbuf,
  * @return 成功返回true，失败返回false
  */
 CORE_API bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len);
+CORE_API bool from_hex_string(const std::string_view& hex_string, void* outbuf, size_t outbuf_len);
+
+/**
+ * @brief 将任意算术类型或聚合类型转换为十六进制字符串
+ * @param t         要转换的值
+ * @param outstr    输出的十六进制字符串
+ * @param uppercase 十六进制字符是否大写，默认为true
+ * @return 成功返回true，失败返回false
+ */
+template <typename T>
+bool to_hex_string(const T& t, std::string& outstr, const bool uppercase = true)
+{
+    static_assert(std::is_arithmetic_v<T> || std::is_aggregate_v<T>, "Invalid type!");
+    static_assert(std::is_trivial_v<T>, "Type must be trivial!");
+    return to_hex_string(static_cast<const void*>(&t), sizeof(t), outstr, uppercase);
+}
+
+/**
+ * @brief 将十六进制字符串转换为任意算术类型或聚合类型
+ * @param hexstr 输入的十六进制字符串
+ * @param t      输出的值
+ * @return 成功返回true，失败返回false
+ */
+template <typename T>
+bool from_hex_string(const std::string_view& hexstr, T& t)
+{
+    static_assert(std::is_arithmetic_v<T> || std::is_aggregate_v<T>, "Invalid type!");
+    static_assert(std::is_trivial_v<T>, "Type must be trivial!");
+    return from_hex_string(hexstr, static_cast<void*>(&t), sizeof(t));
+}
 
 /**
  * @brief 去除字符串两端的空白字符
