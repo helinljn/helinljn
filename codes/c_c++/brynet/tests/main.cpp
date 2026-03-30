@@ -56,7 +56,7 @@ static void signal_handler(int signo)
         }
 
         const core::datetime dt;
-        const std::string    timestr = fmt::format("{:02d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}.{:03d}",
+        const std::string    timestr = fmt::format("{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}.{:03d}",
                                                     dt.year(), dt.month(), dt.day(),
                                                     dt.hour(), dt.minute(), dt.second(), dt.millisecond());
 
