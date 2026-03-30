@@ -161,10 +161,18 @@ int main(int argc, char** argv)
     std::signal(SIGXFSZ, signal_handler);
 
     // 忽略的信号
+    std::signal(SIGINT,  SIG_IGN);  // 忽略 Ctrl+C
+    std::signal(SIGTERM, SIG_IGN);  // 忽略终止请求
     std::signal(SIGPIPE, SIG_IGN);
     std::signal(SIGCHLD, SIG_IGN);
     std::signal(SIGHUP,  SIG_IGN);
     std::signal(SIGTSTP, SIG_IGN);
+    std::signal(SIGCONT, SIG_IGN);
+    std::signal(SIGTTIN, SIG_IGN);
+    std::signal(SIGTTOU, SIG_IGN);
+    std::signal(SIGPOLL, SIG_IGN);
+    std::signal(SIGUSR1, SIG_IGN);
+    std::signal(SIGUSR2, SIG_IGN);
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
     doctest::Context context;
