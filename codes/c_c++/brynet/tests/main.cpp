@@ -20,9 +20,6 @@
     #include <fcntl.h>
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
-// 当前可执行文件路径
-static std::string cur_executable_path;
-
 /**
  * @brief 信号处理函数
  * @param signo 信号编号
@@ -32,8 +29,7 @@ static void signal_handler(int signo)
 {
     auto format_dump_info = [](int signo) -> std::string
     {
-        const std::string stacktrace = core::current_stacktrace(true);
-        const char*       sigstr     = "UNKNOWN";
+        const char* sigstr = "UNKNOWN";
         switch (signo)
         {
             case SIGSEGV:  sigstr = "SIGSEGV";  break;
@@ -60,13 +56,16 @@ static void signal_handler(int signo)
                                                     dt.year(), dt.month(), dt.day(),
                                                     dt.hour(), dt.minute(), dt.second(), dt.millisecond());
 
+        const std::string exepath    = core::get_exepath();
+        const std::string stacktrace = core::current_stacktrace(true);
+
         return fmt::format("******************************** Crash dump begin ********************************\n"
                            "Signal: {}\n"
                            "Time  : {}\n"
                            "Path  : {}\n"
                            "{}"
                            "******************************** Crash dump  end  ********************************\n",
-                           sigstr, timestr, cur_executable_path, stacktrace);
+                           sigstr, timestr, exepath, stacktrace);
     };
 
     const std::string dump_info = format_dump_info(signo);
@@ -97,11 +96,6 @@ static void signal_handler(int signo)
 int main(int argc, char** argv)
 {
     static_assert(__cplusplus == 201703);
-
-    // 设置当前可执行文件路径
-    cur_executable_path = std::move(core::get_exepath());
-    if (cur_executable_path.empty())
-        return EXIT_FAILURE;
 
 #if defined(CORE_PLATFORM_WINDOWS)
     // 控制台编码设置
