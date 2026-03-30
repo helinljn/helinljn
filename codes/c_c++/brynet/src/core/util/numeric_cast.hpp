@@ -73,7 +73,7 @@ DECLARE_STRING_TO_INT_CONVERTER(long double, std::stold)
 
     DECLARE_STRING_TO_INT_CONVERTER(long long,          std::stoll)
     DECLARE_STRING_TO_INT_CONVERTER(unsigned long long, std::stoull)
-#endif // defined(CORE_PLATFORM_LINUX)
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 #undef DECLARE_INT_TO_STRING_CONVERTER
 #undef DECLARE_STRING_TO_INT_CONVERTER

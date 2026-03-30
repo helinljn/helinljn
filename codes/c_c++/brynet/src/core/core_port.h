@@ -11,7 +11,7 @@
     #endif
 #else
     #error "Unrecognized os platform!"
-#endif
+#endif // (defined(_MSC_VER) && !defined(__INTEL_COMPILER)) || defined(_WIN32) || defined(_WIN64)
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #if defined(CORE_LIB_EXPORT)
@@ -25,6 +25,6 @@
     #else
         #define CORE_API
     #endif
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 #endif // __CORE_PORT_H__

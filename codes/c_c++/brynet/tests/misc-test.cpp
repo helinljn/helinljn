@@ -1,4 +1,4 @@
-#include "doctest/doctest.h"
+#include "doctest.h"
 #include "util/singleton.hpp"
 #include "util/common.h"
 #include "util/base64.h"

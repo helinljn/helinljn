@@ -14,7 +14,7 @@
 #elif defined(CORE_PLATFORM_LINUX)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wunused-function"
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 #include "brynet/Version.hpp"
 #include "brynet/base/AppStatus.hpp"
@@ -32,6 +32,6 @@
     #pragma warning(pop)
 #elif defined(CORE_PLATFORM_LINUX)
     #pragma GCC diagnostic pop
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 #endif // __BRYNET_H__

@@ -3,8 +3,9 @@
 set ROOT_INIT_DIR=%~dp0
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
-set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
+set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
+set LIGHTHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/LightHook
 
 echo ------------------
 echo -- fmt
@@ -35,6 +36,20 @@ if not exist %SPDLOG_INIT_DIR% (
 )
 
 echo ------------------
+echo -- doctest
+cd %ROOT_INIT_DIR%
+if not exist %DOCTEST_INIT_DIR% (
+    git clone -b v2.4.12 https://github.com/doctest/doctest.git %DOCTEST_INIT_DIR%
+) else (
+    cd %DOCTEST_INIT_DIR%
+    git remote set-url origin https://github.com/doctest/doctest.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v2.4.12
+)
+
+echo ------------------
 echo -- brynet
 cd %ROOT_INIT_DIR%
 if not exist %BRYNET_INIT_DIR% (
@@ -49,17 +64,17 @@ if not exist %BRYNET_INIT_DIR% (
 )
 
 echo ------------------
-echo -- doctest
+echo -- LightHook
 cd %ROOT_INIT_DIR%
-if not exist %DOCTEST_INIT_DIR% (
-    git clone -b v2.4.12 https://github.com/doctest/doctest.git %DOCTEST_INIT_DIR%
+if not exist %LIGHTHOOK_INIT_DIR% (
+    git clone https://github.com/SamuelTulach/LightHook.git %LIGHTHOOK_INIT_DIR%
 ) else (
-    cd %DOCTEST_INIT_DIR%
-    git remote set-url origin https://github.com/doctest/doctest.git
+    cd %LIGHTHOOK_INIT_DIR%
+    git remote set-url origin https://github.com/SamuelTulach/LightHook.git
     git remote -v
     git checkout .
     git fetch -p origin
-    git checkout v2.4.12
+    git pull
 )
 
 pause

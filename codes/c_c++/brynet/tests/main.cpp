@@ -1,5 +1,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT
-#include "doctest/doctest.h"
+#include "doctest.h"
+#include "util/hook.h"
 #include "util/brynet.h"
 #include "util/common.h"
 #include <cstdlib>

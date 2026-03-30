@@ -1,4 +1,4 @@
-#include "doctest/doctest.h"
+#include "doctest.h"
 #include "fmt/args.h"
 
 DOCTEST_TEST_SUITE("fmt")

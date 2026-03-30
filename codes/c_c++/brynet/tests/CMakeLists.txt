@@ -9,7 +9,8 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/fmt/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/LightHook/Source
     ${CMAKE_PROJECT_ROOT_DIR}/src/core
 )
 

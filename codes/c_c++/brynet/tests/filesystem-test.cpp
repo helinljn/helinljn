@@ -1,4 +1,4 @@
-#include "doctest/doctest.h"
+#include "doctest.h"
 #include "fmt/format.h"
 #include <iostream>
 #include <fstream>

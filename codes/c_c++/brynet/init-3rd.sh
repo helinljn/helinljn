@@ -3,8 +3,9 @@
 ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
-BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
+BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
+LIGHTHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/LightHook
 
 echo ------------------
 echo -- fmt
@@ -35,6 +36,20 @@ else
 fi
 
 echo ------------------
+echo -- doctest
+cd $ROOT_INIT_DIR
+if [ ! -d $DOCTEST_INIT_DIR ]; then
+    git clone -b v2.4.12 https://github.com/doctest/doctest.git $DOCTEST_INIT_DIR
+else
+    cd $DOCTEST_INIT_DIR
+    git remote set-url origin https://github.com/doctest/doctest.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v2.4.12
+fi
+
+echo ------------------
 echo -- brynet
 cd $ROOT_INIT_DIR
 if [ ! -d $BRYNET_INIT_DIR ]; then
@@ -49,15 +64,15 @@ else
 fi
 
 echo ------------------
-echo -- doctest
+echo -- LightHook
 cd $ROOT_INIT_DIR
-if [ ! -d $DOCTEST_INIT_DIR ]; then
-    git clone -b v2.4.12 https://github.com/doctest/doctest.git $DOCTEST_INIT_DIR
+if [ ! -d $LIGHTHOOK_INIT_DIR ]; then
+    git clone https://github.com/SamuelTulach/LightHook.git $LIGHTHOOK_INIT_DIR
 else
-    cd $DOCTEST_INIT_DIR
-    git remote set-url origin https://github.com/doctest/doctest.git
+    cd $LIGHTHOOK_INIT_DIR
+    git remote set-url origin https://github.com/SamuelTulach/LightHook.git
     git remote -v
     git checkout .
     git fetch -p origin
-    git checkout v2.4.12
+    git pull
 fi
