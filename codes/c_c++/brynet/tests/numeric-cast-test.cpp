@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "util/numeric_cast.hpp"
+#include "core/numeric_cast.hpp"
 
 #include <cstdint>
 #include <limits>

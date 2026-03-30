@@ -1,10 +1,10 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 #include "fmt/format.h"
-#include "util/hook.h"
-#include "util/brynet.h"
-#include "util/common.h"
-#include "time/datetime.h"
+#include "core/hook.h"
+#include "core/brynet.h"
+#include "core/common.h"
+#include "core/datetime.h"
 #include <cstdlib>
 #include <csignal>
 #include <cstring>
