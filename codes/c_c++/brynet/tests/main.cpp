@@ -1,8 +1,10 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
+#include "fmt/format.h"
 #include "util/hook.h"
 #include "util/brynet.h"
 #include "util/common.h"
+#include "time/datetime.h"
 #include <cstdlib>
 #include <csignal>
 #include <cstring>
@@ -18,48 +20,8 @@
     #include <fcntl.h>
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
-/**
- * @brief 写入日志文件的异步信号安全函数
- * @param sig_name   信号名称
- * @param stacktrace 栈跟踪信息
- * @return
- */
-static void write_crash_log(const char* sig_name, const std::string& stacktrace)
-{
-    int fd = -1;
-
-#if defined(CORE_PLATFORM_WINDOWS)
-#pragma warning(push)
-#pragma warning(disable:4996)
-    fd = _open("crash_dump.log", _O_WRONLY | _O_CREAT | _O_APPEND, _S_IREAD | _S_IWRITE);
-#pragma warning(pop)
-#elif defined(CORE_PLATFORM_LINUX)
-    fd = open("crash_dump.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
-#endif // defined(CORE_PLATFORM_WINDOWS)
-
-    if (fd != -1)
-    {
-        const char header[] = "\n=== CRASH DUMP ===\nSignal: ";
-        const char middle[] = "\n";
-        const char footer[] = "\n=== END DUMP ===\n\n";
-
-#if defined(CORE_PLATFORM_WINDOWS)
-        std::ignore = _write(fd, header, sizeof(header) - 1);
-        std::ignore = _write(fd, sig_name, static_cast<unsigned int>(strlen(sig_name)));
-        std::ignore = _write(fd, middle, sizeof(middle) - 1);
-        std::ignore = _write(fd, stacktrace.c_str(), static_cast<unsigned int>(stacktrace.size()));
-        std::ignore = _write(fd, footer, sizeof(footer) - 1);
-        _close(fd);
-#elif defined(CORE_PLATFORM_LINUX)
-        std::ignore = write(fd, header, sizeof(header) - 1);
-        std::ignore = write(fd, sig_name, strlen(sig_name));
-        std::ignore = write(fd, middle, sizeof(middle) - 1);
-        std::ignore = write(fd, stacktrace.c_str(), stacktrace.size());
-        std::ignore = write(fd, footer, sizeof(footer) - 1);
-        close(fd);
-#endif // defined(CORE_PLATFORM_WINDOWS)
-    }
-}
+// 当前可执行文件路径
+static std::string cur_executable_path;
 
 /**
  * @brief 信号处理函数
@@ -68,30 +30,66 @@ static void write_crash_log(const char* sig_name, const std::string& stacktrace)
  */
 static void signal_handler(int signo)
 {
-    const char* sig_name = "UNKNOWN";
-    switch (signo)
+    auto format_dump_info = [](int signo) -> std::string
     {
-        case SIGSEGV:  sig_name = "SIGSEGV";  break;
-        case SIGABRT:  sig_name = "SIGABRT";  break;
-        case SIGFPE:   sig_name = "SIGFPE";   break;
-        case SIGILL:   sig_name = "SIGILL";   break;
-        case SIGTERM:  sig_name = "SIGTERM";  break;
-        case SIGINT:   sig_name = "SIGINT";   break;
+        const std::string stacktrace = core::current_stacktrace(true);
+        const char*       sigstr     = "UNKNOWN";
+        switch (signo)
+        {
+            case SIGSEGV:  sigstr = "SIGSEGV";  break;
+            case SIGABRT:  sigstr = "SIGABRT";  break;
+            case SIGFPE:   sigstr = "SIGFPE";   break;
+            case SIGILL:   sigstr = "SIGILL";   break;
+            case SIGTERM:  sigstr = "SIGTERM";  break;
+            case SIGINT:   sigstr = "SIGINT";   break;
 #if defined(CORE_PLATFORM_WINDOWS)
-        case SIGBREAK: sig_name = "SIGBREAK"; break;
+            case SIGBREAK: sigstr = "SIGBREAK"; break;
 #elif defined(CORE_PLATFORM_LINUX)
-        case SIGBUS:   sig_name = "SIGBUS";   break;
-        case SIGQUIT:  sig_name = "SIGQUIT";  break;
-        case SIGSYS:   sig_name = "SIGSYS";   break;
-        case SIGTRAP:  sig_name = "SIGTRAP";  break;
-        case SIGXCPU:  sig_name = "SIGXCPU";  break;
-        case SIGXFSZ:  sig_name = "SIGXFSZ";  break;
+            case SIGBUS:   sigstr = "SIGBUS";   break;
+            case SIGQUIT:  sigstr = "SIGQUIT";  break;
+            case SIGSYS:   sigstr = "SIGSYS";   break;
+            case SIGTRAP:  sigstr = "SIGTRAP";  break;
+            case SIGXCPU:  sigstr = "SIGXCPU";  break;
+            case SIGXFSZ:  sigstr = "SIGXFSZ";  break;
 #endif // defined(CORE_PLATFORM_WINDOWS)
-        default:       sig_name = "UNKNOWN";  break;
-    }
+            default:       sigstr = "UNKNOWN";  break;
+        }
 
-    const std::string stacktrace = core::current_stacktrace(true, 2);
-    write_crash_log(sig_name, stacktrace);
+        const core::datetime dt;
+        const std::string    timestr = fmt::format("{:02d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}.{:03d}",
+                                                    dt.year(), dt.month(), dt.day(),
+                                                    dt.hour(), dt.minute(), dt.second(), dt.millisecond());
+
+        return fmt::format("******************************** Crash dump begin ********************************\n"
+                           "Signal: {}\n"
+                           "Time  : {}\n"
+                           "Path  : {}\n"
+                           "{}"
+                           "******************************** Crash dump  end  ********************************\n",
+                           sigstr, timestr, cur_executable_path, stacktrace);
+    };
+
+    const std::string dump_info = format_dump_info(signo);
+
+#if defined(CORE_PLATFORM_WINDOWS)
+#pragma warning(push)
+#pragma warning(disable:4996)
+    const int fd = _open("crash_dump.log", _O_WRONLY | _O_CREAT | _O_APPEND, _S_IREAD | _S_IWRITE);
+#pragma warning(pop)
+#elif defined(CORE_PLATFORM_LINUX)
+    const int fd = open("crash_dump.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+    if (fd != -1)
+    {
+#if defined(CORE_PLATFORM_WINDOWS)
+        std::ignore = _write(fd, dump_info.c_str(), static_cast<unsigned int>(dump_info.size()));
+        _close(fd);
+#elif defined(CORE_PLATFORM_LINUX)
+        std::ignore = write(fd, dump_info.c_str(), dump_info.size());
+        close(fd);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+    }
 
     _Exit(EXIT_FAILURE);
 }
@@ -99,6 +97,11 @@ static void signal_handler(int signo)
 int main(int argc, char** argv)
 {
     static_assert(__cplusplus == 201703);
+
+    // 设置当前可执行文件路径
+    cur_executable_path = std::move(core::get_exepath());
+    if (cur_executable_path.empty())
+        return EXIT_FAILURE;
 
 #if defined(CORE_PLATFORM_WINDOWS)
     // 控制台编码设置
