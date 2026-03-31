@@ -28,6 +28,10 @@ bool symbol_loader::load(const std::string& path)
         unload();
 
 #if defined(CORE_PLATFORM_WINDOWS)
+    // Windows不支持空路径
+    if (path.empty())
+        return false;
+
     _handle = reinterpret_cast<HMODULE>(LoadLibrary(path.c_str()));
     return _handle != nullptr;
 #elif defined(CORE_PLATFORM_LINUX)
