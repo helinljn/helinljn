@@ -15,6 +15,8 @@
     #pragma GCC diagnostic ignored "-Wunused-function"
     #pragma GCC diagnostic ignored "-Wunused-variable"
     #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+    #include <unistd.h>
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
 #include "LightHook.h"
