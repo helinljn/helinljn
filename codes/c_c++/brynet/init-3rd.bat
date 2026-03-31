@@ -6,6 +6,8 @@ set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
 set LIGHTHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/LightHook
+set DISTORM_INIT_DIR=%ROOT_INIT_DIR%/3rd/distorm
+set FUNCHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/funchook
 
 echo ------------------
 echo -- fmt
@@ -71,6 +73,34 @@ if not exist %LIGHTHOOK_INIT_DIR% (
 ) else (
     cd %LIGHTHOOK_INIT_DIR%
     git remote set-url origin https://github.com/SamuelTulach/LightHook.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+)
+
+echo ------------------
+echo -- distorm
+cd %ROOT_INIT_DIR%
+if not exist %DISTORM_INIT_DIR% (
+    git clone https://github.com/gdabah/distorm.git %DISTORM_INIT_DIR%
+) else (
+    cd %DISTORM_INIT_DIR%
+    git remote set-url origin https://github.com/gdabah/distorm.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+)
+
+echo ------------------
+echo -- funchook
+cd %ROOT_INIT_DIR%
+if not exist %FUNCHOOK_INIT_DIR% (
+    git clone https://github.com/kubo/funchook.git %FUNCHOOK_INIT_DIR%
+) else (
+    cd %FUNCHOOK_INIT_DIR%
+    git remote set-url origin https://github.com/kubo/funchook.git
     git remote -v
     git checkout .
     git fetch -p origin

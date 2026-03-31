@@ -108,6 +108,7 @@ ELSE()
 ENDIF()
 
 # 添加子目录
+ADD_SUBDIRECTORY(3rd)
 ADD_SUBDIRECTORY(src)
 
 # VS工程设置
