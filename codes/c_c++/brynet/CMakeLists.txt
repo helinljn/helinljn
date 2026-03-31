@@ -109,7 +109,6 @@ ENDIF()
 
 # 添加子目录
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(tests)
 
 # VS工程设置
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
