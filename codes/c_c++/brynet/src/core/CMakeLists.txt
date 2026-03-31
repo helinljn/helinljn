@@ -11,6 +11,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/LightHook/Source
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include
 )
 
 # 宏定义、编译选项、链接库
@@ -34,6 +35,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        funchook
         cpptrace
         libssl
         libcrypto
@@ -60,6 +62,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        funchook
         cpptrace
         ssl
         crypto
