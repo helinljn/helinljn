@@ -39,7 +39,7 @@ bool symbol_loader::load(const std::string& path)
     // RTLD_NOW:    立即绑定
     // RTLD_GLOBAL: 符号全局可见
     // RTLD_LOCAL:  符号仅本地可见
-    // 如果路径为空或为nullptr，则打开当前可执行文件
+    // 如果路径为空，则打开当前可执行文件
     if (path.empty())
         _handle = dlopen(nullptr, RTLD_LAZY | RTLD_LOCAL);
     else
