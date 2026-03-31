@@ -59,8 +59,21 @@ FILE(GLOB_RECURSE TESTPATCH_SRC_LIST
     ${PROJECT_SOURCE_DIR}/*.cpp
 )
 
+# 创建一个.def文件，只导出特定函数(只有Windows平台才有效)
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    SET(EXPORT_DEF_FILE "${PROJECT_SOURCE_DIR}/exports.def")
+    FILE(WRITE  ${EXPORT_DEF_FILE} "EXPORTS\n")
+    FILE(APPEND ${EXPORT_DEF_FILE} "    ?testb_func@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z\n")
+    FILE(APPEND ${EXPORT_DEF_FILE} "    ?func1@testb_base@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z\n")
+    FILE(APPEND ${EXPORT_DEF_FILE} "    ?func1@testb@@UEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z\n")
+    FILE(APPEND ${EXPORT_DEF_FILE} "    ?func2@testb@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z\n")
+    FILE(APPEND ${EXPORT_DEF_FILE} "    ?func3@testb@@SA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@AEBV23@@Z\n")
+ELSE()
+    SET(EXPORT_DEF_FILE "")
+ENDIF()
+
 # 生成动态库
-ADD_LIBRARY(${PROJECT_NAME}                SHARED  ${TESTPATCH_SRC_LIST})
+ADD_LIBRARY(${PROJECT_NAME}                SHARED  ${TESTPATCH_SRC_LIST} ${EXPORT_DEF_FILE})
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
 TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
 TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
