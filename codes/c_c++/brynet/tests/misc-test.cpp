@@ -8,6 +8,7 @@
 #include "core/timespan.h"
 #include "core/timestamp.h"
 #include "core/datetime.h"
+#include "core/symbol_loader.h"
 #include "fmt/format.h"
 #include <thread>
 #include <fstream>
@@ -424,6 +425,42 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(span.total_seconds() == 3600);
         DOCTEST_CHECK(span.milliseconds() == 0);
         DOCTEST_CHECK(span.total_milliseconds() == 3600000);
+    }
+
+    DOCTEST_TEST_CASE("SymbolLoader")
+    {
+        // 测试加载可执行文件中的main函数
+        {
+            core::symbol_loader main_loader;
+#if defined(CORE_PLATFORM_WINDOWS)
+            DOCTEST_CHECK(main_loader.load("test.exe"));
+#elif defined(CORE_PLATFORM_LINUX)
+            DOCTEST_CHECK(main_loader.load(""));
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+            const void* main_addr = main_loader.get_symbol("main");
+            DOCTEST_CHECK(main_addr != nullptr);
+        }
+
+        // 测试加载动态链接库中的函数
+        {
+            core::symbol_loader lib_loader;
+#if defined(CORE_PLATFORM_WINDOWS)
+            DOCTEST_CHECK(lib_loader.load("libcore.dll"));
+
+            const void* to_upper_addr = lib_loader.get_symbol("?to_upper@core@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@V?$basic_string_view@DU?$char_traits@D@std@@@3@@Z");
+            DOCTEST_CHECK(to_upper_addr != nullptr);
+#elif defined(CORE_PLATFORM_LINUX)
+            DOCTEST_CHECK(lib_loader.load("libcore.so"));
+
+            const void* to_upper_addr = lib_loader.get_symbol("_ZN4core8to_upperB5cxx11ESt17basic_string_viewIcSt11char_traitsIcEE");
+            DOCTEST_CHECK(to_upper_addr != nullptr);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+            auto func = reinterpret_cast<std::string(*)(std::string_view)>(to_upper_addr);
+            DOCTEST_CHECK(func != nullptr);
+            DOCTEST_CHECK(func("hello") == "HELLO");
+        }
     }
 
     DOCTEST_TEST_CASE("IsGBK")

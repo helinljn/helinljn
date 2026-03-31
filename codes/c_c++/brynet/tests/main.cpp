@@ -7,7 +7,7 @@
 #include "core/datetime.h"
 #include <cstdlib>
 #include <csignal>
-#include <cstring>
+#include <exception>
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #define WIN32_LEAN_AND_MEAN
