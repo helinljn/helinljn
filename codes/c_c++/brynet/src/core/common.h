@@ -45,6 +45,13 @@ CORE_API uint64_t get_program_running_time(void);
 CORE_API uint32_t get_process_id(void);
 
 /**
+ * @brief 获取当前线程Id
+ * @param
+ * @return
+ */
+CORE_API uint32_t get_thread_id(void);
+
+/**
  * @brief 将内存数据转换为16进制字符串(默认为大写形式)
  *        该函数是按字节转换，每个字节都会转换成两个对应的字符
  *        比如：0xF8转换为：'F'和'8'，memlen和outlen必须满足以下关系

@@ -617,12 +617,16 @@ DOCTEST_TEST_SUITE("Misc")
         uint32_t process_id = core::get_process_id();
         DOCTEST_CHECK(process_id > 0);
 
+        // 测试 get_thread_id 函数
+        uint32_t thread_id = core::get_thread_id();
+        DOCTEST_CHECK(thread_id > 0);
+
         // 测试 get_cpu_logic_count 函数
         uint32_t cpu_count = core::get_cpu_logic_count();
         DOCTEST_CHECK(cpu_count > 0);
 
-        fmt::print("FreeMemory: {}, TotalMemory: {}, ProcessID: {}, CPUCount: {}\n",
-            free_memory, total_memory, process_id, cpu_count);
+        fmt::print("FreeMemory: {}, TotalMemory: {}, ProcessID: {}, ThreadID: {}, CPUCount: {}\n",
+            free_memory, total_memory, process_id, thread_id, cpu_count);
     }
 
     DOCTEST_TEST_CASE("ProgramRunningTime")

@@ -15,6 +15,7 @@
     #include <unistd.h>
     #include <time.h>
     #include <iconv.h>
+    #include <sys/types.h>
     #include <sys/sysinfo.h>
 #else
     #error "Error! I don't know what to do..."
@@ -257,6 +258,15 @@ uint32_t get_process_id(void)
     return static_cast<uint32_t>(GetCurrentProcessId());
 #elif defined(CORE_PLATFORM_LINUX)
     return static_cast<uint32_t>(getpid());
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+uint32_t get_thread_id(void)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    return static_cast<uint32_t>(GetCurrentThreadId());
+#elif defined(CORE_PLATFORM_LINUX)
+    return static_cast<uint32_t>(gettid());
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
