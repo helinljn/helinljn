@@ -27,4 +27,6 @@
     #endif
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
+#include <cstdint>
+
 #endif // __CORE_PORT_H__

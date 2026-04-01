@@ -2,7 +2,6 @@
 #define __AES_H__
 
 #include "core_port.h"
-#include <cstdint>
 
 namespace core {
 

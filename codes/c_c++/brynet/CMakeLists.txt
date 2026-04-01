@@ -17,6 +17,8 @@ ENDIF()
 
 # rpath选项
 SET(CMAKE_SKIP_BUILD_RPATH True)
+# 生成compile_commands.json文件
+SET(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 # 项目名字
 PROJECT(brynet)
@@ -97,8 +99,8 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_PROJECT_BUILD_ROOT_DIR}/${CMAKE_BUILD_TYPE})
 
     # 第三方库目录
-    SET(CMAKE_3RD_DIR_CPPTRACE ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/cpptrace-1.0.4/x64-ubuntu-20.04)
-    SET(CMAKE_3RD_DIR_OPENSSL  ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-20.04)
+    SET(CMAKE_3RD_DIR_CPPTRACE ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/cpptrace-1.0.4/x64-ubuntu-24.04)
+    SET(CMAKE_3RD_DIR_OPENSSL  ${CMAKE_PROJECT_ROOT_DIR}/3rd/3rd-libs/openssl-1.1.1t/x64-ubuntu-24.04)
 
     # 静态库 & 动态库的前缀
     SET(CMAKE_STATIC_LIBRARY_PREFIX "lib")
