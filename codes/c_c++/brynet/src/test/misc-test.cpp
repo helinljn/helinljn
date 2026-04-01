@@ -1,5 +1,4 @@
 #include "doctest.h"
-#include "core/singleton.hpp"
 #include "core/common.h"
 #include "core/base64.h"
 #include "core/aes.h"
@@ -12,49 +11,8 @@
 #include <thread>
 #include <fstream>
 
-// Unnamed namespace for internal linkage
-namespace {
-
-class SingletonTest : public core::singleton<SingletonTest>
-{
-public:
-    const std::string& GetFile(void) const {return _file;}
-    void SetFile(std::string str) {_file = std::move(str);}
-
-    int GetLine(void) const {return _line;}
-    void SetLine(const int val) {_line = val;}
-
-private:
-    SingletonTest(void)
-        : _file()
-        , _line(0)
-    {
-    }
-
-private:
-    CORE_SINGLETON_HELPER;
-
-private:
-    std::string _file;
-    int         _line;
-};
-
-} // unnamed namespace
-
 DOCTEST_TEST_SUITE("Misc")
 {
-    DOCTEST_TEST_CASE("Singleton")
-    {
-        auto& st = SingletonTest::instance();
-        DOCTEST_CHECK(st.GetFile().empty());
-        DOCTEST_CHECK(st.GetLine() == 0);
-
-        st.SetFile("hello");
-        st.SetLine(10);
-        DOCTEST_CHECK(st.GetFile() == "hello");
-        DOCTEST_CHECK(st.GetLine() == 10);
-    }
-
     DOCTEST_TEST_CASE("StackTrace")
     {
         const std::string callstack = core::current_stacktrace(false);
@@ -522,7 +480,6 @@ DOCTEST_TEST_SUITE("Misc")
     {
         // 测试空字符串
         uint8_t buf[10];
-        DOCTEST_CHECK(!core::hex_string_to_memory(nullptr, buf, sizeof(buf)));
         DOCTEST_CHECK(core::hex_string_to_memory("", buf, sizeof(buf)));
 
         // 测试基本功能

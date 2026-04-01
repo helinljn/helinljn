@@ -260,12 +260,12 @@ uint32_t get_process_id(void)
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-bool memory_to_hex_string(const void* mem, size_t memlen, char* outbuf, size_t outbuf_len, bool uppercase)
+bool memory_to_hex_string(const void* mem, size_t memlen, char* outbuf, size_t outlen, bool uppercase)
 {
     static const char uppercase_hex_table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     static const char lowercase_hex_table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-    if (!mem || 0 == memlen || !outbuf || 0 == outbuf_len || memlen * 2 + 1 > outbuf_len)
+    if (!mem || 0 == memlen || !outbuf || 0 == outlen || memlen * 2 + 1 > outlen)
         return false;
 
     const char*    hex_table = (uppercase ? uppercase_hex_table : lowercase_hex_table);
@@ -298,12 +298,12 @@ bool to_hex_string(const void* mem, size_t memlen, std::string& outstr, bool upp
     return true;
 }
 
-bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len)
+bool hex_string_to_memory(std::string_view hexstr, void* outbuf, size_t outbuf_len)
 {
-    if (!hex_string || !outbuf || 0 == outbuf_len)
+    if (!outbuf || 0 == outbuf_len)
         return false;
 
-    size_t hex_string_len = strlen(hex_string);
+    size_t hex_string_len = hexstr.size();
     if (hex_string_len % 2 != 0 || hex_string_len / 2 > outbuf_len)
         return false;
 
@@ -312,8 +312,8 @@ bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_le
     uint8_t* temp_outbuf = reinterpret_cast<uint8_t*>(outbuf);
     for (size_t idx = 0; idx != hex_string_len; idx += 2)
     {
-        temp_high = details::hex_string_to_num_internal(hex_string[idx]);
-        temp_low  = details::hex_string_to_num_internal(hex_string[idx + 1]);
+        temp_high = details::hex_string_to_num_internal(hexstr[idx]);
+        temp_low  = details::hex_string_to_num_internal(hexstr[idx + 1]);
         if (0xFF == temp_high || 0xFF == temp_low)
             return false;
 
@@ -323,11 +323,11 @@ bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_le
     return true;
 }
 
-bool from_hex_string(const std::string_view& hex_string, void* outbuf, size_t outbuf_len)
+bool from_hex_string(std::string_view hexstr, void* outbuf, size_t outbuf_len)
 {
-    if (hex_string.length() % 2 != 0)
+    if (hexstr.size() % 2 != 0)
         return false;
-    return hex_string_to_memory(hex_string.data(), outbuf, outbuf_len);
+    return hex_string_to_memory(hexstr.data(), outbuf, outbuf_len);
 }
 
 std::string trim(std::string_view str)
@@ -468,33 +468,32 @@ std::string join(const std::vector<std::string>& parts, std::string_view delimit
     return result;
 }
 
-void split(const char* src_str, const char* separator, std::vector<std::string>& out_result)
+void split(std::string_view src_str, std::string_view separator, std::vector<std::string>& out_result)
 {
-    if (!src_str || !separator)
+    if (src_str.empty() || separator.empty())
         return;
 
     // 构建分隔符哈希集合
     std::unordered_set<char> sep_set;
-    for (const char* p = separator; *p; ++p)
+    for (char c : separator)
     {
-        sep_set.insert(*p);
+        sep_set.insert(c);
     }
 
     // 预分配空间，假设平均每个分隔符之间有10个字符
-    size_t src_len = strlen(src_str);
-    out_result.reserve(src_len / 10 + 1);
+    out_result.reserve(src_str.size() / 10 + 1);
 
-    const char* start = src_str;
-    const char* end   = src_str;
-    while (*end)
+    size_t start = 0;
+    size_t end   = 0;
+    while (end < src_str.size())
     {
-        if (sep_set.count(*end))
+        if (sep_set.count(src_str[end]))
         {
             if (start < end)
-                out_result.emplace_back(start, end - start);
+                out_result.emplace_back(src_str.substr(start, end - start));
 
             // 跳过连续的分隔符
-            while (*end && sep_set.count(*end))
+            while (end < src_str.size() && sep_set.count(src_str[end]))
                 ++end;
 
             start = end;
@@ -507,7 +506,7 @@ void split(const char* src_str, const char* separator, std::vector<std::string>&
 
     // 处理最后一个分隔符后面的字符串
     if (start < end)
-        out_result.emplace_back(start, end - start);
+        out_result.emplace_back(src_str.substr(start, end - start));
 }
 
 bool is_gbk(std::string_view str)

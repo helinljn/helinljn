@@ -47,32 +47,32 @@ CORE_API uint32_t get_process_id(void);
 /**
  * @brief 将内存数据转换为16进制字符串(默认为大写形式)
  *        该函数是按字节转换，每个字节都会转换成两个对应的字符
- *        比如：0xF8转换为：'F'和'8'，memlen和outbuf_len必须满足以下关系
- *        outbuf_len >= memlen * 2 + 1，因为字符串最后会自动以'\0'结束
- * @param mem        需要转换的内存地址
- * @param memlen     内存长度
- * @param outstr     输出的十六进制字符串
- * @param outbuf     输出缓冲区
- * @param outbuf_len 输出缓冲区的长度
- * @param uppercase  十六进制字符是否大写
+ *        比如：0xF8转换为：'F'和'8'，memlen和outlen必须满足以下关系
+ *        outlen >= memlen * 2 + 1，因为字符串最后会自动以'\0'结束
+ * @param mem       需要转换的内存地址
+ * @param memlen    内存长度
+ * @param outstr    输出的十六进制字符串
+ * @param outbuf    输出缓冲区
+ * @param outlen    输出缓冲区的长度
+ * @param uppercase 十六进制字符是否大写
  * @return 成功返回true，失败返回false
  */
-CORE_API bool memory_to_hex_string(const void* mem, size_t memlen, char* outbuf, size_t outbuf_len, bool uppercase = true);
+CORE_API bool memory_to_hex_string(const void* mem, size_t memlen, char* outbuf, size_t outlen, bool uppercase = true);
 CORE_API bool to_hex_string(const void* mem, size_t memlen, std::string& outstr, bool uppercase = true);
 
 /**
  * @brief 将16进制字符串转换为内存数据
  *        该函数是按双字符转换，每两个字符都会转换成对应的一个字节
- *        比如："F8"转换为：0xF8，hex_string和outbuf_len必须满足以下关系
- *        (0 == strlen(hex_string) % 2) && (outbuf_len >= strlen(hex_string) / 2)
+ *        比如："F8"转换为：0xF8，hexstr和outlen必须满足以下关系
+ *        (0 == strlen(hex_string) % 2) && (outlen >= strlen(hex_string) / 2)
  *        即：字符串的长度必须为偶数，输出缓冲区的长度必须 >= 字符串的长度 / 2
- * @param hex_string 需要转换的16进制字符串
- * @param outbuf     输出缓冲区
- * @param outbuf_len 输出缓冲区的长度
+ * @param hexstr 需要转换的16进制字符串
+ * @param outbuf 输出缓冲区
+ * @param outlen 输出缓冲区的长度
  * @return 成功返回true，失败返回false
  */
-CORE_API bool hex_string_to_memory(const char* hex_string, void* outbuf, size_t outbuf_len);
-CORE_API bool from_hex_string(const std::string_view& hex_string, void* outbuf, size_t outbuf_len);
+CORE_API bool hex_string_to_memory(std::string_view hexstr, void* outbuf, size_t outlen);
+CORE_API bool from_hex_string(std::string_view hexstr, void* outbuf, size_t outlen);
 
 /**
  * @brief 将任意算术类型或聚合类型转换为十六进制字符串
@@ -96,7 +96,7 @@ bool to_hex_string(const T& t, std::string& outstr, const bool uppercase = true)
  * @return 成功返回true，失败返回false
  */
 template <typename T>
-bool from_hex_string(const std::string_view& hexstr, T& t)
+bool from_hex_string(std::string_view hexstr, T& t)
 {
     static_assert(std::is_arithmetic_v<T> || std::is_aggregate_v<T>, "Invalid type!");
     static_assert(std::is_trivial_v<T>, "Type must be trivial!");
@@ -186,7 +186,7 @@ CORE_API std::string join(const std::vector<std::string>& parts, std::string_vie
  * @param out_result 存放最终的拆分结果
  * @return
  */
-CORE_API void split(const char* src_str, const char* separator, std::vector<std::string>& out_result);
+CORE_API void split(std::string_view src_str, std::string_view separator, std::vector<std::string>& out_result);
 
 /**
  * @brief 判断给定字符串的字符集是否为GBK(如果全部是ASCII，那么也算是GBK)

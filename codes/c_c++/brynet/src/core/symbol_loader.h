@@ -2,7 +2,7 @@
 #define __SYMBOL_LOADER_H__
 
 #include "core_port.h"
-#include <string>
+#include <string_view>
 
 namespace core {
 
@@ -38,7 +38,7 @@ public:
      * @param path 动态库或可执行文件路径(Linux平台下如果为空字符串则打开当前可执行文件)
      * @return 成功返回true，失败返回false
      */
-    bool load(const std::string& path);
+    bool load(std::string_view path);
 
     /**
      * @brief 卸载已加载的动态库或可执行文件
@@ -52,7 +52,7 @@ public:
      * @param sname 符号名(该名字是经过mangling修饰的)
      * @return 符号地址，失败返回空指针
      */
-    void* get_symbol(const std::string& sname);
+    void* get_symbol(std::string_view sname);
 
     /**
      * @brief 检查是否已加载

@@ -21,7 +21,7 @@ CORE_API std::string md5_string(std::string_view data, bool uppercase = true);
  * @param uppercase 签名字符串是否大写
  * @return 成功返回一个签名字符串，失败返回空字符串
  */
-CORE_API std::string md5_file(const char* filename, bool uppercase = true);
+CORE_API std::string md5_file(std::string_view filename, bool uppercase = true);
 
 } // namespace core
 

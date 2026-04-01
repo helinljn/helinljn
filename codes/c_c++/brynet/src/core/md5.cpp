@@ -326,16 +326,16 @@ std::string md5_string(std::string_view data, bool uppercase)
     return std::string(outbuf, sizeof(outbuf) - 1);
 }
 
-std::string md5_file(const char* filename, bool uppercase)
+std::string md5_file(std::string_view filename, bool uppercase)
 {
     md5::MD5_CTX  context;
     unsigned char buffer[4096];
     unsigned char digest[16];
     char          outbuf[sizeof(digest) * 2 + 1];
-    if (!filename)
+    if (filename.empty())
         return std::string{};
 
-    std::ifstream file(filename, std::ios::binary);
+    std::ifstream file(filename.data(), std::ios::binary);
     if (!file)
         return std::string{};
 

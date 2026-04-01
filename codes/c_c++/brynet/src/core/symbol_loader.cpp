@@ -22,7 +22,7 @@ symbol_loader::~symbol_loader(void)
     unload();
 }
 
-bool symbol_loader::load(const std::string& path)
+bool symbol_loader::load(std::string_view path)
 {
     if (_handle)
         unload();
@@ -32,7 +32,7 @@ bool symbol_loader::load(const std::string& path)
     if (path.empty())
         return false;
 
-    _handle = reinterpret_cast<HMODULE>(LoadLibrary(path.c_str()));
+    _handle = reinterpret_cast<HMODULE>(LoadLibrary(path.data()));
     return _handle != nullptr;
 #elif defined(CORE_PLATFORM_LINUX)
     // RTLD_LAZY:   延迟绑定
@@ -43,7 +43,7 @@ bool symbol_loader::load(const std::string& path)
     if (path.empty())
         _handle = dlopen(nullptr, RTLD_LAZY | RTLD_LOCAL);
     else
-        _handle = dlopen(path.c_str(), RTLD_LAZY | RTLD_LOCAL);
+        _handle = dlopen(path.data(), RTLD_LAZY | RTLD_LOCAL);
     return _handle != nullptr;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
@@ -61,15 +61,15 @@ void symbol_loader::unload(void)
     }
 }
 
-void* symbol_loader::get_symbol(const std::string& sname)
+void* symbol_loader::get_symbol(std::string_view sname)
 {
     if (!_handle)
         return nullptr;
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    return GetProcAddress(reinterpret_cast<HMODULE>(_handle), sname.c_str());
+    return GetProcAddress(reinterpret_cast<HMODULE>(_handle), sname.data());
 #elif defined(CORE_PLATFORM_LINUX)
-    return dlsym(_handle, sname.c_str());
+    return dlsym(_handle, sname.data());
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
