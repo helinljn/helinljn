@@ -132,28 +132,31 @@ CORE_API std::string ltrim(std::string_view str);
 CORE_API std::string rtrim(std::string_view str);
 
 /**
- * @brief 判断字符串是否以指定前缀开头
- * @param str    待检查的字符串
- * @param prefix 前缀字符串
- * @return 是返回true，否返回false
+ * @brief 左对齐字符串，使字符串总宽度为total_width
+ * @param str         待处理的字符串
+ * @param total_width 目标宽度
+ * @param fill_char   填充字符
+ * @return 左对齐后的字符串
  */
-CORE_API bool starts_with(std::string_view str, std::string_view prefix);
+CORE_API std::string pad_left(std::string_view str, size_t total_width, char fill_char = ' ');
 
 /**
- * @brief 判断字符串是否以指定后缀结尾
- * @param str    待检查的字符串
- * @param suffix 后缀字符串
- * @return 是返回true，否返回false
+ * @brief 右对齐字符串，使字符串总宽度为total_width
+ * @param str         待处理的字符串
+ * @param total_width 目标宽度
+ * @param fill_char   填充字符
+ * @return 右对齐后的字符串
  */
-CORE_API bool ends_with(std::string_view str, std::string_view suffix);
+CORE_API std::string pad_right(std::string_view str, size_t total_width, char fill_char = ' ');
 
 /**
- * @brief 判断字符串是否包含指定子串
- * @param str    待检查的字符串
- * @param substr 子串
- * @return 包含返回true，不包含返回false
+ * @brief 居中对齐字符串，使字符串总宽度为total_width
+ * @param str         待处理的字符串
+ * @param total_width 目标宽度
+ * @param fill_char   填充字符
+ * @return 居中对齐后的字符串
  */
-CORE_API bool contains(std::string_view str, std::string_view substr);
+CORE_API std::string center(std::string_view str, size_t total_width, char fill_char = ' ');
 
 /**
  * @brief 将字符串转换为大写
@@ -179,6 +182,14 @@ CORE_API std::string to_lower(std::string_view str);
 CORE_API std::string replace(std::string_view str, std::string_view old_str, std::string_view new_str);
 
 /**
+ * @brief 连接两个字符串
+ * @param str1 第一个字符串
+ * @param str2 第二个字符串
+ * @return 连接后的字符串
+ */
+CORE_API std::string concat(std::string_view str1, std::string_view str2);
+
+/**
  * @brief 用分隔符连接字符串列表
  * @param parts     字符串列表
  * @param delimiter 分隔符
@@ -194,6 +205,96 @@ CORE_API std::string join(const std::vector<std::string>& parts, std::string_vie
  * @return
  */
 CORE_API void split(std::string_view src_str, std::string_view separator, std::vector<std::string>& out_result);
+
+/**
+ * @brief 判断字符串是否以指定前缀开头
+ * @param str    待检查的字符串
+ * @param prefix 前缀字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool starts_with(std::string_view str, std::string_view prefix);
+
+/**
+ * @brief 判断字符串是否以指定后缀结尾
+ * @param str    待检查的字符串
+ * @param suffix 后缀字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool ends_with(std::string_view str, std::string_view suffix);
+
+/**
+ * @brief 判断字符串是否包含指定子串
+ * @param str    待检查的字符串
+ * @param substr 子串
+ * @return 包含返回true，不包含返回false
+ */
+CORE_API bool contains(std::string_view str, std::string_view substr);
+
+/**
+ * @brief 判断字符串是否只包含空白字符
+ * @param str 待检查的字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool is_blank(std::string_view str);
+
+/**
+ * @brief 判断字符串是否只包含数字字符
+ * @param str 待检查的字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool is_digit(std::string_view str);
+
+/**
+ * @brief 判断字符串是否只包含字母字符
+ * @param str 待检查的字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool is_alpha(std::string_view str);
+
+/**
+ * @brief 判断字符串是否只包含字母数字字符
+ * @param str 待检查的字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool is_alnum(std::string_view str);
+
+/**
+ * @brief 判断字符串是否只包含十六进制数字字符
+ * @param str 待检查的字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool is_hexdigit(std::string_view str);
+
+/**
+ * @brief 判断字符串是否只包含数字字符
+ * @param str 待检查的字符串
+ * @return 是返回true，否返回false
+ */
+CORE_API bool is_number(std::string_view str);
+
+/**
+ * @brief 比较两个字符串是否相等，忽略大小写
+ * @param str1 第一个字符串
+ * @param str2 第二个字符串
+ * @return 相等返回0，不相等返回非0
+ */
+CORE_API int stringicmp(std::string_view str1, std::string_view str2);
+
+/**
+ * @brief 统计字符串中指定子串出现的次数
+ * @param str 待统计的字符串
+ * @param substr 待统计的字符串
+ * @return 子串出现的次数
+ */
+CORE_API size_t count_str(std::string_view str, std::string_view substr);
+
+/**
+ * @brief 统计字符串中指定字符出现的次数
+ * @param str 待统计的字符串
+ * @param ch 待统计的字符
+ * @return 字符出现的次数
+ */
+CORE_API size_t count_char(std::string_view str, char ch);
 
 /**
  * @brief 判断给定字符串的字符集是否为GBK(如果全部是ASCII，那么也算是GBK)

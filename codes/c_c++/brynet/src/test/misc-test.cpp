@@ -838,6 +838,114 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(core::join({}, ", ") == "");
         parts = {"hello"};
         DOCTEST_CHECK(core::join(parts, ", ") == "hello");
+
+        // 测试 concat 函数
+        DOCTEST_CHECK(core::concat("hello", "world") == "helloworld");
+        DOCTEST_CHECK(core::concat("", "world") == "world");
+        DOCTEST_CHECK(core::concat("hello", "") == "hello");
+        DOCTEST_CHECK(core::concat("", "") == "");
+        DOCTEST_CHECK(core::concat("hello ", "world") == "hello world");
+
+        // 测试 pad_left 函数
+        DOCTEST_CHECK(core::pad_left("hello", 10, '*') == "*****hello");
+        DOCTEST_CHECK(core::pad_left("hello", 5, '*') == "hello");
+        DOCTEST_CHECK(core::pad_left("hello", 3, '*') == "hello");
+        DOCTEST_CHECK(core::pad_left("", 5, '*') == "*****");
+        DOCTEST_CHECK(core::pad_left("hello", 10, '0') == "00000hello");
+
+        // 测试 pad_right 函数
+        DOCTEST_CHECK(core::pad_right("hello", 10, '*') == "hello*****");
+        DOCTEST_CHECK(core::pad_right("hello", 5, '*') == "hello");
+        DOCTEST_CHECK(core::pad_right("hello", 3, '*') == "hello");
+        DOCTEST_CHECK(core::pad_right("", 5, '*') == "*****");
+        DOCTEST_CHECK(core::pad_right("hello", 10, '0') == "hello00000");
+
+        // 测试 center 函数
+        DOCTEST_CHECK(core::center("hello", 10, '*') == "**hello***");
+        DOCTEST_CHECK(core::center("hello", 11, '*') == "***hello***");
+        DOCTEST_CHECK(core::center("hello", 5, '*') == "hello");
+        DOCTEST_CHECK(core::center("hello", 3, '*') == "hello");
+        DOCTEST_CHECK(core::center("", 5, '*') == "*****");
+        DOCTEST_CHECK(core::center("hello", 10, '0') == "00hello000");
+
+        // 测试 is_blank 函数
+        DOCTEST_CHECK(core::is_blank(""));
+        DOCTEST_CHECK(core::is_blank("   "));
+        DOCTEST_CHECK(core::is_blank("\t\n\r "));
+        DOCTEST_CHECK(!core::is_blank("hello"));
+        DOCTEST_CHECK(!core::is_blank(" hello "));
+
+        // 测试 is_digit 函数
+        DOCTEST_CHECK(core::is_digit("123"));
+        DOCTEST_CHECK(core::is_digit("0"));
+        DOCTEST_CHECK(!core::is_digit(""));
+        DOCTEST_CHECK(!core::is_digit("12a"));
+        DOCTEST_CHECK(!core::is_digit("abc"));
+
+        // 测试 is_alpha 函数
+        DOCTEST_CHECK(core::is_alpha("abc"));
+        DOCTEST_CHECK(core::is_alpha("ABC"));
+        DOCTEST_CHECK(core::is_alpha("abcABC"));
+        DOCTEST_CHECK(!core::is_alpha(""));
+        DOCTEST_CHECK(!core::is_alpha("abc123"));
+        DOCTEST_CHECK(!core::is_alpha("123"));
+
+        // 测试 is_alnum 函数
+        DOCTEST_CHECK(core::is_alnum("abc123"));
+        DOCTEST_CHECK(core::is_alnum("ABC123"));
+        DOCTEST_CHECK(core::is_alnum("abcABC123"));
+        DOCTEST_CHECK(!core::is_alnum(""));
+        DOCTEST_CHECK(!core::is_alnum("abc 123"));
+        DOCTEST_CHECK(!core::is_alnum("abc!@#"));
+
+        // 测试 is_hexdigit 函数
+        DOCTEST_CHECK(core::is_hexdigit("1aF"));
+        DOCTEST_CHECK(core::is_hexdigit("ABCDEF0123456789"));
+        DOCTEST_CHECK(core::is_hexdigit("abcdef"));
+        DOCTEST_CHECK(!core::is_hexdigit(""));
+        DOCTEST_CHECK(!core::is_hexdigit("1g"));
+        DOCTEST_CHECK(!core::is_hexdigit("xyz"));
+
+        // 测试 is_number 函数
+        DOCTEST_CHECK(core::is_number("123"));
+        DOCTEST_CHECK(core::is_number("-123"));
+        DOCTEST_CHECK(core::is_number("+456"));
+        DOCTEST_CHECK(core::is_number("3.14"));
+        DOCTEST_CHECK(core::is_number("-0.5"));
+        DOCTEST_CHECK(core::is_number("0.0"));
+        DOCTEST_CHECK(!core::is_number(""));
+        DOCTEST_CHECK(!core::is_number("."));
+        DOCTEST_CHECK(!core::is_number("+."));
+        DOCTEST_CHECK(!core::is_number("-."));
+        DOCTEST_CHECK(!core::is_number("+"));
+        DOCTEST_CHECK(!core::is_number("-"));
+        DOCTEST_CHECK(!core::is_number("12.34.56"));
+        DOCTEST_CHECK(!core::is_number("12a"));
+        DOCTEST_CHECK(!core::is_number("abc"));
+
+        // 测试 stringicmp 函数
+        DOCTEST_CHECK(core::stringicmp("ABC", "abc") == 0);
+        DOCTEST_CHECK(core::stringicmp("abc", "abd") == -1);
+        DOCTEST_CHECK(core::stringicmp("Abc", "aBd") == -1);
+        DOCTEST_CHECK(core::stringicmp("abd", "abc") == 1);
+        DOCTEST_CHECK(core::stringicmp("ab", "ABC") == -1);
+        DOCTEST_CHECK(core::stringicmp("ABC", "ab") == 1);
+        DOCTEST_CHECK(core::stringicmp("", "") == 0);
+
+        // 测试 count_str 函数
+        DOCTEST_CHECK(core::count_str("hello world", "l") == 3);
+        DOCTEST_CHECK(core::count_str("ababab", "ab") == 3);
+        DOCTEST_CHECK(core::count_str("aaaaa", "aa") == 2);
+        DOCTEST_CHECK(core::count_str("hello", "") == 0);
+        DOCTEST_CHECK(core::count_str("", "hello") == 0);
+        DOCTEST_CHECK(core::count_str("", "") == 0);
+        DOCTEST_CHECK(core::count_str("hello", "x") == 0);
+
+        // 测试 count_char 函数
+        DOCTEST_CHECK(core::count_char("hello world", 'l') == 3);
+        DOCTEST_CHECK(core::count_char("aaaaa", 'a') == 5);
+        DOCTEST_CHECK(core::count_char("hello", 'x') == 0);
+        DOCTEST_CHECK(core::count_char("", 'a') == 0);
     }
 
     DOCTEST_TEST_CASE("SplitString")

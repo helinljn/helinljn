@@ -4,6 +4,7 @@
 #include <random>
 #include <thread>
 #include <sstream>
+#include <algorithm>
 #include <unordered_set>
 #include <cpptrace/cpptrace.hpp>
 
@@ -343,13 +344,13 @@ bool from_hex_string(std::string_view hexstr, void* outbuf, size_t outbuf_len)
 std::string trim(std::string_view str)
 {
     size_t start = 0;
-    while (start < str.size() && std::isspace(static_cast<unsigned char>(str[start])))
+    while (start < str.size() && std::isspace(str[start]))
     {
         ++start;
     }
 
     size_t end = str.size();
-    while (end > start && std::isspace(static_cast<unsigned char>(str[end - 1])))
+    while (end > start && std::isspace(str[end - 1]))
     {
         --end;
     }
@@ -360,7 +361,7 @@ std::string trim(std::string_view str)
 std::string ltrim(std::string_view str)
 {
     size_t start = 0;
-    while (start < str.size() && std::isspace(static_cast<unsigned char>(str[start])))
+    while (start < str.size() && std::isspace(str[start]))
     {
         ++start;
     }
@@ -371,7 +372,7 @@ std::string ltrim(std::string_view str)
 std::string rtrim(std::string_view str)
 {
     size_t end = str.size();
-    while (end > 0 && std::isspace(static_cast<unsigned char>(str[end - 1])))
+    while (end > 0 && std::isspace(str[end - 1]))
     {
         --end;
     }
@@ -379,25 +380,49 @@ std::string rtrim(std::string_view str)
     return std::string(str.substr(0, end));
 }
 
-bool starts_with(std::string_view str, std::string_view prefix)
+std::string pad_left(std::string_view str, size_t total_width, char fill_char)
 {
-    if (prefix.size() > str.size())
-        return false;
+    std::string result;
+    if (str.size() >= total_width)
+        return std::string(str);
 
-    return str.substr(0, prefix.size()) == prefix;
+    result.reserve(total_width);
+    result.append(total_width - str.size(), fill_char);
+    result.append(str);
+
+    return result;
 }
 
-bool ends_with(std::string_view str, std::string_view suffix)
+std::string pad_right(std::string_view str, size_t total_width, char fill_char)
 {
-    if (suffix.size() > str.size())
-        return false;
+    std::string result;
+    if (str.size() >= total_width)
+        return std::string(str);
 
-    return str.substr(str.size() - suffix.size()) == suffix;
+    result.reserve(total_width);
+    result.append(str);
+    result.append(total_width - str.size(), fill_char);
+
+    return result;
 }
 
-bool contains(std::string_view str, std::string_view substr)
+std::string center(std::string_view str, size_t total_width, char fill_char)
 {
-    return str.find(substr) != std::string_view::npos;
+    std::string result;
+    if (str.size() >= total_width)
+        return std::string(str);
+
+    result.reserve(total_width);
+
+    size_t pad_size  = total_width - str.size();
+    size_t left_pad  = pad_size / 2;
+    size_t right_pad = pad_size - left_pad;
+
+    result.append(left_pad, fill_char);
+    result.append(str);
+    result.append(right_pad, fill_char);
+
+    return result;
 }
 
 std::string to_upper(std::string_view str)
@@ -449,6 +474,17 @@ std::string replace(std::string_view str, std::string_view old_str, std::string_
         result.append(new_str);
         pos = found + old_len;
     }
+
+    return result;
+}
+
+std::string concat(std::string_view str1, std::string_view str2)
+{
+    std::string result;
+
+    result.reserve(str1.size() + str2.size());
+    result.append(str1);
+    result.append(str2);
 
     return result;
 }
@@ -517,6 +553,134 @@ void split(std::string_view src_str, std::string_view separator, std::vector<std
     // 处理最后一个分隔符后面的字符串
     if (start < end)
         out_result.emplace_back(src_str.substr(start, end - start));
+}
+
+bool starts_with(std::string_view str, std::string_view prefix)
+{
+    if (prefix.size() > str.size())
+        return false;
+
+    return str.substr(0, prefix.size()) == prefix;
+}
+
+bool ends_with(std::string_view str, std::string_view suffix)
+{
+    if (suffix.size() > str.size())
+        return false;
+
+    return str.substr(str.size() - suffix.size()) == suffix;
+}
+
+bool contains(std::string_view str, std::string_view substr)
+{
+    return str.find(substr) != std::string_view::npos;
+}
+
+bool is_blank(std::string_view str)
+{
+    if (str.empty())
+        return true;
+    return std::all_of(str.begin(), str.end(), [](char c) {return std::isspace(c);});
+}
+
+bool is_digit(std::string_view str)
+{
+    if (str.empty())
+        return false;
+    return std::all_of(str.begin(), str.end(), [](char c) {return std::isdigit(c);});
+}
+
+bool is_alpha(std::string_view str)
+{
+    if (str.empty())
+        return false;
+    return std::all_of(str.begin(), str.end(), [](char c) {return std::isalpha(c);});
+}
+
+bool is_alnum(std::string_view str)
+{
+    if (str.empty())
+        return false;
+    return std::all_of(str.begin(), str.end(), [](char c) {return std::isalnum(c);});
+}
+
+bool is_hexdigit(std::string_view str)
+{
+    if (str.empty())
+        return false;
+    return std::all_of(str.begin(), str.end(), [](char c) {return std::isxdigit(c);});
+}
+
+bool is_number(std::string_view str)
+{
+    if (str.empty())
+        return false;
+
+    size_t start = 0;
+    if (str[0] == '+' || str[0] == '-')
+        start = 1;
+
+    if (start >= str.size())
+        return false;
+
+    bool has_decimal = false;
+    bool has_digit   = false;
+    for (size_t i = start; i < str.size(); ++i)
+    {
+        if (str[i] == '.')
+        {
+            if (has_decimal)
+                return false;
+
+            has_decimal = true;
+            continue;
+        }
+
+        if (!std::isdigit(str[i]))
+            return false;
+
+        has_digit = true;
+    }
+
+    return has_digit;
+}
+
+int stringicmp(std::string_view str1, std::string_view str2)
+{
+    size_t min_len = (std::min)(str1.size(), str2.size());
+    for (size_t i = 0; i < min_len; ++i)
+    {
+        int c1 = std::tolower(str1[i]);
+        int c2 = std::tolower(str2[i]);
+        if (c1 != c2)
+            return (c1 < c2) ? -1 : 1;
+    }
+
+    if (str1.size() < str2.size())
+        return -1;
+    if (str1.size() > str2.size())
+        return 1;
+    return 0;
+}
+
+size_t count_str(std::string_view str, std::string_view substr)
+{
+    if (substr.empty())
+        return 0;
+
+    size_t count = 0;
+    size_t pos   = 0;
+    while ((pos = str.find(substr, pos)) != std::string_view::npos)
+    {
+        ++count;
+        pos += substr.size();
+    }
+    return count;
+}
+
+size_t count_char(std::string_view str, char ch)
+{
+    return std::count(str.begin(), str.end(), ch);
 }
 
 bool is_gbk(std::string_view str)
