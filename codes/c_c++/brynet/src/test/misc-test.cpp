@@ -923,6 +923,15 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(!core::is_number("12a"));
         DOCTEST_CHECK(!core::is_number("abc"));
 
+        // 测试 stringcmp 函数
+        DOCTEST_CHECK(core::stringcmp("abc", "abc") == 0);
+        DOCTEST_CHECK(core::stringcmp("abc", "abd") == -1);
+        DOCTEST_CHECK(core::stringcmp("Abc", "aBd") == -1);
+        DOCTEST_CHECK(core::stringcmp("abd", "abc") == 1);
+        DOCTEST_CHECK(core::stringcmp("ab", "ABC") == 1);
+        DOCTEST_CHECK(core::stringcmp("ABC", "ab") == -1);
+        DOCTEST_CHECK(core::stringcmp("", "") == 0);
+
         // 测试 stringicmp 函数
         DOCTEST_CHECK(core::stringicmp("ABC", "abc") == 0);
         DOCTEST_CHECK(core::stringicmp("abc", "abd") == -1);

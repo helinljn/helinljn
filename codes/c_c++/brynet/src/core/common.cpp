@@ -645,6 +645,15 @@ bool is_number(std::string_view str)
     return has_digit;
 }
 
+int stringcmp(std::string_view str1, std::string_view str2)
+{
+    if (str1 == str2)
+        return 0;
+    if (str1 < str2)
+        return -1;
+    return 1;
+}
+
 int stringicmp(std::string_view str1, std::string_view str2)
 {
     size_t min_len = (std::min)(str1.size(), str2.size());
@@ -680,7 +689,8 @@ size_t count_str(std::string_view str, std::string_view substr)
 
 size_t count_char(std::string_view str, char ch)
 {
-    return std::count(str.begin(), str.end(), ch);
+    auto count = std::count(str.begin(), str.end(), ch);
+    return static_cast<size_t>(count >= 0 ? count : 0);
 }
 
 bool is_gbk(std::string_view str)

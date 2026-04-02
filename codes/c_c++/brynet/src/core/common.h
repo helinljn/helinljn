@@ -273,7 +273,15 @@ CORE_API bool is_hexdigit(std::string_view str);
 CORE_API bool is_number(std::string_view str);
 
 /**
- * @brief 比较两个字符串是否相等，忽略大小写
+ * @brief 比较两个字符串是否相等(区分大小写)
+ * @param str1 第一个字符串
+ * @param str2 第二个字符串
+ * @return 相等返回0，不相等返回非0
+ */
+CORE_API int stringcmp(std::string_view str1, std::string_view str2);
+
+/**
+ * @brief 比较两个字符串是否相等(忽略大小写)
  * @param str1 第一个字符串
  * @param str2 第二个字符串
  * @return 相等返回0，不相等返回非0
