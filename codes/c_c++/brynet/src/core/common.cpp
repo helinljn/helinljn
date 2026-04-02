@@ -647,11 +647,12 @@ bool is_number(std::string_view str)
 
 int stringcmp(std::string_view str1, std::string_view str2)
 {
-    if (str1 == str2)
-        return 0;
-    if (str1 < str2)
+    int result = str1.compare(str2);
+    if (result < 0)
         return -1;
-    return 1;
+    if (result > 0)
+        return 1;
+    return 0;
 }
 
 int stringicmp(std::string_view str1, std::string_view str2)

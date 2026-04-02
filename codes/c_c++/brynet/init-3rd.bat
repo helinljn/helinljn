@@ -4,6 +4,7 @@ set ROOT_INIT_DIR=%~dp0
 set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
+set SIMPLEINI_INIT_DIR=%ROOT_INIT_DIR%/3rd/simpleini
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
 set LIGHTHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/LightHook
 set DISTORM_INIT_DIR=%ROOT_INIT_DIR%/3rd/distorm
@@ -49,6 +50,20 @@ if not exist %DOCTEST_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout v2.4.12
+)
+
+echo ------------------
+echo -- simpleini
+cd %ROOT_INIT_DIR%
+if not exist %SIMPLEINI_INIT_DIR% (
+    git clone -b v4.25 https://github.com/brofield/simpleini.git %SIMPLEINI_INIT_DIR%
+) else (
+    cd %SIMPLEINI_INIT_DIR%
+    git remote set-url origin https://github.com/brofield/simpleini.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v4.25
 )
 
 echo ------------------

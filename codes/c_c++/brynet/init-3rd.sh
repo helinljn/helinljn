@@ -4,6 +4,7 @@ ROOT_INIT_DIR=`pwd`
 FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
+SIMPLEINI_INIT_DIR=$ROOT_INIT_DIR/3rd/simpleini
 BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
 LIGHTHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/LightHook
 DISTORM_INIT_DIR=$ROOT_INIT_DIR/3rd/distorm
@@ -50,6 +51,22 @@ else
     git fetch -p origin
     git checkout v2.4.12
 fi
+
+echo ------------------
+echo -- simpleini
+cd $ROOT_INIT_DIR
+if [ ! -d $SIMPLEINI_INIT_DIR ]; then
+    git clone -b v4.25 https://github.com/brofield/simpleini.git $SIMPLEINI_INIT_DIR
+else
+    cd $SIMPLEINI_INIT_DIR
+    git remote set-url origin https://github.com/brofield/simpleini.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v4.25
+fi
+
+
 
 echo ------------------
 echo -- brynet

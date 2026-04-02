@@ -11,7 +11,9 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/LightHook/Source
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/simpleini
 )
 
 # 宏定义、编译选项、链接库
