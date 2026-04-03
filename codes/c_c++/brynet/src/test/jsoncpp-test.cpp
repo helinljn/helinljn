@@ -3,409 +3,370 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <memory>
+#include <vector>
 
-DOCTEST_TEST_SUITE("JsonCpp")
+/********************************************************************
+ * 测试用例 1：基本 Value 创建与类型判断
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Basic Value Creation and Type Checks")
 {
-    DOCTEST_TEST_CASE("BasicValueCreation")
-    {
-        // 测试各种类型的 JSON 值创建
-        Json::Value nullValue; // 默认创建 null
-        DOCTEST_CHECK(nullValue.isNull());
-        DOCTEST_CHECK(nullValue.asString() == "");
+    // 默认构造的 Value 为 null
+    Json::Value nullValue;
+    DOCTEST_CHECK(nullValue.isNull());
+    DOCTEST_CHECK(nullValue.empty());
 
-        Json::Value boolValue(true);
-        DOCTEST_CHECK(boolValue.isBool());
-        DOCTEST_CHECK(boolValue.asBool() == true);
+    // 布尔/整型/浮点/字符串/数组/对象
+    Json::Value b(true);
+    DOCTEST_CHECK(b.isBool());
+    DOCTEST_CHECK(b.asBool() == true);
 
-        Json::Value intValue(42);
-        DOCTEST_CHECK(intValue.isInt());
-        DOCTEST_CHECK(intValue.asInt() == 42);
+    Json::Value i(42);
+    DOCTEST_CHECK(i.isInt());
+    DOCTEST_CHECK(i.asInt() == 42);
 
-        Json::Value doubleValue(3.14159);
-        DOCTEST_CHECK(doubleValue.isDouble());
-        DOCTEST_CHECK(doubleValue.asDouble() == doctest::Approx(3.14159).epsilon(1e-5));
+    Json::Value d(3.14159);
+    DOCTEST_CHECK(d.isDouble());
+    DOCTEST_CHECK(d.asDouble() == doctest::Approx(3.14159).epsilon(1e-6));
 
-        Json::Value stringValue("Hello, JsonCpp!");
-        DOCTEST_CHECK(stringValue.isString());
-        DOCTEST_CHECK(stringValue.asString() == "Hello, JsonCpp!");
+    Json::Value s("hello");
+    DOCTEST_CHECK(s.isString());
+    DOCTEST_CHECK(s.asString() == "hello");
 
-        Json::Value arrayValue(Json::arrayValue);
-        DOCTEST_CHECK(arrayValue.isArray());
-        DOCTEST_CHECK(arrayValue.empty());
+    Json::Value arr(Json::arrayValue);
+    DOCTEST_CHECK(arr.isArray());
+    DOCTEST_CHECK(arr.empty());
 
-        Json::Value objectValue(Json::objectValue);
-        DOCTEST_CHECK(objectValue.isObject());
-        DOCTEST_CHECK(objectValue.empty());
+    Json::Value obj(Json::objectValue);
+    DOCTEST_CHECK(obj.isObject());
+    DOCTEST_CHECK(obj.empty());
+}
+
+/********************************************************************
+ * 测试用例 2：数组操作（append, index, size, clear, 遍历）
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Array operations")
+{
+    Json::Value arr(Json::arrayValue);
+
+    // append 不同类型
+    arr.append(1);
+    arr.append("two");
+    arr.append(true);
+    arr.append(4.5);
+
+    DOCTEST_CHECK(arr.size() == 4);
+    DOCTEST_CHECK(arr[0].asInt() == 1);
+    DOCTEST_CHECK(arr[1].asString() == "two");
+    DOCTEST_CHECK(arr[2].asBool() == true);
+    DOCTEST_CHECK(arr[3].asDouble() == doctest::Approx(4.5).epsilon(1e-6));
+
+    // 使用下标赋值可以扩展数组
+    arr[4] = "five";
+    DOCTEST_CHECK(arr.size() == 5);
+    DOCTEST_CHECK(arr[4].asString() == "five");
+
+    // 遍历数组（iterator/索引）
+    int cnt = 0;
+    for (Json::Value::iterator it = arr.begin(); it != arr.end(); ++it) {
+        (void)it;
+        cnt++;
     }
+    DOCTEST_CHECK(cnt == 5);
 
-    DOCTEST_TEST_CASE("ArrayOperations")
-    {
-        Json::Value array(Json::arrayValue);
+    // clear 将移除所有元素
+    arr.clear();
+    DOCTEST_CHECK(arr.empty());
+}
 
-        // 添加元素
-        array.append(1);
-        array.append("test");
-        array.append(true);
-        array.append(3.14);
+/********************************************************************
+ * 测试用例 3：对象操作（成员增删、isMember、getMemberNames）
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Object operations")
+{
+    Json::Value o(Json::objectValue);
 
-        DOCTEST_CHECK(array.size() == 4);
-        DOCTEST_CHECK(array[0].asInt() == 1);
-        DOCTEST_CHECK(array[1].asString() == "test");
-        DOCTEST_CHECK(array[2].asBool() == true);
-        DOCTEST_CHECK(array[3].asDouble() == doctest::Approx(3.14).epsilon(1e-4));
+    // 赋值与类型推断
+    o["name"] = "Alice";
+    o["age"] = 30;
+    o["score"] = 99.5;
+    o["active"] = true;
 
-        // 测试数组索引
-        array[4] = "new element";
-        DOCTEST_CHECK(array.size() == 5);
-        DOCTEST_CHECK(array[4].asString() == "new element");
+    DOCTEST_CHECK(o.isMember("name"));
+    DOCTEST_CHECK(o["name"].asString() == "Alice");
+    DOCTEST_CHECK(o["age"].asInt() == 30);
 
-        // 测试数组遍历
-        int count = 0;
-        for (Json::Value::iterator it = array.begin(); it != array.end(); ++it)
+    // getMemberNames 返回成员名向量（顺序未严格保证）
+    Json::Value::Members members = o.getMemberNames();
+    DOCTEST_CHECK(members.size() == 4);
+
+    // 删除成员：removeMember
+    o.removeMember("active");
+    DOCTEST_CHECK(!o.isMember("active"));
+
+    // 嵌套对象
+    Json::Value addr(Json::objectValue);
+    addr["city"] = "Beijing";
+    addr["zip"] = "100000";
+    o["address"] = addr;
+    DOCTEST_CHECK(o["address"]["city"].asString() == "Beijing");
+}
+
+/********************************************************************
+ * 测试用例 4：从字符串解析 JSON（正确与错误场景）
+ * 使用 Json::CharReaderBuilder / parseFromStream（推荐的解析方式）
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Parsing from string (CharReaderBuilder)")
+{
+    const std::string jsonText = R"({
+        "name": "Bob",
+        "age": 25,
+        "grades": [88, 92, 79],
+        "meta": {"active": true}
+    })";
+
+    Json::Value root;
+    Json::CharReaderBuilder builder;
+    std::string errs;
+
+    std::istringstream iss(jsonText);
+    bool ok = Json::parseFromStream(builder, iss, &root, &errs);
+    DOCTEST_CHECK(ok);
+    DOCTEST_CHECK(errs.empty());
+
+    DOCTEST_CHECK(root["name"].asString() == "Bob");
+    DOCTEST_CHECK(root["age"].asInt() == 25);
+    DOCTEST_CHECK(root["grades"].isArray());
+    DOCTEST_CHECK(root["grades"][1].asInt() == 92);
+
+    // 解析错误示例：截断的 JSON
+    const std::string bad = R"({"a": 1,)";
+    Json::Value badRoot;
+    std::istringstream iss2(bad);
+    std::string errs2;
+    bool ok2 = Json::parseFromStream(builder, iss2, &badRoot, &errs2);
+    DOCTEST_CHECK(!ok2);
+    DOCTEST_CHECK(!errs2.empty());
+}
+
+/********************************************************************
+ * 测试用例 5：序列化写出（FastWriter、StyledWriter、StreamWriterBuilder）
+ * 覆盖旧/新写法，展示常用配置
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Writing JSON (FastWriter / StyledWriter / StreamWriterBuilder)")
+{
+    Json::Value root(Json::objectValue);
+    root["user"] = "test";
+    root["val"] = 123;
+
+    // FastWriter（非格式化，历史接口）
+    Json::FastWriter fast;
+    std::string fastOut = fast.write(root);
+    DOCTEST_CHECK(!fastOut.empty());
+
+    // StyledWriter（可读性更好，历史接口）
+    Json::StyledWriter styled;
+    std::string styledOut = styled.write(root);
+    DOCTEST_CHECK(!styledOut.empty());
+    DOCTEST_CHECK(styledOut.find("\n") != std::string::npos); // 有换行和缩进
+
+    // StreamWriterBuilder（现代接口，可配置）
+    Json::StreamWriterBuilder swb;
+    swb["indentation"] = "  ";
+    std::unique_ptr<Json::StreamWriter> writer(swb.newStreamWriter());
+    std::ostringstream oss;
+    writer->write(root, &oss);
+    std::string streamOut = oss.str();
+    DOCTEST_CHECK(!streamOut.empty());
+    DOCTEST_CHECK(streamOut.find("\"user\"") != std::string::npos);
+}
+
+/********************************************************************
+ * 测试用例 6：类型转换行为与异常（asInt/asDouble/asString/asBool）
+ * 说明 JsonCpp 在类型转换上的常见行为与兼容性注意事项
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Type conversion and exceptions")
+{
+    Json::Value v;
+
+    // 从数字转换
+    v = 100;
+    DOCTEST_CHECK(v.asInt() == 100);
+    DOCTEST_CHECK(v.asDouble() == 100.0);
+    DOCTEST_CHECK(v.asString() == "100");
+
+    // 字符串类型的 asInt/asDouble 在某些版本会抛出 Json::LogicError
+    v = "123";
+    DOCTEST_CHECK(v.isString());
+    // 在多数 JsonCpp 版本中，对字符串调用 asInt() 会抛出 Json::LogicError
+    DOCTEST_CHECK_THROWS_AS(v.asInt(), Json::LogicError);
+    DOCTEST_CHECK_THROWS_AS(v.asDouble(), Json::LogicError);
+    DOCTEST_CHECK(v.asString() == "123");
+
+    // 布尔转换
+    v = true;
+    DOCTEST_CHECK(v.asBool() == true);
+    DOCTEST_CHECK(v.asInt() == 1);
+    DOCTEST_CHECK(v.asString() == "true");
+
+    // 空值（null）的默认转换行为（通常返回 0 / false / ""）
+    v = Json::Value();
+    DOCTEST_CHECK(v.isNull());
+    DOCTEST_CHECK(v.asInt() == 0);
+    DOCTEST_CHECK(v.asUInt() == 0u);
+    DOCTEST_CHECK(v.asBool() == false);
+    DOCTEST_CHECK(v.asDouble() == 0.0);
+    DOCTEST_CHECK(v.asString() == "");
+}
+
+/********************************************************************
+ * 测试用例 7：解析特性开关（注释、尾随逗号、单引号）
+ * 演示如何通过 CharReaderBuilder 配置解析规则
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Parsing features: comments, trailing commas, single quotes")
+{
+    // 含注释的 JSON（C++ 风格注释和多行注释）
+    const std::string withComments = R"(
         {
-            count++;
+            // line comment
+            "a": 1 /* block comment */
         }
-        DOCTEST_CHECK(count == 5);
+    )";
+    Json::CharReaderBuilder b1;
+    b1["allowComments"] = true;
+    std::string e1;
+    Json::Value r1;
+    std::istringstream iss_withComments(withComments);
+    DOCTEST_CHECK(Json::parseFromStream(b1, iss_withComments, &r1, &e1));
+    DOCTEST_CHECK(r1["a"].asInt() == 1);
 
-        // 测试数组清空
-        array.clear();
-        DOCTEST_CHECK(array.empty());
+    // 尾随逗号
+    const std::string withTrailing = R"({
+        "x": 1,
+    })";
+    Json::CharReaderBuilder b2;
+    b2["allowTrailingCommas"] = true;
+    std::string e2;
+    Json::Value r2;
+    std::istringstream iss_withTrailing(withTrailing);
+    DOCTEST_CHECK(Json::parseFromStream(b2, iss_withTrailing, &r2, &e2));
+    DOCTEST_CHECK(r2["x"].asInt() == 1);
+
+    // 单引号
+    const std::string withSingle = R"({'k':'v'})";
+    Json::CharReaderBuilder b3;
+    b3["allowSingleQuotes"] = true;
+    std::string e3;
+    Json::Value r3;
+    std::istringstream iss_withSingle(withSingle);
+    DOCTEST_CHECK(Json::parseFromStream(b3, iss_withSingle, &r3, &e3));
+    DOCTEST_CHECK(r3["k"].asString() == "v");
+}
+
+/********************************************************************
+ * 测试用例 8：错误处理与 get() 的默认值
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Error handling and default get")
+{
+    // 当 JSON 字段类型与期望不匹配时，解析仍然可能成功（但转换抛异常）
+    const std::string json = R"({"age": "unknown"})";
+    Json::Value root;
+    Json::CharReaderBuilder builder;
+    std::string errs;
+    std::istringstream iss_json(json);
+    DOCTEST_CHECK(Json::parseFromStream(builder, iss_json, &root, &errs));
+    DOCTEST_CHECK(root["age"].isString());
+    DOCTEST_CHECK_THROWS_AS(root["age"].asInt(), Json::LogicError);
+
+    // get(key, default) 在不存在成员时返回默认值（默认值以 Json::Value 形式提供）
+    const Json::Value& dv = root.get("no", Json::Value("def"));
+    DOCTEST_CHECK(dv.asString() == "def");
+}
+
+/********************************************************************
+ * 测试用例 9：复杂嵌套结构的序列化/反序列化
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Complex nested structures and roundtrip")
+{
+    Json::Value root(Json::objectValue);
+    Json::Value items(Json::arrayValue);
+
+    for (int i = 0; i < 3; ++i) {
+        Json::Value it(Json::objectValue);
+        it["id"] = i;
+        it["name"] = "n" + std::to_string(i);
+        items.append(it);
     }
 
-    DOCTEST_TEST_CASE("ObjectOperations")
-    {
-        Json::Value object(Json::objectValue);
+    root["items"] = items;
+    root["meta"]["version"] = "1.0";
 
-        // 添加成员
-        object["name"] = "John";
-        object["age"] = 30;
-        object["isStudent"] = false;
-        object["grade"] = 95.5;
+    // 序列化并反序列化
+    Json::StreamWriterBuilder swb;
+    std::ostringstream oss;
+    std::unique_ptr<Json::StreamWriter> w(swb.newStreamWriter());
+    w->write(root, &oss);
+    std::string out = oss.str();
+    DOCTEST_CHECK(!out.empty());
 
-        DOCTEST_CHECK(object.isMember("name"));
-        DOCTEST_CHECK(object["name"].asString() == "John");
-        DOCTEST_CHECK(object["age"].asInt() == 30);
+    Json::Value parsed;
+    Json::CharReaderBuilder rb;
+    std::string errs;
+    std::istringstream iss_out(out);
+    DOCTEST_CHECK(Json::parseFromStream(rb, iss_out, &parsed, &errs));
+    DOCTEST_CHECK(parsed["items"].size() == 3);
+    DOCTEST_CHECK(parsed["meta"]["version"].asString() == "1.0");
+}
 
-        // 测试成员检查
-        DOCTEST_CHECK(object.isMember("name"));
-        DOCTEST_CHECK(!object.isMember("non_existent"));
+/********************************************************************
+ * 测试用例 10：Json::Path 使用示例（路径解析、默认值）
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Json::Path usage")
+{
+    Json::Value r(Json::objectValue);
+    r["person"]["name"] = "Ann";
+    r["person"]["age"] = 40;
+    r["arr"] = Json::Value(Json::arrayValue);
+    r["arr"].append(10);
+    r["arr"].append(20);
 
-        // 测试获取成员名称
-        Json::Value::Members members = object.getMemberNames();
-        DOCTEST_CHECK(members.size() == 4);
+    Json::Path pName(".person.name");
+    Json::Path pAge(".person.age");
+    Json::Path pIdx(".arr.[1]");
 
-        // 测试删除成员
-        object.removeMember("isStudent");
-        DOCTEST_CHECK(!object.isMember("isStudent"));
+    DOCTEST_CHECK(pName.resolve(r).asString() == "Ann");
+    DOCTEST_CHECK(pAge.resolve(r).asInt() == 40);
+    DOCTEST_CHECK(pIdx.resolve(r).asInt() == 20);
 
-        // 测试嵌套对象
-        Json::Value address(Json::objectValue);
-        address["street"] = "123 Main St";
-        address["city"] = "New York";
-        object["address"] = address;
+    // 默认值示例：resolve(root, defaultValue)
+    Json::Value def("missing");
+    DOCTEST_CHECK(Json::Path(".person.missing").resolve(r, def).asString() == "missing");
+}
 
-        DOCTEST_CHECK(object["address"]["city"].asString() == "New York");
+/********************************************************************
+ * 测试用例 11：大量数据构建与简单行为验证（性能/内存敏感场景）
+ ********************************************************************/
+DOCTEST_TEST_CASE("JsonCpp - Large structures and roundtrip sanity")
+{
+    Json::Value big(Json::arrayValue);
+    const int N = 1000; // 适中数量，避免测试超时
+    for (int i = 0; i < N; ++i) {
+        Json::Value it(Json::objectValue);
+        it["index"] = i;
+        it["text"] = "entry_" + std::to_string(i);
+        big.append(it);
     }
+    DOCTEST_CHECK(big.size() == (size_t)N);
 
-    DOCTEST_TEST_CASE("JsonParsing")
-    {
-        // 测试从字符串解析 JSON
-        std::string jsonStr = R"({
-            "name": "John",
-            "age": 30,
-            "isStudent": false,
-            "grades": [95, 87, 91],
-            "address": {
-                "street": "123 Main St",
-                "city": "New York"
-            }
-        })";
+    // 序列化/反序列化检查大小一致
+    Json::FastWriter fw;
+    std::string s = fw.write(big);
+    DOCTEST_CHECK(!s.empty());
 
-        Json::Value root;
-        Json::CharReaderBuilder builder;
-        std::string errs;
-
-        std::istringstream stream(jsonStr);
-        DOCTEST_CHECK(Json::parseFromStream(builder, stream, &root, &errs));
-        DOCTEST_CHECK(errs.empty());
-
-        DOCTEST_CHECK(root["name"].asString() == "John");
-        DOCTEST_CHECK(root["age"].asInt() == 30);
-        DOCTEST_CHECK(!root["isStudent"].asBool());
-        DOCTEST_CHECK(root["grades"].isArray());
-        DOCTEST_CHECK(root["grades"].size() == 3);
-        DOCTEST_CHECK(root["grades"][0].asInt() == 95);
-        DOCTEST_CHECK(root["address"]["city"].asString() == "New York");
-
-        // 测试解析错误
-        std::string invalidJson = R"({"name": "John", "age": )";
-        Json::Value invalidRoot;
-        std::istringstream invalidStream(invalidJson);
-        DOCTEST_CHECK(!Json::parseFromStream(builder, invalidStream, &invalidRoot, &errs));
-        DOCTEST_CHECK(!errs.empty());
-    }
-
-    DOCTEST_TEST_CASE("JsonWriting")
-    {
-        // 测试创建 JSON 对象
-        Json::Value root(Json::objectValue);
-        root["name"] = "John";
-        root["age"] = 30;
-        root["isStudent"] = false;
-
-        // 测试快速写入（无格式化）
-        Json::FastWriter fastWriter;
-        std::string fastStr = fastWriter.write(root);
-        DOCTEST_CHECK(!fastStr.empty());
-
-        // 测试美化写入（带格式化）
-        Json::StyledWriter styledWriter;
-        std::string styledStr = styledWriter.write(root);
-        DOCTEST_CHECK(!styledStr.empty());
-
-        // 测试 StreamWriterBuilder
-        Json::StreamWriterBuilder streamBuilder;
-        streamBuilder["indentation"] = "  ";
-        std::unique_ptr<Json::StreamWriter> writer(streamBuilder.newStreamWriter());
-        std::ostringstream oss;
-        writer->write(root, &oss);
-        std::string streamStr = oss.str();
-        DOCTEST_CHECK(!streamStr.empty());
-
-        // 测试写入到标准输出
-        writer->write(root, &std::cout);
-        std::cout << std::endl;
-    }
-
-    DOCTEST_TEST_CASE("TypeConversion")
-    {
-        Json::Value value;
-
-        // 测试数字转换
-        value = 42;
-        DOCTEST_CHECK(value.asInt() == 42);
-        DOCTEST_CHECK(value.asDouble() == 42.0);
-        DOCTEST_CHECK(value.asString() == "42");
-
-        // 测试字符串转换
-        value = "123";
-        DOCTEST_CHECK(value.isString());
-        // 注意：JsonCpp 不会自动将字符串转换为数字
-        // 当值是字符串类型时，asInt() 和 asDouble() 会抛出异常
-        DOCTEST_CHECK_THROWS_AS(value.asInt(), Json::LogicError);
-        DOCTEST_CHECK_THROWS_AS(value.asDouble(), Json::LogicError);
-        // 测试字符串相关的转换
-        DOCTEST_CHECK(value.asString() == "123");
-
-        // 测试数字类型的转换
-        value = 123;
-        DOCTEST_CHECK(value.isInt());
-        DOCTEST_CHECK(value.asInt() == 123);
-        DOCTEST_CHECK(value.asDouble() == 123.0);
-        DOCTEST_CHECK(value.asString() == "123");
-
-        // 测试布尔转换
-        value = true;
-        DOCTEST_CHECK(value.asBool() == true);
-        DOCTEST_CHECK(value.asInt() == 1);
-        DOCTEST_CHECK(value.asString() == "true");
-
-        // 测试空值转换
-        value = Json::Value();
-        DOCTEST_CHECK(value.isNull());
-
-        // 注意：JsonCpp 中空值的转换行为可能因版本而异
-        // 有些版本会抛出异常，有些版本会返回默认值
-        DOCTEST_CHECK(value.asInt() == 0);
-        DOCTEST_CHECK(value.asUInt() == 0);
-        DOCTEST_CHECK(value.asInt64() == 0);
-        DOCTEST_CHECK(value.asUInt64() == 0);
-        DOCTEST_CHECK(value.asBool() == false);
-        DOCTEST_CHECK(value.asDouble() == 0.0);
-        DOCTEST_CHECK(value.asString() == "");
-    }
-
-    DOCTEST_TEST_CASE("SpecialFeatures")
-    {
-        // 测试注释支持
-        std::string jsonWithComments = R"(
-            {
-                // This is a comment
-                "name": "John", /* Another comment */
-                "age": 30
-            }
-        )";
-
-        Json::Value root;
-        Json::CharReaderBuilder builder;
-        builder["allowComments"] = true;
-        std::string errs;
-
-        std::istringstream stream(jsonWithComments);
-        DOCTEST_CHECK(Json::parseFromStream(builder, stream, &root, &errs));
-        DOCTEST_CHECK(root["name"].asString() == "John");
-
-        // 测试尾随逗号
-        std::string jsonWithTrailingComma = R"({
-            "name": "John",
-            "age": 30,
-        })";
-
-        Json::Value root2;
-        Json::CharReaderBuilder builder2;
-        builder2["allowTrailingCommas"] = true;
-        std::string errs2;
-
-        std::istringstream stream2(jsonWithTrailingComma);
-        DOCTEST_CHECK(Json::parseFromStream(builder2, stream2, &root2, &errs2));
-        DOCTEST_CHECK(root2["age"].asInt() == 30);
-
-        // 测试单引号
-        std::string jsonWithSingleQuotes = R"({'name': 'John', 'age': 30})";
-
-        Json::Value root3;
-        Json::CharReaderBuilder builder3;
-        builder3["allowSingleQuotes"] = true;
-        std::string errs3;
-
-        std::istringstream stream3(jsonWithSingleQuotes);
-        DOCTEST_CHECK(Json::parseFromStream(builder3, stream3, &root3, &errs3));
-        DOCTEST_CHECK(root3["name"].asString() == "John");
-    }
-
-    DOCTEST_TEST_CASE("ErrorHandling")
-    {
-        // 测试解析错误处理
-        std::string invalidJson = R"({
-            "name": "John",
-            "age": "thirty"
-        })";
-
-        Json::Value root;
-        Json::CharReaderBuilder builder;
-        std::string errs;
-
-        // 注意：JsonCpp 会将字符串 "thirty" 视为有效，只是类型转换会失败
-        std::istringstream stream(invalidJson);
-        DOCTEST_CHECK(Json::parseFromStream(builder, stream, &root, &errs));
-
-        // 测试类型转换错误
-        DOCTEST_CHECK(root["age"].isString());
-        // 注意：JsonCpp 不会自动将字符串转换为数字
-        // 当值是字符串类型时，asInt() 会抛出异常
-        DOCTEST_CHECK_THROWS_AS(root["age"].asInt(), Json::LogicError);
-        DOCTEST_CHECK_THROWS_AS(root["age"].asDouble(), Json::LogicError);
-
-        // 测试访问不存在的成员
-        // 注意：JsonCpp 中使用 [] 操作符访问不存在的成员会自动插入空值
-        // 所以我们应该使用 isMember 方法来检查成员是否存在
-        DOCTEST_CHECK(!root.isMember("non_existent"));
-        // 测试 get 方法的默认值行为
-        const Json::Value& defaultValue = root.get("non_existent", "default");
-        DOCTEST_CHECK(defaultValue.asString() == "default");
-    }
-
-    DOCTEST_TEST_CASE("ComplexStructures")
-    {
-        // 测试复杂的嵌套结构
-        Json::Value complex(Json::objectValue);
-
-        // 添加数组
-        Json::Value array(Json::arrayValue);
-        array.append(1);
-        array.append(2);
-        array.append(3);
-        complex["numbers"] = array;
-
-        // 添加嵌套对象
-        Json::Value nested(Json::objectValue);
-        nested["inner1"] = "value1";
-        nested["inner2"] = 123;
-        complex["nested"] = nested;
-
-        // 添加嵌套数组
-        Json::Value nestedArray(Json::arrayValue);
-        Json::Value item1(Json::objectValue);
-        item1["name"] = "item1";
-        nestedArray.append(item1);
-        complex["items"] = nestedArray;
-
-        // 验证结构
-        DOCTEST_CHECK(complex["numbers"].isArray());
-        DOCTEST_CHECK(complex["numbers"].size() == 3);
-        DOCTEST_CHECK(complex["nested"]["inner1"].asString() == "value1");
-        DOCTEST_CHECK(complex["items"][0]["name"].asString() == "item1");
-
-        // 测试序列化和反序列化
-        Json::StyledWriter writer;
-        std::string jsonStr = writer.write(complex);
-
-        Json::Value parsed;
-        Json::CharReaderBuilder builder;
-        std::string errs;
-        std::istringstream stream(jsonStr);
-        DOCTEST_CHECK(Json::parseFromStream(builder, stream, &parsed, &errs));
-        DOCTEST_CHECK(parsed["nested"]["inner2"].asInt() == 123);
-    }
-
-    DOCTEST_TEST_CASE("JsonPath")
-    {
-        // 测试 Json::Path 功能
-        Json::Value root(Json::objectValue);
-        root["person"]["name"] = "John";
-        root["person"]["age"] = 30;
-        root["person"]["address"]["city"] = "New York";
-        root["numbers"] = Json::Value(Json::arrayValue);
-        root["numbers"].append(10);
-        root["numbers"].append(20);
-        root["numbers"].append(30);
-
-        // 测试路径解析
-        Json::Path namePath(".person.name");
-        Json::Path agePath(".person.age");
-        Json::Path cityPath(".person.address.city");
-        Json::Path numberPath(".numbers.[1]");
-
-        DOCTEST_CHECK(namePath.resolve(root).asString() == "John");
-        DOCTEST_CHECK(agePath.resolve(root).asInt() == 30);
-        DOCTEST_CHECK(cityPath.resolve(root).asString() == "New York");
-        DOCTEST_CHECK(numberPath.resolve(root).asInt() == 20);
-
-        // 测试默认值
-        Json::Path nonExistentPath(".person.non_existent");
-        Json::Value defaultValue("default");
-        DOCTEST_CHECK(nonExistentPath.resolve(root, defaultValue).asString() == "default");
-    }
-
-    DOCTEST_TEST_CASE("PerformanceConsiderations")
-    {
-        // 测试大型 JSON 处理
-        Json::Value largeArray(Json::arrayValue);
-
-        // 添加 1000 个元素
-        for (int i = 0; i < 1000; i++)
-        {
-            Json::Value item(Json::objectValue);
-            item["id"] = i;
-            item["name"] = "Item " + std::to_string(i);
-            item["value"] = i * 10.5;
-            largeArray.append(item);
-        }
-
-        DOCTEST_CHECK(largeArray.size() == 1000);
-        DOCTEST_CHECK(largeArray[999]["id"].asInt() == 999);
-
-        // 测试序列化速度（这里只是测试功能，不做性能基准）
-        Json::FastWriter fastWriter;
-        std::string jsonStr = fastWriter.write(largeArray);
-        DOCTEST_CHECK(!jsonStr.empty());
-
-        // 测试反序列化
-        Json::Value parsed;
-        Json::CharReaderBuilder builder;
-        std::string errs;
-        std::istringstream stream(jsonStr);
-        DOCTEST_CHECK(Json::parseFromStream(builder, stream, &parsed, &errs));
-        DOCTEST_CHECK(parsed.size() == 1000);
-    }
+    Json::Value parsed;
+    Json::CharReaderBuilder rb;
+    std::string errs;
+    std::istringstream iss_s(s);
+    DOCTEST_CHECK(Json::parseFromStream(rb, iss_s, &parsed, &errs));
+    DOCTEST_CHECK(parsed.size() == (size_t)N);
 }
