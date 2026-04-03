@@ -6,6 +6,7 @@ set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
 set SIMPLEINI_INIT_DIR=%ROOT_INIT_DIR%/3rd/simpleini
 set JSONCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/jsoncpp
+SET TINYXML2_INIT_DIR=%ROOT_INIT_DIR%/3rd/tinyxml2
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
 set LIGHTHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/LightHook
 set DISTORM_INIT_DIR=%ROOT_INIT_DIR%/3rd/distorm
@@ -79,6 +80,20 @@ if not exist %JSONCPP_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout 1.9.7
+)
+
+echo ------------------
+echo -- tinyxml2
+cd %ROOT_INIT_DIR%
+if not exist %TINYXML2_INIT_DIR% (
+    git clone -b 10.1.0 https://github.com/leethomason/tinyxml2.git %TINYXML2_INIT_DIR%
+) else (
+    cd %TINYXML2_INIT_DIR%
+    git remote set-url origin https://github.com/leethomason/tinyxml2.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout 10.1.0
 )
 
 echo ------------------

@@ -15,6 +15,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/simpleini
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
 )
 
 # 宏定义、编译选项、链接库
@@ -38,6 +39,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        tinyxml2
         jsoncpp
         funchook
         cpptrace
@@ -66,6 +68,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        tinyxml2
         jsoncpp
         funchook
         cpptrace

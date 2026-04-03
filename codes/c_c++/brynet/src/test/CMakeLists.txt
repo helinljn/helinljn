@@ -15,6 +15,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/simpleini
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/tinyxml2
     ${CMAKE_PROJECT_ROOT_DIR}/src
 )
 
