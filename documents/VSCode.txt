@@ -11,7 +11,9 @@
 
     6. Markdown All in One
 
-    7. TRAE AI
+    7. Cline Chinese
+
+    8. TRAE AI
 
 【下载地址】
     https://update.code.visualstudio.com/1.110.1/win32-x64/stable
