@@ -3,6 +3,7 @@
 
 #include "core_port.h"
 #include "timestamp.h"
+#include <string>
 
 namespace core {
 
@@ -151,6 +152,14 @@ public:
 
     // Converts datetime to tm struct.
     tm to_tm(void) const {return _tmval;}
+
+    // Formats the datetime as a string using the given format string.
+    // Supports all strftime() format specifiers, plus:
+    //   {ms} - milliseconds (000-999)
+    //   {us} - microseconds (000-999)
+    // Example: dt.format("%Y-%m-%d %H:%M:%S.{ms}{us}")
+    // Returns the formatted string, or empty string on failure.
+    std::string format(std::string_view fmt) const;
 
     bool operator ==(const datetime& ts) const {return _ts == ts._ts;}
     bool operator !=(const datetime& ts) const {return _ts != ts._ts;}

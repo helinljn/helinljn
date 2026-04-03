@@ -221,6 +221,34 @@ DOCTEST_TEST_SUITE("Misc")
         }
 
         {
+            core::datetime dt(2011, 8, 28, 16, 43, 20);
+
+            DOCTEST_CHECK(dt.format("").empty());
+
+            DOCTEST_CHECK(dt.format("%Y-%m-%d") == "2011-08-28");
+            DOCTEST_CHECK(dt.format("%H:%M:%S") == "16:43:20");
+            DOCTEST_CHECK(dt.format("%Y-%m-%d %H:%M:%S") == "2011-08-28 16:43:20");
+
+            core::datetime dt_ms(2011, 8, 28, 16, 43, 20, 123);
+            DOCTEST_CHECK(dt_ms.format("%Y-%m-%d %H:%M:%S.{ms}") == "2011-08-28 16:43:20.123");
+
+            core::datetime dt_us(2011, 8, 28, 16, 43, 20, 123, 456);
+            DOCTEST_CHECK(dt_us.format("%Y-%m-%d %H:%M:%S.{ms}{us}") == "2011-08-28 16:43:20.123456");
+
+            core::datetime dt_ms_zero(2011, 8, 28, 16, 43, 20, 5);
+            DOCTEST_CHECK(dt_ms_zero.format("{ms}") == "005");
+
+            core::datetime dt_us_zero(2011, 8, 28, 16, 43, 20, 0, 7);
+            DOCTEST_CHECK(dt_us_zero.format("{us}") == "007");
+
+            DOCTEST_CHECK(dt_us.format("{ms}") == "123");
+            DOCTEST_CHECK(dt_us.format("{us}") == "456");
+
+            core::datetime now;
+            DOCTEST_CHECK(!now.format("%Y-%m-%d %H:%M:%S").empty());
+        }
+
+        {
             // 1970-01-01 08:00:00 Thursday
             core::datetime dt(core::timestamp(0));
             DOCTEST_CHECK(dt.year() == 1970);

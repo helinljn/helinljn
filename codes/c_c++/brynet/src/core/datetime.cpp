@@ -1,5 +1,7 @@
 #include "datetime.h"
 #include <stdexcept>
+#include <cstdio>
+#include <ctime>
 
 namespace core {
 
@@ -82,6 +84,30 @@ void datetime::update(void)
 {
     _ts.update();
     update_tm();
+}
+
+std::string datetime::format(std::string_view fmt) const
+{
+    if (fmt.empty())
+        return std::string{};
+
+    std::string processed_fmt(fmt);
+
+    char ms_str[8], us_str[8];
+    std::snprintf(ms_str, sizeof(ms_str), "%03d", millisecond());
+    std::snprintf(us_str, sizeof(us_str), "%03d", microsecond());
+
+    for (std::string::size_type pos = 0; (pos = processed_fmt.find("{ms}", pos)) != std::string::npos; pos += 3)
+        processed_fmt.replace(pos, 4, ms_str);
+
+    for (std::string::size_type pos = 0; (pos = processed_fmt.find("{us}", pos)) != std::string::npos; pos += 3)
+        processed_fmt.replace(pos, 4, us_str);
+
+    char buf[1024];
+    if (std::strftime(buf, sizeof(buf), processed_fmt.c_str(), &_tmval) == 0)
+        return std::string{};
+
+    return std::string(buf);
 }
 
 void datetime::update_tm(void)
