@@ -1,0 +1,29 @@
+# Streamlit 配置文件
+# 详细文档见：https://docs.streamlit.io/develop/concepts/configuration/config-file
+
+# ── 主题配置 ──────────────────────────────────────────────────────────────────
+[theme]
+# base: 基础主题，"light" 或 "dark"
+base = "light"
+# primaryColor: 主色调（按钮、滑块、选中状态等）
+primaryColor = "#4B8BFF"
+# backgroundColor: 主内容区背景色
+backgroundColor = "#FFFFFF"
+# secondaryBackgroundColor: 侧边栏/输入框背景色
+secondaryBackgroundColor = "#F0F2F6"
+# textColor: 正文字体颜色
+textColor = "#262730"
+# font: 字体，可选 "sans serif" / "serif" / "monospace"
+font = "sans serif"
+
+# ── 服务器配置 ────────────────────────────────────────────────────────────────
+[server]
+# headless: true 时不自动打开浏览器（CI/部署环境常用）
+headless = true
+# port: 监听端口，默认 8501
+port = 8501
+
+# ── 日志配置 ──────────────────────────────────────────────────────────────────
+[logger]
+# level: 日志级别，可选 "error" / "warning" / "info" / "debug"
+level = "warning"
