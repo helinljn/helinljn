@@ -323,14 +323,14 @@ CORE_API bool is_utf8(std::string_view str);
  * @param gbk_str GBK字符串
  * @return 成功返回UTF-8字符串，失败返回空字符串
  */
-CORE_API std::string gbk_to_utf8(std::string_view gbk_str);
+CORE_API std::string gbk_to_utf8(const std::string& gbk_str);
 
 /**
  * @brief UTF-8转GBK
  * @param utf8_str UTF-8字符串
  * @return 成功返回GBK字符串，失败返回空字符串
  */
-CORE_API std::string utf8_to_gbk(std::string_view utf8_str);
+CORE_API std::string utf8_to_gbk(const std::string& utf8_str);
 
 /**
  * @brief 随机uint32_t整数，生成[0, UINT32_MAX]之间的uint32_t
@@ -372,14 +372,14 @@ CORE_API int32_t random_range(int32_t upper_bound);
  * @param name 环境变量名称
  * @return 存在返回true，不存在返回false
  */
-CORE_API bool env_has(std::string_view name);
+CORE_API bool env_has(const std::string& name);
 
 /**
  * @brief 获取指定环境变量的值
  * @param name 环境变量名称
  * @return 环境变量的值，如果不存在返回空字符串
  */
-CORE_API std::string env_get(std::string_view name);
+CORE_API std::string env_get(const std::string& name);
 
 /**
  * @brief 设置指定环境变量的值
@@ -387,7 +387,7 @@ CORE_API std::string env_get(std::string_view name);
  * @param value 环境变量的值
  * @return 设置成功返回true，失败返回false
  */
-CORE_API bool env_set(std::string_view name, std::string_view value);
+CORE_API bool env_set(const std::string& name, const std::string& value);
 
 /**
  * @brief 获取当前执行文件的绝对路径(【包含】执行文件名)

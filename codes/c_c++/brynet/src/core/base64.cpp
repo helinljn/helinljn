@@ -49,7 +49,7 @@ static const unsigned char g_base64_decode_table[256] = {
     64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
 };
 
-static inline bool is_base64_character_internal(char c)
+static inline bool is_base64_character_internal(unsigned char c)
 {
     return (std::isalnum(c) || ('+' == c) || ('/' == c));
 }
@@ -117,23 +117,22 @@ std::string base64_decode(std::string_view data)
     // 预分配足够的空间，避免多次内存重新分配
     ret.reserve(data.size() * 3 / 4);
 
-    const char* bytes_to_decode = data.data();
-    size_t      datalen         = data.size();
-    int i   = 0;
-    int j   = 0;
-    int in_ = 0;
+    const unsigned char* bytes_to_decode = reinterpret_cast<const unsigned char*>(data.data());
+    size_t               datalen         = data.size();
+    size_t in_ = 0;
+    int    i   = 0;
+    int    j   = 0;
     unsigned char char_array_3[3];
     unsigned char char_array_4[4];
 
-    while (datalen-- && (bytes_to_decode[in_] != '=') && base64::is_base64_character_internal(bytes_to_decode[in_]))
+    while (in_ < datalen && (bytes_to_decode[in_] != '=') && base64::is_base64_character_internal(bytes_to_decode[in_]))
     {
-        char_array_4[i++] = bytes_to_decode[in_];
-        in_++;
+        char_array_4[i++] = bytes_to_decode[in_++];
 
         if (i == 4)
         {
             for (i = 0; i < 4; i++)
-                char_array_4[i] = base64::g_base64_decode_table[static_cast<unsigned char>(char_array_4[i])];
+                char_array_4[i] = base64::g_base64_decode_table[char_array_4[i]];
 
             char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
             char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
@@ -151,7 +150,7 @@ std::string base64_decode(std::string_view data)
             char_array_4[j] = 0;
 
         for (j = 0; j < 4; j++)
-            char_array_4[j] = base64::g_base64_decode_table[static_cast<unsigned char>(char_array_4[j])];
+            char_array_4[j] = base64::g_base64_decode_table[char_array_4[j]];
 
         char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
         char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
