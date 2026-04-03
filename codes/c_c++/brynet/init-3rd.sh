@@ -5,6 +5,7 @@ FMT_INIT_DIR=$ROOT_INIT_DIR/3rd/fmt
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
 SIMPLEINI_INIT_DIR=$ROOT_INIT_DIR/3rd/simpleini
+JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
 BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
 LIGHTHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/LightHook
 DISTORM_INIT_DIR=$ROOT_INIT_DIR/3rd/distorm
@@ -66,7 +67,19 @@ else
     git checkout v4.25
 fi
 
-
+echo ------------------
+echo -- jsoncpp
+cd $ROOT_INIT_DIR
+if [ ! -d $JSONCPP_INIT_DIR ]; then
+    git clone -b 1.9.7 https://github.com/open-source-parsers/jsoncpp.git $JSONCPP_INIT_DIR
+else
+    cd $JSONCPP_INIT_DIR
+    git remote set-url origin https://github.com/open-source-parsers/jsoncpp.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout 1.9.7
+fi
 
 echo ------------------
 echo -- brynet

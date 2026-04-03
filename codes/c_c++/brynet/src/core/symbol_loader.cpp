@@ -63,13 +63,21 @@ void symbol_loader::unload(void)
 
 void* symbol_loader::get_symbol(std::string_view sname)
 {
-    if (!_handle)
+    if (!_handle || sname.empty())
         return nullptr;
 
 #if defined(CORE_PLATFORM_WINDOWS)
     return GetProcAddress(reinterpret_cast<HMODULE>(_handle), sname.data());
 #elif defined(CORE_PLATFORM_LINUX)
-    return dlsym(_handle, sname.data());
+    // 清除上一次调用 dlerror() 时的错误信息
+    dlerror();
+
+    // dlsym 返回值为 nullptr 时并不总表示失败，需通过 dlerror 判断
+    void*       symbol_addr = dlsym(_handle, sname.data());
+    const char* error_msg   = dlerror();
+    if (error_msg != nullptr)
+        return nullptr;
+    return symbol_addr;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 

@@ -5,6 +5,7 @@ set FMT_INIT_DIR=%ROOT_INIT_DIR%/3rd/fmt
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
 set SIMPLEINI_INIT_DIR=%ROOT_INIT_DIR%/3rd/simpleini
+set JSONCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/jsoncpp
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
 set LIGHTHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/LightHook
 set DISTORM_INIT_DIR=%ROOT_INIT_DIR%/3rd/distorm
@@ -64,6 +65,20 @@ if not exist %SIMPLEINI_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout v4.25
+)
+
+echo ------------------
+echo -- jsoncpp
+cd %ROOT_INIT_DIR%
+if not exist %JSONCPP_INIT_DIR% (
+    git clone -b 1.9.7 https://github.com/open-source-parsers/jsoncpp.git %JSONCPP_INIT_DIR%
+) else (
+    cd %JSONCPP_INIT_DIR%
+    git remote set-url origin https://github.com/open-source-parsers/jsoncpp.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout 1.9.7
 )
 
 echo ------------------
