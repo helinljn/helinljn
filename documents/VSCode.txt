@@ -80,6 +80,7 @@
     "security.workspace.trust.banner": "never",
     "security.workspace.trust.startupPrompt": "never",
 
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "terminal.integrated.fontFamily": "Consolas",
     "terminal.integrated.fontSize": 16,
 

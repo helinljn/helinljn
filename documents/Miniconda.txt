@@ -24,6 +24,20 @@ timeout = 120
 # 临时更换pip源
 pip install <包名> -i https://mirrors.aliyun.com/pypi/simple/
 
+# 环境变量
+    Windows:
+        用户变量Path中添加：
+        C:\ProgramData\miniconda3\Scripts
+
+    Linux:
+        vi ~/.bashrc
+
+        # conda
+        export PATH=miniconda_dir/Scripts:$PATH
+
+    然后打开终端(cmd & shell)执行：conda init
+    后续就可以用：conda activate xxx
+
 # Conda常用命令(如果更改base环境的话，则需要管理员权限)
     创建指定python版本的环境
     conda create -n py311 python=3.11.15
