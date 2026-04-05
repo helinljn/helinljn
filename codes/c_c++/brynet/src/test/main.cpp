@@ -51,7 +51,7 @@ static void signal_handler(int signo)
             default:       sigstr = "UNKNOWN";  break;
         }
 
-        const std::string timestr    = core::datetime().format("%Y-%m-%d %H:%M:%S.{ms}{us}");
+        const std::string timestr    = core::datetime().format("%Y-%m-%d %H:%M:%S.{ms}");
         const std::string exepath    = core::get_exepath();
         const std::string stacktrace = core::current_stacktrace(true);
 
@@ -59,9 +59,11 @@ static void signal_handler(int signo)
                            "Signal: {}\n"
                            "Time  : {}\n"
                            "Path  : {}\n"
+                           "Pid   : {}\n"
+                           "Tid   : {}\n"
                            "{}"
                            "******************************** Crash dump  end  ********************************\n",
-                           sigstr, timestr, exepath, stacktrace);
+                           sigstr, timestr, exepath, core::get_process_id(), core::get_thread_id(), stacktrace);
     };
 
     const std::string dump_info = format_dump_info(signo);
