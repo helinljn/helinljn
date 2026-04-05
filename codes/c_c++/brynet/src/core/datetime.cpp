@@ -1,7 +1,8 @@
 #include "datetime.h"
-#include <stdexcept>
-#include <cstdio>
 #include <ctime>
+#include <cstdio>
+#include <cstring>
+#include <stdexcept>
 
 namespace core {
 
@@ -93,14 +94,17 @@ std::string datetime::format(std::string_view fmt) const
 
     std::string processed_fmt(fmt);
 
-    char ms_str[8], us_str[8];
+    char ms_str[12], us_str[12];
     std::snprintf(ms_str, sizeof(ms_str), "%03d", millisecond());
     std::snprintf(us_str, sizeof(us_str), "%03d", microsecond());
 
-    for (std::string::size_type pos = 0; (pos = processed_fmt.find("{ms}", pos)) != std::string::npos; pos += 3)
+    const auto ms_len = std::strlen(ms_str);
+    const auto us_len = std::strlen(us_str);
+
+    for (std::string::size_type pos = 0; (pos = processed_fmt.find("{ms}", pos)) != std::string::npos; pos += ms_len)
         processed_fmt.replace(pos, 4, ms_str);
 
-    for (std::string::size_type pos = 0; (pos = processed_fmt.find("{us}", pos)) != std::string::npos; pos += 3)
+    for (std::string::size_type pos = 0; (pos = processed_fmt.find("{us}", pos)) != std::string::npos; pos += us_len)
         processed_fmt.replace(pos, 4, us_str);
 
     char buf[1024];
