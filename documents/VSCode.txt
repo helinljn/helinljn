@@ -37,6 +37,8 @@
             终端输出限制：500
 
     8. TRAE AI
+        @Builder
+        DeepSeek-V3.1
 
 【下载地址】
     https://update.code.visualstudio.com/1.110.1/win32-x64/stable
