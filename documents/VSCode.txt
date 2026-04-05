@@ -12,6 +12,29 @@
     6. Markdown All in One
 
     7. Cline Chinese
+        1. 自动批准：读取，编辑，安全命令
+        2. API配置：
+            API提供商：OpenAI Compatible
+            基础URL：  https://api.clawsocket.com/v1
+            API密钥：  xxxxxx
+            模型ID：   claude-sonnet-4-6
+            模型配置：
+                上下文窗口大小：512000
+            关闭所有设置和配置
+        3. 功能
+            OpenAI推理强度(中)
+            启用严格计划模式(开启)
+            启用关注链(开启)
+            启用原生工具调用(开启)
+            其余全部保持关闭
+        4. 浏览器
+            全部保持关闭
+        5. 终端
+            默认终端配置文件：Default
+            终端集成超时：5秒
+            启用激进的终端复用(开启)
+            终端执行模式：VS Code终端
+            终端输出限制：500
 
     8. TRAE AI
 
