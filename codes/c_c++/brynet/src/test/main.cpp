@@ -51,11 +51,7 @@ static void signal_handler(int signo)
             default:       sigstr = "UNKNOWN";  break;
         }
 
-        const core::datetime dt;
-        const std::string    timestr = fmt::format("{:04d}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}.{:03d}",
-                                                    dt.year(), dt.month(), dt.day(),
-                                                    dt.hour(), dt.minute(), dt.second(), dt.millisecond());
-
+        const std::string timestr    = core::datetime().format("%Y-%m-%d %H:%M:%S.{ms}{us}");
         const std::string exepath    = core::get_exepath();
         const std::string stacktrace = core::current_stacktrace(true);
 
