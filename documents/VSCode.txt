@@ -35,6 +35,16 @@
             启用激进的终端复用(开启)
             终端执行模式：VS Code终端
             终端输出限制：500
+        6. 解决 Cline 终端集成问题
+            a. 使用 PowerShell 7
+                从 Microsoft Store 安装
+                进入 Cline 设置
+                左键单击 “终端设置” 选项卡
+                导航到 “默认终端配置文件” 并从下拉菜单中选择 “PowerShell 7”
+            b. 禁用 Windows ConPTY
+                导航到您的 VSCode 设置
+                在设置搜索栏中输入 “Integrated: Windows Enable Conpty”
+                取消选中该选项
 
     8. TRAE AI
         @Builder
@@ -106,6 +116,7 @@
     "security.workspace.trust.startupPrompt": "never",
 
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "terminal.integrated.windowsUseConptyDll": false,
     "terminal.integrated.fontFamily": "Consolas",
     "terminal.integrated.fontSize": 16,
 
