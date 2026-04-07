@@ -1470,56 +1470,91 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
     }
 } // DOCTEST_TEST_SUITE("spdlog — Backtrace")
 
-// DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
-// {
-//      * 测试目的：验证异步 logger 与线程池的基本工作流程
-//      * 使用的 API：spdlog::init_thread_pool(queue_size, thread_count)
-//      *             spdlog::create_async<Sink>(name, ...)
-//      *             spdlog::async_overflow_policy::block / overrun_oldest
-//      * 预期行为：异步 logger 将日志消息排队到线程池，由后台线程写入 sink
-//      * 注意事项：
-//      *   1. 必须先调用 spdlog::init_thread_pool() 或手动创建 thread_pool
-//      *   2. 异步 logger 析构时会等待队列清空（block 模式下）
-//      *   3. 测试结束前须 flush 或等待 logger 析构，确保所有消息已写入
-//      *   4. 此功能需要链接 spdlog（非 header_only 模式）或在 header_only 时
-//      *      确保 spdlog.cpp 被包含
-//      */
-//     DOCTEST_TEST_CASE("async_logger — 基本异步写入")
-//     {
-//         test_helpers::cleanup_loggers();
-//         constexpr size_t queue_size    = 128;
-//         constexpr size_t thread_count  = 1;
-//         // 初始化线程池
-//         spdlog::init_thread_pool(queue_size, thread_count);
-//         {
-//             std::ostringstream oss;
-//             auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
-//             sink->set_pattern("%v");
-//             // 创建异步 logger（block 模式：队列满时阻塞）
-//             auto async_logger = std::make_shared<spdlog::async_logger>(
-//                 "async_l", sink,
-//                 spdlog::thread_pool(),
-//                 spdlog::async_overflow_policy::block);
-//             async_logger->set_level(spdlog::level::trace);
-//             for (int i = 0; i < 10; ++i)
-//             {
-//                 async_logger->info("async msg {}", i);
-//             }
-//             // flush + 等待所有消息处理完毕
-//             async_logger->flush();
-//             // 因异步写入，须短暂等待后台线程处理完队列
-//             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//             async_logger->flush();
-//             const std::string out = oss.str();
-//             DOCTEST_CHECK(out.find("async msg 0") != std::string::npos);
-//             DOCTEST_CHECK(out.find("async msg 9") != std::string::npos);
-//             // 显式重置 async_logger，确保在 drop_all 之前完成所有异步操作
-//             async_logger.reset();
-//         }
-//         spdlog::drop_all();
-//         test_helpers::cleanup_loggers();
-//     }
-// } // DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
+/**
+ * 【修复说明】原测试因以下竞态条件在 Linux 上偶发崩溃（use-after-free）：
+ *
+ * 崩溃根本原因：
+ *   async_logger::flush_() 是【非阻塞】的——它只是把 flush 请求投入 MPMC 队列后
+ *   立即返回，并不等待后台工作线程真正处理完该请求。
+ *
+ *   旧代码的对象依赖链：
+ *     async_msg（队列中）→ worker_ptr（shared_ptr<async_logger>）
+ *                       → sinks_（shared_ptr<ostream_sink>）
+ *                       → 内部持有 ostream& oss（引用！）
+ *
+ *   崩溃时序（系统负载高时 100ms 内后台线程未处理完所有消息）：
+ *     1. 主线程发送 10 条 log + 2 条 flush 消息入队（均异步）
+ *     2. 主线程 sleep_for(100ms)——heuristic，不可靠
+ *     3. 主线程执行 async_logger.reset() + 内层 {} 结束
+ *     4. oss（局部变量）在此处析构 ←─ 后台线程还在写！
+ *     5. 后台线程处理队列消息 → sink->log() → 写已析构的 oss → 崩溃
+ *
+ * 正确修复：使用【局部 thread_pool】，在读取 oss 之前先让 tp 析构。
+ *   thread_pool 析构函数：
+ *     (a) 向队列投入 N 个 terminate 消息（FIFO，排在所有 log 之后）
+ *     (b) join 所有工作线程
+ *   join 返回时，所有 log/flush 消息已被后台线程处理完毕，oss 内容已确定，
+ *   可安全读取，不存在任何竞态。
+ */
+DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
+{
+    /**
+     * 测试目的：验证异步 logger 与线程池的基本工作流程
+     * 使用的 API：spdlog::details::thread_pool（局部实例）
+     *             spdlog::async_logger（block 溢出策略）
+     * 预期行为：异步 logger 将日志消息排队到线程池，由后台线程写入 sink；
+     *           thread_pool 析构时 join 工作线程，确保所有消息处理完毕
+     * 注意事项：
+     *   1. 使用局部 thread_pool 而非全局 spdlog::init_thread_pool()，
+     *      以便精确控制其生命周期，避免与其他测试的全局状态相互干扰
+     *   2. 关键：tp 必须在读取 oss 之前析构（join 工作线程），
+     *      否则后台线程可能仍在写 oss，导致 use-after-free
+     *   3. async_logger::flush_() 是非阻塞的（只投队列不等待），
+     *      不能依赖 flush() + sleep 来保证消息已处理完毕
+     */
+    DOCTEST_TEST_CASE("async_logger — 基本异步写入")
+    {
+        test_helpers::cleanup_loggers();
+        constexpr size_t queue_size   = 128;
+        constexpr size_t thread_count = 1;
+
+        // oss 声明在最外层，生命周期覆盖所有异步操作
+        std::ostringstream oss;
+        auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
+        sink->set_pattern("%v");
+
+        {
+            // 局部 thread_pool：其析构函数会 join 工作线程，
+            // 确保所有排队消息处理完后才返回
+            auto tp = std::make_shared<spdlog::details::thread_pool>(queue_size, thread_count);
+            {
+                // 创建异步 logger（block 模式：队列满时阻塞生产者）
+                auto async_logger = std::make_shared<spdlog::async_logger>(
+                    "async_l", sink, tp, spdlog::async_overflow_policy::block);
+                async_logger->set_level(spdlog::level::trace);
+
+                for (int i = 0; i < 10; ++i)
+                {
+                    async_logger->info("async msg {}", i);
+                }
+                // async_logger 在此处离开作用域：
+                //   shared_ptr 引用计数 -1；但队列中的 async_msg::worker_ptr
+                //   仍持有 shared_ptr<async_logger>，对象尚未析构
+            }
+            // tp 在此处离开作用域 → thread_pool 析构：
+            //   (a) 投入 thread_count 个 terminate 消息（FIFO，在所有 log 消息之后）
+            //   (b) join 所有工作线程
+            // join 返回时，队列已空，所有 log 消息均已写入 oss
+        }
+
+        // 所有异步写入已完成，可安全读取 oss
+        const std::string out = oss.str();
+        DOCTEST_CHECK(out.find("async msg 0") != std::string::npos);
+        DOCTEST_CHECK(out.find("async msg 9") != std::string::npos);
+
+        test_helpers::cleanup_loggers();
+    }
+} // DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
 
 /**
  * 自定义 sink：收集所有日志消息到 vector 中，供测试断言使用
