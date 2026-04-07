@@ -76,6 +76,6 @@ pip install <包名> -i https://mirrors.aliyun.com/pypi/simple/
     conda env create -f environment.yml
 
     根据yml文件更新环境
-    conda env upate -f environment.yml
+    conda env update -f environment.yml
 
 如果遇到：raise ValueError("check_hostname requires server_hostname")报错，需要关闭翻墙代理
