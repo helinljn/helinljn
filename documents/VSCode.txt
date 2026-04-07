@@ -41,11 +41,11 @@
         DeepSeek-V3.1
 
 【下载地址】
-    https://update.code.visualstudio.com/1.110.1/win32-x64/stable
+    https://update.code.visualstudio.com/1.111.0/win32-x64/stable
 
 【常用设置】
 {
-    // VSCode version: VSCodeSetup-x64-1.110.1
+    // VSCode version: VSCodeSetup-x64-1.111.0
     "workbench.colorTheme": "One Dark Pro",
     "workbench.startupEditor": "none",
 
