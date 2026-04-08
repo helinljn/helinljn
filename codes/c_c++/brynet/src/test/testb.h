@@ -1,5 +1,7 @@
-#ifndef __TESTB_H__
-#define __TESTB_H__
+#pragma once
+
+#ifndef TESTB_H
+#define TESTB_H
 
 #include <string>
 
@@ -25,4 +27,4 @@ public:
     static std::string func3(const std::string& val);
 };
 
-#endif // __TESTB_H__
+#endif // TESTB_H

@@ -1,5 +1,7 @@
-#ifndef __SYMBOL_LOADER_H__
-#define __SYMBOL_LOADER_H__
+#pragma once
+
+#ifndef SYMBOL_LOADER_H
+#define SYMBOL_LOADER_H
 
 #include "core_port.h"
 #include <string_view>
@@ -80,4 +82,4 @@ private:
 
 } // namespace core
 
-#endif // __SYMBOL_LOADER_H__
+#endif // SYMBOL_LOADER_H

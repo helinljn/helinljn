@@ -28,11 +28,18 @@ bool symbol_loader::load(std::string_view path)
         unload();
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    // Windows不支持空路径
+    // 如果路径为空，加载当前可执行文件
     if (path.empty())
-        return false;
-
-    _handle = reinterpret_cast<HMODULE>(LoadLibrary(path.data()));
+    {
+        char exe_path[MAX_PATH];
+        if (DWORD length = GetModuleFileName(nullptr, exe_path, MAX_PATH); length == 0 || length >= MAX_PATH)
+            return false;
+        _handle = reinterpret_cast<HMODULE>(LoadLibrary(exe_path));
+    }
+    else
+    {
+        _handle = reinterpret_cast<HMODULE>(LoadLibrary(path.data()));
+    }
     return _handle != nullptr;
 #elif defined(CORE_PLATFORM_LINUX)
     // RTLD_LAZY:   延迟绑定

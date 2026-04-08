@@ -1,5 +1,7 @@
-#ifndef __TIMESTAMP_H__
-#define __TIMESTAMP_H__
+#pragma once
+
+#ifndef TIMESTAMP_H
+#define TIMESTAMP_H
 
 #include "timespan.h"
 
@@ -87,4 +89,4 @@ private:
 
 } // namespace core
 
-#endif // __TIMESTAMP_H__
+#endif // TIMESTAMP_H

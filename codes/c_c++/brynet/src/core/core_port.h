@@ -1,5 +1,7 @@
-#ifndef __CORE_PORT_H__
-#define __CORE_PORT_H__
+#pragma once
+
+#ifndef CORE_PORT_H
+#define CORE_PORT_H
 
 #if (defined(_MSC_VER) && !defined(__INTEL_COMPILER)) || defined(_WIN32) || defined(_WIN64)
     #if !defined(CORE_PLATFORM_WINDOWS)
@@ -29,4 +31,4 @@
 
 #include <cstdint>
 
-#endif // __CORE_PORT_H__
+#endif // CORE_PORT_H

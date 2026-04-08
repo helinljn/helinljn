@@ -1,5 +1,7 @@
-#ifndef __MD5_H__
-#define __MD5_H__
+#pragma once
+
+#ifndef MD5_H
+#define MD5_H
 
 #include "core_port.h"
 #include <string>
@@ -25,4 +27,4 @@ CORE_API std::string md5_file(std::string_view filename, bool uppercase = true);
 
 } // namespace core
 
-#endif // __MD5_H__
+#endif // MD5_H

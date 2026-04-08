@@ -1,5 +1,7 @@
-#ifndef __TIMESPAN_H__
-#define __TIMESPAN_H__
+#pragma once
+
+#ifndef TIMESPAN_H
+#define TIMESPAN_H
 
 #include <chrono>
 
@@ -134,4 +136,4 @@ private:
 
 } // namespace core
 
-#endif // __TIMESPAN_H__
+#endif // TIMESPAN_H

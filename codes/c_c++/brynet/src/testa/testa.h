@@ -1,5 +1,7 @@
-#ifndef __TESTA_H__
-#define __TESTA_H__
+#pragma once
+
+#ifndef TESTA_H
+#define TESTA_H
 
 #include "core/core_port.h"
 #include <string>
@@ -40,4 +42,4 @@ public:
     static std::string func3(const std::string& val);
 };
 
-#endif // __TESTA_H__
+#endif // TESTA_H

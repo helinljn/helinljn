@@ -1,5 +1,7 @@
-#ifndef __AES_H__
-#define __AES_H__
+#pragma once
+
+#ifndef AES_H
+#define AES_H
 
 #include "core_port.h"
 
@@ -43,4 +45,4 @@ CORE_API void aes256_decrypt(const uint8_t key[32], const uint8_t cipher_text[16
 
 } // namespace core
 
-#endif // __AES_H__
+#endif // AES_H

@@ -1,5 +1,7 @@
-#ifndef __COMMON_H__
-#define __COMMON_H__
+#pragma once
+
+#ifndef COMMON_H
+#define COMMON_H
 
 #include "core_port.h"
 #include <vector>
@@ -424,4 +426,4 @@ CORE_API std::string current_stacktrace(bool with_snippets, size_t skip = 1, siz
 
 } // namespace core
 
-#endif // __COMMON_H__
+#endif // COMMON_H

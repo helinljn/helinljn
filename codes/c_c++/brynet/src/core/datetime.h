@@ -1,5 +1,7 @@
-#ifndef __DATETIME_H__
-#define __DATETIME_H__
+#pragma once
+
+#ifndef DATETIME_H
+#define DATETIME_H
 
 #include "core_port.h"
 #include "timestamp.h"
@@ -186,4 +188,4 @@ private:
 
 } // namespace core
 
-#endif // __DATETIME_H__
+#endif // DATETIME_H

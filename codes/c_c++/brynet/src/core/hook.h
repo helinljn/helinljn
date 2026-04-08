@@ -1,5 +1,7 @@
-#ifndef __HOOK_H__
-#define __HOOK_H__
+#pragma once
+
+#ifndef HOOK_H
+#define HOOK_H
 
 #include "core_port.h"
 
@@ -27,4 +29,4 @@
     #pragma GCC diagnostic pop
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
-#endif // __HOOK_H__
+#endif // HOOK_H

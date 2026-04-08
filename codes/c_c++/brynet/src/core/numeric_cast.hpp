@@ -1,5 +1,7 @@
-#ifndef __NUMERIC_CAST_HPP__
-#define __NUMERIC_CAST_HPP__
+#pragma once
+
+#ifndef NUMERIC_CAST_HPP
+#define NUMERIC_CAST_HPP
 
 #include "core_port.h"
 #include <string>
@@ -106,4 +108,4 @@ std::string to_string(const From from)
 
 } // namespace core
 
-#endif // __NUMERIC_CAST_HPP__
+#endif // NUMERIC_CAST_HPP

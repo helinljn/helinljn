@@ -1,5 +1,7 @@
-#ifndef __BRYNET_H__
-#define __BRYNET_H__
+#pragma once
+
+#ifndef BRYNET_H
+#define BRYNET_H
 
 #include "core_port.h"
 
@@ -34,4 +36,4 @@
     #pragma GCC diagnostic pop
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
-#endif // __BRYNET_H__
+#endif // BRYNET_H
