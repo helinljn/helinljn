@@ -14,7 +14,8 @@
     ],
 
     "search.exclude": {
-        "**/3rd": true
+        "**/aaa": true,
+        "**/bbb": true
     },
 
     "files.exclude": {
