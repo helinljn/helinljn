@@ -46,7 +46,11 @@
                 在设置搜索栏中输入 “Integrated: Windows Enable Conpty”
                 取消选中该选项
 
-    8. TRAE AI
+    8. Tencent Cloud CodeBuddy
+        Craft
+        GLM-5.1
+
+    9. TRAE AI
         @Builder
         DeepSeek-V3.1
 
@@ -134,6 +138,15 @@
     "C_Cpp.intelliSenseUpdateDelay": 500,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
+
+    "codingcopilot.autoRun": false,
+    "codingcopilot.taskList": true,
+    "codingcopilot.enableAutoCompletions": true,
+    "codingcopilot.enableNextEditSuggestions": true,
+    "codingcopilot.enableInlineChat": true,
+    "codingcopilot.standaloneTerminal": true,
+    "codingcopilot.generationPreference": "intelligentMode",
+    "codingcopilot.commitMessageLanguage": "zh_CN",
 }
 
 【键盘设置】
