@@ -7,23 +7,27 @@
  * ✓ logger->log(source_loc, level, msg) 重载
  * ✓ logger->log(level, const T& msg) 无格式字符串重载
  * ✓ SPDLOG_LOGGER_CALL 宏
- * ✓ 日志级别 level 枚举（trace/debug/info/warn/err/critical/off）
+ * ✓ 日志级别 level 枚举（trace/debug/info/warn/err/critical/off/n_levels）
  * ✓ logger->set_level() / logger->level() / logger->should_log()
  * ✓ spdlog::set_level() / spdlog::get_level() / spdlog::should_log()
  * ✓ spdlog::level::to_string_view() / level::from_str()
  * ✓ logger->set_pattern() / spdlog::set_pattern() / sink->set_pattern()
  * ✓ logger->set_formatter() / spdlog::pattern_formatter
+ * ✓ pattern_formatter 自定义 flag（custom_flag_formatter + add_flag）
  * ✓ ostream_sink_mt / ostream_sink_st
  * ✓ null_sink_mt / null_sink_st
  * ✓ basic_file_sink_mt（truncate + append 模式）
- * ✓ rotating_file_sink_mt（文件大小轮转）
- * ✓ daily_file_sink_mt（每日轮转）
+ * ✓ rotating_file_sink_mt（文件大小轮转 + 内容验证）
+ * ✓ daily_file_sink_mt（每日轮转 + 内容验证）
+ * ✓ hourly_file_sink_mt（每小时轮转）
  * ✓ dist_sink_mt（add_sink / remove_sink / 分发日志）
- * ✓ ringbuffer_sink_mt（环形缓冲 / last_formatted()）
+ * ✓ dup_filter_sink_mt（去重过滤）
+ * ✓ ringbuffer_sink_mt（环形缓冲 / last_formatted() / last_raw()）
  * ✓ callback_sink_mt（用户回调 / 级别过滤）
- * ✓ stdout_sink_mt / stderr_sink_mt / stdout_color_sink_mt
+ * ✓ stdout_sink_mt / stderr_sink_mt / stdout_color_sink_mt / stderr_color_sink_mt
  * ✓ logger->flush() / logger->flush_on() / logger->flush_level()
  * ✓ spdlog::flush_on()（全局）
+ * ✓ spdlog::flush_every()（定期 flush — API 存在性验证）
  * ✓ logger->set_error_handler() / spdlog::set_error_handler()
  * ✓ logger->clone() / logger->sinks()（多 sink、动态添加）
  * ✓ logger->enable_backtrace() / disable_backtrace() / dump_backtrace() / should_backtrace()
@@ -34,30 +38,24 @@
  * ✓ spdlog::apply_all()
  * ✓ spdlog::initialize_logger()
  * ✓ spdlog::shutdown()
+ * ✓ spdlog::create<Sink>()（工厂函数）
+ * ✓ spdlog::set_automatic_registration()
+ * ✓ spdlog::apply_logger_env_levels()（API 存在性验证）
  * ✓ 自定义 sink（继承 base_sink<Mutex>，实现 sink_it_ + flush_）
  * ✓ 自定义 formatter（继承 spdlog::formatter，实现 format + clone）
- * ✓ 版本信息宏 SPDLOG_VER_MAJOR / SPDLOG_VER_MINOR / SPDLOG_VER_PATCH
+ * ✓ mdc（Mapped Diagnostic Context — put/get/remove/clear + pattern %@）
+ * ✓ stopwatch（API 存在性验证 + elapsed/elapsed_ms/reset）
+ * ✓ 版本信息宏 SPDLOG_VER_MAJOR / SPDLOG_VER_MINOR / SPDLOG_VER_PATCH / SPDLOG_VERSION
  *
  * 【条件覆盖模块】
- * ⚙ spdlog::create<Sink>()（工厂函数）
- *   - 通过 spdlog::create<basic_file_sink_mt>() 等接口创建 logger
- *   - 与直接 make_shared 等价，测试中优先使用后者以降低复杂度
- * ⚙ spdlog::set_automatic_registration()
- *   - 控制 create() 是否自动注册；行为测试在 register_logger 套件中间接覆盖
- * ⚙ spdlog::apply_logger_env_levels()
- *   - 依赖 SPDLOG_LEVEL 环境变量；在无环境变量的 CI 中难以验证，仅调用不崩溃
  * ⚙ SPDLOG_LOGGER_TRACE/DEBUG/INFO/WARN/ERROR/CRITICAL 宏
  *   - 依赖 SPDLOG_ACTIVE_LEVEL 编译期宏；默认值下 TRACE/DEBUG 被优化掉，略过
  * ⚙ async_logger 通过 spdlog::create_async<Sink>() 工厂创建
  *   - 测试中直接使用 async_logger 构造函数以便控制 thread_pool 引用
- * ⚙ flush_every（定期 flush 线程）
- *   - 基于时间触发，测试环境时序敏感，仅 API 存在性验证，不做内容断言
- * ⚙ hourly_file_sink_mt（每小时轮转文件）
- *   - 接口与 daily_file_sink 完全相同，测试中以 daily_file_sink 代表覆盖
- * ⚙ dup_filter_sink（去重 sink）
- *   - API 存在但未单独测试（行为：相同消息在时间窗口内只输出一次）
  * ⚙ SPDLOG_WCHAR_TO_UTF8_SUPPORT（宽字符支持）
  *   - 仅 Windows 平台有效；条件编译保护，非 Windows 跳过
+ * ⚙ cfg/argv.h / cfg/env.h（环境变量配置）
+ *   - 需修改进程环境变量，测试隔离性差；仅调用 load_env_levels 不崩溃
  *
  * 【未覆盖模块及原因】
  * ✗ android_sink / syslog_sink / systemd_sink / win_eventlog_sink
@@ -68,14 +66,6 @@
  *   - 需要 Qt 框架，非标准 C++ 环境
  * ✗ msvc_sink / wincolor_sink / ansicolor_sink
  *   - 平台/终端专属，行为依赖 Windows 控制台 API 或 ANSI 转义序列
- * ✗ cfg/ 目录（环境变量配置）
- *   - cfg/argv.h / cfg/env.h 等用于从命令行或环境变量配置 spdlog
- *   - 需修改进程环境变量，测试隔离性差，未覆盖
- * ✗ mdc.h（Mapped Diagnostic Context）
- *   - 线程本地 key-value 上下文，spdlog 1.12+ 新增；
- *     API 存在但与 pattern %@ 占位符配合使用，未单独测试
- * ✗ stopwatch.h
- *   - 简单计时工具，非日志核心；API 为 spdlog::stopwatch，非测试重点
  * ============================================================================
  */
 #include "doctest.h"
@@ -85,19 +75,24 @@
 #include "spdlog/version.h"
 #include "spdlog/pattern_formatter.h"
 #include "spdlog/formatter.h"
+#include "spdlog/mdc.h"
+#include "spdlog/stopwatch.h"
 #include "spdlog/sinks/ostream_sink.h"
 #include "spdlog/sinks/null_sink.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/daily_file_sink.h"
+#include "spdlog/sinks/hourly_file_sink.h"
 #include "spdlog/sinks/stdout_sinks.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/dist_sink.h"
+#include "spdlog/sinks/dup_filter_sink.h"
 #include "spdlog/sinks/ringbuffer_sink.h"
 #include "spdlog/sinks/callback_sink.h"
 #include "spdlog/sinks/base_sink.h"
 #include "spdlog/async.h"
 #include "spdlog/async_logger.h"
+#include "spdlog/cfg/env.h"
 #include <sstream>
 #include <fstream>
 #include <memory>
@@ -281,6 +276,7 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
      */
     DOCTEST_TEST_CASE("log 重载 — source_loc")
     {
+        test_helpers::cleanup_loggers();
         auto [logger, oss] = test_helpers::make_oss_logger("src_loc");
         logger->set_level(spdlog::level::trace);
 
@@ -306,25 +302,32 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
             logger->flush();
             DOCTEST_CHECK(oss->str().find("macro call") != std::string::npos);
         }
+
+        test_helpers::cleanup_loggers();
     }
 
     /**
      * 测试目的：验证 log() 接受 T 类型消息（非格式字符串重载）
      * 使用的 API：logger->log(level, const T& msg)
-     * 预期行为：任意可流式输出的对象均可作为消息
+     * 预期行为：任意可输出到 ostream 的对象均可作为消息，无需格式字符串
+     * 注意事项：此重载不走 fmt 格式化路径，直接 operator<< 输出
      */
     DOCTEST_TEST_CASE("log 重载 — 无格式字符串（T 类型消息）")
     {
+        test_helpers::cleanup_loggers();
         auto [logger, oss] = test_helpers::make_oss_logger("t_msg");
         logger->set_level(spdlog::level::trace);
 
-        logger->info("plain string");
-        logger->info(std::string("std::string"));
+        // logger->log(level, T) 重载：T 不是格式字符串
+        logger->log(spdlog::level::info, std::string("std_string_msg"));
+        logger->log(spdlog::level::warn, 42);
         logger->flush();
 
         const std::string out = oss->str();
-        DOCTEST_CHECK(out.find("plain string")  != std::string::npos);
-        DOCTEST_CHECK(out.find("std::string")   != std::string::npos);
+        DOCTEST_CHECK(out.find("std_string_msg") != std::string::npos);
+        DOCTEST_CHECK(out.find("42")             != std::string::npos);
+
+        test_helpers::cleanup_loggers();
     }
 } // DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
 
@@ -511,6 +514,84 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
 
         test_helpers::cleanup_loggers();
     }
+
+    /**
+     * 测试目的：验证 spdlog::create<Sink>() 工厂函数创建 logger
+     * 使用的 API：spdlog::create<spdlog::sinks::basic_file_sink_mt>()
+     * 预期行为：工厂函数创建的 logger 自动注册到 registry
+     */
+    DOCTEST_TEST_CASE("spdlog::create 工厂函数")
+    {
+        test_helpers::cleanup_loggers();
+
+        // 使用 ostream_sink 以便直接验证输出内容
+        auto oss = std::make_shared<std::ostringstream>();
+        auto logger = spdlog::create<spdlog::sinks::ostream_sink_mt>(
+            "factory_l", *oss);
+        DOCTEST_REQUIRE(logger != nullptr);
+        DOCTEST_CHECK_EQ(logger->name(), "factory_l");
+
+        // 工厂创建的 logger 应已在 registry 中
+        auto got = spdlog::get("factory_l");
+        DOCTEST_CHECK(got != nullptr);
+
+        logger->set_level(spdlog::level::trace);
+        logger->set_pattern("%v");
+        logger->info("factory msg");
+        logger->flush();
+
+        // 验证输出内容
+        DOCTEST_CHECK(oss->str().find("factory msg") != std::string::npos);
+
+        test_helpers::cleanup_loggers();
+    }
+
+    /**
+     * 测试目的：验证 set_automatic_registration 控制工厂函数是否自动注册
+     * 使用的 API：spdlog::set_automatic_registration(bool)
+     * 预期行为：设为 false 后 create() 不自动注册到 registry
+     */
+    DOCTEST_TEST_CASE("set_automatic_registration")
+    {
+        test_helpers::cleanup_loggers();
+
+        const auto path = test_helpers::create_temp_file_path("auto_reg");
+
+        // 关闭自动注册
+        spdlog::set_automatic_registration(false);
+
+        auto logger = spdlog::create<spdlog::sinks::basic_file_sink_mt>(
+            "no_auto_reg", path, /*truncate=*/true);
+        DOCTEST_REQUIRE(logger != nullptr);
+
+        // 不应自动注册
+        DOCTEST_CHECK(spdlog::get("no_auto_reg") == nullptr);
+
+        // 恢复自动注册
+        spdlog::set_automatic_registration(true);
+
+        test_helpers::remove_file(path);
+        test_helpers::cleanup_loggers();
+    }
+
+    /**
+     * 测试目的：验证 apply_logger_env_levels API 存在性
+     * 使用的 API：spdlog::apply_logger_env_levels()
+     * 预期行为：调用不崩溃（实际行为依赖 SPDLOG_LEVEL 环境变量）
+     */
+    DOCTEST_TEST_CASE("apply_logger_env_levels — API 存在性验证")
+    {
+        test_helpers::cleanup_loggers();
+
+        auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger = std::make_shared<spdlog::logger>("env_lv", null_sink);
+        spdlog::register_logger(logger);
+
+        // 无 SPDLOG_LEVEL 环境变量时，此调用不应崩溃
+        DOCTEST_CHECK_NOTHROW(spdlog::apply_logger_env_levels(logger));
+
+        test_helpers::cleanup_loggers();
+    }
 } // DOCTEST_TEST_SUITE("spdlog — Registry 管理")
 
 DOCTEST_TEST_SUITE("spdlog — 日志级别")
@@ -534,6 +615,9 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
         DOCTEST_CHECK(spdlog::level::warn     < spdlog::level::err);
         DOCTEST_CHECK(spdlog::level::err      < spdlog::level::critical);
         DOCTEST_CHECK(spdlog::level::critical < spdlog::level::off);
+
+        // n_levels 哨兵值
+        DOCTEST_CHECK(spdlog::level::n_levels == 7);
     }
 
     /**
@@ -800,44 +884,109 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
         DOCTEST_CHECK(oss1.str().find("[SINK1] shared_msg") != std::string::npos);
         DOCTEST_CHECK(oss2.str().find("[SINK2] shared_msg") != std::string::npos);
     }
+
+    /**
+     * 测试目的：验证 pattern_formatter::add_flag 注册自定义占位符
+     * 使用的 API：spdlog::custom_flag_formatter, pattern_formatter::add_flag<T>()
+     * 预期行为：自定义占位符在 pattern 中被正确解析和格式化
+     */
+    DOCTEST_TEST_CASE("custom_flag_formatter — 自定义 pattern 占位符")
+    {
+        // 自定义 flag formatter：输出固定标记 "[TAG]"
+        class tag_formatter : public spdlog::custom_flag_formatter {
+        public:
+            void format(const spdlog::details::log_msg&,
+                        const std::tm&,
+                        spdlog::memory_buf_t& dest) override {
+                const char* tag = "[TAG]";
+                dest.append(tag, tag + 5);
+            }
+            std::unique_ptr<custom_flag_formatter> clone() const override {
+                return std::make_unique<tag_formatter>();
+            }
+        };
+
+        std::ostringstream oss;
+        auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
+
+        // 注册自定义占位符 '*' → tag_formatter
+        auto formatter = std::make_unique<spdlog::pattern_formatter>();
+        formatter->add_flag<tag_formatter>('*');
+        formatter->set_pattern("[%*] %v");
+
+        sink->set_formatter(std::move(formatter));
+
+        auto logger = std::make_shared<spdlog::logger>("custom_flag_l", sink);
+        logger->info("custom flag msg");
+        logger->flush();
+
+        DOCTEST_CHECK(oss.str().find("[[TAG]] custom flag msg") != std::string::npos);
+    }
 } // DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
 
 DOCTEST_TEST_SUITE("spdlog — Sinks")
 {
     /**
-     * 测试目的：验证 ostream_sink 将日志写入 std::ostream
-     * 使用的 API：spdlog::sinks::ostream_sink_mt / ostream_sink_st
+     * 测试目的：验证 ostream_sink_mt 将日志写入 std::ostream
+     * 使用的 API：spdlog::sinks::ostream_sink_mt
      * 预期行为：日志写入提供的 ostream 对象
-     * 注意事项：_mt 线程安全，_st 单线程，接口相同
      */
-    DOCTEST_TEST_CASE("ostream_sink — 写入到 ostringstream")
+    DOCTEST_TEST_CASE("ostream_sink_mt — 写入到 ostringstream")
     {
         std::ostringstream oss;
         auto sink   = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
-        auto logger = std::make_shared<spdlog::logger>("oss_sink", sink);
+        auto logger = std::make_shared<spdlog::logger>("oss_sink_mt", sink);
         logger->set_pattern("%v");
 
-        logger->info("hello ostream");
+        logger->info("hello ostream mt");
         logger->flush();
 
-        // 验证消息内容存在，不严格比较末尾空白（不同版本可能有差异）
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("hello ostream") != std::string::npos);
+        DOCTEST_CHECK(out.find("hello ostream mt") != std::string::npos);
         DOCTEST_CHECK(out.find('\n') != std::string::npos);
     }
 
     /**
+     * 测试目的：验证 ostream_sink_st（单线程版本）同样正常工作
+     * 使用的 API：spdlog::sinks::ostream_sink_st
+     * 预期行为：功能与 _mt 版本相同，接口一致
+     */
+    DOCTEST_TEST_CASE("ostream_sink_st — 单线程版本")
+    {
+        std::ostringstream oss;
+        auto sink   = std::make_shared<spdlog::sinks::ostream_sink_st>(oss);
+        auto logger = std::make_shared<spdlog::logger>("oss_sink_st", sink);
+        logger->set_pattern("%v");
+
+        logger->info("hello ostream st");
+        logger->flush();
+
+        const std::string out = oss.str();
+        DOCTEST_CHECK(out.find("hello ostream st") != std::string::npos);
+    }
+
+    /**
      * 测试目的：验证 null_sink 丢弃所有日志，不产生 I/O
-     * 使用的 API：spdlog::sinks::null_sink_mt
+     * 使用的 API：spdlog::sinks::null_sink_mt / null_sink_st
      * 预期行为：不崩溃，无输出（不可直接验证，但保证函数调用正常）
      */
     DOCTEST_TEST_CASE("null_sink — 丢弃所有日志")
     {
-        auto sink   = std::make_shared<spdlog::sinks::null_sink_mt>();
-        auto logger = std::make_shared<spdlog::logger>("null_s", sink);
+        DOCTEST_SUBCASE("null_sink_mt")
+        {
+            auto sink   = std::make_shared<spdlog::sinks::null_sink_mt>();
+            auto logger = std::make_shared<spdlog::logger>("null_s_mt", sink);
+            DOCTEST_CHECK_NOTHROW(logger->info("gone mt"));
+            DOCTEST_CHECK_NOTHROW(logger->flush());
+        }
 
-        DOCTEST_CHECK_NOTHROW(logger->info("gone"));
-        DOCTEST_CHECK_NOTHROW(logger->flush());
+        DOCTEST_SUBCASE("null_sink_st")
+        {
+            auto sink   = std::make_shared<spdlog::sinks::null_sink_st>();
+            auto logger = std::make_shared<spdlog::logger>("null_s_st", sink);
+            DOCTEST_CHECK_NOTHROW(logger->info("gone st"));
+            DOCTEST_CHECK_NOTHROW(logger->flush());
+        }
     }
 
     /**
@@ -899,7 +1048,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
     /**
      * 测试目的：验证 rotating_file_sink 按文件大小轮转
      * 使用的 API：spdlog::sinks::rotating_file_sink_mt(filename, max_size, max_files)
-     * 预期行为：主文件始终存在；当内容超出 max_size 时创建备份文件
+     * 预期行为：主文件始终存在且包含最新日志；当内容超出 max_size 时创建备份文件
      * 注意事项：max_size 单位字节，max_files 为最大备份文件数
      */
     DOCTEST_TEST_CASE("rotating_file_sink — 文件大小轮转")
@@ -921,33 +1070,46 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
             logger->flush();
         }
 
-        // 主文件必须存在
+        // 主文件必须存在且包含内容
         DOCTEST_CHECK(std::filesystem::exists(base_path));
+        {
+            const std::string main_content = test_helpers::read_file(base_path);
+            DOCTEST_CHECK(!main_content.empty());
+            // 主文件应包含至少一条日志
+            DOCTEST_CHECK(main_content.find("message number") != std::string::npos);
+        }
 
-        // 检查备份文件是否存在（文件名为 base_path.1, base_path.2 ...）
+        // 检查是否有至少一个备份文件
+        int backup_count = 0;
         for(size_t i = 1; i <= max_files; ++i)
         {
-            // 由于写入量可能不够触发 max_files 个备份，存在文件或不存在均可接受
-            bool exists = std::filesystem::exists(base_path + "." + std::to_string(i)) ||
-                         !std::filesystem::exists(base_path + "." + std::to_string(i));
-            DOCTEST_CHECK(exists);
+            auto backup_path = spdlog::sinks::rotating_file_sink_mt::calc_filename(base_path, i);
+            if (std::filesystem::exists(backup_path))
+            {
+                ++backup_count;
+                // 备份文件也应包含日志内容
+                const std::string backup_content = test_helpers::read_file(backup_path);
+                DOCTEST_CHECK(!backup_content.empty());
+            }
         }
+        DOCTEST_CHECK(backup_count >= 1);
 
         // 清理文件
         test_helpers::remove_file(base_path);
         for(size_t i = 1; i <= max_files; ++i)
         {
-            test_helpers::remove_file(base_path + "." + std::to_string(i));
+            auto backup_path = spdlog::sinks::rotating_file_sink_mt::calc_filename(base_path, i);
+            test_helpers::remove_file(backup_path);
         }
 
         test_helpers::cleanup_loggers();
     }
 
     /**
-     * 测试目的：验证 daily_file_sink 按日期轮转文件
+     * 测试目的：验证 daily_file_sink 按日期轮转文件，并验证内容写入
      * 使用的 API：spdlog::sinks::daily_file_sink_mt(filename, hour, minute)
-     * 预期行为：文件按日期创建，今日日期文件存在
-     * 注意事项：写入少量日志后立即验证文件存在；时间点固定为午夜
+     * 预期行为：日志写入带有日期后缀的文件，内容可读取
+     * 注意事项：写入少量日志后验证文件存在且内容正确
      */
     DOCTEST_TEST_CASE("daily_file_sink — 每日轮转文件")
     {
@@ -955,30 +1117,88 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         constexpr int rot_hour = 0;
         constexpr int rot_minute = 0;
 
+        std::string daily_file_path;
+
         {
             auto sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(base_path, rot_hour, rot_minute);
             auto logger = std::make_shared<spdlog::logger>("daily_sink", sink);
             logger->set_pattern("%v");
-            logger->info("daily log");
+            logger->info("daily log content");
             logger->flush();
+
+            // daily_file_sink::filename() 返回当前实际文件路径
+            daily_file_path = sink->filename();
         }
 
-        // 目录中应至少存在一个匹配 base_path 前缀的文件（含日期）
-        bool found = false;
+        // 文件应存在
+        DOCTEST_CHECK(std::filesystem::exists(daily_file_path));
+
+        // 验证文件内容
+        const std::string content = test_helpers::read_file(daily_file_path);
+        DOCTEST_CHECK(content.find("daily log content") != std::string::npos);
+
+        test_helpers::remove_file(daily_file_path);
+        // 清理可能残留的其他文件（以防 filename() 路径与扫描路径不同）
         auto dir = std::filesystem::temp_directory_path();
+        auto base_stem = std::filesystem::path(base_path).stem().string();
         for (auto& entry : std::filesystem::directory_iterator(dir))
         {
             if (entry.is_regular_file())
             {
                 const auto& fname = entry.path().filename().string();
-                if (fname.find("daily") != std::string::npos)
+                if (fname.rfind(base_stem, 0) == 0)
                 {
-                    found = true;
                     test_helpers::remove_file(entry.path().string());
                 }
             }
         }
-        DOCTEST_CHECK(found);
+
+        test_helpers::cleanup_loggers();
+    }
+
+    /**
+     * 测试目的：验证 hourly_file_sink 按小时轮转文件
+     * 使用的 API：spdlog::sinks::hourly_file_sink_mt(filename, truncate, max_files)
+     * 预期行为：日志写入带小时后缀的文件，内容可读取
+     */
+    DOCTEST_TEST_CASE("hourly_file_sink — 每小时轮转文件")
+    {
+        const auto base_path = test_helpers::create_temp_file_path("hourly");
+
+        std::string hourly_file_path;
+
+        {
+            auto sink = std::make_shared<spdlog::sinks::hourly_file_sink_mt>(base_path, /*truncate=*/true);
+            auto logger = std::make_shared<spdlog::logger>("hourly_sink", sink);
+            logger->set_pattern("%v");
+            logger->info("hourly log content");
+            logger->flush();
+
+            hourly_file_path = sink->filename();
+        }
+
+        // 文件应存在
+        DOCTEST_CHECK(std::filesystem::exists(hourly_file_path));
+
+        // 验证文件内容
+        const std::string content = test_helpers::read_file(hourly_file_path);
+        DOCTEST_CHECK(content.find("hourly log content") != std::string::npos);
+
+        test_helpers::remove_file(hourly_file_path);
+        // 清理可能残留的文件
+        auto dir = std::filesystem::temp_directory_path();
+        auto base_stem = std::filesystem::path(base_path).stem().string();
+        for (auto& entry : std::filesystem::directory_iterator(dir))
+        {
+            if (entry.is_regular_file())
+            {
+                const auto& fname = entry.path().filename().string();
+                if (fname.rfind(base_stem, 0) == 0)
+                {
+                    test_helpers::remove_file(entry.path().string());
+                }
+            }
+        }
 
         test_helpers::cleanup_loggers();
     }
@@ -1045,6 +1265,42 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
     }
 
     /**
+     * 测试目的：验证 dup_filter_sink 在时间窗口内过滤重复消息
+     * 使用的 API：spdlog::sinks::dup_filter_sink_mt(max_skip_duration)
+     * 预期行为：相同消息在窗口内只输出一次，之后输出"Skipped N duplicate messages"
+     * 注意事项：dup_filter_sink 继承自 dist_sink，需添加子 sink 才能输出
+     */
+    DOCTEST_TEST_CASE("dup_filter_sink — 过滤重复消息")
+    {
+        std::ostringstream oss;
+        auto inner_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
+        inner_sink->set_pattern("%v");
+
+        // 5 秒窗口内相同消息只输出一次
+        auto dup_filter = std::make_shared<spdlog::sinks::dup_filter_sink_mt>(std::chrono::seconds(5));
+        dup_filter->add_sink(inner_sink);
+
+        auto logger = std::make_shared<spdlog::logger>("dup_l", dup_filter);
+        logger->set_level(spdlog::level::trace);
+
+        // 连续写入相同消息
+        logger->info("hello");
+        logger->info("hello");
+        logger->info("hello");
+        // 写入不同消息
+        logger->info("world");
+        logger->flush();
+
+        const std::string out = oss.str();
+        // 第一条 "hello" 应出现
+        DOCTEST_CHECK(out.find("hello") != std::string::npos);
+        // "world" 应出现
+        DOCTEST_CHECK(out.find("world") != std::string::npos);
+        // 应出现 "Skipped" 提示
+        DOCTEST_CHECK(out.find("Skipped") != std::string::npos);
+    }
+
+    /**
      * 测试目的：验证 ringbuffer_sink 环形覆盖旧消息，并可回读
      * 使用的 API：spdlog::sinks::ringbuffer_sink_mt(n), last_formatted(), last_raw()
      * 预期行为：写入 > n 条后，last_formatted() 仅保留最后 n 条
@@ -1074,6 +1330,29 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
             const int expected_idx = static_cast<int>(i + 5);
             DOCTEST_CHECK(formatted[i].find("msg " + std::to_string(expected_idx)) != std::string::npos);
         }
+    }
+
+    /**
+     * 测试目的：验证 ringbuffer_sink 的 last_raw() 返回未格式化的原始消息
+     * 使用的 API：spdlog::sinks::ringbuffer_sink_mt::last_raw()
+     * 预期行为：last_raw() 返回包含 log_msg 原始信息的字符串
+     */
+    DOCTEST_TEST_CASE("ringbuffer_sink — last_raw 回读")
+    {
+        constexpr size_t buf_size = 3;
+        auto sink   = std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(buf_size);
+        auto logger = std::make_shared<spdlog::logger>("ring_raw", sink);
+        logger->set_level(spdlog::level::trace);
+
+        logger->info("raw msg 1");
+        logger->info("raw msg 2");
+        logger->flush();
+
+        auto raw = sink->last_raw();
+        DOCTEST_REQUIRE_EQ(raw.size(), 2u);
+        // last_raw 返回包含 log_msg 完整信息的 log_msg_buffer，payload 为原始消息
+        DOCTEST_CHECK(std::string(raw[0].payload.data(), raw[0].payload.size()).find("raw msg 1") != std::string::npos);
+        DOCTEST_CHECK(std::string(raw[1].payload.data(), raw[1].payload.size()).find("raw msg 2") != std::string::npos);
     }
 
     /**
@@ -1147,7 +1426,6 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         {
             auto s = std::make_shared<spdlog::sinks::stdout_sink_mt>();
             auto l = std::make_shared<spdlog::logger>("out", s);
-            // 不实际写入，避免污染控制台
         }());
 
         DOCTEST_CHECK_NOTHROW([]()
@@ -1160,6 +1438,12 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         {
             auto s = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
             auto l = std::make_shared<spdlog::logger>("color_out", s);
+        }());
+
+        DOCTEST_CHECK_NOTHROW([]()
+        {
+            auto s = std::make_shared<spdlog::sinks::stderr_color_sink_mt>();
+            auto l = std::make_shared<spdlog::logger>("color_err", s);
         }());
     }
 } // DOCTEST_TEST_SUITE("spdlog — Sinks")
@@ -1185,22 +1469,29 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
     /**
      * 测试目的：验证 flush_on 达到指定级别时自动 flush
      * 使用的 API：logger->flush_on(level), logger->flush_level()
-     * 预期行为：达到 flush_on 级别时自动刷写，低于该级别不自动 flush
-     * 注意事项：ostream_sink 本身有写操作，flush_on 主要对有缓冲的 sink 有意义
+     * 预期行为：达到 flush_on 级别时自动刷写；使用 basic_file_sink 验证实际 flush 行为
      */
-    DOCTEST_TEST_CASE("flush_on — 达到级别自动 flush")
+    DOCTEST_TEST_CASE("flush_on — 用 basic_file_sink 验证")
     {
-        auto [logger, oss] = test_helpers::make_oss_logger("flush_on_test");
+        const auto path = test_helpers::create_temp_file_path("flush_on");
+
+        auto sink   = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path, true);
+        auto logger = std::make_shared<spdlog::logger>("flush_on_f", sink);
+        logger->set_pattern("%v");
         logger->flush_on(spdlog::level::err);
 
         DOCTEST_CHECK_EQ(logger->flush_level(), spdlog::level::err);
 
-        logger->info("info_no_flush");   // 不触发自动 flush，但 ostream 通常仍能读到
-        logger->error("err_flush");      // 触发自动 flush
+        // info 不触发自动 flush
+        logger->info("info_no_flush");
+        // error 触发自动 flush
+        logger->error("err_triggers_flush");
 
-        const std::string out = oss->str();
-        DOCTEST_CHECK(out.find("info_no_flush") != std::string::npos);
-        DOCTEST_CHECK(out.find("err_flush")     != std::string::npos);
+        // 验证文件内容：error 消息应存在
+        const std::string content = test_helpers::read_file(path);
+        DOCTEST_CHECK(content.find("err_triggers_flush") != std::string::npos);
+
+        test_helpers::remove_file(path);
     }
 
     /**
@@ -1231,6 +1522,33 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
 
         test_helpers::cleanup_loggers();
     }
+
+    /**
+     * 测试目的：验证 spdlog::flush_every 定期刷新功能（API 存在性验证）
+     * 使用的 API：spdlog::flush_every(std::chrono::seconds)
+     * 预期行为：调用不崩溃；设定后后台线程定期对注册的 logger 执行 flush
+     * 注意事项：flush_every 基于时间触发，时序敏感，仅验证 API 可调用
+     *           不做内容断言（避免因调度延迟导致假失败）
+     */
+    DOCTEST_TEST_CASE("flush_every — API 存在性验证")
+    {
+        test_helpers::cleanup_loggers();
+
+        auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
+        auto logger    = std::make_shared<spdlog::logger>("flush_every_l", null_sink);
+        spdlog::set_default_logger(logger);
+
+        // 启动定期 flush（每 1 秒），不崩溃即可
+        DOCTEST_CHECK_NOTHROW(spdlog::flush_every(std::chrono::seconds(1)));
+
+        // 写入一条日志，不验证是否被 flush
+        DOCTEST_CHECK_NOTHROW(spdlog::info("flush_every test"));
+
+        // 关闭定期 flush（传入 0 秒）
+        DOCTEST_CHECK_NOTHROW(spdlog::flush_every(std::chrono::seconds(0)));
+
+        test_helpers::cleanup_loggers();
+    }
 } // DOCTEST_TEST_SUITE("spdlog — Flush 控制")
 
 DOCTEST_TEST_SUITE("spdlog — Error Handler")
@@ -1246,9 +1564,10 @@ DOCTEST_TEST_SUITE("spdlog — Error Handler")
 
     /**
      * 测试目的：验证 set_error_handler 在 sink 内部抛出异常时被调用
-     * 使用的 API：logger->set_error_handler(fn), spdlog::set_error_handler(fn)
+     * 使用的 API：logger->set_error_handler(fn)
      * 预期行为：当 sink 的 sink_it_ 抛出异常时，error handler 被调用
-     * 注意事项：error handler 替代默认的 stderr 错误打印行为
+     * 注意事项：logger->set_error_handler 接受 std::function<void(const std::string&)>
+     *           可使用捕获变量的 lambda
      */
     DOCTEST_TEST_CASE("set_error_handler — sink 抛异常时调用")
     {
@@ -1268,6 +1587,41 @@ DOCTEST_TEST_SUITE("spdlog — Error Handler")
 
         // error handler 应被调用
         DOCTEST_CHECK(!captured_error.empty());
+    }
+
+    /**
+     * 测试目的：验证全局 spdlog::set_error_handler 作用于默认 logger
+     * 使用的 API：spdlog::set_error_handler(fn)
+     * 预期行为：当默认 logger 的 sink 抛异常时，全局 error handler 被调用
+     * 注意事项：spdlog::set_error_handler 接受函数指针 void(*)(const std::string&)，
+     *           不能使用捕获变量的 lambda，因此使用静态变量传递错误信息
+     */
+    DOCTEST_TEST_CASE("spdlog::set_error_handler — 全局版本")
+    {
+        test_helpers::cleanup_loggers();
+
+        // spdlog::set_error_handler 接受函数指针（void(*)(const std::string&)），
+        // 不能使用捕获变量的 lambda，因此使用静态变量传递错误信息
+        static std::string s_global_error;
+
+        auto sink   = std::make_shared<ThrowingSink>();
+        auto logger = std::make_shared<spdlog::logger>("global_err_handler", sink);
+        spdlog::set_default_logger(logger);
+
+        spdlog::set_error_handler([](const std::string& msg)
+        {
+            s_global_error = msg;
+        });
+
+        // 通过全局便捷函数写入，触发默认 logger 的 ThrowingSink
+        spdlog::info("global trigger error");
+        logger->flush();
+
+        // 全局 error handler 应被调用
+        DOCTEST_CHECK(!s_global_error.empty());
+        s_global_error.clear();
+
+        test_helpers::cleanup_loggers();
     }
 } // DOCTEST_TEST_SUITE("spdlog — Error Handler")
 
@@ -1651,6 +2005,52 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
 
         test_helpers::cleanup_loggers();
     }
+
+    /**
+     * 测试目的：验证 spdlog::init_thread_pool / spdlog::thread_pool 全局 API
+     * 使用的 API：spdlog::init_thread_pool(q_size, thread_count), spdlog::thread_pool()
+     * 预期行为：init_thread_pool 创建全局线程池；thread_pool() 返回其 shared_ptr
+     * 注意事项：全局线程池生命周期由 spdlib 管理，需在 shutdown 后重新 init
+     */
+    DOCTEST_TEST_CASE("spdlog::init_thread_pool / thread_pool")
+    {
+        test_helpers::cleanup_loggers();
+
+        constexpr size_t queue_size   = 128;
+        constexpr size_t thread_count = 1;
+
+        // 先 shutdown 清除可能存在的旧全局线程池
+        spdlog::shutdown();
+
+        spdlog::init_thread_pool(queue_size, thread_count);
+
+        auto tp = spdlog::thread_pool();
+        DOCTEST_REQUIRE(tp != nullptr);
+
+        // 使用全局线程池创建 async_logger
+        std::ostringstream oss;
+        auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
+        sink->set_pattern("%v");
+
+        {
+            auto async_logger = std::make_shared<spdlog::async_logger>(
+                "global_tp_async", sink, tp, spdlog::async_overflow_policy::block);
+            async_logger->set_level(spdlog::level::trace);
+
+            async_logger->info("global tp msg");
+        }
+
+        // 必须确保线程池析构（投入 terminate + join 工作线程），所有异步消息才会写入 sink
+        // 步骤：先 shutdown() 释放 registry 中的 tp_ 引用，再 reset tp 释放本地引用，
+        //       当引用计数归零时 ~thread_pool() 析构，join 工作线程
+        spdlog::shutdown();
+        tp.reset();
+
+        const std::string out = oss.str();
+        DOCTEST_CHECK(out.find("global tp msg") != std::string::npos);
+
+        test_helpers::cleanup_loggers();
+    }
 } // DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
 
 /**
@@ -1725,6 +2125,24 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
         DOCTEST_REQUIRE_EQ(sink->messages.size(), 2u);
         DOCTEST_CHECK(sink->messages[0].find("keep_warn")  != std::string::npos);
         DOCTEST_CHECK(sink->messages[1].find("keep_error") != std::string::npos);
+    }
+
+    /**
+     * 测试目的：验证 collecting_sink_st（单线程版本）同样正常工作
+     * 预期行为：功能与 _mt 版本相同
+     */
+    DOCTEST_TEST_CASE("collecting_sink_st — 单线程版本")
+    {
+        auto sink   = std::make_shared<collecting_sink_st>();
+        auto logger = std::make_shared<spdlog::logger>("custom_s_st", sink);
+        sink->set_pattern("%v");
+
+        logger->set_level(spdlog::level::trace);
+        logger->info("st_msg");
+        logger->flush();
+
+        DOCTEST_REQUIRE_EQ(sink->messages.size(), 1u);
+        DOCTEST_CHECK(sink->messages[0].find("st_msg") != std::string::npos);
     }
 } // DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
 
@@ -1807,12 +2225,102 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Formatter")
     }
 } // DOCTEST_TEST_SUITE("spdlog — 自定义 Formatter")
 
+DOCTEST_TEST_SUITE("spdlog — MDC（Mapped Diagnostic Context）")
+{
+    /**
+     * 测试目的：验证 mdc 的 put/get/remove/clear 基本功能
+     * 使用的 API：spdlog::mdc::put(), spdlog::mdc::get(),
+     *             spdlog::mdc::remove(), spdlog::mdc::clear()
+     * 预期行为：mdc 是线程本地 key-value 存储，可独立读写
+     * 注意事项：mdc 不支持异步模式（异步线程有不同的线程本地副本）
+     */
+    DOCTEST_TEST_CASE("mdc — put/get/remove/clear")
+    {
+        // 先清空，防止其他测试残留
+        spdlog::mdc::clear();
+
+        DOCTEST_CHECK_EQ(spdlog::mdc::get("key1"), "");
+
+        spdlog::mdc::put("key1", "value1");
+        DOCTEST_CHECK_EQ(spdlog::mdc::get("key1"), "value1");
+
+        spdlog::mdc::put("key2", "value2");
+        DOCTEST_CHECK_EQ(spdlog::mdc::get("key2"), "value2");
+
+        spdlog::mdc::remove("key1");
+        DOCTEST_CHECK_EQ(spdlog::mdc::get("key1"), "");
+        // key2 不受影响
+        DOCTEST_CHECK_EQ(spdlog::mdc::get("key2"), "value2");
+
+        spdlog::mdc::clear();
+        DOCTEST_CHECK_EQ(spdlog::mdc::get("key2"), "");
+    }
+
+    /**
+     * 测试目的：验证 mdc 与 pattern %& 占位符配合使用
+     * 预期行为：pattern 中的 %& 被替换为 mdc 内容（格式: key:value）
+     */
+    DOCTEST_TEST_CASE("mdc — pattern %& 输出")
+    {
+        spdlog::mdc::clear();
+
+        std::ostringstream oss;
+        auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
+        auto logger = std::make_shared<spdlog::logger>("mdc_l", sink);
+
+        // 设置 pattern 包含 %& (mdc 占位符)
+        sink->set_pattern("[%&] %v");
+
+        spdlog::mdc::put("request_id", "abc123");
+
+        logger->info("mdc test msg");
+        logger->flush();
+
+        const std::string out = oss.str();
+        // %& 应输出 mdc 内容（格式: request_id:abc123）
+        DOCTEST_CHECK(out.find("abc123") != std::string::npos);
+        DOCTEST_CHECK(out.find("mdc test msg") != std::string::npos);
+
+        spdlog::mdc::clear();
+    }
+} // DOCTEST_TEST_SUITE("spdlog — MDC")
+
+DOCTEST_TEST_SUITE("spdlog — Stopwatch")
+{
+    /**
+     * 测试目的：验证 stopwatch 的基本 API
+     * 使用的 API：spdlog::stopwatch, elapsed(), elapsed_ms(), reset()
+     * 预期行为：stopwatch 可构造，elapsed 返回合理时间，reset 重置计时
+     */
+    DOCTEST_TEST_CASE("stopwatch — 基本功能")
+    {
+        spdlog::stopwatch sw;
+
+        // 短暂等待
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        // elapsed() 应返回 > 0 的时间
+        auto elapsed = sw.elapsed();
+        DOCTEST_CHECK(elapsed.count() > 0.0);
+
+        // elapsed_ms() 也应 > 0
+        auto elapsed_ms = sw.elapsed_ms();
+        DOCTEST_CHECK(elapsed_ms.count() > 0);
+
+        // reset 后重新计时
+        sw.reset();
+        auto elapsed_after_reset = sw.elapsed();
+        // reset 后时间应小于 reset 前（因为是新起点）
+        DOCTEST_CHECK(elapsed_after_reset.count() <= elapsed.count() + 0.1);
+    }
+} // DOCTEST_TEST_SUITE("spdlog — Stopwatch")
+
 DOCTEST_TEST_SUITE("spdlog — 版本信息")
 {
     /**
      * 测试目的：验证 spdlog 版本宏与运行时版本信息
      * 使用的 API：SPDLOG_VERSION, SPDLOG_VER_MAJOR/MINOR/PATCH
-     * 预期行为：版本宏为正整数；版本字符串不为空
+     * 预期行为：版本宏为正整数；SPDLOG_VERSION 与手动计算一致
      */
     DOCTEST_TEST_CASE("版本宏")
     {
@@ -1821,8 +2329,9 @@ DOCTEST_TEST_SUITE("spdlog — 版本信息")
         DOCTEST_CHECK(SPDLOG_VER_PATCH >= 0);
 
         // SPDLOG_VERSION = major * 10000 + minor * 100 + patch
-        const int version = SPDLOG_VER_MAJOR * 10000 + SPDLOG_VER_MINOR * 100 + SPDLOG_VER_PATCH;
-        DOCTEST_CHECK(version >= 10000); // 至少 1.0.0
+        const int expected_version = SPDLOG_VER_MAJOR * 10000 + SPDLOG_VER_MINOR * 100 + SPDLOG_VER_PATCH;
+        DOCTEST_CHECK_EQ(SPDLOG_VERSION, expected_version);
+        DOCTEST_CHECK(SPDLOG_VERSION >= 10000); // 至少 1.0.0
     }
 } // DOCTEST_TEST_SUITE("spdlog — 版本信息")
 

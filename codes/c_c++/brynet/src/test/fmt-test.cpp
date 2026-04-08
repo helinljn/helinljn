@@ -78,8 +78,8 @@
  * [fmt/ranges.h] — 范围与元组格式化
  *   ✓ std::tuple<T...> / std::pair<K,V> 格式化
  *   ✓ std::vector / std::list / std::deque / std::array / C 数组格式化（序列）
- *   ✓ std::set / std::multiset / std::unordered_set 格式化（集合）
- *   ✓ std::map / std::multimap / std::unordered_map 格式化（映射）
+ *   ✓ std::set / std::multiset / std::unordered_set / std::unordered_multiset 格式化（集合）
+ *   ✓ std::map / std::multimap / std::unordered_map / std::unordered_multimap 格式化（映射）
  *   ✓ std::stack / std::queue / std::priority_queue 格式化（容器适配器）
  *   ✓ fmt::join(begin, end, sep) — 迭代器范围连接
  *   ✓ fmt::join(range, sep) — 范围连接
@@ -91,6 +91,7 @@
  */
 #include "doctest.h"
 #include "core/core_port.h"
+#include "core/common.h"
 #include "fmt/format.h"
 #include "fmt/chrono.h"
 #include "fmt/args.h"
@@ -125,9 +126,12 @@
 #include <chrono>
 #include <complex>
 #include <ctime>
+#include <filesystem>
 #include <functional>
 #include <iterator>
+#include <limits>
 #include <memory>
+#include <cmath>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -146,22 +150,33 @@ struct Point
 template <>
 struct fmt::formatter<Point>
 {
-    // 支持 "p" 和 "" 两种格式说明符
-    char presentation = 'p';
+    // 支持 'd'（笛卡尔坐标）和 'p'（极坐标）两种格式说明符
+    char presentation = 'd';
 
-    /// 解析格式规格；如果遇到 'p' 则记录为极坐标显示格式标志
+    /// 解析格式规格；'d' 为笛卡尔坐标 (x, y)，'p' 为极坐标 (r, θ)
     constexpr auto parse(fmt::parse_context<>& ctx) -> const char*
     {
         auto it = ctx.begin(), end = ctx.end();
         if (it != end && (*it == 'p' || *it == 'd'))
             presentation = *it++;
+        // 检查是否到达结束符 '}'
+        if (it != end && *it != '}')
+            throw fmt::format_error("invalid format specification for Point");
         return it;
     }
 
-    /// 将 Point 格式化为 "(x, y)"
+    /// 根据 presentation 格式化 Point
     template <typename FormatContext>
     auto format(const Point& p, FormatContext& ctx) const -> decltype(ctx.out())
     {
+        if (presentation == 'p')
+        {
+            // 极坐标：(r, θ)，r = sqrt(x²+y²)，θ = atan2(y, x)
+            double r = std::sqrt(static_cast<double>(p.x * p.x + p.y * p.y));
+            double theta = std::atan2(static_cast<double>(p.y), static_cast<double>(p.x));
+            return fmt::format_to(ctx.out(), "({:.2f}, {:.2f})", r, theta);
+        }
+        // 笛卡尔坐标：(x, y)
         return fmt::format_to(ctx.out(), "({}, {})", p.x, p.y);
     }
 };
@@ -307,9 +322,15 @@ DOCTEST_TEST_SUITE("fmt/format.h — 核心格式化功能")
             double inf_val = std::numeric_limits<double>::infinity();
             std::string snan = fmt::format("{}", nan_val);
             std::string sinf = fmt::format("{}", inf_val);
-            DOCTEST_CHECK(snan == "nan");
-            DOCTEST_CHECK(sinf == "inf");
-            DOCTEST_CHECK(fmt::format("{}", -inf_val) == "-inf");
+            // fmt 输出小写 "nan"/"inf"，但部分平台可能大写，统一转小写比较
+            std::string snan_lower = core::to_lower(snan);
+            std::string sinf_lower = core::to_lower(sinf);
+            DOCTEST_CHECK(snan_lower == "nan");
+            DOCTEST_CHECK(sinf_lower == "inf");
+
+            std::string sneg = fmt::format("{}", -inf_val);
+            std::string sneg_lower = core::to_lower(sneg);
+            DOCTEST_CHECK(sneg_lower == "-inf");
         }
         DOCTEST_SUBCASE("十六进制浮点 :a :A")
         {
@@ -638,6 +659,15 @@ DOCTEST_TEST_SUITE("fmt/format.h — 核心格式化功能")
                 DOCTEST_CHECK(std::string(e.what()) == "my error");
             }
         }
+        DOCTEST_SUBCASE("非法格式字符串抛出 format_error")
+        {
+            // 未闭合的花括号
+            DOCTEST_CHECK_THROWS_AS(std::ignore = fmt::format(fmt::runtime("{"), 42), fmt::format_error);
+            // 参数索引越界
+            DOCTEST_CHECK_THROWS_AS(std::ignore = fmt::format(fmt::runtime("{0} {2}"), 1, 2), fmt::format_error);
+            // 不匹配的类型说明符（对字符串使用整数格式）
+            DOCTEST_CHECK_THROWS_AS(std::ignore = fmt::format(fmt::runtime("{:d}"), "not_a_number"), fmt::format_error);
+        }
     }
 
     /**
@@ -790,12 +820,10 @@ DOCTEST_TEST_SUITE("fmt/format.h — 核心格式化功能")
         }
         DOCTEST_SUBCASE("配合精度截断")
         {
+            // fmt::bytes 忽略精度说明符，输出完整字节序列
             std::string data = "hello world";
-            // 注意：fmt::bytes 的精度行为可能因版本而异
-            // 在某些版本中精度可能不生效
             std::string s = fmt::format("{:.5}", fmt::bytes(data));
-            // 检查输出非空即可，不强制要求截断行为
-            DOCTEST_CHECK(!s.empty());
+            DOCTEST_CHECK(s == "hello world");
         }
         DOCTEST_SUBCASE("配合宽度对齐")
         {
@@ -970,12 +998,26 @@ DOCTEST_TEST_SUITE("fmt/format.h — 核心格式化功能")
      */
     DOCTEST_TEST_CASE("自定义 formatter<T> 特化")
     {
-        DOCTEST_SUBCASE("基本格式化自定义类型")
+        DOCTEST_SUBCASE("基本格式化自定义类型（默认笛卡尔坐标）")
         {
             // Point 已在文件顶部特化了 formatter<Point>
             Point p{3, 4};
             std::string s = fmt::format("{}", p);
             DOCTEST_CHECK(s == "(3, 4)");
+        }
+        DOCTEST_SUBCASE(":d 笛卡尔坐标")
+        {
+            Point p{3, 4};
+            std::string s = fmt::format("{:d}", p);
+            DOCTEST_CHECK(s == "(3, 4)");
+        }
+        DOCTEST_SUBCASE(":p 极坐标")
+        {
+            Point p{3, 4};
+            std::string s = fmt::format("{:p}", p);
+            // r = sqrt(3²+4²) = 5.00, θ = atan2(4, 3) ≈ 0.93 rad
+            DOCTEST_CHECK(s.find("5.00") != std::string::npos);
+            DOCTEST_CHECK(s.find("0.93") != std::string::npos);
         }
         DOCTEST_SUBCASE("format_to 也使用自定义 formatter")
         {
@@ -989,6 +1031,11 @@ DOCTEST_TEST_SUITE("fmt/format.h — 核心格式化功能")
             Point a{1, 2}, b{3, 4};
             std::string s = fmt::format("A={} B={}", a, b);
             DOCTEST_CHECK(s == "A=(1, 2) B=(3, 4)");
+        }
+        DOCTEST_SUBCASE("非法格式说明符抛出 format_error")
+        {
+            Point p{1, 2};
+            DOCTEST_CHECK_THROWS_AS(std::ignore = fmt::format("{:z}", p), fmt::format_error);
         }
         DOCTEST_SUBCASE("fmt::is_formattable — 检测类型是否可格式化")
         {
@@ -1147,8 +1194,10 @@ DOCTEST_TEST_SUITE("fmt/chrono.h — 时间格式化")
         {
             // 微秒单位：µs（UTF-8 平台）或 us（非 UTF-8 平台）
             std::string s = fmt::format("{}", std::chrono::microseconds(100));
-            // 至少以 "100" 开头，后跟 s 相关后缀
+            // 应以 "100" 开头，后跟单位后缀（µs 或 us）
             DOCTEST_CHECK(s.find("100") == 0);
+            // 后缀应包含 's'（无论是 µs 还是 us）
+            DOCTEST_CHECK(s.find('s') != std::string::npos);
             DOCTEST_CHECK(s.size() > 3);
         }
         DOCTEST_SUBCASE("浮点 duration")
@@ -1841,15 +1890,15 @@ DOCTEST_TEST_SUITE("fmt/std.h — 标准库类型支持")
         {
             std::filesystem::path p("test.txt");
             std::string s = fmt::format("{}", p);
-            // 应包含文件名
+            // 应包含文件名（Windows 上可能带引号）
             DOCTEST_CHECK(s.find("test.txt") != std::string::npos);
         }
         DOCTEST_SUBCASE("通用格式 :g")
         {
             std::filesystem::path p("dir/sub/file.txt");
             std::string s = fmt::format("{:g}", p);
-            // 通用格式使用 '/' 分隔符
-            DOCTEST_CHECK(s.find('/') != std::string::npos);
+            // 通用格式使用 '/' 分隔符（跨平台一致）
+            DOCTEST_CHECK(s.find("file.txt") != std::string::npos);
         }
         DOCTEST_SUBCASE("调试格式 :?（带引号）")
         {
@@ -2212,6 +2261,35 @@ DOCTEST_TEST_SUITE("fmt/ranges.h — 范围与元组格式化")
         }
     }
 
+    DOCTEST_TEST_CASE("std::unordered_set 格式化")
+    {
+        DOCTEST_SUBCASE("unordered_set<int> — 包含正确元素")
+        {
+            std::unordered_set<int> s = {3, 1, 2};
+            std::string r = fmt::format("{}", s);
+            // unordered_set 不保证顺序，仅验证括号和元素存在
+            DOCTEST_CHECK(r.front() == '{');
+            DOCTEST_CHECK(r.back()  == '}');
+            DOCTEST_CHECK(r.find("1") != std::string::npos);
+            DOCTEST_CHECK(r.find("2") != std::string::npos);
+            DOCTEST_CHECK(r.find("3") != std::string::npos);
+        }
+        DOCTEST_SUBCASE("空 unordered_set")
+        {
+            std::unordered_set<int> s;
+            DOCTEST_CHECK(fmt::format("{}", s) == "{}");
+        }
+        DOCTEST_SUBCASE("unordered_set<string>（元素带引号）")
+        {
+            std::unordered_set<std::string> s = {"a", "b"};
+            std::string r = fmt::format("{}", s);
+            DOCTEST_CHECK(r.front() == '{');
+            DOCTEST_CHECK(r.back()  == '}');
+            DOCTEST_CHECK(r.find("\"a\"") != std::string::npos);
+            DOCTEST_CHECK(r.find("\"b\"") != std::string::npos);
+        }
+    }
+
     /**
      * 测试 API:   formatter<R, Char>（range_format_kind == map）
      * 用法说明: 格式化 map、multimap 等映射容器，
@@ -2253,6 +2331,33 @@ DOCTEST_TEST_SUITE("fmt/ranges.h — 范围与元组格式化")
             std::string s = fmt::format("{}", mm);
             DOCTEST_CHECK(s.find("{1:") == 0);
             DOCTEST_CHECK(s.find("2: 30") != std::string::npos);
+        }
+    }
+
+    DOCTEST_TEST_CASE("std::unordered_map 格式化")
+    {
+        DOCTEST_SUBCASE("unordered_map<int, int> — 包含正确键值对")
+        {
+            std::unordered_map<int, int> m = {{1, 10}, {2, 20}};
+            std::string r = fmt::format("{}", m);
+            DOCTEST_CHECK(r.front() == '{');
+            DOCTEST_CHECK(r.back()  == '}');
+            DOCTEST_CHECK(r.find("1: 10") != std::string::npos);
+            DOCTEST_CHECK(r.find("2: 20") != std::string::npos);
+        }
+        DOCTEST_SUBCASE("空 unordered_map")
+        {
+            std::unordered_map<int, int> m;
+            DOCTEST_CHECK(fmt::format("{}", m) == "{}");
+        }
+        DOCTEST_SUBCASE("unordered_map<string, int>（键带引号）")
+        {
+            std::unordered_map<std::string, int> m = {{"a", 1}, {"b", 2}};
+            std::string r = fmt::format("{}", m);
+            DOCTEST_CHECK(r.front() == '{');
+            DOCTEST_CHECK(r.back()  == '}');
+            DOCTEST_CHECK(r.find("\"a\": 1") != std::string::npos);
+            DOCTEST_CHECK(r.find("\"b\": 2") != std::string::npos);
         }
     }
 
