@@ -13,11 +13,7 @@ DOCTEST_TEST_SUITE("Hook")
         // 测试加载可执行文件中的main函数
         {
             core::symbol_loader main_loader;
-#if defined(CORE_PLATFORM_WINDOWS)
-            DOCTEST_CHECK(main_loader.load("test.exe"));
-#elif defined(CORE_PLATFORM_LINUX)
             DOCTEST_CHECK(main_loader.load(""));
-#endif // defined(CORE_PLATFORM_WINDOWS)
 
             const void* main_addr = main_loader.get_symbol("main");
             DOCTEST_CHECK(main_addr != nullptr);
@@ -232,7 +228,7 @@ DOCTEST_TEST_SUITE("Hook")
             core::symbol_loader exe_loader;
 #if defined(CORE_PLATFORM_WINDOWS)
             DOCTEST_CHECK(patch_loader.load("libtestpatch.dll"));
-            DOCTEST_CHECK(exe_loader.load("test.exe"));
+            DOCTEST_CHECK(exe_loader.load(""));
 
             // libtestpatch.dll
             void* patch_func = patch_loader.get_symbol("?testb_func@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");
@@ -548,7 +544,7 @@ DOCTEST_TEST_SUITE("Hook")
             core::symbol_loader exe_loader;
 #if defined(CORE_PLATFORM_WINDOWS)
             DOCTEST_CHECK(patch_loader.load("libtestpatch.dll"));
-            DOCTEST_CHECK(exe_loader.load("test.exe"));
+            DOCTEST_CHECK(exe_loader.load(""));
 
             // libtestpatch.dll
             void* patch_func = patch_loader.get_symbol("?testb_func@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z");

@@ -902,7 +902,6 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：主文件始终存在；当内容超出 max_size 时创建备份文件
      * 注意事项：max_size 单位字节，max_files 为最大备份文件数
      */
-
     DOCTEST_TEST_CASE("rotating_file_sink — 文件大小轮转")
     {
         const auto base_path = test_helpers::create_temp_file_path("rotating");

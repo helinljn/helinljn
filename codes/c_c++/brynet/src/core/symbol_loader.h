@@ -37,7 +37,7 @@ public:
 
     /**
      * @brief 加载动态库或可执行文件
-     * @param path 动态库或可执行文件路径(Linux平台下如果为空字符串则打开当前可执行文件)
+     * @param path 动态库或可执行文件路径(如果为空字符串则打开当前可执行文件)
      * @return 成功返回true，失败返回false
      */
     bool load(std::string_view path);
