@@ -28,7 +28,7 @@
  * ✓ logger->clone() / logger->sinks()（多 sink、动态添加）
  * ✓ logger->enable_backtrace() / disable_backtrace() / dump_backtrace() / should_backtrace()
  * ✓ spdlog::enable_backtrace() / dump_backtrace() / disable_backtrace()（全局）
- * ✓ spdlog::async_logger（block / overrun_oldest 溢出策略）
+ * ✓ spdlog::async_logger（block / overrun_oldest / discard_new 溢出策略）
  * ✓ spdlog::init_thread_pool() / spdlog::thread_pool()
  * ✓ spdlog::register_logger() / get() / drop() / drop_all() / register_or_replace()
  * ✓ spdlog::apply_all()
@@ -1551,6 +1551,104 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
         const std::string out = oss.str();
         DOCTEST_CHECK(out.find("async msg 0") != std::string::npos);
         DOCTEST_CHECK(out.find("async msg 9") != std::string::npos);
+
+        test_helpers::cleanup_loggers();
+    }
+
+    /**
+     * 测试目的：验证 overrun_oldest 溢出策略——队列满时丢弃最旧的消息
+     * 使用的 API：spdlog::async_logger（overrun_oldest 溢出策略）
+     * 预期行为：
+     *   - 队列满时最旧的消息被覆盖，最新消息始终可入队（不阻塞）
+     *   - 最后发送的消息必然能被写入 sink
+     * 注意事项：
+     *   - 使用极小队列（queue_size=4）并发送远多于队列容量的消息，
+     *     以触发溢出覆盖行为；即使工作线程消费速度快未必每次都溢出，
+     *     但最后一条消息（msg 19）保证被处理
+     *   - 仍采用局部 thread_pool 模式，tp 析构 join 后方可读取 oss
+     */
+    DOCTEST_TEST_CASE("async_logger — overrun_oldest 溢出策略")
+    {
+        test_helpers::cleanup_loggers();
+        // 极小队列以增大溢出概率
+        constexpr size_t queue_size   = 4;
+        constexpr size_t thread_count = 1;
+
+        std::ostringstream oss;
+        auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
+        sink->set_pattern("%v");
+
+        {
+            auto tp = std::make_shared<spdlog::details::thread_pool>(queue_size, thread_count);
+            {
+                // overrun_oldest：队列满时覆盖最旧消息，不阻塞生产者
+                auto async_logger = std::make_shared<spdlog::async_logger>(
+                    "async_overrun", sink, tp,
+                    spdlog::async_overflow_policy::overrun_oldest);
+                async_logger->set_level(spdlog::level::trace);
+
+                for (int i = 0; i < 20; ++i)
+                {
+                    async_logger->info("overrun msg {}", i);
+                }
+                // async_logger 离开作用域，队列中的消息仍被后台线程持有
+            }
+            // tp 析构 → join 工作线程，等待所有消息处理完毕
+        }
+
+        // overrun_oldest：最后入队的消息不会被覆盖（之后无更新消息），必然写入
+        const std::string out = oss.str();
+        DOCTEST_CHECK(out.find("overrun msg 19") != std::string::npos);
+        // 整体有输出（至少部分消息被写入）
+        DOCTEST_CHECK(!out.empty());
+
+        test_helpers::cleanup_loggers();
+    }
+
+    /**
+     * 测试目的：验证 discard_new 溢出策略——队列满时丢弃新到来的消息
+     * 使用的 API：spdlog::async_logger（discard_new 溢出策略）
+     * 预期行为：
+     *   - 队列满时新消息被静默丢弃，已在队列中的旧消息不受影响（不阻塞）
+     *   - 第一条消息（队列空时入队）必然能被写入 sink
+     * 注意事项：
+     *   - 使用极小队列（queue_size=4）以增大触发丢弃的概率
+     *   - tp 析构 join 是保证无竞态的唯一可靠手段
+     */
+    DOCTEST_TEST_CASE("async_logger — discard_new 溢出策略")
+    {
+        test_helpers::cleanup_loggers();
+        // 极小队列以增大溢出概率
+        constexpr size_t queue_size   = 4;
+        constexpr size_t thread_count = 1;
+
+        std::ostringstream oss;
+        auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
+        sink->set_pattern("%v");
+
+        {
+            auto tp = std::make_shared<spdlog::details::thread_pool>(queue_size, thread_count);
+            {
+                // discard_new：队列满时新消息被丢弃，不阻塞生产者
+                auto async_logger = std::make_shared<spdlog::async_logger>(
+                    "async_discard", sink, tp,
+                    spdlog::async_overflow_policy::discard_new);
+                async_logger->set_level(spdlog::level::trace);
+
+                for (int i = 0; i < 20; ++i)
+                {
+                    async_logger->info("discard msg {}", i);
+                }
+                // async_logger 离开作用域，队列中的消息仍被后台线程持有
+            }
+            // tp 析构 → join 工作线程，等待所有消息处理完毕
+        }
+
+        // discard_new：最先入队的消息（队列为空时）必然被处理
+        const std::string out = oss.str();
+        DOCTEST_CHECK(out.find("discard msg 0") != std::string::npos);
+        // 整体有输出（至少部分消息被写入）
+        DOCTEST_CHECK(!out.empty());
 
         test_helpers::cleanup_loggers();
     }
