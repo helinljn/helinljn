@@ -18,6 +18,7 @@
 #elif defined(CORE_PLATFORM_LINUX)
     #include <unistd.h>
     #include <fcntl.h>
+    #include <cstring>
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
 /**
@@ -84,8 +85,13 @@ static void signal_handler(int signo)
         _close(fd);
 #elif defined(CORE_PLATFORM_LINUX)
         std::ignore = write(fd, dump_info.c_str(), dump_info.size());
+        fsync(fd);
         close(fd);
 #endif // defined(CORE_PLATFORM_WINDOWS)
+    }
+    else
+    {
+        std::cerr << dump_info;
     }
 
     _Exit(EXIT_FAILURE);
@@ -107,8 +113,8 @@ int main(int argc, char** argv)
     std::signal(SIGSEGV, signal_handler);
 
     // 忽略的信号
-    std::signal(SIGINT,   SIG_IGN);  // 忽略 Ctrl+C
-    std::signal(SIGTERM,  SIG_IGN);  // 忽略终止请求
+    // std::signal(SIGINT,   SIG_IGN);  // 忽略 Ctrl+C
+    // std::signal(SIGTERM,  SIG_IGN);  // 忽略终止请求
     std::signal(SIGBREAK, SIG_IGN);  // 忽略 Ctrl+Break
 
     // 设置abort行为
@@ -141,30 +147,35 @@ int main(int argc, char** argv)
 #pragma warning(pop)
 #elif defined(CORE_PLATFORM_LINUX)
     // 致命信号处理
-    std::signal(SIGABRT, signal_handler);
-    std::signal(SIGFPE,  signal_handler);
-    std::signal(SIGILL,  signal_handler);
-    std::signal(SIGSEGV, signal_handler);
-    std::signal(SIGBUS,  signal_handler);
-    std::signal(SIGQUIT, signal_handler);
-    std::signal(SIGSYS,  signal_handler);
-    std::signal(SIGTRAP, signal_handler);
-    std::signal(SIGXCPU, signal_handler);
-    std::signal(SIGXFSZ, signal_handler);
+    {
+        struct sigaction sa_fatal{};
+        sa_fatal.sa_handler = signal_handler;
+        sa_fatal.sa_flags   = 0;
+
+        sigfillset(&sa_fatal.sa_mask);
+        sigaction(SIGABRT, &sa_fatal, nullptr);
+        sigaction(SIGFPE,  &sa_fatal, nullptr);
+        sigaction(SIGILL,  &sa_fatal, nullptr);
+        sigaction(SIGSEGV, &sa_fatal, nullptr);
+        sigaction(SIGBUS,  &sa_fatal, nullptr);
+        sigaction(SIGQUIT, &sa_fatal, nullptr);
+        sigaction(SIGSYS,  &sa_fatal, nullptr);
+        sigaction(SIGTRAP, &sa_fatal, nullptr);
+        sigaction(SIGXCPU, &sa_fatal, nullptr);
+        sigaction(SIGXFSZ, &sa_fatal, nullptr);
+    }
 
     // 忽略的信号
-    std::signal(SIGINT,  SIG_IGN);  // 忽略 Ctrl+C
-    std::signal(SIGTERM, SIG_IGN);  // 忽略终止请求
-    std::signal(SIGPIPE, SIG_IGN);
-    std::signal(SIGCHLD, SIG_IGN);
-    std::signal(SIGHUP,  SIG_IGN);
-    std::signal(SIGTSTP, SIG_IGN);
-    std::signal(SIGCONT, SIG_IGN);
-    std::signal(SIGTTIN, SIG_IGN);
-    std::signal(SIGTTOU, SIG_IGN);
-    std::signal(SIGPOLL, SIG_IGN);
-    std::signal(SIGUSR1, SIG_IGN);
-    std::signal(SIGUSR2, SIG_IGN);
+    {
+        struct sigaction sa_ignore{};
+        sa_ignore.sa_handler = SIG_IGN;
+        sa_ignore.sa_flags   = SA_RESTART;
+
+        sigemptyset(&sa_ignore.sa_mask);
+        // sigaction(SIGINT,  &sa_ignore, nullptr);  // 忽略 Ctrl+C
+        // sigaction(SIGTERM, &sa_ignore, nullptr);  // 忽略终止请求
+        sigaction(SIGPIPE, &sa_ignore, nullptr);
+    }
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
     doctest::Context context;
