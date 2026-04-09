@@ -4,7 +4,7 @@
 #define SYMBOL_LOADER_H
 
 #include "core_port.h"
-#include <string_view>
+#include <string>
 
 namespace core {
 
@@ -40,7 +40,7 @@ public:
      * @param path 动态库或可执行文件路径(如果为空字符串则打开当前可执行文件)
      * @return 成功返回true，失败返回false
      */
-    bool load(std::string_view path);
+    bool load(const std::string& path);
 
     /**
      * @brief 卸载已加载的动态库或可执行文件
@@ -54,30 +54,27 @@ public:
      * @param sname 符号名(该名字是经过mangling修饰的)
      * @return 符号地址，失败返回空指针
      */
-    void* get_symbol(std::string_view sname);
+    void* get_symbol(const std::string& sname);
 
     /**
-     * @brief 检查是否已加载
+     * @brief 分离已加载的动态库或可执行文件，放弃所有权
+     *        主要用于Hook场景：将句柄转移给其他管理机制，避免析构时意外卸载
      * @param
-     * @return true已加载，false未加载
+     * @return 原始句柄，调用者负责后续释放；若未加载则返回nullptr
      */
-    bool is_loaded(void) const
+    void* detach(void)
     {
-        return _handle != nullptr;
-    }
+        void* h = _handle;
 
-    /**
-     * @brief 分离已加载的动态库或可执行文件，主要用于Hook代码时加载动态库
-     * @param
-     * @return
-     */
-    void detach(void)
-    {
-        _handle = nullptr;
+        _handle        = nullptr;
+        _should_unload = false;
+
+        return h;
     }
 
 private:
     void* _handle;
+    bool  _should_unload;
 };
 
 } // namespace core

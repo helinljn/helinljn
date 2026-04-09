@@ -14,6 +14,7 @@ namespace core {
 
 symbol_loader::symbol_loader(void)
     : _handle(nullptr)
+    , _should_unload(false)
 {
 }
 
@@ -22,7 +23,7 @@ symbol_loader::~symbol_loader(void)
     unload();
 }
 
-bool symbol_loader::load(std::string_view path)
+bool symbol_loader::load(const std::string& path)
 {
     if (_handle)
         unload();
@@ -31,16 +32,14 @@ bool symbol_loader::load(std::string_view path)
     // 如果路径为空，加载当前可执行文件
     if (path.empty())
     {
-        char exe_path[MAX_PATH];
-        if (DWORD length = GetModuleFileName(nullptr, exe_path, MAX_PATH); length == 0 || length >= MAX_PATH)
-            return false;
-        _handle = reinterpret_cast<HMODULE>(LoadLibrary(exe_path));
+        _handle        = reinterpret_cast<HMODULE>(GetModuleHandle(nullptr));
+        _should_unload = false;
     }
     else
     {
-        _handle = reinterpret_cast<HMODULE>(LoadLibrary(path.data()));
+        _handle        = reinterpret_cast<HMODULE>(LoadLibrary(path.c_str()));
+        _should_unload = _handle != nullptr;
     }
-    return _handle != nullptr;
 #elif defined(CORE_PLATFORM_LINUX)
     // RTLD_LAZY:   延迟绑定
     // RTLD_NOW:    立即绑定
@@ -48,39 +47,48 @@ bool symbol_loader::load(std::string_view path)
     // RTLD_LOCAL:  符号仅本地可见
     // 如果路径为空，则打开当前可执行文件
     if (path.empty())
-        _handle = dlopen(nullptr, RTLD_LAZY | RTLD_LOCAL);
+    {
+        _handle        = dlopen(nullptr, RTLD_LAZY | RTLD_LOCAL);
+        _should_unload = false;
+    }
     else
-        _handle = dlopen(path.data(), RTLD_LAZY | RTLD_LOCAL);
-    return _handle != nullptr;
+    {
+        _handle        = dlopen(path.c_str(), RTLD_LAZY | RTLD_LOCAL);
+        _should_unload = _handle != nullptr;
+    }
 #endif // defined(CORE_PLATFORM_WINDOWS)
+
+    return _handle != nullptr;
 }
 
 void symbol_loader::unload(void)
 {
-    if (_handle)
+    if (_handle && _should_unload)
     {
 #if defined(CORE_PLATFORM_WINDOWS)
         FreeLibrary(reinterpret_cast<HMODULE>(_handle));
 #elif defined(CORE_PLATFORM_LINUX)
         dlclose(_handle);
 #endif // defined(CORE_PLATFORM_WINDOWS)
-        _handle = nullptr;
+
+        _handle        = nullptr;
+        _should_unload = false;
     }
 }
 
-void* symbol_loader::get_symbol(std::string_view sname)
+void* symbol_loader::get_symbol(const std::string& sname)
 {
     if (!_handle || sname.empty())
         return nullptr;
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    return GetProcAddress(reinterpret_cast<HMODULE>(_handle), sname.data());
+    return GetProcAddress(reinterpret_cast<HMODULE>(_handle), sname.c_str());
 #elif defined(CORE_PLATFORM_LINUX)
     // 清除上一次调用 dlerror() 时的错误信息
     dlerror();
 
     // dlsym 返回值为 nullptr 时并不总表示失败，需通过 dlerror 判断
-    void*       symbol_addr = dlsym(_handle, sname.data());
+    void*       symbol_addr = dlsym(_handle, sname.c_str());
     const char* error_msg   = dlerror();
     if (error_msg != nullptr)
         return nullptr;

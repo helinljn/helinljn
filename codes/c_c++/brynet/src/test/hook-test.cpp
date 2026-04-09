@@ -134,7 +134,7 @@ DOCTEST_TEST_SUITE("Hook")
             DOCTEST_CHECK(func3 != nullptr);
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
-            // detach shared
+            // detach shared(放弃所有权，避免析构时卸载补丁库)
             patch_loader.detach();
 
             // Patch testa_func to patch_testa_func
