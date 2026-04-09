@@ -136,11 +136,12 @@
     "C_Cpp.autocompleteAddParentheses": true,
 
     "codingcopilot.autoRun": false,
+    "codingcopilot.taskList": false,
+    "codingcopilot.enableCodelens": false,
+    "codingcopilot.enableInlineChat": false,
+    "codingcopilot.standaloneTerminal": true,
     "codingcopilot.enableAutoCompletions": true,
     "codingcopilot.enableNextEditSuggestions": false,
-    "codingcopilot.enableInlineChat": false,
-    "codingcopilot.taskList": false,
-    "codingcopilot.standaloneTerminal": true,
     "codingcopilot.generationPreference": "intelligentMode",
     "codingcopilot.commitMessageLanguage": "zh_CN",
 }
