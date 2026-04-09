@@ -50,6 +50,10 @@
         Craft
         GLM-5.1
 
+    9. TRAE AI
+        Builder
+        DeepSeek-V3.1
+
 【下载地址】
     https://update.code.visualstudio.com/1.111.0/win32-x64/stable
 
@@ -139,11 +143,15 @@
     "codingcopilot.taskList": false,
     "codingcopilot.enableCodelens": false,
     "codingcopilot.enableInlineChat": false,
-    "codingcopilot.standaloneTerminal": true,
-    "codingcopilot.enableAutoCompletions": true,
+    "codingcopilot.standaloneTerminal": false,
+    "codingcopilot.enableFloatShortcut": false,
+    "codingcopilot.enableAutoCompletions": false,
     "codingcopilot.enableNextEditSuggestions": false,
     "codingcopilot.generationPreference": "intelligentMode",
     "codingcopilot.commitMessageLanguage": "zh_CN",
+
+    "trae.enableInlineCommand": false,
+    "trae.enableAddToChatTips": false,
 }
 
 【键盘设置】
