@@ -1,7 +1,6 @@
 #include "doctest.h"
 #include "core/common.h"
 #include "core/base64.h"
-#include "core/aes.h"
 #include "core/md5.h"
 #include "core/numeric_cast.hpp"
 #include "core/timespan.h"
@@ -1061,38 +1060,6 @@ DOCTEST_TEST_SUITE("Misc")
         }
     }
 
-    DOCTEST_TEST_CASE("AES")
-    {
-        // 测试 AES-128 加密和解密
-        uint8_t key[16] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
-        uint8_t plain_text[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-        uint8_t cipher_text[16];
-        uint8_t decrypted_text[16];
-
-        // 加密
-        core::aes128_encrypt(key, plain_text, cipher_text);
-
-        // 解密
-        core::aes128_decrypt(key, cipher_text, decrypted_text);
-
-        // 验证解密后的结果是否与原始明文相同
-        for (int i = 0; i < 16; ++i)
-        {
-            DOCTEST_CHECK(decrypted_text[i] == plain_text[i]);
-        }
-
-        // 测试空数据（边界情况）
-        uint8_t empty_plain[16] = {0};
-        uint8_t empty_cipher[16];
-        uint8_t empty_decrypted[16];
-        core::aes128_encrypt(key, empty_plain, empty_cipher);
-        core::aes128_decrypt(key, empty_cipher, empty_decrypted);
-        for (int i = 0; i < 16; ++i)
-        {
-            DOCTEST_CHECK(empty_decrypted[i] == empty_plain[i]);
-        }
-    }
-
     DOCTEST_TEST_CASE("Base64")
     {
         // 测试基本编码和解码
@@ -1123,6 +1090,94 @@ DOCTEST_TEST_SUITE("Misc")
         {
             DOCTEST_CHECK(static_cast<uint8_t>(decoded[i]) == binary_data[i]);
         }
+    }
+
+    DOCTEST_TEST_CASE("Base64URL")
+    {
+        // 测试基本编码和解码
+        std::string original = "Hello, Base64URL!";
+        std::string encoded = core::base64_url_encode(original);
+        DOCTEST_CHECK(!encoded.empty());
+
+        std::string decoded = core::base64_url_decode(encoded);
+        DOCTEST_CHECK(decoded == original);
+
+        // 测试空字符串
+        DOCTEST_CHECK(core::base64_url_encode("").empty());
+        DOCTEST_CHECK(core::base64_url_decode("").empty());
+
+        // 测试 URL 安全字符替换：+ -> - , / -> _
+        // "any carnal pleasure." 的标准 base64 为 "YW55IGNhcm5hbCBwbGVhc3VyZS4="
+        // URL 安全版本应为 "YW55IGNhcm5hbCBwbGVhc3VyZS4"（无填充，+变-，/变_）
+        std::string data_with_plus_slash = std::string(186, '\0') + std::string(1, '\3');
+        std::string url_encoded = core::base64_url_encode(data_with_plus_slash);
+        DOCTEST_CHECK(url_encoded.find('+') == std::string::npos);
+        DOCTEST_CHECK(url_encoded.find('/') == std::string::npos);
+        DOCTEST_CHECK(url_encoded.find('=') == std::string::npos);
+
+        std::string url_decoded = core::base64_url_decode(url_encoded);
+        DOCTEST_CHECK(url_decoded == data_with_plus_slash);
+
+        // 测试不含填充符
+        // "Hello" 标准 base64 = "SGVsbG8="，URL 安全 = "SGVsbG8"
+        std::string hello = "Hello";
+        std::string hello_encoded = core::base64_url_encode(hello);
+        DOCTEST_CHECK(hello_encoded == "SGVsbG8");
+        DOCTEST_CHECK(hello_encoded.find('=') == std::string::npos);
+
+        std::string hello_decoded = core::base64_url_decode(hello_encoded);
+        DOCTEST_CHECK(hello_decoded == hello);
+
+        // 测试标准 base64 与 URL base64 的对照
+        // "Hello, Base64!" 标准 base64 = "SGVsbG8sIEJhc2U2NCE="
+        std::string test_data = "Hello, Base64!";
+        std::string std_encoded = core::base64_encode(test_data);
+        std::string url_enc = core::base64_url_encode(test_data);
+
+        // URL 编码应与标准编码前缀相同，但不含填充
+        DOCTEST_CHECK(url_enc.find('=') == std::string::npos);
+        DOCTEST_CHECK(std_encoded.substr(0, url_enc.size()) == url_enc);
+
+        // 测试特殊字符
+        std::string special_chars = "!@#$%^&*()_+";
+        encoded = core::base64_url_encode(special_chars);
+        decoded = core::base64_url_decode(encoded);
+        DOCTEST_CHECK(decoded == special_chars);
+
+        // 测试二进制数据
+        std::vector<uint8_t> binary_data = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09};
+        std::string binary_str(reinterpret_cast<const char*>(binary_data.data()), binary_data.size());
+        encoded = core::base64_url_encode(binary_str);
+        decoded = core::base64_url_decode(encoded);
+        DOCTEST_CHECK(decoded.size() == binary_data.size());
+        for (size_t i = 0; i < binary_data.size(); ++i)
+        {
+            DOCTEST_CHECK(static_cast<uint8_t>(decoded[i]) == binary_data[i]);
+        }
+
+        // 测试解码带填充的 URL safe 字符串（兼容处理）
+        // 虽然 URL safe 编码不包含填充，但解码时应能正确处理带填充的输入
+        std::string with_padding = "SGVsbG8=";
+        DOCTEST_CHECK(core::base64_url_decode(with_padding) == "Hello");
+
+        // 测试长度 % 4 == 1 的无效输入
+        DOCTEST_CHECK(core::base64_url_decode("A").empty());
+
+        // 测试长度 % 4 == 2 的合法输入（需补2个=）
+        // "A" 编码后标准 base64 为 "QQ=="，URL safe 为 "QQ"
+        DOCTEST_CHECK(core::base64_url_decode("QQ") == "A");
+
+        // 测试长度 % 4 == 3 的合法输入（需补1个=）
+        // "AB" 编码后标准 base64 为 "QUI="，URL safe 为 "QUI"
+        DOCTEST_CHECK(core::base64_url_decode("QUI") == "AB");
+
+        // 测试长度 % 4 == 0 的合法输入（无需补=）
+        // "ABC" 编码后标准 base64 为 "QUJD"，URL safe 也是 "QUJD"
+        DOCTEST_CHECK(core::base64_url_decode("QUJD") == "ABC");
+
+        // 测试 URL safe 字符的解码
+        // 确认 '-' 还原为 '+'，'_' 还原为 '/'
+        DOCTEST_CHECK(core::base64_url_decode("A-B_") == core::base64_decode("A+B/"));
     }
 
     DOCTEST_TEST_CASE("MD5")
