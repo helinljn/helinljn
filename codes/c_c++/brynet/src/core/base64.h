@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef BASE64_H
+#define BASE64_H
+
 #include "core_port.h"
 #include <string>
 #include <string_view>
@@ -35,3 +38,5 @@ CORE_API std::string base64_url_encode(std::string_view data);
 CORE_API std::string base64_url_decode(std::string_view data);
 
 } // namespace core
+
+#endif // BASE64_H
