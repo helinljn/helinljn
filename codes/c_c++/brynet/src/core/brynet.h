@@ -22,7 +22,7 @@
 #include "brynet/base/AppStatus.hpp"
 #include "brynet/base/WaitGroup.hpp"
 #include "brynet/net/AsyncConnector.hpp"
-#include <brynet/net/PromiseReceive.hpp>
+// #include <brynet/net/PromiseReceive.hpp>
 #include "brynet/net/http/HttpFormat.hpp"
 #include "brynet/net/http/HttpService.hpp"
 #include "brynet/net/wrapper/ServiceBuilder.hpp"
