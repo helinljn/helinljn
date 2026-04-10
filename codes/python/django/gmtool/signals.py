@@ -20,7 +20,7 @@ def auto_assign_super_admin_role(sender, instance, created, **kwargs):
         return
 
     try:
-        from .models import Role, UserProfile, RoleCommandPermission, UserCommandPermission, GMCommand
+        from .models import Role, UserProfile, UserCommandPermission, GMCommand
 
         # 确保超级管理员角色存在
         role, role_created = Role.objects.get_or_create(
@@ -51,16 +51,6 @@ def auto_assign_super_admin_role(sender, instance, created, **kwargs):
             new_user_perms.append(UserCommandPermission(user=instance, command=cmd))
         if new_user_perms:
             UserCommandPermission.objects.bulk_create(new_user_perms)
-
-        # 同时也保持 RoleCommandPermission 的同步（兼容性）
-        existing_role_perm_ids = set(RoleCommandPermission.objects.filter(
-            role=role
-        ).values_list('command_id', flat=True))
-        new_role_perms = []
-        for cmd in GMCommand.objects.filter(is_active=True).exclude(id__in=existing_role_perm_ids):
-            new_role_perms.append(RoleCommandPermission(role=role, command=cmd))
-        if new_role_perms:
-            RoleCommandPermission.objects.bulk_create(new_role_perms)
 
         if created or role_created or profile_created or new_user_perms:
             logger.info(

@@ -41,20 +41,6 @@ class Role(models.Model):
         return self.display_name
 
 
-class RoleCommandPermission(models.Model):
-    """角色-命令权限关联"""
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, verbose_name='角色')
-    command = models.ForeignKey(GMCommand, on_delete=models.CASCADE, verbose_name='命令')
-
-    class Meta:
-        verbose_name = '角色命令权限'
-        verbose_name_plural = '角色命令权限'
-        unique_together = ('role', 'command')
-
-    def __str__(self):
-        return f'{self.role.display_name} - {self.command.command_name}'
-
-
 class UserCommandPermission(models.Model):
     """用户-命令权限关联（直接按用户分配权限）"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='用户')

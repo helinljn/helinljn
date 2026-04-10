@@ -77,18 +77,6 @@ CREATE TABLE django_session (
     expire_date     DATETIME           NOT NULL
 );
 
--- Admin 日志表
-CREATE TABLE django_admin_log (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    action_time     DATETIME           NOT NULL,
-    object_id       TEXT               NULL,
-    object_repr     VARCHAR(200)       NOT NULL,
-    action_flag     SMALLINT           NOT NULL,
-    change_message  TEXT               NOT NULL,
-    content_type_id INTEGER            NULL REFERENCES django_content_type(id),
-    user_id         INTEGER            NOT NULL REFERENCES auth_user(id)
-);
-
 -- Django 迁移记录表
 CREATE TABLE django_migrations (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -133,19 +121,8 @@ CREATE TABLE gmtool_role (
 );
 
 -- -----------------------------------------------------------
--- 2.3 RoleCommandPermission - 角色-命令权限关联（兼容保留）
--- 注意：此表仅作兼容性保留，权限判定已改为按用户直接分配
--- -----------------------------------------------------------
-CREATE TABLE gmtool_rolecommandpermission (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    role_id         INTEGER            NOT NULL REFERENCES gmtool_role(id),     -- 关联角色
-    command_id      INTEGER            NOT NULL REFERENCES gmtool_gmcommand(id), -- 关联命令
-    CONSTRAINT gmtool_rolecommandpermission_role_id_command_id UNIQUE (role_id, command_id)
-);
-
--- -----------------------------------------------------------
--- 2.4 UserCommandPermission - 用户-命令权限关联（核心权限模型）
--- 每个用户的命令权限直接通过此表关联，不再通过角色间接关联
+-- 2.3 UserCommandPermission - 用户-命令权限关联
+-- 每个用户的命令权限直接通过此表关联
 -- -----------------------------------------------------------
 CREATE TABLE gmtool_usercommandpermission (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -155,7 +132,7 @@ CREATE TABLE gmtool_usercommandpermission (
 );
 
 -- -----------------------------------------------------------
--- 2.5 UserProfile - 用户扩展信息
+-- 2.4 UserProfile - 用户扩展信息
 -- 关联 Django 内置 User，添加角色分组和联系电话
 -- -----------------------------------------------------------
 CREATE TABLE gmtool_userprofile (
@@ -166,7 +143,7 @@ CREATE TABLE gmtool_userprofile (
 );
 
 -- -----------------------------------------------------------
--- 2.6 CommandLog - 命令执行日志
+-- 2.5 CommandLog - 命令执行日志
 -- 记录所有GM命令执行的详细日志
 -- -----------------------------------------------------------
 CREATE TABLE gmtool_commandlog (
@@ -182,7 +159,7 @@ CREATE TABLE gmtool_commandlog (
 );
 
 -- -----------------------------------------------------------
--- 2.7 LoginLog - 登录日志
+-- 2.6 LoginLog - 登录日志
 -- 记录用户登录/登出/登录失败
 -- -----------------------------------------------------------
 CREATE TABLE gmtool_loginlog (
@@ -207,8 +184,6 @@ CREATE INDEX idx_userprofile_user_id     ON gmtool_userprofile (user_id);
 CREATE INDEX idx_userprofile_role_id     ON gmtool_userprofile (role_id);
 CREATE INDEX idx_usercmdperm_user_id     ON gmtool_usercommandpermission (user_id);
 CREATE INDEX idx_usercmdperm_command_id  ON gmtool_usercommandpermission (command_id);
-CREATE INDEX idx_rolecmdperm_role_id     ON gmtool_rolecommandpermission (role_id);
-CREATE INDEX idx_rolecmdperm_command_id  ON gmtool_rolecommandpermission (command_id);
 CREATE INDEX idx_commandlog_user_id      ON gmtool_commandlog (user_id);
 CREATE INDEX idx_commandlog_command_id   ON gmtool_commandlog (command_id);
 CREATE INDEX idx_commandlog_status       ON gmtool_commandlog (status);
@@ -237,4 +212,3 @@ CREATE INDEX idx_session_expire_date     ON django_session (expire_date);
 --   └── 1:N ── gmtool_loginlog
 --
 -- gmtool_role
---   └── M:N ── gmtool_gmcommand（通过 gmtool_rolecommandpermission，兼容保留）

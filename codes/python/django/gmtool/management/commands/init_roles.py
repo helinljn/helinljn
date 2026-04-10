@@ -7,7 +7,7 @@ class Command(BaseCommand):
     help = '初始化超级管理员角色、同步命令定义，并为所有Django超级管理员自动绑定角色和权限'
 
     def handle(self, *args, **options):
-        from gmtool.models import Role, UserProfile, RoleCommandPermission, UserCommandPermission, GMCommand
+        from gmtool.models import Role, UserProfile, UserCommandPermission, GMCommand
         from gmtool.command_parser import sync_commands_to_db
 
         # 1. 同步命令定义
@@ -28,19 +28,7 @@ class Command(BaseCommand):
         else:
             self.stdout.write('超级管理员角色已存在')
 
-        # 3. 为超级管理员角色分配所有活跃命令权限（兼容性保留）
-        commands = GMCommand.objects.filter(is_active=True)
-        existing_perm_ids = set(RoleCommandPermission.objects.filter(
-            role=role
-        ).values_list('command_id', flat=True))
-        added = 0
-        for cmd in commands:
-            if cmd.id not in existing_perm_ids:
-                RoleCommandPermission.objects.get_or_create(role=role, command=cmd)
-                added += 1
-        self.stdout.write(f'角色权限分配: 新增={added}, 共={commands.count()}个活跃命令')
-
-        # 4. 为所有 Django 超级管理员自动绑定 GM 超级管理员角色
+        # 3. 为所有 Django 超级管理员自动绑定 GM 超级管理员角色
         bound_count = 0
         for user in User.objects.filter(is_superuser=True):
             profile, _ = UserProfile.objects.get_or_create(
@@ -55,7 +43,8 @@ class Command(BaseCommand):
             f'已为 {bound_count} 个Django超级管理员绑定GM超级管理员角色'
         ))
 
-        # 5. 为所有超级管理员用户授予用户级权限
+        # 4. 为所有超级管理员用户授予用户级权限
+        commands = GMCommand.objects.filter(is_active=True)
         user_perm_added = 0
         for user in User.objects.filter(is_superuser=True):
             existing_user_perm_ids = set(UserCommandPermission.objects.filter(

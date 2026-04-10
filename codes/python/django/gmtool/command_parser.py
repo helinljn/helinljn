@@ -66,7 +66,7 @@ def sync_commands_to_db(json_path=None):
     - JSON中不存在的命令：标记为不活跃(is_active=False)
     返回 (created_count, updated_count, deactivated_count)
     """
-    from .models import GMCommand, Role, RoleCommandPermission
+    from .models import GMCommand, UserCommandPermission
 
     commands = parse_commands(json_path)
     existing_ids = set(GMCommand.objects.values_list('command_id', flat=True))
@@ -104,27 +104,10 @@ def sync_commands_to_db(json_path=None):
         command_id__in=deactivated_ids
     ).update(is_active=False)
 
-    # 将新增命令自动授予超级管理员角色及所有超级管理员用户，确保权限实时同步
+    # 将新增命令自动授予所有超级管理员用户
     if new_commands:
         try:
-            role = Role.objects.get(is_super_admin=True)
-            existing_perm_ids = set(RoleCommandPermission.objects.filter(
-                role=role
-            ).values_list('command_id', flat=True))
-            new_perms = []
-            for cmd in new_commands:
-                if cmd.id not in existing_perm_ids:
-                    new_perms.append(RoleCommandPermission(role=role, command=cmd))
-            if new_perms:
-                RoleCommandPermission.objects.bulk_create(new_perms)
-                logger.info(f'新增 {len(new_perms)} 条角色权限已自动授予超级管理员角色')
-        except Role.DoesNotExist:
-            logger.warning('超级管理员角色不存在，跳过角色权限自动授权')
-
-        # 同时为所有超级管理员用户授予用户级权限
-        try:
             from django.contrib.auth.models import User
-            from .models import UserCommandPermission
             superadmin_users = User.objects.filter(is_superuser=True)
             for user in superadmin_users:
                 existing_user_perm_ids = set(UserCommandPermission.objects.filter(

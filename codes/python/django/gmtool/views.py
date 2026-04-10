@@ -14,7 +14,7 @@ from .command_parser import sync_commands_to_db
 from .decorators import command_permission_required, get_user_permissions, is_super_admin
 from .forms import RoleForm, UserCreateForm, UserEditForm
 from .idip_client import send_idip_command
-from .models import CommandLog, GMCommand, LoginLog, Role, RoleCommandPermission, UserCommandPermission, UserProfile
+from .models import CommandLog, GMCommand, LoginLog, Role, UserCommandPermission, UserProfile
 
 logger = logging.getLogger(__name__)
 
@@ -558,3 +558,20 @@ def get_client_ip(request):
     if x_forwarded_for:
         return x_forwarded_for.split(',')[0].strip()
     return request.META.get('REMOTE_ADDR', '0.0.0.0')
+
+
+# ========== 自定义错误页面 ==========
+
+def custom_404(request, exception=None):
+    """404 页面未找到"""
+    return render(request, 'gmtool/404.html', status=404)
+
+
+def custom_500(request):
+    """500 服务器错误"""
+    return render(request, 'gmtool/500.html', status=500)
+
+
+def custom_403(request, exception=None):
+    """403 访问被拒绝"""
+    return render(request, 'gmtool/403.html', status=403)
