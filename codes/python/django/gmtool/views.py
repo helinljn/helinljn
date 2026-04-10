@@ -26,7 +26,12 @@ logger = logging.getLogger(__name__)
 def login_view(request):
     """登录页面"""
     if request.user.is_authenticated:
-        return redirect('gmtool:dashboard')
+        # 已登录用户访问登录页，显示提示而非静默跳转
+        # 避免多标签页场景下 CSRF 失败重定向回登录页后自动跳转，看起来像绕过了密码验证
+        return render(request, 'gmtool/login.html', {
+            'already_logged_in': True,
+            'current_user': request.user,
+        })
     if request.method == 'POST':
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
@@ -65,13 +70,14 @@ def login_view(request):
 
 def logout_view(request):
     """登出"""
-    log_operation('auth', 'logout', user=request.user, ip_address=get_client_ip(request),
-                  detail={'username': request.user.username})
-    LoginLog.objects.create(
-        user=request.user, username=request.user.username, action='logout',
-        ip_address=get_client_ip(request),
-        user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
-    )
+    if request.user.is_authenticated:
+        log_operation('auth', 'logout', user=request.user, ip_address=get_client_ip(request),
+                      detail={'username': request.user.username})
+        LoginLog.objects.create(
+            user=request.user, username=request.user.username, action='logout',
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+        )
     auth_logout(request)
     return redirect('gmtool:login')
 
@@ -660,14 +666,17 @@ def custom_403(request, exception=None):
 def csrf_failure(request, reason=""):
     """CSRF 验证失败处理
     
-    典型场景：两个未登录标签页共享同一个匿名 session，
-    其中一个登录后 Django 轮转了 CSRF token，
-    另一个标签页提交时 token 失效。
-    处理方式：对登录请求重定向回登录页并提示，其他请求返回 403。
+    典型场景：两个标签页共享同一个 session，其中一个登录后 Django 轮转了
+    CSRF token，另一个标签页提交时 token 失效。
+    
+    处理方式：
+    - 登录页 CSRF 失败 → 统一重定向回登录页并提示"页面已过期"，
+      不调用 auth_logout（避免销毁共享 session 影响其他标签页），
+      也不因 request.user.is_authenticated 而放行（避免绕过密码验证）。
+      重定向后 login_view 的 GET 分支会根据 session 状态决定跳转。
+    - 其他请求 → 返回 403 页面
     """
     if request.path == '/gmtool/login/':
-        from django.contrib.auth import logout as auth_logout
-        auth_logout(request)
         from django.contrib import messages
         messages.error(request, '页面已过期，请重新登录。')
         return redirect('gmtool:login')

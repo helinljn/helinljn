@@ -17,12 +17,34 @@
             </div>
             <div class="card card-md">
                 <div class="card-body">
+                    {% if already_logged_in %}
+                    <h2 class="h2 text-center mb-4">已登录</h2>
+                    <div class="alert alert-info mb-3">
+                        <i class="ti ti-info-circle me-2"></i>当前已以 <strong>{{ current_user.username }}</strong> 身份登录。
+                    </div>
+                    <div class="form-footer">
+                        <a href="{% url 'gmtool:dashboard' %}" class="btn btn-primary w-100 mb-2">
+                            <i class="ti ti-home me-2"></i>进入系统
+                        </a>
+                        <a href="{% url 'gmtool:logout' %}" class="btn btn-outline-secondary w-100">
+                            <i class="ti ti-switch-horizontal me-2"></i>切换账号
+                        </a>
+                    </div>
+                    {% else %}
                     <h2 class="h2 text-center mb-4">登录你的账号</h2>
                     {% if error %}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="ti ti-alert-circle me-2"></i>{{ error }}
                         <a class="btn-close" data-bs-dismiss="alert"></a>
                     </div>
+                    {% endif %}
+                    {% if messages %}
+                    {% for msg in messages %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="ti ti-alert-triangle me-2"></i>{{ msg }}
+                        <a class="btn-close" data-bs-dismiss="alert"></a>
+                    </div>
+                    {% endfor %}
                     {% endif %}
                     <form method="post" autocomplete="off">
                         {% csrf_token %}
@@ -52,6 +74,7 @@
                             </button>
                         </div>
                     </form>
+                    {% endif %}
                 </div>
             </div>
             <div class="text-center text-muted mt-3">

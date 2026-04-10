@@ -70,7 +70,8 @@ CREATE TABLE django_content_type (
     CONSTRAINT django_content_type_app_label_model UNIQUE (app_label, model)
 );
 
--- Session 表
+-- Session 表（同一浏览器的所有标签页共享同一个 sessionid cookie，
+-- 因此同一浏览器无法同时登录不同用户，这是 cookie-session 机制的固有限制）
 CREATE TABLE django_session (
     session_key     VARCHAR(40)        NOT NULL PRIMARY KEY,
     session_data    TEXT               NOT NULL,
