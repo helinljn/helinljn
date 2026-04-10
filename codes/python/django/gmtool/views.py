@@ -1,6 +1,8 @@
 """GM命令后台管理系统 - 视图函数"""
 import json
 import logging
+import os
+import tempfile
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login
@@ -8,17 +10,31 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .audit_log import log_operation
 from .command_parser import sync_commands_to_db
-from .decorators import command_permission_required, get_user_permissions, is_super_admin
+from .decorators import command_permission_required, get_user_permissions, is_super_admin, super_admin_required
 from .forms import RoleForm, UserCreateForm, UserEditForm
 from .idip_client import send_idip_command
 from .models import CommandLog, GMCommand, LoginLog, Role, UserCommandPermission, UserProfile
 
 logger = logging.getLogger(__name__)
+
+
+def _group_commands_by_tab(commands):
+    """将命令查询集按 tab 字段分组"""
+    tab_groups = {}
+    for cmd in commands:
+        tab = cmd.tab
+        if tab not in tab_groups:
+            tab_groups[tab] = []
+        tab_groups[tab].append(cmd)
+    return tab_groups
 
 
 # ========== 认证相关 ==========
@@ -48,7 +64,9 @@ def login_view(request):
                 log_operation('auth', 'login', user=user, ip_address=ip,
                               detail={'username': username})
                 next_url = request.GET.get('next', '')
-                return redirect(next_url if next_url else 'gmtool:dashboard')
+                if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
+                    return redirect(next_url)
+                return redirect('gmtool:dashboard')
             else:
                 LoginLog.objects.create(
                     user=None, username=username, action='login_failed',
@@ -89,15 +107,9 @@ def dashboard(request):
     """仪表盘首页"""
     user_perms = get_user_permissions(request.user)
     commands = GMCommand.objects.filter(is_active=True, command_id__in=user_perms)
-    # 按 tab 分组
-    tab_groups = {}
-    for cmd in commands:
-        tab = cmd.tab
-        if tab not in tab_groups:
-            tab_groups[tab] = []
-        tab_groups[tab].append(cmd)
+    tab_groups = _group_commands_by_tab(commands)
 
-    recent_logs = CommandLog.objects.filter(user=request.user)[:5]
+    recent_logs = CommandLog.objects.filter(user=request.user).select_related('command')[:5]
     is_admin = is_super_admin(request.user)
 
     return render(request, 'gmtool/dashboard.html', {
@@ -121,13 +133,7 @@ def command_list(request):
     if search:
         commands = commands.filter(command_name__icontains=search)
 
-    # 按 tab 分组
-    tab_groups = {}
-    for cmd in commands:
-        tab = cmd.tab
-        if tab not in tab_groups:
-            tab_groups[tab] = []
-        tab_groups[tab].append(cmd)
+    tab_groups = _group_commands_by_tab(commands)
 
     return render(request, 'gmtool/command_list.html', {
         'tab_groups': tab_groups,
@@ -195,8 +201,8 @@ def command_execute(request, cmd_id):
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'error': '请求数据格式错误'}, status=400)
         except Exception as e:
-            logger.exception(f'命令执行异常: {e}')
-            return JsonResponse({'success': False, 'error': f'服务器错误: {str(e)}'}, status=500)
+            logger.exception('命令执行异常: %s', e)
+            return JsonResponse({'success': False, 'error': '服务器内部错误'}, status=500)
 
     # GET: 显示执行表单
     return render(request, 'gmtool/command_execute.html', {
@@ -209,11 +215,9 @@ def command_execute(request, cmd_id):
 # ========== 用户管理（super_admin） ==========
 
 @login_required
+@super_admin_required
 def user_list(request):
     """用户列表管理"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     users = User.objects.select_related('userprofile', 'userprofile__role').all()
 
     # 搜索
@@ -233,11 +237,9 @@ def user_list(request):
 
 
 @login_required
+@super_admin_required
 def user_create(request):
     """创建用户"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
         if form.is_valid():
@@ -261,11 +263,9 @@ def user_create(request):
 
 
 @login_required
+@super_admin_required
 def user_edit(request, user_id):
     """编辑用户"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     user_obj = get_object_or_404(User, pk=user_id)
     # 确保UserProfile存在
     UserProfile.objects.get_or_create(user=user_obj, defaults={})
@@ -303,31 +303,26 @@ def user_edit(request, user_id):
 
 
 @login_required
+@super_admin_required
+@require_POST
 def user_delete(request, user_id):
     """删除用户"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
-    if request.method == 'POST':
-        user_obj = get_object_or_404(User, pk=user_id)
-        if user_obj != request.user:
-            target_name = user_obj.username
-            user_obj.delete()
-            log_operation('user', 'delete', user=request.user,
-                          ip_address=get_client_ip(request),
-                          detail={'target_user': target_name, 'target_id': user_id})
-        return redirect('gmtool:user_list')
+    user_obj = get_object_or_404(User, pk=user_id)
+    if user_obj != request.user:
+        target_name = user_obj.username
+        user_obj.delete()
+        log_operation('user', 'delete', user=request.user,
+                      ip_address=get_client_ip(request),
+                      detail={'target_user': target_name, 'target_id': user_id})
     return redirect('gmtool:user_list')
 
 
 # ========== 角色管理（super_admin） ==========
 
 @login_required
+@super_admin_required
 def role_list(request):
     """角色列表管理"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     roles = Role.objects.all()
     return render(request, 'gmtool/role_list.html', {
         'roles': roles,
@@ -336,11 +331,9 @@ def role_list(request):
 
 
 @login_required
+@super_admin_required
 def role_create(request):
     """创建角色"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     if request.method == 'POST':
         form = RoleForm(request.POST)
         if form.is_valid():
@@ -364,11 +357,9 @@ def role_create(request):
 
 
 @login_required
+@super_admin_required
 def role_edit(request, role_id):
     """编辑角色"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     role = get_object_or_404(Role, pk=role_id)
     if request.method == 'POST':
         form = RoleForm(request.POST, instance=role)
@@ -394,11 +385,9 @@ def role_edit(request, role_id):
 
 
 @login_required
+@super_admin_required
 def user_permissions(request, user_id):
     """用户权限分配（针对每个用户单独设置）"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     user_obj = get_object_or_404(User, pk=user_id)
     # 超级管理员不需要手动分配权限
     if is_super_admin(user_obj):
@@ -413,15 +402,23 @@ def user_permissions(request, user_id):
             user=user_obj
         ).values_list('command_id', flat=True))
 
-        # 清除旧权限，写入新权限
-        UserCommandPermission.objects.filter(user=user_obj).delete()
-        for cmd_id in selected_ids:
-            UserCommandPermission.objects.create(
-                user=user_obj,
-                command_id=cmd_id,
-            )
+        # 校验：仅允许分配活跃命令的权限
+        active_command_ids = set(
+            GMCommand.objects.filter(is_active=True).values_list('id', flat=True)
+        )
+        valid_ids = [int(cid) for cid in selected_ids if int(cid) in active_command_ids]
 
-        new_perm_ids = set(int(x) for x in selected_ids)
+        # 清除旧权限，写入新权限（事务保护）
+        with transaction.atomic():
+            UserCommandPermission.objects.filter(user=user_obj).delete()
+            new_user_perms = [
+                UserCommandPermission(user=user_obj, command_id=cmd_id)
+                for cmd_id in valid_ids
+            ]
+            if new_user_perms:
+                UserCommandPermission.objects.bulk_create(new_user_perms)
+
+        new_perm_ids = set(valid_ids)
         log_operation('permission', 'assign', user=request.user,
                       ip_address=get_client_ip(request),
                       detail={
@@ -459,31 +456,26 @@ def user_permissions(request, user_id):
 
 
 @login_required
+@super_admin_required
+@require_POST
 def role_delete(request, role_id):
     """删除角色"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
-    if request.method == 'POST':
-        role = get_object_or_404(Role, pk=role_id)
-        if not role.is_super_admin:
-            role_name = role.name
-            role.delete()
-            log_operation('role', 'delete', user=request.user,
-                          ip_address=get_client_ip(request),
-                          detail={'role_id': role_id, 'role_name': role_name})
-        return redirect('gmtool:role_list')
+    role = get_object_or_404(Role, pk=role_id)
+    if not role.is_super_admin:
+        role_name = role.name
+        role.delete()
+        log_operation('role', 'delete', user=request.user,
+                      ip_address=get_client_ip(request),
+                      detail={'role_id': role_id, 'role_name': role_name})
     return redirect('gmtool:role_list')
 
 
 # ========== 操作日志 ==========
 
 @login_required
+@super_admin_required
 def login_log_list(request):
     """登录日志列表"""
-    if not is_super_admin(request.user):
-        return redirect('gmtool:dashboard')
-
     logs = LoginLog.objects.all()
 
     # 筛选
@@ -541,13 +533,10 @@ def command_log_list(request):
 # ========== API ==========
 
 @login_required
+@super_admin_required
+@require_POST
 def upload_commands_api(request):
     """上传idip_commands.json并自动同步命令定义"""
-    if not is_super_admin(request.user):
-        return JsonResponse({'error': '权限不足'}, status=403)
-
-    if request.method != 'POST':
-        return JsonResponse({'error': '仅支持POST请求'}, status=405)
 
     # 校验文件
     uploaded_file = request.FILES.get('file')
@@ -585,21 +574,30 @@ def upload_commands_api(request):
         if request_name and not isinstance(cmd_data.get(request_name), list):
             return JsonResponse({'error': f'命令 {cmd_id} 的请求参数 {request_name} 必须是数组'}, status=400)
 
-    # 写入 idip_commands.json
+    # 原子写入 idip_commands.json（先写临时文件再替换，防止中途崩溃损坏文件）
     try:
         json_path = settings.BASE_DIR / 'idip_commands.json'
-        with open(json_path, 'w', encoding='utf-8') as f:
-            f.write(raw.decode('utf-8') if isinstance(raw, bytes) else raw)
+        content_str = raw.decode('utf-8') if isinstance(raw, bytes) else raw
+        fd, tmp_path = tempfile.mkstemp(dir=str(settings.BASE_DIR), suffix='.json.tmp')
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                f.write(content_str)
+            os.replace(tmp_path, str(json_path))
+        except Exception:
+            # 清理临时文件
+            if os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            raise
     except Exception as e:
-        logger.exception(f'写入JSON文件失败: {e}')
+        logger.exception('写入JSON文件失败: %s', e)
         return JsonResponse({'error': f'文件写入失败: {str(e)}'}, status=500)
 
     # 自动执行同步
     try:
         created, updated, deactivated = sync_commands_to_db()
     except Exception as e:
-        logger.exception(f'同步命令异常: {e}')
-        return JsonResponse({'error': f'文件已上传但同步失败: {str(e)}'}, status=500)
+        logger.exception('同步命令异常: %s', e)
+        return JsonResponse({'error': '文件已上传但同步失败'}, status=500)
 
     log_operation('command', 'upload_and_sync', user=request.user,
                   ip_address=get_client_ip(request),
@@ -619,13 +617,10 @@ def upload_commands_api(request):
 
 
 @login_required
+@super_admin_required
+@require_POST
 def sync_commands_api(request):
     """从JSON同步命令定义"""
-    if not is_super_admin(request.user):
-        return JsonResponse({'error': '权限不足'}, status=403)
-
-    if request.method != 'POST':
-        return JsonResponse({'error': '仅支持POST请求'}, status=405)
 
     try:
         created, updated, deactivated = sync_commands_to_db()
@@ -643,7 +638,7 @@ def sync_commands_api(request):
             'deactivated': deactivated,
         })
     except Exception as e:
-        logger.exception(f'同步命令异常: {e}')
+        logger.exception('同步命令异常: %s', e)
         return JsonResponse({'error': str(e)}, status=500)
 
 

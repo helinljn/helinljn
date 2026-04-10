@@ -7,22 +7,14 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-# 延迟导入 requests，避免模块级导入失败阻塞 app 加载
-requests = None
-
 
 def _get_requests():
-    """延迟获取 requests 模块"""
-    global requests
-    if requests is None:
-        try:
-            import requests as _requests
-            requests = _requests
-        except ImportError:
-            raise ImportError(
-                "requests 库未安装，请执行: pip install requests"
-            )
-    return requests
+    """延迟获取 requests 模块，避免模块级导入失败阻塞 app 加载"""
+    try:
+        import requests
+        return requests
+    except ImportError:
+        raise ImportError("requests 库未安装，请执行: pip install requests")
 
 
 def send_idip_command(command, params):
@@ -81,15 +73,15 @@ def send_idip_command(command, params):
         response.raise_for_status()
         return response.json(), None
     except req.Timeout:
-        logger.error(f'IDIP API请求超时: command={command.command_id}')
+        logger.error('IDIP API请求超时: command=%s', command.command_id)
         return None, '请求超时，请稍后重试'
     except req.ConnectionError:
-        logger.error(f'IDIP API连接失败: url={settings.IDIP_API_URL}')
+        logger.error('IDIP API连接失败: url=%s', settings.IDIP_API_URL)
         return None, '无法连接到游戏服务器，请检查配置'
     except Exception as e:
         # 兼容不同版本 requests 的 JSONDecodeError
         if hasattr(req, 'JSONDecodeError') and isinstance(e, req.JSONDecodeError):
-            logger.error(f'IDIP API响应解析失败: response={response.text[:500]}')
+            logger.error('IDIP API响应解析失败: response=%.500s', response.text)
             return {'raw_response': response.text}, None
-        logger.error(f'IDIP API请求异常: {e}')
+        logger.error('IDIP API请求异常: %s', e)
         return None, f'请求失败: {str(e)}'

@@ -54,13 +54,13 @@ def auto_assign_super_admin_role(sender, instance, created, **kwargs):
 
         if created or role_created or profile_created or new_user_perms:
             logger.info(
-                f'超级管理员自动绑定: user={instance.username}, '
-                f'新增用户权限={len(new_user_perms)}'
+                '超级管理员自动绑定: user=%s, 新增用户权限=%d',
+                instance.username, len(new_user_perms),
             )
 
     except Exception as e:
         # 数据库未就绪时（如迁移阶段）忽略错误
-        logger.debug(f'超级管理员自动绑定跳过: {e}')
+        logger.debug('超级管理员自动绑定跳过: %s', e)
 
 
 @receiver(post_migrate)

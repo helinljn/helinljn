@@ -120,8 +120,8 @@ def sync_commands_to_db(json_path=None):
                 if new_user_perms:
                     UserCommandPermission.objects.bulk_create(new_user_perms)
             if superadmin_users.exists():
-                logger.info(f'新增权限已自动授予 {superadmin_users.count()} 个超级管理员用户')
+                logger.info('新增权限已自动授予 %d 个超级管理员用户', superadmin_users.count())
         except Exception as e:
-            logger.warning(f'超级管理员用户权限自动授权跳过: {e}')
+            logger.warning('超级管理员用户权限自动授权跳过: %s', e)
 
     return created_count, updated_count, deactivated_count

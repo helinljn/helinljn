@@ -213,3 +213,25 @@ CREATE INDEX idx_session_expire_date     ON django_session (expire_date);
 --   └── 1:N ── gmtool_loginlog
 --
 -- gmtool_role
+
+
+-- ============================================================
+-- 五、初始数据
+-- ============================================================
+
+-- 默认超级管理员角色
+INSERT INTO gmtool_role (name, display_name, description, is_super_admin, created_at)
+VALUES ('super_admin', '超级管理员', '系统最高权限角色，拥有所有命令执行权限及管理功能', 1, datetime('now'));
+
+-- ============================================================
+-- 六、类型说明
+-- ============================================================
+--
+-- SQLite3 没有 JSON 原生类型，以下字段实际存储为 TEXT：
+--   gmtool_gmcommand.request_params   (JSON → TEXT)
+--   gmtool_gmcommand.response_params  (JSON → TEXT)
+--   gmtool_commandlog.request_data    (JSON → TEXT)
+--   gmtool_commandlog.response_data   (JSON → TEXT)
+--
+-- Django 的 JSONField 在 SQLite 上通过 json_type() 和
+-- json_extract() 提供部分 JSON 查询支持（SQLite >= 3.9.0）。

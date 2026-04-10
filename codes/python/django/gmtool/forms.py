@@ -4,17 +4,8 @@ from django.contrib.auth.models import User
 from .models import Role, UserProfile
 
 
-class UserCreateForm(forms.ModelForm):
-    """创建用户表单"""
-    password = forms.CharField(
-        label='密码',
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-        min_length=6,
-    )
-    password_confirm = forms.CharField(
-        label='确认密码',
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-    )
+class RoleAndPhoneMixin(forms.Form):
+    """角色分组和联系电话字段的共享定义"""
     role = forms.ModelChoiceField(
         label='角色分组',
         queryset=Role.objects.all(),
@@ -26,6 +17,19 @@ class UserCreateForm(forms.ModelForm):
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+
+
+class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
+    """创建用户表单"""
+    password = forms.CharField(
+        label='密码',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        min_length=6,
+    )
+    password_confirm = forms.CharField(
+        label='确认密码',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
     )
 
     class Meta:
@@ -64,20 +68,8 @@ class UserCreateForm(forms.ModelForm):
         return user
 
 
-class UserEditForm(forms.ModelForm):
+class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
     """编辑用户表单"""
-    role = forms.ModelChoiceField(
-        label='角色分组',
-        queryset=Role.objects.all(),
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-select'}),
-    )
-    phone = forms.CharField(
-        label='联系电话',
-        max_length=20,
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-    )
     new_password = forms.CharField(
         label='新密码（留空不修改）',
         required=False,
