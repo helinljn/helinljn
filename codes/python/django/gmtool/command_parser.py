@@ -43,9 +43,15 @@ def parse_commands(json_path=None):
         # 提取响应参数定义
         response_params = cmd_data.get(response_name, [])
 
+        command_name = (
+            cmd_data.get('name')
+            or cmd_data.get('command_name')
+            or cmd_data.get('tab', '')
+        )
+
         commands.append({
             'command_id': cmd_id,
-            'command_name': cmd_data.get('tab', ''),
+            'command_name': command_name,
             'tab': cmd_data.get('tab', ''),
             'request_name': request_name,
             'request_id': cmd_data.get('id', 0),

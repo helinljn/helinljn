@@ -26,6 +26,31 @@ from .models import CommandLog, GMCommand, LoginLog, Role, UserCommandPermission
 logger = logging.getLogger(__name__)
 
 
+def _get_safe_next_url(request):
+    """获取安全的登录后跳转地址，仅允许本站内相对路径"""
+    next_url = request.GET.get('next', '')
+    if not next_url:
+        return ''
+
+    # 禁止 scheme-relative URL（如 //evil.com）
+    if next_url.startswith('//'):
+        return ''
+
+    # 仅允许当前主机，且 HTTPS 请求下要求 https
+    if not url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return ''
+
+    # 仅允许相对路径跳转，避免外部跳转风险
+    if not next_url.startswith('/'):
+        return ''
+
+    return next_url
+
+
 def _group_commands_by_tab(commands):
     """将命令查询集按 tab 字段分组"""
     tab_groups = {}
@@ -63,8 +88,8 @@ def login_view(request):
                 )
                 log_operation('auth', 'login', user=user, ip_address=ip,
                               detail={'username': username})
-                next_url = request.GET.get('next', '')
-                if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts=settings.ALLOWED_HOSTS):
+                next_url = _get_safe_next_url(request)
+                if next_url:
                     return redirect(next_url)
                 return redirect('gmtool:dashboard')
             else:
@@ -402,11 +427,28 @@ def user_permissions(request, user_id):
             user=user_obj
         ).values_list('command_id', flat=True))
 
-        # 校验：仅允许分配活跃命令的权限
+        # 校验：仅允许分配活跃命令的权限，忽略非法ID避免500
         active_command_ids = set(
             GMCommand.objects.filter(is_active=True).values_list('id', flat=True)
         )
-        valid_ids = [int(cid) for cid in selected_ids if int(cid) in active_command_ids]
+        valid_ids = []
+        invalid_ids = []
+        for cid in selected_ids:
+            try:
+                cmd_pk = int(cid)
+            except (TypeError, ValueError):
+                invalid_ids.append(cid)
+                continue
+            if cmd_pk in active_command_ids:
+                valid_ids.append(cmd_pk)
+
+        if invalid_ids:
+            logger.warning(
+                '用户权限分配收到非法命令ID: operator=%s, target_user_id=%s, invalid_ids=%s',
+                request.user.username,
+                user_id,
+                invalid_ids,
+            )
 
         # 清除旧权限，写入新权限（事务保护）
         with transaction.atomic():
@@ -671,10 +713,10 @@ def custom_403(request, exception=None):
 
 def csrf_failure(request, reason=""):
     """CSRF 验证失败处理
-    
+
     典型场景：两个标签页共享同一个 session，其中一个登录后 Django 轮转了
     CSRF token，另一个标签页提交时 token 失效。
-    
+
     处理方式：
     - 登录页 CSRF 失败 → 统一重定向回登录页并提示"页面已过期"，
       不调用 auth_logout（避免销毁共享 session 影响其他标签页），
