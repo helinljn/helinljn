@@ -12,14 +12,14 @@
 namespace core {
 
 /**
- * @brief 获取当前空闲内存(以KB为单位)
+ * @brief 获取当前空闲内存(以MB为单位)
  * @param
  * @return
  */
 CORE_API uint32_t get_free_memory(void);
 
 /**
- * @brief 获取系统总内存(以KB为单位)
+ * @brief 获取系统总内存(以MB为单位)
  * @param
  * @return
  */
@@ -268,7 +268,7 @@ CORE_API bool is_alnum(std::string_view str);
 CORE_API bool is_hexdigit(std::string_view str);
 
 /**
- * @brief 判断字符串是否只包含数字字符
+ * @brief 判断字符串是否是十进制数值格式（支持可选正负号与单个小数点）
  * @param str 待检查的字符串
  * @return 是返回true，否返回false
  */
@@ -349,14 +349,14 @@ CORE_API uint32_t random_uint32(void);
 CORE_API uint64_t random_uint64(void);
 
 /**
- * @brief 随机浮点数，生成[0, 1]之间的float
+ * @brief 随机浮点数，生成[0, 1)之间的float
  * @param
  * @return
  */
 CORE_API float random_float(void);
 
 /**
- * @brief 随机浮点数，生成[0, 1]之间的double
+ * @brief 随机浮点数，生成[0, 1)之间的double
  * @param
  * @return
  */

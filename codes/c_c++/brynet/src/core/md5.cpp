@@ -23,17 +23,16 @@ documentation and/or software.
 #include "md5.h"
 #include "common.h"
 #include <cstdio>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
+#include <limits>
 
 namespace core {
 namespace md5  {
 
-/* POINTER defines a generic pointer type */
-typedef unsigned char* POINTER;
-
 /* UINT4 defines a four byte word */
-typedef unsigned int UINT4;
+typedef uint32_t UINT4;
 
 /* MD5 context. */
 typedef struct {
@@ -61,15 +60,15 @@ typedef struct {
 #define S43 15
 #define S44 21
 
-static void MD5Transform (UINT4 state[4], unsigned char block[64]);
-static void Encode (unsigned char *output, UINT4 *input, unsigned int len);
-static void Decode (UINT4 *output, unsigned char *input, unsigned int len);
+static void MD5Transform (UINT4 state[4], const unsigned char block[64]);
+static void Encode (unsigned char *output, const UINT4 *input, unsigned int len);
+static void Decode (UINT4 *output, const unsigned char *input, unsigned int len);
 
 static void MD5Init (MD5_CTX *context);
-static void MD5Update (MD5_CTX *context, unsigned char *input, unsigned int inputLen);
+static void MD5Update (MD5_CTX *context, const unsigned char *input, unsigned int inputLen);
 static void MD5Final (unsigned char digest[16], MD5_CTX *context);
 
-static unsigned char PADDING[64] = {
+static const unsigned char PADDING[64] = {
     0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -112,7 +111,7 @@ Rotation is separate from addition to prevent recomputation.
 
 /* MD5 basic transformation. Transforms state based on block.
  */
-static void MD5Transform (UINT4 state[4], unsigned char block[64])
+static void MD5Transform (UINT4 state[4], const unsigned char block[64])
 {
     UINT4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
@@ -197,13 +196,13 @@ static void MD5Transform (UINT4 state[4], unsigned char block[64])
 
     /* Zeroize sensitive information.
     */
-    memset((POINTER)x, 0, sizeof (x));
+    memset(x, 0, sizeof (x));
 }
 
 /* Encodes input (UINT4) into output (unsigned char). Assumes len is
   a multiple of 4.
  */
-static void Encode (unsigned char *output, UINT4 *input, unsigned int len)
+static void Encode (unsigned char *output, const UINT4 *input, unsigned int len)
 {
     unsigned int i, j;
 
@@ -218,7 +217,7 @@ static void Encode (unsigned char *output, UINT4 *input, unsigned int len)
 /* Decodes input (unsigned char) into output (UINT4). Assumes len is
   a multiple of 4.
  */
-static void Decode (UINT4 *output, unsigned char *input, unsigned int len)
+static void Decode (UINT4 *output, const unsigned char *input, unsigned int len)
 {
     unsigned int i, j;
 
@@ -244,7 +243,7 @@ static void MD5Init (MD5_CTX *context)
   operation, processing another message block, and updating the
   context.
  */
-static void MD5Update (MD5_CTX *context, unsigned char *input, unsigned int inputLen)
+static void MD5Update (MD5_CTX *context, const unsigned char *input, unsigned int inputLen)
 
 {
     unsigned int i, index, partLen;
@@ -263,7 +262,7 @@ static void MD5Update (MD5_CTX *context, unsigned char *input, unsigned int inpu
     /* Transform as many times as possible.
     */
     if (inputLen >= partLen) {
-        memcpy((POINTER)&context->buffer[index], (POINTER)input, partLen);
+        memcpy(&context->buffer[index], input, partLen);
         MD5Transform (context->state, context->buffer);
 
         for (i = partLen; i + 63 < inputLen; i += 64)
@@ -275,7 +274,7 @@ static void MD5Update (MD5_CTX *context, unsigned char *input, unsigned int inpu
         i = 0;
 
     /* Buffer remaining input */
-    memcpy((POINTER)&context->buffer[index], (POINTER)&input[i],inputLen-i);
+    memcpy(&context->buffer[index], &input[i], inputLen - i);
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
@@ -303,21 +302,34 @@ static void MD5Final (unsigned char digest[16], MD5_CTX *context)
 
     /* Zeroize sensitive information.
     */
-    memset ((POINTER)context, 0, sizeof (*context));
+    memset (context, 0, sizeof (*context));
 }
 
 } // namespace md5
 
-std::string md5_string(std::string_view data, bool uppercase)
+std::string md5_string(const std::string& data, bool uppercase)
 {
     md5::MD5_CTX  context;
     unsigned char digest[16];
     char          outbuf[sizeof(digest) * 2 + 1];
-    if (data.empty())
-        return std::string{};
 
     md5::MD5Init(&context);
-    md5::MD5Update(&context, (unsigned char *)data.data(), (unsigned int) data.size());
+
+    const auto* input     = reinterpret_cast<const unsigned char*>(data.data());
+    size_t      remaining = data.size();
+    while (remaining > 0)
+    {
+        const unsigned int chunk =
+            (remaining > static_cast<size_t>(std::numeric_limits<unsigned int>::max()))
+                ? std::numeric_limits<unsigned int>::max()
+                : static_cast<unsigned int>(remaining);
+
+        md5::MD5Update(&context, input, chunk);
+
+        input     += chunk;
+        remaining -= chunk;
+    }
+
     md5::MD5Final(digest, &context);
 
     if (!memory_to_hex_string(digest, sizeof(digest), outbuf, sizeof(outbuf), uppercase))
@@ -326,7 +338,7 @@ std::string md5_string(std::string_view data, bool uppercase)
     return std::string(outbuf, sizeof(outbuf) - 1);
 }
 
-std::string md5_file(std::string_view filename, bool uppercase)
+std::string md5_file(const std::string& filename, bool uppercase)
 {
     md5::MD5_CTX  context;
     unsigned char buffer[4096];
@@ -335,7 +347,7 @@ std::string md5_file(std::string_view filename, bool uppercase)
     if (filename.empty())
         return std::string{};
 
-    std::ifstream file(filename.data(), std::ios::binary);
+    std::ifstream file(filename, std::ios::binary);
     if (!file)
         return std::string{};
 

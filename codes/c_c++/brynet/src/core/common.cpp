@@ -195,7 +195,7 @@ uint32_t get_free_memory(void)
     if (!GlobalMemoryStatusEx(&memory_status))
         return 0;
 
-    return static_cast<uint32_t>(memory_status.ullAvailPhys / 1024);
+    return static_cast<uint32_t>(memory_status.ullAvailPhys / 1024 / 1024);
 #elif defined(CORE_PLATFORM_LINUX)
     struct sysinfo info;
 
@@ -203,7 +203,7 @@ uint32_t get_free_memory(void)
     if (ret)
         return 0;
 
-    return static_cast<uint32_t>(info.freeram * info.mem_unit / 1024);
+    return static_cast<uint32_t>(info.freeram * info.mem_unit / 1024 / 1024);
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
@@ -216,7 +216,7 @@ uint32_t get_total_memory(void)
     if (!GlobalMemoryStatusEx(&memory_status))
         return 0;
 
-    return static_cast<uint32_t>(memory_status.ullTotalPhys / 1024);
+    return static_cast<uint32_t>(memory_status.ullTotalPhys / 1024 / 1024);
 #elif defined(CORE_PLATFORM_LINUX)
     struct sysinfo info;
 
@@ -224,7 +224,7 @@ uint32_t get_total_memory(void)
     if (ret)
         return 0;
 
-    return static_cast<uint32_t>(info.totalram * info.mem_unit / 1024);
+    return static_cast<uint32_t>(info.totalram * info.mem_unit / 1024 / 1024);
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
@@ -338,8 +338,15 @@ bool hex_string_to_memory(std::string_view hexstr, void* outbuf, size_t outbuf_l
 
 bool from_hex_string(std::string_view hexstr, void* outbuf, size_t outbuf_len)
 {
-    if (hexstr.size() % 2 != 0)
+    if (hexstr.empty() || !outbuf || outbuf_len == 0)
         return false;
+
+    if (outbuf_len > ((std::numeric_limits<size_t>::max)() / 2))
+        return false;
+
+    if (hexstr.size() != outbuf_len * 2)
+        return false;
+
     return hex_string_to_memory(hexstr, outbuf, outbuf_len);
 }
 
@@ -973,8 +980,11 @@ bool env_has(const std::string& name)
         return false;
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    DWORD size = GetEnvironmentVariableA(name.c_str(), nullptr, 0);
-    return size != 0;
+    char  dummy = '\0';
+    DWORD size  = GetEnvironmentVariableA(name.c_str(), &dummy, 1);
+    if (size != 0)
+        return true;
+    return GetLastError() != ERROR_ENVVAR_NOT_FOUND;
 #elif defined(CORE_PLATFORM_LINUX)
     return getenv(name.c_str()) != nullptr;
 #endif // defined(CORE_PLATFORM_WINDOWS)

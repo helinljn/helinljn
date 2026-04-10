@@ -1192,8 +1192,9 @@ DOCTEST_TEST_SUITE("Misc")
         DOCTEST_CHECK(md5_lower.size() == 32);
         DOCTEST_CHECK(md5_upper.size() == 32);
 
-        // 测试空字符串
-        DOCTEST_CHECK(core::md5_string("", false).empty());
+        // 测试空字符串（应返回有效 MD5）
+        DOCTEST_CHECK(core::md5_string("", false) == "d41d8cd98f00b204e9800998ecf8427e");
+        DOCTEST_CHECK(core::md5_string("", true)  == "D41D8CD98F00B204E9800998ECF8427E");
 
         // 测试文件 MD5（创建临时文件）
         std::string temp_filename = "temp_md5_test.txt";
@@ -1202,13 +1203,14 @@ DOCTEST_TEST_SUITE("Misc")
             temp_file << test_string;
         }
 
-        std::string file_md5_lower = core::md5_file(temp_filename.c_str(), false);
-        std::string file_md5_upper = core::md5_file(temp_filename.c_str(), true);
+        std::string file_md5_lower = core::md5_file(temp_filename, false);
+        std::string file_md5_upper = core::md5_file(temp_filename, true);
 
         DOCTEST_CHECK(!file_md5_lower.empty());
         DOCTEST_CHECK(!file_md5_upper.empty());
         DOCTEST_CHECK(file_md5_lower.size() == 32);
         DOCTEST_CHECK(file_md5_upper.size() == 32);
+        DOCTEST_CHECK(core::to_upper(file_md5_lower) == file_md5_upper);
 
         // 清理临时文件
         std::remove(temp_filename.c_str());

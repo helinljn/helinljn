@@ -5,25 +5,24 @@
 
 #include "core_port.h"
 #include <string>
-#include <string_view>
 
 namespace core {
 
 /**
  * @brief 计算MD5签名(默认为大写形式)
- * @param data      待签名的数据
+ * @param data      待签名的数据(允许为空，空字符串会返回其有效MD5)
  * @param uppercase 签名字符串是否大写
  * @return 成功返回一个签名字符串，失败返回空字符串
  */
-CORE_API std::string md5_string(std::string_view data, bool uppercase = true);
+CORE_API std::string md5_string(const std::string& data, bool uppercase = true);
 
 /**
  * @brief 计算MD5签名(默认为大写形式)
- * @param filename  待签名的文件
+ * @param filename  待签名的文件路径
  * @param uppercase 签名字符串是否大写
- * @return 成功返回一个签名字符串，失败返回空字符串
+ * @return 成功返回一个签名字符串，失败返回空字符串(如文件不存在或无法打开)
  */
-CORE_API std::string md5_file(std::string_view filename, bool uppercase = true);
+CORE_API std::string md5_file(const std::string& filename, bool uppercase = true);
 
 } // namespace core
 
