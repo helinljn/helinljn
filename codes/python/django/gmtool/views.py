@@ -140,7 +140,18 @@ def command_list(request):
 @command_permission_required
 def command_execute(request, cmd_id):
     """命令执行页面：GET显示动态表单，POST转发请求"""
-    command = get_object_or_404(GMCommand, command_id=cmd_id, is_active=True)
+    command = GMCommand.objects.filter(command_id=cmd_id).first()
+
+    # 命令不存在或已停用
+    if not command or not command.is_active:
+        if request.method == 'POST':
+            return JsonResponse(
+                {'success': False, 'error': '该命令已被停用或删除，请刷新页面获取最新命令列表', 'command_deactivated': True},
+                status=410,
+            )
+        from django.contrib import messages
+        messages.error(request, '该命令已被停用或删除')
+        return redirect('gmtool:command_list')
 
     if request.method == 'POST':
         try:

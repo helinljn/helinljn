@@ -198,6 +198,11 @@ document.getElementById('commandForm').addEventListener('submit', async function
 
         if (data.success) {
             resultContent.textContent = JSON.stringify(data.data, null, 2);
+        } else if (data.command_deactivated) {
+            resultContent.textContent = '命令已失效: ' + (data.error || '该命令已被停用或删除，即将跳转到命令列表...');
+            setTimeout(function() {
+                window.location.href = '{% url "gmtool:command_list" %}';
+            }, 2000);
         } else {
             resultContent.textContent = '错误: ' + (data.error || '未知错误');
         }

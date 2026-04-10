@@ -45,6 +45,7 @@ def command_permission_required(view_func):
     命令权限装饰器。
     检查当前用户是否拥有指定命令的执行权限，超级管理员自动通过。
     用于AJAX请求时返回JSON错误。
+    区分"权限不足"和"命令已停用"两种情况。
     """
     @functools.wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -55,12 +56,19 @@ def command_permission_required(view_func):
             return view_func(request, *args, **kwargs)
         # 检查用户是否有该命令的直接权限
         cmd_id = kwargs.get('cmd_id')
-        if cmd_id and UserCommandPermission.objects.filter(
-            user=request.user,
-            command__command_id=cmd_id,
-            command__is_active=True,
-        ).exists():
-            return view_func(request, *args, **kwargs)
+        if cmd_id:
+            # 先检查命令是否存在且活跃
+            cmd = GMCommand.objects.filter(command_id=cmd_id).first()
+            if not cmd or not cmd.is_active:
+                return JsonResponse(
+                    {'error': '该命令已被停用或删除', 'command_deactivated': True},
+                    status=410,
+                )
+            if UserCommandPermission.objects.filter(
+                user=request.user,
+                command=cmd,
+            ).exists():
+                return view_func(request, *args, **kwargs)
         return JsonResponse({'error': '您没有执行该命令的权限'}, status=403)
     return wrapper
 
