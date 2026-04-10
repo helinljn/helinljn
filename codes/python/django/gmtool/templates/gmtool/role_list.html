@@ -2,19 +2,24 @@
 
 {% block title %}角色管理 - GM命令管理系统{% endblock %}
 {% block nav_roles %}active{% endblock %}
+{% block page_pretitle %}管理{% endblock %}
+{% block page_title %}角色管理{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0">角色管理</h4>
-    <a href="{% url 'gmtool:role_create' %}" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg"></i> 创建角色
-    </a>
+<div class="mb-3">
+    <div class="row align-items-center">
+        <div class="col-auto ms-auto">
+            <a href="{% url 'gmtool:role_create' %}" class="btn btn-primary btn-sm">
+                <i class="ti ti-plus me-1"></i>创建角色
+            </a>
+        </div>
+    </div>
 </div>
 
 <div class="card">
     <div class="table-responsive">
-        <table class="table table-hover table-sm mb-0">
-            <thead class="table-light">
+        <table class="table table-vcenter card-table">
+            <thead>
                 <tr>
                     <th>ID</th>
                     <th>角色标识</th>
@@ -33,23 +38,23 @@
                     <td>{{ role.display_name }}</td>
                     <td>
                         {% if role.is_super_admin %}
-                        <span class="badge bg-danger">超级管理员</span>
+                        <span class="badge bg-danger-lt"><i class="ti ti-crown me-1"></i>超级管理员</span>
                         {% else %}
-                        <span class="badge bg-secondary">普通角色</span>
+                        <span class="badge bg-secondary-lt">普通角色</span>
                         {% endif %}
                     </td>
                     <td>{{ role.description|default:"-"|truncatechars:30 }}</td>
-                    <td>{{ role.created_at|date:"Y-m-d H:i" }}</td>
+                    <td class="text-muted">{{ role.created_at|date:"Y-m-d H:i" }}</td>
                     <td>
                         <a href="{% url 'gmtool:role_edit' role.id %}" class="btn btn-sm btn-outline-primary" title="编辑">
-                            <i class="bi bi-pencil"></i>
+                            <i class="ti ti-edit"></i>
                         </a>
                         {% if not role.is_super_admin %}
                         <form method="post" action="{% url 'gmtool:role_delete' role.id %}" class="d-inline"
                               onsubmit="return confirm('确认删除角色 {{ role.display_name }}？')">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="删除">
-                                <i class="bi bi-trash"></i>
+                                <i class="ti ti-trash"></i>
                             </button>
                         </form>
                         {% endif %}
