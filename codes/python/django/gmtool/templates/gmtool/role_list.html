@@ -1,0 +1,65 @@
+{% extends "gmtool/base.html" %}
+
+{% block title %}角色管理 - GM命令管理系统{% endblock %}
+{% block nav_roles %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">角色管理</h4>
+    <a href="{% url 'gmtool:role_create' %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> 创建角色
+    </a>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover table-sm mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>角色标识</th>
+                    <th>显示名称</th>
+                    <th>类型</th>
+                    <th>描述</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for role in roles %}
+                <tr>
+                    <td>{{ role.id }}</td>
+                    <td><code>{{ role.name }}</code></td>
+                    <td>{{ role.display_name }}</td>
+                    <td>
+                        {% if role.is_super_admin %}
+                        <span class="badge bg-danger">超级管理员</span>
+                        {% else %}
+                        <span class="badge bg-secondary">普通角色</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ role.description|default:"-"|truncatechars:30 }}</td>
+                    <td>{{ role.created_at|date:"Y-m-d H:i" }}</td>
+                    <td>
+                        <a href="{% url 'gmtool:role_edit' role.id %}" class="btn btn-sm btn-outline-primary" title="编辑">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% if not role.is_super_admin %}
+                        <form method="post" action="{% url 'gmtool:role_delete' role.id %}" class="d-inline"
+                              onsubmit="return confirm('确认删除角色 {{ role.display_name }}？')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="删除">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-3">暂无角色数据</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

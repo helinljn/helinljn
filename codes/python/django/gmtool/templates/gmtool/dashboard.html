@@ -1,0 +1,140 @@
+{% extends "gmtool/base.html" %}
+
+{% block title %}仪表盘 - GM命令管理系统{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<h4 class="mb-4">仪表盘</h4>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">可用命令</h6>
+                        <h2 class="mb-0">{{ command_count }}</h2>
+                    </div>
+                    <i class="bi bi-terminal" style="font-size:2.5rem; opacity:0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">命令分组</h6>
+                        <h2 class="mb-0">{{ tab_groups|length }}</h2>
+                    </div>
+                    <i class="bi bi-collection" style="font-size:2.5rem; opacity:0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">用户角色</h6>
+                        <h2 class="mb-0">
+                            {% if request.user.userprofile.role %}
+                                {{ request.user.userprofile.role.display_name }}
+                            {% else %}
+                                未分配
+                            {% endif %}
+                        </h2>
+                    </div>
+                    <i class="bi bi-shield-check" style="font-size:2.5rem; opacity:0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 命令快捷入口 -->
+<h5 class="mb-3">命令快捷入口</h5>
+<div class="row">
+    {% for tab, cmds in tab_groups.items %}
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100">
+            <div class="card-header bg-light">
+                <i class="bi bi-folder2-open"></i> {{ tab }}
+            </div>
+            <div class="card-body p-2">
+                {% for cmd in cmds %}
+                <a href="{% url 'gmtool:command_execute' cmd.command_id %}"
+                   class="btn btn-sm btn-outline-primary m-1">
+                    {{ cmd.command_name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">暂无可用的命令，请联系管理员分配权限。</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- 最近操作 -->
+{% if recent_logs %}
+<h5 class="mb-3 mt-4">最近操作</h5>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-light">
+            <tr><th>时间</th><th>命令</th><th>服务器</th><th>状态</th></tr>
+        </thead>
+        <tbody>
+            {% for log in recent_logs %}
+            <tr>
+                <td>{{ log.created_at|date:"m-d H:i" }}</td>
+                <td>{{ log.command.command_name|default:"-" }}</td>
+                <td>{{ log.partition }}</td>
+                <td>
+                    {% if log.status == 'success' %}
+                    <span class="badge bg-success">成功</span>
+                    {% elif log.status == 'failed' %}
+                    <span class="badge bg-danger">失败</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">超时</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if is_admin %}
+<div class="mt-4">
+    <button class="btn btn-outline-secondary" onclick="syncCommands()">
+        <i class="bi bi-arrow-repeat"></i> 同步命令定义
+    </button>
+</div>
+
+<script>
+function syncCommands() {
+    if (!confirm('确认从JSON文件同步命令定义？')) return;
+    fetch('{% url "gmtool:sync_commands_api" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert(`同步完成！新增: ${data.created}, 更新: ${data.updated}, 停用: ${data.deactivated}`);
+            location.reload();
+        } else {
+            alert('同步失败: ' + (data.error || '未知错误'));
+        }
+    })
+    .catch(err => alert('请求失败: ' + err));
+}
+</script>
+{% endif %}
+{% endblock %}

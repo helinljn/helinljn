@@ -1,0 +1,50 @@
+name: django-admin
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+  - defaults
+dependencies:
+  - asgiref=3.11.1
+  - backports.zstd=1.3.0
+  - brotli-python=1.2.0
+  - bzip2=1.0.8
+  - ca-certificates=2026.2.25
+  - certifi=2026.2.25
+  - charset-normalizer=3.4.7
+  - django=5.2.12
+  - h2=4.3.0
+  - hpack=4.1.0
+  - hyperframe=6.1.0
+  - idna=3.11
+  - libexpat=2.7.5
+  - libffi=3.5.2
+  - liblzma=5.8.2
+  - libsqlite=3.53.0
+  - libzlib=1.3.2
+  - openssl=3.6.2
+  - packaging=26.0
+  - pip=26.0.1
+  - pysocks=1.7.1
+  - python=3.11.15
+  - python_abi=3.11
+  - requests=2.33.1
+  - setuptools=82.0.1
+  - sqlparse=0.5.5
+  - tk=8.6.13
+  - typing_extensions=4.15.0
+  - tzdata=2025c
+  - ucrt=10.0.26100.0
+  - urllib3=2.6.3
+  - vc=14.3
+  - vc14_runtime=14.44.35208
+  - vcomp14=14.44.35208
+  - wheel=0.46.3
+  - win_inet_pton=1.1.0
+  - zstd=1.5.7
+prefix: C:\Users\helin\.conda\envs\django-admin

@@ -1,0 +1,199 @@
+{% extends "gmtool/base.html" %}
+
+{% block title %}{{ command.command_name }} - GM命令管理系统{% endblock %}
+{% block nav_commands %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-box { max-height: 400px; overflow-y: auto; }
+    pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="{% url 'gmtool:command_list' %}" class="btn btn-sm btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> 返回列表
+        </a>
+        <h4 class="d-inline">{{ command.command_name }}</h4>
+        <span class="badge bg-secondary">{{ command.command_id }}</span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-light">
+                <i class="bi bi-terminal"></i> 命令参数
+                <small class="text-muted">- {{ command.request_name }}</small>
+            </div>
+            <div class="card-body">
+                <form id="commandForm">
+                    {% csrf_token %}
+                    <!-- 动态表单参数 -->
+                    {% for param in request_params %}
+                    <div class="mb-3">
+                        <label class="form-label" for="param_{{ param.id }}">
+                            {{ param.name }}
+                            {% if param.isnull == "true" %}
+                            <span class="text-muted">(可选)</span>
+                            {% endif %}
+                        </label>
+                        {% if param.type == "time" %}
+                            <input type="datetime-local"
+                                   class="form-control param-field"
+                                   id="param_{{ param.id }}"
+                                   data-param-id="{{ param.id }}"
+                                   data-param-type="time"
+                                   {% if param.isnull != "true" %}required{% endif %}>
+                        {% elif param.type == "string" %}
+                            {% if param.multitarget %}
+                            <textarea class="form-control param-field"
+                                      id="param_{{ param.id }}"
+                                      data-param-id="{{ param.id }}"
+                                      data-param-type="string"
+                                      data-multitarget="true"
+                                      rows="3"
+                                      placeholder="多个目标请用逗号或换行分隔"
+                                      {% if param.isnull != "true" %}required{% endif %}
+                                      {% if param.size %}maxlength="{{ param.size }}"{% endif %}></textarea>
+                            {% else %}
+                            <input type="text"
+                                   class="form-control param-field"
+                                   id="param_{{ param.id }}"
+                                   data-param-id="{{ param.id }}"
+                                   data-param-type="string"
+                                   {% if param.isnull != "true" %}required{% endif %}
+                                   {% if param.size %}maxlength="{{ param.size }}"{% endif %}>
+                            {% endif %}
+                        {% else %}
+                            <input type="number"
+                                   class="form-control param-field"
+                                   id="param_{{ param.id }}"
+                                   data-param-id="{{ param.id }}"
+                                   data-param-type="{{ param.type }}"
+                                   {% if param.isnull != "true" %}required{% endif %}>
+                        {% endif %}
+                        {% if param.tip %}
+                        <div class="form-text">{{ param.tip }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <hr>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-play-fill"></i> 执行命令
+                    </button>
+                    <button type="reset" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i> 重置
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-light">
+                <i class="bi bi-info-circle"></i> 命令信息
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr><td class="text-muted">命令ID</td><td><code>{{ command.command_id }}</code></td></tr>
+                    <tr><td class="text-muted">请求名</td><td><code>{{ command.request_name }}</code></td></tr>
+                    <tr><td class="text-muted">协议ID</td><td>{{ command.request_id }}</td></tr>
+                    <tr><td class="text-muted">响应名</td><td><code>{{ command.response_name }}</code></td></tr>
+                    <tr><td class="text-muted">响应ID</td><td>{{ command.response_id }}</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 执行结果 -->
+<div class="card mt-3 d-none" id="resultCard">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-check-circle"></i> 执行结果</span>
+        <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('resultCard').classList.add('d-none')">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div class="card-body result-box">
+        <pre id="resultContent"></pre>
+    </div>
+</div>
+
+<!-- 加载中遮罩 -->
+<div class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center"
+     id="loadingOverlay" style="z-index:9999;">
+    <div class="text-white text-center">
+        <div class="spinner-border mb-2" role="status"></div>
+        <div>请求发送中...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('commandForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // 收集参数
+    const params = {};
+    document.querySelectorAll('.param-field').forEach(field => {
+        const id = field.dataset.paramId;
+        let value = field.value.trim();
+
+        if (!value) return; // 跳过空值
+
+        if (field.dataset.paramType === 'time') {
+            // datetime-local 转换为 UNIX 时间戳
+            value = Math.floor(new Date(value).getTime() / 1000);
+        } else if (field.dataset.multitarget === 'true') {
+            // 多目标：用分号拼接
+            value = value.split(/[,\n;]/).map(s => s.trim()).filter(s => s).join(';');
+        } else if (['uint32','uint64','int32','uint8'].includes(field.dataset.paramType)) {
+            value = parseInt(value, 10);
+        }
+
+        params[id] = value;
+    });
+
+    // 显示加载
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.remove('d-none');
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+            body: JSON.stringify({ params }),
+        });
+
+        const data = await response.json();
+        const resultCard = document.getElementById('resultCard');
+        const resultContent = document.getElementById('resultContent');
+        resultCard.classList.remove('d-none');
+
+        if (data.success) {
+            resultContent.textContent = JSON.stringify(data.data, null, 2);
+        } else {
+            resultContent.textContent = '错误: ' + (data.error || '未知错误');
+        }
+    } catch (err) {
+        const resultCard = document.getElementById('resultCard');
+        resultCard.classList.remove('d-none');
+        document.getElementById('resultContent').textContent = '请求异常: ' + err.message;
+    } finally {
+        overlay.classList.add('d-none');
+        btn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

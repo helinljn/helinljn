@@ -1,0 +1,60 @@
+{% extends "gmtool/base.html" %}
+
+{% block title %}权限分配 - {{ target_user.username }} - GM命令管理系统{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">权限分配 - {{ target_user.username }}</h4>
+    <a href="{% url 'gmtool:user_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> 返回列表
+    </a>
+</div>
+
+<div class="alert alert-info py-2">
+    <i class="bi bi-info-circle"></i>
+    为用户 <strong>{{ target_user.username }}</strong> 单独分配可执行的GM命令权限。超级管理员自动拥有全部权限，无需手动分配。
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {% for tab, cmds in tab_groups.items %}
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input tab-check" id="tab_{{ forloop.counter }}"
+                       onclick="toggleTab(this, '{{ forloop.counter }}')">
+                <label class="form-check-label fw-bold" for="tab_{{ forloop.counter }}">
+                    {{ tab }}
+                </label>
+            </div>
+        </div>
+        <div class="card-body">
+            {% for cmd in cmds %}
+            <div class="form-check form-check-inline me-4">
+                <input type="checkbox" class="form-check-input cmd-check-{{ forloop.parentloop.counter }}"
+                       name="commands" value="{{ cmd.id }}" id="cmd_{{ cmd.id }}"
+                       {% if cmd.permitted %}checked{% endif %}>
+                <label class="form-check-label" for="cmd_{{ cmd.id }}">
+                    {{ cmd.command_name }} <small class="text-muted">({{ cmd.command_id }})</small>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-check-lg"></i> 保存权限
+    </button>
+    <a href="{% url 'gmtool:user_list' %}" class="btn btn-outline-secondary">取消</a>
+</form>
+
+<script>
+function toggleTab(el, tabIdx) {
+    document.querySelectorAll('.cmd-check-' + tabIdx).forEach(cb => {
+        cb.checked = el.checked;
+    });
+}
+</script>
+{% endblock %}

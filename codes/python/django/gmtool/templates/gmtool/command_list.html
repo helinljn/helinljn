@@ -1,0 +1,62 @@
+{% extends "gmtool/base.html" %}
+
+{% block title %}命令管理 - GM命令管理系统{% endblock %}
+{% block nav_commands %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">命令管理</h4>
+    <form method="get" class="d-flex" style="max-width:300px;">
+        <input type="text" name="search" class="form-control form-control-sm me-2"
+               placeholder="搜索命令..." value="{{ search }}">
+        <button type="submit" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-search"></i>
+        </button>
+    </form>
+</div>
+
+{% for tab, cmds in tab_groups.items %}
+<div class="card mb-3">
+    <div class="card-header bg-light">
+        <i class="bi bi-folder2-open"></i> {{ tab }}
+        <span class="badge bg-secondary">{{ cmds|length }}</span>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:120px;">命令ID</th>
+                        <th>命令名称</th>
+                        <th>请求名</th>
+                        <th style="width:100px;">协议ID</th>
+                        <th style="width:120px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cmd in cmds %}
+                    <tr>
+                        <td><code>{{ cmd.command_id }}</code></td>
+                        <td>{{ cmd.command_name }}</td>
+                        <td><code>{{ cmd.request_name }}</code></td>
+                        <td>{{ cmd.request_id }}</td>
+                        <td>
+                            <a href="{% url 'gmtool:command_execute' cmd.command_id %}"
+                               class="btn btn-sm btn-primary">
+                                <i class="bi bi-play-fill"></i> 执行
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i>
+    {% if search %}未找到匹配"{{ search }}"的命令{% else %}暂无可用的命令，请联系管理员分配权限{% endif %}
+</div>
+{% endfor %}
+{% endblock %}
