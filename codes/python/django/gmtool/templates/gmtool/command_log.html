@@ -113,6 +113,14 @@
 </div>
 {% endif %}
 
+<!-- 日志数据（使用 data-* 属性安全传递，避免 XSS） -->
+{% for log in page_obj %}
+<div class="d-none"
+     id="log-{{ log.id }}"
+     data-request='{{ log.request_data|escapejs }}'
+     data-response='{{ log.response_data|escapejs }}'></div>
+{% endfor %}
+
 <!-- 详情弹窗 -->
 <div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -138,20 +146,21 @@
 
 {% block extra_js %}
 <script>
-const logData = {
-    {% for log in page_obj %}
-    {{ log.id }}: {
-        request: {{ log.request_data|safe }},
-        response: {{ log.response_data|safe|default:"null" }},
-    },
-    {% endfor %}
-};
-
 function showDetail(id) {
-    const data = logData[id];
-    if (data) {
-        document.getElementById('requestData').textContent = JSON.stringify(data.request, null, 2);
-        document.getElementById('responseData').textContent = data.response ? JSON.stringify(data.response, null, 2) : '无响应数据';
+    const el = document.getElementById('log-' + id);
+    if (el) {
+        try {
+            const request = JSON.parse(el.dataset.request);
+            document.getElementById('requestData').textContent = JSON.stringify(request, null, 2);
+        } catch {
+            document.getElementById('requestData').textContent = el.dataset.request || '无数据';
+        }
+        try {
+            const response = JSON.parse(el.dataset.response);
+            document.getElementById('responseData').textContent = JSON.stringify(response, null, 2);
+        } catch {
+            document.getElementById('responseData').textContent = el.dataset.response || '无响应数据';
+        }
     }
     new bootstrap.Modal(document.getElementById('detailModal')).show();
 }

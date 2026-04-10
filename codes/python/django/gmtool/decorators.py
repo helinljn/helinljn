@@ -4,7 +4,7 @@ import functools
 from django.http import JsonResponse
 from django.shortcuts import redirect
 
-from .models import UserProfile, UserCommandPermission
+from .models import GMCommand, UserProfile, UserCommandPermission
 
 
 def is_super_admin(user):
@@ -71,7 +71,6 @@ def get_user_permissions(user):
     超级管理员(Django is_superuser 或 GM角色)返回所有活跃命令。
     普通用户从 UserCommandPermission 读取直接分配的权限。
     """
-    from .models import GMCommand
     # Django 超级管理员 或 GM 超级管理员角色 → 所有活跃命令
     if is_super_admin(user):
         return list(GMCommand.objects.filter(is_active=True).values_list('command_id', flat=True))

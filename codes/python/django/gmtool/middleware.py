@@ -2,6 +2,7 @@
 import os
 import logging
 import threading
+import time
 
 from django.conf import settings
 from django.core.cache import cache
@@ -43,7 +44,6 @@ class IDIPFileMonitorMiddleware:
 
         # 节流：使用缓存控制检查频率
         last_check = cache.get(CACHE_KEY_LAST_CHECK, 0)
-        import time
         now = time.time()
         if now - last_check < CHECK_INTERVAL:
             return

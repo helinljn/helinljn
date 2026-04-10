@@ -152,7 +152,7 @@ CREATE TABLE gmtool_commandlog (
     command_id      INTEGER            NULL REFERENCES gmtool_gmcommand(id),       -- 执行的命令
     partition       INTEGER            NOT NULL,                                    -- 服务器组号
     request_data    JSON               NOT NULL,                                    -- 发送的完整请求体
-    response_data   JSON               NULL,                                        -- API返回的响应
+    response_data   JSON               NULL,                                        -- API返回的响应（可为空）
     status          VARCHAR(20)        NOT NULL,                                    -- 状态：success/failed/timeout
     ip_address      CHAR(39)           NOT NULL,                                    -- 请求IP
     created_at      DATETIME           NOT NULL                                     -- 执行时间

@@ -2,7 +2,8 @@
 import json
 import logging
 
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
@@ -70,7 +71,7 @@ def logout_view(request):
         ip_address=get_client_ip(request),
         user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
     )
-    logout(request)
+    auth_logout(request)
     return redirect('gmtool:login')
 
 
