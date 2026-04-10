@@ -124,6 +124,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # GM命令管理系统配置
 LOGIN_URL = '/gmtool/login/'
+CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 
 # IDIP API 配置
 IDIP_API_URL = 'http://127.0.0.1:8080/api/idip'  # 游戏IDIP接口地址（部署时修改）
@@ -161,7 +162,7 @@ LOGGING = {
         },
         'audit_file': {
             'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'class': 'gmtool.logging_handlers.SafeTimedRotatingFileHandler',
             'filename': str(LOG_DIR / 'audit.log'),
             'when': 'midnight',       # 每天午夜轮转
             'backupCount': 90,         # 保留90天日志
@@ -170,7 +171,7 @@ LOGGING = {
         },
         'app_file': {
             'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'class': 'gmtool.logging_handlers.SafeTimedRotatingFileHandler',
             'filename': str(LOG_DIR / 'gmtool.log'),
             'when': 'midnight',
             'backupCount': 30,         # 保留30天

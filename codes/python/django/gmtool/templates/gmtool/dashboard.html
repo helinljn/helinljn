@@ -122,12 +122,84 @@
 
 {% if is_admin %}
 <div class="mt-4">
-    <button class="btn btn-outline-secondary" onclick="syncCommands()">
-        <i class="ti ti-refresh me-1"></i> 同步命令定义
-    </button>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="ti ti-settings me-2"></i>命令配置管理</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4 class="mb-2">上传命令定义文件</h4>
+                    <p class="text-muted mb-3">上传 <code>idip_commands.json</code> 文件以替换现有配置，上传后自动同步到数据库。</p>
+                    <div class="input-group">
+                        <input type="file" class="form-control" id="jsonFileInput" accept=".json">
+                        <button class="btn btn-primary" id="uploadBtn" onclick="uploadCommands()">
+                            <i class="ti ti-upload me-1"></i>上传并同步
+                        </button>
+                    </div>
+                    <div id="uploadResult" class="mt-2" style="display:none;"></div>
+                </div>
+                <div class="col-md-6">
+                    <h4 class="mb-2">手动同步</h4>
+                    <p class="text-muted mb-3">从服务器上现有的 <code>idip_commands.json</code> 文件重新同步命令定义到数据库。</p>
+                    <button class="btn btn-outline-secondary" onclick="syncCommands()">
+                        <i class="ti ti-refresh me-1"></i> 同步命令定义
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+function uploadCommands() {
+    const fileInput = document.getElementById('jsonFileInput');
+    const resultDiv = document.getElementById('uploadResult');
+    const btn = document.getElementById('uploadBtn');
+
+    if (!fileInput.files.length) {
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<div class="alert alert-warning mb-0"><i class="ti ti-alert-triangle me-1"></i>请先选择文件</div>';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>上传中...';
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = '<div class="alert alert-info mb-0"><i class="ti ti-loader me-1"></i>正在上传并同步...</div>';
+
+    fetch('{% url "gmtool:upload_commands_api" %}', {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-upload me-1"></i>上传并同步';
+        if (data.success) {
+            resultDiv.innerHTML = `<div class="alert alert-success mb-0">
+                <i class="ti ti-check me-1"></i>上传同步成功！新增: ${data.created}, 更新: ${data.updated}, 停用: ${data.deactivated}
+            </div>`;
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger mb-0">
+                <i class="ti ti-alert-circle me-1"></i>${data.error || '未知错误'}
+            </div>`;
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="ti ti-upload me-1"></i>上传并同步';
+        resultDiv.innerHTML = `<div class="alert alert-danger mb-0">
+            <i class="ti ti-alert-circle me-1"></i>请求失败: ${err}
+        </div>`;
+    });
+}
+
 function syncCommands() {
     if (!confirm('确认从JSON文件同步命令定义？')) return;
     fetch('{% url "gmtool:sync_commands_api" %}', {

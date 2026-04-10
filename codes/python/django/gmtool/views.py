@@ -2,6 +2,7 @@
 import json
 import logging
 
+from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -523,6 +524,84 @@ def command_log_list(request):
 # ========== API ==========
 
 @login_required
+def upload_commands_api(request):
+    """上传idip_commands.json并自动同步命令定义"""
+    if not is_super_admin(request.user):
+        return JsonResponse({'error': '权限不足'}, status=403)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': '仅支持POST请求'}, status=405)
+
+    # 校验文件
+    uploaded_file = request.FILES.get('file')
+    if not uploaded_file:
+        return JsonResponse({'error': '请选择文件'}, status=400)
+
+    # 校验文件名
+    if not uploaded_file.name.endswith('.json'):
+        return JsonResponse({'error': '仅支持 .json 文件'}, status=400)
+
+    # 校验文件大小（限制 5MB）
+    if uploaded_file.size > 5 * 1024 * 1024:
+        return JsonResponse({'error': '文件大小不能超过 5MB'}, status=400)
+
+    # 解析并校验 JSON 内容
+    try:
+        raw = uploaded_file.read()
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        return JsonResponse({'error': f'JSON 解析失败: {str(e)}'}, status=400)
+
+    # 校验顶层结构：必须是 dict，且每个值包含必要字段
+    if not isinstance(data, dict):
+        return JsonResponse({'error': 'JSON 顶层必须是对象(dict)'}, status=400)
+
+    required_keys = {'tab', 'request', 'id', 'responseid', 'respone'}
+    for cmd_id, cmd_data in data.items():
+        if not isinstance(cmd_data, dict):
+            return JsonResponse({'error': f'命令 {cmd_id} 的值必须是对象'}, status=400)
+        missing = required_keys - set(cmd_data.keys())
+        if missing:
+            return JsonResponse({'error': f'命令 {cmd_id} 缺少必要字段: {", ".join(missing)}'}, status=400)
+        # 校验 request_name 对应的参数列表存在
+        request_name = cmd_data.get('request', '')
+        if request_name and not isinstance(cmd_data.get(request_name), list):
+            return JsonResponse({'error': f'命令 {cmd_id} 的请求参数 {request_name} 必须是数组'}, status=400)
+
+    # 写入 idip_commands.json
+    try:
+        json_path = settings.BASE_DIR / 'idip_commands.json'
+        with open(json_path, 'w', encoding='utf-8') as f:
+            f.write(raw.decode('utf-8') if isinstance(raw, bytes) else raw)
+    except Exception as e:
+        logger.exception(f'写入JSON文件失败: {e}')
+        return JsonResponse({'error': f'文件写入失败: {str(e)}'}, status=500)
+
+    # 自动执行同步
+    try:
+        created, updated, deactivated = sync_commands_to_db()
+    except Exception as e:
+        logger.exception(f'同步命令异常: {e}')
+        return JsonResponse({'error': f'文件已上传但同步失败: {str(e)}'}, status=500)
+
+    log_operation('command', 'upload_and_sync', user=request.user,
+                  ip_address=get_client_ip(request),
+                  detail={
+                      'filename': uploaded_file.name,
+                      'created': created,
+                      'updated': updated,
+                      'deactivated': deactivated,
+                  })
+
+    return JsonResponse({
+        'success': True,
+        'created': created,
+        'updated': updated,
+        'deactivated': deactivated,
+    })
+
+
+@login_required
 def sync_commands_api(request):
     """从JSON同步命令定义"""
     if not is_super_admin(request.user):
@@ -575,4 +654,21 @@ def custom_500(request):
 
 def custom_403(request, exception=None):
     """403 访问被拒绝"""
+    return render(request, 'gmtool/403.html', status=403)
+
+
+def csrf_failure(request, reason=""):
+    """CSRF 验证失败处理
+    
+    典型场景：两个未登录标签页共享同一个匿名 session，
+    其中一个登录后 Django 轮转了 CSRF token，
+    另一个标签页提交时 token 失效。
+    处理方式：对登录请求重定向回登录页并提示，其他请求返回 403。
+    """
+    if request.path == '/gmtool/login/':
+        from django.contrib.auth import logout as auth_logout
+        auth_logout(request)
+        from django.contrib import messages
+        messages.error(request, '页面已过期，请重新登录。')
+        return redirect('gmtool:login')
     return render(request, 'gmtool/403.html', status=403)

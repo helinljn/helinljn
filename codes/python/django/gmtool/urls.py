@@ -35,4 +35,5 @@ urlpatterns = [
 
     # API
     path('api/commands/sync/', views.sync_commands_api, name='sync_commands_api'),
+    path('api/commands/upload/', views.upload_commands_api, name='upload_commands_api'),
 ]
