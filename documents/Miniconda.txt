@@ -2,27 +2,30 @@
 # 安装时选择：Install for all users，勾选所有选项
 https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D
 
-# 更换Conda源
+# 显示现有源
 conda config --show channels
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
-conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
-conda config --set show_channel_urls yes
+
+# 清除现有源
+conda config --remove-key channels
+
+# 清除索引缓存
+conda clean -i
+
+# 恢复默认源
+conda config --add channels defaults
+
+# 更换conda源
+    conda配置文件位置：~/.condarc(Windows路径为：C:\Users\<UserName>\.condarc)
+        channels:
+          - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+          - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
 
 # 更换pip源
-pip配置文件位置：~/.pip/pip.conf (Windows路径为：C:\Users\<UserName>\pip\pip.ini)
-
-[global]
-trusted-host = mirrors.aliyun.com
-index-url = https://mirrors.aliyun.com/pypi/simple/
-timeout = 120
-
-# 临时更换pip源
-pip install <包名> -i https://mirrors.aliyun.com/pypi/simple/
+    pip配置文件位置：~/.pip/pip.conf (Windows路径为：C:\Users\<UserName>\pip\pip.ini)
+        [global]
+        trusted-host = pypi.tuna.tsinghua.edu.cn
+        index-url = https://pypi.tuna.tsinghua.edu.cn/simple/
+        timeout = 60
 
 # 环境变量
     Windows:
