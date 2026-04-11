@@ -84,9 +84,12 @@
                                         <i class="ti ti-user-circle me-1"></i> {{ request.user.username }}
                                         {% if is_admin %}<span class="badge bg-warning ms-1">管理员</span>{% endif %}
                                     </span>
-                                    <a href="{% url 'gmtool:logout' %}" class="btn btn-outline-danger btn-sm">
-                                        <i class="ti ti-logout me-1"></i>退出
-                                    </a>
+                                    <form method="post" action="{% url 'gmtool:logout' %}" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="ti ti-logout me-1"></i>退出
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

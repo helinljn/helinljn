@@ -26,9 +26,12 @@
                         <a href="{% url 'gmtool:dashboard' %}" class="btn btn-primary w-100 mb-2">
                             <i class="ti ti-home me-2"></i>进入系统
                         </a>
-                        <a href="{% url 'gmtool:logout' %}" class="btn btn-outline-secondary w-100">
-                            <i class="ti ti-switch-horizontal me-2"></i>切换账号
-                        </a>
+                        <form method="post" action="{% url 'gmtool:logout' %}" class="w-100">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-secondary w-100">
+                                <i class="ti ti-switch-horizontal me-2"></i>切换账号
+                            </button>
+                        </form>
                     </div>
                     {% else %}
                     <h2 class="h2 text-center mb-4">登录你的账号</h2>

@@ -111,16 +111,17 @@ def login_view(request):
     return render(request, 'gmtool/login.html')
 
 
+@login_required
+@require_POST
 def logout_view(request):
-    """登出"""
-    if request.user.is_authenticated:
-        log_operation('auth', 'logout', user=request.user, ip_address=get_client_ip(request),
-                      detail={'username': request.user.username})
-        LoginLog.objects.create(
-            user=request.user, username=request.user.username, action='logout',
-            ip_address=get_client_ip(request),
-            user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
-        )
+    """登出（仅允许POST，防止CSRF强制登出）"""
+    log_operation('auth', 'logout', user=request.user, ip_address=get_client_ip(request),
+                  detail={'username': request.user.username})
+    LoginLog.objects.create(
+        user=request.user, username=request.user.username, action='logout',
+        ip_address=get_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+    )
     auth_logout(request)
     return redirect('gmtool:login')
 
@@ -187,8 +188,24 @@ def command_execute(request, cmd_id):
     if request.method == 'POST':
         try:
             body = json.loads(request.body)
+            if not isinstance(body, dict):
+                return JsonResponse({'success': False, 'error': '请求体必须为JSON对象'}, status=400)
+
             params = body.get('params', {})
-            partition = params.get('Partition', 0)
+            if not isinstance(params, dict):
+                return JsonResponse({'success': False, 'error': 'params必须为对象'}, status=400)
+
+            raw_partition = params.get('Partition', 0)
+            try:
+                partition = int(raw_partition)
+            except (TypeError, ValueError):
+                return JsonResponse({'success': False, 'error': 'Partition必须为整数'}, status=400)
+
+            if partition < 0:
+                return JsonResponse({'success': False, 'error': 'Partition不能为负数'}, status=400)
+
+            # 归一化写回，确保后续下游与日志类型一致
+            params['Partition'] = partition
 
             # 调用IDIP API
             response_data, error, request_content = send_idip_command(command, params)
