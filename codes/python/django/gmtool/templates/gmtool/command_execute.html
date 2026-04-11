@@ -1,8 +1,9 @@
 {% extends "gmtool/base.html" %}
+{% load i18n %}
 
-{% block title %}{{ command.command_name }} - GM命令管理系统{% endblock %}
+{% block title %}{{ command.command_name }} - {% trans "GM Command System" %}{% endblock %}
 {% block nav_commands %}active{% endblock %}
-{% block page_pretitle %}命令{% endblock %}
+{% block page_pretitle %}{% trans "Commands" %}{% endblock %}
 {% block page_title %}{{ command.command_name }}{% endblock %}
 
 {% block extra_css %}
@@ -15,7 +16,7 @@
 {% block content %}
 <div class="mb-3">
     <a href="{% url 'gmtool:command_list' %}" class="btn btn-sm btn-outline-secondary me-2">
-        <i class="ti ti-arrow-left me-1"></i>返回列表
+        <i class="ti ti-arrow-left me-1"></i>{% trans "Back to List" %}
     </a>
     <span class="badge bg-secondary-lt">{{ command.command_id }}</span>
 </div>
@@ -24,7 +25,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-terminal-2 me-2"></i>命令参数</h3>
+                <h3 class="card-title"><i class="ti ti-terminal-2 me-2"></i>{% trans "Command Parameters" %}</h3>
                 <div class="card-actions">
                     <small class="text-muted">{{ command.request_name }}</small>
                 </div>
@@ -37,7 +38,7 @@
                         <label class="form-label" for="param_{{ param.id }}">
                             {{ param.name }}
                             {% if param.isnull == "true" %}
-                            <span class="form-label-description">可选</span>
+                            <span class="form-label-description">{% trans "Optional" %}</span>
                             {% endif %}
                         </label>
                         {% if param.type == "time" %}
@@ -55,7 +56,7 @@
                                       data-param-type="string"
                                       data-multitarget="true"
                                       rows="3"
-                                      placeholder="多个目标请用逗号或换行分隔"
+                                      placeholder="{% trans 'Separate multiple targets with commas or newlines' %}"
                                       {% if param.isnull != "true" %}required{% endif %}
                                       {% if param.size %}maxlength="{{ param.size }}"{% endif %}></textarea>
                             {% else %}
@@ -83,10 +84,10 @@
 
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="ti ti-player-play me-1"></i>执行命令
+                            <i class="ti ti-player-play me-1"></i>{% trans "Execute Command" %}
                         </button>
                         <button type="reset" class="btn btn-outline-secondary ms-2">
-                            <i class="ti ti-rotate me-1"></i>重置
+                            <i class="ti ti-rotate me-1"></i>{% trans "Reset" %}
                         </button>
                     </div>
                 </form>
@@ -97,28 +98,28 @@
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>命令信息</h3>
+                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>{% trans "Command Info" %}</h3>
             </div>
             <div class="card-body p-0">
                 <div class="list-group list-group-flush">
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">命令ID</span>
+                        <span class="text-muted">{% trans "Command ID" %}</span>
                         <span><code>{{ command.command_id }}</code></span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">请求名</span>
+                        <span class="text-muted">{% trans "Request Name" %}</span>
                         <span><code>{{ command.request_name }}</code></span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">协议ID</span>
+                        <span class="text-muted">{% trans "Protocol ID" %}</span>
                         <span>{{ command.request_id }}</span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">响应名</span>
+                        <span class="text-muted">{% trans "Response Name" %}</span>
                         <span><code>{{ command.response_name }}</code></span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">响应ID</span>
+                        <span class="text-muted">{% trans "Response ID" %}</span>
                         <span>{{ command.response_id }}</span>
                     </div>
                 </div>
@@ -130,7 +131,7 @@
 <!-- 执行结果 -->
 <div class="card mt-3 d-none" id="resultCard">
     <div class="card-header">
-        <h3 class="card-title"><i class="ti ti-check me-2"></i>执行结果</h3>
+        <h3 class="card-title"><i class="ti ti-check me-2"></i>{% trans "Execution Result" %}</h3>
         <div class="card-actions">
             <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('resultCard').classList.add('d-none')">
                 <i class="ti ti-x"></i>
@@ -147,7 +148,7 @@
      id="loadingOverlay" style="z-index:9999;">
     <div class="text-white text-center">
         <div class="mb-3"><span class="spinner-border spinner-border-lg"></span></div>
-        <div>请求发送中...</div>
+        <div>{% trans "Sending request..." %}</div>
     </div>
 </div>
 {% endblock %}
@@ -199,17 +200,17 @@ document.getElementById('commandForm').addEventListener('submit', async function
         if (data.success) {
             resultContent.textContent = JSON.stringify(data.data, null, 2);
         } else if (data.command_deactivated) {
-            resultContent.textContent = '命令已失效: ' + (data.error || '该命令已被停用或删除，即将跳转到命令列表...');
+            resultContent.textContent = '{% trans "Command deactivated" %}: ' + (data.error || '{% trans "This command has been deactivated or deleted, redirecting to command list..." %}');
             setTimeout(function() {
                 window.location.href = '{% url "gmtool:command_list" %}';
             }, 2000);
         } else {
-            resultContent.textContent = '错误: ' + (data.error || '未知错误');
+            resultContent.textContent = '{% trans "Error" %}: ' + (data.error || '{% trans "Unknown error" %}');
         }
     } catch (err) {
         const resultCard = document.getElementById('resultCard');
         resultCard.classList.remove('d-none');
-        document.getElementById('resultContent').textContent = '请求异常: ' + err.message;
+        document.getElementById('resultContent').textContent = '{% trans "Request error" %}: ' + err.message;
     } finally {
         overlay.classList.add('d-none');
         overlay.classList.remove('d-flex');

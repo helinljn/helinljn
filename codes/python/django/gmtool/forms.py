@@ -1,19 +1,20 @@
 """Django表单定义"""
 from django import forms
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 from .models import Role, UserProfile
 
 
 class RoleAndPhoneMixin(forms.Form):
     """角色分组和联系电话字段的共享定义"""
     role = forms.ModelChoiceField(
-        label='角色分组',
+        label=_('Role'),
         queryset=Role.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
     phone = forms.CharField(
-        label='联系电话',
+        label=_('Phone'),
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -23,12 +24,12 @@ class RoleAndPhoneMixin(forms.Form):
 class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
     """创建用户表单"""
     password = forms.CharField(
-        label='密码',
+        label=_('Password'),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         min_length=6,
     )
     password_confirm = forms.CharField(
-        label='确认密码',
+        label=_('Confirm Password'),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
     )
 
@@ -41,9 +42,9 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
-            'username': '用户名',
-            'email': '邮箱',
-            'is_active': '是否启用',
+            'username': _('Username'),
+            'email': _('Email'),
+            'is_active': _('Active'),
         }
 
     def clean(self):
@@ -51,7 +52,7 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
         password = cleaned_data.get('password')
         password_confirm = cleaned_data.get('password_confirm')
         if password and password_confirm and password != password_confirm:
-            self.add_error('password_confirm', '两次密码输入不一致')
+            self.add_error('password_confirm', _('Passwords do not match'))
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -71,7 +72,7 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
 class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
     """编辑用户表单"""
     new_password = forms.CharField(
-        label='新密码（留空不修改）',
+        label=_('New Password (leave blank to keep unchanged)'),
         required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         min_length=6,
@@ -86,9 +87,9 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
-            'username': '用户名',
-            'email': '邮箱',
-            'is_active': '是否启用',
+            'username': _('Username'),
+            'email': _('Email'),
+            'is_active': _('Active'),
         }
 
     def __init__(self, *args, **kwargs):
@@ -101,7 +102,7 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
         # 如果编辑的是自己，禁用 is_active 复选框
         if self.is_self:
             self.fields['is_active'].disabled = True
-            self.fields['is_active'].help_text = '不能禁用自己的账号'
+            self.fields['is_active'].help_text = _('You cannot disable your own account')
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -132,8 +133,8 @@ class RoleForm(forms.ModelForm):
             'is_super_admin': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
-            'name': '角色标识',
-            'display_name': '显示名称',
-            'description': '角色描述',
-            'is_super_admin': '超级管理员',
+            'name': _('Role Identifier'),
+            'display_name': _('Display Name'),
+            'description': _('Description'),
+            'is_super_admin': _('Super Admin'),
         }

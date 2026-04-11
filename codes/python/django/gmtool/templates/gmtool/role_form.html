@@ -1,14 +1,15 @@
 {% extends "gmtool/base.html" %}
+{% load i18n %}
 
-{% block title %}{{ title }} - GM命令管理系统{% endblock %}
+{% block title %}{{ title }} - {% trans "GM Command System" %}{% endblock %}
 {% block nav_roles %}active{% endblock %}
-{% block page_pretitle %}管理{% endblock %}
+{% block page_pretitle %}{% trans "Management" %}{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
 <div class="mb-3">
     <a href="{% url 'gmtool:role_list' %}" class="btn btn-sm btn-outline-secondary">
-        <i class="ti ti-arrow-left me-1"></i>返回列表
+        <i class="ti ti-arrow-left me-1"></i>{% trans "Back to List" %}
     </a>
 </div>
 
@@ -22,7 +23,7 @@
                     <div class="mb-3">
                         <label class="form-label" for="{{ field.id_for_label }}">
                             {{ field.label }}
-                            {% if field.field.required %}<span class="form-label-description">必填</span>{% endif %}
+                            {% if field.field.required %}<span class="form-label-description">{% trans "Required" %}</span>{% endif %}
                         </label>
                         {{ field }}
                         {% if field.errors %}
@@ -32,9 +33,9 @@
                     {% endfor %}
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary">
-                            <i class="ti ti-check me-1"></i>保存
+                            <i class="ti ti-check me-1"></i>{% trans "Save" %}
                         </button>
-                        <a href="{% url 'gmtool:role_list' %}" class="btn btn-outline-secondary ms-2">取消</a>
+                        <a href="{% url 'gmtool:role_list' %}" class="btn btn-outline-secondary ms-2">{% trans "Cancel" %}</a>
                     </div>
                 </form>
             </div>

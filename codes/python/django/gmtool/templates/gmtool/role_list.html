@@ -1,16 +1,17 @@
 {% extends "gmtool/base.html" %}
+{% load i18n %}
 
-{% block title %}角色管理 - GM命令管理系统{% endblock %}
+{% block title %}{% trans "Roles" %} - {% trans "GM Command System" %}{% endblock %}
 {% block nav_roles %}active{% endblock %}
-{% block page_pretitle %}管理{% endblock %}
-{% block page_title %}角色管理{% endblock %}
+{% block page_pretitle %}{% trans "Management" %}{% endblock %}
+{% block page_title %}{% trans "Roles" %}{% endblock %}
 
 {% block content %}
 <div class="mb-3">
     <div class="row align-items-center">
         <div class="col-auto ms-auto">
             <a href="{% url 'gmtool:role_create' %}" class="btn btn-primary btn-sm">
-                <i class="ti ti-plus me-1"></i>创建角色
+                <i class="ti ti-plus me-1"></i>{% trans "Create Role" %}
             </a>
         </div>
     </div>
@@ -22,12 +23,12 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>角色标识</th>
-                    <th>显示名称</th>
-                    <th>类型</th>
-                    <th>描述</th>
-                    <th>创建时间</th>
-                    <th>操作</th>
+                    <th>{% trans "Role Identifier" %}</th>
+                    <th>{% trans "Display Name" %}</th>
+                    <th>{% trans "Type" %}</th>
+                    <th>{% trans "Description" %}</th>
+                    <th>{% trans "Created At" %}</th>
+                    <th>{% trans "Actions" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,22 +39,22 @@
                     <td>{{ role.display_name }}</td>
                     <td>
                         {% if role.is_super_admin %}
-                        <span class="badge bg-danger-lt"><i class="ti ti-crown me-1"></i>超级管理员</span>
+                        <span class="badge bg-danger-lt"><i class="ti ti-crown me-1"></i>{% trans "Super Admin" %}</span>
                         {% else %}
-                        <span class="badge bg-secondary-lt">普通角色</span>
+                        <span class="badge bg-secondary-lt">{% trans "Regular Role" %}</span>
                         {% endif %}
                     </td>
                     <td>{{ role.description|default:"-"|truncatechars:30 }}</td>
                     <td class="text-muted">{{ role.created_at|date:"Y-m-d H:i" }}</td>
                     <td>
-                        <a href="{% url 'gmtool:role_edit' role.id %}" class="btn btn-sm btn-outline-primary" title="编辑">
+                        <a href="{% url 'gmtool:role_edit' role.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit' %}">
                             <i class="ti ti-edit"></i>
                         </a>
                         {% if not role.is_super_admin %}
                         <form method="post" action="{% url 'gmtool:role_delete' role.id %}" class="d-inline"
-                              onsubmit="return confirm('确认删除角色 {{ role.display_name }}？')">
+                              onsubmit="return confirm('{% blocktrans with name=role.display_name %}Confirm delete role {{ name }}?{% endblocktrans %}')">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="删除">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}">
                                 <i class="ti ti-trash"></i>
                             </button>
                         </form>
@@ -61,7 +62,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center text-muted py-3">暂无角色数据</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-3">{% trans "No role data" %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>

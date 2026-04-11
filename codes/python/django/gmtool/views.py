@@ -16,6 +16,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as __
 
 from .audit_log import log_operation
 from .command_parser import sync_commands_to_db
@@ -73,8 +75,6 @@ def _group_commands_by_tab(commands):
 def login_view(request):
     """登录页面"""
     if request.user.is_authenticated:
-        # 已登录用户访问登录页，显示提示而非静默跳转
-        # 避免多标签页场景下 CSRF 失败重定向回登录页后自动跳转，看起来像绕过了密码验证
         return render(request, 'gmtool/login.html', {
             'already_logged_in': True,
             'current_user': request.user,
@@ -91,10 +91,10 @@ def login_view(request):
                 user=None, username=request.POST.get('username', ''),
                 action='login_failed', ip_address=ip,
                 user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
-                reason='尝试次数过多，请稍后再试',
+                reason=_('Too many login attempts'),
             )
             return render(request, 'gmtool/login.html', {
-                'error': f'登录尝试次数过多，请 {LOGIN_LOCKOUT_SECONDS // 60} 分钟后再试',
+                'error': _('Too many login attempts, please try again in %(minutes)d minutes') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
             })
 
         username = request.POST.get('username', '')
@@ -121,26 +121,25 @@ def login_view(request):
                 cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
                 LoginLog.objects.create(
                     user=None, username=username, action='login_failed',
-                    ip_address=ip, user_agent=ua, reason='账号已禁用',
+                    ip_address=ip, user_agent=ua, reason=_('Account disabled'),
                 )
                 log_operation('auth', 'login_failed', ip_address=ip,
-                              detail={'username': username, 'reason': '账号已禁用'})
-                return render(request, 'gmtool/login.html', {'error': '账号已被禁用'})
+                              detail={'username': username, 'reason': 'Account disabled'})
+                return render(request, 'gmtool/login.html', {'error': _('This account has been disabled')})
         else:
             # 登录失败，累加计数
             cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
             remaining = LOGIN_MAX_ATTEMPTS - attempts - 1
             LoginLog.objects.create(
                 user=None, username=username, action='login_failed',
-                ip_address=ip, user_agent=ua, reason='用户名或密码错误',
+                ip_address=ip, user_agent=ua, reason=_('Incorrect username or password'),
             )
             log_operation('auth', 'login_failed', ip_address=ip,
-                          detail={'username': username, 'reason': '用户名或密码错误'})
-            error_msg = '用户名或密码错误'
+                          detail={'username': username, 'reason': 'Incorrect username or password'})
             if remaining > 0:
-                error_msg = f'用户名或密码错误，还可尝试 {remaining} 次'
+                error_msg = _('Incorrect username or password, %(remaining)d attempts remaining') % {'remaining': remaining}
             else:
-                error_msg = f'登录尝试次数过多，请 {LOGIN_LOCKOUT_SECONDS // 60} 分钟后再试'
+                error_msg = _('Too many login attempts, please try again in %(minutes)d minutes') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60}
             return render(request, 'gmtool/login.html', {'error': error_msg})
     return render(request, 'gmtool/login.html')
 
@@ -213,31 +212,31 @@ def command_execute(request, cmd_id):
     if not command or not command.is_active:
         if request.method == 'POST':
             return JsonResponse(
-                {'success': False, 'error': '该命令已被停用或删除，请刷新页面获取最新命令列表', 'command_deactivated': True},
+                {'success': False, 'error': __('This command has been deactivated or deleted, please refresh the page'), 'command_deactivated': True},
                 status=410,
             )
         from django.contrib import messages
-        messages.error(request, '该命令已被停用或删除')
+        messages.error(request, _('This command has been deactivated or deleted'))
         return redirect('gmtool:command_list')
 
     if request.method == 'POST':
         try:
             body = json.loads(request.body)
             if not isinstance(body, dict):
-                return JsonResponse({'success': False, 'error': '请求体必须为JSON对象'}, status=400)
+                return JsonResponse({'success': False, 'error': __('Request body must be a JSON object')}, status=400)
 
             params = body.get('params', {})
             if not isinstance(params, dict):
-                return JsonResponse({'success': False, 'error': 'params必须为对象'}, status=400)
+                return JsonResponse({'success': False, 'error': __('Params must be an object')}, status=400)
 
             raw_partition = params.get('Partition', 0)
             try:
                 partition = int(raw_partition)
             except (TypeError, ValueError):
-                return JsonResponse({'success': False, 'error': 'Partition必须为整数'}, status=400)
+                return JsonResponse({'success': False, 'error': __('Partition must be an integer')}, status=400)
 
             if partition < 0:
-                return JsonResponse({'success': False, 'error': 'Partition不能为负数'}, status=400)
+                return JsonResponse({'success': False, 'error': __('Partition cannot be negative')}, status=400)
 
             # 归一化写回，确保后续下游与日志类型一致
             params['Partition'] = partition
@@ -279,10 +278,10 @@ def command_execute(request, cmd_id):
             return JsonResponse({'success': True, 'data': response_data})
 
         except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': '请求数据格式错误'}, status=400)
+            return JsonResponse({'success': False, 'error': __('Invalid request data format')}, status=400)
         except Exception as e:
-            logger.exception('命令执行异常: %s', e)
-            return JsonResponse({'success': False, 'error': '服务器内部错误'}, status=500)
+            logger.exception('Command execution error: %s', e)
+            return JsonResponse({'success': False, 'error': __('Internal server error')}, status=500)
 
     # GET: 显示执行表单
     return render(request, 'gmtool/command_execute.html', {
@@ -340,7 +339,7 @@ def user_create(request):
 
     return render(request, 'gmtool/user_form.html', {
         'form': form,
-        'title': '创建用户',
+        'title': _('Create User'),
         'is_admin': True,
     })
 
@@ -360,7 +359,7 @@ def user_edit(request, user_id):
         if form.is_valid():
             # 禁止禁用自己的账号
             if is_self and not form.cleaned_data.get('is_active', True):
-                form.add_error('is_active', '不能禁用自己的账号')
+                form.add_error('is_active', _('You cannot disable your own account'))
             else:
                 form.save()
                 log_operation('user', 'update', user=request.user,
@@ -378,7 +377,7 @@ def user_edit(request, user_id):
 
     return render(request, 'gmtool/user_form.html', {
         'form': form,
-        'title': '编辑用户',
+        'title': _('Edit User'),
         'edit_user': user_obj,
         'is_self': is_self,
         'is_admin': True,
@@ -437,7 +436,7 @@ def role_create(request):
 
     return render(request, 'gmtool/role_form.html', {
         'form': form,
-        'title': '创建角色',
+        'title': _('Create Role'),
         'is_admin': True,
     })
 
@@ -464,7 +463,7 @@ def role_edit(request, role_id):
 
     return render(request, 'gmtool/role_form.html', {
         'form': form,
-        'title': '编辑角色',
+        'title': _('Edit Role'),
         'edit_role': role,
         'is_admin': True,
     })
@@ -505,7 +504,7 @@ def user_permissions(request, user_id):
 
         if invalid_ids:
             logger.warning(
-                '用户权限分配收到非法命令ID: operator=%s, target_user_id=%s, invalid_ids=%s',
+                'Invalid command IDs received in permission assignment: operator=%s, target_user_id=%s, invalid_ids=%s',
                 request.user.username,
                 user_id,
                 invalid_ids,
@@ -663,38 +662,38 @@ def upload_commands_api(request):
     # 校验文件
     uploaded_file = request.FILES.get('file')
     if not uploaded_file:
-        return JsonResponse({'error': '请选择文件'}, status=400)
+        return JsonResponse({'error': __('Please select a file')}, status=400)
 
     # 校验文件名
     if not uploaded_file.name.endswith('.json'):
-        return JsonResponse({'error': '仅支持 .json 文件'}, status=400)
+        return JsonResponse({'error': __('Only .json files are supported')}, status=400)
 
     # 校验文件大小（限制 5MB）
     if uploaded_file.size > 5 * 1024 * 1024:
-        return JsonResponse({'error': '文件大小不能超过 5MB'}, status=400)
+        return JsonResponse({'error': __('File size cannot exceed 5MB')}, status=400)
 
     # 解析并校验 JSON 内容
     try:
         raw = uploaded_file.read()
         data = json.loads(raw)
     except json.JSONDecodeError as e:
-        return JsonResponse({'error': f'JSON 解析失败: {str(e)}'}, status=400)
+        return JsonResponse({'error': __('JSON parse failed: %(error)s') % {'error': str(e)}}, status=400)
 
     # 校验顶层结构：必须是 dict，且每个值包含必要字段
     if not isinstance(data, dict):
-        return JsonResponse({'error': 'JSON 顶层必须是对象(dict)'}, status=400)
+        return JsonResponse({'error': __('Top-level JSON must be an object')}, status=400)
 
     required_keys = {'tab', 'request', 'id', 'responseid', 'respone'}
     for cmd_id, cmd_data in data.items():
         if not isinstance(cmd_data, dict):
-            return JsonResponse({'error': f'命令 {cmd_id} 的值必须是对象'}, status=400)
+            return JsonResponse({'error': __('Command %(id)s value must be an object') % {'id': cmd_id}}, status=400)
         missing = required_keys - set(cmd_data.keys())
         if missing:
-            return JsonResponse({'error': f'命令 {cmd_id} 缺少必要字段: {", ".join(missing)}'}, status=400)
+            return JsonResponse({'error': __('Command %(id)s is missing required fields: %(fields)s') % {'id': cmd_id, 'fields': ', '.join(missing)}}, status=400)
         # 校验 request_name 对应的参数列表存在
         request_name = cmd_data.get('request', '')
         if request_name and not isinstance(cmd_data.get(request_name), list):
-            return JsonResponse({'error': f'命令 {cmd_id} 的请求参数 {request_name} 必须是数组'}, status=400)
+            return JsonResponse({'error': __('Request params %(name)s for command %(id)s must be an array') % {'name': request_name, 'id': cmd_id}}, status=400)
 
     # 原子写入 idip_commands.json（先写临时文件再替换，防止中途崩溃损坏文件）
     try:
@@ -711,15 +710,15 @@ def upload_commands_api(request):
                 os.unlink(tmp_path)
             raise
     except Exception as e:
-        logger.exception('写入JSON文件失败: %s', e)
-        return JsonResponse({'error': f'文件写入失败: {str(e)}'}, status=500)
+        logger.exception('Failed to write JSON file: %s', e)
+        return JsonResponse({'error': __('File write failed: %(error)s') % {'error': str(e)}}, status=500)
 
     # 自动执行同步
     try:
         created, updated, deactivated = sync_commands_to_db()
     except Exception as e:
-        logger.exception('同步命令异常: %s', e)
-        return JsonResponse({'error': '文件已上传但同步失败'}, status=500)
+        logger.exception('Command sync error: %s', e)
+        return JsonResponse({'error': __('File uploaded but sync failed')}, status=500)
 
     log_operation('command', 'upload_and_sync', user=request.user,
                   ip_address=get_client_ip(request),
@@ -760,7 +759,7 @@ def sync_commands_api(request):
             'deactivated': deactivated,
         })
     except Exception as e:
-        logger.exception('同步命令异常: %s', e)
+        logger.exception('Command sync error: %s', e)
         return JsonResponse({'error': str(e)}, status=500)
 
 
@@ -797,20 +796,9 @@ def custom_403(request, exception=None):
 
 
 def csrf_failure(request, reason=""):
-    """CSRF 验证失败处理
-
-    典型场景：两个标签页共享同一个 session，其中一个登录后 Django 轮转了
-    CSRF token，另一个标签页提交时 token 失效。
-
-    处理方式：
-    - 登录页 CSRF 失败 → 统一重定向回登录页并提示"页面已过期"，
-      不调用 auth_logout（避免销毁共享 session 影响其他标签页），
-      也不因 request.user.is_authenticated 而放行（避免绕过密码验证）。
-      重定向后 login_view 的 GET 分支会根据 session 状态决定跳转。
-    - 其他请求 → 返回 403 页面
-    """
+    """CSRF 验证失败处理"""
     if request.path == '/gmtool/login/':
         from django.contrib import messages
-        messages.error(request, '页面已过期，请重新登录。')
+        messages.error(request, __('Page expired, please log in again.'))
         return redirect('gmtool:login')
     return render(request, 'gmtool/403.html', status=403)
