@@ -595,6 +595,17 @@ def command_log_list(request):
     })
 
 
+@login_required
+def log_detail_api(request, log_id):
+    """日志详情 API，返回单条日志的 JSON 数据"""
+    log = get_object_or_404(CommandLog, pk=log_id)
+    return JsonResponse({
+        'request_content': log.request_content or '',
+        'request_data': json.dumps(log.request_data, ensure_ascii=False) if log.request_data else '',
+        'response_data': json.dumps(log.response_data, ensure_ascii=False) if log.response_data else '',
+    })
+
+
 # ========== API ==========
 
 @login_required

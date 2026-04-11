@@ -5,6 +5,83 @@
 {% block page_pretitle %}日志{% endblock %}
 {% block page_title %}操作日志{% endblock %}
 
+{% block extra_css %}
+<style>
+/* 请求参数列：缩略显示，点击查看详情 */
+.log-request-preview {
+    max-width: 180px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+}
+/* 详情弹窗遮罩 */
+.detail-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+}
+/* 详情弹窗主体 */
+.detail-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1051;
+    background: #fff;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.3);
+}
+.detail-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e6e7e9;
+}
+.detail-modal-body {
+    padding: 1.5rem;
+    color: #333;
+}
+.detail-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+.detail-section-title {
+    margin-bottom: 0.5rem;
+}
+.detail-section-title + .detail-section-title {
+    margin-top: 1rem;
+}
+.detail-pre {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 13px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #333;
+}
+.detail-pre-sm {
+    max-height: 200px;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="card mb-3">
     <div class="card-header">
@@ -69,7 +146,7 @@
                     <td>{{ log.partition }}</td>
                     <td>
                         {% if log.request_content %}
-                        <span class="text-muted" style="max-width:180px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;" title="点击详情查看完整内容">{{ log.request_content|truncatechars:30 }}</span>
+                        <span class="text-muted log-request-preview" title="点击查看完整内容" onclick="showDetail({{ log.id }})">{{ log.request_content|truncatechars:30 }}</span>
                         {% else %}
                         <span class="text-muted">-</span>
                         {% endif %}
@@ -121,71 +198,55 @@
 </div>
 {% endif %}
 
-<!-- 日志数据（使用 data-* 属性安全传递，避免 XSS） -->
+<!-- 日志数据存储：每条日志用隐藏 textarea 保存原始文本，供弹窗读取 -->
 {% for log in page_obj %}
-<div class="d-none"
-     id="log-{{ log.id }}"
-     data-request='{{ log.request_data|escapejs }}'
-     data-request-content='{{ log.request_content|escapejs }}'
-     data-response='{{ log.response_data|escapejs }}'></div>
+<textarea id="rc-{{ log.id }}" style="display:none;">{{ log.request_content }}</textarea>
+<textarea id="rd-{{ log.id }}" style="display:none;">{{ log.request_data }}</textarea>
+<textarea id="rs-{{ log.id }}" style="display:none;">{{ log.response_data }}</textarea>
 {% endfor %}
 
-<!-- 详情弹窗 -->
-<div class="modal fade" id="detailModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="ti ti-file-text me-2"></i>日志详情</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <h4 class="mb-2">完整请求JSON</h4>
-                    <pre id="requestContentData" class="rounded p-3" style="background: var(--tblr-bg-surface); max-height:300px; overflow-y:auto;"></pre>
-                </div>
-                <div class="mb-3">
-                    <h4 class="mb-2">请求数据（表单参数）</h4>
-                    <pre id="requestData" class="rounded p-3" style="background: var(--tblr-bg-surface); max-height:200px; overflow-y:auto;"></pre>
-                </div>
-                <div>
-                    <h4 class="mb-2">响应数据</h4>
-                    <pre id="responseData" class="rounded p-3" style="background: var(--tblr-bg-surface); max-height:200px; overflow-y:auto;"></pre>
-                </div>
-            </div>
-        </div>
+<!-- 详情弹窗（纯 CSS+JS 实现，不依赖 Bootstrap Modal） -->
+<div id="detailOverlay" class="detail-overlay" onclick="closeDetail()"></div>
+<div id="detailModal" class="detail-modal">
+    <div class="detail-modal-header">
+        <h5 style="margin:0;"><i class="ti ti-file-text me-2"></i>日志详情</h5>
+        <button type="button" class="detail-modal-close" onclick="closeDetail()">&times;</button>
     </div>
+    <div id="detailBody" class="detail-modal-body"></div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
+function escapeHtml(text) {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function readTextarea(id) {
+    var el = document.getElementById(id);
+    return (el && el.value) ? el.value : '';
+}
+
 function showDetail(id) {
-    const el = document.getElementById('log-' + id);
-    if (el) {
-        // 完整请求JSON
-        const rc = el.dataset.requestContent;
-        try {
-            const obj = JSON.parse(rc);
-            document.getElementById('requestContentData').textContent = JSON.stringify(obj, null, 2);
-        } catch {
-            document.getElementById('requestContentData').textContent = rc || '无数据';
-        }
-        // 请求表单参数
-        try {
-            const request = JSON.parse(el.dataset.request);
-            document.getElementById('requestData').textContent = JSON.stringify(request, null, 2);
-        } catch {
-            document.getElementById('requestData').textContent = el.dataset.request || '无数据';
-        }
-        // 响应数据
-        try {
-            const response = JSON.parse(el.dataset.response);
-            document.getElementById('responseData').textContent = JSON.stringify(response, null, 2);
-        } catch {
-            document.getElementById('responseData').textContent = el.dataset.response || '无响应数据';
-        }
-    }
-    new bootstrap.Modal(document.getElementById('detailModal')).show();
+    var rcVal = readTextarea('rc-' + id) || '无数据';
+    var rdVal = readTextarea('rd-' + id) || '无数据';
+    var rsVal = readTextarea('rs-' + id) || '无响应数据';
+
+    document.getElementById('detailBody').innerHTML =
+        '<h4 class="detail-section-title">完整请求JSON</h4>' +
+        '<pre class="detail-pre">' + escapeHtml(rcVal) + '</pre>' +
+        '<h4 class="detail-section-title">请求数据（表单参数）</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rdVal) + '</pre>' +
+        '<h4 class="detail-section-title">响应数据</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rsVal) + '</pre>';
+
+    document.getElementById('detailOverlay').style.display = 'block';
+    document.getElementById('detailModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+    document.getElementById('detailOverlay').style.display = 'none';
+    document.getElementById('detailModal').style.display = 'none';
+    document.body.style.overflow = '';
 }
 </script>
 {% endblock %}
