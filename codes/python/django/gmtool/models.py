@@ -80,6 +80,7 @@ class CommandLog(models.Model):
     command = models.ForeignKey(GMCommand, on_delete=models.SET_NULL, null=True, verbose_name='执行命令')
     partition = models.IntegerField('服务器组号')
     request_data = models.JSONField('请求数据')
+    request_content = models.TextField('完整请求JSON', blank=True, default='', help_text='IDIP协议完整请求内容')
     response_data = models.JSONField('响应数据', null=True, blank=True)
     status = models.CharField('状态', max_length=20, choices=STATUS_CHOICES)
     ip_address = models.GenericIPAddressField('IP地址')

@@ -54,6 +54,7 @@
                     <th>用户</th>
                     <th>命令</th>
                     <th>服务器</th>
+                    <th>请求参数</th>
                     <th>状态</th>
                     <th>IP</th>
                     <th>操作</th>
@@ -66,6 +67,13 @@
                     <td>{{ log.user.username|default:"-" }}</td>
                     <td>{{ log.command.command_name|default:"-" }}</td>
                     <td>{{ log.partition }}</td>
+                    <td>
+                        {% if log.request_content %}
+                        <span class="text-muted" style="max-width:180px;display:inline-block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;" title="点击详情查看完整内容">{{ log.request_content|truncatechars:30 }}</span>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
                     <td>
                         {% if log.status == 'success' %}
                         <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>成功</span>
@@ -83,7 +91,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center text-muted py-3">暂无日志数据</td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-3">暂无日志数据</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -118,6 +126,7 @@
 <div class="d-none"
      id="log-{{ log.id }}"
      data-request='{{ log.request_data|escapejs }}'
+     data-request-content='{{ log.request_content|escapejs }}'
      data-response='{{ log.response_data|escapejs }}'></div>
 {% endfor %}
 
@@ -131,7 +140,11 @@
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <h4 class="mb-2">请求数据</h4>
+                    <h4 class="mb-2">完整请求JSON</h4>
+                    <pre id="requestContentData" class="rounded p-3" style="background: var(--tblr-bg-surface); max-height:300px; overflow-y:auto;"></pre>
+                </div>
+                <div class="mb-3">
+                    <h4 class="mb-2">请求数据（表单参数）</h4>
                     <pre id="requestData" class="rounded p-3" style="background: var(--tblr-bg-surface); max-height:200px; overflow-y:auto;"></pre>
                 </div>
                 <div>
@@ -149,12 +162,22 @@
 function showDetail(id) {
     const el = document.getElementById('log-' + id);
     if (el) {
+        // 完整请求JSON
+        const rc = el.dataset.requestContent;
+        try {
+            const obj = JSON.parse(rc);
+            document.getElementById('requestContentData').textContent = JSON.stringify(obj, null, 2);
+        } catch {
+            document.getElementById('requestContentData').textContent = rc || '无数据';
+        }
+        // 请求表单参数
         try {
             const request = JSON.parse(el.dataset.request);
             document.getElementById('requestData').textContent = JSON.stringify(request, null, 2);
         } catch {
             document.getElementById('requestData').textContent = el.dataset.request || '无数据';
         }
+        // 响应数据
         try {
             const response = JSON.parse(el.dataset.response);
             document.getElementById('responseData').textContent = JSON.stringify(response, null, 2);

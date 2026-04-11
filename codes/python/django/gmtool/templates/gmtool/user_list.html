@@ -60,7 +60,7 @@
                         {% if u.is_superuser %}
                         <span class="badge bg-danger-lt">全部</span>
                         {% else %}
-                        <span class="badge bg-secondary-lt">{{ u.usercommandpermission_set.count }}</span>
+                        <span class="badge bg-secondary-lt">{{ u.perm_count }}</span>
                         {% endif %}
                     </td>
                     <td>

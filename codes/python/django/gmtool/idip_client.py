@@ -31,7 +31,7 @@ def send_idip_command(command, params):
         params: dict, 用户提交的表单参数
 
     返回:
-        (dict|None, str|None): (响应数据, 错误信息)
+        (dict|None, str|None, str): (响应数据, 错误信息, 完整请求JSON字符串)
     """
     req = _get_requests()
 
@@ -64,6 +64,19 @@ def send_idip_command(command, params):
         'content': content_encoded,
     }
 
+    # 构造完整的请求JSON（包含form_data原始格式，用于存储和展示）
+    full_request = {
+        'url': settings.IDIP_API_URL,
+        'method': 'POST',
+        'form_data': form_data,
+        'content_json': content_json,
+    }
+    request_content_str = json.dumps(full_request, ensure_ascii=False)
+
+    # 记录请求日志
+    logger.info('IDIP请求发送: command=%s, request_id=%s, content=%s',
+                command.command_id, command.request_id, content_str)
+
     try:
         response = req.post(
             settings.IDIP_API_URL,
@@ -71,17 +84,19 @@ def send_idip_command(command, params):
             timeout=settings.IDIP_TIMEOUT,
         )
         response.raise_for_status()
-        return response.json(), None
+        result = response.json()
+        logger.info('IDIP请求成功: command=%s, response=%s', command.command_id, json.dumps(result, ensure_ascii=False)[:500])
+        return result, None, request_content_str
     except req.Timeout:
         logger.error('IDIP API请求超时: command=%s', command.command_id)
-        return None, '请求超时，请稍后重试'
+        return None, '请求超时，请稍后重试', request_content_str
     except req.ConnectionError:
         logger.error('IDIP API连接失败: url=%s', settings.IDIP_API_URL)
-        return None, '无法连接到游戏服务器，请检查配置'
+        return None, '无法连接到游戏服务器，请检查配置', request_content_str
     except Exception as e:
         # 兼容不同版本 requests 的 JSONDecodeError
         if hasattr(req, 'JSONDecodeError') and isinstance(e, req.JSONDecodeError):
             logger.error('IDIP API响应解析失败: response=%.500s', response.text)
-            return {'raw_response': response.text}, None
+            return {'raw_response': response.text}, None, request_content_str
         logger.error('IDIP API请求异常: %s', e)
-        return None, f'请求失败: {str(e)}'
+        return None, f'请求失败: {str(e)}', request_content_str

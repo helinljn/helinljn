@@ -134,7 +134,7 @@ def dashboard(request):
     commands = GMCommand.objects.filter(is_active=True, command_id__in=user_perms)
     tab_groups = _group_commands_by_tab(commands)
 
-    recent_logs = CommandLog.objects.filter(user=request.user).select_related('command')[:5]
+    recent_logs = CommandLog.objects.filter(user=request.user).select_related('user', 'command')[:5]
     is_admin = is_super_admin(request.user)
 
     return render(request, 'gmtool/dashboard.html', {
@@ -191,26 +191,29 @@ def command_execute(request, cmd_id):
             partition = params.get('Partition', 0)
 
             # 调用IDIP API
-            response_data, error = send_idip_command(command, params)
+            response_data, error, request_content = send_idip_command(command, params)
 
             # 记录日志
             status = 'success'
             if error:
                 status = 'timeout' if '超时' in error else 'failed'
 
+            client_ip = get_client_ip(request)
+
             CommandLog.objects.create(
                 user=request.user,
                 command=command,
                 partition=partition,
                 request_data=params,
+                request_content=request_content,
                 response_data=response_data,
                 status=status,
-                ip_address=get_client_ip(request),
+                ip_address=client_ip,
             )
 
             # 审计日志
             log_operation('command', 'execute', user=request.user,
-                          ip_address=get_client_ip(request),
+                          ip_address=client_ip,
                           detail={
                               'command_id': cmd_id,
                               'command_name': command.command_name,
@@ -243,7 +246,10 @@ def command_execute(request, cmd_id):
 @super_admin_required
 def user_list(request):
     """用户列表管理"""
-    users = User.objects.select_related('userprofile', 'userprofile__role').all()
+    from django.db.models import Count
+    users = User.objects.select_related('userprofile', 'userprofile__role').annotate(
+        perm_count=Count('usercommandpermission', distinct=True)
+    ).all()
 
     # 搜索
     search = request.GET.get('search', '')

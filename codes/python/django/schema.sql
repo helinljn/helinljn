@@ -152,7 +152,8 @@ CREATE TABLE gmtool_commandlog (
     user_id         INTEGER            NULL REFERENCES auth_user(id),             -- 操作用户
     command_id      INTEGER            NULL REFERENCES gmtool_gmcommand(id),       -- 执行的命令
     partition       INTEGER            NOT NULL,                                    -- 服务器组号
-    request_data    JSON               NOT NULL,                                    -- 发送的完整请求体
+    request_data    JSON               NOT NULL,                                    -- 发送的完整请求体（表单参数）
+    request_content TEXT               NOT NULL DEFAULT '',                         -- IDIP协议完整请求JSON（含url/method/form_data/content_json）
     response_data   JSON               NULL,                                        -- API返回的响应（可为空）
     status          VARCHAR(20)        NOT NULL,                                    -- 状态：success/failed/timeout
     ip_address      CHAR(39)           NOT NULL,                                    -- 请求IP
@@ -178,7 +179,7 @@ CREATE TABLE gmtool_loginlog (
 -- 三、索引
 -- ============================================================
 
-CREATE INDEX idx_gmcommand_command_id    ON gmtool_gmcommand (command_id);
+-- 注：gmtool_gmcommand.command_id 已有 UNIQUE 约束，SQLite 自动创建索引，无需额外创建
 CREATE INDEX idx_gmcommand_is_active     ON gmtool_gmcommand (is_active);
 CREATE INDEX idx_role_is_super_admin     ON gmtool_role (is_super_admin);
 CREATE INDEX idx_userprofile_user_id     ON gmtool_userprofile (user_id);
@@ -228,10 +229,11 @@ VALUES ('super_admin', '超级管理员', '系统最高权限角色，拥有所�
 -- ============================================================
 --
 -- SQLite3 没有 JSON 原生类型，以下字段实际存储为 TEXT：
---   gmtool_gmcommand.request_params   (JSON → TEXT)
---   gmtool_gmcommand.response_params  (JSON → TEXT)
---   gmtool_commandlog.request_data    (JSON → TEXT)
---   gmtool_commandlog.response_data   (JSON → TEXT)
+--   gmtool_gmcommand.request_params    (JSON → TEXT)
+--   gmtool_gmcommand.response_params   (JSON → TEXT)
+--   gmtool_commandlog.request_data     (JSON → TEXT)
+--   gmtool_commandlog.request_content  (TEXT → 纯文本，存储完整请求JSON字符串)
+--   gmtool_commandlog.response_data    (JSON → TEXT)
 --
 -- Django 的 JSONField 在 SQLite 上通过 json_type() 和
 -- json_extract() 提供部分 JSON 查询支持（SQLite >= 3.9.0）。
