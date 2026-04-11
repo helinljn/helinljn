@@ -77,10 +77,10 @@ class IDIPFileMonitorMiddleware:
                     created, updated, deactivated = sync_commands_to_db()
                     if created > 0 or deactivated > 0:
                         logger.info(
-                            f'idip_commands.json 变更已自动同步: '
-                            f'新增={created}, 更新={updated}, 停用={deactivated}'
+                            'idip_commands.json 变更已自动同步: 新增=%d, 更新=%d, 停用=%d',
+                            created, updated, deactivated,
                         )
                     # 更新缓存的 mtime
                     cache.set(CACHE_KEY_MTIME, current_mtime, timeout=86400)
                 except Exception as e:
-                    logger.error(f'自动同步 idip_commands.json 失败: {e}')
+                    logger.error('自动同步 idip_commands.json 失败: %s', e)

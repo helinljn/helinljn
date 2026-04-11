@@ -3,6 +3,7 @@ import functools
 
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.utils.translation import gettext as __
 
 from .models import GMCommand, UserProfile, UserCommandPermission
 
@@ -51,7 +52,7 @@ def command_permission_required(view_func):
     @functools.wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return JsonResponse({'error': '请先登录'}, status=401)
+            return JsonResponse({'error': __('Please log in first')}, status=401)
         # 超级管理员自动通过
         if is_super_admin(request.user):
             return view_func(request, *args, **kwargs)
@@ -62,7 +63,7 @@ def command_permission_required(view_func):
             cmd = GMCommand.objects.filter(command_id=cmd_id).first()
             if not cmd or not cmd.is_active:
                 return JsonResponse(
-                    {'error': '该命令已被停用或删除', 'command_deactivated': True},
+                    {'error': __('This command has been deactivated or deleted'), 'command_deactivated': True},
                     status=410,
                 )
             if UserCommandPermission.objects.filter(
@@ -72,7 +73,7 @@ def command_permission_required(view_func):
                 # 将已查询的 command 对象缓存到 request，避免视图重复查询
                 request._gmcommand = cmd
                 return view_func(request, *args, **kwargs)
-        return JsonResponse({'error': '您没有执行该命令的权限'}, status=403)
+        return JsonResponse({'error': __('You do not have permission to execute this command')}, status=403)
     return wrapper
 
 

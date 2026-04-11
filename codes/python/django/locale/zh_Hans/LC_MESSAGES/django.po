@@ -281,6 +281,24 @@ msgstr "文件写入失败: %(error)s"
 msgid "Page expired, please log in again."
 msgstr "页面已过期，请重新登录。"
 
+#: decorators.py
+msgid "Please log in first"
+msgstr "请先登录"
+
+msgid "This command has been deactivated or deleted"
+msgstr "该命令已被停用或删除"
+
+msgid "You do not have permission to execute this command"
+msgstr "您没有执行该命令的权限"
+
+#: forms.py
+msgid "A super admin role already exists. Only one is allowed."
+msgstr "超级管理员角色已存在，仅允许创建一个。"
+
+#: views.py
+msgid "You cannot delete your own account"
+msgstr "不能删除自己的账号"
+
 #: templates
 msgid "GM Command System"
 msgstr "GM命令管理系统"

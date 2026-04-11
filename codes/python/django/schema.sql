@@ -191,6 +191,7 @@ CREATE INDEX idx_commandlog_command_id   ON gmtool_commandlog (command_id);
 CREATE INDEX idx_commandlog_status       ON gmtool_commandlog (status);
 CREATE INDEX idx_commandlog_created_at   ON gmtool_commandlog (created_at);
 CREATE INDEX idx_loginlog_user_id        ON gmtool_loginlog (user_id);
+CREATE INDEX idx_loginlog_username      ON gmtool_loginlog (username);
 CREATE INDEX idx_loginlog_action         ON gmtool_loginlog (action);
 CREATE INDEX idx_loginlog_created_at     ON gmtool_loginlog (created_at);
 CREATE INDEX idx_session_expire_date     ON django_session (expire_date);

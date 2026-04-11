@@ -155,6 +155,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = '/gmtool/login/'
 CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 
+# 会话安全配置
+SESSION_COOKIE_AGE = 86400 * 7          # Session 有效期 7 天（秒）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True   # 浏览器关闭时过期（覆盖 AGE，但重新打开后需重新登录）
+
 # IDIP API 配置
 IDIP_API_URL = 'http://127.0.0.1:8080/api/idip'  # 游戏IDIP接口地址（部署时修改）
 IDIP_TIMEOUT = 30  # 请求超时时间（秒）

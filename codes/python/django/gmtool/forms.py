@@ -138,3 +138,18 @@ class RoleForm(forms.ModelForm):
             'description': _('Description'),
             'is_super_admin': _('Super Admin'),
         }
+
+    def clean_is_super_admin(self):
+        """防止创建多个超级管理员角色（系统设计仅允许一个 super_admin）"""
+        is_super = self.cleaned_data.get('is_super_admin', False)
+        if is_super:
+            # 编辑时：如果当前实例已经是 super_admin，允许保留
+            if self.instance and self.instance.pk and self.instance.is_super_admin:
+                return is_super
+            # 创建或从非超管改为超管时：检查是否已存在超管角色
+            qs = Role.objects.filter(is_super_admin=True)
+            if self.instance and self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError(_('A super admin role already exists. Only one is allowed.'))
+        return is_super

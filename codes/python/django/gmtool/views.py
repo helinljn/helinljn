@@ -390,7 +390,10 @@ def user_edit(request, user_id):
 def user_delete(request, user_id):
     """删除用户"""
     user_obj = get_object_or_404(User, pk=user_id)
-    if user_obj != request.user:
+    if user_obj == request.user:
+        from django.contrib import messages
+        messages.warning(request, __('You cannot delete your own account'))
+    else:
         target_name = user_obj.username
         user_obj.delete()
         log_operation('user', 'delete', user=request.user,
@@ -797,8 +800,9 @@ def custom_403(request, exception=None):
 
 def csrf_failure(request, reason=""):
     """CSRF 验证失败处理"""
-    if request.path == '/gmtool/login/':
-        from django.contrib import messages
+    from django.contrib import messages
+    from django.urls import reverse
+    if request.path == reverse('gmtool:login'):
         messages.error(request, __('Page expired, please log in again.'))
         return redirect('gmtool:login')
     return render(request, 'gmtool/403.html', status=403)
