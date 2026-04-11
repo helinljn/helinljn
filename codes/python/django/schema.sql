@@ -182,7 +182,7 @@ CREATE TABLE gmtool_loginlog (
 -- 注：gmtool_gmcommand.command_id 已有 UNIQUE 约束，SQLite 自动创建索引，无需额外创建
 CREATE INDEX idx_gmcommand_is_active     ON gmtool_gmcommand (is_active);
 CREATE INDEX idx_role_is_super_admin     ON gmtool_role (is_super_admin);
-CREATE INDEX idx_userprofile_user_id     ON gmtool_userprofile (user_id);
+-- 注：gmtool_userprofile.user_id 已有 UNIQUE 约束，SQLite 自动创建索引，无需额外创建
 CREATE INDEX idx_userprofile_role_id     ON gmtool_userprofile (role_id);
 CREATE INDEX idx_usercmdperm_user_id     ON gmtool_usercommandpermission (user_id);
 CREATE INDEX idx_usercmdperm_command_id  ON gmtool_usercommandpermission (command_id);

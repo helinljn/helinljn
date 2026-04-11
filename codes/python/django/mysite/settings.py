@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/5.2/howto/deployment-checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get(
@@ -30,6 +30,19 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
+
+# 生产环境安全检查：确保关键配置不被遗漏
+if not DEBUG:
+    if SECRET_KEY.startswith('django-insecure-'):
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured(
+            '生产环境必须通过环境变量 DJANGO_SECRET_KEY 设置安全的 SECRET_KEY'
+        )
+    if ALLOWED_HOSTS == ['*']:
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured(
+            '生产环境必须通过环境变量 DJANGO_ALLOWED_HOSTS 设置具体的允许主机'
+        )
 
 
 # Application definition
@@ -81,6 +94,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {'timeout': 20},  # SQLite 并发写入等待锁的超时时间（秒）
     }
 }
 
@@ -133,6 +147,15 @@ CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 # IDIP API 配置
 IDIP_API_URL = 'http://127.0.0.1:8080/api/idip'  # 游戏IDIP接口地址（部署时修改）
 IDIP_TIMEOUT = 30  # 请求超时时间（秒）
+
+# 是否信任反向代理的 X-Forwarded-For 头（生产环境使用 Nginx 等反向代理时设为 True）
+TRUSTED_PROXY = os.environ.get('DJANGO_TRUSTED_PROXY', 'False').lower() in ('true', '1', 'yes')
+
+# 生产环境安全配置（仅在 DEBUG=False 时生效）
+if not DEBUG:
+    SECURE_CONTENT_TYPE_NOSNIFF = True       # 防止 MIME 类型嗅探
+    SESSION_COOKIE_SECURE = True             # Session Cookie 仅通过 HTTPS 传输
+    CSRF_COOKIE_SECURE = True                # CSRF Cookie 仅通过 HTTPS 传输
 
 # 缓存配置（中间件文件监控使用）
 CACHES = {

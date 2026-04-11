@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import tempfile
+import time
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login
@@ -24,6 +25,11 @@ from .idip_client import send_idip_command
 from .models import CommandLog, GMCommand, LoginLog, Role, UserCommandPermission, UserProfile
 
 logger = logging.getLogger(__name__)
+
+# 登录失败限速配置
+LOGIN_MAX_ATTEMPTS = 5          # 最大尝试次数
+LOGIN_LOCKOUT_SECONDS = 300     # 锁定时长（秒），5分钟
+LOGIN_THROTTLE_CACHE_PREFIX = 'gmtool:login_throttle:'
 
 
 def _get_safe_next_url(request):
@@ -74,14 +80,32 @@ def login_view(request):
             'current_user': request.user,
         })
     if request.method == 'POST':
+        ip = get_client_ip(request)
+
+        # 登录失败限速检查
+        from django.core.cache import cache
+        cache_key = f'{LOGIN_THROTTLE_CACHE_PREFIX}{ip}'
+        attempts = cache.get(cache_key, 0)
+        if attempts >= LOGIN_MAX_ATTEMPTS:
+            LoginLog.objects.create(
+                user=None, username=request.POST.get('username', ''),
+                action='login_failed', ip_address=ip,
+                user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+                reason='尝试次数过多，请稍后再试',
+            )
+            return render(request, 'gmtool/login.html', {
+                'error': f'登录尝试次数过多，请 {LOGIN_LOCKOUT_SECONDS // 60} 分钟后再试',
+            })
+
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)
-        ip = get_client_ip(request)
         ua = request.META.get('HTTP_USER_AGENT', '')[:500]
         if user is not None:
             if user.is_active:
                 login(request, user)
+                # 登录成功，清除失败计数
+                cache.delete(cache_key)
                 LoginLog.objects.create(
                     user=user, username=username, action='login',
                     ip_address=ip, user_agent=ua,
@@ -93,6 +117,8 @@ def login_view(request):
                     return redirect(next_url)
                 return redirect('gmtool:dashboard')
             else:
+                # 登录失败，累加计数
+                cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
                 LoginLog.objects.create(
                     user=None, username=username, action='login_failed',
                     ip_address=ip, user_agent=ua, reason='账号已禁用',
@@ -101,13 +127,21 @@ def login_view(request):
                               detail={'username': username, 'reason': '账号已禁用'})
                 return render(request, 'gmtool/login.html', {'error': '账号已被禁用'})
         else:
+            # 登录失败，累加计数
+            cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
+            remaining = LOGIN_MAX_ATTEMPTS - attempts - 1
             LoginLog.objects.create(
                 user=None, username=username, action='login_failed',
                 ip_address=ip, user_agent=ua, reason='用户名或密码错误',
             )
             log_operation('auth', 'login_failed', ip_address=ip,
                           detail={'username': username, 'reason': '用户名或密码错误'})
-            return render(request, 'gmtool/login.html', {'error': '用户名或密码错误'})
+            error_msg = '用户名或密码错误'
+            if remaining > 0:
+                error_msg = f'用户名或密码错误，还可尝试 {remaining} 次'
+            else:
+                error_msg = f'登录尝试次数过多，请 {LOGIN_LOCKOUT_SECONDS // 60} 分钟后再试'
+            return render(request, 'gmtool/login.html', {'error': error_msg})
     return render(request, 'gmtool/login.html')
 
 
@@ -172,7 +206,8 @@ def command_list(request):
 @command_permission_required
 def command_execute(request, cmd_id):
     """命令执行页面：GET显示动态表单，POST转发请求"""
-    command = GMCommand.objects.filter(command_id=cmd_id).first()
+    # 优先使用装饰器已查询的 command 对象，避免重复查询；超管直接通过时需自行查询
+    command = getattr(request, '_gmcommand', None) or GMCommand.objects.filter(command_id=cmd_id).first()
 
     # 命令不存在或已停用
     if not command or not command.is_active:
@@ -371,7 +406,10 @@ def user_delete(request, user_id):
 @super_admin_required
 def role_list(request):
     """角色列表管理"""
-    roles = Role.objects.all()
+    from django.db.models import Count
+    roles = Role.objects.annotate(
+        user_count=Count('userprofile', distinct=True)
+    ).all()
     return render(request, 'gmtool/role_list.html', {
         'roles': roles,
         'is_admin': True,
@@ -473,14 +511,22 @@ def user_permissions(request, user_id):
                 invalid_ids,
             )
 
-        # 清除旧权限，写入新权限（事务保护）
+        # 差集模式更新权限（事务保护）：仅删除需移除的，仅创建需新增的
         with transaction.atomic():
-            UserCommandPermission.objects.filter(user=user_obj).delete()
-            new_user_perms = [
-                UserCommandPermission(user=user_obj, command_id=cmd_id)
-                for cmd_id in valid_ids
-            ]
-            if new_user_perms:
+            valid_ids_set = set(valid_ids)
+            old_perm_ids_set = set(old_perm_ids)
+            to_remove = old_perm_ids_set - valid_ids_set
+            to_add = valid_ids_set - old_perm_ids_set
+
+            if to_remove:
+                UserCommandPermission.objects.filter(
+                    user=user_obj, command_id__in=to_remove
+                ).delete()
+            if to_add:
+                new_user_perms = [
+                    UserCommandPermission(user=user_obj, command_id=cmd_id)
+                    for cmd_id in to_add
+                ]
                 UserCommandPermission.objects.bulk_create(new_user_perms)
 
         new_perm_ids = set(valid_ids)
@@ -541,7 +587,7 @@ def role_delete(request, role_id):
 @super_admin_required
 def login_log_list(request):
     """登录日志列表"""
-    logs = LoginLog.objects.all()
+    logs = LoginLog.objects.select_related('user').all()
 
     # 筛选
     action_filter = request.GET.get('action', '')
@@ -721,10 +767,15 @@ def sync_commands_api(request):
 # ========== 辅助函数 ==========
 
 def get_client_ip(request):
-    """获取客户端IP地址"""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        return x_forwarded_for.split(',')[0].strip()
+    """获取客户端IP地址
+
+    仅在配置了可信反向代理（TRUSTED_PROXY=True）时才使用 X-Forwarded-For，
+    否则直接使用 REMOTE_ADDR，防止客户端伪造 IP。
+    """
+    if getattr(settings, 'TRUSTED_PROXY', False):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
     return request.META.get('REMOTE_ADDR', '0.0.0.0')
 
 

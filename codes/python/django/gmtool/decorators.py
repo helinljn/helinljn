@@ -46,6 +46,7 @@ def command_permission_required(view_func):
     检查当前用户是否拥有指定命令的执行权限，超级管理员自动通过。
     用于AJAX请求时返回JSON错误。
     区分"权限不足"和"命令已停用"两种情况。
+    权限校验通过后，将查询到的 command 对象附加到 request._gmcommand，避免视图重复查询。
     """
     @functools.wraps(view_func)
     def wrapper(request, *args, **kwargs):
@@ -68,6 +69,8 @@ def command_permission_required(view_func):
                 user=request.user,
                 command=cmd,
             ).exists():
+                # 将已查询的 command 对象缓存到 request，避免视图重复查询
+                request._gmcommand = cmd
                 return view_func(request, *args, **kwargs)
         return JsonResponse({'error': '您没有执行该命令的权限'}, status=403)
     return wrapper
