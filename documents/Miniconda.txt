@@ -21,7 +21,7 @@ conda config --add channels defaults
           - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
 
 # 更换pip源
-    pip配置文件位置：~/.pip/pip.conf (Windows路径为：C:\Users\<UserName>\pip\pip.ini)
+    pip配置文件位置：~/.pip/pip.conf(Windows路径为：C:\Users\<UserName>\pip\pip.ini)
         [global]
         trusted-host = pypi.tuna.tsinghua.edu.cn
         index-url = https://pypi.tuna.tsinghua.edu.cn/simple/

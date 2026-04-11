@@ -1,7 +1,7 @@
 {
     "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python-envs.defaultPackageManager": "ms-python.python:conda",
-    "python.defaultInterpreterPath": "C:\\Users\\helin\\.conda\\envs\\django-admin\\python.exe",
+    "python.defaultInterpreterPath": "C:\\Users\\${env:USERNAME}\\.conda\\envs\\django-admin\\python.exe",
 
     "search.exclude": {
         "**/aaa": true,
