@@ -139,7 +139,7 @@
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
 
-    "codingcopilot.autoRun": false,
+    "codingcopilot.autoRun": true,
     "codingcopilot.taskList": false,
     "codingcopilot.enableCodelens": false,
     "codingcopilot.enableInlineChat": false,
