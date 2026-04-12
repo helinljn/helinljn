@@ -5,6 +5,7 @@ import os
 import tempfile
 
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def validate_command_ids(command_id, request_id, response_id, exclude_command_id
 
     # request_id 和 response_id 不能相同
     if request_id == response_id:
-        errors.append('Request ID and Response ID cannot be the same')
+        errors.append(_('请求 ID 和响应 ID 不能相同'))
 
     # 查询数据库中已有的所有 request_id 和 response_id
     existing_commands = GMCommand.objects.all()
@@ -37,18 +38,30 @@ def validate_command_ids(command_id, request_id, response_id, exclude_command_id
     # 检查 command_id 是否已存在
     if GMCommand.objects.filter(command_id=command_id).exists():
         if not exclude_command_id or command_id != exclude_command_id:
-            errors.append(f'Command ID {command_id} already exists')
+            errors.append(_('命令 ID %(id)s 已存在') % {'id': command_id})
 
     # 收集所有已有的 request_id 和 response_id，以及它们所属的 command_id
     for cmd in existing_commands:
         if cmd.request_id == request_id:
-            errors.append(f'Request ID {request_id} is already used by command {cmd.command_id} (as request ID)')
+            errors.append(
+                _('请求 ID %(req)s 已被命令 %(cmd)s 使用（作为请求 ID）')
+                % {'req': request_id, 'cmd': cmd.command_id}
+            )
         if cmd.request_id == response_id:
-            errors.append(f'Response ID {response_id} is already used by command {cmd.command_id} (as request ID)')
+            errors.append(
+                _('响应 ID %(rsp)s 已被命令 %(cmd)s 使用（作为请求 ID）')
+                % {'rsp': response_id, 'cmd': cmd.command_id}
+            )
         if cmd.response_id == request_id:
-            errors.append(f'Request ID {request_id} is already used by command {cmd.command_id} (as response ID)')
+            errors.append(
+                _('请求 ID %(req)s 已被命令 %(cmd)s 使用（作为响应 ID）')
+                % {'req': request_id, 'cmd': cmd.command_id}
+            )
         if cmd.response_id == response_id:
-            errors.append(f'Response ID {response_id} is already used by command {cmd.command_id} (as response ID)')
+            errors.append(
+                _('响应 ID %(rsp)s 已被命令 %(cmd)s 使用（作为响应 ID）')
+                % {'rsp': response_id, 'cmd': cmd.command_id}
+            )
 
     # 去重
     errors = list(dict.fromkeys(errors))
@@ -82,13 +95,16 @@ def validate_json_command_ids(data):
         json_response_ids.append((cmd_id, rsp_id))
 
         if req_id == rsp_id:
-            errors.append(f'Command {cmd_id}: request ID and response ID cannot be the same')
+            errors.append(
+                _('命令 %(cmd)s：请求 ID 和响应 ID 不能相同')
+                % {'cmd': cmd_id}
+            )
 
     # 检查 JSON 内 command_id 重复
     seen_cmd_ids = {}
     for cid in json_command_ids:
         if cid in seen_cmd_ids:
-            errors.append(f'Command ID {cid} is duplicated in the JSON file')
+            errors.append(_('命令 ID %(id)s 在 JSON 文件中重复') % {'id': cid})
         seen_cmd_ids[cid] = True
 
     # 检查 JSON 内 request_id / response_id 交叉重复
@@ -104,7 +120,16 @@ def validate_json_command_ids(data):
         if key in seen_protocol:
             prev_cmd_id, prev_type = seen_protocol[key]
             errors.append(
-                f'Protocol ID {pid} is used by both command {prev_cmd_id} ({prev_type}) and command {cmd_id} ({id_type})'
+                _(
+                    '协议 ID %(pid)s 同时被命令 %(prev_cmd)s（%(prev_type)s）和命令 %(cmd)s（%(id_type)s）使用'
+                )
+                % {
+                    'pid': pid,
+                    'prev_cmd': prev_cmd_id,
+                    'prev_type': prev_type,
+                    'cmd': cmd_id,
+                    'id_type': id_type,
+                }
             )
         seen_protocol[key] = (cmd_id, id_type)
 
@@ -122,11 +147,17 @@ def validate_json_command_ids(data):
                 continue  # 同一命令更新，跳过
             if req_id == cmd.request_id:
                 errors.append(
-                    f'Command {json_cmd_id} request ID {req_id} conflicts with existing command {cmd.command_id} (request ID)'
+                    _(
+                        '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
+                    )
+                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': cmd.command_id}
                 )
             if req_id == cmd.response_id:
                 errors.append(
-                    f'Command {json_cmd_id} request ID {req_id} conflicts with existing command {cmd.command_id} (response ID)'
+                    _(
+                        '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
+                    )
+                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': cmd.command_id}
                 )
 
         for json_cmd_id, rsp_id in json_response_ids:
@@ -134,11 +165,17 @@ def validate_json_command_ids(data):
                 continue
             if rsp_id == cmd.request_id:
                 errors.append(
-                    f'Command {json_cmd_id} response ID {rsp_id} conflicts with existing command {cmd.command_id} (request ID)'
+                    _(
+                        '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
+                    )
+                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': cmd.command_id}
                 )
             if rsp_id == cmd.response_id:
                 errors.append(
-                    f'Command {json_cmd_id} response ID {rsp_id} conflicts with existing command {cmd.command_id} (response ID)'
+                    _(
+                        '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
+                    )
+                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': cmd.command_id}
                 )
 
     # 去重
@@ -167,7 +204,7 @@ def add_command_to_json(command_data):
     # 获取 command_id
     command_id = command_data.get('command_id')
     if not command_id:
-        return False, 'Missing command_id in command_data'
+        return False, _('command_data 中缺少 command_id')
 
     # 添加到 JSON 数据中
     data[command_id] = command_data['data']

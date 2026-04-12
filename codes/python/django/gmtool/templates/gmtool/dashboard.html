@@ -160,6 +160,30 @@
 </div>
 
 <script>
+function getCookie(name) {
+    const cookies = document.cookie ? document.cookie.split(';') : [];
+    for (let i = 0; i < cookies.length; i += 1) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(`${name}=`)) {
+            return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+    }
+    return '';
+}
+
+function setUploadResult(resultDiv, type, message) {
+    resultDiv.style.display = 'block';
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} mb-0`;
+
+    const icon = document.createElement('i');
+    icon.className = type === 'danger' ? 'ti ti-alert-circle me-1' : 'ti ti-info-circle me-1';
+    alertDiv.appendChild(icon);
+
+    alertDiv.appendChild(document.createTextNode(message));
+    resultDiv.replaceChildren(alertDiv);
+}
+
 function uploadCommands() {
     const fileInput = document.getElementById('jsonFileInput');
     const resultDiv = document.getElementById('uploadResult');
@@ -181,7 +205,7 @@ function uploadCommands() {
 
     fetch('{% url "gmtool:upload_commands_api" %}', {
         method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
         body: formData,
     })
     .then(r => r.json())
@@ -194,17 +218,13 @@ function uploadCommands() {
             </div>`;
             setTimeout(() => location.reload(), 2000);
         } else {
-            resultDiv.innerHTML = `<div class="alert alert-danger mb-0">
-                <i class="ti ti-alert-circle me-1"></i>${data.error || '{% trans "未知错误" %}'}
-            </div>`;
+            setUploadResult(resultDiv, 'danger', data.error || '{% trans "未知错误" %}');
         }
     })
     .catch(err => {
         btn.disabled = false;
         btn.innerHTML = '<i class="ti ti-upload me-1"></i>{% trans "上传并同步" %}';
-        resultDiv.innerHTML = `<div class="alert alert-danger mb-0">
-            <i class="ti ti-alert-circle me-1"></i>{% trans "请求失败" %}: ${err}
-        </div>`;
+        setUploadResult(resultDiv, 'danger', '{% trans "请求失败" %}: ' + String(err));
     });
 }
 
@@ -212,7 +232,7 @@ function syncCommands() {
     if (!confirm('{% trans "确认从JSON文件同步命令定义？" %}')) return;
     fetch('{% url "gmtool:sync_commands_api" %}', {
         method: 'POST',
-        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        headers: {'X-CSRFToken': getCookie('csrftoken')},
     })
     .then(r => r.json())
     .then(data => {

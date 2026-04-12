@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
@@ -20,6 +20,12 @@ class GMCommand(models.Model):
         verbose_name = _('GM命令')
         verbose_name_plural = _('GM命令')
         ordering = ['command_id']
+        indexes = [
+            models.Index(fields=['command_id'], name='gmcmd_cmdid_idx'),
+            models.Index(fields=['is_active', 'command_id'], name='gmcmd_active_cmd_idx'),
+            models.Index(fields=['request_id'], name='gmcmd_reqid_idx'),
+            models.Index(fields=['response_id'], name='gmcmd_respid_idx'),
+        ]
 
     def __str__(self):
         return f'{self.command_id} - {self.command_name}'
@@ -50,7 +56,12 @@ class UserCommandPermission(models.Model):
     class Meta:
         verbose_name = _('用户命令权限')
         verbose_name_plural = _('用户命令权限')
-        unique_together = ('user', 'command')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'command'],
+                name='uniq_user_command_permission',
+            )
+        ]
 
     def __str__(self):
         return f'{self.user.username} - {self.command.command_name}'
@@ -91,6 +102,11 @@ class CommandLog(models.Model):
         verbose_name = _('命令日志')
         verbose_name_plural = _('命令日志')
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at'], name='cmdlog_user_created_idx'),
+            models.Index(fields=['status', '-created_at'], name='cmdlog_status_created_idx'),
+            models.Index(fields=['command', '-created_at'], name='cmdlog_cmd_created_idx'),
+        ]
 
     def __str__(self):
         return f'{self.user} - {self.command} - {self.status}'
@@ -115,6 +131,10 @@ class LoginLog(models.Model):
         verbose_name = _('登录日志')
         verbose_name_plural = _('登录日志')
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['action', '-created_at'], name='loginlog_action_created_idx'),
+            models.Index(fields=['username', '-created_at'], name='loginlog_user_created_idx'),
+        ]
 
     def __str__(self):
         return f'{self.username} - {self.get_action_display()} - {self.created_at}'
