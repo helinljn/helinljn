@@ -113,7 +113,7 @@ def send_idip_command(command, params):
                     wrapped_json = json.loads(wrapped_json)
                 except (TypeError, ValueError, json.JSONDecodeError):
                     logger.error('IDIP包装响应解析失败: command=%s, json=%s',
-                                 command.command_id, str(wrapped_json)[:500])
+                                 command.command_id, str(wrapped_json))
                     return None, _('请求失败: %(error)s') % {'error': 'invalid wrapped json string'}, request_content_str, 'error'
 
             if not isinstance(wrapped_json, dict):
@@ -132,7 +132,7 @@ def send_idip_command(command, params):
                 'json': wrapped_json,
             }
             logger.info('IDIP请求完成(包装): command=%s, response=%s',
-                        command.command_id, json.dumps(normalized, ensure_ascii=False)[:500])
+                        command.command_id, json.dumps(normalized, ensure_ascii=False))
             return normalized, None, request_content_str, ''
 
         # 旧格式：包装成新结构返回，确保上层一致处理
@@ -142,7 +142,7 @@ def send_idip_command(command, params):
             'json': result if isinstance(result, dict) else {'Result': 0, 'RetMsg': 'OK', 'raw': result},
         }
         logger.info('IDIP请求成功(旧格式兼容): command=%s, response=%s',
-                    command.command_id, json.dumps(normalized_old, ensure_ascii=False)[:500])
+                    command.command_id, json.dumps(normalized_old, ensure_ascii=False))
         return normalized_old, None, request_content_str, ''
 
     except req.Timeout:
@@ -154,7 +154,7 @@ def send_idip_command(command, params):
     except Exception as e:
         # 兼容不同版本 requests 的 JSONDecodeError
         if hasattr(req, 'JSONDecodeError') and isinstance(e, req.JSONDecodeError):
-            logger.error('IDIP API响应解析失败: response=%.500s', response.text)
+            logger.error('IDIP API响应解析失败: response=%s', response.text)
             return {'raw_response': response.text}, None, request_content_str, ''
         logger.error('IDIP API请求异常: %s', e)
         return None, _('请求失败: %(error)s') % {'error': str(e)}, request_content_str, 'error'
