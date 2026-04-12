@@ -27,9 +27,12 @@ SECRET_KEY = os.environ.get(
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# 开发环境默认开启 DEBUG，生产环境请显式设置 DJANGO_DEBUG=False
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()]
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # 生产环境安全检查：确保关键配置不被遗漏
 if not DEBUG:
@@ -38,7 +41,7 @@ if not DEBUG:
         raise ImproperlyConfigured(
             '生产环境必须通过环境变量 DJANGO_SECRET_KEY 设置安全的 SECRET_KEY'
         )
-    if ALLOWED_HOSTS == ['*']:
+    if not ALLOWED_HOSTS:
         from django.core.exceptions import ImproperlyConfigured
         raise ImproperlyConfigured(
             '生产环境必须通过环境变量 DJANGO_ALLOWED_HOSTS 设置具体的允许主机'
@@ -170,11 +173,19 @@ BATCH_EXECUTE_INTERVAL_MS = 200    # 批量请求间隔（毫秒）
 # 是否信任反向代理的 X-Forwarded-For 头（生产环境使用 Nginx 等反向代理时设为 True）
 TRUSTED_PROXY = os.environ.get('DJANGO_TRUSTED_PROXY', 'False').lower() in ('true', '1', 'yes')
 
+# Clickjacking 防护（全环境启用）
+X_FRAME_OPTIONS = 'DENY'
+
 # 生产环境安全配置（仅在 DEBUG=False 时生效）
 if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True       # 防止 MIME 类型嗅探
     SESSION_COOKIE_SECURE = True             # Session Cookie 仅通过 HTTPS 传输
     CSRF_COOKIE_SECURE = True                # CSRF Cookie 仅通过 HTTPS 传输
+    SECURE_SSL_REDIRECT = True               # 强制 HTTPS
+    SECURE_HSTS_SECONDS = 31536000           # HSTS: 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_REFERRER_POLICY = 'same-origin'
 
 # 缓存配置（中间件文件监控使用）
 CACHES = {

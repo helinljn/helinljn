@@ -28,6 +28,12 @@ from .models import CommandLog, GMCommand, LoginLog, Role, UserCommandPermission
 
 logger = logging.getLogger(__name__)
 
+# 脱敏字段（日志详情接口返回前处理）
+SENSITIVE_FIELD_NAMES = {
+    'password', 'passwd', 'pwd', 'token', 'access_token', 'refresh_token',
+    'secret', 'sign', 'signature', 'sessionid', 'cookie', 'authorization',
+}
+
 # 登录失败限速配置
 LOGIN_MAX_ATTEMPTS = 5          # 最大尝试次数
 LOGIN_LOCKOUT_SECONDS = 300     # 锁定时长（秒），5分钟
@@ -715,7 +721,12 @@ def login_log_list(request):
 @login_required
 def command_log_list(request):
     """操作日志列表"""
+    is_admin = is_super_admin(request.user)
     logs = CommandLog.objects.select_related('user', 'command').all()
+
+    # 非管理员仅可查看自己的日志
+    if not is_admin:
+        logs = logs.filter(user=request.user)
 
     # 筛选
     status_filter = request.GET.get('status', '')
@@ -727,31 +738,70 @@ def command_log_list(request):
         logs = logs.filter(command__command_id=cmd_filter)
 
     user_filter = request.GET.get('user', '')
-    if user_filter:
+    if user_filter and is_admin:
         logs = logs.filter(user__username__icontains=user_filter)
 
     paginator = Paginator(logs, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
 
+    # 普通用户只展示其日志中出现过的命令，避免暴露全量命令信息
+    if is_admin:
+        commands_qs = GMCommand.objects.filter(is_active=True)
+    else:
+        command_ids = logs.exclude(command__isnull=True).values_list('command_id', flat=True).distinct()
+        commands_qs = GMCommand.objects.filter(id__in=command_ids, is_active=True)
+
     return render(request, 'gmtool/command_log.html', {
         'page_obj': page_obj,
         'status_filter': status_filter,
         'cmd_filter': cmd_filter,
-        'user_filter': user_filter,
-        'commands': GMCommand.objects.filter(is_active=True),
-        'is_admin': is_super_admin(request.user),
+        'user_filter': user_filter if is_admin else '',
+        'commands': commands_qs,
+        'is_admin': is_admin,
     })
+
+
+def _mask_sensitive_data(data):
+    """递归脱敏日志中的敏感字段"""
+    if isinstance(data, dict):
+        masked = {}
+        for key, value in data.items():
+            if str(key).lower() in SENSITIVE_FIELD_NAMES:
+                masked[key] = '***'
+            else:
+                masked[key] = _mask_sensitive_data(value)
+        return masked
+    if isinstance(data, list):
+        return [_mask_sensitive_data(item) for item in data]
+    return data
 
 
 @login_required
 def log_detail_api(request, log_id):
-    """日志详情 API，返回单条日志的 JSON 数据"""
-    log = get_object_or_404(CommandLog, pk=log_id)
+    """日志详情 API，返回单条日志的 JSON 数据（含权限校验与脱敏）"""
+    logs = CommandLog.objects.all()
+    if not is_super_admin(request.user):
+        logs = logs.filter(user=request.user)
+
+    log = get_object_or_404(logs, pk=log_id)
+
+    masked_request_data = _mask_sensitive_data(log.request_data) if log.request_data else ''
+    masked_response_data = _mask_sensitive_data(log.response_data) if log.response_data else ''
+
+    # request_content 为 JSON 字符串时进行结构化脱敏，失败则返回空串避免透传敏感原文
+    masked_request_content = ''
+    if log.request_content:
+        try:
+            parsed_content = json.loads(log.request_content)
+            masked_request_content = json.dumps(_mask_sensitive_data(parsed_content), ensure_ascii=False)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            masked_request_content = ''
+
     return JsonResponse({
-        'request_content': log.request_content or '',
-        'request_data': json.dumps(log.request_data, ensure_ascii=False) if log.request_data else '',
-        'response_data': json.dumps(log.response_data, ensure_ascii=False) if log.response_data else '',
+        'request_content': masked_request_content,
+        'request_data': json.dumps(masked_request_data, ensure_ascii=False) if masked_request_data else '',
+        'response_data': json.dumps(masked_response_data, ensure_ascii=False) if masked_response_data else '',
     })
 
 

@@ -295,26 +295,55 @@ function addResultRow(index, targetLabel, data) {
     const tbody = document.getElementById('batchResultBody');
     const row = document.createElement('tr');
 
-    let statusHtml, resultText;
+    let statusClass, statusText, resultText;
     if (data.success) {
-        statusHtml = '<span class="status-success"><i class="ti ti-circle-check me-1"></i>{% trans "成功" %}</span>';
+        statusClass = 'status-success';
+        statusText = '{% trans "成功" %}';
         resultText = JSON.stringify(data.data, null, 2);
     } else if (data.command_deactivated) {
-        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "已停用" %}</span>';
+        statusClass = 'status-failed';
+        statusText = '{% trans "已停用" %}';
         resultText = data.error || '{% trans "命令已失效" %}';
     } else {
-        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "失败" %}</span>';
+        statusClass = 'status-failed';
+        statusText = '{% trans "失败" %}';
         resultText = data.error || '{% trans "未知错误" %}';
     }
 
     batchResults.push({ target: targetLabel, success: data.success, error: data.error || null, data: data.data || null });
 
-    row.innerHTML = `
-        <td>${index}</td>
-        <td><code>${targetLabel}</code></td>
-        <td>${statusHtml}</td>
-        <td class="result-cell"><pre style="margin:0;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto;">${resultText}</pre></td>
-    `;
+    const tdIndex = document.createElement('td');
+    tdIndex.textContent = String(index);
+
+    const tdTarget = document.createElement('td');
+    const code = document.createElement('code');
+    code.textContent = String(targetLabel || '');
+    tdTarget.appendChild(code);
+
+    const tdStatus = document.createElement('td');
+    const statusSpan = document.createElement('span');
+    statusSpan.className = statusClass;
+    const statusIcon = document.createElement('i');
+    statusIcon.className = `ti ${data.success ? 'ti-circle-check' : 'ti-circle-x'} me-1`;
+    statusSpan.appendChild(statusIcon);
+    statusSpan.appendChild(document.createTextNode(statusText));
+    tdStatus.appendChild(statusSpan);
+
+    const tdResult = document.createElement('td');
+    tdResult.className = 'result-cell';
+    const pre = document.createElement('pre');
+    pre.style.margin = '0';
+    pre.style.whiteSpace = 'pre-wrap';
+    pre.style.wordBreak = 'break-all';
+    pre.style.maxHeight = '80px';
+    pre.style.overflowY = 'auto';
+    pre.textContent = String(resultText || '');
+    tdResult.appendChild(pre);
+
+    row.appendChild(tdIndex);
+    row.appendChild(tdTarget);
+    row.appendChild(tdStatus);
+    row.appendChild(tdResult);
     tbody.appendChild(row);
 }
 
@@ -347,20 +376,38 @@ function exportBatchResults() {
 
 function collectSingleParams() {
     const params = {};
+    let hasError = false;
+
     document.querySelectorAll('.single-input.param-field').forEach(field => {
         const id = field.dataset.paramId;
         // Skip fields that are in batch mode
         if (batchFields.has(id)) return;
+
         let value = field.value.trim();
         if (!value) return;
+
         if (field.dataset.paramType === 'time') {
-            value = Math.floor(new Date(value).getTime() / 1000);
+            const ts = Math.floor(new Date(value).getTime() / 1000);
+            if (!Number.isFinite(ts)) {
+                alert('{% trans "时间格式无效" %}: ' + id);
+                hasError = true;
+                return;
+            }
+            value = ts;
         } else if (['uint32','uint64','int32','uint8'].includes(field.dataset.paramType)) {
-            value = parseInt(value, 10);
+            const intValue = Number.parseInt(value, 10);
+            if (!Number.isFinite(intValue)) {
+                alert('{% trans "数值格式无效" %}: ' + id);
+                hasError = true;
+                return;
+            }
+            value = intValue;
         }
+
         params[id] = value;
     });
-    return params;
+
+    return hasError ? null : params;
 }
 
 function getBatchValues(paramId) {
@@ -371,6 +418,8 @@ function getBatchValues(paramId) {
 
 async function singleExecute() {
     const params = collectSingleParams();
+    if (params === null) return;
+
     // Also collect any batch fields that might have a single value (shouldn't normally happen)
     const overlay = document.getElementById('loadingOverlay');
     overlay.classList.remove('d-none');
@@ -469,6 +518,12 @@ async function batchExecute() {
     resetBtn.disabled = true;
 
     const baseParams = collectSingleParams();
+    if (baseParams === null) {
+        submitBtn.disabled = false;
+        cancelBtn.classList.add('d-none');
+        resetBtn.disabled = false;
+        return;
+    }
 
     for (let i = 0; i < maxCount; i++) {
         if (batchCancelled) break;
@@ -478,33 +533,52 @@ async function batchExecute() {
         // Build params: base + batch field values for this iteration
         const params = { ...baseParams };
         let targetLabel = '';
+        let iterationHasError = false;
+        let iterationErrorMsg = '';
 
         for (const paramId of batchFields) {
             const values = batchData[paramId];
             const valueIndex = values.length === 1 ? 0 : i;
             let value = values[valueIndex];
 
-            // Type conversion
-            const textarea = document.getElementById('batch_' + paramId);
-            const paramType = textarea ? textarea.dataset.paramType : 'string';
-            if (paramType === 'time') {
-                value = Math.floor(new Date(value).getTime() / 1000);
-            } else if (['uint32','uint64','int32','uint8'].includes(paramType)) {
-                value = parseInt(value, 10);
-            }
-
-            params[paramId] = value;
-
             // Use the primary batch field for the label
             if (paramId === primaryBatchField) {
                 targetLabel = values[valueIndex];
             }
+
+            // Type conversion
+            const textarea = document.getElementById('batch_' + paramId);
+            const paramType = textarea ? textarea.dataset.paramType : 'string';
+            if (paramType === 'time') {
+                const ts = Math.floor(new Date(value).getTime() / 1000);
+                if (!Number.isFinite(ts)) {
+                    iterationHasError = true;
+                    iterationErrorMsg = '{% trans "时间格式无效" %}: ' + paramId;
+                    break;
+                }
+                value = ts;
+            } else if (['uint32','uint64','int32','uint8'].includes(paramType)) {
+                const intValue = Number.parseInt(value, 10);
+                if (!Number.isFinite(intValue)) {
+                    iterationHasError = true;
+                    iterationErrorMsg = '{% trans "数值格式无效" %}: ' + paramId;
+                    break;
+                }
+                value = intValue;
+            }
+
+            params[paramId] = value;
         }
 
         // If targetLabel is still empty, use first batch field
         if (!targetLabel && batchFields.size > 0) {
             const firstField = [...batchFields][0];
             targetLabel = batchData[firstField][batchData[firstField].length === 1 ? 0 : i];
+        }
+
+        if (iterationHasError) {
+            addResultRow(i + 1, targetLabel || '-', { success: false, error: iterationErrorMsg });
+            continue;
         }
 
         try {
