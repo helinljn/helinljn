@@ -12,7 +12,7 @@
     6. Markdown All in One
 
     7. Cline Chinese
-        1. 自动批准：读取，编辑，安全命令
+        1. 自动批准：读取，编辑，所有命令
         2. API配置：
             API提供商：OpenAI Compatible
             基础URL：  https://api.clawsocket.com/v1
