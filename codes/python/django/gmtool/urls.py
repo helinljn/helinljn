@@ -12,6 +12,7 @@ urlpatterns = [
 
     # 命令管理
     path('commands/', views.command_list, name='command_list'),
+    path('commands/add/', views.add_gm_command, name='add_gm_command'),
     path('commands/<str:cmd_id>/execute/', views.command_execute, name='command_execute'),
 
     # 用户管理

@@ -129,7 +129,14 @@
         </div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <h4 class="mb-2">{% trans "Add GM Command" %}</h4>
+                    <p class="text-muted mb-3">{% trans "Manually add a new GM command definition. CommandId and protocol IDs must be unique." %}</p>
+                    <a href="{% url 'gmtool:add_gm_command' %}" class="btn btn-success">
+                        <i class="ti ti-plus me-1"></i>{% trans "Add Command" %}
+                    </a>
+                </div>
+                <div class="col-md-4">
                     <h4 class="mb-2">{% trans "Upload Command Definition File" %}</h4>
                     <p class="text-muted mb-3">{% trans "Upload an" %} <code>idip_commands.json</code> {% trans "file to replace the existing configuration. It will be automatically synced to the database after upload." %}</p>
                     <div class="input-group">
@@ -140,7 +147,7 @@
                     </div>
                     <div id="uploadResult" class="mt-2" style="display:none;"></div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <h4 class="mb-2">{% trans "Manual Sync" %}</h4>
                     <p class="text-muted mb-3">{% trans "Re-sync command definitions from the existing" %} <code>idip_commands.json</code> {% trans "file on the server to the database." %}</p>
                     <button class="btn btn-outline-secondary" onclick="syncCommands()">

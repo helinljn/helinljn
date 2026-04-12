@@ -20,9 +20,9 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext as __
 
 from .audit_log import log_operation
-from .command_parser import sync_commands_to_db
+from .command_parser import add_command_to_json, sync_commands_to_db, validate_json_command_ids
 from .decorators import command_permission_required, get_user_permissions, is_super_admin, super_admin_required
-from .forms import RoleForm, UserCreateForm, UserEditForm
+from .forms import AddGMCommandForm, RoleForm, UserCreateForm, UserEditForm
 from .idip_client import send_idip_command
 from .models import CommandLog, GMCommand, LoginLog, Role, UserCommandPermission, UserProfile
 
@@ -288,6 +288,92 @@ def command_execute(request, cmd_id):
         'command': command,
         'request_params': command.request_params,
         'is_admin': is_super_admin(request.user),
+    })
+
+
+@login_required
+@super_admin_required
+def add_gm_command(request):
+    """添加GM命令（仅超级管理员）"""
+    if request.method == 'POST':
+        form = AddGMCommandForm(request.POST)
+        if form.is_valid():
+            command_id = form.cleaned_data['command_id']
+            tab = form.cleaned_data['tab']
+            command_name = form.cleaned_data['command_name']
+            request_name = form.cleaned_data['request_name']
+            request_id = form.cleaned_data['request_id']
+            response_name = form.cleaned_data['response_name']
+            response_id = form.cleaned_data['response_id']
+            request_desc = form.cleaned_data.get('request_desc', '')
+            response_desc = form.cleaned_data.get('response_desc', '')
+
+            # 解析参数
+            default_request_params = [
+                {"isnull": "false", "id": "AreaId", "type": "uint32", "name": "*渠道信息(Channel information)"},
+                {"isnull": "false", "id": "Partition", "type": "uint32", "name": "服务器组号(Server group number)"},
+                {"isnull": "false", "id": "PlatId", "type": "uint8", "name": "*平台信息(Platform information)"},
+            ]
+            default_response_params = [
+                {"isnull": "false", "id": "Result", "type": "int32", "name": "结果(Result Id)"},
+                {"isnull": "false", "id": "RetMsg", "type": "string", "name": "返回消息(Result message)"},
+            ]
+
+            request_params_raw = form.cleaned_data.get('request_params', '').strip()
+            response_params_raw = form.cleaned_data.get('response_params', '').strip()
+
+            request_params = json.loads(request_params_raw) if request_params_raw else default_request_params
+            response_params = json.loads(response_params_raw) if response_params_raw else default_response_params
+
+            # 构建 JSON 格式的命令数据
+            cmd_json_data = {
+                "tab": tab,
+                "request_desc": request_desc or f"{command_name}请求({command_name} request)",
+                "id": request_id,
+                "request": request_name,
+                "respone_desc": response_desc or f"{command_name}应答({command_name} response)",
+                response_name: response_params,
+                "responseid": response_id,
+                "respone": response_name,
+                request_name: request_params,
+            }
+
+            # 写入 idip_commands.json
+            success, error_msg = add_command_to_json({
+                'command_id': command_id,
+                'data': cmd_json_data,
+            })
+            if not success:
+                from django.contrib import messages
+                messages.error(request, _('Failed to write command to JSON file: %(error)s') % {'error': error_msg})
+            else:
+                # 同步到数据库
+                try:
+                    sync_commands_to_db()
+                except Exception as e:
+                    logger.exception('Command sync error after add: %s', e)
+                    from django.contrib import messages
+                    messages.warning(request, _('Command added to JSON file but database sync failed'))
+
+                log_operation('command', 'add', user=request.user,
+                              ip_address=get_client_ip(request),
+                              detail={
+                                  'command_id': command_id,
+                                  'command_name': command_name,
+                                  'request_id': request_id,
+                                  'response_id': response_id,
+                              })
+
+                from django.contrib import messages
+                messages.success(request, _('Command %(id)s added successfully') % {'id': command_id})
+                return redirect('gmtool:dashboard')
+    else:
+        form = AddGMCommandForm()
+
+    return render(request, 'gmtool/command_add.html', {
+        'form': form,
+        'title': _('Add GM Command'),
+        'is_admin': True,
     })
 
 
@@ -710,6 +796,11 @@ def upload_commands_api(request):
         if request_name and not isinstance(cmd_data.get(request_name), list):
             return JsonResponse({'error': __('Request params %(name)s for command %(id)s must be an array') % {'name': request_name, 'id': cmd_id}}, status=400)
 
+    # 校验 ID 重复（CommandId、request_id、response_id）
+    is_valid_ids, id_error_msg = validate_json_command_ids(data)
+    if not is_valid_ids:
+        return JsonResponse({'error': _('ID conflict detected: %(errors)s') % {'errors': id_error_msg}}, status=400)
+
     # 原子写入 idip_commands.json（先写临时文件再替换，防止中途崩溃损坏文件）
     try:
         json_path = settings.BASE_DIR / 'idip_commands.json'
@@ -757,6 +848,18 @@ def upload_commands_api(request):
 @require_POST
 def sync_commands_api(request):
     """从JSON同步命令定义"""
+
+    # 先校验 JSON 文件中的 ID 是否有冲突
+    json_path = os.path.join(settings.BASE_DIR, 'idip_commands.json')
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        return JsonResponse({'error': _('Failed to read JSON file: %(error)s') % {'error': str(e)}}, status=400)
+
+    is_valid_ids, id_error_msg = validate_json_command_ids(data)
+    if not is_valid_ids:
+        return JsonResponse({'error': _('ID conflict detected: %(errors)s') % {'errors': id_error_msg}}, status=400)
 
     try:
         created, updated, deactivated = sync_commands_to_db()
