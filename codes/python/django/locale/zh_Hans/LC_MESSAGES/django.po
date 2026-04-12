@@ -659,6 +659,7 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\command_list.html:66
 #, python-format
+#| msgid "未找到匹配\"%(search_term)s\"的命令"
 msgid "未找到匹配“%(search_term)s”的命令"
 msgstr ""
 

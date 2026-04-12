@@ -672,7 +672,7 @@ msgid "执行"
 msgstr "Execute"
 
 #: .\gmtool\templates\gmtool\command_list.html:66
-#, fuzzy, python-format
+#, python-format
 #| msgid "未找到匹配\"%(search_term)s\"的命令"
 msgid "未找到匹配“%(search_term)s”的命令"
 msgstr "No commands found matching \"%(search_term)s\""
@@ -1049,7 +1049,7 @@ msgstr "Edit User"
 
 #: .\gmtool\views.py:570
 msgid "编辑角色"
-msgstr ""
+msgstr "Edit Role"
 
 #: .\gmtool\views.py:805 .\gmtool\views.py:865
 #, python-format
@@ -1060,73 +1060,3 @@ msgstr "ID conflict detected: %(errors)s"
 #, python-format
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr "Failed to read JSON file: %(error)s"
-
-#~ msgid "该命令已被停用或删除，请刷新页面获取最新命令列表"
-#~ msgstr ""
-#~ "This command has been deactivated or deleted. Please refresh the page for "
-#~ "the latest command list."
-
-#~ msgid "请求体必须是 JSON 对象"
-#~ msgstr "Request body must be a JSON object"
-
-#~ msgid "参数 Params 必须是对象"
-#~ msgstr "Params must be an object"
-
-#~ msgid "Partition 必须为整数"
-#~ msgstr "Partition must be an integer"
-
-#~ msgid "Partition 不能为负数"
-#~ msgstr "Partition cannot be negative"
-
-#~ msgid "请求数据格式错误"
-#~ msgstr "Invalid request data format"
-
-#~ msgid "服务器内部错误"
-#~ msgstr "Internal server error"
-
-#~ msgid "不能删除自己的账号"
-#~ msgstr "You cannot delete your own account"
-
-#~ msgid "不能删除超级管理员账号"
-#~ msgstr "You cannot delete a super admin account"
-
-#~ msgid "超级管理员角色不可编辑"
-#~ msgstr "Super admin role cannot be edited"
-
-#~ msgid "页面已过期，请重新登录。"
-#~ msgstr "Page has expired. Please log in again."
-
-#~ msgid "请选择文件"
-#~ msgstr "Please select a file"
-
-#~ msgid "仅支持 .json 文件"
-#~ msgstr "Only .json files are supported"
-
-#~ msgid "文件大小不能超过 5MB"
-#~ msgstr "File size cannot exceed 5MB"
-
-#, python-format
-#~ msgid "JSON 解析失败: %(error)s"
-#~ msgstr "JSON parsing failed: %(error)s"
-
-#~ msgid "JSON 顶层必须是对象(dict)"
-#~ msgstr "JSON top level must be an object (dict)"
-
-#, python-format
-#~ msgid "命令 %(id)s 的值必须是对象"
-#~ msgstr "Command %(id)s value must be an object"
-
-#, python-format
-#~ msgid "命令 %(id)s 缺少必要字段: %(fields)s"
-#~ msgstr "Command %(id)s is missing required fields: %(fields)s"
-
-#, python-format
-#~ msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
-#~ msgstr "Command %(id)s request parameter %(name)s must be an array"
-
-#, python-format
-#~ msgid "文件写入失败: %(error)s"
-#~ msgstr "File write failed: %(error)s"
-
-#~ msgid "文件已上传但同步失败"
-#~ msgstr "File uploaded but sync failed"
