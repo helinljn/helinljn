@@ -49,25 +49,12 @@
                                    data-param-type="time"
                                    {% if param.isnull != "true" %}required{% endif %}>
                         {% elif param.type == "string" %}
-                            {% if param.multitarget %}
-                            <textarea class="form-control param-field"
-                                      id="param_{{ param.id }}"
-                                      data-param-id="{{ param.id }}"
-                                      data-param-type="string"
-                                      data-multitarget="true"
-                                      rows="3"
-                                      placeholder="{% trans 'Separate multiple targets with commas or newlines' %}"
-                                      {% if param.isnull != "true" %}required{% endif %}
-                                      {% if param.size %}maxlength="{{ param.size }}"{% endif %}></textarea>
-                            {% else %}
                             <input type="text"
                                    class="form-control param-field"
                                    id="param_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="string"
-                                   {% if param.isnull != "true" %}required{% endif %}
-                                   {% if param.size %}maxlength="{{ param.size }}"{% endif %}>
-                            {% endif %}
+                                   {% if param.isnull != "true" %}required{% endif %}>
                         {% else %}
                             <input type="number"
                                    class="form-control param-field"
@@ -75,9 +62,6 @@
                                    data-param-id="{{ param.id }}"
                                    data-param-type="{{ param.type }}"
                                    {% if param.isnull != "true" %}required{% endif %}>
-                        {% endif %}
-                        {% if param.tip %}
-                        <div class="form-hint">{{ param.tip }}</div>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -167,8 +151,6 @@ document.getElementById('commandForm').addEventListener('submit', async function
 
         if (field.dataset.paramType === 'time') {
             value = Math.floor(new Date(value).getTime() / 1000);
-        } else if (field.dataset.multitarget === 'true') {
-            value = value.split(/[,\n;]/).map(s => s.trim()).filter(s => s).join(';');
         } else if (['uint32','uint64','int32','uint8'].includes(field.dataset.paramType)) {
             value = parseInt(value, 10);
         }
