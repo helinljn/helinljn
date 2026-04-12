@@ -83,8 +83,8 @@
                                     <div class="dropdown me-3">
                                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
                                             <i class="ti ti-language me-1"></i>
-                                            {% get_current_language as LANGUAGE_CODE %}
-                                            {% if LANGUAGE_CODE == 'zh-hans' %}{% trans "中文" %}{% else %}English{% endif %}
+                                    {% get_current_language as LANGUAGE_CODE %}
+                                            {% if LANGUAGE_CODE == 'zh-hans' %}{% trans "中文" %}{% else %}{% trans "英文" %}{% endif %}
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li>
@@ -98,7 +98,7 @@
                                                 <form action="{% url 'set_language' %}" method="post" class="m-0">{% csrf_token %}
                                                     <input type="hidden" name="language" value="en">
                                                     <input type="hidden" name="next" value="{{ request.path }}">
-                                                    <button type="submit" class="dropdown-item">English</button>
+                                                    <button type="submit" class="dropdown-item">{% trans "英文" %}</button>
                                                 </form>
                                             </li>
                                         </ul>

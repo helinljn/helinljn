@@ -11,7 +11,7 @@ msgstr ""
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: zh_Hans\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -203,7 +203,7 @@ msgstr ""
 #: .\gmtool\forms.py:239 .\gmtool\forms.py:251
 #, python-format
 msgid "无效的 JSON: %(error)s"
-msgstr "无效的 JSON: %(error)s"
+msgstr ""
 
 #: .\gmtool\forms.py:248
 msgid "响应参数必须是 JSON 数组"
@@ -452,6 +452,11 @@ msgstr ""
 msgid "中文"
 msgstr ""
 
+#: .\gmtool\templates\gmtool\base.html:87
+#: .\gmtool\templates\gmtool\login.html:95
+msgid "英文"
+msgstr ""
+
 #: .\gmtool\templates\gmtool\base.html:94
 #: .\gmtool\templates\gmtool\login.html:95
 msgid "简体中文"
@@ -651,8 +656,8 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\command_list.html:66
 #, python-format
-msgid "No commands found matching \"%(search_term)s\""
-msgstr "未找到匹配\"%(search_term)s\"的命令"
+msgid "未找到匹配\"%(search_term)s\"的命令"
+msgstr ""
 
 #: .\gmtool\templates\gmtool\command_list.html:66
 #: .\gmtool\templates\gmtool\dashboard.html:86
@@ -698,7 +703,7 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\command_log.html:134
 msgid "IP"
-msgstr "IP"
+msgstr ""
 
 #: .\gmtool\templates\gmtool\command_log.html:147
 msgid "点击查看完整内容"
@@ -842,8 +847,8 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\login.html:23
 #, python-format
-msgid "You are already logged in as <strong>%(username)s</strong>."
-msgstr "当前已以 <strong>%(username)s</strong> 身份登录。"
+msgid "当前已以 <strong>%(username)s</strong> 身份登录。"
+msgstr ""
 
 #: .\gmtool\templates\gmtool\login.html:27
 msgid "进入系统"
@@ -901,8 +906,8 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\role_list.html:55
 #, python-format
-msgid "Confirm delete role %(name)s?"
-msgstr "确认删除角色 %(name)s？"
+msgid "确认删除角色 %(name)s？"
+msgstr ""
 
 #: .\gmtool\templates\gmtool\role_list.html:57
 #: .\gmtool\templates\gmtool\user_list.html:86
@@ -944,8 +949,8 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\user_list.html:84
 #, python-format
-msgid "Confirm delete user %(username)s?"
-msgstr "确认删除用户 %(username)s？"
+msgid "确认删除用户 %(username)s？"
+msgstr ""
 
 #: .\gmtool\templates\gmtool\user_list.html:95
 msgid "暂无用户数据"
@@ -959,11 +964,9 @@ msgstr ""
 #: .\gmtool\templates\gmtool\user_permissions.html:18
 #, python-format
 msgid ""
-"Assign GM command execution permissions for user <strong>%(username)s</"
-"strong>. Super admins have all permissions automatically."
-msgstr ""
 "为用户 <strong>%(username)s</strong> 单独分配可执行的GM命令权限。超级管理员自"
 "动拥有全部权限，无需手动分配。"
+msgstr ""
 
 #: .\gmtool\templates\gmtool\user_permissions.html:53
 msgid "保存权限"
@@ -999,6 +1002,34 @@ msgstr ""
 msgid "该命令已被停用或删除"
 msgstr ""
 
+#: .\gmtool\views.py
+msgid "该命令已被停用或删除，请刷新页面获取最新命令列表"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "请求体必须是 JSON 对象"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "参数 Params 必须是对象"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "Partition 必须为整数"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "Partition 不能为负数"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "请求数据格式错误"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "服务器内部错误"
+msgstr ""
+
 #: .\gmtool\views.py:351
 #, python-format
 msgid "写入命令到 JSON 文件失败: %(error)s"
@@ -1017,8 +1048,65 @@ msgstr ""
 msgid "编辑用户"
 msgstr ""
 
-#: .\gmtool\views.py:570
-msgid "编辑角色"
+#: .\gmtool\views.py
+msgid "不能删除自己的账号"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "不能删除超级管理员账号"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "超级管理员角色不可编辑"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "页面已过期，请重新登录。"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "请选择文件"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "仅支持 .json 文件"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "文件大小不能超过 5MB"
+msgstr ""
+
+#: .\gmtool\views.py
+#, python-format
+msgid "JSON 解析失败: %(error)s"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "JSON 顶层必须是对象(dict)"
+msgstr ""
+
+#: .\gmtool\views.py
+#, python-format
+msgid "命令 %(id)s 的值必须是对象"
+msgstr ""
+
+#: .\gmtool\views.py
+#, python-format
+msgid "命令 %(id)s 缺少必要字段: %(fields)s"
+msgstr ""
+
+#: .\gmtool\views.py
+#, python-format
+msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
+msgstr ""
+
+#: .\gmtool\views.py
+#, python-format
+msgid "文件写入失败: %(error)s"
+msgstr ""
+
+#: .\gmtool\views.py
+msgid "文件已上传但同步失败"
 msgstr ""
 
 #: .\gmtool\views.py:805 .\gmtool\views.py:865
