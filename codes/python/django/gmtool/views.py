@@ -284,10 +284,13 @@ def command_execute(request, cmd_id):
             return JsonResponse({'success': False, 'error': __('Internal server error')}, status=500)
 
     # GET: 显示执行表单
+    from django.conf import settings
     return render(request, 'gmtool/command_execute.html', {
         'command': command,
         'request_params': command.request_params,
         'is_admin': is_super_admin(request.user),
+        'batch_max_targets': getattr(settings, 'BATCH_EXECUTE_MAX_TARGETS', 200),
+        'batch_interval_ms': getattr(settings, 'BATCH_EXECUTE_INTERVAL_MS', 200),
     })
 
 

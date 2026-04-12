@@ -163,6 +163,10 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True   # 浏览器关闭时过期（覆盖 AGE
 IDIP_API_URL = 'http://127.0.0.1:8080/api/idip'  # 游戏IDIP接口地址（部署时修改）
 IDIP_TIMEOUT = 30  # 请求超时时间（秒）
 
+# 批量执行配置
+BATCH_EXECUTE_MAX_TARGETS = 200    # 单次批量最大目标数（玩家/RoleId等）
+BATCH_EXECUTE_INTERVAL_MS = 200    # 批量请求间隔（毫秒）
+
 # 是否信任反向代理的 X-Forwarded-For 头（生产环境使用 Nginx 等反向代理时设为 True）
 TRUSTED_PROXY = os.environ.get('DJANGO_TRUSTED_PROXY', 'False').lower() in ('true', '1', 'yes')
 

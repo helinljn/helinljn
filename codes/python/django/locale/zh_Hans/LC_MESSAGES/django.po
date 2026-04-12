@@ -522,6 +522,7 @@ msgstr "添加命令"
 #: .\gmtool\templates\gmtool\role_form.html:38
 #: .\gmtool\templates\gmtool\user_form.html:48
 #: .\gmtool\templates\gmtool\user_permissions.html:55
+#: .\gmtool\templates\gmtool\command_execute.html
 msgid "Cancel"
 msgstr "取消"
 
@@ -587,6 +588,58 @@ msgstr "未知错误"
 #: .\gmtool\templates\gmtool\command_execute.html:195
 msgid "Request error"
 msgstr "请求异常"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Batch Mode"
+msgstr "批量模式"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Enter multiple values, one per line or comma separated, e.g.:\nvalue1\nvalue2\nvalue3"
+msgstr "输入多个值，每行一个或用逗号分隔，如：\n值1\n值2\n值3"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Supports comma separation, newline separation"
+msgstr "支持逗号分隔、换行分隔"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Import from file"
+msgstr "从文件导入"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Batch Execute"
+msgstr "批量执行"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Batch Execution Results"
+msgstr "批量执行结果"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Target"
+msgstr "目标"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Export"
+msgstr "导出"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Please enter at least one value for batch field"
+msgstr "请为批量字段输入至少一个值"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Number of values exceeds limit"
+msgstr "值数量超过限制"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Batch field count mismatch"
+msgstr "批量字段数量不匹配"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Each batch field must have the same number of values, or exactly 1 value to reuse for all"
+msgstr "每个批量字段的值数量必须相同，或仅输入1个值以对所有目标复用"
+
+#: .\gmtool\templates\gmtool\command_execute.html
+msgid "Batch"
+msgstr "批量"
 
 #: .\gmtool\templates\gmtool\command_list.html:17
 msgid "Search commands..."
@@ -785,8 +838,9 @@ msgstr "更新"
 
 #: .\gmtool\templates\gmtool\dashboard.html:193
 #: .\gmtool\templates\gmtool\dashboard.html:220
+#: .\gmtool\templates\gmtool\command_execute.html
 msgid "Deactivated"
-msgstr "停用"
+msgstr "已停用"
 
 #: .\gmtool\templates\gmtool\dashboard.html:206
 #: .\gmtool\templates\gmtool\dashboard.html:226

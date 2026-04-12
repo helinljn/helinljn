@@ -10,6 +10,23 @@
 <style>
     .result-box { max-height: 400px; overflow-y: auto; }
     pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
+    .batch-toggle { cursor: pointer; user-select: none; }
+    .batch-toggle input[type="checkbox"] { cursor: pointer; }
+    .batch-textarea { display: none; font-family: monospace; resize: vertical; min-height: 100px; }
+    .batch-textarea.active { display: block; }
+    .single-input.hidden { display: none; }
+    .batch-hint { font-size: 0.75rem; color: #6c757d; margin-top: 4px; }
+    .batch-progress { height: 4px; }
+    .batch-result-table { max-height: 500px; overflow-y: auto; }
+    .batch-result-table td, .batch-result-table th { white-space: nowrap; }
+    .batch-result-table td.result-cell { white-space: normal; max-width: 400px; overflow: hidden; text-overflow: ellipsis; }
+    .status-success { color: #2fb344; }
+    .status-failed { color: #d63939; }
+    .status-pending { color: #6c757d; }
+    .status-running { color: #4299e1; }
+    .file-import-label { cursor: pointer; font-size: 0.8rem; }
+    .file-import-label:hover { text-decoration: underline; }
+    .param-label-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 </style>
 {% endblock %}
 
@@ -34,43 +51,76 @@
                 <form id="commandForm">
                     {% csrf_token %}
                     {% for param in request_params %}
-                    <div class="mb-3">
+                    <div class="mb-3" id="param-group-{{ param.id }}">
                         <label class="form-label" for="param_{{ param.id }}">
-                            {{ param.name }}
-                            {% if param.isnull == "true" %}
-                            <span class="form-label-description">{% trans "Optional" %}</span>
-                            {% endif %}
+                            <span class="param-label-row">
+                                {{ param.name }}
+                                {% if param.isnull == "true" %}
+                                <span class="form-label-description">{% trans "Optional" %}</span>
+                                {% endif %}
+                                {% if param.id != "AreaId" and param.id != "Partition" and param.id != "PlatId" %}
+                                <span class="batch-toggle ms-2">
+                                    <input type="checkbox" class="batch-mode-toggle" data-param-id="{{ param.id }}" onchange="toggleFieldBatchMode('{{ param.id }}', this.checked)">
+                                    {% trans "Batch" %}
+                                </span>
+                                {% endif %}
+                            </span>
                         </label>
-                        {% if param.type == "time" %}
+                        {# Single value input #}
+                        {% if param.id == "Partition" %}
+                            <input type="number"
+                                   class="form-control single-input param-field"
+                                   id="single_{{ param.id }}"
+                                   data-param-id="{{ param.id }}"
+                                   data-param-type="{{ param.type }}"
+                                   {% if param.isnull != "true" %}required{% endif %}>
+                        {% elif param.type == "time" %}
                             <input type="datetime-local"
-                                   class="form-control param-field"
-                                   id="param_{{ param.id }}"
+                                   class="form-control single-input param-field"
+                                   id="single_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="time"
                                    {% if param.isnull != "true" %}required{% endif %}>
                         {% elif param.type == "string" %}
                             <input type="text"
-                                   class="form-control param-field"
-                                   id="param_{{ param.id }}"
+                                   class="form-control single-input param-field"
+                                   id="single_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="string"
                                    {% if param.isnull != "true" %}required{% endif %}>
                         {% else %}
                             <input type="number"
-                                   class="form-control param-field"
-                                   id="param_{{ param.id }}"
+                                   class="form-control single-input param-field"
+                                   id="single_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="{{ param.type }}"
                                    {% if param.isnull != "true" %}required{% endif %}>
                         {% endif %}
+                        {# Batch textarea (hidden by default) #}
+                        <textarea class="form-control batch-textarea"
+                                  id="batch_{{ param.id }}"
+                                  data-param-id="{{ param.id }}"
+                                  data-param-type="{{ param.type }}"
+                                  placeholder="{% trans 'Enter multiple values, one per line or comma separated, e.g.:&#10;value1&#10;value2&#10;value3' %}"
+                        ></textarea>
+                        <div class="batch-hint" id="hint_{{ param.id }}" style="display:none;">
+                            {% trans "Supports comma separation, newline separation" %} |
+                            <label class="file-import-label text-primary">
+                                <i class="ti ti-file-import me-1"></i>{% trans "Import from file" %}
+                                <input type="file" class="file-import-input" data-target="{{ param.id }}" accept=".txt,.csv" style="display:none;" onchange="importValuesFromFile(this)">
+                            </label>
+                        </div>
                     </div>
                     {% endfor %}
 
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="ti ti-player-play me-1"></i>{% trans "Execute Command" %}
+                            <i class="ti ti-player-play me-1"></i><span id="submitBtnText">{% trans "Execute Command" %}</span>
                         </button>
-                        <button type="reset" class="btn btn-outline-secondary ms-2">
+                        <button type="button" class="btn btn-danger ms-2 d-none" id="cancelBatchBtn" onclick="cancelBatch()">
+                            <i class="ti ti-player-stop me-1"></i>{% trans "Cancel" %}
+                        </button>
+                        <button type="reset" class="btn btn-outline-secondary ms-2" id="resetBtn">
                             <i class="ti ti-rotate me-1"></i>{% trans "Reset" %}
                         </button>
                     </div>
@@ -127,37 +177,201 @@
     </div>
 </div>
 
+<!-- 批量执行结果 -->
+<div class="card mt-3 d-none" id="batchResultCard">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-list-check me-2"></i>{% trans "Batch Execution Results" %}</h3>
+        <div class="card-actions">
+            <span class="me-2" id="batchProgressText"></span>
+            <button class="btn btn-sm btn-outline-primary me-1 d-none" id="exportResultBtn" onclick="exportBatchResults()">
+                <i class="ti ti-download me-1"></i>{% trans "Export" %}
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('batchResultCard').classList.add('d-none')">
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+    </div>
+    <div class="progress batch-progress rounded-0">
+        <div class="progress-bar" id="batchProgressBar" role="progressbar" style="width: 0%"></div>
+    </div>
+    <div class="table-responsive batch-result-table">
+        <table class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>{% trans "Target" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Result" %}</th>
+                </tr>
+            </thead>
+            <tbody id="batchResultBody">
+            </tbody>
+        </table>
+    </div>
+</div>
+
 <!-- 加载中遮罩 -->
 <div class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 align-items-center justify-content-center"
      id="loadingOverlay" style="z-index:9999;">
     <div class="text-white text-center">
         <div class="mb-3"><span class="spinner-border spinner-border-lg"></span></div>
-        <div>{% trans "Sending request..." %}</div>
+        <div id="loadingText">{% trans "Sending request..." %}</div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.getElementById('commandForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+const BATCH_MAX_TARGETS = {{ batch_max_targets }};
+const BATCH_INTERVAL_MS = {{ batch_interval_ms }};
 
+// Track which param fields are in batch mode
+const batchFields = new Set();
+let batchCancelled = false;
+let batchResults = [];
+
+function toggleFieldBatchMode(paramId, checked) {
+    const singleInput = document.getElementById('single_' + paramId);
+    const batchInput = document.getElementById('batch_' + paramId);
+    const hint = document.getElementById('hint_' + paramId);
+
+    if (checked) {
+        batchFields.add(paramId);
+        singleInput.classList.add('hidden');
+        singleInput.removeAttribute('required');
+        batchInput.classList.add('active');
+        batchInput.setAttribute('required', '');
+        hint.style.display = 'block';
+    } else {
+        batchFields.delete(paramId);
+        singleInput.classList.remove('hidden');
+        if (singleInput.dataset.paramType !== undefined) {
+            // Restore required based on original param
+        }
+        batchInput.classList.remove('active');
+        batchInput.removeAttribute('required');
+        hint.style.display = 'none';
+    }
+    updateSubmitButtonText();
+}
+
+function updateSubmitButtonText() {
+    const btnText = document.getElementById('submitBtnText');
+    if (batchFields.size > 0) {
+        btnText.textContent = '{% trans "Batch Execute" %}';
+    } else {
+        btnText.textContent = '{% trans "Execute Command" %}';
+    }
+}
+
+function parseBatchValues(input) {
+    const values = [];
+    const lines = input.split(/[\n,;]+/);
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed) values.push(trimmed);
+    }
+    return values;
+}
+
+function importValuesFromFile(input) {
+    const paramId = input.dataset.target;
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const batchInput = document.getElementById('batch_' + paramId);
+        batchInput.value = e.target.result;
+    };
+    reader.readAsText(file);
+    input.value = '';
+}
+
+function cancelBatch() {
+    batchCancelled = true;
+}
+
+function addResultRow(index, targetLabel, data) {
+    const tbody = document.getElementById('batchResultBody');
+    const row = document.createElement('tr');
+
+    let statusHtml, resultText;
+    if (data.success) {
+        statusHtml = '<span class="status-success"><i class="ti ti-circle-check me-1"></i>{% trans "Success" %}</span>';
+        resultText = JSON.stringify(data.data, null, 2);
+    } else if (data.command_deactivated) {
+        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "Deactivated" %}</span>';
+        resultText = data.error || '{% trans "Command deactivated" %}';
+    } else {
+        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "Failed" %}</span>';
+        resultText = data.error || '{% trans "Unknown error" %}';
+    }
+
+    batchResults.push({ target: targetLabel, success: data.success, error: data.error || null, data: data.data || null });
+
+    row.innerHTML = `
+        <td>${index}</td>
+        <td><code>${targetLabel}</code></td>
+        <td>${statusHtml}</td>
+        <td class="result-cell"><pre style="margin:0;white-space:pre-wrap;word-break:break-all;max-height:80px;overflow-y:auto;">${resultText}</pre></td>
+    `;
+    tbody.appendChild(row);
+}
+
+function updateBatchProgress(current, total) {
+    const pct = Math.round((current / total) * 100);
+    const bar = document.getElementById('batchProgressBar');
+    const text = document.getElementById('batchProgressText');
+    bar.style.width = pct + '%';
+    text.textContent = current + '/' + total;
+}
+
+function exportBatchResults() {
+    if (!batchResults.length) return;
+    const header = 'Target,Status,Error,Result\n';
+    const rows = batchResults.map(r => {
+        const status = r.success ? 'Success' : 'Failed';
+        const error = (r.error || '').replace(/"/g, '""');
+        const result = JSON.stringify(r.data || {}).replace(/"/g, '""');
+        return `${r.target},${status},"${error}","${result}"`;
+    }).join('\n');
+    const csv = header + rows;
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'batch_results_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function collectSingleParams() {
     const params = {};
-    document.querySelectorAll('.param-field').forEach(field => {
+    document.querySelectorAll('.single-input.param-field').forEach(field => {
         const id = field.dataset.paramId;
+        // Skip fields that are in batch mode
+        if (batchFields.has(id)) return;
         let value = field.value.trim();
-
         if (!value) return;
-
         if (field.dataset.paramType === 'time') {
             value = Math.floor(new Date(value).getTime() / 1000);
         } else if (['uint32','uint64','int32','uint8'].includes(field.dataset.paramType)) {
             value = parseInt(value, 10);
         }
-
         params[id] = value;
     });
+    return params;
+}
 
+function getBatchValues(paramId) {
+    const textarea = document.getElementById('batch_' + paramId);
+    if (!textarea) return [];
+    return parseBatchValues(textarea.value);
+}
+
+async function singleExecute() {
+    const params = collectSingleParams();
+    // Also collect any batch fields that might have a single value (shouldn't normally happen)
     const overlay = document.getElementById('loadingOverlay');
     overlay.classList.remove('d-none');
     overlay.classList.add('d-flex');
@@ -198,6 +412,158 @@ document.getElementById('commandForm').addEventListener('submit', async function
         overlay.classList.remove('d-flex');
         btn.disabled = false;
     }
+}
+
+async function batchExecute() {
+    // Find all batch-enabled fields and their values
+    const batchData = {};
+    let maxCount = 0;
+    let primaryBatchField = null;
+
+    for (const paramId of batchFields) {
+        const values = getBatchValues(paramId);
+        if (values.length === 0) {
+            const textarea = document.getElementById('batch_' + paramId);
+            const paramLabel = textarea ? textarea.closest('.mb-3').querySelector('.form-label').textContent.trim() : paramId;
+            alert('{% trans "Please enter at least one value for batch field" %}: ' + paramLabel);
+            return;
+        }
+        if (values.length > BATCH_MAX_TARGETS) {
+            alert('{% trans "Number of values exceeds limit" %}' + ' (' + BATCH_MAX_TARGETS + ')');
+            return;
+        }
+        batchData[paramId] = values;
+        if (values.length > maxCount) {
+            maxCount = values.length;
+            primaryBatchField = paramId;
+        }
+    }
+
+    if (maxCount === 0) return;
+
+    // Check all batch fields have the same count, or single-value fields that repeat
+    for (const paramId of batchFields) {
+        if (batchData[paramId].length !== maxCount && batchData[paramId].length !== 1) {
+            const textarea = document.getElementById('batch_' + paramId);
+            const paramLabel = textarea ? textarea.closest('.mb-3').querySelector('.form-label').textContent.trim() : paramId;
+            alert('{% trans "Batch field count mismatch" %}: ' + paramLabel + ' (' + batchData[paramId].length + ' vs ' + maxCount + '). {% trans "Each batch field must have the same number of values, or exactly 1 value to reuse for all" %}');
+            return;
+        }
+    }
+
+    batchCancelled = false;
+    batchResults = [];
+
+    const resultCard = document.getElementById('resultCard');
+    resultCard.classList.add('d-none');
+    const batchResultCard = document.getElementById('batchResultCard');
+    batchResultCard.classList.remove('d-none');
+    document.getElementById('batchResultBody').innerHTML = '';
+    document.getElementById('exportResultBtn').classList.add('d-none');
+
+    const submitBtn = document.getElementById('submitBtn');
+    const cancelBtn = document.getElementById('cancelBatchBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    submitBtn.disabled = true;
+    cancelBtn.classList.remove('d-none');
+    resetBtn.disabled = true;
+
+    const baseParams = collectSingleParams();
+
+    for (let i = 0; i < maxCount; i++) {
+        if (batchCancelled) break;
+
+        updateBatchProgress(i, maxCount);
+
+        // Build params: base + batch field values for this iteration
+        const params = { ...baseParams };
+        let targetLabel = '';
+
+        for (const paramId of batchFields) {
+            const values = batchData[paramId];
+            const valueIndex = values.length === 1 ? 0 : i;
+            let value = values[valueIndex];
+
+            // Type conversion
+            const textarea = document.getElementById('batch_' + paramId);
+            const paramType = textarea ? textarea.dataset.paramType : 'string';
+            if (paramType === 'time') {
+                value = Math.floor(new Date(value).getTime() / 1000);
+            } else if (['uint32','uint64','int32','uint8'].includes(paramType)) {
+                value = parseInt(value, 10);
+            }
+
+            params[paramId] = value;
+
+            // Use the primary batch field for the label
+            if (paramId === primaryBatchField) {
+                targetLabel = values[valueIndex];
+            }
+        }
+
+        // If targetLabel is still empty, use first batch field
+        if (!targetLabel && batchFields.size > 0) {
+            const firstField = [...batchFields][0];
+            targetLabel = batchData[firstField][batchData[firstField].length === 1 ? 0 : i];
+        }
+
+        try {
+            const response = await fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify({ params }),
+            });
+            const data = await response.json();
+            addResultRow(i + 1, targetLabel, data);
+
+            if (data.command_deactivated) {
+                batchCancelled = true;
+                setTimeout(function() {
+                    window.location.href = '{% url "gmtool:command_list" %}';
+                }, 2000);
+            }
+        } catch (err) {
+            addResultRow(i + 1, targetLabel, { success: false, error: err.message });
+        }
+
+        if (i < maxCount - 1 && !batchCancelled) {
+            await new Promise(r => setTimeout(r, BATCH_INTERVAL_MS));
+        }
+    }
+
+    updateBatchProgress(maxCount, maxCount);
+    submitBtn.disabled = false;
+    cancelBtn.classList.add('d-none');
+    resetBtn.disabled = false;
+    document.getElementById('exportResultBtn').classList.remove('d-none');
+}
+
+document.getElementById('commandForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (batchFields.size > 0) {
+        await batchExecute();
+    } else {
+        await singleExecute();
+    }
+});
+
+document.getElementById('commandForm').addEventListener('reset', function() {
+    setTimeout(function() {
+        // Reset all batch mode toggles
+        document.querySelectorAll('.batch-mode-toggle').forEach(toggle => {
+            if (toggle.checked) {
+                toggle.checked = false;
+                toggleFieldBatchMode(toggle.dataset.paramId, false);
+            }
+        });
+        // Clear batch textareas
+        document.querySelectorAll('.batch-textarea').forEach(ta => {
+            ta.value = '';
+        });
+    }, 0);
 });
 </script>
 {% endblock %}
