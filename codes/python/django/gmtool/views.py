@@ -250,9 +250,14 @@ def command_execute(request, cmd_id):
             # 调用IDIP API
             response_data, error, request_content, error_type = send_idip_command(command, params)
 
+            # 包装协议语义失败（status=false）视为失败
+            wrapped_failed = False
+            if isinstance(response_data, dict) and 'status' in response_data and 'json' in response_data:
+                wrapped_failed = not bool(response_data.get('status'))
+
             # 记录日志
             status = 'success'
-            if error:
+            if error or wrapped_failed:
                 status = 'timeout' if error_type == 'timeout' else 'failed'
 
             client_ip = get_client_ip(request)
@@ -281,6 +286,11 @@ def command_execute(request, cmd_id):
             if error:
                 return JsonResponse({'success': False, 'error': error})
 
+            # 新包装协议：直接透传给前端
+            if isinstance(response_data, dict) and 'status' in response_data and 'json' in response_data:
+                return JsonResponse(response_data)
+
+            # 旧协议：保持兼容
             return JsonResponse({'success': True, 'data': response_data})
 
         except json.JSONDecodeError:
@@ -291,9 +301,33 @@ def command_execute(request, cmd_id):
 
     # GET: 显示执行表单
     from django.conf import settings
+
+    # 读取 idip_commands.json，构建字段 id -> name 的展示映射（用于结果表格列名）
+    response_field_labels = {}
+    try:
+        json_path = settings.BASE_DIR / 'idip_commands.json'
+        with open(json_path, 'r', encoding='utf-8') as f:
+            command_json_map = json.load(f)
+        cmd_json = command_json_map.get(command.command_id, {})
+        if isinstance(cmd_json, dict):
+            for _, val in cmd_json.items():
+                if isinstance(val, list):
+                    for item in val:
+                        if isinstance(item, dict):
+                            field_id = item.get('id')
+                            field_name = item.get('name')
+                            if field_id and field_name:
+                                response_field_labels[field_id] = field_name
+    except Exception:
+        logger.warning('Load idip_commands.json field labels failed for command=%s', command.command_id)
+
     return render(request, 'gmtool/command_execute.html', {
         'command': command,
         'request_params': command.request_params,
+        'response_params': command.response_params,
+        'response_params_json': json.dumps(command.response_params, ensure_ascii=False),
+        'response_field_labels_json': json.dumps(response_field_labels, ensure_ascii=False),
+        'response_name': command.response_name,
         'is_admin': is_super_admin(request.user),
         'batch_max_targets': getattr(settings, 'BATCH_EXECUTE_MAX_TARGETS', 200),
         'batch_interval_ms': getattr(settings, 'BATCH_EXECUTE_INTERVAL_MS', 200),

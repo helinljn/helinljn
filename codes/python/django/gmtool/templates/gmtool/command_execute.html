@@ -27,6 +27,10 @@
     .file-import-label { cursor: pointer; font-size: 0.8rem; }
     .file-import-label:hover { text-decoration: underline; }
     .param-label-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .structured-result-section + .structured-result-section { margin-top: 1rem; }
+    .structured-table th, .structured-table td { vertical-align: top; }
+    .structured-value-pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+    .raw-json-box { max-height: 280px; overflow-y: auto; }
 </style>
 {% endblock %}
 
@@ -173,7 +177,22 @@
         </div>
     </div>
     <div class="card-body result-box">
-        <pre id="resultContent"></pre>
+        <div id="structuredResultWrap" class="structured-result-section d-none">
+            <div class="mb-2 fw-bold">{% trans "响应概览" %}</div>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered structured-table mb-3">
+                    <tbody id="structuredMetaBody"></tbody>
+                </table>
+            </div>
+
+            <div class="mb-2 fw-bold">{% trans "响应数据" %}（<code>{{ response_name }}</code>）</div>
+            <div id="structuredDataBody"></div>
+        </div>
+
+        <div id="rawResultWrap" class="d-none">
+            <div class="mb-2 fw-bold">{% trans "原始JSON（兜底）" %}</div>
+            <pre id="resultContent" class="raw-json-box"></pre>
+        </div>
     </div>
 </div>
 
@@ -224,11 +243,223 @@
 <script>
 const BATCH_MAX_TARGETS = Number('{{ batch_max_targets|default:200 }}');
 const BATCH_INTERVAL_MS = Number('{{ batch_interval_ms|default:200 }}');
+const RESPONSE_SCHEMA = JSON.parse('{{ response_params_json|default:"[]"|escapejs }}');
+const RESPONSE_FIELD_LABELS = JSON.parse('{{ response_field_labels_json|default:"{}"|escapejs }}');
 
 // Track which param fields are in batch mode
 const batchFields = new Set();
 let batchCancelled = false;
 let batchResults = [];
+
+function clearResultViews() {
+    const structuredWrap = document.getElementById('structuredResultWrap');
+    const rawWrap = document.getElementById('rawResultWrap');
+    const metaBody = document.getElementById('structuredMetaBody');
+    const dataBody = document.getElementById('structuredDataBody');
+    const rawContent = document.getElementById('resultContent');
+    structuredWrap.classList.add('d-none');
+    rawWrap.classList.add('d-none');
+    metaBody.innerHTML = '';
+    dataBody.innerHTML = '';
+    rawContent.textContent = '';
+}
+
+function showRawJsonFallback(payload) {
+    const rawWrap = document.getElementById('rawResultWrap');
+    const rawContent = document.getElementById('resultContent');
+    rawWrap.classList.remove('d-none');
+    rawContent.textContent = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2);
+}
+
+function getDisplayLabel(key) {
+    if (key === null || key === undefined) return '';
+    const strKey = String(key);
+    return RESPONSE_FIELD_LABELS[strKey] || strKey;
+}
+
+function appendKvRow(tbody, key, value) {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th');
+    const td = document.createElement('td');
+    th.style.width = '220px';
+    th.textContent = getDisplayLabel(key);
+    td.appendChild(renderValueElement(value));
+    tr.appendChild(th);
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+}
+
+function renderObjectAsTable(obj) {
+    const wrap = document.createElement('div');
+    wrap.className = 'table-responsive';
+    const table = document.createElement('table');
+    table.className = 'table table-sm table-bordered structured-table mb-2';
+    const tbody = document.createElement('tbody');
+    const entries = Object.entries(obj || {});
+    if (!entries.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.className = 'text-muted';
+        td.textContent = '{% trans "无数据" %}';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    } else {
+        for (const [k, v] of entries) {
+            appendKvRow(tbody, k, v);
+        }
+    }
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    return wrap;
+}
+
+function renderArrayAsTable(arr) {
+    const wrap = document.createElement('div');
+    wrap.className = 'table-responsive';
+
+    const table = document.createElement('table');
+    table.className = 'table table-sm table-bordered structured-table mb-2';
+
+    if (!arr.length) {
+        const tbody = document.createElement('tbody');
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.className = 'text-muted';
+        td.textContent = '{% trans "无数据" %}';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        return wrap;
+    }
+
+    const allObject = arr.every(item => item && typeof item === 'object' && !Array.isArray(item));
+    if (!allObject) {
+        const tbody = document.createElement('tbody');
+        arr.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            const th = document.createElement('th');
+            const td = document.createElement('td');
+            th.style.width = '80px';
+            th.textContent = '#' + (idx + 1);
+            td.appendChild(renderValueElement(item));
+            tr.appendChild(th);
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        return wrap;
+    }
+
+    const columns = [];
+    arr.forEach(item => {
+        Object.keys(item).forEach(k => {
+            if (!columns.includes(k)) columns.push(k);
+        });
+    });
+
+    const thead = document.createElement('thead');
+    const headTr = document.createElement('tr');
+    columns.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = getDisplayLabel(col);
+        headTr.appendChild(th);
+    });
+    thead.appendChild(headTr);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    arr.forEach(item => {
+        const tr = document.createElement('tr');
+        columns.forEach(col => {
+            const td = document.createElement('td');
+            td.appendChild(renderValueElement(item[col]));
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    return wrap;
+}
+
+function renderValueElement(value) {
+    if (value === null || value === undefined) {
+        const span = document.createElement('span');
+        span.className = 'text-muted';
+        span.textContent = '-';
+        return span;
+    }
+    if (Array.isArray(value)) {
+        return renderArrayAsTable(value);
+    }
+    if (typeof value === 'object') {
+        return renderObjectAsTable(value);
+    }
+    const span = document.createElement('span');
+    span.textContent = String(value);
+    return span;
+}
+
+function renderStructuredResult(payload) {
+    const structuredWrap = document.getElementById('structuredResultWrap');
+    const metaBody = document.getElementById('structuredMetaBody');
+    const dataBody = document.getElementById('structuredDataBody');
+
+    if (!payload || typeof payload !== 'object') {
+        showRawJsonFallback(payload);
+        return;
+    }
+
+    const topLevel = {};
+    Object.keys(payload).forEach(k => {
+        if (k !== 'Data') topLevel[k] = payload[k];
+    });
+
+    const topEntries = Object.entries(topLevel);
+    if (!topEntries.length) {
+        appendKvRow(metaBody, '{% trans "状态" %}', '{% trans "无" %}');
+    } else {
+        topEntries.forEach(([k, v]) => appendKvRow(metaBody, k, v));
+    }
+
+    const sourceData = (payload.Data && typeof payload.Data === 'object') ? payload.Data : payload;
+    const schema = Array.isArray(RESPONSE_SCHEMA) ? RESPONSE_SCHEMA : [];
+    const rendered = new Set();
+
+    const dataTableWrap = document.createElement('div');
+    dataTableWrap.className = 'table-responsive';
+    const dataTable = document.createElement('table');
+    dataTable.className = 'table table-sm table-bordered structured-table mb-0';
+    const dataTbody = document.createElement('tbody');
+
+    if (schema.length) {
+        schema.forEach(field => {
+            const fieldId = field.id;
+            const label = field.name || fieldId;
+            const val = sourceData[fieldId];
+            appendKvRow(dataTbody, label, val);
+            rendered.add(fieldId);
+        });
+    }
+
+    Object.keys(sourceData).forEach(k => {
+        if (!rendered.has(k)) {
+            appendKvRow(dataTbody, k, sourceData[k]);
+        }
+    });
+
+    if (!dataTbody.children.length) {
+        appendKvRow(dataTbody, '{% trans "结果" %}', '{% trans "无数据" %}');
+    }
+
+    dataTable.appendChild(dataTbody);
+    dataTableWrap.appendChild(dataTable);
+    dataBody.appendChild(dataTableWrap);
+
+    structuredWrap.classList.remove('d-none');
+}
 
 function toggleFieldBatchMode(paramId, checked) {
     const singleInput = document.getElementById('single_' + paramId);
@@ -291,7 +522,31 @@ function cancelBatch() {
     batchCancelled = true;
 }
 
-function addResultRow(index, targetLabel, data) {
+function normalizeExecuteResponse(data) {
+    // 旧协议：{success: bool, data/error}
+    if (data && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'success')) {
+        return data;
+    }
+
+    // 新协议：{status: bool, id: request_id, json: {...}}
+    if (data && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'status') && Object.prototype.hasOwnProperty.call(data, 'json')) {
+        if (data.status) {
+            return { success: true, data: data.json, wrappedId: data.id };
+        }
+        const errorObj = (data.json && typeof data.json === 'object') ? data.json : {};
+        return {
+            success: false,
+            error: errorObj.RetMsg || '{% trans "未知错误" %}',
+            data: data,
+            wrappedId: data.id
+        };
+    }
+
+    return { success: false, error: '{% trans "未知错误" %}', data: data };
+}
+
+function addResultRow(index, targetLabel, rawData) {
+    const data = normalizeExecuteResponse(rawData);
     const tbody = document.getElementById('batchResultBody');
     const row = document.createElement('tr');
 
@@ -331,14 +586,20 @@ function addResultRow(index, targetLabel, data) {
 
     const tdResult = document.createElement('td');
     tdResult.className = 'result-cell';
-    const pre = document.createElement('pre');
-    pre.style.margin = '0';
-    pre.style.whiteSpace = 'pre-wrap';
-    pre.style.wordBreak = 'break-all';
-    pre.style.maxHeight = '80px';
-    pre.style.overflowY = 'auto';
-    pre.textContent = String(resultText || '');
-    tdResult.appendChild(pre);
+
+    if (data.success) {
+        // 与单次执行保持一致：结构化展示（并使用 name 字段映射）
+        tdResult.appendChild(renderValueElement(data.data));
+    } else {
+        const pre = document.createElement('pre');
+        pre.style.margin = '0';
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.style.wordBreak = 'break-all';
+        pre.style.maxHeight = '80px';
+        pre.style.overflowY = 'auto';
+        pre.textContent = String(resultText || '');
+        tdResult.appendChild(pre);
+    }
 
     row.appendChild(tdIndex);
     row.appendChild(tdTarget);
@@ -437,25 +698,30 @@ async function singleExecute() {
             body: JSON.stringify({ params }),
         });
 
-        const data = await response.json();
+        const rawData = await response.json();
+        const data = normalizeExecuteResponse(rawData);
         const resultCard = document.getElementById('resultCard');
-        const resultContent = document.getElementById('resultContent');
         resultCard.classList.remove('d-none');
+        clearResultViews();
 
         if (data.success) {
-            resultContent.textContent = JSON.stringify(data.data, null, 2);
+            renderStructuredResult(data.data);
+            if (document.getElementById('structuredResultWrap').classList.contains('d-none')) {
+                showRawJsonFallback(data.data);
+            }
         } else if (data.command_deactivated) {
-            resultContent.textContent = '{% trans "命令已失效" %}: ' + (data.error || '{% trans "该命令已被停用或删除，即将跳转到命令列表..." %}');
+            showRawJsonFallback('{% trans "命令已失效" %}: ' + (data.error || '{% trans "该命令已被停用或删除，即将跳转到命令列表..." %}'));
             setTimeout(function() {
                 window.location.href = '{% url "gmtool:command_list" %}';
             }, 2000);
         } else {
-            resultContent.textContent = '{% trans "错误" %}: ' + (data.error || '{% trans "未知错误" %}');
+            showRawJsonFallback('{% trans "错误" %}: ' + (data.error || '{% trans "未知错误" %}'));
         }
     } catch (err) {
         const resultCard = document.getElementById('resultCard');
         resultCard.classList.remove('d-none');
-        document.getElementById('resultContent').textContent = '{% trans "请求异常" %}: ' + err.message;
+        clearResultViews();
+        showRawJsonFallback('{% trans "请求异常" %}: ' + err.message);
     } finally {
         overlay.classList.add('d-none');
         overlay.classList.remove('d-flex');
@@ -590,8 +856,9 @@ async function batchExecute() {
                 },
                 body: JSON.stringify({ params }),
             });
-            const data = await response.json();
-            addResultRow(i + 1, targetLabel, data);
+            const rawData = await response.json();
+            const data = normalizeExecuteResponse(rawData);
+            addResultRow(i + 1, targetLabel, rawData);
 
             if (data.command_deactivated) {
                 batchCancelled = true;

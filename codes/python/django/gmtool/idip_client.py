@@ -27,6 +27,15 @@ def send_idip_command(command, params):
         Content-Type: application/x-www-form-urlencoded
         id={command_id}&GSA=&content={url_encoded_json}
 
+    兼容两种响应格式：
+    1) 新格式包装：
+       {
+         "status": bool,
+         "id": request_id,
+         "json": {...} | "...(兼容字符串)"
+       }
+    2) 旧格式：直接返回业务 JSON
+
     参数:
         command: GMCommand 模型实例
         params: dict, 用户提交的表单参数
@@ -86,8 +95,56 @@ def send_idip_command(command, params):
         )
         response.raise_for_status()
         result = response.json()
-        logger.info('IDIP请求成功: command=%s, response=%s', command.command_id, json.dumps(result, ensure_ascii=False)[:500])
-        return result, None, request_content_str, ''
+
+        # 新格式包装解析并规范化
+        if isinstance(result, dict) and 'status' in result and 'json' in result:
+            status = bool(result.get('status'))
+            wrapped_id = result.get('id', command.request_id)
+            try:
+                wrapped_id = int(wrapped_id)
+            except (TypeError, ValueError):
+                wrapped_id = command.request_id
+
+            wrapped_json = result.get('json')
+
+            # 成功：按需求应为对象，同时兼容字符串
+            if status and isinstance(wrapped_json, str):
+                try:
+                    wrapped_json = json.loads(wrapped_json)
+                except (TypeError, ValueError, json.JSONDecodeError):
+                    logger.error('IDIP包装响应解析失败: command=%s, json=%s',
+                                 command.command_id, str(wrapped_json)[:500])
+                    return None, _('请求失败: %(error)s') % {'error': 'invalid wrapped json string'}, request_content_str, 'error'
+
+            if not isinstance(wrapped_json, dict):
+                if status:
+                    logger.error('IDIP包装响应格式错误: command=%s, type=%s',
+                                 command.command_id, type(wrapped_json).__name__)
+                    return None, _('请求失败: %(error)s') % {'error': 'invalid wrapped json type'}, request_content_str, 'error'
+                wrapped_json = {
+                    'Result': -1,
+                    'RetMsg': _('请求失败: %(error)s') % {'error': 'invalid wrapped error object'},
+                }
+
+            normalized = {
+                'status': status,
+                'id': wrapped_id,
+                'json': wrapped_json,
+            }
+            logger.info('IDIP请求完成(包装): command=%s, response=%s',
+                        command.command_id, json.dumps(normalized, ensure_ascii=False)[:500])
+            return normalized, None, request_content_str, ''
+
+        # 旧格式：包装成新结构返回，确保上层一致处理
+        normalized_old = {
+            'status': True,
+            'id': command.request_id,
+            'json': result if isinstance(result, dict) else {'Result': 0, 'RetMsg': 'OK', 'raw': result},
+        }
+        logger.info('IDIP请求成功(旧格式兼容): command=%s, response=%s',
+                    command.command_id, json.dumps(normalized_old, ensure_ascii=False)[:500])
+        return normalized_old, None, request_content_str, ''
+
     except req.Timeout:
         logger.error('IDIP API请求超时: command=%s', command.command_id)
         return None, _('请求超时，请稍后重试'), request_content_str, 'timeout'
