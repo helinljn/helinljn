@@ -1,10 +1,10 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Users" %} - {% trans "GM Command System" %}{% endblock %}
+{% block title %}{% trans "用户管理" %} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_users %}active{% endblock %}
-{% block page_pretitle %}{% trans "Management" %}{% endblock %}
-{% block page_title %}{% trans "Users" %}{% endblock %}
+{% block page_pretitle %}{% trans "管理" %}{% endblock %}
+{% block page_title %}{% trans "用户管理" %}{% endblock %}
 
 {% block content %}
 <div class="mb-3">
@@ -13,13 +13,13 @@
             <form method="get">
                 <div class="input-icon">
                     <span class="input-icon-addon"><i class="ti ti-search"></i></span>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="{% trans 'Search username...' %}" value="{{ search }}" style="width:220px;">
+                    <input type="text" name="search" class="form-control form-control-sm" placeholder="{% trans '搜索用户名...' %}" value="{{ search }}" style="width:220px;">
                 </div>
             </form>
         </div>
         <div class="col-auto ms-auto">
             <a href="{% url 'gmtool:user_create' %}" class="btn btn-primary btn-sm">
-                <i class="ti ti-plus me-1"></i>{% trans "Create User" %}
+                <i class="ti ti-plus me-1"></i>{% trans "创建用户" %}
             </a>
         </div>
     </div>
@@ -31,12 +31,12 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>{% trans "Username" %}</th>
-                    <th>{% trans "Email" %}</th>
-                    <th>{% trans "Role" %}</th>
-                    <th>{% trans "Permissions" %}</th>
-                    <th>{% trans "Status" %}</th>
-                    <th>{% trans "Actions" %}</th>
+                    <th>{% trans "用户名" %}</th>
+                    <th>{% trans "邮箱" %}</th>
+                    <th>{% trans "角色" %}</th>
+                    <th>{% trans "权限数" %}</th>
+                    <th>{% trans "状态" %}</th>
+                    <th>{% trans "操作" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,36 +54,36 @@
                         {% if u.userprofile and u.userprofile.role %}
                         <span class="badge bg-info-lt">{{ u.userprofile.role.display_name }}</span>
                         {% else %}
-                        <span class="text-muted">{% trans "Unassigned" %}</span>
+                        <span class="text-muted">{% trans "未分配" %}</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if u.is_superuser %}
-                        <span class="badge bg-danger-lt">{% trans "All" %}</span>
+                        <span class="badge bg-danger-lt">{% trans "全部" %}</span>
                         {% else %}
                         <span class="badge bg-secondary-lt">{{ u.perm_count }}</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if u.is_active %}
-                        <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>{% trans "Active" %}</span>
+                        <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>{% trans "是否启用" %}</span>
                         {% else %}
-                        <span class="badge bg-secondary-lt"><i class="ti ti-ban me-1"></i>{% trans "Disabled" %}</span>
+                        <span class="badge bg-secondary-lt"><i class="ti ti-ban me-1"></i>{% trans "已禁用" %}</span>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'gmtool:user_edit' u.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit' %}">
+                        <a href="{% url 'gmtool:user_edit' u.id %}" class="btn btn-sm btn-outline-primary" title="{% trans '编辑' %}">
                             <i class="ti ti-edit"></i>
                         </a>
                         {% if not u.is_superuser %}
-                        <a href="{% url 'gmtool:user_permissions' u.id %}" class="btn btn-sm btn-outline-success" title="{% trans 'Permissions' %}">
+                        <a href="{% url 'gmtool:user_permissions' u.id %}" class="btn btn-sm btn-outline-success" title="{% trans '权限数' %}">
                             <i class="ti ti-shield-lock"></i>
                         </a>
                         {% if u != request.user %}
                         <form method="post" action="{% url 'gmtool:user_delete' u.id %}" class="d-inline"
-                              onsubmit="return confirm('{% blocktrans with username=u.username %}Confirm delete user {{ username }}?{% endblocktrans %}')">
+                              onsubmit="return confirm('{% blocktrans with username=u.username %}确认删除用户 {{ username }}？{% endblocktrans %}')">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans '删除' %}">
                                 <i class="ti ti-trash"></i>
                             </button>
                         </form>
@@ -92,7 +92,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center text-muted py-3">{% trans "No user data" %}</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-3">{% trans "暂无用户数据" %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>

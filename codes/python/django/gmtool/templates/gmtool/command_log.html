@@ -1,10 +1,10 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Operation Logs" %} - {% trans "GM Command System" %}{% endblock %}
+{% block title %}{% trans "操作日志" %} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_logs %}active{% endblock %}
-{% block page_pretitle %}{% trans "Logs" %}{% endblock %}
-{% block page_title %}{% trans "Operation Logs" %}{% endblock %}
+{% block page_pretitle %}{% trans "日志" %}{% endblock %}
+{% block page_title %}{% trans "操作日志" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -83,18 +83,18 @@
 {% block content %}
 <div class="card mb-3">
     <div class="card-header">
-        <h3 class="card-title">{% trans "Filter" %}</h3>
+        <h3 class="card-title">{% trans "筛选条件" %}</h3>
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-auto">
-                <label class="form-label">{% trans "Username" %}</label>
-                <input type="text" name="user" class="form-control form-control-sm" placeholder="{% trans 'Enter username' %}" value="{{ user_filter }}">
+                <label class="form-label">{% trans "用户名" %}</label>
+                <input type="text" name="user" class="form-control form-control-sm" placeholder="{% trans '请输入用户名' %}" value="{{ user_filter }}">
             </div>
             <div class="col-auto">
-                <label class="form-label">{% trans "Command" %}</label>
+                <label class="form-label">{% trans "命令" %}</label>
                 <select name="command" class="form-select form-select-sm">
-                    <option value="">{% trans "All Commands" %}</option>
+                    <option value="">{% trans "全部命令" %}</option>
                     {% for cmd in commands %}
                     <option value="{{ cmd.command_id }}" {% if cmd_filter == cmd.command_id %}selected{% endif %}>
                         {{ cmd.command_name }}
@@ -103,17 +103,17 @@
                 </select>
             </div>
             <div class="col-auto">
-                <label class="form-label">{% trans "Status" %}</label>
+                <label class="form-label">{% trans "状态" %}</label>
                 <select name="status" class="form-select form-select-sm">
-                    <option value="">{% trans "All Statuses" %}</option>
-                    <option value="success" {% if status_filter == 'success' %}selected{% endif %}>{% trans "Success" %}</option>
-                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>{% trans "Failed" %}</option>
-                    <option value="timeout" {% if status_filter == 'timeout' %}selected{% endif %}>{% trans "Timeout" %}</option>
+                    <option value="">{% trans "全部状态" %}</option>
+                    <option value="success" {% if status_filter == 'success' %}selected{% endif %}>{% trans "成功" %}</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>{% trans "失败" %}</option>
+                    <option value="timeout" {% if status_filter == 'timeout' %}selected{% endif %}>{% trans "超时" %}</option>
                 </select>
             </div>
             <div class="col-auto align-self-end">
                 <button type="submit" class="btn btn-sm btn-primary">
-                    <i class="ti ti-search me-1"></i>{% trans "Filter" %}
+                    <i class="ti ti-search me-1"></i>{% trans "筛选条件" %}
                 </button>
             </div>
         </form>
@@ -125,14 +125,14 @@
         <table class="table table-vcenter card-table">
             <thead>
                 <tr>
-                    <th>{% trans "Time" %}</th>
-                    <th>{% trans "User" %}</th>
-                    <th>{% trans "Command" %}</th>
-                    <th>{% trans "Server" %}</th>
-                    <th>{% trans "Request Params" %}</th>
-                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "时间" %}</th>
+                    <th>{% trans "用户" %}</th>
+                    <th>{% trans "命令" %}</th>
+                    <th>{% trans "服务器" %}</th>
+                    <th>{% trans "请求参数定义" %}</th>
+                    <th>{% trans "状态" %}</th>
                     <th>{% trans "IP" %}</th>
-                    <th>{% trans "Actions" %}</th>
+                    <th>{% trans "操作" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -144,18 +144,18 @@
                     <td>{{ log.partition }}</td>
                     <td>
                         {% if log.request_content %}
-                        <span class="text-muted log-request-preview" title="{% trans 'Click to view full content' %}" onclick="showDetail({{ log.id }})">{{ log.request_content|truncatechars:30 }}</span>
+                        <span class="text-muted log-request-preview" title="{% trans '点击查看完整内容' %}" onclick="showDetail({{ log.id }})">{{ log.request_content|truncatechars:30 }}</span>
                         {% else %}
                         <span class="text-muted">-</span>
                         {% endif %}
                     </td>
                     <td>
                         {% if log.status == 'success' %}
-                        <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>{% trans "Success" %}</span>
+                        <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>{% trans "成功" %}</span>
                         {% elif log.status == 'failed' %}
-                        <span class="badge bg-danger-lt"><i class="ti ti-x me-1"></i>{% trans "Failed" %}</span>
+                        <span class="badge bg-danger-lt"><i class="ti ti-x me-1"></i>{% trans "失败" %}</span>
                         {% else %}
-                        <span class="badge bg-warning-lt"><i class="ti ti-clock me-1"></i>{% trans "Timeout" %}</span>
+                        <span class="badge bg-warning-lt"><i class="ti ti-clock me-1"></i>{% trans "超时" %}</span>
                         {% endif %}
                     </td>
                     <td>{{ log.ip_address }}</td>
@@ -166,7 +166,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="8" class="text-center text-muted py-3">{% trans "No log data" %}</td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-3">{% trans "暂无日志数据" %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -207,7 +207,7 @@
 <div id="detailOverlay" class="detail-overlay" onclick="closeDetail()"></div>
 <div id="detailModal" class="detail-modal">
     <div class="detail-modal-header">
-        <h5 style="margin:0;"><i class="ti ti-file-text me-2"></i>{% trans "Log Details" %}</h5>
+        <h5 style="margin:0;"><i class="ti ti-file-text me-2"></i>{% trans "日志详情" %}</h5>
         <button type="button" class="detail-modal-close" onclick="closeDetail()">&times;</button>
     </div>
     <div id="detailBody" class="detail-modal-body"></div>
@@ -224,16 +224,16 @@ function readTextarea(id) {
 }
 
 function showDetail(id) {
-    var rcVal = readTextarea('rc-' + id) || '{% trans "No data" %}';
-    var rdVal = readTextarea('rd-' + id) || '{% trans "No data" %}';
-    var rsVal = readTextarea('rs-' + id) || '{% trans "No response data" %}';
+    var rcVal = readTextarea('rc-' + id) || '{% trans "无数据" %}';
+    var rdVal = readTextarea('rd-' + id) || '{% trans "无数据" %}';
+    var rsVal = readTextarea('rs-' + id) || '{% trans "无响应数据" %}';
 
     document.getElementById('detailBody').innerHTML =
-        '<h4 class="detail-section-title">{% trans "Full Request JSON" %}</h4>' +
+        '<h4 class="detail-section-title">{% trans "完整请求JSON" %}</h4>' +
         '<pre class="detail-pre">' + escapeHtml(rcVal) + '</pre>' +
-        '<h4 class="detail-section-title">{% trans "Request Data (Form Params)" %}</h4>' +
+        '<h4 class="detail-section-title">{% trans "请求数据（表单参数）" %}</h4>' +
         '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rdVal) + '</pre>' +
-        '<h4 class="detail-section-title">{% trans "Response Data" %}</h4>' +
+        '<h4 class="detail-section-title">{% trans "响应数据" %}</h4>' +
         '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rsVal) + '</pre>';
 
     document.getElementById('detailOverlay').style.display = 'block';

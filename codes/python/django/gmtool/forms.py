@@ -10,13 +10,13 @@ from .models import Role, UserProfile
 class RoleAndPhoneMixin(forms.Form):
     """角色分组和联系电话字段的共享定义"""
     role = forms.ModelChoiceField(
-        label=_('Role'),
+        label=_('角色'),
         queryset=Role.objects.filter(is_super_admin=False),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
     phone = forms.CharField(
-        label=_('Phone'),
+        label=_('联系电话'),
         max_length=20,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'}),
@@ -26,12 +26,12 @@ class RoleAndPhoneMixin(forms.Form):
 class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
     """创建用户表单 — 不允许选择超级管理员角色（超管仅通过初始化创建）"""
     password = forms.CharField(
-        label=_('Password'),
+        label=_('密码'),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         min_length=6,
     )
     password_confirm = forms.CharField(
-        label=_('Confirm Password'),
+        label=_('确认密码'),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
     )
 
@@ -44,9 +44,9 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
-            'username': _('Username'),
-            'email': _('Email'),
-            'is_active': _('Active'),
+            'username': _('用户名'),
+            'email': _('邮箱'),
+            'is_active': _('是否启用'),
         }
 
     def clean(self):
@@ -54,7 +54,7 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
         password = cleaned_data.get('password')
         password_confirm = cleaned_data.get('password_confirm')
         if password and password_confirm and password != password_confirm:
-            self.add_error('password_confirm', _('Passwords do not match'))
+            self.add_error('password_confirm', _('两次密码输入不一致'))
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -74,7 +74,7 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
 class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
     """编辑用户表单 — 禁止提升/降级超级管理员权限"""
     new_password = forms.CharField(
-        label=_('New Password (leave blank to keep unchanged)'),
+        label=_('新密码（留空不修改）'),
         required=False,
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         min_length=6,
@@ -89,9 +89,9 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
             'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
-            'username': _('Username'),
-            'email': _('Email'),
-            'is_active': _('Active'),
+            'username': _('用户名'),
+            'email': _('邮箱'),
+            'is_active': _('是否启用'),
         }
 
     def __init__(self, *args, **kwargs):
@@ -105,13 +105,13 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
         # 如果编辑的是自己，禁用 is_active 复选框
         if self.is_self:
             self.fields['is_active'].disabled = True
-            self.fields['is_active'].help_text = _('You cannot disable your own account')
+            self.fields['is_active'].help_text = _('不能禁用自己的账号')
         # 如果编辑的目标是超级管理员，禁用角色和 is_active 字段（禁止降级）
         if self.is_target_super_admin:
             self.fields['role'].disabled = True
-            self.fields['role'].help_text = _('Super admin role cannot be changed')
+            self.fields['role'].help_text = _('超级管理员角色不可更改')
             self.fields['is_active'].disabled = True
-            self.fields['is_active'].help_text = _('Super admin account cannot be disabled')
+            self.fields['is_active'].help_text = _('超级管理员账号不可禁用')
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -141,89 +141,89 @@ class RoleForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
         labels = {
-            'name': _('Role Identifier'),
-            'display_name': _('Display Name'),
-            'description': _('Description'),
+            'name': _('角色标识'),
+            'display_name': _('显示名称'),
+            'description': _('角色描述'),
         }
         help_texts = {
-            'name': _('Cannot be "super_admin", which is reserved for the system'),
+            'name': _('不能为"super_admin"，该标识为系统保留'),
         }
 
     def clean_name(self):
         name = self.cleaned_data.get('name', '')
         if name == 'super_admin':
-            raise forms.ValidationError(_('The role identifier "super_admin" is reserved and cannot be used'))
+            raise forms.ValidationError(_('角色标识"super_admin"为系统保留，不可使用'))
         return name
 
 
 class AddGMCommandForm(forms.Form):
     """添加GM命令表单"""
     command_id = forms.CharField(
-        label=_('Command ID'),
+        label=_('命令编号'),
         max_length=20,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 10226011'}),
-        help_text=_('Unique command identifier, e.g. 10226011'),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '例如：10226011'}),
+        help_text=_('唯一的命令标识符，如 10226011'),
     )
     tab = forms.CharField(
-        label=_('Tab Group'),
+        label=_('分组标签'),
         max_length=200,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('e.g. Query XXX')}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('e.g. 查询XXX')}),
     )
     command_name = forms.CharField(
-        label=_('Command Name'),
+        label=_('命令名称'),
         max_length=200,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Command display name')}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('命令显示名称')}),
     )
     request_name = forms.CharField(
-        label=_('Request Name'),
+        label=_('请求名'),
         max_length=100,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. QueryXxxReq'}),
     )
     request_id = forms.IntegerField(
-        label=_('Request ID'),
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 4097'}),
-        help_text=_('Must be unique across all commands (both request and response IDs)'),
+        label=_('协议请求ID'),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '例如：4097'}),
+        help_text=_('必须在所有命令中唯一（包括请求ID和响应ID）'),
     )
     request_desc = forms.CharField(
-        label=_('Request Description'),
+        label=_('请求描述'),
         max_length=500,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Request description (optional)')}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('请求描述（可选）')}),
     )
     response_name = forms.CharField(
-        label=_('Response Name'),
+        label=_('响应名'),
         max_length=100,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. QueryXxxRsp'}),
     )
     response_id = forms.IntegerField(
-        label=_('Response ID'),
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 4098'}),
-        help_text=_('Must be unique across all commands, typically request_id + 1'),
+        label=_('协议响应ID'),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': '例如：4098'}),
+        help_text=_('必须在所有命令中唯一，通常为请求ID + 1'),
     )
     response_desc = forms.CharField(
-        label=_('Response Description'),
+        label=_('响应描述'),
         max_length=500,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Response description (optional)')}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('响应描述（可选）')}),
     )
     request_params = forms.CharField(
-        label=_('Request Params (JSON)'),
+        label=_('请求参数定义（JSON）'),
         required=False,
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': '[\n  {"isnull": "false", "id": "AreaId", "type": "uint32", "name": "Channel Info"}\n]'}),
-        help_text=_('JSON array of request parameter definitions. Leave empty for default AreaId/Partition/PlatId fields.'),
+        help_text=_('请求参数定义的 JSON 数组。留空则使用默认的 AreaId/Partition/PlatId 字段。'),
     )
     response_params = forms.CharField(
-        label=_('Response Params (JSON)'),
+        label=_('响应参数定义（JSON）'),
         required=False,
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': '[\n  {"isnull": "false", "id": "Result", "type": "int32", "name": "Result Id"}\n]'}),
-        help_text=_('JSON array of response parameter definitions. Leave empty for default Result/RetMsg fields.'),
+        help_text=_('响应参数定义的 JSON 数组。留空则使用默认的 Result/RetMsg 字段。'),
     )
 
     def clean_command_id(self):
         command_id = self.cleaned_data.get('command_id', '')
         from .models import GMCommand
         if GMCommand.objects.filter(command_id=command_id).exists():
-            raise forms.ValidationError(_('Command ID %(id)s already exists') % {'id': command_id})
+            raise forms.ValidationError(_('命令 ID %(id)s 已存在') % {'id': command_id})
         return command_id
 
     def clean_request_params(self):
@@ -233,10 +233,10 @@ class AddGMCommandForm(forms.Form):
         try:
             parsed = json.loads(raw)
             if not isinstance(parsed, list):
-                raise forms.ValidationError(_('Request params must be a JSON array'))
+                raise forms.ValidationError(_('请求参数必须是 JSON 数组'))
             return raw
         except json.JSONDecodeError as e:
-            raise forms.ValidationError(_('Invalid JSON: %(error)s') % {'error': str(e)})
+            raise forms.ValidationError(_('无效的 JSON: %(error)s') % {'error': str(e)})
 
     def clean_response_params(self):
         raw = self.cleaned_data.get('response_params', '').strip()
@@ -245,10 +245,10 @@ class AddGMCommandForm(forms.Form):
         try:
             parsed = json.loads(raw)
             if not isinstance(parsed, list):
-                raise forms.ValidationError(_('Response params must be a JSON array'))
+                raise forms.ValidationError(_('响应参数必须是 JSON 数组'))
             return raw
         except json.JSONDecodeError as e:
-            raise forms.ValidationError(_('Invalid JSON: %(error)s') % {'error': str(e)})
+            raise forms.ValidationError(_('无效的 JSON: %(error)s') % {'error': str(e)})
 
     def clean(self):
         cleaned_data = super().clean()
@@ -257,7 +257,7 @@ class AddGMCommandForm(forms.Form):
 
         if request_id is not None and response_id is not None:
             if request_id == response_id:
-                self.add_error('response_id', _('Request ID and Response ID cannot be the same'))
+                self.add_error('response_id', _('请求 ID 和响应 ID 不能相同'))
 
             from .command_parser import validate_command_ids
             command_id = cleaned_data.get('command_id', '')

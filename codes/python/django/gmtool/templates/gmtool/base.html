@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% trans "GM Command System" %}{% endblock %}</title>
+    <title>{% block title %}{% trans "GM命令管理系统" %}{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
     {% block extra_css %}{% endblock %}
@@ -15,7 +15,7 @@
             <div class="container-fluid">
                 <h1 class="navbar-brand navbar-brand-autodark">
                     <a href="{% url 'gmtool:dashboard' %}">
-                        <i class="ti ti-command me-2"></i>{% trans "GM Command System" %}
+                        <i class="ti ti-command me-2"></i>{% trans "GM命令管理系统" %}
                     </a>
                 </h1>
                 <div class="collapse navbar-collapse" id="sidebar-menu">
@@ -23,40 +23,40 @@
                         <li class="nav-item">
                             <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="{% url 'gmtool:dashboard' %}">
                                 <span class="nav-link-icon"><i class="ti ti-dashboard"></i></span>
-                                <span class="nav-link-title">{% trans "Dashboard" %}</span>
+                                <span class="nav-link-title">{% trans "仪表盘" %}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% block nav_commands %}{% endblock %}" href="{% url 'gmtool:command_list' %}">
                                 <span class="nav-link-icon"><i class="ti ti-terminal-2"></i></span>
-                                <span class="nav-link-title">{% trans "Commands" %}</span>
+                                <span class="nav-link-title">{% trans "命令管理" %}</span>
                             </a>
                         </li>
                         {% if is_admin %}
                         <li class="nav-item">
                             <a class="nav-link {% block nav_users %}{% endblock %}" href="{% url 'gmtool:user_list' %}">
                                 <span class="nav-link-icon"><i class="ti ti-users"></i></span>
-                                <span class="nav-link-title">{% trans "Users" %}</span>
+                                <span class="nav-link-title">{% trans "用户管理" %}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% block nav_roles %}{% endblock %}" href="{% url 'gmtool:role_list' %}">
                                 <span class="nav-link-icon"><i class="ti ti-tags"></i></span>
-                                <span class="nav-link-title">{% trans "Roles" %}</span>
+                                <span class="nav-link-title">{% trans "角色" %}</span>
                             </a>
                         </li>
                         {% endif %}
                         <li class="nav-item">
                             <a class="nav-link {% block nav_logs %}{% endblock %}" href="{% url 'gmtool:command_log_list' %}">
                                 <span class="nav-link-icon"><i class="ti ti-file-text"></i></span>
-                                <span class="nav-link-title">{% trans "Operation Logs" %}</span>
+                                <span class="nav-link-title">{% trans "操作日志" %}</span>
                             </a>
                         </li>
                         {% if is_admin %}
                         <li class="nav-item">
                             <a class="nav-link {% block nav_login_logs %}{% endblock %}" href="{% url 'gmtool:login_log_list' %}">
                                 <span class="nav-link-icon"><i class="ti ti-door-enter"></i></span>
-                                <span class="nav-link-title">{% trans "Login Logs" %}</span>
+                                <span class="nav-link-title">{% trans "登录日志" %}</span>
                             </a>
                         </li>
                         {% endif %}
@@ -74,9 +74,9 @@
                         <div class="row align-items-center">
                             <div class="col-auto">
                                 <div class="page-pretitle">
-                                    <span class="text-muted">{% block page_pretitle %}{% trans "Home" %}{% endblock %}</span>
+                                    <span class="text-muted">{% block page_pretitle %}{% trans "首页" %}{% endblock %}</span>
                                 </div>
-                                <h2 class="page-title">{% block page_title %}{% trans "Dashboard" %}{% endblock %}</h2>
+                                <h2 class="page-title">{% block page_title %}{% trans "仪表盘" %}{% endblock %}</h2>
                             </div>
                             <div class="col-auto ms-auto d-print-none">
                                 <div class="d-flex align-items-center">
@@ -84,14 +84,14 @@
                                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
                                             <i class="ti ti-language me-1"></i>
                                             {% get_current_language as LANGUAGE_CODE %}
-                                            {% if LANGUAGE_CODE == 'zh-hans' %}{% trans "Chinese" %}{% else %}English{% endif %}
+                                            {% if LANGUAGE_CODE == 'zh-hans' %}{% trans "中文" %}{% else %}English{% endif %}
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li>
                                                 <form action="{% url 'set_language' %}" method="post" class="m-0">{% csrf_token %}
                                                     <input type="hidden" name="language" value="zh-hans">
                                                     <input type="hidden" name="next" value="{{ request.path }}">
-                                                    <button type="submit" class="dropdown-item">{% trans "Simplified Chinese" %}</button>
+                                                    <button type="submit" class="dropdown-item">{% trans "简体中文" %}</button>
                                                 </form>
                                             </li>
                                             <li>
@@ -105,12 +105,12 @@
                                     </div>
                                     <span class="me-3">
                                         <i class="ti ti-user-circle me-1"></i> {{ request.user.username }}
-                                        {% if is_admin %}<span class="badge bg-warning ms-1">{% trans "Admin" %}</span>{% endif %}
+                                        {% if is_admin %}<span class="badge bg-warning ms-1">{% trans "管理员" %}</span>{% endif %}
                                     </span>
                                     <form method="post" action="{% url 'gmtool:logout' %}" class="m-0">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-outline-danger btn-sm">
-                                            <i class="ti ti-logout me-1"></i>{% trans "Logout" %}
+                                            <i class="ti ti-logout me-1"></i>{% trans "登出" %}
                                         </button>
                                     </form>
                                 </div>

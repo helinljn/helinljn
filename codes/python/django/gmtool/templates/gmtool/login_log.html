@@ -1,34 +1,34 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Login Logs" %} - {% trans "GM Command System" %}{% endblock %}
+{% block title %}{% trans "登录日志" %} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_login_logs %}active{% endblock %}
-{% block page_pretitle %}{% trans "Logs" %}{% endblock %}
-{% block page_title %}{% trans "Login Logs" %}{% endblock %}
+{% block page_pretitle %}{% trans "日志" %}{% endblock %}
+{% block page_title %}{% trans "登录日志" %}{% endblock %}
 
 {% block content %}
 <div class="card mb-3">
     <div class="card-header">
-        <h3 class="card-title">{% trans "Filter" %}</h3>
+        <h3 class="card-title">{% trans "筛选条件" %}</h3>
     </div>
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-auto">
-                <label class="form-label">{% trans "Username" %}</label>
-                <input type="text" name="user" class="form-control form-control-sm" placeholder="{% trans 'Enter username' %}" value="{{ user_filter }}">
+                <label class="form-label">{% trans "用户名" %}</label>
+                <input type="text" name="user" class="form-control form-control-sm" placeholder="{% trans '请输入用户名' %}" value="{{ user_filter }}">
             </div>
             <div class="col-auto">
-                <label class="form-label">{% trans "Action Type" %}</label>
+                <label class="form-label">{% trans "操作类型" %}</label>
                 <select name="action" class="form-select form-select-sm">
-                    <option value="">{% trans "All Types" %}</option>
-                    <option value="login" {% if action_filter == 'login' %}selected{% endif %}>{% trans "Login" %}</option>
-                    <option value="logout" {% if action_filter == 'logout' %}selected{% endif %}>{% trans "Logout" %}</option>
-                    <option value="login_failed" {% if action_filter == 'login_failed' %}selected{% endif %}>{% trans "Login Failed" %}</option>
+                    <option value="">{% trans "全部类型" %}</option>
+                    <option value="login" {% if action_filter == 'login' %}selected{% endif %}>{% trans "登录" %}</option>
+                    <option value="logout" {% if action_filter == 'logout' %}selected{% endif %}>{% trans "登出" %}</option>
+                    <option value="login_failed" {% if action_filter == 'login_failed' %}selected{% endif %}>{% trans "登录失败" %}</option>
                 </select>
             </div>
             <div class="col-auto align-self-end">
                 <button type="submit" class="btn btn-sm btn-primary">
-                    <i class="ti ti-search me-1"></i>{% trans "Filter" %}
+                    <i class="ti ti-search me-1"></i>{% trans "筛选条件" %}
                 </button>
             </div>
         </form>
@@ -40,12 +40,12 @@
         <table class="table table-vcenter card-table">
             <thead>
                 <tr>
-                    <th>{% trans "Time" %}</th>
-                    <th>{% trans "Username" %}</th>
-                    <th>{% trans "Action Type" %}</th>
-                    <th>{% trans "IP Address" %}</th>
-                    <th>{% trans "Browser" %}</th>
-                    <th>{% trans "Failure Reason" %}</th>
+                    <th>{% trans "时间" %}</th>
+                    <th>{% trans "用户名" %}</th>
+                    <th>{% trans "操作类型" %}</th>
+                    <th>{% trans "IP地址" %}</th>
+                    <th>{% trans "浏览器" %}</th>
+                    <th>{% trans "失败原因" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,11 +55,11 @@
                     <td>{{ log.username }}</td>
                     <td>
                         {% if log.action == 'login' %}
-                        <span class="badge bg-success-lt"><i class="ti ti-login me-1"></i>{% trans "Login" %}</span>
+                        <span class="badge bg-success-lt"><i class="ti ti-login me-1"></i>{% trans "登录" %}</span>
                         {% elif log.action == 'logout' %}
-                        <span class="badge bg-secondary-lt"><i class="ti ti-logout me-1"></i>{% trans "Logout" %}</span>
+                        <span class="badge bg-secondary-lt"><i class="ti ti-logout me-1"></i>{% trans "登出" %}</span>
                         {% else %}
-                        <span class="badge bg-danger-lt"><i class="ti ti-alert-circle me-1"></i>{% trans "Login Failed" %}</span>
+                        <span class="badge bg-danger-lt"><i class="ti ti-alert-circle me-1"></i>{% trans "登录失败" %}</span>
                         {% endif %}
                     </td>
                     <td>{{ log.ip_address }}</td>
@@ -71,7 +71,7 @@
                     <td>{{ log.reason|default:"-" }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="6" class="text-center text-muted py-3">{% trans "No log data" %}</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-3">{% trans "暂无日志数据" %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>

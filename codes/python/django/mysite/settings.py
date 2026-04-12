@@ -126,8 +126,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'zh-hans'
 
 LANGUAGES = [
-    ('zh-hans', 'Simplified Chinese'),
-    ('en', 'English'),
+    ('zh-hans', '简体中文'),
+    ('en', '英文'),
 ]
 
 LOCALE_PATHS = [
@@ -210,8 +210,8 @@ LOGGING = {
             'level': 'INFO',
             'class': 'gmtool.logging_handlers.SafeTimedRotatingFileHandler',
             'filename': str(LOG_DIR / 'audit.log'),
-            'when': 'midnight',       # 每天午夜轮转
-            'backupCount': 90,         # 保留90天日志
+            'when': 'midnight',  # 每天午夜轮转
+            'backupCount': 30,   # 保留30天日志
             'encoding': 'utf-8',
             'formatter': 'audit',
         },
@@ -219,8 +219,8 @@ LOGGING = {
             'level': 'INFO',
             'class': 'gmtool.logging_handlers.SafeTimedRotatingFileHandler',
             'filename': str(LOG_DIR / 'gmtool.log'),
-            'when': 'midnight',
-            'backupCount': 30,         # 保留30天
+            'when': 'midnight',  # 每天午夜轮转
+            'backupCount': 30,   # 保留30天
             'encoding': 'utf-8',
             'formatter': 'verbose',
         },

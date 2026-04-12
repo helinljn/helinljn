@@ -91,10 +91,10 @@ def login_view(request):
                 user=None, username=request.POST.get('username', ''),
                 action='login_failed', ip_address=ip,
                 user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
-                reason=_('Too many login attempts'),
+                reason=_('尝试次数过多'),
             )
             return render(request, 'gmtool/login.html', {
-                'error': _('Too many login attempts, please try again in %(minutes)d minutes') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
+                'error': _('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
             })
 
         username = request.POST.get('username', '')
@@ -121,25 +121,25 @@ def login_view(request):
                 cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
                 LoginLog.objects.create(
                     user=None, username=username, action='login_failed',
-                    ip_address=ip, user_agent=ua, reason=_('Account disabled'),
+                    ip_address=ip, user_agent=ua, reason=_('账号已禁用'),
                 )
                 log_operation('auth', 'login_failed', ip_address=ip,
                               detail={'username': username, 'reason': 'Account disabled'})
-                return render(request, 'gmtool/login.html', {'error': _('This account has been disabled')})
+                return render(request, 'gmtool/login.html', {'error': _('账号已被禁用')})
         else:
             # 登录失败，累加计数
             cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
             remaining = LOGIN_MAX_ATTEMPTS - attempts - 1
             LoginLog.objects.create(
                 user=None, username=username, action='login_failed',
-                ip_address=ip, user_agent=ua, reason=_('Incorrect username or password'),
+                ip_address=ip, user_agent=ua, reason=_('用户名或密码错误'),
             )
             log_operation('auth', 'login_failed', ip_address=ip,
                           detail={'username': username, 'reason': 'Incorrect username or password'})
             if remaining > 0:
-                error_msg = _('Incorrect username or password, %(remaining)d attempts remaining') % {'remaining': remaining}
+                error_msg = _('用户名或密码错误，还可尝试 %(remaining)d 次') % {'remaining': remaining}
             else:
-                error_msg = _('Too many login attempts, please try again in %(minutes)d minutes') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60}
+                error_msg = _('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60}
             return render(request, 'gmtool/login.html', {'error': error_msg})
     return render(request, 'gmtool/login.html')
 
@@ -212,31 +212,31 @@ def command_execute(request, cmd_id):
     if not command or not command.is_active:
         if request.method == 'POST':
             return JsonResponse(
-                {'success': False, 'error': __('This command has been deactivated or deleted, please refresh the page'), 'command_deactivated': True},
+                {'success': False, 'error': __('该命令已被停用或删除，请刷新页面获取最新命令列表'), 'command_deactivated': True},
                 status=410,
             )
         from django.contrib import messages
-        messages.error(request, _('This command has been deactivated or deleted'))
+        messages.error(request, _('该命令已被停用或删除'))
         return redirect('gmtool:command_list')
 
     if request.method == 'POST':
         try:
             body = json.loads(request.body)
             if not isinstance(body, dict):
-                return JsonResponse({'success': False, 'error': __('Request body must be a JSON object')}, status=400)
+                return JsonResponse({'success': False, 'error': __('请求体必须是 JSON 对象')}, status=400)
 
             params = body.get('params', {})
             if not isinstance(params, dict):
-                return JsonResponse({'success': False, 'error': __('Params must be an object')}, status=400)
+                return JsonResponse({'success': False, 'error': __('参数 Params 必须是对象')}, status=400)
 
             raw_partition = params.get('Partition', 0)
             try:
                 partition = int(raw_partition)
             except (TypeError, ValueError):
-                return JsonResponse({'success': False, 'error': __('Partition must be an integer')}, status=400)
+                return JsonResponse({'success': False, 'error': __('Partition 必须为整数')}, status=400)
 
             if partition < 0:
-                return JsonResponse({'success': False, 'error': __('Partition cannot be negative')}, status=400)
+                return JsonResponse({'success': False, 'error': __('Partition 不能为负数')}, status=400)
 
             # 归一化写回，确保后续下游与日志类型一致
             params['Partition'] = partition
@@ -278,10 +278,10 @@ def command_execute(request, cmd_id):
             return JsonResponse({'success': True, 'data': response_data})
 
         except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': __('Invalid request data format')}, status=400)
+            return JsonResponse({'success': False, 'error': __('请求数据格式错误')}, status=400)
         except Exception as e:
             logger.exception('Command execution error: %s', e)
-            return JsonResponse({'success': False, 'error': __('Internal server error')}, status=500)
+            return JsonResponse({'success': False, 'error': __('服务器内部错误')}, status=500)
 
     # GET: 显示执行表单
     from django.conf import settings
@@ -348,7 +348,7 @@ def add_gm_command(request):
             })
             if not success:
                 from django.contrib import messages
-                messages.error(request, _('Failed to write command to JSON file: %(error)s') % {'error': error_msg})
+                messages.error(request, _('写入命令到 JSON 文件失败: %(error)s') % {'error': error_msg})
             else:
                 # 同步到数据库
                 try:
@@ -356,7 +356,7 @@ def add_gm_command(request):
                 except Exception as e:
                     logger.exception('Command sync error after add: %s', e)
                     from django.contrib import messages
-                    messages.warning(request, _('Command added to JSON file but database sync failed'))
+                    messages.warning(request, _('命令已添加到 JSON 文件，但数据库同步失败'))
 
                 log_operation('command', 'add', user=request.user,
                               ip_address=get_client_ip(request),
@@ -368,14 +368,14 @@ def add_gm_command(request):
                               })
 
                 from django.contrib import messages
-                messages.success(request, _('Command %(id)s added successfully') % {'id': command_id})
+                messages.success(request, _('命令 %(id)s 添加成功') % {'id': command_id})
                 return redirect('gmtool:dashboard')
     else:
         form = AddGMCommandForm()
 
     return render(request, 'gmtool/command_add.html', {
         'form': form,
-        'title': _('Add GM Command'),
+        'title': _('添加GM命令'),
         'is_admin': True,
     })
 
@@ -428,7 +428,7 @@ def user_create(request):
 
     return render(request, 'gmtool/user_form.html', {
         'form': form,
-        'title': _('Create User'),
+        'title': _('创建用户'),
         'is_admin': True,
     })
 
@@ -450,7 +450,7 @@ def user_edit(request, user_id):
         if form.is_valid():
             # 禁止禁用自己的账号
             if is_self and not form.cleaned_data.get('is_active', True):
-                form.add_error('is_active', _('You cannot disable your own account'))
+                form.add_error('is_active', _('不能禁用自己的账号'))
             else:
                 form.save()
                 log_operation('user', 'update', user=request.user,
@@ -469,7 +469,7 @@ def user_edit(request, user_id):
 
     return render(request, 'gmtool/user_form.html', {
         'form': form,
-        'title': _('Edit User'),
+        'title': _('编辑用户'),
         'edit_user': user_obj,
         'is_self': is_self,
         'is_target_super_admin': is_target_super_admin,
@@ -485,10 +485,10 @@ def user_delete(request, user_id):
     user_obj = get_object_or_404(User, pk=user_id)
     if user_obj == request.user:
         from django.contrib import messages
-        messages.warning(request, __('You cannot delete your own account'))
+        messages.warning(request, __('不能删除自己的账号'))
     elif is_super_admin(user_obj):
         from django.contrib import messages
-        messages.warning(request, __('Cannot delete super admin account'))
+        messages.warning(request, __('不能删除超级管理员账号'))
     else:
         target_name = user_obj.username
         user_obj.delete()
@@ -535,7 +535,7 @@ def role_create(request):
 
     return render(request, 'gmtool/role_form.html', {
         'form': form,
-        'title': _('Create Role'),
+        'title': _('创建角色'),
         'is_admin': True,
     })
 
@@ -548,7 +548,7 @@ def role_edit(request, role_id):
     # 禁止编辑超级管理员角色
     if role.is_super_admin:
         from django.contrib import messages
-        messages.warning(request, __('Super admin role cannot be edited'))
+        messages.warning(request, __('超级管理员角色不可编辑'))
         return redirect('gmtool:role_list')
     if request.method == 'POST':
         form = RoleForm(request.POST, instance=role)
@@ -567,7 +567,7 @@ def role_edit(request, role_id):
 
     return render(request, 'gmtool/role_form.html', {
         'form': form,
-        'title': _('Edit Role'),
+        'title': _('编辑角色'),
         'edit_role': role,
         'is_admin': True,
     })
@@ -766,43 +766,43 @@ def upload_commands_api(request):
     # 校验文件
     uploaded_file = request.FILES.get('file')
     if not uploaded_file:
-        return JsonResponse({'error': __('Please select a file')}, status=400)
+        return JsonResponse({'error': __('请选择文件')}, status=400)
 
     # 校验文件名
     if not uploaded_file.name.endswith('.json'):
-        return JsonResponse({'error': __('Only .json files are supported')}, status=400)
+        return JsonResponse({'error': __('仅支持 .json 文件')}, status=400)
 
     # 校验文件大小（限制 5MB）
     if uploaded_file.size > 5 * 1024 * 1024:
-        return JsonResponse({'error': __('File size cannot exceed 5MB')}, status=400)
+        return JsonResponse({'error': __('文件大小不能超过 5MB')}, status=400)
 
     # 解析并校验 JSON 内容
     try:
         raw = uploaded_file.read()
         data = json.loads(raw)
     except json.JSONDecodeError as e:
-        return JsonResponse({'error': __('JSON parse failed: %(error)s') % {'error': str(e)}}, status=400)
+        return JsonResponse({'error': __('JSON 解析失败: %(error)s') % {'error': str(e)}}, status=400)
 
     # 校验顶层结构：必须是 dict，且每个值包含必要字段
     if not isinstance(data, dict):
-        return JsonResponse({'error': __('Top-level JSON must be an object')}, status=400)
+        return JsonResponse({'error': __('JSON 顶层必须是对象(dict)')}, status=400)
 
     required_keys = {'tab', 'request', 'id', 'responseid', 'respone'}
     for cmd_id, cmd_data in data.items():
         if not isinstance(cmd_data, dict):
-            return JsonResponse({'error': __('Command %(id)s value must be an object') % {'id': cmd_id}}, status=400)
+            return JsonResponse({'error': __('命令 %(id)s 的值必须是对象') % {'id': cmd_id}}, status=400)
         missing = required_keys - set(cmd_data.keys())
         if missing:
-            return JsonResponse({'error': __('Command %(id)s is missing required fields: %(fields)s') % {'id': cmd_id, 'fields': ', '.join(missing)}}, status=400)
+            return JsonResponse({'error': __('命令 %(id)s 缺少必要字段: %(fields)s') % {'id': cmd_id, 'fields': ', '.join(missing)}}, status=400)
         # 校验 request_name 对应的参数列表存在
         request_name = cmd_data.get('request', '')
         if request_name and not isinstance(cmd_data.get(request_name), list):
-            return JsonResponse({'error': __('Request params %(name)s for command %(id)s must be an array') % {'name': request_name, 'id': cmd_id}}, status=400)
+            return JsonResponse({'error': __('命令 %(id)s 的请求参数 %(name)s 必须是数组') % {'name': request_name, 'id': cmd_id}}, status=400)
 
     # 校验 ID 重复（CommandId、request_id、response_id）
     is_valid_ids, id_error_msg = validate_json_command_ids(data)
     if not is_valid_ids:
-        return JsonResponse({'error': _('ID conflict detected: %(errors)s') % {'errors': id_error_msg}}, status=400)
+        return JsonResponse({'error': _('检测到 ID 冲突: %(errors)s') % {'errors': id_error_msg}}, status=400)
 
     # 原子写入 idip_commands.json（先写临时文件再替换，防止中途崩溃损坏文件）
     try:
@@ -820,14 +820,14 @@ def upload_commands_api(request):
             raise
     except Exception as e:
         logger.exception('Failed to write JSON file: %s', e)
-        return JsonResponse({'error': __('File write failed: %(error)s') % {'error': str(e)}}, status=500)
+        return JsonResponse({'error': __('文件写入失败: %(error)s') % {'error': str(e)}}, status=500)
 
     # 自动执行同步
     try:
         created, updated, deactivated = sync_commands_to_db()
     except Exception as e:
         logger.exception('Command sync error: %s', e)
-        return JsonResponse({'error': __('File uploaded but sync failed')}, status=500)
+        return JsonResponse({'error': __('文件已上传但同步失败')}, status=500)
 
     log_operation('command', 'upload_and_sync', user=request.user,
                   ip_address=get_client_ip(request),
@@ -858,11 +858,11 @@ def sync_commands_api(request):
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
     except (json.JSONDecodeError, FileNotFoundError) as e:
-        return JsonResponse({'error': _('Failed to read JSON file: %(error)s') % {'error': str(e)}}, status=400)
+        return JsonResponse({'error': _('读取 JSON 文件失败: %(error)s') % {'error': str(e)}}, status=400)
 
     is_valid_ids, id_error_msg = validate_json_command_ids(data)
     if not is_valid_ids:
-        return JsonResponse({'error': _('ID conflict detected: %(errors)s') % {'errors': id_error_msg}}, status=400)
+        return JsonResponse({'error': _('检测到 ID 冲突: %(errors)s') % {'errors': id_error_msg}}, status=400)
 
     try:
         created, updated, deactivated = sync_commands_to_db()
@@ -921,6 +921,6 @@ def csrf_failure(request, reason=""):
     from django.contrib import messages
     from django.urls import reverse
     if request.path == reverse('gmtool:login'):
-        messages.error(request, __('Page expired, please log in again.'))
+        messages.error(request, __('页面已过期，请重新登录。'))
         return redirect('gmtool:login')
     return render(request, 'gmtool/403.html', status=403)

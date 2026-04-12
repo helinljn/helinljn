@@ -1,21 +1,21 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Permission Assignment" %} - {{ target_user.username }} - {% trans "GM Command System" %}{% endblock %}
+{% block title %}{% trans "权限分配" %} - {{ target_user.username }} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_users %}active{% endblock %}
-{% block page_pretitle %}{% trans "Management" %}{% endblock %}
-{% block page_title %}{% trans "Permission Assignment" %} - {{ target_user.username }}{% endblock %}
+{% block page_pretitle %}{% trans "管理" %}{% endblock %}
+{% block page_title %}{% trans "权限分配" %} - {{ target_user.username }}{% endblock %}
 
 {% block content %}
 <div class="mb-3">
     <a href="{% url 'gmtool:user_list' %}" class="btn btn-sm btn-outline-secondary">
-        <i class="ti ti-arrow-left me-1"></i>{% trans "Back to List" %}
+        <i class="ti ti-arrow-left me-1"></i>{% trans "返回列表" %}
     </a>
 </div>
 
 <div class="alert alert-info">
     <i class="ti ti-info-circle me-2"></i>
-    {% blocktrans with username=target_user.username %}Assign GM command execution permissions for user <strong>{{ username }}</strong>. Super admins have all permissions automatically.{% endblocktrans %}
+    {% blocktrans with username=target_user.username %}为用户 <strong>{{ username }}</strong> 单独分配可执行的GM命令权限。超级管理员自动拥有全部权限，无需手动分配。{% endblocktrans %}
 </div>
 
 <form method="post">
@@ -50,9 +50,9 @@
 
     <div class="mt-3">
         <button type="submit" class="btn btn-primary">
-            <i class="ti ti-check me-1"></i>{% trans "Save Permissions" %}
+            <i class="ti ti-check me-1"></i>{% trans "保存权限" %}
         </button>
-        <a href="{% url 'gmtool:user_list' %}" class="btn btn-outline-secondary ms-2">{% trans "Cancel" %}</a>
+        <a href="{% url 'gmtool:user_list' %}" class="btn btn-outline-secondary ms-2">{% trans "取消" %}</a>
     </div>
 </form>
 

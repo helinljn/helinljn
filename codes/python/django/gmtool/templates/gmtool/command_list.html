@@ -1,10 +1,10 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "Commands" %} - {% trans "GM Command System" %}{% endblock %}
+{% block title %}{% trans "命令管理" %} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_commands %}active{% endblock %}
-{% block page_pretitle %}{% trans "Commands" %}{% endblock %}
-{% block page_title %}{% trans "Commands" %}{% endblock %}
+{% block page_pretitle %}{% trans "命令管理" %}{% endblock %}
+{% block page_title %}{% trans "命令管理" %}{% endblock %}
 
 {% block content %}
 <div class="mb-3">
@@ -14,9 +14,9 @@
                 <div class="input-icon">
                     <span class="input-icon-addon"><i class="ti ti-search"></i></span>
                     <input type="text" name="search" class="form-control form-control-sm"
-                           placeholder="{% trans 'Search commands...' %}" value="{{ search }}" style="width:220px;">
+                           placeholder="{% trans '搜索命令...' %}" value="{{ search }}" style="width:220px;">
                 </div>
-                <button type="submit" class="btn btn-sm btn-primary ms-2 d-none">{% trans "Search" %}</button>
+                <button type="submit" class="btn btn-sm btn-primary ms-2 d-none">{% trans "搜索" %}</button>
             </form>
         </div>
     </div>
@@ -34,11 +34,11 @@
         <table class="table table-vcenter card-table" style="table-layout:fixed;">
             <thead>
                 <tr>
-                    <th style="width:120px;">{% trans "Command ID" %}</th>
-                    <th style="width:25%;">{% trans "Command Name" %}</th>
-                    <th style="width:25%;">{% trans "Request Name" %}</th>
-                    <th style="width:100px;">{% trans "Protocol ID" %}</th>
-                    <th style="width:120px;">{% trans "Actions" %}</th>
+                    <th style="width:120px;">{% trans "命令编号" %}</th>
+                    <th style="width:25%;">{% trans "命令名称" %}</th>
+                    <th style="width:25%;">{% trans "请求名" %}</th>
+                    <th style="width:100px;">{% trans "协议ID" %}</th>
+                    <th style="width:120px;">{% trans "操作" %}</th>
                 </tr>
             </thead>
             <tbody>
@@ -51,7 +51,7 @@
                     <td>
                         <a href="{% url 'gmtool:command_execute' cmd.command_id %}"
                            class="btn btn-sm btn-primary">
-                            <i class="ti ti-player-play me-1"></i>{% trans "Execute" %}
+                            <i class="ti ti-player-play me-1"></i>{% trans "执行" %}
                         </a>
                     </td>
                 </tr>
@@ -63,7 +63,7 @@
 {% empty %}
 <div class="alert alert-info">
     <i class="ti ti-info-circle me-2"></i>
-    {% if search %}{% blocktrans with search_term=search %}No commands found matching "{{ search_term }}"{% endblocktrans %}{% else %}{% trans "No commands available. Please contact your administrator to assign permissions." %}{% endif %}
+    {% if search %}{% blocktrans with search_term=search %}未找到匹配“{{ search_term }}”的命令{% endblocktrans %}{% else %}{% trans "暂无可用的命令，请联系管理员分配权限。" %}{% endif %}
 </div>
 {% endfor %}
 {% endblock %}

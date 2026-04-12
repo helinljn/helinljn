@@ -15,7 +15,7 @@ def _get_requests():
         import requests
         return requests
     except ImportError:
-        raise ImportError(_("requests library not installed, please run: pip install requests"))
+        raise ImportError(_("requests 库未安装，请执行: pip install requests"))
 
 
 def send_idip_command(command, params):
@@ -90,14 +90,14 @@ def send_idip_command(command, params):
         return result, None, request_content_str, ''
     except req.Timeout:
         logger.error('IDIP API请求超时: command=%s', command.command_id)
-        return None, _('Request timed out, please try again later'), request_content_str, 'timeout'
+        return None, _('请求超时，请稍后重试'), request_content_str, 'timeout'
     except req.ConnectionError:
         logger.error('IDIP API连接失败: url=%s', settings.IDIP_API_URL)
-        return None, _('Unable to connect to game server, please check configuration'), request_content_str, 'connection'
+        return None, _('无法连接到游戏服务器，请检查配置'), request_content_str, 'connection'
     except Exception as e:
         # 兼容不同版本 requests 的 JSONDecodeError
         if hasattr(req, 'JSONDecodeError') and isinstance(e, req.JSONDecodeError):
             logger.error('IDIP API响应解析失败: response=%.500s', response.text)
             return {'raw_response': response.text}, None, request_content_str, ''
         logger.error('IDIP API请求异常: %s', e)
-        return None, _('Request failed: %(error)s') % {'error': str(e)}, request_content_str, 'error'
+        return None, _('请求失败: %(error)s') % {'error': str(e)}, request_content_str, 'error'

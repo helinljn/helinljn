@@ -1,15 +1,15 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{{ title }} - {% trans "GM Command System" %}{% endblock %}
+{% block title %}{{ title }} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_dashboard %}active{% endblock %}
-{% block page_pretitle %}{% trans "Command Management" %}{% endblock %}
+{% block page_pretitle %}{% trans "命令管理" %}{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
 <div class="mb-3">
     <a href="{% url 'gmtool:dashboard' %}" class="btn btn-sm btn-outline-secondary">
-        <i class="ti ti-arrow-left me-1"></i>{% trans "Back to Dashboard" %}
+        <i class="ti ti-arrow-left me-1"></i>{% trans "返回仪表盘" %}
     </a>
 </div>
 
@@ -17,19 +17,19 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-plus me-2"></i>{% trans "Add GM Command" %}</h3>
+                <h3 class="card-title"><i class="ti ti-plus me-2"></i>{% trans "添加GM命令" %}</h3>
             </div>
             <div class="card-body">
                 <form method="post" id="addCommandForm">
                     {% csrf_token %}
 
                     {# 基本信息区 #}
-                    <h4 class="mb-3">{% trans "Basic Information" %}</h4>
+                    <h4 class="mb-3">{% trans "基本信息" %}</h4>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="{{ form.command_id.id_for_label }}">
                                 {{ form.command_id.label }}
-                                <span class="form-label-description text-danger">{% trans "Required" %}</span>
+                                <span class="form-label-description text-danger">{% trans "必填" %}</span>
                             </label>
                             {{ form.command_id }}
                             {% if form.command_id.errors %}
@@ -41,7 +41,7 @@
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="{{ form.tab.id_for_label }}">
                                 {{ form.tab.label }}
-                                <span class="form-label-description text-danger">{% trans "Required" %}</span>
+                                <span class="form-label-description text-danger">{% trans "必填" %}</span>
                             </label>
                             {{ form.tab }}
                             {% if form.tab.errors %}
@@ -51,7 +51,7 @@
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="{{ form.command_name.id_for_label }}">
                                 {{ form.command_name.label }}
-                                <span class="form-label-description text-danger">{% trans "Required" %}</span>
+                                <span class="form-label-description text-danger">{% trans "必填" %}</span>
                             </label>
                             {{ form.command_name }}
                             {% if form.command_name.errors %}
@@ -61,12 +61,12 @@
                     </div>
 
                     {# 请求信息区 #}
-                    <h4 class="mb-3 mt-4">{% trans "Request Definition" %}</h4>
+                    <h4 class="mb-3 mt-4">{% trans "请求定义" %}</h4>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="{{ form.request_name.id_for_label }}">
                                 {{ form.request_name.label }}
-                                <span class="form-label-description text-danger">{% trans "Required" %}</span>
+                                <span class="form-label-description text-danger">{% trans "必填" %}</span>
                             </label>
                             {{ form.request_name }}
                             {% if form.request_name.errors %}
@@ -76,7 +76,7 @@
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="{{ form.request_id.id_for_label }}">
                                 {{ form.request_id.label }}
-                                <span class="form-label-description text-danger">{% trans "Required" %}</span>
+                                <span class="form-label-description text-danger">{% trans "必填" %}</span>
                             </label>
                             {{ form.request_id }}
                             {% if form.request_id.errors %}
@@ -108,12 +108,12 @@
                     </div>
 
                     {# 响应信息区 #}
-                    <h4 class="mb-3 mt-4">{% trans "Response Definition" %}</h4>
+                    <h4 class="mb-3 mt-4">{% trans "响应定义" %}</h4>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="{{ form.response_name.id_for_label }}">
                                 {{ form.response_name.label }}
-                                <span class="form-label-description text-danger">{% trans "Required" %}</span>
+                                <span class="form-label-description text-danger">{% trans "必填" %}</span>
                             </label>
                             {{ form.response_name }}
                             {% if form.response_name.errors %}
@@ -123,7 +123,7 @@
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="{{ form.response_id.id_for_label }}">
                                 {{ form.response_id.label }}
-                                <span class="form-label-description text-danger">{% trans "Required" %}</span>
+                                <span class="form-label-description text-danger">{% trans "必填" %}</span>
                             </label>
                             {{ form.response_id }}
                             {% if form.response_id.errors %}
@@ -156,9 +156,9 @@
 
                     <div class="form-footer mt-4">
                         <button type="submit" class="btn btn-primary">
-                            <i class="ti ti-check me-1"></i>{% trans "Add Command" %}
+                            <i class="ti ti-check me-1"></i>{% trans "添加命令" %}
                         </button>
-                        <a href="{% url 'gmtool:dashboard' %}" class="btn btn-outline-secondary ms-2">{% trans "Cancel" %}</a>
+                        <a href="{% url 'gmtool:dashboard' %}" class="btn btn-outline-secondary ms-2">{% trans "取消" %}</a>
                     </div>
                 </form>
             </div>

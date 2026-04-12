@@ -1,9 +1,9 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{{ command.command_name }} - {% trans "GM Command System" %}{% endblock %}
+{% block title %}{{ command.command_name }} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_commands %}active{% endblock %}
-{% block page_pretitle %}{% trans "Commands" %}{% endblock %}
+{% block page_pretitle %}{% trans "命令管理" %}{% endblock %}
 {% block page_title %}{{ command.command_name }}{% endblock %}
 
 {% block extra_css %}
@@ -33,7 +33,7 @@
 {% block content %}
 <div class="mb-3">
     <a href="{% url 'gmtool:command_list' %}" class="btn btn-sm btn-outline-secondary me-2">
-        <i class="ti ti-arrow-left me-1"></i>{% trans "Back to List" %}
+        <i class="ti ti-arrow-left me-1"></i>{% trans "返回列表" %}
     </a>
     <span class="badge bg-secondary-lt">{{ command.command_id }}</span>
 </div>
@@ -42,7 +42,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-terminal-2 me-2"></i>{% trans "Command Parameters" %}</h3>
+                <h3 class="card-title"><i class="ti ti-terminal-2 me-2"></i>{% trans "命令参数" %}</h3>
                 <div class="card-actions">
                     <small class="text-muted">{{ command.request_name }}</small>
                 </div>
@@ -56,12 +56,12 @@
                             <span class="param-label-row">
                                 {{ param.name }}
                                 {% if param.isnull == "true" %}
-                                <span class="form-label-description">{% trans "Optional" %}</span>
+                                <span class="form-label-description">{% trans "可选" %}</span>
                                 {% endif %}
                                 {% if param.id != "AreaId" and param.id != "Partition" and param.id != "PlatId" %}
                                 <span class="batch-toggle ms-2">
                                     <input type="checkbox" class="batch-mode-toggle" data-param-id="{{ param.id }}" onchange="toggleFieldBatchMode('{{ param.id }}', this.checked)">
-                                    {% trans "Batch" %}
+                                    {% trans "批量" %}
                                 </span>
                                 {% endif %}
                             </span>
@@ -101,12 +101,12 @@
                                   id="batch_{{ param.id }}"
                                   data-param-id="{{ param.id }}"
                                   data-param-type="{{ param.type }}"
-                                  placeholder="{% trans 'Enter multiple values, one per line or comma separated, e.g.:&#10;value1&#10;value2&#10;value3' %}"
+                                  placeholder="{% trans '输入多个值，每行一个或用逗号分隔，如：&#10;值1&#10;值2&#10;值3' %}"
                         ></textarea>
                         <div class="batch-hint" id="hint_{{ param.id }}" style="display:none;">
-                            {% trans "Supports comma separation, newline separation" %} |
+                            {% trans "支持逗号分隔、换行分隔" %} |
                             <label class="file-import-label text-primary">
-                                <i class="ti ti-file-import me-1"></i>{% trans "Import from file" %}
+                                <i class="ti ti-file-import me-1"></i>{% trans "从文件导入" %}
                                 <input type="file" class="file-import-input" data-target="{{ param.id }}" accept=".txt,.csv" style="display:none;" onchange="importValuesFromFile(this)">
                             </label>
                         </div>
@@ -115,13 +115,13 @@
 
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="ti ti-player-play me-1"></i><span id="submitBtnText">{% trans "Execute Command" %}</span>
+                            <i class="ti ti-player-play me-1"></i><span id="submitBtnText">{% trans "执行命令" %}</span>
                         </button>
                         <button type="button" class="btn btn-danger ms-2 d-none" id="cancelBatchBtn" onclick="cancelBatch()">
-                            <i class="ti ti-player-stop me-1"></i>{% trans "Cancel" %}
+                            <i class="ti ti-player-stop me-1"></i>{% trans "取消" %}
                         </button>
                         <button type="reset" class="btn btn-outline-secondary ms-2" id="resetBtn">
-                            <i class="ti ti-rotate me-1"></i>{% trans "Reset" %}
+                            <i class="ti ti-rotate me-1"></i>{% trans "重置" %}
                         </button>
                     </div>
                 </form>
@@ -132,28 +132,28 @@
     <div class="col-lg-4">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>{% trans "Command Info" %}</h3>
+                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>{% trans "命令信息" %}</h3>
             </div>
             <div class="card-body p-0">
                 <div class="list-group list-group-flush">
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">{% trans "Command ID" %}</span>
+                        <span class="text-muted">{% trans "命令编号" %}</span>
                         <span><code>{{ command.command_id }}</code></span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">{% trans "Request Name" %}</span>
+                        <span class="text-muted">{% trans "请求名" %}</span>
                         <span><code>{{ command.request_name }}</code></span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">{% trans "Protocol ID" %}</span>
+                        <span class="text-muted">{% trans "协议ID" %}</span>
                         <span>{{ command.request_id }}</span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">{% trans "Response Name" %}</span>
+                        <span class="text-muted">{% trans "响应名" %}</span>
                         <span><code>{{ command.response_name }}</code></span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">{% trans "Response ID" %}</span>
+                        <span class="text-muted">{% trans "协议响应ID" %}</span>
                         <span>{{ command.response_id }}</span>
                     </div>
                 </div>
@@ -165,7 +165,7 @@
 <!-- 执行结果 -->
 <div class="card mt-3 d-none" id="resultCard">
     <div class="card-header">
-        <h3 class="card-title"><i class="ti ti-check me-2"></i>{% trans "Execution Result" %}</h3>
+        <h3 class="card-title"><i class="ti ti-check me-2"></i>{% trans "执行结果" %}</h3>
         <div class="card-actions">
             <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('resultCard').classList.add('d-none')">
                 <i class="ti ti-x"></i>
@@ -180,11 +180,11 @@
 <!-- 批量执行结果 -->
 <div class="card mt-3 d-none" id="batchResultCard">
     <div class="card-header">
-        <h3 class="card-title"><i class="ti ti-list-check me-2"></i>{% trans "Batch Execution Results" %}</h3>
+        <h3 class="card-title"><i class="ti ti-list-check me-2"></i>{% trans "批量执行结果" %}</h3>
         <div class="card-actions">
             <span class="me-2" id="batchProgressText"></span>
             <button class="btn btn-sm btn-outline-primary me-1 d-none" id="exportResultBtn" onclick="exportBatchResults()">
-                <i class="ti ti-download me-1"></i>{% trans "Export" %}
+                <i class="ti ti-download me-1"></i>{% trans "导出" %}
             </button>
             <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('batchResultCard').classList.add('d-none')">
                 <i class="ti ti-x"></i>
@@ -199,9 +199,9 @@
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>{% trans "Target" %}</th>
-                    <th>{% trans "Status" %}</th>
-                    <th>{% trans "Result" %}</th>
+                    <th>{% trans "目标" %}</th>
+                    <th>{% trans "状态" %}</th>
+                    <th>{% trans "结果" %}</th>
                 </tr>
             </thead>
             <tbody id="batchResultBody">
@@ -215,15 +215,15 @@
      id="loadingOverlay" style="z-index:9999;">
     <div class="text-white text-center">
         <div class="mb-3"><span class="spinner-border spinner-border-lg"></span></div>
-        <div id="loadingText">{% trans "Sending request..." %}</div>
+        <div id="loadingText">{% trans "请求发送中..." %}</div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-const BATCH_MAX_TARGETS = {{ batch_max_targets }};
-const BATCH_INTERVAL_MS = {{ batch_interval_ms }};
+const BATCH_MAX_TARGETS = Number('{{ batch_max_targets|default:200 }}');
+const BATCH_INTERVAL_MS = Number('{{ batch_interval_ms|default:200 }}');
 
 // Track which param fields are in batch mode
 const batchFields = new Set();
@@ -258,9 +258,9 @@ function toggleFieldBatchMode(paramId, checked) {
 function updateSubmitButtonText() {
     const btnText = document.getElementById('submitBtnText');
     if (batchFields.size > 0) {
-        btnText.textContent = '{% trans "Batch Execute" %}';
+        btnText.textContent = '{% trans "批量执行" %}';
     } else {
-        btnText.textContent = '{% trans "Execute Command" %}';
+        btnText.textContent = '{% trans "执行命令" %}';
     }
 }
 
@@ -297,14 +297,14 @@ function addResultRow(index, targetLabel, data) {
 
     let statusHtml, resultText;
     if (data.success) {
-        statusHtml = '<span class="status-success"><i class="ti ti-circle-check me-1"></i>{% trans "Success" %}</span>';
+        statusHtml = '<span class="status-success"><i class="ti ti-circle-check me-1"></i>{% trans "成功" %}</span>';
         resultText = JSON.stringify(data.data, null, 2);
     } else if (data.command_deactivated) {
-        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "Deactivated" %}</span>';
-        resultText = data.error || '{% trans "Command deactivated" %}';
+        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "已停用" %}</span>';
+        resultText = data.error || '{% trans "命令已失效" %}';
     } else {
-        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "Failed" %}</span>';
-        resultText = data.error || '{% trans "Unknown error" %}';
+        statusHtml = '<span class="status-failed"><i class="ti ti-circle-x me-1"></i>{% trans "失败" %}</span>';
+        resultText = data.error || '{% trans "未知错误" %}';
     }
 
     batchResults.push({ target: targetLabel, success: data.success, error: data.error || null, data: data.data || null });
@@ -330,7 +330,7 @@ function exportBatchResults() {
     if (!batchResults.length) return;
     const header = 'Target,Status,Error,Result\n';
     const rows = batchResults.map(r => {
-        const status = r.success ? 'Success' : 'Failed';
+        const status = r.success ? '成功' : '失败';
         const error = (r.error || '').replace(/"/g, '""');
         const result = JSON.stringify(r.data || {}).replace(/"/g, '""');
         return `${r.target},${status},"${error}","${result}"`;
@@ -396,17 +396,17 @@ async function singleExecute() {
         if (data.success) {
             resultContent.textContent = JSON.stringify(data.data, null, 2);
         } else if (data.command_deactivated) {
-            resultContent.textContent = '{% trans "Command deactivated" %}: ' + (data.error || '{% trans "This command has been deactivated or deleted, redirecting to command list..." %}');
+            resultContent.textContent = '{% trans "命令已失效" %}: ' + (data.error || '{% trans "该命令已被停用或删除，即将跳转到命令列表..." %}');
             setTimeout(function() {
                 window.location.href = '{% url "gmtool:command_list" %}';
             }, 2000);
         } else {
-            resultContent.textContent = '{% trans "Error" %}: ' + (data.error || '{% trans "Unknown error" %}');
+            resultContent.textContent = '{% trans "错误" %}: ' + (data.error || '{% trans "未知错误" %}');
         }
     } catch (err) {
         const resultCard = document.getElementById('resultCard');
         resultCard.classList.remove('d-none');
-        document.getElementById('resultContent').textContent = '{% trans "Request error" %}: ' + err.message;
+        document.getElementById('resultContent').textContent = '{% trans "请求异常" %}: ' + err.message;
     } finally {
         overlay.classList.add('d-none');
         overlay.classList.remove('d-flex');
@@ -425,11 +425,11 @@ async function batchExecute() {
         if (values.length === 0) {
             const textarea = document.getElementById('batch_' + paramId);
             const paramLabel = textarea ? textarea.closest('.mb-3').querySelector('.form-label').textContent.trim() : paramId;
-            alert('{% trans "Please enter at least one value for batch field" %}: ' + paramLabel);
+            alert('{% trans "请为批量字段输入至少一个值" %}: ' + paramLabel);
             return;
         }
         if (values.length > BATCH_MAX_TARGETS) {
-            alert('{% trans "Number of values exceeds limit" %}' + ' (' + BATCH_MAX_TARGETS + ')');
+            alert('{% trans "值数量超过限制" %}' + ' (' + BATCH_MAX_TARGETS + ')');
             return;
         }
         batchData[paramId] = values;
@@ -446,7 +446,7 @@ async function batchExecute() {
         if (batchData[paramId].length !== maxCount && batchData[paramId].length !== 1) {
             const textarea = document.getElementById('batch_' + paramId);
             const paramLabel = textarea ? textarea.closest('.mb-3').querySelector('.form-label').textContent.trim() : paramId;
-            alert('{% trans "Batch field count mismatch" %}: ' + paramLabel + ' (' + batchData[paramId].length + ' vs ' + maxCount + '). {% trans "Each batch field must have the same number of values, or exactly 1 value to reuse for all" %}');
+            alert('{% trans "批量字段数量不匹配" %}: ' + paramLabel + ' (' + batchData[paramId].length + ' vs ' + maxCount + '). {% trans "每个批量字段的值数量必须相同，或仅输入1个值以对所有目标复用" %}');
             return;
         }
     }

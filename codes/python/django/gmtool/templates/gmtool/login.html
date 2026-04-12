@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Login" %} - {% trans "GM Command System" %}</title>
+    <title>{% trans "登录" %} - {% trans "GM命令管理系统" %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
 </head>
@@ -12,29 +12,29 @@
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
                 <a href="{% url 'gmtool:login' %}" class="navbar-brand navbar-brand-autodark">
-                    <i class="ti ti-command me-2" style="font-size:2rem;"></i>{% trans "GM Command System" %}
+                    <i class="ti ti-command me-2" style="font-size:2rem;"></i>{% trans "GM命令管理系统" %}
                 </a>
             </div>
             <div class="card card-md">
                 <div class="card-body">
                     {% if already_logged_in %}
-                    <h2 class="h2 text-center mb-4">{% trans "Already Logged In" %}</h2>
+                    <h2 class="h2 text-center mb-4">{% trans "已登录" %}</h2>
                     <div class="alert alert-info mb-3">
-                        <i class="ti ti-info-circle me-2"></i>{% blocktrans with username=current_user.username %}You are already logged in as <strong>{{ username }}</strong>.{% endblocktrans %}
+                        <i class="ti ti-info-circle me-2"></i>{% blocktrans with username=current_user.username %}当前已以 <strong>{{ username }}</strong> 身份登录。{% endblocktrans %}
                     </div>
                     <div class="form-footer">
                         <a href="{% url 'gmtool:dashboard' %}" class="btn btn-primary w-100 mb-2">
-                            <i class="ti ti-home me-2"></i>{% trans "Enter System" %}
+                            <i class="ti ti-home me-2"></i>{% trans "进入系统" %}
                         </a>
                         <form method="post" action="{% url 'gmtool:logout' %}" class="w-100">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-outline-secondary w-100">
-                                <i class="ti ti-switch-horizontal me-2"></i>{% trans "Switch Account" %}
+                                <i class="ti ti-switch-horizontal me-2"></i>{% trans "切换账号" %}
                             </button>
                         </form>
                     </div>
                     {% else %}
-                    <h2 class="h2 text-center mb-4">{% trans "Sign in to your account" %}</h2>
+                    <h2 class="h2 text-center mb-4">{% trans "登录你的账号" %}</h2>
                     {% if error %}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <i class="ti ti-alert-circle me-2"></i>{{ error }}
@@ -52,28 +52,28 @@
                     <form method="post" autocomplete="off">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label class="form-label required">{% trans "Username" %}</label>
+                            <label class="form-label required">{% trans "用户名" %}</label>
                             <div class="input-group input-group-flat">
                                 <span class="input-group-text">
                                     <i class="ti ti-user"></i>
                                 </span>
-                                <input type="text" name="username" class="form-control" placeholder="{% trans 'Enter username' %}" required autofocus>
+                                <input type="text" name="username" class="form-control" placeholder="{% trans '请输入用户名' %}" required autofocus>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label required">
-                                {% trans "Password" %}
+                                {% trans "密码" %}
                             </label>
                             <div class="input-group input-group-flat">
                                 <span class="input-group-text">
                                     <i class="ti ti-lock"></i>
                                 </span>
-                                <input type="password" name="password" class="form-control" placeholder="{% trans 'Enter password' %}" required>
+                                <input type="password" name="password" class="form-control" placeholder="{% trans '请输入密码' %}" required>
                             </div>
                         </div>
                         <div class="form-footer">
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="ti ti-login me-2"></i>{% trans "Sign In" %}
+                                <i class="ti ti-login me-2"></i>{% trans "登录" %}
                             </button>
                         </div>
                     </form>
@@ -86,16 +86,16 @@
                 <form action="{% url 'set_language' %}" method="post" class="d-inline m-0">{% csrf_token %}
                     <input type="hidden" name="language" value="en">
                     <input type="hidden" name="next" value="{{ request.path }}">
-                    <button type="submit" class="btn btn-link text-muted p-0 m-0">English</button>
+                    <button type="submit" class="btn btn-link text-muted p-0 m-0">{% trans "英文" %}</button>
                 </form>
                 {% else %}
                 <form action="{% url 'set_language' %}" method="post" class="d-inline m-0">{% csrf_token %}
                     <input type="hidden" name="language" value="zh-hans">
                     <input type="hidden" name="next" value="{{ request.path }}">
-                    <button type="submit" class="btn btn-link text-muted p-0 m-0">{% trans "Simplified Chinese" %}</button>
+                    <button type="submit" class="btn btn-link text-muted p-0 m-0">{% trans "简体中文" %}</button>
                 </form>
                 {% endif %}
-                <span class="text-muted"> | {% trans "GM Command System" %} &copy; 2026</span>
+                <span class="text-muted"> | {% trans "GM命令管理系统" %} &copy; 2026</span>
             </div>
         </div>
     </div>
