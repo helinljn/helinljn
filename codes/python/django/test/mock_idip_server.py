@@ -153,17 +153,45 @@ def _generate_from_schema(
     return result
 
 
+def _apply_success_defaults(payload: Dict[str, Any], schema_fields: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """对常见结果字段应用“成功响应”兜底，避免随机值导致业务判失败。"""
+    field_ids = {f.get("id", "") for f in schema_fields if isinstance(f, dict)}
+
+    if "Result" in field_ids:
+        payload["Result"] = 0
+    if "RetMsg" in field_ids:
+        payload["RetMsg"] = "OK"
+    if "ret" in field_ids and isinstance(payload.get("ret"), (int, float)):
+        payload["ret"] = 0
+
+    return payload
+
+
 def generate_command_response(command_id: str, command_def: Dict[str, Any]) -> Dict[str, Any]:
-    """生成成功响应中的 json_obj（不额外包 Result/RetMsg/Data）。"""
-    response_name = command_def.get("respone")
+    """按当前命令定义自动读取响应协议并组装 json。"""
+    # 兼容不同字段命名（当前文件主要是 respone）
+    response_name = (
+        command_def.get("respone")
+        or command_def.get("response")
+        or command_def.get("response_name")
+    )
     if not response_name:
         return {}
 
-    # 手工覆盖优先
-    data = CUSTOM_RESPONSES.get(command_id)
-    if data is None:
-        schema = command_def.get(response_name, [])
-        data = _generate_from_schema(schema, command_def)
+    schema = command_def.get(response_name, [])
+    if not isinstance(schema, list):
+        return {}
+
+    # 先按 schema 自动生成，保证所有命令都有可用响应
+    data = _generate_from_schema(schema, command_def)
+
+    # 再合并手工覆盖（只覆盖指定字段，不影响其他字段自动生成）
+    custom = CUSTOM_RESPONSES.get(command_id)
+    if isinstance(custom, dict):
+        data.update(custom)
+
+    # 对通用状态字段兜底为成功，避免随机值把请求判定为失败
+    data = _apply_success_defaults(data, schema)
 
     return data
 

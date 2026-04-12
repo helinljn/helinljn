@@ -1,4 +1,4 @@
-# 游戏 GM 命令后台管理系统（Django）开发文档
+# 游戏 GM 命令后台管理系统（Django）
 
 ---
 
@@ -473,6 +473,62 @@ python manage.py runserver
 ```
 
 > 建议在创建/修改 `idip_commands.json` 后执行一次 `python manage.py sync_commands` 做显式校验。
+
+### 16.1 本地 Mock IDIP 服务（`test/mock_idip_server.py`）
+
+仓库已新增可直接联调用的 Mock 服务脚本：`test/mock_idip_server.py`。
+
+#### 启动方式
+
+```bash
+python test/mock_idip_server.py
+```
+
+可选参数：
+
+```bash
+python test/mock_idip_server.py --host 127.0.0.1 --port 18080
+```
+
+#### 联调配置
+
+在 Django 配置中将：
+
+- `IDIP_API_URL = http://127.0.0.1:18080/cy_idip`
+
+与当前 `idip_client.py` 的调用协议保持一致（`application/x-www-form-urlencoded`，字段 `id/GSA/content`）。
+
+#### 提供接口
+
+- `POST /cy_idip`：模拟 IDIP 命令执行
+- `GET /health`：健康检查，返回 `{"status":"ok","service":"mock-idip-server"}`
+
+#### 返回协议（统一包装）
+
+- 成功：
+
+```json
+{"status": true, "id": request_id, "json": {...}}
+```
+
+- 失败：
+
+```json
+{"status": false, "id": request_id, "json": {"Result": error_code, "RetMsg": "error_msg"}}
+```
+
+#### 数据来源与生成规则
+
+1. 启动时读取项目根目录 `idip_commands.json`
+2. 按命令定义自动生成响应字段（含结构体/列表）
+3. 支持按 `command_id` 固定覆盖（见脚本内 `CUSTOM_RESPONSES`）
+
+#### 失败注入（联调建议）
+
+可通过以下任一方式主动触发失败返回（`Result=5001`）：
+
+- 表单字段：`__mock_fail=1`
+- `content.body` 中传：`"_mock_fail": true`
 
 ---
 
