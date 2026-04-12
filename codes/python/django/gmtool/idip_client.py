@@ -4,6 +4,7 @@ import logging
 import urllib.parse
 
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ def _get_requests():
         import requests
         return requests
     except ImportError:
-        raise ImportError("requests 库未安装，请执行: pip install requests")
+        raise ImportError(_("requests library not installed, please run: pip install requests"))
 
 
 def send_idip_command(command, params):
@@ -31,7 +32,7 @@ def send_idip_command(command, params):
         params: dict, 用户提交的表单参数
 
     返回:
-        (dict|None, str|None, str): (响应数据, 错误信息, 完整请求JSON字符串)
+        (dict|None, str|None, str, str): (响应数据, 错误信息, 完整请求JSON字符串, 错误类型)
     """
     req = _get_requests()
 
@@ -86,17 +87,17 @@ def send_idip_command(command, params):
         response.raise_for_status()
         result = response.json()
         logger.info('IDIP请求成功: command=%s, response=%s', command.command_id, json.dumps(result, ensure_ascii=False)[:500])
-        return result, None, request_content_str
+        return result, None, request_content_str, ''
     except req.Timeout:
         logger.error('IDIP API请求超时: command=%s', command.command_id)
-        return None, '请求超时，请稍后重试', request_content_str
+        return None, _('Request timed out, please try again later'), request_content_str, 'timeout'
     except req.ConnectionError:
         logger.error('IDIP API连接失败: url=%s', settings.IDIP_API_URL)
-        return None, '无法连接到游戏服务器，请检查配置', request_content_str
+        return None, _('Unable to connect to game server, please check configuration'), request_content_str, 'connection'
     except Exception as e:
         # 兼容不同版本 requests 的 JSONDecodeError
         if hasattr(req, 'JSONDecodeError') and isinstance(e, req.JSONDecodeError):
             logger.error('IDIP API响应解析失败: response=%.500s', response.text)
-            return {'raw_response': response.text}, None, request_content_str
+            return {'raw_response': response.text}, None, request_content_str, ''
         logger.error('IDIP API请求异常: %s', e)
-        return None, f'请求失败: {str(e)}', request_content_str
+        return None, _('Request failed: %(error)s') % {'error': str(e)}, request_content_str, 'error'

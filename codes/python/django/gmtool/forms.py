@@ -167,7 +167,7 @@ class AddGMCommandForm(forms.Form):
     tab = forms.CharField(
         label=_('Tab Group'),
         max_length=200,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 查询XXX(Query XXX)'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('e.g. Query XXX')}),
     )
     command_name = forms.CharField(
         label=_('Command Name'),
@@ -209,13 +209,13 @@ class AddGMCommandForm(forms.Form):
     request_params = forms.CharField(
         label=_('Request Params (JSON)'),
         required=False,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': '[\n  {"isnull": "false", "id": "AreaId", "type": "uint32", "name": "渠道信息"}\n]'}),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': '[\n  {"isnull": "false", "id": "AreaId", "type": "uint32", "name": "Channel Info"}\n]'}),
         help_text=_('JSON array of request parameter definitions. Leave empty for default AreaId/Partition/PlatId fields.'),
     )
     response_params = forms.CharField(
         label=_('Response Params (JSON)'),
         required=False,
-        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': '[\n  {"isnull": "false", "id": "Result", "type": "int32", "name": "结果(Result Id)"}\n]'}),
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6, 'placeholder': '[\n  {"isnull": "false", "id": "Result", "type": "int32", "name": "Result Id"}\n]'}),
         help_text=_('JSON array of response parameter definitions. Leave empty for default Result/RetMsg fields.'),
     )
 

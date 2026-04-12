@@ -114,8 +114,6 @@ msgid "Command Name"
 msgstr "命令名称"
 
 #: .\gmtool\forms.py:175
-#, fuzzy
-#| msgid "Command Name"
 msgid "Command display name"
 msgstr "命令显示名称"
 
@@ -134,8 +132,6 @@ msgid "Must be unique across all commands (both request and response IDs)"
 msgstr "必须在所有命令中唯一（包括请求ID和响应ID）"
 
 #: .\gmtool\forms.py:188
-#, fuzzy
-#| msgid "Description"
 msgid "Request Description"
 msgstr "请求描述"
 
@@ -158,8 +154,6 @@ msgid "Must be unique across all commands, typically request_id + 1"
 msgstr "必须在所有命令中唯一，通常为请求ID + 1"
 
 #: .\gmtool\forms.py:204
-#, fuzzy
-#| msgid "Description"
 msgid "Response Description"
 msgstr "响应描述"
 
@@ -168,8 +162,6 @@ msgid "Response description (optional)"
 msgstr "响应描述（可选）"
 
 #: .\gmtool\forms.py:210
-#, fuzzy
-#| msgid "Request Params"
 msgid "Request Params (JSON)"
 msgstr "请求参数定义（JSON）"
 
@@ -181,8 +173,6 @@ msgstr ""
 "请求参数定义的 JSON 数组。留空则使用默认的 AreaId/Partition/PlatId 字段。"
 
 #: .\gmtool\forms.py:216
-#, fuzzy
-#| msgid "Response Params"
 msgid "Response Params (JSON)"
 msgstr "响应参数定义（JSON）"
 
@@ -193,14 +183,11 @@ msgid ""
 msgstr "响应参数定义的 JSON 数组。留空则使用默认的 Result/RetMsg 字段。"
 
 #: .\gmtool\forms.py:226
-#, fuzzy, python-format
-#| msgid "Command %(id)s value must be an object"
+#, python-format
 msgid "Command ID %(id)s already exists"
 msgstr "命令 ID %(id)s 已存在"
 
 #: .\gmtool\forms.py:236
-#, fuzzy
-#| msgid "Request body must be a JSON object"
 msgid "Request params must be a JSON array"
 msgstr "请求参数必须是 JSON 数组"
 
@@ -465,21 +452,15 @@ msgid "Admin"
 msgstr "管理员"
 
 #: .\gmtool\templates\gmtool\command_add.html:6
-#, fuzzy
-#| msgid "Command Name"
 msgid "Command Management"
 msgstr "命令管理"
 
 #: .\gmtool\templates\gmtool\command_add.html:12
-#, fuzzy
-#| msgid "Dashboard"
 msgid "Back to Dashboard"
 msgstr "返回仪表盘"
 
 #: .\gmtool\templates\gmtool\command_add.html:20
 #: .\gmtool\templates\gmtool\dashboard.html:133 .\gmtool\views.py:375
-#, fuzzy
-#| msgid "GM Command"
 msgid "Add GM Command"
 msgstr "添加GM命令"
 
@@ -500,21 +481,15 @@ msgid "Required"
 msgstr "必填"
 
 #: .\gmtool\templates\gmtool\command_add.html:64
-#, fuzzy
-#| msgid "Request Data"
 msgid "Request Definition"
 msgstr "请求定义"
 
 #: .\gmtool\templates\gmtool\command_add.html:111
-#, fuzzy
-#| msgid "Response Data"
 msgid "Response Definition"
 msgstr "响应定义"
 
 #: .\gmtool\templates\gmtool\command_add.html:159
 #: .\gmtool\templates\gmtool\dashboard.html:136
-#, fuzzy
-#| msgid "All Commands"
 msgid "Add Command"
 msgstr "添加命令"
 
@@ -711,7 +686,7 @@ msgstr "服务器"
 
 #: .\gmtool\templates\gmtool\command_log.html:134
 msgid "IP"
-msgstr ""
+msgstr "IP"
 
 #: .\gmtool\templates\gmtool\command_log.html:147
 msgid "Click to view full content"
@@ -973,7 +948,7 @@ msgstr "全部"
 
 #: .\gmtool\templates\gmtool\user_list.html:71
 msgid "Disabled"
-msgstr ""
+msgstr "已禁用"
 
 #: .\gmtool\templates\gmtool\user_list.html:84
 #, python-format
@@ -1033,8 +1008,7 @@ msgid "This command has been deactivated or deleted"
 msgstr "该命令已被停用或删除"
 
 #: .\gmtool\views.py:348
-#, fuzzy, python-format
-#| msgid "File write failed: %(error)s"
+#, python-format
 msgid "Failed to write command to JSON file: %(error)s"
 msgstr "写入命令到 JSON 文件失败: %(error)s"
 
@@ -1043,8 +1017,7 @@ msgid "Command added to JSON file but database sync failed"
 msgstr "命令已添加到 JSON 文件，但数据库同步失败"
 
 #: .\gmtool\views.py:368
-#, fuzzy, python-format
-#| msgid "Command %(id)s value must be an object"
+#, python-format
 msgid "Command %(id)s added successfully"
 msgstr "命令 %(id)s 添加成功"
 
@@ -1062,8 +1035,7 @@ msgid "ID conflict detected: %(errors)s"
 msgstr "检测到 ID 冲突: %(errors)s"
 
 #: .\gmtool\views.py:858
-#, fuzzy, python-format
-#| msgid "File write failed: %(error)s"
+#, python-format
 msgid "Failed to read JSON file: %(error)s"
 msgstr "读取 JSON 文件失败: %(error)s"
 
@@ -1136,3 +1108,47 @@ msgstr "读取 JSON 文件失败: %(error)s"
 
 #~ msgid "Separate multiple targets with commas or newlines"
 #~ msgstr "多个目标请用逗号或换行分隔"
+
+# New entries added for i18n
+
+#: .\gmtool\idip_client.py:17
+msgid "requests library not installed, please run: pip install requests"
+msgstr "requests 库未安装，请执行: pip install requests"
+
+#: .\gmtool\idip_client.py:92
+msgid "Request timed out, please try again later"
+msgstr "请求超时，请稍后重试"
+
+#: .\gmtool\idip_client.py:95
+msgid "Unable to connect to game server, please check configuration"
+msgstr "无法连接到游戏服务器，请检查配置"
+
+#: .\gmtool\idip_client.py:102
+#, python-format
+msgid "Request failed: %(error)s"
+msgstr "请求失败: %(error)s"
+
+#: .\gmtool\apps.py:8
+msgid "GM Command Management"
+msgstr "GM命令管理"
+
+#: .\gmtool\forms.py:170
+msgid "e.g. Query XXX"
+msgstr "e.g. 查询XXX"
+
+#: .\gmtool\forms.py:212
+msgid "[\\n  {\"isnull\": \"false\", \"id\": \"AreaId\", \"type\": \"uint32\", \"name\": \"Channel Info\"}\\n]"
+msgstr "[\\n  {\"isnull\": \"false\", \"id\": \"AreaId\", \"type\": \"uint32\", \"name\": \"渠道信息\"}\\n]"
+
+#: .\gmtool\forms.py:218
+msgid "[\\n  {\"isnull\": \"false\", \"id\": \"Result\", \"type\": \"int32\", \"name\": \"Result Id\"}\\n]"
+msgstr "[\\n  {\"isnull\": \"false\", \"id\": \"Result\", \"type\": \"int32\", \"name\": \"结果(Result Id)\"}\\n]"
+
+#: .\gmtool\templates\gmtool\base.html:87
+msgid "Chinese"
+msgstr "中文"
+
+#: .\gmtool\templates\gmtool\base.html:94
+#: .\gmtool\templates\gmtool\login.html:95
+msgid "Simplified Chinese"
+msgstr "简体中文"

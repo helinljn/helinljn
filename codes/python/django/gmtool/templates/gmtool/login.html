@@ -92,7 +92,7 @@
                 <form action="{% url 'set_language' %}" method="post" class="d-inline m-0">{% csrf_token %}
                     <input type="hidden" name="language" value="zh-hans">
                     <input type="hidden" name="next" value="{{ request.path }}">
-                    <button type="submit" class="btn btn-link text-muted p-0 m-0">简体中文</button>
+                    <button type="submit" class="btn btn-link text-muted p-0 m-0">{% trans "Simplified Chinese" %}</button>
                 </form>
                 {% endif %}
                 <span class="text-muted"> | {% trans "GM Command System" %} &copy; 2026</span>

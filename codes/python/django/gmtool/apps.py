@@ -1,10 +1,11 @@
 from django.apps import AppConfig
+from django.utils.translation import gettext_lazy as _
 
 
 class GmtoolConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'gmtool'
-    verbose_name = 'GM命令管理'
+    verbose_name = _('GM Command Management')
 
     def ready(self):
         """应用启动时注册信号处理器"""

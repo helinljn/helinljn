@@ -242,12 +242,12 @@ def command_execute(request, cmd_id):
             params['Partition'] = partition
 
             # 调用IDIP API
-            response_data, error, request_content = send_idip_command(command, params)
+            response_data, error, request_content, error_type = send_idip_command(command, params)
 
             # 记录日志
             status = 'success'
             if error:
-                status = 'timeout' if '超时' in error else 'failed'
+                status = 'timeout' if error_type == 'timeout' else 'failed'
 
             client_ip = get_client_ip(request)
 
