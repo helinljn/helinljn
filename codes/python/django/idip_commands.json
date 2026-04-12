@@ -8,269 +8,158 @@
         "SUsrInfo": [
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "Account",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleName",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "角色名称(Role name)"
             },
             {
                 "isnull": "false",
                 "id": "Gender",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
                 "name": "性别（1：男；2：女）(Gender, 1: Male; 2: Female)"
             },
             {
                 "isnull": "false",
-                "size": 24,
                 "id": "Job",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "职业(Profession)"
             },
             {
                 "isnull": "false",
                 "id": "Exp",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "经验值(Exp)"
             },
             {
                 "isnull": "false",
                 "id": "Level",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "当前等级(Level)"
             },
             {
                 "isnull": "false",
                 "id": "Scene",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint64",
-                "fix": "",
                 "name": "所在场景(Scene Id)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "Location",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "所在位置(Location)"
             },
             {
                 "isnull": "false",
                 "id": "Fight",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "战斗力(Fighting power)"
             },
             {
                 "isnull": "false",
                 "id": "Gold",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "元宝存量(YuanBao)"
             },
             {
                 "isnull": "false",
                 "id": "Money",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "金币存量(Gold)"
             },
             {
                 "isnull": "false",
                 "id": "BindGold",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "绑定元宝存量(Bind YuanBao)"
             },
             {
                 "isnull": "false",
                 "id": "JiaoZi",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "铜钱(JiaoZi)"
             },
             {
                 "isnull": "false",
                 "id": "SpecialYuanBao",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "储备元宝(Special YuanBao)"
             },
             {
                 "isnull": "false",
                 "id": "Serverld",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "服务器Id(Server Id)"
             },
             {
                 "isnull": "false",
-                "size": 16,
                 "id": "CmbiChannelId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "渠道号(CMBI Channel Id)"
             },
             {
                 "isnull": "false",
                 "id": "ChannelId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "渠道号(Channel Id)"
             },
             {
                 "isnull": "false",
                 "id": "RegisterTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "注册时间(Registration time)"
             },
             {
                 "isnull": "false",
                 "id": "LastLogoutTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "最后注销时间(Last logout time)"
             },
             {
                 "isnull": "false",
                 "id": "IsOnline",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
                 "name": "当前是否在线（1是 0 否）(Currently online, 1: Yes, 0: No)"
             },
             {
                 "isnull": "false",
                 "id": "Time",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "入帮时间(Guild joining time)"
             },
             {
                 "isnull": "false",
                 "id": "Position",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "帮内职务(Guild position)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "GuildName",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "帮会名称(Guild name)"
             },
             {
                 "isnull": "false",
                 "id": "Graduation",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "拜师完成(Has completed apprenticeship)"
             },
             {
                 "isnull": "false",
                 "id": "IsFriend",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结拜达成(Has completed brotherhood)"
             }
         ],
@@ -278,22 +167,13 @@
             {
                 "isnull": "false",
                 "id": "UsrList_count",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "个人信息列表的最大数量(Maximum number of personal information entries)"
             },
             {
                 "isnull": "false",
-                "size": 20,
                 "id": "UsrList",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "SUsrInfo",
-                "fix": "",
                 "name": "个人信息列表(Personal information list)"
             }
         ],
@@ -303,68 +183,40 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": true,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "true",
-                "size": 64,
                 "id": "RoleName",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "角色名称(Role name)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226001": {
         "tab": "发公告(Send announcement)",
@@ -376,22 +228,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -401,107 +244,52 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
                 "id": "NoticeId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint64",
-                "fix": "",
                 "name": "公告Id：大于0(Announcement Id, must be greater than 0)"
             },
             {
                 "isnull": "false",
                 "id": "Frequency",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "显示频率（min）(Display frequency, unit: minute)"
             },
             {
                 "isnull": "false",
                 "id": "BeginTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "公告开始时间(Announcement start time, UNIX_TIMESTAMP)"
             },
             {
                 "isnull": "false",
                 "id": "EndTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "公告结束时间(Announcement end time, UNIX_TIMESTAMP)"
             },
             {
                 "isnull": "false",
-                "size": 720,
                 "id": "RollingContent",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "公告内容(Announcement content)"
-            },
-            {
-                "isnull": "false",
-                "id": "Source",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "uint32",
-                "fix": "",
-                "name": "渠道号，由前端生成，不需要填写(Unused fields, fill in 1 by default)"
-            },
-            {
-                "isnull": "false",
-                "size": 64,
-                "id": "Serial",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "string",
-                "fix": "",
-                "name": "流水号，由前端生成，不需填写(Unused fields, fill in 1 by default)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226002": {
         "tab": "查询公告(Query announcement)",
@@ -513,62 +301,37 @@
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "NoticeId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint64",
-                "fix": "",
                 "name": "公告Id：大于0(Announcement Id, must be greater than 0)"
             },
             {
                 "isnull": "false",
                 "id": "BeginTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "公告开始时间(Announcement start time, UNIX_TIMESTAMP)"
             },
             {
                 "isnull": "false",
                 "id": "EndTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "公告结束时间(Announcement end time, UNIX_TIMESTAMP)"
             },
             {
                 "isnull": "false",
-                "size": 720,
                 "id": "RollingContent",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "公告内容(Announcement content)"
             },
             {
                 "isnull": "false",
                 "id": "Frequency",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "显示频率（min）(Display frequency, unit: minute)"
             }
         ],
@@ -576,22 +339,13 @@
             {
                 "isnull": "false",
                 "id": "RollingMsgList_count",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "公告列表的最大数量(Maximum number of announcement listings)"
             },
             {
                 "isnull": "false",
-                "size": 5,
                 "id": "RollingMsgList",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "SRollingMsgInfo",
-                "fix": "",
                 "name": "公告列表(Announcement listings)"
             }
         ],
@@ -601,55 +355,34 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
                 "id": "BeginTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "公告开始时间(Announcement start time, UNIX_TIMESTAMP)"
             },
             {
                 "isnull": "false",
                 "id": "EndTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "time",
-                "fix": "",
                 "name": "公告结束时间(Announcement end time, UNIX_TIMESTAMP)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226003": {
         "tab": "删除公告(Delete announcement)",
@@ -661,22 +394,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -686,66 +410,28 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
                 "id": "NoticeId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint64",
-                "fix": "",
                 "name": "公告Id：大于0(Announcement Id, must be greater than 0)"
-            },
-            {
-                "isnull": "false",
-                "id": "Source",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "uint32",
-                "fix": "",
-                "name": "渠道号，由前端生成，不需要填写(Unused fields, fill in 1 by default)"
-            },
-            {
-                "isnull": "false",
-                "size": 64,
-                "id": "Serial",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "string",
-                "fix": "",
-                "name": "流水号，由前端生成，不需填写(Unused fields, fill in 1 by default)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226004": {
         "tab": "封号(Account suspension)",
@@ -757,22 +443,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -782,78 +459,46 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": true,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "false",
                 "id": "BanTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "封停时长（秒）(Duration of account suspension, unit: second)"
             },
             {
                 "isnull": "false",
-                "size": 1024,
                 "id": "BanReason",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "封号原因(Reason for account suspension)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226005": {
         "tab": "封角色(Suspend character)",
@@ -865,22 +510,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -890,78 +526,46 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "false",
                 "id": "BanTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "封停时长（秒）(Duration of character suspension, unit: second)"
             },
             {
                 "isnull": "false",
-                "size": 1024,
                 "id": "BanReason",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "封号原因(Reason for character suspension)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226006": {
         "tab": "禁言(Mute)",
@@ -973,22 +577,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -998,78 +593,46 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": true,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "false",
                 "id": "BanTime",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "禁言时长（秒）(Duration of mute, unit: second)"
             },
             {
                 "isnull": "false",
-                "size": 1024,
                 "id": "BanReason",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "禁言原因(Reason for mute)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226007": {
         "tab": "解除处罚(Lift the punishment)",
@@ -1081,83 +644,49 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "false",
                 "id": "UnBanUser",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
                 "name": "解除封号（0 否，1 是）(Lift account suspension, 0: No, 1: Yes)"
             },
             {
                 "isnull": "false",
                 "id": "UnBanCharac",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
                 "name": "解封角色（0 否，1 是）(Lift character suspension, 0: No, 1: Yes)"
             },
             {
                 "isnull": "false",
                 "id": "UnBanChat",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
                 "name": "解除禁言（0 否，1 是）(Lift mute, 0: No, 1: Yes)"
             }
         ],
@@ -1167,26 +696,16 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226008": {
         "tab": "发邮件送道具(Send items via email)",
@@ -1198,22 +717,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -1223,150 +733,76 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": true,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "false",
-                "size": 256,
                 "id": "MailTitle",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "邮件标题(Email Subject)"
             },
             {
                 "isnull": "false",
-                "size": 4098,
                 "id": "MailContent",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "邮件内容(Email Content)"
             },
             {
                 "isnull": "false",
                 "id": "IsBind",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
                 "name": "是否绑定（0不绑定 1绑定）(Whether to bind the item, 0: Not bound, 1: Bound)"
             },
             {
                 "isnull": "false",
                 "id": "ItemId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "道具Id(Item Id)"
             },
             {
                 "isnull": "false",
                 "id": "ItemNum",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "道具数量(Item count)"
             },
             {
                 "isnull": "false",
                 "id": "Star",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "装备星级(Equipment star level)"
             },
             {
                 "isnull": "false",
                 "id": "ExtraParam",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "额外参数(Additional Parameters)"
-            },
-            {
-                "isnull": "false",
-                "id": "Source",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "uint32",
-                "fix": "",
-                "name": "渠道号，由前端生成，不需要填写(Unused fields, fill in 1 by default)"
-            },
-            {
-                "isnull": "false",
-                "size": 64,
-                "id": "Serial",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "string",
-                "fix": "",
-                "name": "流水号，由前端生成，不需填写(Unused fields, fill in 1 by default)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226009": {
         "tab": "删除二级密码(Delete secondary password)",
@@ -1378,22 +814,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -1403,78 +830,34 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
-            },
-            {
-                "isnull": "false",
-                "id": "Source",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "uint32",
-                "fix": "",
-                "name": "渠道号，由前端生成，不需要填写(Unused fields, fill in 1 by default)"
-            },
-            {
-                "isnull": "false",
-                "size": 64,
-                "id": "Serial",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "string",
-                "fix": "",
-                "name": "流水号，由前端生成，不需填写(Unused fields, fill in 1 by default)"
             }
-        ],
-        "isauditing": ""
+        ]
     },
     "10226010": {
         "tab": "修改玩家文本信息(Modify text information)",
@@ -1486,22 +869,13 @@
             {
                 "isnull": "false",
                 "id": "Result",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "结果(Result Id)"
             },
             {
                 "isnull": "false",
-                "size": 100,
                 "id": "RetMsg",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "返回消息(Result message)"
             }
         ],
@@ -1511,118 +885,57 @@
             {
                 "isnull": "false",
                 "id": "AreaId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "*渠道信息，统一默认填10(Channel information: Fill in 10 by default)"
+                "name": "*渠道信息(Channel information)"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
-                "name": "服务器组号：例如：北乔峰1201，南慕容1202(Server group number)"
+                "name": "服务器组号(Server group number)"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint8",
-                "fix": "",
-                "name": "*平台信息，统一默认填1(Platform information: Fill in 1 by default)"
+                "name": "*平台信息(Platform information)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "OpenId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "账号(Account)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "RoleId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "GUID(Role Id)"
             },
             {
                 "isnull": "false",
                 "id": "ModifyType",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "uint32",
-                "fix": "",
                 "name": "修改文本类型(The text type)"
             },
             {
                 "isnull": "false",
                 "id": "ModifyContent",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "修改文本内容(The text content)"
             },
             {
                 "isnull": "false",
                 "id": "GroupId",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "int32",
-                "fix": "",
                 "name": "群组ID(Chat group ID)"
             },
             {
                 "isnull": "false",
-                "size": 64,
                 "id": "PetGuid",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
                 "type": "string",
-                "fix": "",
                 "name": "珍兽GUID(Pet GUID)"
-            },
-            {
-                "isnull": "false",
-                "id": "Source",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "uint32",
-                "fix": "",
-                "name": "渠道号，由前端生成，不需要填写(Unused fields, fill in 1 by default)"
-            },
-            {
-                "isnull": "false",
-                "size": 64,
-                "id": "Serial",
-                "multitarget": false,
-                "DictionaryFilename": "",
-                "tip": "",
-                "type": "string",
-                "fix": "",
-                "name": "流水号，由前端生成，不需填写(Unused fields, fill in 1 by default)"
             }
-        ],
-        "isauditing": ""
+        ]
     }
 }

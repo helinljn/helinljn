@@ -234,9 +234,6 @@ msgstr "创建用户"
 msgid "Edit User"
 msgstr "编辑用户"
 
-msgid "You cannot disable your own account"
-msgstr "不能禁用自己的账号"
-
 msgid "Create Role"
 msgstr "创建角色"
 
@@ -285,9 +282,6 @@ msgstr "页面已过期，请重新登录。"
 msgid "Please log in first"
 msgstr "请先登录"
 
-msgid "This command has been deactivated or deleted"
-msgstr "该命令已被停用或删除"
-
 msgid "You do not have permission to execute this command"
 msgstr "您没有执行该命令的权限"
 
@@ -312,26 +306,14 @@ msgstr "命令管理"
 msgid "Users"
 msgstr "用户管理"
 
-msgid "Roles"
-msgstr "角色分组"
-
 msgid "Operation Logs"
 msgstr "操作日志"
-
-msgid "Login Logs"
-msgstr "登录日志"
 
 msgid "Home"
 msgstr "首页"
 
 msgid "Admin"
 msgstr "管理员"
-
-msgid "Logout"
-msgstr "退出"
-
-msgid "Login"
-msgstr "登录"
 
 msgid "Already Logged In"
 msgstr "已登录"
@@ -454,12 +436,6 @@ msgstr "搜索命令..."
 msgid "Search"
 msgstr "搜索"
 
-msgid "Command ID"
-msgstr "命令ID"
-
-msgid "Request Name"
-msgstr "请求名"
-
 msgid "Protocol ID"
 msgstr "协议ID"
 
@@ -494,12 +470,6 @@ msgstr "重置"
 msgid "Command Info"
 msgstr "命令信息"
 
-msgid "Response Name"
-msgstr "响应名"
-
-msgid "Response ID"
-msgstr "响应ID"
-
 msgid "Execution Result"
 msgstr "执行结果"
 
@@ -518,9 +488,6 @@ msgstr "错误"
 msgid "Request error"
 msgstr "请求异常"
 
-msgid "Operation Logs"
-msgstr "操作日志"
-
 msgid "Logs"
 msgstr "日志"
 
@@ -532,9 +499,6 @@ msgstr "全部命令"
 
 msgid "All Statuses"
 msgstr "全部状态"
-
-msgid "Request Params"
-msgstr "请求参数"
 
 msgid "Click to view full content"
 msgstr "点击查看完整内容"
@@ -551,9 +515,6 @@ msgstr "无数据"
 msgid "No response data"
 msgstr "无响应数据"
 
-msgid "Full Request JSON"
-msgstr "完整请求JSON"
-
 msgid "Request Data (Form Params)"
 msgstr "请求数据（表单参数）"
 
@@ -562,9 +523,6 @@ msgstr "管理"
 
 msgid "Search username..."
 msgstr "搜索用户名..."
-
-msgid "Create User"
-msgstr "创建用户"
 
 msgid "Permissions"
 msgstr "权限数"
@@ -603,12 +561,6 @@ msgstr "为用户 <strong>%(username)s</strong> 单独分配可执行的GM命令
 
 msgid "Save Permissions"
 msgstr "保存权限"
-
-msgid "Create Role"
-msgstr "创建角色"
-
-msgid "Role Identifier"
-msgstr "角色标识"
 
 msgid "Type"
 msgstr "类型"
