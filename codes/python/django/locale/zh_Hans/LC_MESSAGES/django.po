@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-12 14:10+0800\n"
+"POT-Creation-Date: 2026-04-12 15:41+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -272,6 +272,7 @@ msgid "用户信息"
 msgstr ""
 
 #: .\gmtool\models.py:76 .\gmtool\templates\gmtool\command_execute.html:300
+#: .\gmtool\templates\gmtool\command_execute.html:333
 #: .\gmtool\templates\gmtool\command_log.html:109
 #: .\gmtool\templates\gmtool\command_log.html:154
 #: .\gmtool\templates\gmtool\dashboard.html:109
@@ -279,6 +280,7 @@ msgid "成功"
 msgstr ""
 
 #: .\gmtool\models.py:77 .\gmtool\templates\gmtool\command_execute.html:306
+#: .\gmtool\templates\gmtool\command_execute.html:333
 #: .\gmtool\templates\gmtool\command_log.html:110
 #: .\gmtool\templates\gmtool\command_log.html:156
 #: .\gmtool\templates\gmtool\dashboard.html:111
@@ -453,7 +455,8 @@ msgid "中文"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\base.html:87
-#: .\gmtool\templates\gmtool\login.html:95
+#: .\gmtool\templates\gmtool\base.html:101
+#: .\gmtool\templates\gmtool\login.html:89
 msgid "英文"
 msgstr ""
 
@@ -656,7 +659,7 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\command_list.html:66
 #, python-format
-msgid "未找到匹配\"%(search_term)s\"的命令"
+msgid "未找到匹配“%(search_term)s”的命令"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\command_list.html:66
@@ -1002,34 +1005,6 @@ msgstr ""
 msgid "该命令已被停用或删除"
 msgstr ""
 
-#: .\gmtool\views.py
-msgid "该命令已被停用或删除，请刷新页面获取最新命令列表"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "请求体必须是 JSON 对象"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "参数 Params 必须是对象"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "Partition 必须为整数"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "Partition 不能为负数"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "请求数据格式错误"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "服务器内部错误"
-msgstr ""
-
 #: .\gmtool\views.py:351
 #, python-format
 msgid "写入命令到 JSON 文件失败: %(error)s"
@@ -1048,65 +1023,8 @@ msgstr ""
 msgid "编辑用户"
 msgstr ""
 
-#: .\gmtool\views.py
-msgid "不能删除自己的账号"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "不能删除超级管理员账号"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "超级管理员角色不可编辑"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "页面已过期，请重新登录。"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "请选择文件"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "仅支持 .json 文件"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "文件大小不能超过 5MB"
-msgstr ""
-
-#: .\gmtool\views.py
-#, python-format
-msgid "JSON 解析失败: %(error)s"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "JSON 顶层必须是对象(dict)"
-msgstr ""
-
-#: .\gmtool\views.py
-#, python-format
-msgid "命令 %(id)s 的值必须是对象"
-msgstr ""
-
-#: .\gmtool\views.py
-#, python-format
-msgid "命令 %(id)s 缺少必要字段: %(fields)s"
-msgstr ""
-
-#: .\gmtool\views.py
-#, python-format
-msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
-msgstr ""
-
-#: .\gmtool\views.py
-#, python-format
-msgid "文件写入失败: %(error)s"
-msgstr ""
-
-#: .\gmtool\views.py
-msgid "文件已上传但同步失败"
+#: .\gmtool\views.py:570
+msgid "编辑角色"
 msgstr ""
 
 #: .\gmtool\views.py:805 .\gmtool\views.py:865

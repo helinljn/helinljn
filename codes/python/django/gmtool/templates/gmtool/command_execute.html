@@ -330,7 +330,7 @@ function exportBatchResults() {
     if (!batchResults.length) return;
     const header = 'Target,Status,Error,Result\n';
     const rows = batchResults.map(r => {
-        const status = r.success ? '成功' : '失败';
+        const status = r.success ? '{% trans "成功" %}' : '{% trans "失败" %}';
         const error = (r.error || '').replace(/"/g, '""');
         const result = JSON.stringify(r.data || {}).replace(/"/g, '""');
         return `${r.target},${status},"${error}","${result}"`;

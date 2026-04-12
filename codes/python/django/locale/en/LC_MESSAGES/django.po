@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-12 14:10+0800\n"
+"POT-Creation-Date: 2026-04-12 15:41+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -181,7 +181,9 @@ msgstr "Request Params (JSON)"
 #: .\gmtool\forms.py:213
 msgid ""
 "请求参数定义的 JSON 数组。留空则使用默认的 AreaId/Partition/PlatId 字段。"
-msgstr "JSON array of request parameter definitions. Leave empty for default AreaId/Partition/PlatId fields."
+msgstr ""
+"JSON array of request parameter definitions. Leave empty for default AreaId/"
+"Partition/PlatId fields."
 
 #: .\gmtool\forms.py:216
 msgid "响应参数定义（JSON）"
@@ -189,7 +191,9 @@ msgstr "Response Params (JSON)"
 
 #: .\gmtool\forms.py:219
 msgid "响应参数定义的 JSON 数组。留空则使用默认的 Result/RetMsg 字段。"
-msgstr "JSON array of response parameter definitions. Leave empty for default Result/RetMsg fields."
+msgstr ""
+"JSON array of response parameter definitions. Leave empty for default Result/"
+"RetMsg fields."
 
 #: .\gmtool\forms.py:226
 #, python-format
@@ -272,6 +276,7 @@ msgid "用户信息"
 msgstr "User Profile"
 
 #: .\gmtool\models.py:76 .\gmtool\templates\gmtool\command_execute.html:300
+#: .\gmtool\templates\gmtool\command_execute.html:333
 #: .\gmtool\templates\gmtool\command_log.html:109
 #: .\gmtool\templates\gmtool\command_log.html:154
 #: .\gmtool\templates\gmtool\dashboard.html:109
@@ -279,6 +284,7 @@ msgid "成功"
 msgstr "Success"
 
 #: .\gmtool\models.py:77 .\gmtool\templates\gmtool\command_execute.html:306
+#: .\gmtool\templates\gmtool\command_execute.html:333
 #: .\gmtool\templates\gmtool\command_log.html:110
 #: .\gmtool\templates\gmtool\command_log.html:156
 #: .\gmtool\templates\gmtool\dashboard.html:111
@@ -405,7 +411,8 @@ msgstr "Page Not Found"
 
 #: .\gmtool\templates\gmtool\404.html:44
 msgid "抱歉，您访问的页面不存在或已被移除。"
-msgstr "Sorry, the page you are looking for does not exist or has been removed."
+msgstr ""
+"Sorry, the page you are looking for does not exist or has been removed."
 
 #: .\gmtool\templates\gmtool\500.html:6 .\gmtool\templates\gmtool\500.html:43
 msgid "服务器错误"
@@ -413,7 +420,9 @@ msgstr "Server Error"
 
 #: .\gmtool\templates\gmtool\500.html:44
 msgid "抱歉，服务器处理请求时遇到了问题，请稍后再试。"
-msgstr "Sorry, the server encountered an error while processing your request. Please try again later."
+msgstr ""
+"Sorry, the server encountered an error while processing your request. Please "
+"try again later."
 
 #: .\gmtool\templates\gmtool\base.html:26
 #: .\gmtool\templates\gmtool\base.html:79
@@ -453,7 +462,8 @@ msgid "中文"
 msgstr "Chinese"
 
 #: .\gmtool\templates\gmtool\base.html:87
-#: .\gmtool\templates\gmtool\login.html:95
+#: .\gmtool\templates\gmtool\base.html:101
+#: .\gmtool\templates\gmtool\login.html:89
 msgid "英文"
 msgstr "English"
 
@@ -533,7 +543,11 @@ msgstr "Batch"
 
 #: .\gmtool\templates\gmtool\command_execute.html:104
 msgid "输入多个值，每行一个或用逗号分隔，如：&#10;值1&#10;值2&#10;值3"
-msgstr "Enter multiple values, one per line or comma-separated, e.g.:\nValue1\nValue2\nValue3"
+msgstr ""
+"Enter multiple values, one per line or comma-separated, e.g.:\n"
+"Value1\n"
+"Value2\n"
+"Value3"
 
 #: .\gmtool\templates\gmtool\command_execute.html:107
 msgid "支持逗号分隔、换行分隔"
@@ -609,7 +623,8 @@ msgstr "Unknown error"
 
 #: .\gmtool\templates\gmtool\command_execute.html:399
 msgid "该命令已被停用或删除，即将跳转到命令列表..."
-msgstr "This command has been deactivated or deleted, redirecting to command list..."
+msgstr ""
+"This command has been deactivated or deleted, redirecting to command list..."
 
 #: .\gmtool\templates\gmtool\command_execute.html:404
 msgid "错误"
@@ -633,7 +648,9 @@ msgstr "Batch field count mismatch"
 
 #: .\gmtool\templates\gmtool\command_execute.html:449
 msgid "每个批量字段的值数量必须相同，或仅输入1个值以对所有目标复用"
-msgstr "Each batch field must have the same number of values, or exactly 1 value to reuse for all"
+msgstr ""
+"Each batch field must have the same number of values, or exactly 1 value to "
+"reuse for all"
 
 #: .\gmtool\templates\gmtool\command_list.html:17
 msgid "搜索命令..."
@@ -655,14 +672,17 @@ msgid "执行"
 msgstr "Execute"
 
 #: .\gmtool\templates\gmtool\command_list.html:66
-#, python-format
-msgid "未找到匹配\"%(search_term)s\"的命令"
+#, fuzzy, python-format
+#| msgid "未找到匹配\"%(search_term)s\"的命令"
+msgid "未找到匹配“%(search_term)s”的命令"
 msgstr "No commands found matching \"%(search_term)s\""
 
 #: .\gmtool\templates\gmtool\command_list.html:66
 #: .\gmtool\templates\gmtool\dashboard.html:86
 msgid "暂无可用的命令，请联系管理员分配权限。"
-msgstr "No commands available. Please contact your administrator to assign permissions."
+msgstr ""
+"No commands available. Please contact your administrator to assign "
+"permissions."
 
 #: .\gmtool\templates\gmtool\command_log.html:6
 #: .\gmtool\templates\gmtool\login_log.html:6
@@ -762,7 +782,9 @@ msgstr "Command Configuration"
 
 #: .\gmtool\templates\gmtool\dashboard.html:134
 msgid "手动添加新的 GM 命令定义。CommandId 和协议 ID 必须唯一。"
-msgstr "Manually add a new GM command definition. CommandId and protocol IDs must be unique."
+msgstr ""
+"Manually add a new GM command definition. CommandId and protocol IDs must be "
+"unique."
 
 #: .\gmtool\templates\gmtool\dashboard.html:140
 msgid "上传命令定义文件"
@@ -774,7 +796,9 @@ msgstr "Upload an"
 
 #: .\gmtool\templates\gmtool\dashboard.html:141
 msgid "文件以替换现有配置，上传后自动同步到数据库。"
-msgstr "file to replace the existing configuration. It will be automatically synced to the database after upload."
+msgstr ""
+"file to replace the existing configuration. It will be automatically synced "
+"to the database after upload."
 
 #: .\gmtool\templates\gmtool\dashboard.html:145
 #: .\gmtool\templates\gmtool\dashboard.html:190
@@ -924,7 +948,8 @@ msgstr "No role data"
 
 #: .\gmtool\templates\gmtool\user_form.html:19
 msgid "这是超级管理员账号，角色和启用状态不可更改。"
-msgstr "This is a super admin account. Role and active status cannot be changed."
+msgstr ""
+"This is a super admin account. Role and active status cannot be changed."
 
 #: .\gmtool\templates\gmtool\user_list.html:16
 msgid "搜索用户名..."
@@ -1004,34 +1029,6 @@ msgstr "Incorrect username or password, %(remaining)d attempts remaining"
 msgid "该命令已被停用或删除"
 msgstr "This command has been deactivated or deleted"
 
-#: .\gmtool\views.py
-msgid "该命令已被停用或删除，请刷新页面获取最新命令列表"
-msgstr "This command has been deactivated or deleted. Please refresh the page for the latest command list."
-
-#: .\gmtool\views.py
-msgid "请求体必须是 JSON 对象"
-msgstr "Request body must be a JSON object"
-
-#: .\gmtool\views.py
-msgid "参数 Params 必须是对象"
-msgstr "Params must be an object"
-
-#: .\gmtool\views.py
-msgid "Partition 必须为整数"
-msgstr "Partition must be an integer"
-
-#: .\gmtool\views.py
-msgid "Partition 不能为负数"
-msgstr "Partition cannot be negative"
-
-#: .\gmtool\views.py
-msgid "请求数据格式错误"
-msgstr "Invalid request data format"
-
-#: .\gmtool\views.py
-msgid "服务器内部错误"
-msgstr "Internal server error"
-
 #: .\gmtool\views.py:351
 #, python-format
 msgid "写入命令到 JSON 文件失败: %(error)s"
@@ -1050,66 +1047,9 @@ msgstr "Command %(id)s added successfully"
 msgid "编辑用户"
 msgstr "Edit User"
 
-#: .\gmtool\views.py
-msgid "不能删除自己的账号"
-msgstr "You cannot delete your own account"
-
-#: .\gmtool\views.py
-msgid "不能删除超级管理员账号"
-msgstr "You cannot delete a super admin account"
-
-#: .\gmtool\views.py
-msgid "超级管理员角色不可编辑"
-msgstr "Super admin role cannot be edited"
-
-#: .\gmtool\views.py
-msgid "页面已过期，请重新登录。"
-msgstr "Page has expired. Please log in again."
-
-#: .\gmtool\views.py
-msgid "请选择文件"
-msgstr "Please select a file"
-
-#: .\gmtool\views.py
-msgid "仅支持 .json 文件"
-msgstr "Only .json files are supported"
-
-#: .\gmtool\views.py
-msgid "文件大小不能超过 5MB"
-msgstr "File size cannot exceed 5MB"
-
-#: .\gmtool\views.py
-#, python-format
-msgid "JSON 解析失败: %(error)s"
-msgstr "JSON parsing failed: %(error)s"
-
-#: .\gmtool\views.py
-msgid "JSON 顶层必须是对象(dict)"
-msgstr "JSON top level must be an object (dict)"
-
-#: .\gmtool\views.py
-#, python-format
-msgid "命令 %(id)s 的值必须是对象"
-msgstr "Command %(id)s value must be an object"
-
-#: .\gmtool\views.py
-#, python-format
-msgid "命令 %(id)s 缺少必要字段: %(fields)s"
-msgstr "Command %(id)s is missing required fields: %(fields)s"
-
-#: .\gmtool\views.py
-#, python-format
-msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
-msgstr "Command %(id)s request parameter %(name)s must be an array"
-
-#: .\gmtool\views.py
-#, python-format
-msgid "文件写入失败: %(error)s"
-msgstr "File write failed: %(error)s"
-
-#: .\gmtool\views.py
-msgid "文件已上传但同步失败"
-msgstr "File uploaded but sync failed"
+#: .\gmtool\views.py:570
+msgid "编辑角色"
+msgstr ""
 
 #: .\gmtool\views.py:805 .\gmtool\views.py:865
 #, python-format
@@ -1120,3 +1060,73 @@ msgstr "ID conflict detected: %(errors)s"
 #, python-format
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr "Failed to read JSON file: %(error)s"
+
+#~ msgid "该命令已被停用或删除，请刷新页面获取最新命令列表"
+#~ msgstr ""
+#~ "This command has been deactivated or deleted. Please refresh the page for "
+#~ "the latest command list."
+
+#~ msgid "请求体必须是 JSON 对象"
+#~ msgstr "Request body must be a JSON object"
+
+#~ msgid "参数 Params 必须是对象"
+#~ msgstr "Params must be an object"
+
+#~ msgid "Partition 必须为整数"
+#~ msgstr "Partition must be an integer"
+
+#~ msgid "Partition 不能为负数"
+#~ msgstr "Partition cannot be negative"
+
+#~ msgid "请求数据格式错误"
+#~ msgstr "Invalid request data format"
+
+#~ msgid "服务器内部错误"
+#~ msgstr "Internal server error"
+
+#~ msgid "不能删除自己的账号"
+#~ msgstr "You cannot delete your own account"
+
+#~ msgid "不能删除超级管理员账号"
+#~ msgstr "You cannot delete a super admin account"
+
+#~ msgid "超级管理员角色不可编辑"
+#~ msgstr "Super admin role cannot be edited"
+
+#~ msgid "页面已过期，请重新登录。"
+#~ msgstr "Page has expired. Please log in again."
+
+#~ msgid "请选择文件"
+#~ msgstr "Please select a file"
+
+#~ msgid "仅支持 .json 文件"
+#~ msgstr "Only .json files are supported"
+
+#~ msgid "文件大小不能超过 5MB"
+#~ msgstr "File size cannot exceed 5MB"
+
+#, python-format
+#~ msgid "JSON 解析失败: %(error)s"
+#~ msgstr "JSON parsing failed: %(error)s"
+
+#~ msgid "JSON 顶层必须是对象(dict)"
+#~ msgstr "JSON top level must be an object (dict)"
+
+#, python-format
+#~ msgid "命令 %(id)s 的值必须是对象"
+#~ msgstr "Command %(id)s value must be an object"
+
+#, python-format
+#~ msgid "命令 %(id)s 缺少必要字段: %(fields)s"
+#~ msgstr "Command %(id)s is missing required fields: %(fields)s"
+
+#, python-format
+#~ msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
+#~ msgstr "Command %(id)s request parameter %(name)s must be an array"
+
+#, python-format
+#~ msgid "文件写入失败: %(error)s"
+#~ msgstr "File write failed: %(error)s"
+
+#~ msgid "文件已上传但同步失败"
+#~ msgstr "File uploaded but sync failed"
