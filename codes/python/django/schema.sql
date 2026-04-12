@@ -111,6 +111,8 @@ CREATE TABLE gmtool_gmcommand (
 -- -----------------------------------------------------------
 -- 2.2 Role - 角色定义
 -- 仅用于用户分类标记（角色分组），不承载权限
+-- 重要约束：is_super_admin=True 的角色有且仅能有一个（super_admin），
+--   不能通过界面创建、编辑或删除，只能通过数据库初始化产生
 -- -----------------------------------------------------------
 CREATE TABLE gmtool_role (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -221,7 +223,7 @@ CREATE INDEX idx_session_expire_date     ON django_session (expire_date);
 -- 五、初始数据
 -- ============================================================
 
--- 默认超级管理员角色
+-- 默认超级管理员角色（唯一，不可通过界面创建/编辑/删除）
 INSERT INTO gmtool_role (name, display_name, description, is_super_admin, created_at)
 VALUES ('super_admin', '超级管理员', '系统最高权限角色，拥有所有命令执行权限及管理功能', 1, datetime('now'));
 

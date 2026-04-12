@@ -13,6 +13,13 @@
     </a>
 </div>
 
+{% if is_target_super_admin %}
+<div class="alert alert-warning mb-3">
+    <i class="ti ti-alert-triangle me-1"></i>
+    {% trans "This is a super admin account. Role and active status cannot be changed." %}
+</div>
+{% endif %}
+
 <div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="card">

@@ -353,9 +353,11 @@ def user_edit(request, user_id):
     UserProfile.objects.get_or_create(user=user_obj, defaults={})
 
     is_self = user_obj == request.user
+    is_target_super_admin = is_super_admin(user_obj)
 
     if request.method == 'POST':
-        form = UserEditForm(request.POST, instance=user_obj, is_self=is_self)
+        form = UserEditForm(request.POST, instance=user_obj, is_self=is_self,
+                            is_target_super_admin=is_target_super_admin)
         if form.is_valid():
             # 禁止禁用自己的账号
             if is_self and not form.cleaned_data.get('is_active', True):
@@ -373,13 +375,15 @@ def user_edit(request, user_id):
                               })
                 return redirect('gmtool:user_list')
     else:
-        form = UserEditForm(instance=user_obj, is_self=is_self)
+        form = UserEditForm(instance=user_obj, is_self=is_self,
+                            is_target_super_admin=is_target_super_admin)
 
     return render(request, 'gmtool/user_form.html', {
         'form': form,
         'title': _('Edit User'),
         'edit_user': user_obj,
         'is_self': is_self,
+        'is_target_super_admin': is_target_super_admin,
         'is_admin': True,
     })
 
@@ -393,6 +397,9 @@ def user_delete(request, user_id):
     if user_obj == request.user:
         from django.contrib import messages
         messages.warning(request, __('You cannot delete your own account'))
+    elif is_super_admin(user_obj):
+        from django.contrib import messages
+        messages.warning(request, __('Cannot delete super admin account'))
     else:
         target_name = user_obj.username
         user_obj.delete()
@@ -449,6 +456,11 @@ def role_create(request):
 def role_edit(request, role_id):
     """编辑角色"""
     role = get_object_or_404(Role, pk=role_id)
+    # 禁止编辑超级管理员角色
+    if role.is_super_admin:
+        from django.contrib import messages
+        messages.warning(request, __('Super admin role cannot be edited'))
+        return redirect('gmtool:role_list')
     if request.method == 'POST':
         form = RoleForm(request.POST, instance=role)
         if form.is_valid():

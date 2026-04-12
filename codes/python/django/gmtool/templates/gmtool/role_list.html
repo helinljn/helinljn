@@ -47,10 +47,10 @@
                     <td>{{ role.description|default:"-"|truncatechars:30 }}</td>
                     <td class="text-muted">{{ role.created_at|date:"Y-m-d H:i" }}</td>
                     <td>
+                        {% if not role.is_super_admin %}
                         <a href="{% url 'gmtool:role_edit' role.id %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit' %}">
                             <i class="ti ti-edit"></i>
                         </a>
-                        {% if not role.is_super_admin %}
                         <form method="post" action="{% url 'gmtool:role_delete' role.id %}" class="d-inline"
                               onsubmit="return confirm('{% blocktrans with name=role.display_name %}Confirm delete role {{ name }}?{% endblocktrans %}')">
                             {% csrf_token %}
@@ -58,6 +58,8 @@
                                 <i class="ti ti-trash"></i>
                             </button>
                         </form>
+                        {% else %}
+                        <span class="text-muted">{% trans "System reserved" %}</span>
                         {% endif %}
                     </td>
                 </tr>

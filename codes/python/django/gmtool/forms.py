@@ -9,7 +9,7 @@ class RoleAndPhoneMixin(forms.Form):
     """角色分组和联系电话字段的共享定义"""
     role = forms.ModelChoiceField(
         label=_('Role'),
-        queryset=Role.objects.all(),
+        queryset=Role.objects.filter(is_super_admin=False),
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
@@ -22,7 +22,7 @@ class RoleAndPhoneMixin(forms.Form):
 
 
 class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
-    """创建用户表单"""
+    """创建用户表单 — 不允许选择超级管理员角色（超管仅通过初始化创建）"""
     password = forms.CharField(
         label=_('Password'),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
@@ -70,7 +70,7 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
 
 
 class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
-    """编辑用户表单"""
+    """编辑用户表单 — 禁止提升/降级超级管理员权限"""
     new_password = forms.CharField(
         label=_('New Password (leave blank to keep unchanged)'),
         required=False,
@@ -94,6 +94,7 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.is_self = kwargs.pop('is_self', False)
+        self.is_target_super_admin = kwargs.pop('is_target_super_admin', False)
         super().__init__(*args, **kwargs)
         # 填充当前角色和电话
         if self.instance and hasattr(self.instance, 'userprofile'):
@@ -103,6 +104,12 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
         if self.is_self:
             self.fields['is_active'].disabled = True
             self.fields['is_active'].help_text = _('You cannot disable your own account')
+        # 如果编辑的目标是超级管理员，禁用角色和 is_active 字段（禁止降级）
+        if self.is_target_super_admin:
+            self.fields['role'].disabled = True
+            self.fields['role'].help_text = _('Super admin role cannot be changed')
+            self.fields['is_active'].disabled = True
+            self.fields['is_active'].help_text = _('Super admin account cannot be disabled')
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -122,34 +129,26 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
 
 
 class RoleForm(forms.ModelForm):
-    """角色表单"""
+    """角色表单 — 不允许创建或编辑超级管理员角色（仅通过初始化创建）"""
     class Meta:
         model = Role
-        fields = ['name', 'display_name', 'description', 'is_super_admin']
+        fields = ['name', 'display_name', 'description']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'display_name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'is_super_admin': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
         labels = {
             'name': _('Role Identifier'),
             'display_name': _('Display Name'),
             'description': _('Description'),
-            'is_super_admin': _('Super Admin'),
+        }
+        help_texts = {
+            'name': _('Cannot be "super_admin", which is reserved for the system'),
         }
 
-    def clean_is_super_admin(self):
-        """防止创建多个超级管理员角色（系统设计仅允许一个 super_admin）"""
-        is_super = self.cleaned_data.get('is_super_admin', False)
-        if is_super:
-            # 编辑时：如果当前实例已经是 super_admin，允许保留
-            if self.instance and self.instance.pk and self.instance.is_super_admin:
-                return is_super
-            # 创建或从非超管改为超管时：检查是否已存在超管角色
-            qs = Role.objects.filter(is_super_admin=True)
-            if self.instance and self.instance.pk:
-                qs = qs.exclude(pk=self.instance.pk)
-            if qs.exists():
-                raise forms.ValidationError(_('A super admin role already exists. Only one is allowed.'))
-        return is_super
+    def clean_name(self):
+        name = self.cleaned_data.get('name', '')
+        if name == 'super_admin':
+            raise forms.ValidationError(_('The role identifier "super_admin" is reserved and cannot be used'))
+        return name

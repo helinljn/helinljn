@@ -83,9 +83,21 @@ msgstr "角色描述"
 msgid "Super Admin"
 msgstr "超级管理员"
 
-#: .\gmtool\forms.py:154
-msgid "A super admin role already exists. Only one is allowed."
-msgstr "超级管理员角色已存在，仅允许创建一个。"
+#: .\gmtool\forms.py:143
+msgid "Cannot be \"super_admin\", which is reserved for the system"
+msgstr "不能为\"super_admin\"，该标识为系统保留"
+
+#: .\gmtool\forms.py:148
+msgid "The role identifier \"super_admin\" is reserved and cannot be used"
+msgstr "角色标识\"super_admin\"为系统保留，不可使用"
+
+#: .\gmtool\forms.py:113
+msgid "Super admin role cannot be changed"
+msgstr "超级管理员角色不可更改"
+
+#: .\gmtool\forms.py:115
+msgid "Super admin account cannot be disabled"
+msgstr "超级管理员账号不可禁用"
 
 #: .\gmtool\models.py:8 .\gmtool\templates\gmtool\command_execute.html:90
 #: .\gmtool\templates\gmtool\command_list.html:37
@@ -711,6 +723,14 @@ msgstr "类型"
 msgid "Regular Role"
 msgstr "普通角色"
 
+#: .\gmtool\templates\gmtool\role_list.html:56
+msgid "System reserved"
+msgstr "系统保留"
+
+#: .\gmtool\templates\gmtool\user_form.html:13
+msgid "This is a super admin account. Role and active status cannot be changed."
+msgstr "这是超级管理员账号，角色和启用状态不可更改。"
+
 #: .\gmtool\templates\gmtool\role_list.html:50
 #: .\gmtool\templates\gmtool\user_list.html:75
 msgid "Edit"
@@ -811,6 +831,14 @@ msgstr "该命令已被停用或删除"
 #: .\gmtool\views.py:380
 msgid "Edit User"
 msgstr "编辑用户"
+
+#: .\gmtool\views.py:399
+msgid "Cannot delete super admin account"
+msgstr "不能删除超级管理员账号"
+
+#: .\gmtool\views.py:475
+msgid "Super admin role cannot be edited"
+msgstr "超级管理员角色不可编辑"
 
 #: .\gmtool\views.py:469
 msgid "Edit Role"

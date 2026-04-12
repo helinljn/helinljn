@@ -79,7 +79,6 @@
                         <a href="{% url 'gmtool:user_permissions' u.id %}" class="btn btn-sm btn-outline-success" title="{% trans 'Permissions' %}">
                             <i class="ti ti-shield-lock"></i>
                         </a>
-                        {% endif %}
                         {% if u != request.user %}
                         <form method="post" action="{% url 'gmtool:user_delete' u.id %}" class="d-inline"
                               onsubmit="return confirm('{% blocktrans with username=u.username %}Confirm delete user {{ username }}?{% endblocktrans %}')">
@@ -88,6 +87,7 @@
                                 <i class="ti ti-trash"></i>
                             </button>
                         </form>
+                        {% endif %}
                         {% endif %}
                     </td>
                 </tr>
