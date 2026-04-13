@@ -32,8 +32,8 @@ def user_list(request):
     if search:
         users = users.filter(username__icontains=search)
 
-    # 添加排序以避免分页警告，按注册时间降序排列（最新的在前）
-    users = users.order_by('-date_joined')
+    # 添加排序以避免分页警告，按用户ID升序排列
+    users = users.order_by('id')
 
     paginator = Paginator(users, 20)
     page_number = request.GET.get('page', 1)
@@ -146,7 +146,7 @@ def role_list(request):
     from django.db.models import Count
     roles = Role.objects.annotate(
         user_count=Count('userprofile', distinct=True)
-    ).all()
+    ).order_by('id')  # 按ID升序排列
     return render(request, 'gmtool/role_list.html', {
         'roles': roles,
         'is_admin': True,
