@@ -79,109 +79,112 @@ def format_sql_statement(sql):
     return sql + ';'
 
 
-def export_schema_to_sql(database_path, output_path):
+def export_schema_to_sql(database_path, output_path, format_output=True):
     """
     导出SQLite数据库的表结构到SQL文件，格式美观易读
     """
-    conn = sqlite3.connect(database_path)
-    cursor = conn.cursor()
+    total_rows = 0
 
-    # 获取所有表
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
-    tables = cursor.fetchall()
+    with sqlite3.connect(database_path) as conn:
+        cursor = conn.cursor()
 
-    with open(output_path, 'w', encoding='utf-8') as f:
-        # 文件头部信息
-        f.write("-- ============================================================================\n")
-        f.write("-- SQLite数据库表结构导出\n")
-        f.write(f"-- 数据库文件: {database_path}\n")
-        f.write(f"-- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        f.write(f"-- 总表数: {len(tables)}\n")
-        f.write("-- ============================================================================\n\n")
+        # 获取所有表
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
+        tables = cursor.fetchall()
 
-        # 导出每个表的创建语句
-        for i, table in enumerate(tables):
-            table_name = table[0]
+        with open(output_path, 'w', encoding='utf-8') as f:
+            # 文件头部信息
+            f.write("-- ============================================================================\n")
+            f.write("-- SQLite数据库表结构导出\n")
+            f.write(f"-- 数据库文件: {database_path}\n")
+            f.write(f"-- 生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"-- 总表数: {len(tables)}\n")
+            f.write("-- ============================================================================\n\n")
 
-            # 获取创建表的SQL语句
-            cursor.execute(f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table_name}'")
-            create_sql = cursor.fetchone()[0]
+            # 导出每个表的创建语句
+            for i, table in enumerate(tables):
+                table_name = table[0]
 
-            # 格式化SQL语句
-            formatted_sql = format_sql_statement(create_sql)
+                # 获取创建表的SQL语句
+                cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+                row = cursor.fetchone()
+                create_sql = row[0] if row else ''
 
-            # 表头
-            f.write(f"-- {'=' * 76}\n")
-            f.write(f"-- 表 {i+1}: {table_name}\n")
-            f.write(f"-- {'=' * 76}\n\n")
+                # 格式化SQL语句
+                formatted_sql = format_sql_statement(create_sql) if format_output else (create_sql + ';' if create_sql else '')
 
-            # 输出格式化的CREATE TABLE语句
-            f.write(formatted_sql)
-            f.write('\n\n')
+                # 表头
+                f.write(f"-- {'=' * 76}\n")
+                f.write(f"-- 表 {i+1}: {table_name}\n")
+                f.write(f"-- {'=' * 76}\n\n")
 
-            # 获取表的字段信息
-            cursor.execute(f"PRAGMA table_info('{table_name}')")
-            columns = cursor.fetchall()
+                # 输出格式化的CREATE TABLE语句
+                if formatted_sql:
+                    f.write(formatted_sql)
+                    f.write('\n\n')
 
-            # 输出字段信息
-            f.write(f"-- 字段信息:\n")
-            f.write(f"-- {'ID':<4} {'字段名':<20} {'类型':<15} {'非空':<6} {'主键':<6} {'默认值'}\n")
-            f.write(f"-- {'-'*4} {'-'*20} {'-'*15} {'-'*6} {'-'*6} {'-'*20}\n")
+                # 获取表的字段信息
+                cursor.execute(f'PRAGMA table_info("{table_name}")')
+                columns = cursor.fetchall()
 
-            for col in columns:
-                col_id, col_name, col_type, notnull, dflt_value, pk = col
-                notnull_str = 'YES' if notnull else 'NO'
-                pk_str = 'YES' if pk else 'NO'
-                default_str = str(dflt_value) if dflt_value else 'NULL'
-                f.write(f"-- {col_id:<4} {col_name:<20} {col_type:<15} {notnull_str:<6} {pk_str:<6} {default_str}\n")
+                # 输出字段信息
+                f.write("-- 字段信息:\n")
+                f.write(f"-- {'ID':<4} {'字段名':<20} {'类型':<15} {'非空':<6} {'主键':<6} {'默认值'}\n")
+                f.write(f"-- {'-' * 4} {'-' * 20} {'-' * 15} {'-' * 6} {'-' * 6} {'-' * 20}\n")
 
-            f.write('\n')
+                for col in columns:
+                    col_id, col_name, col_type, notnull, dflt_value, pk = col
+                    notnull_str = 'YES' if notnull else 'NO'
+                    pk_str = 'YES' if pk else 'NO'
+                    default_str = 'NULL' if dflt_value is None else str(dflt_value)
+                    f.write(f"-- {col_id:<4} {col_name:<20} {col_type:<15} {notnull_str:<6} {pk_str:<6} {default_str}\n")
 
-            # 获取索引信息
-            cursor.execute(f"SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name='{table_name}' AND sql IS NOT NULL")
-            indexes = cursor.fetchall()
-
-            if indexes:
-                f.write(f"-- 索引:\n")
-                for idx_name, idx_sql in indexes:
-                    formatted_idx = format_sql_statement(idx_sql)
-                    f.write(formatted_idx + '\n')
                 f.write('\n')
 
-            # 获取表行数
-            try:
-                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-                row_count = cursor.fetchone()[0]
-                f.write(f"-- 行数: {row_count}\n")
-            except:
-                f.write(f"-- 行数: 无法统计\n")
+                # 获取索引信息
+                cursor.execute("SELECT name, sql FROM sqlite_master WHERE type='index' AND tbl_name=? AND sql IS NOT NULL", (table_name,))
+                indexes = cursor.fetchall()
 
-            f.write('\n\n')
+                if indexes:
+                    f.write("-- 索引:\n")
+                    for idx_name, idx_sql in indexes:
+                        formatted_idx = format_sql_statement(idx_sql) if format_output else (idx_sql + ';' if idx_sql else '')
+                        if formatted_idx:
+                            f.write(formatted_idx + '\n')
+                    f.write('\n')
 
-        # 数据库统计信息
-        f.write("-- ============================================================================\n")
-        f.write("-- 数据库统计信息\n")
-        f.write("-- ============================================================================\n\n")
+                # 获取表行数
+                try:
+                    cursor.execute(f'SELECT COUNT(*) FROM "{table_name}"')
+                    row_count = cursor.fetchone()[0]
+                    f.write(f"-- 行数: {row_count}\n")
+                except Exception:
+                    f.write("-- 行数: 无法统计\n")
 
-        total_rows = 0
-        for table in tables:
-            table_name = table[0]
-            try:
-                cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
-                row_count = cursor.fetchone()[0]
-                f.write(f"-- {table_name:<30}: {row_count:>6} 行\n")
-                total_rows += row_count
-            except:
-                f.write(f"-- {table_name:<30}: 无法统计\n")
+                f.write('\n\n')
 
-        f.write(f"\n-- 总行数: {total_rows}\n")
-        f.write(f"-- 平均每表行数: {total_rows // len(tables) if len(tables) > 0 else 0}\n")
+            # 数据库统计信息
+            f.write("-- ============================================================================\n")
+            f.write("-- 数据库统计信息\n")
+            f.write("-- ============================================================================\n\n")
 
-    conn.close()
+            for table in tables:
+                table_name = table[0]
+                try:
+                    cursor.execute(f'SELECT COUNT(*) FROM "{table_name}"')
+                    row_count = cursor.fetchone()[0]
+                    f.write(f"-- {table_name:<30}: {row_count:>6} 行\n")
+                    total_rows += row_count
+                except Exception:
+                    f.write(f"-- {table_name:<30}: 无法统计\n")
+
+            f.write(f"\n-- 总行数: {total_rows}\n")
+            f.write(f"-- 平均每表行数: {total_rows // len(tables) if len(tables) > 0 else 0}\n")
+
     print(f"✅ 数据库结构已导出到: {output_path}")
     print(f"📊 共导出 {len(tables)} 个表")
     print(f"📈 总行数: {total_rows}")
-    print(f"📝 文件已格式化，便于阅读")
+    print("📝 文件已格式化，便于阅读" if format_output else "📝 文件已按原始 SQL 导出")
 
 
 def main():
@@ -198,7 +201,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        export_schema_to_sql(args.db, args.output)
+        export_schema_to_sql(args.db, args.output, format_output=args.format)
     except Exception as e:
         print(f"❌ 导出失败: {e}")
         sys.exit(1)

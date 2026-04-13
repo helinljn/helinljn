@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-文件行尾符转换脚本 - 专业审阅版本
+文件行尾符转换脚本
 
 功能：
 1. 将CRLF转换为LF（Unix格式）
@@ -20,10 +20,11 @@ import sys
 import argparse
 import re
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional
 
 # 编译正则表达式供全局使用，避免重复编译
 _DOS_PATTERN = re.compile(b'(?<!\r)\n')
+
 
 def to_unix(content: bytes) -> bytes:
     """
@@ -45,6 +46,7 @@ def to_unix(content: bytes) -> bytes:
     content = content.replace(b'\r', b'\n')
     return content
 
+
 def to_dos(content: bytes) -> bytes:
     """
     将Unix行尾符(LF)转换为Windows行尾符(CRLF)
@@ -62,6 +64,7 @@ def to_dos(content: bytes) -> bytes:
     # 使用预编译的正则表达式，避免每次调用都重新编译
     result = _DOS_PATTERN.sub(b'\r\n', content)
     return result
+
 
 def convert_file(filepath: Path, to_type: str) -> bool:
     """
@@ -98,6 +101,7 @@ def convert_file(filepath: Path, to_type: str) -> bool:
         print(f"转换文件 {filepath} 时出错: {e}")
         return False
 
+
 def is_binary_file(content: bytes) -> bool:
     """
     简单启发式检测是否为二进制文件
@@ -127,6 +131,7 @@ def is_binary_file(content: bytes) -> bool:
 
     return False
 
+
 def get_conversion_type(ext: str) -> Optional[str]:
     """
     根据文件扩展名确定转换类型
@@ -150,6 +155,7 @@ def get_conversion_type(ext: str) -> Optional[str]:
     else:
         return None
 
+
 def convert_directory(root_dir: Path, verbose: bool = True, dry_run: bool = False,
                      skip_git: bool = True) -> dict:
     """
@@ -167,6 +173,7 @@ def convert_directory(root_dir: Path, verbose: bool = True, dry_run: bool = Fals
     stats = {
         'total_files': 0,
         'converted_files': 0,
+        'would_convert_files': 0,
         'skipped_files': 0,
         'skipped_binary': 0,
         'error_files': 0,
@@ -194,22 +201,24 @@ def convert_directory(root_dir: Path, verbose: bool = True, dry_run: bool = Fals
                 type_desc = "Unix (CRLF->LF)" if conv_type == 'unix' else "DOS (LF->CRLF)"
                 print(f"发现: {filepath.relative_to(root_dir)} [{type_desc}]")
 
-            if dry_run:
-                stats['converted_files'] += 1
-                stats['by_type'][conv_type] += 1
-                continue
-
-            # 实际转换文件
-            try:
-                # 检查文件大小（避免处理超大文件）
-                file_size = filepath.stat().st_size
-                MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB限制
-                if file_size > MAX_FILE_SIZE:
-                    if verbose:
-                        print(f"  跳过（文件过大: {file_size:,} 字节）: {filepath.relative_to(root_dir)}")
-                    stats['skipped_files'] += 1
+            # 实际转换前先检查文件大小（避免处理超大文件）
+            if not dry_run:
+                try:
+                    file_size = filepath.stat().st_size
+                    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB限制
+                    if file_size > MAX_FILE_SIZE:
+                        if verbose:
+                            print(f"  跳过（文件过大: {file_size:,} 字节）: {filepath.relative_to(root_dir)}")
+                        stats['skipped_files'] += 1
+                        continue
+                except Exception as e:
+                    error_msg = f"无法读取文件大小: {filepath.relative_to(root_dir)} - {e}"
+                    stats['error_files'] += 1
+                    stats['errors'].append(error_msg)
+                    print(f"  系统错误: {error_msg}")
                     continue
 
+            try:
                 with open(filepath, 'rb') as f:
                     original_content = f.read()
 
@@ -228,6 +237,13 @@ def convert_directory(root_dir: Path, verbose: bool = True, dry_run: bool = Fals
 
                 # 检查内容是否有变化
                 if new_content != original_content:
+                    if dry_run:
+                        stats['would_convert_files'] += 1
+                        stats['by_type'][conv_type] += 1
+                        if verbose:
+                            print(f"  将转换: {filepath.relative_to(root_dir)}")
+                        continue
+
                     # 创建备份（可选功能）
                     # backup_path = filepath.with_suffix(filepath.suffix + '.bak')
                     # with open(backup_path, 'wb') as f:
@@ -276,6 +292,7 @@ def convert_directory(root_dir: Path, verbose: bool = True, dry_run: bool = Fals
                 print(f"  错误: {filepath.relative_to(root_dir)} - {e}")
 
     return stats
+
 
 def main():
     """主函数"""
@@ -332,7 +349,8 @@ def main():
     stats = convert_directory(
         root_dir,
         verbose=verbose,
-        dry_run=args.dry_run
+        dry_run=args.dry_run,
+        skip_git=args.skip_git,
     )
 
     # 显示统计信息
@@ -341,6 +359,8 @@ def main():
     print("=" * 50)
     print(f"扫描文件总数: {stats['total_files']}")
     print(f"成功转换文件: {stats['converted_files']}")
+    if stats['would_convert_files']:
+        print(f"试运行将转换文件: {stats['would_convert_files']}")
     if stats['by_type']['unix'] > 0:
         print(f"  - Unix转换 (CRLF->LF): {stats['by_type']['unix']}")
     if stats['by_type']['dos'] > 0:
@@ -354,6 +374,7 @@ def main():
 
     if stats['error_files'] > 0:
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
