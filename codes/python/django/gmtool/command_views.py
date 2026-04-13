@@ -351,6 +351,9 @@ def command_log_list(request):
     if user_filter and is_admin:
         logs = logs.filter(user__username__icontains=user_filter)
 
+    # 添加排序以避免分页警告（按创建时间降序，最新的在前）
+    logs = logs.order_by('-created_at')
+
     paginator = Paginator(logs, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)

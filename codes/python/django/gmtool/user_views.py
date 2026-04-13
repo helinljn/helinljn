@@ -32,6 +32,9 @@ def user_list(request):
     if search:
         users = users.filter(username__icontains=search)
 
+    # 添加排序以避免分页警告，按注册时间降序排列（最新的在前）
+    users = users.order_by('-date_joined')
+
     paginator = Paginator(users, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
@@ -335,6 +338,9 @@ def login_log_list(request):
     user_filter = request.GET.get('user', '')
     if user_filter:
         logs = logs.filter(username__icontains=user_filter)
+
+    # 添加排序以避免分页警告
+    logs = logs.order_by('-created_at')
 
     paginator = Paginator(logs, 20)
     page_number = request.GET.get('page', 1)
