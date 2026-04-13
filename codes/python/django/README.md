@@ -50,7 +50,12 @@ c:\helin\helinljn\codes\python\django\
 ├── gmtool/
 │   ├── apps.py
 │   ├── models.py
-│   ├── views.py
+│   ├── views.py（统一导出模块，向后兼容）
+│   ├── auth_views.py（新增：认证相关视图）
+│   ├── command_views.py（新增：命令管理视图）
+│   ├── user_views.py（新增：用户和角色管理视图）
+│   ├── api_views.py（新增：API相关视图）
+│   ├── utils.py（新增：公共辅助函数）
 │   ├── urls.py
 │   ├── forms.py
 │   ├── decorators.py
@@ -264,34 +269,48 @@ c:\helin\helinljn\codes\python\django\
 
 ### 8.2 gmtool 路由（`gmtool/urls.py`）
 
-| 路径 | 视图 | 权限 |
-|---|---|---|
-| `/gmtool/` | `dashboard` | 登录 |
-| `/gmtool/login/` | `login_view` | 匿名 |
-| `/gmtool/logout/` | `logout_view` | 登录（POST） |
-| `/gmtool/commands/` | `command_list` | 登录 |
-| `/gmtool/commands/add/` | `add_gm_command` | 超管 |
-| `/gmtool/commands/<cmd_id>/execute/` | `command_execute` | 命令权限 |
-| `/gmtool/users/...` | 用户管理相关 | 超管 |
-| `/gmtool/roles/...` | 角色管理相关 | 超管 |
-| `/gmtool/users/<id>/permissions/` | `user_permissions` | 超管 |
-| `/gmtool/logs/` | `command_log_list` | 登录（普通用户仅看自己） |
-| `/gmtool/logs/login/` | `login_log_list` | 超管 |
-| `/gmtool/api/commands/sync/` | `sync_commands_api` | 超管（POST） |
-| `/gmtool/api/commands/upload/` | `upload_commands_api` | 超管（POST） |
-| `/gmtool/api/logs/<id>/` | `log_detail_api` | 登录（含权限校验） |
+视图模块化拆分后，路由映射保持不变，但视图函数的导入来源已更新：
+
+| 路径 | 视图 | 权限 | 所属模块 |
+|---|---|---|---|
+| `/gmtool/` | `dashboard` | 登录 | `command_views` |
+| `/gmtool/login/` | `login_view` | 匿名 | `auth_views` |
+| `/gmtool/logout/` | `logout_view` | 登录（POST） | `auth_views` |
+| `/gmtool/commands/` | `command_list` | 登录 | `command_views` |
+| `/gmtool/commands/add/` | `add_gm_command` | 超管 | `command_views` |
+| `/gmtool/commands/<cmd_id>/execute/` | `command_execute` | 命令权限 | `command_views` |
+| `/gmtool/users/...` | 用户管理相关 | 超管 | `user_views` |
+| `/gmtool/roles/...` | 角色管理相关 | 超管 | `user_views` |
+| `/gmtool/users/<id>/permissions/` | `user_permissions` | 超管 | `user_views` |
+| `/gmtool/logs/` | `command_log_list` | 登录（普通用户仅看自己） | `command_views` |
+| `/gmtool/logs/login/` | `login_log_list` | 超管 | `user_views` |
+| `/gmtool/api/commands/sync/` | `sync_commands_api` | 超管（POST） | `command_views` |
+| `/gmtool/api/commands/upload/` | `upload_commands_api` | 超管（POST） | `api_views` |
+| `/gmtool/api/logs/<id>/` | `log_detail_api` | 登录（含权限校验） | `api_views` |
+
+> **向后兼容性**：原有的 `views.py` 作为统一导出模块，仍然提供所有视图函数的导出，确保第三方代码导入不受影响。
 
 ---
 
-## 9. 视图行为要点（`gmtool/views.py`）
+## 9. 视图模块化设计（2026年4月重构）
 
-### 9.1 登录与安全
+为了提高代码可维护性，原有的 `gmtool/views.py`（约1000行）已拆分为四个功能模块，并保持了向后兼容性：
+
+| 模块 | 功能 | 包含视图函数示例 |
+|---|---|---|
+| `auth_views.py` | 认证相关 | `login_view`, `logout_view`, `custom_404`, `custom_500`, `custom_403`, `csrf_failure` |
+| `command_views.py` | 命令管理 | `dashboard`, `command_list`, `command_execute`, `add_gm_command`, `sync_commands_api`, `command_log_list` |
+| `user_views.py` | 用户和角色管理 | `user_list`, `user_create`, `user_edit`, `user_delete`, `role_list`, `role_create`, `role_edit`, `user_permissions`, `role_delete`, `login_log_list` |
+| `api_views.py` | API接口 | `log_detail_api`, `upload_commands_api` |
+| `utils.py` | 公共辅助函数 | `get_client_ip`, `_group_commands_by_tab`, `_validate_command_params_basic`, `_mask_sensitive_data` |
+
+### 9.1 登录与安全（`auth_views.py`）
 
 - 已登录访问登录页：显示“已登录提示页”，非静默跳转
-- 登录失败限速：同 IP 连续失败 5 次，锁定 5 分钟（缓存实现）
+- 登录失败限速：同 IP 连续失败 5 次，锁定 5 分钟（缓存实现），支持 IP 和 IP+用户名双维度限速
 - 登出仅允许 POST，避免 CSRF 强制登出
 
-### 9.2 命令执行
+### 9.2 命令执行（`command_views.py`）
 
 - GET：动态渲染请求参数表单，并下发响应 schema（`response_params`）
 - POST：JSON 请求体校验（含 `Partition` 类型/范围校验）
@@ -311,16 +330,23 @@ c:\helin\helinljn\codes\python\django\
 
 该机制确保不同 GM 命令可根据各自响应定义动态调整展示列表。
 
-### 9.3 批量执行参数（配置注入前端）
+### 9.3 数据库查询优化
+
+- **超级管理员**：直接获取所有活跃命令，避免权限检查开销
+- **普通用户**：通过关联表查询 `GMCommand.objects.filter(usercommandpermission__user=request.user)`，避免 `command_id__in` 子查询
+- **关联查询**：在关键视图使用 `select_related` 和 `prefetch_related` 减少 N+1 查询
+- **分页优化**：对日志列表等进行适当分页控制
+
+### 9.4 批量执行参数（配置注入前端）
 
 - `BATCH_EXECUTE_MAX_TARGETS`
 - `BATCH_EXECUTE_INTERVAL_MS`
 
-### 9.4 日志详情脱敏
+### 9.5 日志详情脱敏（`api_views.py`）
 
 `log_detail_api` 对敏感字段递归脱敏（例如 password/token/cookie/authorization 等），并对 `request_content` 做结构化脱敏后返回。
 
-### 9.5 命令定义文件上传
+### 9.6 命令定义文件上传（`api_views.py`）
 
 `upload_commands_api` 包含：
 
@@ -351,11 +377,14 @@ c:\helin\helinljn\codes\python\django\
 
 ## 11. 中间件与装饰器
 
-### 11.1 `IDIPFileMonitorMiddleware`
+### 11.1 `IDIPFileMonitorMiddleware`（已增强）
 
-- 检查间隔：30 秒（缓存节流）
-- 通过 `mtime` 变化检测 `idip_commands.json` 更新
+- 检查间隔：30 秒（可通过 `IDIP_FILE_CHECK_INTERVAL` 配置，缓存节流）
+- 双模式变更检测：
+  - **修改时间检测**（默认）：快速轻量，适合大多数场景
+  - **文件哈希检测**（`IDIP_USE_HASH_CHECK=True`）：通过 MD5 哈希精确检测文件内容变更，避免误报
 - 线程锁避免并发重复同步
+- 可配置是否启用（`ENABLE_IDIP_FILE_MONITOR`）
 - 自动调用 `sync_commands_to_db()`
 
 ### 11.2 权限装饰器（`decorators.py`）

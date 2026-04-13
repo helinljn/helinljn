@@ -171,6 +171,15 @@ IDIP_TIMEOUT = config('IDIP_TIMEOUT', default=30, cast=int)                     
 BATCH_EXECUTE_MAX_TARGETS = 200  # 单次批量最大目标数（玩家/RoleId等）
 BATCH_EXECUTE_INTERVAL_MS = 200  # 批量请求间隔（毫秒）
 
+# 文件变更监控配置
+IDIP_FILE_CHECK_INTERVAL = config('IDIP_FILE_CHECK_INTERVAL', default=30, cast=int)          # 文件监控检查间隔（秒）
+ENABLE_IDIP_FILE_MONITOR = config('ENABLE_IDIP_FILE_MONITOR', default=True, cast=bool)       # 是否启用文件监控
+IDIP_USE_HASH_CHECK = config('IDIP_USE_HASH_CHECK', default=False, cast=bool)                # 是否使用文件哈希检测变更（更准确但稍慢）
+
+# 登录限速配置
+LOGIN_MAX_ATTEMPTS = config('LOGIN_MAX_ATTEMPTS', default=5, cast=int)                       # 登录最大尝试次数
+LOGIN_LOCKOUT_SECONDS = config('LOGIN_LOCKOUT_SECONDS', default=300, cast=int)               # 登录锁定时间（秒）
+
 # 是否信任反向代理的 X-Forwarded-For 头（生产环境使用 Nginx 等反向代理时设为 True）
 TRUSTED_PROXY = config('DJANGO_TRUSTED_PROXY', default=False, cast=bool)
 
