@@ -17,7 +17,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import gettext as __
 
 from .audit_log import log_operation
 from .command_parser import add_command_to_json, sync_commands_to_db, validate_json_command_ids
@@ -38,6 +37,81 @@ SENSITIVE_FIELD_NAMES = {
 LOGIN_MAX_ATTEMPTS = 5          # 最大尝试次数
 LOGIN_LOCKOUT_SECONDS = 300     # 锁定时长（秒），5分钟
 LOGIN_THROTTLE_CACHE_PREFIX = 'gmtool:login_throttle:'
+
+
+def _normalize_login_username(username):
+    """规范化登录用户名，用于构建限速键。"""
+    return (username or '').strip().lower()
+
+
+def _build_login_throttle_cache_keys(ip, username):
+    """构建登录限速键：IP 维度 + IP+用户名维度。"""
+    normalized = _normalize_login_username(username)
+    key_ip = f'{LOGIN_THROTTLE_CACHE_PREFIX}ip:{ip}'
+    key_ip_user = f'{LOGIN_THROTTLE_CACHE_PREFIX}ip_user:{ip}:{normalized}'
+    return key_ip, key_ip_user
+
+
+def _validate_command_params_basic(command, params):
+    """
+    基于 command.request_params 做基础参数校验：
+    - 必填字段校验（isnull=false）
+    - 基础类型校验（int/uint/string/bool）
+    """
+    schema = command.request_params or []
+    if not isinstance(schema, list):
+        return False, _('命令参数定义错误，请联系管理员')
+
+    for field in schema:
+        if not isinstance(field, dict):
+            continue
+
+        field_id = field.get('id')
+        if not field_id:
+            continue
+
+        raw_type = str(field.get('type', '')).strip().lower()
+        is_required = str(field.get('isnull', 'false')).strip().lower() == 'false'
+        value = params.get(field_id)
+
+        if is_required and (value is None or value == ''):
+            return False, _('缺少必填参数: %(field)s') % {'field': field_id}
+
+        if value is None or value == '':
+            continue
+
+        # uint/int 系列
+        if raw_type.startswith('uint') or raw_type.startswith('int'):
+            try:
+                int_value = int(value)
+            except (TypeError, ValueError):
+                return False, _('参数 %(field)s 必须为整数') % {'field': field_id}
+            if raw_type.startswith('uint') and int_value < 0:
+                return False, _('参数 %(field)s 不能为负数') % {'field': field_id}
+            params[field_id] = int_value
+            continue
+
+        # string 系列
+        if raw_type.startswith('string'):
+            if not isinstance(value, str):
+                params[field_id] = str(value)
+            continue
+
+        # bool 系列
+        if raw_type.startswith('bool'):
+            if isinstance(value, bool):
+                continue
+            if isinstance(value, str):
+                lowered = value.strip().lower()
+                if lowered in ('true', '1', 'yes', 'on'):
+                    params[field_id] = True
+                    continue
+                if lowered in ('false', '0', 'no', 'off'):
+                    params[field_id] = False
+                    continue
+            return False, _('参数 %(field)s 必须为布尔值') % {'field': field_id}
+
+    return True, ''
 
 
 def _get_safe_next_url(request):
@@ -87,14 +161,18 @@ def login_view(request):
         })
     if request.method == 'POST':
         ip = get_client_ip(request)
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
 
-        # 登录失败限速检查
+        # 登录失败限速检查（IP + username 双维度）
         from django.core.cache import cache
-        cache_key = f'{LOGIN_THROTTLE_CACHE_PREFIX}{ip}'
-        attempts = cache.get(cache_key, 0)
+        cache_key_ip, cache_key_ip_user = _build_login_throttle_cache_keys(ip, username)
+        attempts_ip = cache.get(cache_key_ip, 0)
+        attempts_ip_user = cache.get(cache_key_ip_user, 0)
+        attempts = max(attempts_ip, attempts_ip_user)
         if attempts >= LOGIN_MAX_ATTEMPTS:
             LoginLog.objects.create(
-                user=None, username=request.POST.get('username', ''),
+                user=None, username=username,
                 action='login_failed', ip_address=ip,
                 user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
                 reason=_('尝试次数过多'),
@@ -103,15 +181,14 @@ def login_view(request):
                 'error': _('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
             })
 
-        username = request.POST.get('username', '')
-        password = request.POST.get('password', '')
         user = authenticate(request, username=username, password=password)
         ua = request.META.get('HTTP_USER_AGENT', '')[:500]
         if user is not None:
             if user.is_active:
                 login(request, user)
-                # 登录成功，清除失败计数
-                cache.delete(cache_key)
+                # 登录成功，清除失败计数（双维度）
+                cache.delete(cache_key_ip)
+                cache.delete(cache_key_ip_user)
                 LoginLog.objects.create(
                     user=user, username=username, action='login',
                     ip_address=ip, user_agent=ua,
@@ -123,8 +200,10 @@ def login_view(request):
                     return redirect(next_url)
                 return redirect('gmtool:dashboard')
             else:
-                # 登录失败，累加计数
-                cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
+                # 登录失败，累加计数（双维度）
+                next_attempts = attempts + 1
+                cache.set(cache_key_ip, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
+                cache.set(cache_key_ip_user, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
                 LoginLog.objects.create(
                     user=None, username=username, action='login_failed',
                     ip_address=ip, user_agent=ua, reason=_('账号已禁用'),
@@ -133,9 +212,11 @@ def login_view(request):
                               detail={'username': username, 'reason': 'Account disabled'})
                 return render(request, 'gmtool/login.html', {'error': _('账号已被禁用')})
         else:
-            # 登录失败，累加计数
-            cache.set(cache_key, attempts + 1, timeout=LOGIN_LOCKOUT_SECONDS)
-            remaining = LOGIN_MAX_ATTEMPTS - attempts - 1
+            # 登录失败，累加计数（双维度）
+            next_attempts = attempts + 1
+            cache.set(cache_key_ip, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
+            cache.set(cache_key_ip_user, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
+            remaining = LOGIN_MAX_ATTEMPTS - next_attempts
             LoginLog.objects.create(
                 user=None, username=username, action='login_failed',
                 ip_address=ip, user_agent=ua, reason=_('用户名或密码错误'),
@@ -218,7 +299,7 @@ def command_execute(request, cmd_id):
     if not command or not command.is_active:
         if request.method == 'POST':
             return JsonResponse(
-                {'success': False, 'error': __('该命令已被停用或删除，请刷新页面获取最新命令列表'), 'command_deactivated': True},
+                {'success': False, 'error': _('该命令已被停用或删除，请刷新页面获取最新命令列表'), 'command_deactivated': True},
                 status=410,
             )
         from django.contrib import messages
@@ -229,20 +310,25 @@ def command_execute(request, cmd_id):
         try:
             body = json.loads(request.body)
             if not isinstance(body, dict):
-                return JsonResponse({'success': False, 'error': __('请求体必须是 JSON 对象')}, status=400)
+                return JsonResponse({'success': False, 'error': _('请求体必须是 JSON 对象')}, status=400)
 
             params = body.get('params', {})
             if not isinstance(params, dict):
-                return JsonResponse({'success': False, 'error': __('参数 Params 必须是对象')}, status=400)
+                return JsonResponse({'success': False, 'error': _('参数 Params 必须是对象')}, status=400)
+
+            # 基础 schema 校验（必填 + 基础类型）
+            valid, schema_error = _validate_command_params_basic(command, params)
+            if not valid:
+                return JsonResponse({'success': False, 'error': schema_error}, status=400)
 
             raw_partition = params.get('Partition', 0)
             try:
                 partition = int(raw_partition)
             except (TypeError, ValueError):
-                return JsonResponse({'success': False, 'error': __('Partition 必须为整数')}, status=400)
+                return JsonResponse({'success': False, 'error': _('Partition 必须为整数')}, status=400)
 
             if partition < 0:
-                return JsonResponse({'success': False, 'error': __('Partition 不能为负数')}, status=400)
+                return JsonResponse({'success': False, 'error': _('Partition 不能为负数')}, status=400)
 
             # 归一化写回，确保后续下游与日志类型一致
             params['Partition'] = partition
@@ -294,10 +380,10 @@ def command_execute(request, cmd_id):
             return JsonResponse({'success': True, 'data': response_data})
 
         except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': __('请求数据格式错误')}, status=400)
+            return JsonResponse({'success': False, 'error': _('请求数据格式错误')}, status=400)
         except Exception as e:
             logger.exception('Command execution error: %s', e)
-            return JsonResponse({'success': False, 'error': __('服务器内部错误')}, status=500)
+            return JsonResponse({'success': False, 'error': _('服务器内部错误')}, status=500)
 
     # GET: 显示执行表单
     from django.conf import settings
@@ -525,10 +611,10 @@ def user_delete(request, user_id):
     user_obj = get_object_or_404(User, pk=user_id)
     if user_obj == request.user:
         from django.contrib import messages
-        messages.warning(request, __('不能删除自己的账号'))
+        messages.warning(request, _('不能删除自己的账号'))
     elif is_super_admin(user_obj):
         from django.contrib import messages
-        messages.warning(request, __('不能删除超级管理员账号'))
+        messages.warning(request, _('不能删除超级管理员账号'))
     else:
         target_name = user_obj.username
         user_obj.delete()
@@ -588,7 +674,7 @@ def role_edit(request, role_id):
     # 禁止编辑超级管理员角色
     if role.is_super_admin:
         from django.contrib import messages
-        messages.warning(request, __('超级管理员角色不可编辑'))
+        messages.warning(request, _('超级管理员角色不可编辑'))
         return redirect('gmtool:role_list')
     if request.method == 'POST':
         form = RoleForm(request.POST, instance=role)
@@ -850,38 +936,38 @@ def upload_commands_api(request):
     # 校验文件
     uploaded_file = request.FILES.get('file')
     if not uploaded_file:
-        return JsonResponse({'error': __('请选择文件')}, status=400)
+        return JsonResponse({'error': _('请选择文件')}, status=400)
 
     # 校验文件名
     if not uploaded_file.name.endswith('.json'):
-        return JsonResponse({'error': __('仅支持 .json 文件')}, status=400)
+        return JsonResponse({'error': _('仅支持 .json 文件')}, status=400)
 
     # 校验文件大小（限制 5MB）
     if uploaded_file.size > 5 * 1024 * 1024:
-        return JsonResponse({'error': __('文件大小不能超过 5MB')}, status=400)
+        return JsonResponse({'error': _('文件大小不能超过 5MB')}, status=400)
 
     # 解析并校验 JSON 内容
     try:
         raw = uploaded_file.read()
         data = json.loads(raw)
     except json.JSONDecodeError as e:
-        return JsonResponse({'error': __('JSON 解析失败: %(error)s') % {'error': str(e)}}, status=400)
+        return JsonResponse({'error': _('JSON 解析失败: %(error)s') % {'error': str(e)}}, status=400)
 
     # 校验顶层结构：必须是 dict，且每个值包含必要字段
     if not isinstance(data, dict):
-        return JsonResponse({'error': __('JSON 顶层必须是对象(dict)')}, status=400)
+        return JsonResponse({'error': _('JSON 顶层必须是对象(dict)')}, status=400)
 
     required_keys = {'tab', 'request', 'id', 'responseid', 'respone'}
     for cmd_id, cmd_data in data.items():
         if not isinstance(cmd_data, dict):
-            return JsonResponse({'error': __('命令 %(id)s 的值必须是对象') % {'id': cmd_id}}, status=400)
+            return JsonResponse({'error': _('命令 %(id)s 的值必须是对象') % {'id': cmd_id}}, status=400)
         missing = required_keys - set(cmd_data.keys())
         if missing:
-            return JsonResponse({'error': __('命令 %(id)s 缺少必要字段: %(fields)s') % {'id': cmd_id, 'fields': ', '.join(missing)}}, status=400)
+            return JsonResponse({'error': _('命令 %(id)s 缺少必要字段: %(fields)s') % {'id': cmd_id, 'fields': ', '.join(missing)}}, status=400)
         # 校验 request_name 对应的参数列表存在
         request_name = cmd_data.get('request', '')
         if request_name and not isinstance(cmd_data.get(request_name), list):
-            return JsonResponse({'error': __('命令 %(id)s 的请求参数 %(name)s 必须是数组') % {'name': request_name, 'id': cmd_id}}, status=400)
+            return JsonResponse({'error': _('命令 %(id)s 的请求参数 %(name)s 必须是数组') % {'name': request_name, 'id': cmd_id}}, status=400)
 
     # 校验 ID 重复（CommandId、request_id、response_id）
     is_valid_ids, id_error_msg = validate_json_command_ids(data)
@@ -904,14 +990,14 @@ def upload_commands_api(request):
             raise
     except Exception as e:
         logger.exception('Failed to write JSON file: %s', e)
-        return JsonResponse({'error': __('文件写入失败: %(error)s') % {'error': str(e)}}, status=500)
+        return JsonResponse({'error': _('文件写入失败: %(error)s') % {'error': str(e)}}, status=500)
 
     # 自动执行同步
     try:
         created, updated, deactivated = sync_commands_to_db()
     except Exception as e:
         logger.exception('Command sync error: %s', e)
-        return JsonResponse({'error': __('文件已上传但同步失败')}, status=500)
+        return JsonResponse({'error': _('文件已上传但同步失败')}, status=500)
 
     log_operation('command', 'upload_and_sync', user=request.user,
                   ip_address=get_client_ip(request),
@@ -1005,6 +1091,6 @@ def csrf_failure(request, reason=""):
     from django.contrib import messages
     from django.urls import reverse
     if request.path == reverse('gmtool:login'):
-        messages.error(request, __('页面已过期，请重新登录。'))
+        messages.error(request, _('页面已过期，请重新登录。'))
         return redirect('gmtool:login')
     return render(request, 'gmtool/403.html', status=403)

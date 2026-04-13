@@ -532,6 +532,32 @@ python test/mock_idip_server.py --host 127.0.0.1 --port 18080
 
 ---
 
+### 16.2 部署前安全检查清单（建议）
+
+在生产环境（`DJANGO_DEBUG=False`）上线前，至少完成以下检查：
+
+1. 必填环境变量
+   - `DJANGO_SECRET_KEY`：必须显式配置，禁止使用默认/临时值
+   - `DJANGO_ALLOWED_HOSTS`：必须配置为实际域名或主机列表（逗号分隔）
+
+2. 传输与 Cookie 安全
+   - 确认已启用 HTTPS
+   - 确认 `SESSION_COOKIE_SECURE=True`、`CSRF_COOKIE_SECURE=True`
+   - 反向代理场景按需配置 `DJANGO_TRUSTED_PROXY=True`
+
+3. Django 部署自检
+   - 执行：
+     ```bash
+     python manage.py check --deploy
+     ```
+   - 目标：高危告警清零后再上线
+
+4. 命令链路联调
+   - 配置正确的 `IDIP_API_URL`
+   - 使用 mock 或测试环境完成至少一条成功调用与一条失败调用验证（含日志落库）
+
+---
+
 ## 17. 维护规范（建议）
 
 1. 新增路由、视图、配置项后，优先更新本文第 8/9/12 章。

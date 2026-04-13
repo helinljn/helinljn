@@ -20,15 +20,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment-checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-42=3%q&8-m^-lkdrvebqbz1y2f1f&)24lzf8v=+ex5jv)f0z9v',
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
 # 开发环境默认开启 DEBUG，生产环境请显式设置 DJANGO_DEBUG=False
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# 规则：
+# - 开发环境（DEBUG=True）允许使用本地临时密钥，便于开箱运行
+# - 非开发环境（DEBUG=False）必须显式通过环境变量 DJANGO_SECRET_KEY 提供
+_env_secret_key = os.environ.get('DJANGO_SECRET_KEY')
+if _env_secret_key:
+    SECRET_KEY = _env_secret_key
+elif DEBUG:
+    SECRET_KEY = 'dev-only-change-me'
+else:
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(
+        '生产环境必须通过环境变量 DJANGO_SECRET_KEY 设置安全的 SECRET_KEY'
+    )
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()]
 if DEBUG and not ALLOWED_HOSTS:
@@ -36,11 +45,6 @@ if DEBUG and not ALLOWED_HOSTS:
 
 # 生产环境安全检查：确保关键配置不被遗漏
 if not DEBUG:
-    if SECRET_KEY.startswith('django-insecure-'):
-        from django.core.exceptions import ImproperlyConfigured
-        raise ImproperlyConfigured(
-            '生产环境必须通过环境变量 DJANGO_SECRET_KEY 设置安全的 SECRET_KEY'
-        )
     if not ALLOWED_HOSTS:
         from django.core.exceptions import ImproperlyConfigured
         raise ImproperlyConfigured(
