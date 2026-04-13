@@ -36,6 +36,7 @@ dependencies:
   - polib=1.2.0
   - pysocks=1.7.1
   - python=3.11.15
+  - python-decouple=3.8
   - python_abi=3.11
   - requests=2.33.1
   - setuptools=82.0.1
