@@ -492,18 +492,199 @@ python manage.py compilemessages
 
 ---
 
-## 16. 运行与初始化建议（开发环境）
+## 16. 完整部署与初始化指南
+
+### 16.1 环境准备（基于 Conda）
+
+#### 16.1.1 安装 Miniconda（Windows）
+
+如果您尚未安装 Conda，请按以下步骤安装 Miniconda：
+
+1. **下载 Miniconda**（推荐版本）：
+   - 下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D
+   - 首选版本：`Miniconda3-py38_23.11.0-2-Windows-x86_64.exe`
+
+2. **安装选项**：
+   - 运行安装程序，选择"Install for all users"
+   - 勾选所有选项（特别是"Add Miniconda3 to my PATH environment variable"）
+   - 按照默认设置完成安装
+
+3. **验证安装**：
+   ```bash
+   conda --version
+   python --version
+   ```
+
+4. **初始化Conda**：
+   安装完成后，需要执行以下命令初始化Conda，以便在终端中使用`conda activate`命令：
+   ```bash
+   conda init
+   ```
+   执行后**关闭并重新打开终端**，然后就可以使用`conda activate`命令激活环境了。
+
+#### 16.1.2 创建项目环境
+
+项目提供了 `environment.yml` 文件用于创建 Conda 环境：
 
 ```bash
-python manage.py migrate
-python manage.py init_roles
-python manage.py createsuperuser
-python manage.py runserver
+# 创建并激活环境（环境名：django-admin）
+conda env create -f environment.yml
+conda activate django-admin
+
+# 如果已存在环境，可以更新：
+conda env update -f environment.yml --prune
 ```
 
-> 建议在创建/修改 `idip_commands.json` 后执行一次 `python manage.py sync_commands` 做显式校验。
+环境文件中已包含所有必需的依赖：
+- Django 5.2.12
+- Python 3.11
+- SQLite 3
+- 国际化工具（gettext）
+- Python-decouple（环境变量管理）
+- requests（HTTP 客户端）
 
-### 16.1 本地 Mock IDIP 服务（`test/mock_idip_server.py`）
+### 16.2 数据库初始化
+
+#### 16.2.1 SQLite（默认，开发环境）
+
+项目默认使用SQLite数据库，无需额外配置：
+
+```bash
+# 1. 应用数据库迁移
+python manage.py migrate
+
+# 2. 同步命令定义（从 idip_commands.json 同步到数据库）
+python manage.py sync_commands
+
+# 3. 初始化角色并绑定超级管理员
+python manage.py init_roles
+```
+
+#### 16.2.2 MySQL（生产环境）
+
+如果需要切换到MySQL数据库，请按以下步骤操作：
+
+##### 步骤1：安装MySQL客户端和Python驱动
+
+```bash
+# 安装MySQL客户端库（Windows）
+# 从 https://dev.mysql.com/downloads/installer/ 下载并安装MySQL
+
+# 或者使用conda安装
+conda install mysqlclient
+```
+
+##### 步骤2：创建MySQL数据库和用户
+
+```sql
+-- 登录MySQL
+mysql -u root -p
+
+-- 创建数据库
+CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 创建用户并授权
+CREATE USER 'gmtool_user'@'localhost' IDENTIFIED BY 'your_password_here';
+GRANT ALL PRIVILEGES ON gmtool.* TO 'gmtool_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+##### 步骤3：配置Django连接MySQL
+
+修改 `mysite/settings.py` 中的数据库配置：
+
+```python
+# 注释或替换原有的SQLite配置
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+# 添加MySQL配置
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'gmtool',                     # 数据库名
+        'USER': 'gmtool_user',                # 用户名
+        'PASSWORD': 'your_password_here',     # 密码
+        'HOST': 'localhost',                  # 数据库主机
+        'PORT': '3306',                       # 端口（默认3306）
+        'OPTIONS': {
+            'charset': 'utf8mb4',             # 字符集
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
+    }
+}
+```
+
+##### 步骤4：执行数据库迁移
+
+```bash
+# 应用所有迁移
+python manage.py migrate
+
+# 同步命令定义
+python manage.py sync_commands
+
+# 初始化角色
+python manage.py init_roles
+```
+
+##### 步骤5：注意事项
+
+1. **字符集问题**：
+   - MySQL需要配置为 `utf8mb4` 字符集以支持完整的Unicode字符（包括emoji）
+   - Django默认使用 `utf8mb4`，确保MySQL服务器也使用相同配置
+
+2. **时区设置**：
+   - 确保MySQL时区与Django时区一致
+   - 可在MySQL中执行：`SET GLOBAL time_zone = '+8:00';`（根据实际时区调整）
+
+3. **性能优化**：
+   - 生产环境建议启用连接池
+   - 考虑使用 `django-db-connection-pool` 等库
+
+4. **备份与恢复**：
+   ```bash
+   # 备份MySQL数据库
+   mysqldump -u gmtool_user -p gmtool > backup_$(date +%Y%m%d).sql
+
+   # 恢复数据库
+   mysql -u gmtool_user -p gmtool < backup_file.sql
+   ```
+
+### 16.3 创建超级管理员
+
+系统提供两种超级管理员创建方式：
+
+#### 方式一：使用 Django 内置命令（推荐）
+```bash
+# 创建 Django 超级管理员（自动绑定 GM 超级管理员角色和权限）
+python manage.py createsuperuser
+
+# 按照提示输入用户名、邮箱和密码
+```
+
+#### 方式二：通过信号自动绑定
+如果已有 Django 超级管理员用户（`is_superuser=True`），系统会自动：
+1. 绑定 `super_admin` 角色
+2. 授予所有活跃命令的权限
+
+### 16.4 运行开发服务器
+
+```bash
+# 启动开发服务器（默认端口 8000）
+python manage.py runserver
+
+# 指定端口启动
+python manage.py runserver 8080
+```
+
+访问地址：`http://localhost:8000/gmtool/`
+
+### 16.5 本地 Mock IDIP 服务（`test/mock_idip_server.py`）
 
 仓库已新增可直接联调用的 Mock 服务脚本：`test/mock_idip_server.py`。
 
@@ -561,7 +742,7 @@ python test/mock_idip_server.py --host 127.0.0.1 --port 18080
 
 ---
 
-### 16.2 部署前安全检查清单（建议）
+### 16.6 部署前安全检查清单（建议）
 
 在生产环境（`DJANGO_DEBUG=False`）上线前，至少完成以下检查：
 
