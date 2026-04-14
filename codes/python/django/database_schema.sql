@@ -1,7 +1,7 @@
 -- ============================================================================
 -- SQLite数据库表结构导出
 -- 数据库文件: db.sqlite3
--- 生成时间: 2026-04-13 18:43:09
+-- 生成时间: 2026-04-14 12:30:07
 -- 总表数: 15
 -- ============================================================================
 
@@ -214,7 +214,7 @@ CREATE TABLE "django_migrations" (
 -- 2    name                 varchar(255)    YES    NO     NULL
 -- 3    applied              datetime        YES    NO     NULL
 
--- 行数: 21
+-- 行数: 22
 
 
 -- ============================================================================
@@ -284,7 +284,7 @@ CREATE INDEX "cmdlog_status_created_idx"
 CREATE INDEX "cmdlog_cmd_created_idx"
   ON "gmtool_commandlog" ("command_id", "created_at" DESC);
 
--- 行数: 42
+-- 行数: 48
 
 
 -- ============================================================================
@@ -302,7 +302,8 @@ CREATE TABLE "gmtool_gmcommand" (
   "response_id"                  integer NOT NULL,
   "request_params"               text NOT NULL CHECK ((JSON_VALID("request_params") OR "request_params" IS NULL)),
   "response_params"              text NOT NULL CHECK ((JSON_VALID("response_params") OR "response_params" IS NULL)),
-  "is_active"                    bool NOT NULL
+  "is_active"                    bool NOT NULL,
+  "field_labels"                 text NOT NULL CHECK ((JSON_VALID("field_labels") OR "field_labels" IS NULL))
 );
 
 -- 字段信息:
@@ -319,6 +320,7 @@ CREATE TABLE "gmtool_gmcommand" (
 -- 8    request_params       TEXT            YES    NO     NULL
 -- 9    response_params      TEXT            YES    NO     NULL
 -- 10   is_active            bool            YES    NO     NULL
+-- 11   field_labels         TEXT            YES    NO     NULL
 
 -- 索引:
 CREATE INDEX "gmcmd_cmdid_idx"
@@ -461,14 +463,14 @@ CREATE INDEX "gmtool_userprofile_role_id_1e579274"
 -- auth_user_groups              :      0 行
 -- auth_user_user_permissions    :      0 行
 -- django_content_type           :     11 行
--- django_migrations             :     21 行
+-- django_migrations             :     22 行
 -- django_session                :      2 行
--- gmtool_commandlog             :     42 行
+-- gmtool_commandlog             :     48 行
 -- gmtool_gmcommand              :     12 行
 -- gmtool_loginlog               :     38 行
 -- gmtool_role                   :      2 行
 -- gmtool_usercommandpermission  :     13 行
 -- gmtool_userprofile            :      2 行
 
--- 总行数: 189
--- 平均每表行数: 12
+-- 总行数: 196
+-- 平均每表行数: 13

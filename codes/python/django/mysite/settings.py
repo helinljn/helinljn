@@ -31,6 +31,8 @@ DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 _env_secret_key = config('DJANGO_SECRET_KEY', default='')
 if _env_secret_key:
     SECRET_KEY = _env_secret_key
+elif DEBUG:
+    SECRET_KEY = 'django-insecure-dev-key-only-for-development-do-not-use-in-production'
 else:
     from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured(
@@ -192,12 +194,13 @@ SECURE_BROWSER_XSS_FILTER = True
 # Referer 头发送策略
 SECURE_REFERRER_POLICY = 'same-origin'
 
-# SESSION_COOKIE_SECURE = True             # Session Cookie 仅通过 HTTPS 传输
-# CSRF_COOKIE_SECURE = True                # CSRF Cookie 仅通过 HTTPS 传输
-# SECURE_SSL_REDIRECT = True               # 强制 HTTPS
-# SECURE_HSTS_SECONDS = 31536000           # HSTS: 1 year
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
+# 生产环境 HTTPS 安全配置（DEBUG=False 时自动启用）
+# SESSION_COOKIE_SECURE = not DEBUG      # Session Cookie 仅通过 HTTPS 传输
+# CSRF_COOKIE_SECURE = not DEBUG         # CSRF Cookie 仅通过 HTTPS 传输
+# SECURE_SSL_REDIRECT = not DEBUG        # 强制 HTTPS
+# SECURE_HSTS_SECONDS = 31536000         # HSTS: 1 year
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # HSTS 包含子域名
+# SECURE_HSTS_PRELOAD = True             # HSTS 预加载
 
 # 缓存配置（中间件文件监控使用）
 CACHES = {

@@ -196,12 +196,12 @@ def main():
     parser = argparse.ArgumentParser(description='导出SQLite数据库表结构到格式化的SQL文件')
     parser.add_argument('--db', default='db.sqlite3', help='数据库文件路径 (默认: db.sqlite3)')
     parser.add_argument('--output', default='database_schema.sql', help='输出文件路径 (默认: database_schema.sql)')
-    parser.add_argument('--format', action='store_true', help='是否格式化SQL输出')
+    parser.add_argument('--no-format', action='store_true', dest='no_format', help='禁用SQL格式化，输出原始单行SQL')
 
     args = parser.parse_args()
 
     try:
-        export_schema_to_sql(args.db, args.output, format_output=args.format)
+        export_schema_to_sql(args.db, args.output, format_output=not args.no_format)
     except Exception as e:
         print(f"❌ 导出失败: {e}")
         sys.exit(1)

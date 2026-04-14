@@ -170,26 +170,10 @@ def command_execute(request, cmd_id):
             return JsonResponse({'success': False, 'error': _('服务器内部错误')}, status=500)
 
     # GET: 显示执行表单
-    from django.conf import settings
 
-    # 读取 idip_commands.json，构建字段 id -> name 的展示映射（用于结果表格列名）
-    response_field_labels = {}
-    try:
-        json_path = settings.BASE_DIR / 'idip_commands.json'
-        with open(json_path, 'r', encoding='utf-8') as f:
-            command_json_map = json.load(f)
-        cmd_json = command_json_map.get(command.command_id, {})
-        if isinstance(cmd_json, dict):
-            for _, val in cmd_json.items():
-                if isinstance(val, list):
-                    for item in val:
-                        if isinstance(item, dict):
-                            field_id = item.get('id')
-                            field_name = item.get('name')
-                            if field_id and field_name:
-                                response_field_labels[field_id] = field_name
-    except Exception:
-        logger.warning('Load idip_commands.json field labels failed for command=%s', command.command_id)
+    # 直接使用数据库中同步存储的 field_labels（含嵌套结构体字段的中英文标签）
+    # 无需每次请求读取 idip_commands.json，标签在命令同步时已一并入库
+    response_field_labels = command.field_labels or {}
 
     return render(request, 'gmtool/command_execute.html', {
         'command': command,
@@ -199,8 +183,8 @@ def command_execute(request, cmd_id):
         'response_field_labels_json': json.dumps(response_field_labels, ensure_ascii=False),
         'response_name': command.response_name,
         'is_admin': is_super_admin(request.user),
-        'batch_max_targets': getattr(settings, 'BATCH_EXECUTE_MAX_TARGETS', 200),
-        'batch_interval_ms': getattr(settings, 'BATCH_EXECUTE_INTERVAL_MS', 200),
+        'batch_max_targets': settings.BATCH_EXECUTE_MAX_TARGETS,
+        'batch_interval_ms': settings.BATCH_EXECUTE_INTERVAL_MS,
     })
 
 

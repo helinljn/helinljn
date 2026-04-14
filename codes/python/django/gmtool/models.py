@@ -14,6 +14,8 @@ class GMCommand(models.Model):
     response_id = models.IntegerField(_('协议响应ID'))
     request_params = models.JSONField(_('请求参数定义'), default=list)
     response_params = models.JSONField(_('响应参数定义'), default=list)
+    field_labels = models.JSONField(_('字段标签映射'), default=dict,
+                                    help_text=_('所有字段（含嵌套结构体）的 id -> name 映射，用于结果展示'))
     is_active = models.BooleanField(_('是否启用'), default=True)
 
     class Meta:

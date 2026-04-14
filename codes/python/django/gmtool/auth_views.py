@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .audit_log import log_operation
 from .models import LoginLog
+from .utils import get_client_ip
 
 logger = logging.getLogger(__name__)
 
@@ -58,20 +59,6 @@ def _get_safe_next_url(request):
         return ''
 
     return next_url
-
-
-def get_client_ip(request):
-    """获取客户端IP地址
-
-    仅在配置了可信反向代理（TRUSTED_PROXY=True）时才使用 X-Forwarded-For，
-    否则直接使用 REMOTE_ADDR，防止客户端伪造 IP。
-    """
-    from django.conf import settings
-    if getattr(settings, 'TRUSTED_PROXY', False):
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            return x_forwarded_for.split(',')[0].strip()
-    return request.META.get('REMOTE_ADDR', '0.0.0.0')
 
 
 def login_view(request):

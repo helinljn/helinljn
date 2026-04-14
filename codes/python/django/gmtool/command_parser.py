@@ -228,6 +228,25 @@ def add_command_to_json(command_data):
     return True, ''
 
 
+def _extract_field_labels(cmd_data):
+    """
+    从命令 JSON 数据中提取所有字段 id -> name 映射（含嵌套结构体）。
+
+    遍历命令对象中所有列表类型的值，收集其中的 id 和 name 字段。
+    这样可以获取包括嵌套结构体（如 SUsrInfo）在内的所有字段标签。
+    """
+    labels = {}
+    for val in cmd_data.values():
+        if isinstance(val, list):
+            for item in val:
+                if isinstance(item, dict):
+                    field_id = item.get('id')
+                    field_name = item.get('name')
+                    if field_id and field_name:
+                        labels[field_id] = field_name
+    return labels
+
+
 def parse_commands(json_path=None):
     """
     解析idip_commands.json文件，提取命令定义数据。
@@ -243,6 +262,7 @@ def parse_commands(json_path=None):
             'response_id': int,
             'request_params': list,
             'response_params': list,
+            'field_labels': dict,  # 新增：所有字段的 id -> name 映射
         },
         ...
     ]
@@ -269,6 +289,9 @@ def parse_commands(json_path=None):
             or cmd_data.get('tab', '')
         )
 
+        # 提取所有字段标签（含嵌套结构体）
+        field_labels = _extract_field_labels(cmd_data)
+
         commands.append({
             'command_id': cmd_id,
             'command_name': command_name,
@@ -279,6 +302,7 @@ def parse_commands(json_path=None):
             'response_id': cmd_data.get('responseid', 0),
             'request_params': request_params,
             'response_params': response_params,
+            'field_labels': field_labels,
         })
 
     return commands
@@ -318,6 +342,7 @@ def sync_commands_to_db(json_path=None):
                     'response_id': cmd['response_id'],
                     'request_params': cmd['request_params'],
                     'response_params': cmd['response_params'],
+                    'field_labels': cmd['field_labels'],
                     'is_active': True,
                 }
             )
