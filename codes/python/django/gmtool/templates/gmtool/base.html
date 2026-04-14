@@ -125,7 +125,7 @@
                 <div class="container-xl">
                     {% if messages %}
                     {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <div class="alert {% if 'success' in message.tags %}alert-success{% elif 'danger' in message.tags or 'error' in message.tags %}alert-danger{% elif 'warning' in message.tags %}alert-warning{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
                         <div class="d-flex">
                             <div>
                                 {% if message.tags == 'success' %}

@@ -208,8 +208,7 @@ TRUSTED_PROXY_COUNT = config('DJANGO_TRUSTED_PROXY_COUNT', default=1, cast=int)
 X_FRAME_OPTIONS = 'DENY'
 # 防止 MIME 类型嗅探
 SECURE_CONTENT_TYPE_NOSNIFF = True
-# XSS 防护
-SECURE_BROWSER_XSS_FILTER = True
+# XSS 防护：已移除 SECURE_BROWSER_XSS_FILTER（X-XSS-Protection 已被现代浏览器废弃，改用 CSP 防护）
 # Referer 头发送策略
 SECURE_REFERRER_POLICY = 'same-origin'
 # Cross-Origin 策略

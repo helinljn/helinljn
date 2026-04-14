@@ -46,14 +46,20 @@ def is_super_admin(user, request=None):
 def super_admin_required(view_func):
     """
     超级管理员权限装饰器。
-    未登录跳转登录页，非超级管理员返回仪表盘并提示。
+    未登录跳转登录页，非超级管理员：
+    - AJAX 请求返回 JSON 错误
+    - 普通请求返回仪表盘并提示
     """
     @functools.wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'error': _('请先登录')}, status=401)
             return redirect('gmtool:login')
         if is_super_admin(request.user, request):
             return view_func(request, *args, **kwargs)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': _('您没有管理员权限')}, status=403)
         messages.warning(request, _('您没有管理员权限'))
         return redirect('gmtool:dashboard')
     return wrapper

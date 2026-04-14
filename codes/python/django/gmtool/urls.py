@@ -34,8 +34,8 @@ urlpatterns = [
     path('logs/', command_views.command_log_list, name='command_log_list'),
     path('logs/login/', user_views.login_log_list, name='login_log_list'),
 
-    # API
-    path('api/commands/sync/', command_views.sync_commands_api, name='sync_commands_api'),
-    path('api/commands/upload/', api_views.upload_commands_api, name='upload_commands_api'),
-    path('api/logs/<int:log_id>/', api_views.log_detail_api, name='log_detail_api'),
+    # API v1
+    path('api/v1/commands/sync/', command_views.sync_commands_api, name='sync_commands_api'),
+    path('api/v1/commands/upload/', api_views.upload_commands_api, name='upload_commands_api'),
+    path('api/v1/logs/<int:log_id>/', api_views.log_detail_api, name='log_detail_api'),
 ]

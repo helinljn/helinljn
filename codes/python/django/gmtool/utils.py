@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 logger = logging.getLogger(__name__)
 
 # 脱敏字段（日志详情接口返回前处理）— 从 settings 获取，便于扩展
-from django.conf import settings as django_settings
-SENSITIVE_FIELD_NAMES = getattr(django_settings, 'SENSITIVE_FIELDS', {
+from django.conf import settings
+SENSITIVE_FIELD_NAMES = getattr(settings, 'SENSITIVE_FIELDS', {
     'password', 'passwd', 'pwd', 'token', 'access_token', 'refresh_token',
     'secret', 'sign', 'signature', 'sessionid', 'cookie', 'authorization',
 })
@@ -24,7 +24,6 @@ def get_client_ip(request):
     - 默认从右侧取第一个（最靠近应用服务器的代理添加的客户端IP）
     - 如果有多层代理，可设置 TRUSTED_PROXY_COUNT 跳过指定数量的代理IP
     """
-    from django.conf import settings
     if getattr(settings, 'TRUSTED_PROXY', False):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:

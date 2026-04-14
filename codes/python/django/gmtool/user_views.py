@@ -2,6 +2,8 @@
 import logging
 
 import hashlib
+import hmac
+import time
 
 from django.conf import settings as django_settings
 from django.contrib import messages
@@ -25,15 +27,24 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
+# 确认令牌有效期（秒），5 分钟窗口
+_CONFIRM_TOKEN_TTL = 300
+
+
 def _make_confirm_token(obj_id, obj_name):
-    """生成删除确认令牌，防止绕过前端直接POST删除"""
-    raw = f'{django_settings.SECRET_KEY}:delete:{obj_id}:{obj_name}'
-    return hashlib.sha256(raw.encode()).hexdigest()[:16]
+    """生成删除确认令牌，使用 HMAC-SHA256 + 时间窗口防重放"""
+    timestamp = str(int(time.time() // _CONFIRM_TOKEN_TTL))
+    raw = f'delete:{obj_id}:{obj_name}:{timestamp}'
+    return hmac.new(
+        django_settings.SECRET_KEY.encode(),
+        raw.encode(),
+        hashlib.sha256,
+    ).hexdigest()[:32]
 
 
 def _verify_confirm_token(obj_id, obj_name, token):
     """验证删除确认令牌"""
-    return token == _make_confirm_token(obj_id, obj_name)
+    return hmac.compare_digest(token, _make_confirm_token(obj_id, obj_name))
 
 
 @login_required

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-14 18:30+0800\n"
+"POT-Creation-Date: 2026-04-14 19:11+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,7 +192,7 @@ msgstr ""
 "This command has been deactivated or deleted. Please refresh the page to get "
 "the latest command list."
 
-#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:81
+#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:87
 msgid "该命令已被停用或删除"
 msgstr "This command has been deactivated or deleted"
 
@@ -244,15 +244,15 @@ msgstr "Add GM Command"
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr "Failed to read JSON file: %(error)s"
 
-#: .\gmtool\decorators.py:57
-msgid "您没有管理员权限"
-msgstr "You do not have administrator privileges"
-
-#: .\gmtool\decorators.py:73
+#: .\gmtool\decorators.py:57 .\gmtool\decorators.py:79
 msgid "请先登录"
 msgstr "Please log in first"
 
-#: .\gmtool\decorators.py:99
+#: .\gmtool\decorators.py:62 .\gmtool\decorators.py:63
+msgid "您没有管理员权限"
+msgstr "You do not have administrator privileges"
+
+#: .\gmtool\decorators.py:105
 msgid "您没有执行该命令的权限"
 msgstr "You do not have permission to execute this command"
 
@@ -301,7 +301,7 @@ msgstr "Passwords do not match"
 msgid "新密码（留空不修改）"
 msgstr "New Password (leave blank to keep unchanged)"
 
-#: .\gmtool\forms.py:107 .\gmtool\user_views.py:111
+#: .\gmtool\forms.py:107 .\gmtool\user_views.py:122
 msgid "不能禁用自己的账号"
 msgstr "You cannot disable your own account"
 
@@ -1196,7 +1196,7 @@ msgstr "Management"
 msgid "保存"
 msgstr "Save"
 
-#: .\gmtool\templates\gmtool\role_list.html:14 .\gmtool\user_views.py:198
+#: .\gmtool\templates\gmtool\role_list.html:14 .\gmtool\user_views.py:209
 msgid "创建角色"
 msgstr "Create Role"
 
@@ -1240,7 +1240,7 @@ msgstr ""
 msgid "搜索用户名..."
 msgstr "Search username..."
 
-#: .\gmtool\templates\gmtool\user_list.html:22 .\gmtool\user_views.py:89
+#: .\gmtool\templates\gmtool\user_list.html:22 .\gmtool\user_views.py:100
 msgid "创建用户"
 msgstr "Create User"
 
@@ -1288,50 +1288,50 @@ msgstr ""
 msgid "保存权限"
 msgstr "Save Permissions"
 
-#: .\gmtool\user_views.py:130
+#: .\gmtool\user_views.py:141
 msgid "编辑用户"
 msgstr "Edit User"
 
-#: .\gmtool\user_views.py:145
+#: .\gmtool\user_views.py:156
 msgid "不能删除自己的账号"
 msgstr "You cannot delete your own account"
 
-#: .\gmtool\user_views.py:147
+#: .\gmtool\user_views.py:158
 msgid "不能删除超级管理员账号"
 msgstr "You cannot delete the super admin account"
 
-#: .\gmtool\user_views.py:152 .\gmtool\user_views.py:342
+#: .\gmtool\user_views.py:163 .\gmtool\user_views.py:353
 msgid "删除确认失败，请重试"
 msgstr "Failed to delete, please retry"
 
-#: .\gmtool\user_views.py:210
+#: .\gmtool\user_views.py:221
 msgid "超级管理员角色不可编辑"
 msgstr "Super admin role cannot be edited"
 
-#: .\gmtool\user_views.py:229
+#: .\gmtool\user_views.py:240
 msgid "编辑角色"
 msgstr "Edit Role"
 
-#: .\gmtool\utils.py:63
+#: .\gmtool\utils.py:62
 msgid "命令参数定义错误，请联系管理员"
 msgstr "Invalid command parameter schema, please contact the administrator"
 
-#: .\gmtool\utils.py:78
+#: .\gmtool\utils.py:77
 #, python-format
 msgid "缺少必填参数: %(field)s"
 msgstr "Missing required parameter: %(field)s"
 
-#: .\gmtool\utils.py:88
+#: .\gmtool\utils.py:87
 #, python-format
 msgid "参数 %(field)s 必须为整数"
 msgstr "Parameter %(field)s must be an integer"
 
-#: .\gmtool\utils.py:90
+#: .\gmtool\utils.py:89
 #, python-format
 msgid "参数 %(field)s 不能为负数"
 msgstr "Parameter %(field)s cannot be negative"
 
-#: .\gmtool\utils.py:112
+#: .\gmtool\utils.py:111
 #, python-format
 msgid "参数 %(field)s 必须为布尔值"
 msgstr "Parameter %(field)s must be a boolean"

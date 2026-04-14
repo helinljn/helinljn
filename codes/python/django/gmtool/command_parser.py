@@ -9,7 +9,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import gettext as _
 
-from .models import GMCommand, UserCommandPermission, UserCommandPermission
+from .models import GMCommand, UserCommandPermission
 
 logger = logging.getLogger(__name__)
 
