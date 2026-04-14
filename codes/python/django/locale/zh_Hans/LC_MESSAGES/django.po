@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-14 14:46+0800\n"
+"POT-Creation-Date: 2026-04-14 17:33+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -53,7 +53,7 @@ msgstr ""
 msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
 msgstr ""
 
-#: .\gmtool\api_views.py:96 .\gmtool\command_views.py:304
+#: .\gmtool\api_views.py:96 .\gmtool\command_views.py:307
 #, python-format
 msgid "检测到 ID 冲突: %(errors)s"
 msgstr ""
@@ -175,71 +175,71 @@ msgstr ""
 msgid "command_data 中缺少 command_id"
 msgstr ""
 
-#: .\gmtool\command_views.py:97
+#: .\gmtool\command_views.py:100
 msgid "该命令已被停用或删除，请刷新页面获取最新命令列表"
 msgstr ""
 
-#: .\gmtool\command_views.py:101 .\gmtool\decorators.py:77
+#: .\gmtool\command_views.py:104 .\gmtool\decorators.py:81
 msgid "该命令已被停用或删除"
 msgstr ""
 
-#: .\gmtool\command_views.py:108
+#: .\gmtool\command_views.py:111
 msgid "请求体必须是 JSON 对象"
 msgstr ""
 
-#: .\gmtool\command_views.py:112
+#: .\gmtool\command_views.py:115
 msgid "参数 Params 必须是对象"
 msgstr ""
 
-#: .\gmtool\command_views.py:123
+#: .\gmtool\command_views.py:126
 msgid "Partition 必须为整数"
 msgstr ""
 
-#: .\gmtool\command_views.py:126
+#: .\gmtool\command_views.py:129
 msgid "Partition 不能为负数"
 msgstr ""
 
-#: .\gmtool\command_views.py:178
+#: .\gmtool\command_views.py:181
 msgid "请求数据格式错误"
 msgstr ""
 
-#: .\gmtool\command_views.py:181 .\gmtool\command_views.py:323
+#: .\gmtool\command_views.py:184 .\gmtool\command_views.py:326
 msgid "服务器内部错误"
 msgstr ""
 
-#: .\gmtool\command_views.py:256
+#: .\gmtool\command_views.py:259
 #, python-format
 msgid "写入命令到 JSON 文件失败: %(error)s"
 msgstr ""
 
-#: .\gmtool\command_views.py:264
+#: .\gmtool\command_views.py:267
 msgid "命令已添加到 JSON 文件，但数据库同步失败"
 msgstr ""
 
-#: .\gmtool\command_views.py:276
+#: .\gmtool\command_views.py:279
 #, python-format
 msgid "命令 %(id)s 添加成功"
 msgstr ""
 
-#: .\gmtool\command_views.py:283 .\gmtool\templates\gmtool\command_add.html:20
+#: .\gmtool\command_views.py:286 .\gmtool\templates\gmtool\command_add.html:20
 #: .\gmtool\templates\gmtool\dashboard.html:133
 msgid "添加GM命令"
 msgstr ""
 
-#: .\gmtool\command_views.py:300
+#: .\gmtool\command_views.py:303
 #, python-format
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr ""
 
-#: .\gmtool\decorators.py:53
+#: .\gmtool\decorators.py:57
 msgid "您没有管理员权限"
 msgstr ""
 
-#: .\gmtool\decorators.py:69
+#: .\gmtool\decorators.py:73
 msgid "请先登录"
 msgstr ""
 
-#: .\gmtool\decorators.py:94
+#: .\gmtool\decorators.py:98
 msgid "您没有执行该命令的权限"
 msgstr ""
 
@@ -267,7 +267,7 @@ msgstr ""
 #: .\gmtool\templates\gmtool\command_log.html:91
 #: .\gmtool\templates\gmtool\login.html:55
 #: .\gmtool\templates\gmtool\login_log.html:17
-#: .\gmtool\templates\gmtool\login_log.html:44
+#: .\gmtool\templates\gmtool\login_log.html:52
 #: .\gmtool\templates\gmtool\user_list.html:34
 msgid "用户名"
 msgstr ""
@@ -290,7 +290,7 @@ msgstr ""
 msgid "新密码（留空不修改）"
 msgstr ""
 
-#: .\gmtool\forms.py:110 .\gmtool\user_views.py:93
+#: .\gmtool\forms.py:110 .\gmtool\user_views.py:96
 msgid "不能禁用自己的账号"
 msgstr ""
 
@@ -444,7 +444,18 @@ msgstr ""
 msgid "无法连接到游戏服务器，请检查配置"
 msgstr ""
 
-#: .\gmtool\models.py:15 .\gmtool\templates\gmtool\command_log.html:132
+#: .\gmtool\management\commands\init_roles.py:22 .\gmtool\models.py:40
+#: .\gmtool\signals.py:31 .\gmtool\signals.py:84
+#: .\gmtool\templates\gmtool\role_list.html:42
+msgid "超级管理员"
+msgstr ""
+
+#: .\gmtool\management\commands\init_roles.py:23 .\gmtool\signals.py:32
+#: .\gmtool\signals.py:85
+msgid "系统最高权限角色，拥有所有命令执行权限及管理功能"
+msgstr ""
+
+#: .\gmtool\models.py:15 .\gmtool\templates\gmtool\command_log.html:140
 msgid "请求参数定义"
 msgstr ""
 
@@ -464,23 +475,19 @@ msgstr ""
 msgid "GM命令"
 msgstr ""
 
-#: .\gmtool\models.py:40 .\gmtool\templates\gmtool\role_list.html:42
-msgid "超级管理员"
-msgstr ""
-
 #: .\gmtool\models.py:41 .\gmtool\models.py:108 .\gmtool\models.py:138
 #: .\gmtool\templates\gmtool\role_list.html:30
 msgid "创建时间"
 msgstr ""
 
 #: .\gmtool\models.py:62 .\gmtool\models.py:81 .\gmtool\models.py:100
-#: .\gmtool\models.py:132 .\gmtool\templates\gmtool\command_log.html:129
+#: .\gmtool\models.py:132 .\gmtool\templates\gmtool\command_log.html:137
 msgid "用户"
 msgstr ""
 
 #: .\gmtool\models.py:63 .\gmtool\models.py:101
 #: .\gmtool\templates\gmtool\command_log.html:95
-#: .\gmtool\templates\gmtool\command_log.html:130
+#: .\gmtool\templates\gmtool\command_log.html:138
 #: .\gmtool\templates\gmtool\dashboard.html:99
 msgid "命令"
 msgstr ""
@@ -496,7 +503,7 @@ msgstr ""
 #: .\gmtool\models.py:96 .\gmtool\templates\gmtool\command_execute.html:556
 #: .\gmtool\templates\gmtool\command_execute.html:623
 #: .\gmtool\templates\gmtool\command_log.html:109
-#: .\gmtool\templates\gmtool\command_log.html:154
+#: .\gmtool\templates\gmtool\command_log.html:162
 #: .\gmtool\templates\gmtool\dashboard.html:109
 msgid "成功"
 msgstr ""
@@ -504,13 +511,13 @@ msgstr ""
 #: .\gmtool\models.py:97 .\gmtool\templates\gmtool\command_execute.html:564
 #: .\gmtool\templates\gmtool\command_execute.html:623
 #: .\gmtool\templates\gmtool\command_log.html:110
-#: .\gmtool\templates\gmtool\command_log.html:156
+#: .\gmtool\templates\gmtool\command_log.html:164
 #: .\gmtool\templates\gmtool\dashboard.html:111
 msgid "失败"
 msgstr ""
 
 #: .\gmtool\models.py:98 .\gmtool\templates\gmtool\command_log.html:111
-#: .\gmtool\templates\gmtool\command_log.html:158
+#: .\gmtool\templates\gmtool\command_log.html:166
 #: .\gmtool\templates\gmtool\dashboard.html:113
 msgid "超时"
 msgstr ""
@@ -523,7 +530,7 @@ msgstr ""
 msgid "请求数据"
 msgstr ""
 
-#: .\gmtool\models.py:104 .\gmtool\templates\gmtool\command_log.html:233
+#: .\gmtool\models.py:104 .\gmtool\templates\gmtool\command_log.html:245
 msgid "完整请求JSON"
 msgstr ""
 
@@ -532,21 +539,21 @@ msgid "IDIP协议完整请求内容"
 msgstr ""
 
 #: .\gmtool\models.py:105 .\gmtool\templates\gmtool\command_execute.html:188
-#: .\gmtool\templates\gmtool\command_log.html:237
+#: .\gmtool\templates\gmtool\command_log.html:249
 msgid "响应数据"
 msgstr ""
 
 #: .\gmtool\models.py:106 .\gmtool\templates\gmtool\command_execute.html:222
 #: .\gmtool\templates\gmtool\command_execute.html:422
 #: .\gmtool\templates\gmtool\command_log.html:106
-#: .\gmtool\templates\gmtool\command_log.html:133
+#: .\gmtool\templates\gmtool\command_log.html:141
 #: .\gmtool\templates\gmtool\dashboard.html:99
 #: .\gmtool\templates\gmtool\user_list.html:38
 msgid "状态"
 msgstr ""
 
 #: .\gmtool\models.py:107 .\gmtool\models.py:135
-#: .\gmtool\templates\gmtool\login_log.html:46
+#: .\gmtool\templates\gmtool\login_log.html:54
 msgid "IP地址"
 msgstr ""
 
@@ -557,23 +564,23 @@ msgstr ""
 #: .\gmtool\models.py:128 .\gmtool\templates\gmtool\login.html:6
 #: .\gmtool\templates\gmtool\login.html:76
 #: .\gmtool\templates\gmtool\login_log.html:24
-#: .\gmtool\templates\gmtool\login_log.html:58
+#: .\gmtool\templates\gmtool\login_log.html:66
 msgid "登录"
 msgstr ""
 
 #: .\gmtool\models.py:129 .\gmtool\templates\gmtool\base.html:113
 #: .\gmtool\templates\gmtool\login_log.html:25
-#: .\gmtool\templates\gmtool\login_log.html:60
+#: .\gmtool\templates\gmtool\login_log.html:68
 msgid "登出"
 msgstr ""
 
 #: .\gmtool\models.py:130 .\gmtool\templates\gmtool\login_log.html:26
-#: .\gmtool\templates\gmtool\login_log.html:62
+#: .\gmtool\templates\gmtool\login_log.html:70
 msgid "登录失败"
 msgstr ""
 
 #: .\gmtool\models.py:134 .\gmtool\templates\gmtool\login_log.html:21
-#: .\gmtool\templates\gmtool\login_log.html:45
+#: .\gmtool\templates\gmtool\login_log.html:53
 msgid "操作类型"
 msgstr ""
 
@@ -581,7 +588,7 @@ msgstr ""
 msgid "浏览器标识"
 msgstr ""
 
-#: .\gmtool\models.py:137 .\gmtool\templates\gmtool\login_log.html:48
+#: .\gmtool\models.py:137 .\gmtool\templates\gmtool\login_log.html:56
 msgid "失败原因"
 msgstr ""
 
@@ -819,7 +826,7 @@ msgstr ""
 #: .\gmtool\templates\gmtool\command_execute.html:303
 #: .\gmtool\templates\gmtool\command_execute.html:328
 #: .\gmtool\templates\gmtool\command_execute.html:454
-#: .\gmtool\templates\gmtool\command_log.html:217
+#: .\gmtool\templates\gmtool\command_log.html:229
 msgid "无数据"
 msgstr ""
 
@@ -898,7 +905,7 @@ msgid "搜索"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\command_list.html:41
-#: .\gmtool\templates\gmtool\command_log.html:135
+#: .\gmtool\templates\gmtool\command_log.html:143
 #: .\gmtool\templates\gmtool\role_list.html:31
 #: .\gmtool\templates\gmtool\user_list.html:39
 msgid "操作"
@@ -924,9 +931,9 @@ msgid "日志"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\command_log.html:86
-#: .\gmtool\templates\gmtool\command_log.html:116
+#: .\gmtool\templates\gmtool\command_log.html:124
 #: .\gmtool\templates\gmtool\login_log.html:12
-#: .\gmtool\templates\gmtool\login_log.html:31
+#: .\gmtool\templates\gmtool\login_log.html:39
 msgid "筛选条件"
 msgstr ""
 
@@ -944,47 +951,57 @@ msgstr ""
 msgid "全部状态"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:128
+#: .\gmtool\templates\gmtool\command_log.html:115
+#: .\gmtool\templates\gmtool\login_log.html:30
+msgid "开始时间"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\command_log.html:119
+#: .\gmtool\templates\gmtool\login_log.html:34
+msgid "结束时间"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\command_log.html:136
 #: .\gmtool\templates\gmtool\dashboard.html:99
-#: .\gmtool\templates\gmtool\login_log.html:43
+#: .\gmtool\templates\gmtool\login_log.html:51
 msgid "时间"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:131
+#: .\gmtool\templates\gmtool\command_log.html:139
 #: .\gmtool\templates\gmtool\dashboard.html:99
 msgid "服务器"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:134
+#: .\gmtool\templates\gmtool\command_log.html:142
 msgid "IP"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:147
+#: .\gmtool\templates\gmtool\command_log.html:155
 msgid "点击查看完整内容"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:169
-#: .\gmtool\templates\gmtool\login_log.html:74
+#: .\gmtool\templates\gmtool\command_log.html:177
+#: .\gmtool\templates\gmtool\login_log.html:82
 msgid "暂无日志数据"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:203
+#: .\gmtool\templates\gmtool\command_log.html:215
 msgid "日志详情"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:218
+#: .\gmtool\templates\gmtool\command_log.html:230
 msgid "无响应数据"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:221
+#: .\gmtool\templates\gmtool\command_log.html:233
 msgid "加载中..."
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:235
+#: .\gmtool\templates\gmtool\command_log.html:247
 msgid "请求数据（表单参数）"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\command_log.html:242
+#: .\gmtool\templates\gmtool\command_log.html:254
 msgid "加载失败，请重试"
 msgstr ""
 
@@ -1127,7 +1144,7 @@ msgstr ""
 msgid "全部类型"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\login_log.html:47
+#: .\gmtool\templates\gmtool\login_log.html:55
 msgid "浏览器"
 msgstr ""
 
@@ -1144,7 +1161,7 @@ msgstr ""
 msgid "保存"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\role_list.html:14 .\gmtool\user_views.py:178
+#: .\gmtool\templates\gmtool\role_list.html:14 .\gmtool\user_views.py:181
 msgid "创建角色"
 msgstr ""
 
@@ -1187,7 +1204,7 @@ msgstr ""
 msgid "搜索用户名..."
 msgstr ""
 
-#: .\gmtool\templates\gmtool\user_list.html:22 .\gmtool\user_views.py:71
+#: .\gmtool\templates\gmtool\user_list.html:22 .\gmtool\user_views.py:74
 msgid "创建用户"
 msgstr ""
 
@@ -1229,23 +1246,23 @@ msgstr ""
 msgid "保存权限"
 msgstr ""
 
-#: .\gmtool\user_views.py:112
+#: .\gmtool\user_views.py:115
 msgid "编辑用户"
 msgstr ""
 
-#: .\gmtool\user_views.py:128
+#: .\gmtool\user_views.py:131
 msgid "不能删除自己的账号"
 msgstr ""
 
-#: .\gmtool\user_views.py:131
+#: .\gmtool\user_views.py:134
 msgid "不能删除超级管理员账号"
 msgstr ""
 
-#: .\gmtool\user_views.py:191
+#: .\gmtool\user_views.py:194
 msgid "超级管理员角色不可编辑"
 msgstr ""
 
-#: .\gmtool\user_views.py:210
+#: .\gmtool\user_views.py:213
 msgid "编辑角色"
 msgstr ""
 

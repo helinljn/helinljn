@@ -111,6 +111,14 @@
                     <option value="timeout" {% if status_filter == 'timeout' %}selected{% endif %}>{% trans "超时" %}</option>
                 </select>
             </div>
+            <div class="col-auto">
+                <label class="form-label">{% trans "开始时间" %}</label>
+                <input type="datetime-local" name="start_time" class="form-control form-control-sm" value="{{ start_time_filter }}">
+            </div>
+            <div class="col-auto">
+                <label class="form-label">{% trans "结束时间" %}</label>
+                <input type="datetime-local" name="end_time" class="form-control form-control-sm" value="{{ end_time_filter }}">
+            </div>
             <div class="col-auto align-self-end">
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="ti ti-search me-1"></i>{% trans "筛选条件" %}
@@ -178,17 +186,21 @@
 <div class="card-footer d-flex align-items-center justify-content-center">
     <ul class="pagination m-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&command={{ cmd_filter }}&user={{ user_filter }}">
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ status_filter }}&command={{ cmd_filter }}&user={{ user_filter }}&start_time={{ start_time_filter }}&end_time={{ end_time_filter }}">
             <i class="ti ti-chevron-left"></i>
         </a></li>
         {% endif %}
-        {% for num in page_obj.paginator.page_range %}
+        {% for num in elided_page_range %}
+        {% if num == page_obj.paginator.ELLIPSIS %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% else %}
         <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-            <a class="page-link" href="?page={{ num }}&status={{ status_filter }}&command={{ cmd_filter }}&user={{ user_filter }}">{{ num }}</a>
+            <a class="page-link" href="?page={{ num }}&status={{ status_filter }}&command={{ cmd_filter }}&user={{ user_filter }}&start_time={{ start_time_filter }}&end_time={{ end_time_filter }}">{{ num }}</a>
         </li>
+        {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&command={{ cmd_filter }}&user={{ user_filter }}">
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ status_filter }}&command={{ cmd_filter }}&user={{ user_filter }}&start_time={{ start_time_filter }}&end_time={{ end_time_filter }}">
             <i class="ti ti-chevron-right"></i>
         </a></li>
         {% endif %}

@@ -4,6 +4,7 @@ import logging
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +28,8 @@ def auto_assign_super_admin_role(sender, instance, created, **kwargs):
         role, role_created = Role.objects.get_or_create(
             name='super_admin',
             defaults={
-                'display_name': '超级管理员',
-                'description': '系统最高权限角色，拥有所有命令执行权限及管理功能',
+                'display_name': _('超级管理员'),
+                'description': _('系统最高权限角色，拥有所有命令执行权限及管理功能'),
                 'is_super_admin': True,
             }
         )
@@ -80,8 +81,8 @@ def auto_bind_existing_superusers(sender, **kwargs):
         Role.objects.get_or_create(
             name='super_admin',
             defaults={
-                'display_name': '超级管理员',
-                'description': '系统最高权限角色，拥有所有命令执行权限及管理功能',
+                'display_name': _('超级管理员'),
+                'description': _('系统最高权限角色，拥有所有命令执行权限及管理功能'),
                 'is_super_admin': True,
             }
         )

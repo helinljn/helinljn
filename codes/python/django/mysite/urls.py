@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
+from django.views.i18n import JavaScriptCatalog
 from gmtool.views import custom_403, custom_404, custom_500
 
 handler404 = custom_404
@@ -24,6 +25,7 @@ handler403 = custom_403
 
 urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
+    path('jsi18n/', JavaScriptCatalog.as_view(domain='django'), name='javascript-catalog'),
     path('gmtool/', include('gmtool.urls')),
     path('', RedirectView.as_view(url='/gmtool/', permanent=False)),
     re_path(r'^.*$', custom_404),

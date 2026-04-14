@@ -1,6 +1,7 @@
 """管理命令：初始化超级管理员角色并为所有Django超级管理员绑定"""
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 
 class Command(BaseCommand):
@@ -18,8 +19,8 @@ class Command(BaseCommand):
         role, role_created = Role.objects.get_or_create(
             name='super_admin',
             defaults={
-                'display_name': '超级管理员',
-                'description': '系统最高权限角色，拥有所有命令执行权限及管理功能',
+                'display_name': _('超级管理员'),
+                'description': _('系统最高权限角色，拥有所有命令执行权限及管理功能'),
                 'is_super_admin': True,
             }
         )

@@ -68,6 +68,9 @@ c:\helin\helinljn\codes\python\django\
 │   ├── management/commands/
 │   │   ├── init_roles.py
 │   │   └── sync_commands.py
+│   ├── static/gmtool/js/
+│   │   ├── command_execute.js（命令执行页面逻辑）
+│   │   └── command_log_detail.js（操作日志详情弹窗逻辑）
 │   ├── migrations/
 │   │   ├── 0001_initial.py
 │   │   ├── 0002_loginlog.py
@@ -262,6 +265,7 @@ c:\helin\helinljn\codes\python\django\
 | 路径 | 说明 |
 |---|---|
 | `/i18n/` | Django 语言切换相关路由 |
+| `/jsi18n/` | JavaScript 国际化 catalog（`django.gettext` 等） |
 | `/gmtool/` | gmtool 子路由入口 |
 | `/` | 重定向至 `/gmtool/` |
 
@@ -355,6 +359,42 @@ c:\helin\helinljn\codes\python\django\
 - 临时文件 + `os.replace` 原子覆盖
 - 成功后自动同步并记录审计日志
 
+### 9.7 前端安全与性能优化
+
+#### CDN 资源 SRI 校验
+
+`base.html` 中所有 CDN 引用（Tabler CSS/JS、Tabler Icons CSS）已添加 `integrity` 和 `crossorigin="anonymous"` 属性，防止 CDN 篡改攻击。
+
+#### 内联 JS 提取为静态文件
+
+命令执行页面（`command_execute.html`）和操作日志页面（`command_log.html`）的内联 JS 已提取为独立静态文件：
+
+| 静态文件 | 来源页面 | 说明 |
+|---|---|---|
+| `gmtool/js/command_execute.js` | `command_execute.html` | 命令执行、批量执行、结构化结果展示 |
+| `gmtool/js/command_log_detail.js` | `command_log.html` | 日志详情弹窗（`showDetail`/`closeDetail`/`escapeHtml`） |
+
+模板→JS 数据传递方式：
+
+- `command_execute.html`：使用 Django `json_script` 模板标签安全传递 `response_params_json`、`response_field_labels_json`、`batch_max_targets`、`batch_interval_ms`
+- `command_log.html`：使用 `json_script` 传递 `log_detail_i18n`（i18n 字符串字典）
+
+#### JavaScript 国际化
+
+- 项目级路由 `/jsi18n/` 提供 Django JavaScript Catalog（`domain='django'`）
+- `base.html` 中全局加载 `<script src="{% url 'javascript-catalog' %}"></script>`
+- `command_execute.js` 中通过 `django.gettext()` 实现前端 i18n，内置 fallback（catalog 未加载时返回原文）
+
+### 9.8 日志查询优化
+
+#### 默认时间范围筛选
+
+操作日志和登录日志列表默认筛选最近 7 天数据，避免全量查询导致的性能问题。用户可通过「开始时间」和「结束时间」输入框自定义范围。
+
+#### 分页上限保护
+
+日志列表分页改用 `Paginator.get_elided_page_range()`，只渲染当前页前后各 2 页 + 首尾各 1 页 + 省略号，避免总页数过大时渲染数百个页码按钮。
+
 ---
 
 ## 10. 表单规则（`gmtool/forms.py`）
@@ -407,6 +447,8 @@ c:\helin\helinljn\codes\python\django\
 - `IDIP_API_URL`, `IDIP_TIMEOUT`
 - `TRUSTED_PROXY`：控制是否信任 `X-Forwarded-For`
 - `BATCH_EXECUTE_MAX_TARGETS`, `BATCH_EXECUTE_INTERVAL_MS`
+- `SESSION_COOKIE_HTTPONLY = True`：禁止 JS 访问 Session Cookie
+- `STATIC_ROOT = BASE_DIR / 'staticfiles'`：`collectstatic` 输出目录
 - `X_FRAME_OPTIONS = 'DENY'`
 
 ### 12.2 国际化
@@ -419,6 +461,7 @@ c:\helin\helinljn\codes\python\django\
 ### 12.3 生产安全（`DEBUG=False`）
 
 - 强制安全检查：`SECRET_KEY`、`ALLOWED_HOSTS`
+- `SESSION_COOKIE_HTTPONLY = True`：禁止 JS 访问 Session Cookie
 - `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`
 - `SECURE_SSL_REDIRECT`
 - HSTS（`SECURE_HSTS_*`）

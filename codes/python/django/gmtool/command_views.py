@@ -2,11 +2,14 @@
 import json
 import logging
 
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
 
@@ -346,12 +349,40 @@ def command_log_list(request):
     if user_filter and is_admin:
         logs = logs.filter(user__username__icontains=user_filter)
 
+    # 时间范围筛选（默认最近7天）
+    start_time_filter = request.GET.get('start_time', '')
+    end_time_filter = request.GET.get('end_time', '')
+
+    # 如果没有指定任何时间范围，默认筛选最近7天
+    if not start_time_filter and not end_time_filter:
+        default_start = timezone.now() - timedelta(days=7)
+        start_time_filter = default_start.strftime('%Y-%m-%dT%H:%M')
+        logs = logs.filter(created_at__gte=default_start)
+    else:
+        if start_time_filter:
+            try:
+                start_dt = timezone.make_aware(
+                    timezone.datetime.strptime(start_time_filter, '%Y-%m-%dT%H:%M')
+                )
+                logs = logs.filter(created_at__gte=start_dt)
+            except (ValueError, TypeError):
+                start_time_filter = ''
+        if end_time_filter:
+            try:
+                end_dt = timezone.make_aware(
+                    timezone.datetime.strptime(end_time_filter, '%Y-%m-%dT%H:%M')
+                )
+                logs = logs.filter(created_at__lte=end_dt)
+            except (ValueError, TypeError):
+                end_time_filter = ''
+
     # 添加排序以避免分页警告（按创建时间降序，最新的在前）
     logs = logs.order_by('-created_at')
 
     paginator = Paginator(logs, 20)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
+    elided_page_range = list(paginator.get_elided_page_range(page_obj.number, on_each_side=2, on_ends=1))
 
     # 普通用户只展示其日志中出现过的命令，避免暴露全量命令信息
     if is_admin:
@@ -362,9 +393,12 @@ def command_log_list(request):
 
     return render(request, 'gmtool/command_log.html', {
         'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
         'status_filter': status_filter,
         'cmd_filter': cmd_filter,
         'user_filter': user_filter if is_admin else '',
+        'start_time_filter': start_time_filter,
+        'end_time_filter': end_time_filter,
         'commands': commands_qs,
         'is_admin': is_admin,
     })

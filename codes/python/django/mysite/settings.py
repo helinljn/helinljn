@@ -151,6 +151,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 输出目录，生产部署使用
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -164,6 +165,7 @@ CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 # 会话安全配置
 SESSION_COOKIE_AGE = 86400              # Session 有效期 1 天（秒），GM 管理系统缩短有效期更安全
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 浏览器关闭时过期
+SESSION_COOKIE_HTTPONLY = True          # 禁止 JS 访问 Session Cookie，防止 XSS 窃取
 
 # IDIP API 配置
 IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:18080/cy_idip')  # 游戏IDIP接口地址（部署时修改）
