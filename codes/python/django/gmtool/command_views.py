@@ -2,9 +2,8 @@
 import json
 import logging
 
-from datetime import timedelta
-
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -19,7 +18,7 @@ from .decorators import command_permission_required, is_super_admin, super_admin
 from .forms import AddGMCommandForm
 from .idip_client import send_idip_command
 from .models import CommandLog, GMCommand
-from .utils import get_client_ip, _group_commands_by_tab, _validate_command_params_basic
+from .utils import get_client_ip, _group_commands_by_tab, _validate_command_params_basic, parse_time_range_filters
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +99,6 @@ def command_execute(request, cmd_id):
                 {'success': False, 'error': _('该命令已被停用或删除，请刷新页面获取最新命令列表'), 'command_deactivated': True},
                 status=410,
             )
-        from django.contrib import messages
         messages.error(request, _('该命令已被停用或删除'))
         return redirect('gmtool:command_list')
 
@@ -255,7 +253,6 @@ def add_gm_command(request):
                 'data': cmd_json_data,
             })
             if not success:
-                from django.contrib import messages
                 messages.error(request, _('写入命令到 JSON 文件失败: %(error)s') % {'error': error_msg})
             else:
                 # 同步到数据库
@@ -263,7 +260,6 @@ def add_gm_command(request):
                     sync_commands_to_db()
                 except Exception as e:
                     logger.exception('Command sync error after add: %s', e)
-                    from django.contrib import messages
                     messages.warning(request, _('命令已添加到 JSON 文件，但数据库同步失败'))
 
                 log_operation('command', 'add', user=request.user,
@@ -275,7 +271,6 @@ def add_gm_command(request):
                                   'response_id': response_id,
                               })
 
-                from django.contrib import messages
                 messages.success(request, _('命令 %(id)s 添加成功') % {'id': command_id})
                 return redirect('gmtool:dashboard')
     else:
@@ -295,7 +290,7 @@ def sync_commands_api(request):
     """从JSON同步命令定义"""
 
     # 先校验 JSON 文件中的 ID 是否有冲突
-    json_path = settings.BASE_DIR / 'idip_commands.json'
+    json_path = getattr(settings, 'IDIP_JSON_PATH', settings.BASE_DIR / 'idip_commands.json')
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -350,36 +345,16 @@ def command_log_list(request):
         logs = logs.filter(user__username__icontains=user_filter)
 
     # 时间范围筛选（默认最近7天）
-    start_time_filter = request.GET.get('start_time', '')
-    end_time_filter = request.GET.get('end_time', '')
-
-    # 如果没有指定任何时间范围，默认筛选最近7天
-    if not start_time_filter and not end_time_filter:
-        default_start = timezone.now() - timedelta(days=7)
-        start_time_filter = default_start.strftime('%Y-%m-%dT%H:%M')
-        logs = logs.filter(created_at__gte=default_start)
-    else:
-        if start_time_filter:
-            try:
-                start_dt = timezone.make_aware(
-                    timezone.datetime.strptime(start_time_filter, '%Y-%m-%dT%H:%M')
-                )
-                logs = logs.filter(created_at__gte=start_dt)
-            except (ValueError, TypeError):
-                start_time_filter = ''
-        if end_time_filter:
-            try:
-                end_dt = timezone.make_aware(
-                    timezone.datetime.strptime(end_time_filter, '%Y-%m-%dT%H:%M')
-                )
-                logs = logs.filter(created_at__lte=end_dt)
-            except (ValueError, TypeError):
-                end_time_filter = ''
+    start_time_filter, end_time_filter, start_dt, end_dt = parse_time_range_filters(request)
+    if start_dt:
+        logs = logs.filter(created_at__gte=start_dt)
+    if end_dt:
+        logs = logs.filter(created_at__lte=end_dt)
 
     # 添加排序以避免分页警告（按创建时间降序，最新的在前）
     logs = logs.order_by('-created_at')
 
-    paginator = Paginator(logs, 20)
+    paginator = Paginator(logs, settings.PAGE_SIZE)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     elided_page_range = list(paginator.get_elided_page_range(page_obj.number, on_each_side=2, on_ends=1))

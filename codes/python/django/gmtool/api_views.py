@@ -63,8 +63,8 @@ def upload_commands_api(request):
     if not uploaded_file.name.endswith('.json'):
         return JsonResponse({'error': _('仅支持 .json 文件')}, status=400)
 
-    # 校验文件大小（限制 5MB）
-    if uploaded_file.size > 5 * 1024 * 1024:
+    # 校验文件大小
+    if uploaded_file.size > settings.UPLOAD_MAX_SIZE:
         return JsonResponse({'error': _('文件大小不能超过 5MB')}, status=400)
 
     # 解析并校验 JSON 内容
@@ -97,7 +97,7 @@ def upload_commands_api(request):
 
     # 原子写入 idip_commands.json（先写临时文件再替换，防止中途崩溃损坏文件）
     try:
-        json_path = settings.BASE_DIR / 'idip_commands.json'
+        json_path = getattr(settings, 'IDIP_JSON_PATH', settings.BASE_DIR / 'idip_commands.json')
         content_str = raw.decode('utf-8') if isinstance(raw, bytes) else raw
         fd, tmp_path = tempfile.mkstemp(suffix='.json.tmp')
         try:

@@ -87,13 +87,14 @@ def command_permission_required(view_func):
                 request._gmcommand = cmd
                 return view_func(request, *args, **kwargs)
 
-            # 检查用户是否有该命令的直接权限
-            if UserCommandPermission.objects.filter(
+            # 检查用户是否有该命令的直接权限（同时确认命令对象关联）
+            perm = UserCommandPermission.objects.filter(
                 user=request.user,
                 command=cmd,
-            ).exists():
+            ).select_related('command').first()
+            if perm:
                 # 将已查询的 command 对象缓存到 request，避免视图重复查询
-                request._gmcommand = cmd
+                request._gmcommand = perm.command
                 return view_func(request, *args, **kwargs)
         return JsonResponse({'error': _('您没有执行该命令的权限')}, status=403)
     return wrapper

@@ -1,5 +1,5 @@
 {% extends "gmtool/base.html" %}
-{% load i18n %}
+{% load i18n gmtool_tags %}
 
 {% block title %}{% trans "角色" %} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_roles %}active{% endblock %}
@@ -54,6 +54,7 @@
                         <form method="post" action="{% url 'gmtool:role_delete' role.id %}" class="d-inline"
                               onsubmit="return confirm('{% blocktrans with name=role.display_name %}确认删除角色 {{ name }}？{% endblocktrans %}')">
                             {% csrf_token %}
+                            <input type="hidden" name="confirm_token" value="{% confirm_token role.id role.name %}">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans '删除' %}">
                                 <i class="ti ti-trash"></i>
                             </button>

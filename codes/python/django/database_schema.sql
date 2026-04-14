@@ -1,7 +1,7 @@
 -- ============================================================================
 -- SQLite数据库表结构导出
 -- 数据库文件: db.sqlite3
--- 生成时间: 2026-04-14 15:02:21
+-- 生成时间: 2026-04-14 18:39:14
 -- 总表数: 15
 -- ============================================================================
 
@@ -112,7 +112,7 @@ CREATE TABLE "auth_user" (
 -- 9    date_joined          datetime        YES    NO     NULL
 -- 10   first_name           varchar(150)    YES    NO     NULL
 
--- 行数: 0
+-- 行数: 2
 
 
 -- ============================================================================
@@ -238,7 +238,7 @@ CREATE TABLE "django_session" (
 CREATE INDEX "django_session_expire_date_a5c62663"
   ON "django_session" ("expire_date");
 
--- 行数: 0
+-- 行数: 1
 
 
 -- ============================================================================
@@ -286,7 +286,7 @@ CREATE INDEX "cmdlog_cmd_created_idx"
 CREATE INDEX "cmdlog_created_idx"
   ON "gmtool_commandlog" ("created_at" DESC);
 
--- 行数: 0
+-- 行数: 23
 
 
 -- ============================================================================
@@ -374,7 +374,7 @@ CREATE INDEX "loginlog_created_idx"
 CREATE INDEX "loginlog_ip_created_idx"
   ON "gmtool_loginlog" ("ip_address", "created_at" DESC);
 
--- 行数: 0
+-- 行数: 24
 
 
 -- ============================================================================
@@ -400,7 +400,7 @@ CREATE TABLE "gmtool_role" (
 -- 4    is_super_admin       bool            YES    NO     NULL
 -- 5    created_at           datetime        YES    NO     NULL
 
--- 行数: 1
+-- 行数: 2
 
 
 -- ============================================================================
@@ -427,7 +427,7 @@ CREATE INDEX "gmtool_usercommandpermission_command_id_91c9204b"
 CREATE INDEX "gmtool_usercommandpermission_user_id_15b4cb9f"
   ON "gmtool_usercommandpermission" ("user_id");
 
--- 行数: 0
+-- 行数: 12
 
 
 -- ============================================================================
@@ -453,7 +453,7 @@ CREATE TABLE "gmtool_userprofile" (
 CREATE INDEX "gmtool_userprofile_role_id_1e579274"
   ON "gmtool_userprofile" ("role_id");
 
--- 行数: 0
+-- 行数: 2
 
 
 -- ============================================================================
@@ -463,18 +463,18 @@ CREATE INDEX "gmtool_userprofile_role_id_1e579274"
 -- auth_group                    :      0 行
 -- auth_group_permissions        :      0 行
 -- auth_permission               :     44 行
--- auth_user                     :      0 行
+-- auth_user                     :      2 行
 -- auth_user_groups              :      0 行
 -- auth_user_user_permissions    :      0 行
 -- django_content_type           :     11 行
 -- django_migrations             :     24 行
--- django_session                :      0 行
--- gmtool_commandlog             :      0 行
+-- django_session                :      1 行
+-- gmtool_commandlog             :     23 行
 -- gmtool_gmcommand              :     11 行
--- gmtool_loginlog               :      0 行
--- gmtool_role                   :      1 行
--- gmtool_usercommandpermission  :      0 行
--- gmtool_userprofile            :      0 行
+-- gmtool_loginlog               :     24 行
+-- gmtool_role                   :      2 行
+-- gmtool_usercommandpermission  :     12 行
+-- gmtool_userprofile            :      2 行
 
--- 总行数: 91
--- 平均每表行数: 6
+-- 总行数: 156
+-- 平均每表行数: 10

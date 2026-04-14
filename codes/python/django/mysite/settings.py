@@ -180,12 +180,29 @@ IDIP_FILE_CHECK_INTERVAL = config('IDIP_FILE_CHECK_INTERVAL', default=30, cast=i
 ENABLE_IDIP_FILE_MONITOR = config('ENABLE_IDIP_FILE_MONITOR', default=True, cast=bool)       # 是否启用文件监控
 IDIP_USE_HASH_CHECK = config('IDIP_USE_HASH_CHECK', default=False, cast=bool)                # 是否使用文件哈希检测变更（更准确但稍慢）
 
+# 敏感字段名（用于日志脱敏）
+SENSITIVE_FIELDS = frozenset(config(
+    'SENSITIVE_FIELDS',
+    default='password,passwd,pwd,token,access_token,refresh_token,secret,sign,signature,sessionid,cookie,authorization',
+).split(','))
+
+# IDIP 命令文件路径
+IDIP_JSON_PATH = config('IDIP_JSON_PATH', default=str(BASE_DIR / 'idip_commands.json'))
+
+# 分页配置
+PAGE_SIZE = config('PAGE_SIZE', default=20, cast=int)  # 每页条数
+
+# 上传文件大小限制
+UPLOAD_MAX_SIZE = config('UPLOAD_MAX_SIZE', default=5 * 1024 * 1024, cast=int)  # 默认5MB
+
 # 登录限速配置
 LOGIN_MAX_ATTEMPTS = config('LOGIN_MAX_ATTEMPTS', default=5, cast=int)                       # 登录最大尝试次数
 LOGIN_LOCKOUT_SECONDS = config('LOGIN_LOCKOUT_SECONDS', default=300, cast=int)               # 登录锁定时间（秒）
 
 # 是否信任反向代理的 X-Forwarded-For 头（生产环境使用 Nginx 等反向代理时设为 True）
 TRUSTED_PROXY = config('DJANGO_TRUSTED_PROXY', default=False, cast=bool)
+# 可信代理数量（从 X-Forwarded-For 右侧起，跳过这么多个代理 IP 后取客户端 IP）
+TRUSTED_PROXY_COUNT = config('DJANGO_TRUSTED_PROXY_COUNT', default=1, cast=int)
 
 # Clickjacking 防护
 X_FRAME_OPTIONS = 'DENY'

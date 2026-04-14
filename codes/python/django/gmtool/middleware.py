@@ -31,6 +31,10 @@ class IDIPFileMonitorMiddleware:
     2. 支持两种变更检测方式：修改时间（默认）或文件哈希（更准确）
     3. 如果文件被修改，自动调用 sync_commands_to_db 同步命令
     4. 同步时新增的命令会自动授予超级管理员（由 command_parser 保证）
+
+    注意：当前使用 LocMemCache 和线程锁，仅在单进程部署下有效。
+    多进程（如 gunicorn 多 worker）环境下，各进程的缓存不共享，
+    可能导致重复同步。如需多进程支持，请配置 Redis 缓存和分布式锁。
     """
 
     def __init__(self, get_response):
@@ -39,7 +43,7 @@ class IDIPFileMonitorMiddleware:
         self._lock = threading.Lock()
         # 初始化状态
         self._enabled = ENABLE_FILE_MONITOR
-        self._json_path = os.path.join(settings.BASE_DIR, 'idip_commands.json')
+        self._json_path = getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
 
     def __call__(self, request):
         if self._enabled:

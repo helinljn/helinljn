@@ -5,7 +5,11 @@ import os
 import tempfile
 
 from django.conf import settings
+from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import gettext as _
+
+from .models import GMCommand, UserCommandPermission, UserCommandPermission
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +26,6 @@ def validate_command_ids(command_id, request_id, response_id, exclude_command_id
 
     返回: (is_valid, error_message)
     """
-    from .models import GMCommand
-
     errors = []
 
     # request_id 和 response_id 不能相同
@@ -38,7 +40,6 @@ def validate_command_ids(command_id, request_id, response_id, exclude_command_id
         errors.append(_('命令 ID %(id)s 已存在') % {'id': command_id})
 
     # 一次查询检查 request_id / response_id 冲突（替代4次独立查询）
-    from django.db.models import Q
     conflict_qs = GMCommand.objects.all()
     if exclude_command_id:
         conflict_qs = conflict_qs.exclude(command_id=exclude_command_id)
@@ -85,8 +86,6 @@ def validate_json_command_ids(data):
     data: dict，即 idip_commands.json 的完整内容
     返回: (is_valid, error_message)
     """
-    from .models import GMCommand
-
     errors = []
 
     # 先检查 JSON 内部是否有重复
@@ -213,7 +212,7 @@ def add_command_to_json(command_data):
     command_data: dict，包含完整的命令定义（符合 idip_commands.json 中单个命令的格式）
     返回: (success, error_message)
     """
-    json_path = os.path.join(settings.BASE_DIR, 'idip_commands.json')
+    json_path = getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
 
     try:
         with open(json_path, 'r', encoding='utf-8') as f:
@@ -288,7 +287,7 @@ def parse_commands(json_path=None):
     ]
     """
     if json_path is None:
-        json_path = os.path.join(settings.BASE_DIR, 'idip_commands.json')
+        json_path = getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
 
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
@@ -336,9 +335,6 @@ def sync_commands_to_db(json_path=None):
     - JSON中不存在的命令：标记为不活跃(is_active=False)
     返回 (created_count, updated_count, deactivated_count)
     """
-    from django.db import transaction
-    from .models import GMCommand, UserCommandPermission
-
     commands = parse_commands(json_path)
 
     with transaction.atomic():
@@ -382,20 +378,14 @@ def sync_commands_to_db(json_path=None):
         if new_commands:
             try:
                 from django.contrib.auth import get_user_model
+                from .utils import assign_super_admin_permissions
                 User = get_user_model()
-                superadmin_users = User.objects.filter(is_superuser=True)
-                for user in superadmin_users:
-                    existing_user_perm_ids = set(UserCommandPermission.objects.filter(
-                        user=user
-                    ).values_list('command_id', flat=True))
-                    new_user_perms = []
-                    for cmd in new_commands:
-                        if cmd.id not in existing_user_perm_ids:
-                            new_user_perms.append(UserCommandPermission(user=user, command=cmd))
-                    if new_user_perms:
-                        UserCommandPermission.objects.bulk_create(new_user_perms)
-                if superadmin_users.exists():
-                    logger.info('新增权限已自动授予 %d 个超级管理员用户', superadmin_users.count())
+                superadmin_count = 0
+                for user in User.objects.filter(is_superuser=True):
+                    assign_super_admin_permissions(user, new_commands=new_commands)
+                    superadmin_count += 1
+                if superadmin_count > 0:
+                    logger.info('新增权限已自动授予 %d 个超级管理员用户', superadmin_count)
             except Exception as e:
                 logger.warning('超级管理员用户权限自动授权跳过: %s', e)
 

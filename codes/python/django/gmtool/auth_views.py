@@ -2,6 +2,7 @@
 import logging
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -123,7 +124,7 @@ def login_view(request):
                     ip_address=ip, user_agent=ua, reason=_('账号已禁用'),
                 )
                 log_operation('auth', 'login_failed', ip_address=ip,
-                              detail={'username': username, 'reason': 'Account disabled'})
+                              detail={'username': username, 'reason': str(_('账号已禁用'))})
                 return render(request, 'gmtool/login.html', {'error': _('账号已被禁用')})
         else:
             # 登录失败，计数已在上方原子递增，无需额外操作
@@ -133,7 +134,7 @@ def login_view(request):
                 ip_address=ip, user_agent=ua, reason=_('用户名或密码错误'),
             )
             log_operation('auth', 'login_failed', ip_address=ip,
-                          detail={'username': username, 'reason': 'Incorrect username or password'})
+                          detail={'username': username, 'reason': str(_('用户名或密码错误'))})
             if remaining > 0:
                 error_msg = _('用户名或密码错误，还可尝试 %(remaining)d 次') % {'remaining': remaining}
             else:
@@ -176,7 +177,6 @@ def custom_403(request, exception=None):
 
 def csrf_failure(request, reason=""):
     """CSRF 验证失败处理"""
-    from django.contrib import messages
     from django.urls import reverse
     if request.path == reverse('gmtool:login'):
         messages.error(request, _('页面已过期，请重新登录。'))

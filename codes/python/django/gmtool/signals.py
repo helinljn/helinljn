@@ -22,7 +22,8 @@ def auto_assign_super_admin_role(sender, instance, created, **kwargs):
         return
 
     try:
-        from .models import Role, UserProfile, UserCommandPermission, GMCommand
+        from .models import Role, UserProfile
+        from .utils import assign_super_admin_permissions
 
         # 确保超级管理员角色存在
         role, role_created = Role.objects.get_or_create(
@@ -44,20 +45,15 @@ def auto_assign_super_admin_role(sender, instance, created, **kwargs):
             profile.role = role
             profile.save(update_fields=['role'])
 
-        # 自动赋予所有活跃命令的用户级权限
-        existing_perm_ids = set(UserCommandPermission.objects.filter(
-            user=instance
-        ).values_list('command_id', flat=True))
-        new_user_perms = []
-        for cmd in GMCommand.objects.filter(is_active=True).exclude(id__in=existing_perm_ids):
-            new_user_perms.append(UserCommandPermission(user=instance, command=cmd))
-        if new_user_perms:
-            UserCommandPermission.objects.bulk_create(new_user_perms)
+        # 仅在首次创建时自动授予全部活跃命令权限，避免每次保存都触发查询
+        new_perm_count = 0
+        if created or profile_created:
+            new_perm_count = assign_super_admin_permissions(instance)
 
-        if created or role_created or profile_created or new_user_perms:
+        if created or role_created or profile_created or new_perm_count:
             logger.info(
                 '超级管理员自动绑定: user=%s, 新增用户权限=%d',
-                instance.username, len(new_user_perms),
+                instance.username, new_perm_count,
             )
 
     except Exception as e:
@@ -75,10 +71,11 @@ def auto_bind_existing_superusers(sender, **kwargs):
         return
 
     try:
-        from .models import Role, UserProfile, UserCommandPermission, GMCommand
+        from .models import Role, UserProfile
+        from .utils import assign_super_admin_permissions
 
         # 确保角色存在
-        Role.objects.get_or_create(
+        role, _ = Role.objects.get_or_create(
             name='super_admin',
             defaults={
                 'display_name': _('超级管理员'),
@@ -88,7 +85,7 @@ def auto_bind_existing_superusers(sender, **kwargs):
         )
 
         # 为所有 Django 超级管理员绑定角色和权限
-        role = Role.objects.get(name='super_admin')
+        total_new_perms = 0
         for user in User.objects.filter(is_superuser=True):
             profile, _ = UserProfile.objects.get_or_create(
                 user=user,
@@ -98,15 +95,10 @@ def auto_bind_existing_superusers(sender, **kwargs):
                 profile.role = role
                 profile.save(update_fields=['role'])
 
-            # 授予用户级权限
-            existing_perm_ids = set(UserCommandPermission.objects.filter(
-                user=user
-            ).values_list('command_id', flat=True))
-            new_perms = []
-            for cmd in GMCommand.objects.filter(is_active=True).exclude(id__in=existing_perm_ids):
-                new_perms.append(UserCommandPermission(user=user, command=cmd))
-            if new_perms:
-                UserCommandPermission.objects.bulk_create(new_perms)
+            total_new_perms += assign_super_admin_permissions(user)
+
+        if total_new_perms > 0:
+            logger.info('迁移后超级管理员权限补全: 新增权限=%d', total_new_perms)
 
     except Exception as e:
         # 数据库表可能还未创建，安全忽略

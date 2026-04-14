@@ -655,7 +655,7 @@ function collectSingleParams() {
                 return;
             }
             value = ts;
-        } else if (['uint32','uint64','int32','uint8'].includes(field.dataset.paramType)) {
+        } else if (['uint8','uint16','uint32','uint64','int8','int16','int32','int64'].includes(field.dataset.paramType)) {
             const intValue = Number.parseInt(value, 10);
             if (!Number.isFinite(intValue)) {
                 alert('{% trans "数值格式无效" %}: ' + id);

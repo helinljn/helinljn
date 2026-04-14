@@ -65,12 +65,12 @@ c:\helin\helinljn\codes\python\django\
 │   ├── signals.py
 │   ├── audit_log.py
 │   ├── logging_handlers.py
+│   ├── templatetags/
+│   │   ├── __init__.py
+│   │   └── gmtool_tags.py（自定义模板标签：确认令牌等）
 │   ├── management/commands/
 │   │   ├── init_roles.py
 │   │   └── sync_commands.py
-│   ├── static/gmtool/js/
-│   │   ├── command_execute.js（命令执行页面逻辑）
-│   │   └── command_log_detail.js（操作日志详情弹窗逻辑）
 │   ├── migrations/
 │   │   ├── 0001_initial.py
 │   │   ├── 0002_loginlog.py
@@ -306,7 +306,7 @@ c:\helin\helinljn\codes\python\django\
 | `command_views.py` | 命令管理 | `dashboard`, `command_list`, `command_execute`, `add_gm_command`, `sync_commands_api`, `command_log_list` |
 | `user_views.py` | 用户和角色管理 | `user_list`, `user_create`, `user_edit`, `user_delete`, `role_list`, `role_create`, `role_edit`, `user_permissions`, `role_delete`, `login_log_list` |
 | `api_views.py` | API接口 | `log_detail_api`, `upload_commands_api` |
-| `utils.py` | 公共辅助函数 | `get_client_ip`, `_group_commands_by_tab`, `_validate_command_params_basic`, `_mask_sensitive_data` |
+| `utils.py` | 公共辅助函数 | `get_client_ip`, `_group_commands_by_tab`, `_validate_command_params_basic`, `_mask_sensitive_data`, `assign_super_admin_permissions`, `parse_time_range_filters` |
 
 ### 9.1 登录与安全（`auth_views.py`）
 
@@ -365,14 +365,12 @@ c:\helin\helinljn\codes\python\django\
 
 `base.html` 中所有 CDN 引用（Tabler CSS/JS、Tabler Icons CSS）已添加 `integrity` 和 `crossorigin="anonymous"` 属性，防止 CDN 篡改攻击。
 
-#### 内联 JS 提取为静态文件
+#### 模板内联 JS
 
-命令执行页面（`command_execute.html`）和操作日志页面（`command_log.html`）的内联 JS 已提取为独立静态文件：
+命令执行页面（`command_execute.html`）和操作日志页面（`command_log.html`）使用内联 JavaScript 实现：
 
-| 静态文件 | 来源页面 | 说明 |
-|---|---|---|
-| `gmtool/js/command_execute.js` | `command_execute.html` | 命令执行、批量执行、结构化结果展示 |
-| `gmtool/js/command_log_detail.js` | `command_log.html` | 日志详情弹窗（`showDetail`/`closeDetail`/`escapeHtml`） |
+- `command_execute.html`：命令执行、批量执行、结构化结果展示
+- `command_log.html`：日志详情弹窗（`showDetail`/`closeDetail`/`escapeHtml`）
 
 模板→JS 数据传递方式：
 
@@ -383,7 +381,7 @@ c:\helin\helinljn\codes\python\django\
 
 - 项目级路由 `/jsi18n/` 提供 Django JavaScript Catalog（`domain='django'`）
 - `base.html` 中全局加载 `<script src="{% url 'javascript-catalog' %}"></script>`
-- `command_execute.js` 中通过 `django.gettext()` 实现前端 i18n，内置 fallback（catalog 未加载时返回原文）
+- 页面内联 JS 中通过 `django.gettext()` 实现前端 i18n，内置 fallback（catalog 未加载时返回原文）
 
 ### 9.8 日志查询优化
 
@@ -395,10 +393,27 @@ c:\helin\helinljn\codes\python\django\
 
 日志列表分页改用 `Paginator.get_elided_page_range()`，只渲染当前页前后各 2 页 + 首尾各 1 页 + 省略号，避免总页数过大时渲染数百个页码按钮。
 
+### 9.9 删除确认令牌（防 CSRF 误触）
+
+用户删除和角色删除操作增加了基于 SHA256 的确认令牌校验机制：
+
+- 后端 `_make_confirm_token(obj_id, obj_name)` 使用 `settings.SECRET_KEY` 生成令牌
+- 前端删除表单中通过自定义模板标签 `{% confirm_token obj_id obj_name %}` 注入隐藏字段
+- 后端 `_verify_confirm_token()` 校验令牌一致性，防止 CSRF 或直接 POST 请求误删
+
+模板标签定义在 `gmtool/templatetags/gmtool_tags.py`，使用时需 `{% load gmtool_tags %}`。
+
+### 9.10 自定义模板标签库（`gmtool_tags`）
+
+| 标签 | 用法 | 说明 |
+|---|---|---|
+| `confirm_token` | `{% confirm_token obj_id obj_name %}` | 输出隐藏 `<input>` 含 SHA256 确认令牌 |
+
 ---
 
 ## 10. 表单规则（`gmtool/forms.py`）
 
+- `UserCreateForm` / `UserEditForm`：共享 `widgets` 和 `labels` 常量定义，避免重复
 - `UserCreateForm`：
   - 必填密码与确认密码一致
   - 角色下拉过滤 `is_super_admin=False`
@@ -408,7 +423,7 @@ c:\helin\helinljn\codes\python\django\
   - 编辑超管目标：禁用角色与 `is_active`
 - `RoleForm`：
   - 不包含 `is_super_admin` 字段
-  - 禁止 `name=super_admin`
+  - 禁止 `name` 为 `Role.RESERVED_NAMES` 中的保留名
 - `AddGMCommandForm`：
   - 支持请求/响应参数 JSON 输入
   - 校验 ID 唯一性与 request/response 冲突
@@ -425,6 +440,7 @@ c:\helin\helinljn\codes\python\django\
   - **文件哈希检测**（`IDIP_USE_HASH_CHECK=True`）：通过 MD5 哈希精确检测文件内容变更，避免误报
 - 线程锁避免并发重复同步
 - 可配置是否启用（`ENABLE_IDIP_FILE_MONITOR`）
+- 监控文件路径通过 `settings.IDIP_JSON_PATH` 配置（默认项目根目录 `idip_commands.json`）
 - 自动调用 `sync_commands_to_db()`
 
 ### 11.2 权限装饰器（`decorators.py`）
@@ -445,8 +461,14 @@ c:\helin\helinljn\codes\python\django\
 - `LOGIN_URL = '/gmtool/login/'`
 - `CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'`
 - `IDIP_API_URL`, `IDIP_TIMEOUT`
+- `IDIP_JSON_PATH`：命令定义文件路径（默认项目根目录 `idip_commands.json`）
 - `TRUSTED_PROXY`：控制是否信任 `X-Forwarded-For`
+- `TRUSTED_PROXY_COUNT`：可信代理数量（从 XFF 右侧起跳过 N 个代理 IP 后取客户端 IP）
 - `BATCH_EXECUTE_MAX_TARGETS`, `BATCH_EXECUTE_INTERVAL_MS`
+- `UPLOAD_MAX_SIZE`：命令定义文件上传大小限制（默认 5MB）
+- `SENSITIVE_FIELDS`：日志脱敏敏感字段名集合
+- `PAGE_SIZE`：列表分页每页条数（默认 20）
+- `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCKOUT_SECONDS`：登录限速配置
 - `SESSION_COOKIE_HTTPONLY = True`：禁止 JS 访问 Session Cookie
 - `STATIC_ROOT = BASE_DIR / 'staticfiles'`：`collectstatic` 输出目录
 - `X_FRAME_OPTIONS = 'DENY'`
@@ -796,7 +818,7 @@ python test/mock_idip_server.py --host 127.0.0.1 --port 18080
 2. 传输与 Cookie 安全
    - 确认已启用 HTTPS
    - 确认 `SESSION_COOKIE_SECURE=True`、`CSRF_COOKIE_SECURE=True`
-   - 反向代理场景按需配置 `DJANGO_TRUSTED_PROXY=True`
+   - 反向代理场景按需配置 `DJANGO_TRUSTED_PROXY=True`，并根据代理层数设置 `DJANGO_TRUSTED_PROXY_COUNT`
 
 3. Django 部署自检
    - 执行：

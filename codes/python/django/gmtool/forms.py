@@ -4,9 +4,22 @@ import json
 from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from .models import Role, UserProfile
+from .models import Role, UserProfile, GMCommand
+from .command_parser import validate_command_ids
 
 User = get_user_model()
+
+# 用户表单共享的 widgets 和 labels 定义，避免 DRY 违规
+_USER_WIDGETS = {
+    'username': forms.TextInput(attrs={'class': 'form-control'}),
+    'email': forms.EmailInput(attrs={'class': 'form-control'}),
+    'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+}
+_USER_LABELS = {
+    'username': _('用户名'),
+    'email': _('邮箱'),
+    'is_active': _('是否启用'),
+}
 
 
 class RoleAndPhoneMixin(forms.Form):
@@ -40,16 +53,8 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'is_active']
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
-        labels = {
-            'username': _('用户名'),
-            'email': _('邮箱'),
-            'is_active': _('是否启用'),
-        }
+        widgets = _USER_WIDGETS
+        labels = _USER_LABELS
 
     def clean(self):
         cleaned_data = super().clean()
@@ -85,16 +90,8 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'is_active']
-        widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
-        labels = {
-            'username': _('用户名'),
-            'email': _('邮箱'),
-            'is_active': _('是否启用'),
-        }
+        widgets = _USER_WIDGETS
+        labels = _USER_LABELS
 
     def __init__(self, *args, **kwargs):
         self.is_self = kwargs.pop('is_self', False)
@@ -153,7 +150,7 @@ class RoleForm(forms.ModelForm):
 
     def clean_name(self):
         name = self.cleaned_data.get('name', '')
-        if name == 'super_admin':
+        if name in Role.RESERVED_NAMES:
             raise forms.ValidationError(_('角色标识"super_admin"为系统保留，不可使用'))
         return name
 
@@ -223,7 +220,6 @@ class AddGMCommandForm(forms.Form):
 
     def clean_command_id(self):
         command_id = self.cleaned_data.get('command_id', '')
-        from .models import GMCommand
         if GMCommand.objects.filter(command_id=command_id).exists():
             raise forms.ValidationError(_('命令 ID %(id)s 已存在') % {'id': command_id})
         return command_id
@@ -261,7 +257,6 @@ class AddGMCommandForm(forms.Form):
             if request_id == response_id:
                 self.add_error('response_id', _('请求 ID 和响应 ID 不能相同'))
 
-            from .command_parser import validate_command_ids
             command_id = cleaned_data.get('command_id', '')
             is_valid, error_msg = validate_command_ids(command_id, request_id, response_id)
             if not is_valid:

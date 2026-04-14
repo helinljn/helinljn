@@ -1,7 +1,9 @@
 """管理命令：初始化超级管理员角色并为所有Django超级管理员绑定"""
+from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+
+User = get_user_model()
 
 
 class Command(BaseCommand):
@@ -45,14 +47,8 @@ class Command(BaseCommand):
         ))
 
         # 4. 为所有超级管理员用户授予用户级权限
-        commands = GMCommand.objects.filter(is_active=True)
-        user_perm_added = 0
+        from gmtool.utils import assign_super_admin_permissions
+        total_new_perms = 0
         for user in User.objects.filter(is_superuser=True):
-            existing_user_perm_ids = set(UserCommandPermission.objects.filter(
-                user=user
-            ).values_list('command_id', flat=True))
-            for cmd in commands:
-                if cmd.id not in existing_user_perm_ids:
-                    UserCommandPermission.objects.get_or_create(user=user, command=cmd)
-                    user_perm_added += 1
-        self.stdout.write(f'用户权限分配: 新增={user_perm_added}')
+            total_new_perms += assign_super_admin_permissions(user)
+        self.stdout.write(f'用户权限分配: 新增={total_new_perms}')

@@ -1,5 +1,5 @@
 {% extends "gmtool/base.html" %}
-{% load i18n %}
+{% load i18n gmtool_tags %}
 
 {% block title %}{% trans "用户管理" %} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_users %}active{% endblock %}
@@ -66,7 +66,7 @@
                     </td>
                     <td>
                         {% if u.is_active %}
-                        <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>{% trans "是否启用" %}</span>
+                        <span class="badge bg-success-lt"><i class="ti ti-check me-1"></i>{% trans "已启用" %}</span>
                         {% else %}
                         <span class="badge bg-secondary-lt"><i class="ti ti-ban me-1"></i>{% trans "已禁用" %}</span>
                         {% endif %}
@@ -83,6 +83,7 @@
                         <form method="post" action="{% url 'gmtool:user_delete' u.id %}" class="d-inline"
                               onsubmit="return confirm('{% blocktrans with username=u.username %}确认删除用户 {{ username }}？{% endblocktrans %}')">
                             {% csrf_token %}
+                            <input type="hidden" name="confirm_token" value="{% confirm_token u.id u.username %}">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans '删除' %}">
                                 <i class="ti ti-trash"></i>
                             </button>
@@ -108,10 +109,14 @@
             <i class="ti ti-chevron-left"></i>
         </a></li>
         {% endif %}
-        {% for num in page_obj.paginator.page_range %}
+        {% for num in elided_page_range %}
+        {% if num == page_obj.paginator.ELLIPSIS %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% else %}
         <li class="page-item {% if page_obj.number == num %}active{% endif %}">
             <a class="page-link" href="?page={{ num }}&search={{ search }}">{{ num }}</a>
         </li>
+        {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
         <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&search={{ search }}">
