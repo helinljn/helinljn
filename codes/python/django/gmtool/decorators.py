@@ -14,14 +14,16 @@ def is_super_admin(user, request=None):
     判断用户是否为超级管理员。
     优先检查 Django 内置 is_superuser，同时检查 GM 系统角色。
     两者任一为 True 即视为超级管理员，确保唯一绑定。
-    支持请求级缓存，同一请求中多次调用不会重复查库。
+    支持请求级缓存（基于 user.id 的字典），同一请求中对不同用户的多次调用互不干扰。
     """
     if not user.is_authenticated:
         return False
 
-    # 请求级缓存：避免同一请求内多次查库
-    if request and hasattr(request, '_is_super_admin_cache'):
-        return request._is_super_admin_cache
+    # 请求级缓存：基于 user.id 的字典，避免不同用户的缓存互相覆盖
+    if request:
+        cache = getattr(request, '_super_admin_cache', None)
+        if cache is not None and user.id in cache:
+            return cache[user.id]
 
     result = False
     # Django 内置超级管理员直接视为 GM 超级管理员
@@ -35,7 +37,9 @@ def is_super_admin(user, request=None):
             result = False
 
     if request:
-        request._is_super_admin_cache = result
+        if not hasattr(request, '_super_admin_cache'):
+            request._super_admin_cache = {}
+        request._super_admin_cache[user.id] = result
     return result
 
 
