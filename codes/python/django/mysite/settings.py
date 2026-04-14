@@ -162,8 +162,8 @@ LOGIN_URL = '/gmtool/login/'
 CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 
 # 会话安全配置
-SESSION_COOKIE_AGE = 86400 * 7          # Session 有效期 7 天（秒）
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 浏览器关闭时过期（覆盖 AGE，但重新打开后需重新登录）
+SESSION_COOKIE_AGE = 86400              # Session 有效期 1 天（秒），GM 管理系统缩短有效期更安全
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 浏览器关闭时过期
 
 # IDIP API 配置
 IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:18080/cy_idip')  # 游戏IDIP接口地址（部署时修改）
@@ -193,6 +193,8 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 # Referer 头发送策略
 SECURE_REFERRER_POLICY = 'same-origin'
+# Cross-Origin 策略
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
 
 # 生产环境 HTTPS 安全配置（DEBUG=False 时自动启用）
 # SESSION_COOKIE_SECURE = not DEBUG      # Session Cookie 仅通过 HTTPS 传输

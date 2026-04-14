@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -23,7 +23,6 @@ class GMCommand(models.Model):
         verbose_name_plural = _('GM命令')
         ordering = ['command_id']
         indexes = [
-            models.Index(fields=['command_id'], name='gmcmd_cmdid_idx'),
             models.Index(fields=['is_active', 'command_id'], name='gmcmd_active_cmd_idx'),
             models.Index(fields=['request_id'], name='gmcmd_reqid_idx'),
             models.Index(fields=['response_id'], name='gmcmd_respid_idx'),
@@ -41,10 +40,18 @@ class Role(models.Model):
     is_super_admin = models.BooleanField(_('超级管理员'), default=False)
     created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
 
+    RESERVED_NAMES = {'super_admin'}
+
     class Meta:
         verbose_name = _('角色')
         verbose_name_plural = _('角色')
         ordering = ['-is_super_admin', 'name']
+
+    def clean(self):
+        super().clean()
+        if self.name in self.RESERVED_NAMES and not self.is_super_admin:
+            from django.core.exceptions import ValidationError
+            raise ValidationError({'name': _('角色标识"super_admin"为系统保留，不可使用')})
 
     def __str__(self):
         return self.display_name
@@ -52,7 +59,7 @@ class Role(models.Model):
 
 class UserCommandPermission(models.Model):
     """用户-命令权限关联（直接按用户分配权限）"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_('用户'))
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_('用户'))
     command = models.ForeignKey(GMCommand, on_delete=models.CASCADE, verbose_name=_('命令'))
 
     class Meta:
@@ -71,7 +78,7 @@ class UserCommandPermission(models.Model):
 
 class UserProfile(models.Model):
     """用户扩展信息"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name=_('用户'))
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_('用户'))
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('角色'))
     phone = models.CharField(_('联系电话'), max_length=20, blank=True)
 
@@ -90,7 +97,7 @@ class CommandLog(models.Model):
         ('failed', _('失败')),
         ('timeout', _('超时')),
     ]
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name=_('用户'))
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_('用户'))
     command = models.ForeignKey(GMCommand, on_delete=models.SET_NULL, null=True, verbose_name=_('命令'))
     partition = models.IntegerField(_('服务器组号'))
     request_data = models.JSONField(_('请求数据'))
@@ -105,6 +112,7 @@ class CommandLog(models.Model):
         verbose_name_plural = _('命令日志')
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['-created_at'], name='cmdlog_created_idx'),
             models.Index(fields=['user', '-created_at'], name='cmdlog_user_created_idx'),
             models.Index(fields=['status', '-created_at'], name='cmdlog_status_created_idx'),
             models.Index(fields=['command', '-created_at'], name='cmdlog_cmd_created_idx'),
@@ -121,7 +129,7 @@ class LoginLog(models.Model):
         ('logout', _('登出')),
         ('login_failed', _('登录失败')),
     ]
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name=_('用户'))
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_('用户'))
     username = models.CharField(_('用户名'), max_length=150)
     action = models.CharField(_('操作类型'), max_length=20, choices=ACTION_CHOICES)
     ip_address = models.GenericIPAddressField(_('IP地址'))
@@ -134,6 +142,8 @@ class LoginLog(models.Model):
         verbose_name_plural = _('登录日志')
         ordering = ['-created_at']
         indexes = [
+            models.Index(fields=['-created_at'], name='loginlog_created_idx'),
+            models.Index(fields=['ip_address', '-created_at'], name='loginlog_ip_created_idx'),
             models.Index(fields=['action', '-created_at'], name='loginlog_action_created_idx'),
             models.Index(fields=['username', '-created_at'], name='loginlog_user_created_idx'),
         ]

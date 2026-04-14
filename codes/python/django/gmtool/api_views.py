@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 def log_detail_api(request, log_id):
     """日志详情 API，返回单条日志的 JSON 数据（含权限校验与脱敏）"""
     logs = CommandLog.objects.all()
-    if not is_super_admin(request.user):
+    if not is_super_admin(request.user, request):
         logs = logs.filter(user=request.user)
 
     log = get_object_or_404(logs, pk=log_id)
@@ -99,7 +99,7 @@ def upload_commands_api(request):
     try:
         json_path = settings.BASE_DIR / 'idip_commands.json'
         content_str = raw.decode('utf-8') if isinstance(raw, bytes) else raw
-        fd, tmp_path = tempfile.mkstemp(dir=str(settings.BASE_DIR), suffix='.json.tmp')
+        fd, tmp_path = tempfile.mkstemp(suffix='.json.tmp')
         try:
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
                 f.write(content_str)

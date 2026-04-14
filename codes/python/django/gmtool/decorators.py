@@ -1,6 +1,7 @@
 """权限装饰器"""
 import functools
 
+from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
@@ -8,35 +9,48 @@ from django.utils.translation import gettext_lazy as _
 from .models import GMCommand, UserProfile, UserCommandPermission
 
 
-def is_super_admin(user):
+def is_super_admin(user, request=None):
     """
     判断用户是否为超级管理员。
     优先检查 Django 内置 is_superuser，同时检查 GM 系统角色。
     两者任一为 True 即视为超级管理员，确保唯一绑定。
+    支持请求级缓存，同一请求中多次调用不会重复查库。
     """
     if not user.is_authenticated:
         return False
+
+    # 请求级缓存：避免同一请求内多次查库
+    if request and hasattr(request, '_is_super_admin_cache'):
+        return request._is_super_admin_cache
+
+    result = False
     # Django 内置超级管理员直接视为 GM 超级管理员
     if user.is_superuser:
-        return True
-    try:
-        profile = user.userprofile
-        return profile.role is not None and profile.role.is_super_admin
-    except UserProfile.DoesNotExist:
-        return False
+        result = True
+    else:
+        try:
+            profile = user.userprofile
+            result = profile.role is not None and profile.role.is_super_admin
+        except UserProfile.DoesNotExist:
+            result = False
+
+    if request:
+        request._is_super_admin_cache = result
+    return result
 
 
 def super_admin_required(view_func):
     """
     超级管理员权限装饰器。
-    未登录跳转登录页，非超级管理员返回仪表盘。
+    未登录跳转登录页，非超级管理员返回仪表盘并提示。
     """
     @functools.wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return redirect('gmtool:login')
-        if is_super_admin(request.user):
+        if is_super_admin(request.user, request):
             return view_func(request, *args, **kwargs)
+        messages.warning(request, _('您没有管理员权限'))
         return redirect('gmtool:dashboard')
     return wrapper
 
@@ -53,19 +67,23 @@ def command_permission_required(view_func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({'error': _('请先登录')}, status=401)
-        # 超级管理员自动通过
-        if is_super_admin(request.user):
-            return view_func(request, *args, **kwargs)
-        # 检查用户是否有该命令的直接权限
+
         cmd_id = kwargs.get('cmd_id')
         if cmd_id:
-            # 先检查命令是否存在且活跃
+            # 所有用户（含超管）都需检查命令是否存在且活跃
             cmd = GMCommand.objects.filter(command_id=cmd_id).first()
             if not cmd or not cmd.is_active:
                 return JsonResponse(
                     {'error': _('该命令已被停用或删除'), 'command_deactivated': True},
                     status=410,
                 )
+
+            # 超级管理员自动通过
+            if is_super_admin(request.user, request):
+                request._gmcommand = cmd
+                return view_func(request, *args, **kwargs)
+
+            # 检查用户是否有该命令的直接权限
             if UserCommandPermission.objects.filter(
                 user=request.user,
                 command=cmd,
@@ -84,7 +102,7 @@ def get_user_permissions(user):
     普通用户从 UserCommandPermission 读取直接分配的权限。
     """
     # Django 超级管理员 或 GM 超级管理员角色 → 所有活跃命令
-    if is_super_admin(user):
+    if is_super_admin(user):  # get_user_permissions 通常不在请求上下文中调用，不传 request
         return list(GMCommand.objects.filter(is_active=True).values_list('command_id', flat=True))
     # 普通用户：直接权限
     return list(UserCommandPermission.objects.filter(

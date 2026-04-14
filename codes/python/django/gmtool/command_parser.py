@@ -30,37 +30,44 @@ def validate_command_ids(command_id, request_id, response_id, exclude_command_id
     if request_id == response_id:
         errors.append(_('请求 ID 和响应 ID 不能相同'))
 
-    # 查询数据库中已有的所有 request_id 和 response_id
-    existing_commands = GMCommand.objects.all()
-    if exclude_command_id:
-        existing_commands = existing_commands.exclude(command_id=exclude_command_id)
-
     # 检查 command_id 是否已存在
-    if GMCommand.objects.filter(command_id=command_id).exists():
-        if not exclude_command_id or command_id != exclude_command_id:
-            errors.append(_('命令 ID %(id)s 已存在') % {'id': command_id})
+    cmd_qs = GMCommand.objects.all()
+    if exclude_command_id:
+        cmd_qs = cmd_qs.exclude(command_id=exclude_command_id)
+    if cmd_qs.filter(command_id=command_id).exists():
+        errors.append(_('命令 ID %(id)s 已存在') % {'id': command_id})
 
-    # 收集所有已有的 request_id 和 response_id，以及它们所属的 command_id
-    for cmd in existing_commands:
-        if cmd.request_id == request_id:
+    # 一次查询检查 request_id / response_id 冲突（替代4次独立查询）
+    from django.db.models import Q
+    conflict_qs = GMCommand.objects.all()
+    if exclude_command_id:
+        conflict_qs = conflict_qs.exclude(command_id=exclude_command_id)
+
+    conflicts = list(conflict_qs.filter(
+        Q(request_id=request_id) | Q(request_id=response_id) |
+        Q(response_id=request_id) | Q(response_id=response_id)
+    ).values('command_id', 'request_id', 'response_id'))
+
+    for conflict in conflicts:
+        if conflict['request_id'] == request_id:
             errors.append(
                 _('请求 ID %(req)s 已被命令 %(cmd)s 使用（作为请求 ID）')
-                % {'req': request_id, 'cmd': cmd.command_id}
+                % {'req': request_id, 'cmd': conflict['command_id']}
             )
-        if cmd.request_id == response_id:
+        if conflict['request_id'] == response_id:
             errors.append(
                 _('响应 ID %(rsp)s 已被命令 %(cmd)s 使用（作为请求 ID）')
-                % {'rsp': response_id, 'cmd': cmd.command_id}
+                % {'rsp': response_id, 'cmd': conflict['command_id']}
             )
-        if cmd.response_id == request_id:
+        if conflict['response_id'] == request_id:
             errors.append(
                 _('请求 ID %(req)s 已被命令 %(cmd)s 使用（作为响应 ID）')
-                % {'req': request_id, 'cmd': cmd.command_id}
+                % {'req': request_id, 'cmd': conflict['command_id']}
             )
-        if cmd.response_id == response_id:
+        if conflict['response_id'] == response_id:
             errors.append(
                 _('响应 ID %(rsp)s 已被命令 %(cmd)s 使用（作为响应 ID）')
-                % {'rsp': response_id, 'cmd': cmd.command_id}
+                % {'rsp': response_id, 'cmd': conflict['command_id']}
             )
 
     # 去重
@@ -133,49 +140,62 @@ def validate_json_command_ids(data):
             )
         seen_protocol[key] = (cmd_id, id_type)
 
-    # 检查与数据库中已有命令的冲突
-    db_commands = GMCommand.objects.all()
-    for cmd in db_commands:
-        # command_id 冲突（如果 JSON 中包含该 command_id 则是更新，不算冲突）
-        if cmd.command_id not in seen_cmd_ids:
-            # 数据库中有但 JSON 中没有的命令，不检查
-            pass
+    # 检查与数据库中已有命令的冲突（一次查询 + 内存比对）
+    db_commands = list(GMCommand.objects.values('command_id', 'request_id', 'response_id'))
+    db_cmd_map = {}
+    db_req_map = {}
+    db_rsp_map = {}
+    for db_cmd in db_commands:
+        cid = db_cmd['command_id']
+        rid = db_cmd['request_id']
+        rpid = db_cmd['response_id']
+        db_cmd_map[cid] = db_cmd
+        if rid not in db_req_map:
+            db_req_map[rid] = []
+        db_req_map[rid].append(cid)
+        if rpid not in db_rsp_map:
+            db_rsp_map[rpid] = []
+        db_rsp_map[rpid].append(cid)
 
-        # 检查协议ID冲突（仅对 JSON 中新增的命令检查）
-        for json_cmd_id, req_id in json_request_ids:
-            if json_cmd_id == cmd.command_id:
-                continue  # 同一命令更新，跳过
-            if req_id == cmd.request_id:
+    for json_cmd_id, req_id in json_request_ids:
+        # 同一命令更新，跳过
+        if json_cmd_id in db_cmd_map:
+            continue
+        for db_cid in db_req_map.get(req_id, []):
+            if db_cid != json_cmd_id:
                 errors.append(
                     _(
                         '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
                     )
-                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': cmd.command_id}
+                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': db_cid}
                 )
-            if req_id == cmd.response_id:
+        for db_cid in db_rsp_map.get(req_id, []):
+            if db_cid != json_cmd_id:
                 errors.append(
                     _(
                         '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
                     )
-                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': cmd.command_id}
+                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': db_cid}
                 )
 
-        for json_cmd_id, rsp_id in json_response_ids:
-            if json_cmd_id == cmd.command_id:
-                continue
-            if rsp_id == cmd.request_id:
+    for json_cmd_id, rsp_id in json_response_ids:
+        if json_cmd_id in db_cmd_map:
+            continue
+        for db_cid in db_req_map.get(rsp_id, []):
+            if db_cid != json_cmd_id:
                 errors.append(
                     _(
                         '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
                     )
-                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': cmd.command_id}
+                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': db_cid}
                 )
-            if rsp_id == cmd.response_id:
+        for db_cid in db_rsp_map.get(rsp_id, []):
+            if db_cid != json_cmd_id:
                 errors.append(
                     _(
                         '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
                     )
-                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': cmd.command_id}
+                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': db_cid}
                 )
 
     # 去重
@@ -212,7 +232,7 @@ def add_command_to_json(command_data):
     # 原子写入
     try:
         content_str = json.dumps(data, ensure_ascii=False, indent=4)
-        fd, tmp_path = tempfile.mkstemp(dir=str(settings.BASE_DIR), suffix='.json.tmp')
+        fd, tmp_path = tempfile.mkstemp(suffix='.json.tmp')
         try:
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
                 f.write(content_str)
@@ -361,7 +381,8 @@ def sync_commands_to_db(json_path=None):
         # 将新增命令自动授予所有超级管理员用户
         if new_commands:
             try:
-                from django.contrib.auth.models import User
+                from django.contrib.auth import get_user_model
+                User = get_user_model()
                 superadmin_users = User.objects.filter(is_superuser=True)
                 for user in superadmin_users:
                     existing_user_perm_ids = set(UserCommandPermission.objects.filter(

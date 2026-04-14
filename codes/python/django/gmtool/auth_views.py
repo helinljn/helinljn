@@ -73,12 +73,21 @@ def login_view(request):
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
 
-        # 登录失败限速检查（IP + username 双维度）
+        # 登录失败限速检查（IP + username 双维度，使用原子递增避免竞态）
         cache_key_ip, cache_key_ip_user = _build_login_throttle_cache_keys(ip, username)
-        attempts_ip = cache.get(cache_key_ip, 0)
-        attempts_ip_user = cache.get(cache_key_ip_user, 0)
-        attempts = max(attempts_ip, attempts_ip_user)
-        if attempts >= LOGIN_MAX_ATTEMPTS:
+        # 原子递增：key不存在时初始化为1，已存在时+1
+        try:
+            attempts_ip = cache.incr(cache_key_ip)
+        except ValueError:
+            attempts_ip = 1
+            cache.set(cache_key_ip, 1, timeout=LOGIN_LOCKOUT_SECONDS)
+        try:
+            attempts_ip_user = cache.incr(cache_key_ip_user)
+        except ValueError:
+            attempts_ip_user = 1
+            cache.set(cache_key_ip_user, 1, timeout=LOGIN_LOCKOUT_SECONDS)
+        # 任一维度达到上限即锁定
+        if attempts_ip > LOGIN_MAX_ATTEMPTS or attempts_ip_user > LOGIN_MAX_ATTEMPTS:
             LoginLog.objects.create(
                 user=None, username=username,
                 action='login_failed', ip_address=ip,
@@ -108,10 +117,7 @@ def login_view(request):
                     return redirect(next_url)
                 return redirect('gmtool:dashboard')
             else:
-                # 登录失败，累加计数（双维度）
-                next_attempts = attempts + 1
-                cache.set(cache_key_ip, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
-                cache.set(cache_key_ip_user, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
+                # 登录失败，计数已在上方原子递增，无需额外操作
                 LoginLog.objects.create(
                     user=None, username=username, action='login_failed',
                     ip_address=ip, user_agent=ua, reason=_('账号已禁用'),
@@ -120,11 +126,8 @@ def login_view(request):
                               detail={'username': username, 'reason': 'Account disabled'})
                 return render(request, 'gmtool/login.html', {'error': _('账号已被禁用')})
         else:
-            # 登录失败，累加计数（双维度）
-            next_attempts = attempts + 1
-            cache.set(cache_key_ip, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
-            cache.set(cache_key_ip_user, next_attempts, timeout=LOGIN_LOCKOUT_SECONDS)
-            remaining = LOGIN_MAX_ATTEMPTS - next_attempts
+            # 登录失败，计数已在上方原子递增，无需额外操作
+            remaining = LOGIN_MAX_ATTEMPTS - max(attempts_ip, attempts_ip_user)
             LoginLog.objects.create(
                 user=None, username=username, action='login_failed',
                 ip_address=ip, user_agent=ua, reason=_('用户名或密码错误'),

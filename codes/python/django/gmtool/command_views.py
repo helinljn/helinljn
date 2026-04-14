@@ -24,39 +24,50 @@ logger = logging.getLogger(__name__)
 @login_required
 def dashboard(request):
     """仪表盘首页"""
+    is_admin = is_super_admin(request.user, request)
     # 优化查询：超级管理员直接获取所有活跃命令，普通用户通过关联表获取
-    if is_super_admin(request.user):
-        commands = GMCommand.objects.filter(is_active=True)
+    if is_admin:
+        commands = GMCommand.objects.filter(is_active=True).only(
+            'id', 'command_id', 'command_name', 'tab'
+        )
     else:
         commands = GMCommand.objects.filter(
             is_active=True,
             usercommandpermission__user=request.user
-        ).distinct()
+        ).distinct().only(
+            'id', 'command_id', 'command_name', 'tab'
+        )
 
     tab_groups = _group_commands_by_tab(commands)
+    # 利用已加载的数据计算命令数量，避免额外 COUNT 查询
+    command_count = sum(len(cmds) for cmds in tab_groups.values())
 
-    recent_logs = CommandLog.objects.filter(user=request.user).select_related('user', 'command')[:5]
-    is_admin = is_super_admin(request.user)
+    recent_logs = CommandLog.objects.filter(user=request.user).select_related('command')[:5]
 
     return render(request, 'gmtool/dashboard.html', {
         'tab_groups': tab_groups,
         'recent_logs': recent_logs,
         'is_admin': is_admin,
-        'command_count': commands.count(),
+        'command_count': command_count,
     })
 
 
 @login_required
 def command_list(request):
     """可用命令列表"""
+    is_admin = is_super_admin(request.user, request)
     # 优化查询：超级管理员直接获取所有活跃命令，普通用户通过关联表获取
-    if is_super_admin(request.user):
-        commands = GMCommand.objects.filter(is_active=True)
+    if is_admin:
+        commands = GMCommand.objects.filter(is_active=True).only(
+            'id', 'command_id', 'command_name', 'tab', 'request_name', 'request_id'
+        )
     else:
         commands = GMCommand.objects.filter(
             is_active=True,
             usercommandpermission__user=request.user
-        ).distinct()
+        ).distinct().only(
+            'id', 'command_id', 'command_name', 'tab', 'request_name', 'request_id'
+        )
 
     # 搜索
     search = request.GET.get('search', '')
@@ -68,7 +79,7 @@ def command_list(request):
     return render(request, 'gmtool/command_list.html', {
         'tab_groups': tab_groups,
         'search': search,
-        'is_admin': is_super_admin(request.user),
+        'is_admin': is_admin,
     })
 
 
@@ -182,7 +193,7 @@ def command_execute(request, cmd_id):
         'response_params_json': json.dumps(command.response_params, ensure_ascii=False),
         'response_field_labels_json': json.dumps(response_field_labels, ensure_ascii=False),
         'response_name': command.response_name,
-        'is_admin': is_super_admin(request.user),
+        'is_admin': is_super_admin(request.user, request),
         'batch_max_targets': settings.BATCH_EXECUTE_MAX_TARGETS,
         'batch_interval_ms': settings.BATCH_EXECUTE_INTERVAL_MS,
     })
@@ -309,13 +320,13 @@ def sync_commands_api(request):
         })
     except Exception as e:
         logger.exception('Command sync error: %s', e)
-        return JsonResponse({'error': str(e)}, status=500)
+        return JsonResponse({'error': str(_('服务器内部错误'))}, status=500)
 
 
 @login_required
 def command_log_list(request):
     """操作日志列表"""
-    is_admin = is_super_admin(request.user)
+    is_admin = is_super_admin(request.user, request)
     logs = CommandLog.objects.select_related('user', 'command').all()
 
     # 非管理员仅可查看自己的日志

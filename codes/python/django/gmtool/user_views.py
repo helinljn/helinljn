@@ -1,8 +1,8 @@
 """用户和角色管理相关视图"""
 import logging
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,6 +15,7 @@ from .forms import RoleForm, UserCreateForm, UserEditForm
 from .models import GMCommand, LoginLog, Role, UserCommandPermission, UserProfile
 from .utils import get_client_ip
 
+User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
@@ -81,7 +82,7 @@ def user_edit(request, user_id):
     UserProfile.objects.get_or_create(user=user_obj, defaults={})
 
     is_self = user_obj == request.user
-    is_target_super_admin = is_super_admin(user_obj)
+    is_target_super_admin = is_super_admin(user_obj, request)
 
     if request.method == 'POST':
         form = UserEditForm(request.POST, instance=user_obj, is_self=is_self,
@@ -125,7 +126,7 @@ def user_delete(request, user_id):
     if user_obj == request.user:
         from django.contrib import messages
         messages.warning(request, _('不能删除自己的账号'))
-    elif is_super_admin(user_obj):
+    elif is_super_admin(user_obj, request):
         from django.contrib import messages
         messages.warning(request, _('不能删除超级管理员账号'))
     else:
@@ -218,10 +219,12 @@ def user_permissions(request, user_id):
     """用户权限分配（针对每个用户单独设置）"""
     user_obj = get_object_or_404(User, pk=user_id)
     # 超级管理员不需要手动分配权限
-    if is_super_admin(user_obj):
+    if is_super_admin(user_obj, request):
         return redirect('gmtool:user_list')
 
-    commands = GMCommand.objects.filter(is_active=True)
+    commands = GMCommand.objects.filter(is_active=True).only(
+        'id', 'command_id', 'command_name', 'tab'
+    )
 
     if request.method == 'POST':
         selected_ids = request.POST.getlist('commands')
@@ -231,19 +234,18 @@ def user_permissions(request, user_id):
         ).values_list('command_id', flat=True))
 
         # 校验：仅允许分配活跃命令的权限，忽略非法ID避免500
-        active_command_ids = set(
-            GMCommand.objects.filter(is_active=True).values_list('id', flat=True)
-        )
         valid_ids = []
         invalid_ids = []
         for cid in selected_ids:
             try:
-                cmd_pk = int(cid)
+                valid_ids.append(int(cid))
             except (TypeError, ValueError):
                 invalid_ids.append(cid)
-                continue
-            if cmd_pk in active_command_ids:
-                valid_ids.append(cmd_pk)
+        # 用一条 IN 查询替代全量获取
+        active_command_ids = set(
+            GMCommand.objects.filter(id__in=valid_ids, is_active=True).values_list('id', flat=True)
+        )
+        valid_ids = [cid for cid in valid_ids if cid in active_command_ids]
 
         if invalid_ids:
             logger.warning(

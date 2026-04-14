@@ -196,16 +196,9 @@
 </div>
 {% endif %}
 
-<!-- 日志数据存储 -->
-{% for log in page_obj %}
-<textarea id="rc-{{ log.id }}" style="display:none;">{{ log.request_content }}</textarea>
-<textarea id="rd-{{ log.id }}" style="display:none;">{{ log.request_data }}</textarea>
-<textarea id="rs-{{ log.id }}" style="display:none;">{{ log.response_data }}</textarea>
-{% endfor %}
-
 <!-- 详情弹窗 -->
 <div id="detailOverlay" class="detail-overlay" onclick="closeDetail()"></div>
-<div id="detailModal" class="detail-modal">
+<div id="detailModal" class="detail-modal" data-api-url="{% url 'gmtool:log_detail_api' log_id=0 %}">
     <div class="detail-modal-header">
         <h5 style="margin:0;"><i class="ti ti-file-text me-2"></i>{% trans "日志详情" %}</h5>
         <button type="button" class="detail-modal-close" onclick="closeDetail()">&times;</button>
@@ -215,30 +208,39 @@
 
 <script>
 function escapeHtml(text) {
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function readTextarea(id) {
-    var el = document.getElementById(id);
-    return (el && el.value) ? el.value : '';
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function showDetail(id) {
-    var rcVal = readTextarea('rc-' + id) || '{% trans "无数据" %}';
-    var rdVal = readTextarea('rd-' + id) || '{% trans "无数据" %}';
-    var rsVal = readTextarea('rs-' + id) || '{% trans "无响应数据" %}';
+    var modal = document.getElementById('detailModal');
+    var apiUrl = modal.getAttribute('data-api-url').replace(/\/0\/$/, '/' + id + '/');
+    var noData = '{% trans "无数据" %}';
+    var noResp = '{% trans "无响应数据" %}';
 
     document.getElementById('detailBody').innerHTML =
-        '<h4 class="detail-section-title">{% trans "完整请求JSON" %}</h4>' +
-        '<pre class="detail-pre">' + escapeHtml(rcVal) + '</pre>' +
-        '<h4 class="detail-section-title">{% trans "请求数据（表单参数）" %}</h4>' +
-        '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rdVal) + '</pre>' +
-        '<h4 class="detail-section-title">{% trans "响应数据" %}</h4>' +
-        '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rsVal) + '</pre>';
-
+        '<div class="text-center py-4"><span class="text-muted">{% trans "加载中..." %}</span></div>';
     document.getElementById('detailOverlay').style.display = 'block';
     document.getElementById('detailModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
+
+    fetch(apiUrl)
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            var rcVal = data.request_content || noData;
+            var rdVal = data.request_data || noData;
+            var rsVal = data.response_data || noResp;
+            document.getElementById('detailBody').innerHTML =
+                '<h4 class="detail-section-title">{% trans "完整请求JSON" %}</h4>' +
+                '<pre class="detail-pre">' + escapeHtml(rcVal) + '</pre>' +
+                '<h4 class="detail-section-title">{% trans "请求数据（表单参数）" %}</h4>' +
+                '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rdVal) + '</pre>' +
+                '<h4 class="detail-section-title">{% trans "响应数据" %}</h4>' +
+                '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rsVal) + '</pre>';
+        })
+        .catch(function() {
+            document.getElementById('detailBody').innerHTML =
+                '<div class="text-center py-4 text-danger">{% trans "加载失败，请重试" %}</div>';
+        });
 }
 
 function closeDetail() {

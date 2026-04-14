@@ -1,12 +1,13 @@
 """信号处理器 — Django 超级管理员与 GM 超级管理员自动绑定"""
 import logging
 
+from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save, post_migrate
 from django.dispatch import receiver
 
-from django.contrib.auth.models import User
-
 logger = logging.getLogger(__name__)
+
+User = get_user_model()
 
 
 @receiver(post_save, sender=User)
@@ -106,6 +107,6 @@ def auto_bind_existing_superusers(sender, **kwargs):
             if new_perms:
                 UserCommandPermission.objects.bulk_create(new_perms)
 
-    except Exception:
+    except Exception as e:
         # 数据库表可能还未创建，安全忽略
-        pass
+        logger.debug('迁移后超级管理员自动绑定跳过: %s', e)

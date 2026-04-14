@@ -154,7 +154,7 @@ def send_idip_command(command, params):
     except Exception as e:
         # 兼容不同版本 requests 的 JSONDecodeError
         if hasattr(req, 'JSONDecodeError') and isinstance(e, req.JSONDecodeError):
-            logger.error('IDIP API响应解析失败: response=%s', response.text)
-            return {'raw_response': response.text}, None, request_content_str, ''
+            logger.error('IDIP API响应解析失败: response=%s', getattr(response, 'text', str(e)))
+            return {'raw_response': getattr(response, 'text', str(e))}, None, request_content_str, ''
         logger.error('IDIP API请求异常: %s', e)
         return None, _('请求失败: %(error)s') % {'error': str(e)}, request_content_str, 'error'

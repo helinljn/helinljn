@@ -47,10 +47,10 @@ class IDIPFileMonitorMiddleware:
         return self.get_response(request)
 
     def _calculate_file_hash(self, filepath):
-        """计算文件内容的MD5哈希值"""
+        """计算文件内容的SHA256哈希值"""
         try:
             with open(filepath, 'rb') as f:
-                return hashlib.md5(f.read()).hexdigest()
+                return hashlib.sha256(f.read()).hexdigest()
         except (OSError, IOError):
             return None
 
