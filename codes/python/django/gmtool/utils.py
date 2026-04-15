@@ -3,6 +3,7 @@ import json
 import logging
 
 from django.utils.translation import gettext_lazy as _
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,47 @@ SENSITIVE_FIELD_NAMES = getattr(settings, 'SENSITIVE_FIELDS', {
     'password', 'passwd', 'pwd', 'token', 'access_token', 'refresh_token',
     'secret', 'sign', 'signature', 'sessionid', 'cookie', 'authorization',
 })
+
+
+def ensure_super_admin_role():
+    """确保系统超级管理员角色存在并返回该角色。"""
+    from .models import Role
+
+    role, _ = Role.objects.get_or_create(
+        name='super_admin',
+        defaults={
+            'display_name': _('超级管理员'),
+            'description': _('系统最高权限角色，拥有所有命令执行权限及管理功能'),
+            'is_super_admin': True,
+        }
+    )
+    return role
+
+
+def is_super_admin_user(user):
+    """统一判断用户是否为超级管理员（Django 超管或 GM 超管角色）。"""
+    if not user or not user.is_authenticated:
+        return False
+
+    if user.is_superuser:
+        return True
+
+    try:
+        profile = user.userprofile
+    except Exception:
+        return False
+
+    return profile.role is not None and profile.role.is_super_admin
+
+
+def get_super_admin_users_queryset():
+    """统一获取全部超级管理员用户（Django 超管 + GM 超管角色）。"""
+    from django.contrib.auth import get_user_model
+
+    User = get_user_model()
+    return User.objects.filter(
+        Q(is_superuser=True) | Q(userprofile__role__is_super_admin=True)
+    ).distinct()
 
 
 def get_client_ip(request):

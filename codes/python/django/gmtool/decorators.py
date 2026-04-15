@@ -6,7 +6,8 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
-from .models import GMCommand, UserProfile, UserCommandPermission
+from .models import GMCommand, UserCommandPermission
+from .utils import is_super_admin_user
 
 
 def is_super_admin(user, request=None):
@@ -25,16 +26,7 @@ def is_super_admin(user, request=None):
         if cache is not None and user.id in cache:
             return cache[user.id]
 
-    result = False
-    # Django 内置超级管理员直接视为 GM 超级管理员
-    if user.is_superuser:
-        result = True
-    else:
-        try:
-            profile = user.userprofile
-            result = profile.role is not None and profile.role.is_super_admin
-        except UserProfile.DoesNotExist:
-            result = False
+    result = is_super_admin_user(user)
 
     if request:
         if not hasattr(request, '_super_admin_cache'):

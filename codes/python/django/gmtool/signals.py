@@ -22,18 +22,12 @@ def auto_assign_super_admin_role(sender, instance, created, **kwargs):
         return
 
     try:
-        from .models import Role, UserProfile
-        from .utils import assign_super_admin_permissions
+        from .models import UserProfile
+        from .utils import assign_super_admin_permissions, ensure_super_admin_role
 
         # 确保超级管理员角色存在
-        role, role_created = Role.objects.get_or_create(
-            name='super_admin',
-            defaults={
-                'display_name': _('超级管理员'),
-                'description': _('系统最高权限角色，拥有所有命令执行权限及管理功能'),
-                'is_super_admin': True,
-            }
-        )
+        role = ensure_super_admin_role()
+        role_created = False
 
         # 确保 UserProfile 存在并绑定超级管理员角色
         profile, profile_created = UserProfile.objects.get_or_create(
@@ -71,22 +65,19 @@ def auto_bind_existing_superusers(sender, **kwargs):
         return
 
     try:
-        from .models import Role, UserProfile
-        from .utils import assign_super_admin_permissions
-
-        # 确保角色存在
-        role, _ = Role.objects.get_or_create(
-            name='super_admin',
-            defaults={
-                'display_name': _('超级管理员'),
-                'description': _('系统最高权限角色，拥有所有命令执行权限及管理功能'),
-                'is_super_admin': True,
-            }
+        from .models import UserProfile
+        from .utils import (
+            assign_super_admin_permissions,
+            ensure_super_admin_role,
+            get_super_admin_users_queryset,
         )
 
-        # 为所有 Django 超级管理员绑定角色和权限
+        # 确保角色存在
+        role = ensure_super_admin_role()
+
+        # 为所有超级管理员绑定角色和权限
         total_new_perms = 0
-        for user in User.objects.filter(is_superuser=True):
+        for user in get_super_admin_users_queryset():
             profile, _ = UserProfile.objects.get_or_create(
                 user=user,
                 defaults={'role': role}

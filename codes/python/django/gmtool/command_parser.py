@@ -377,13 +377,9 @@ def sync_commands_to_db(json_path=None):
         # 将新增命令自动授予所有超级管理员用户（Django 超管 + GM 超管角色）
         if new_commands:
             try:
-                from django.contrib.auth import get_user_model
-                from .utils import assign_super_admin_permissions
+                from .utils import assign_super_admin_permissions, get_super_admin_users_queryset
 
-                User = get_user_model()
-                super_admin_users = User.objects.filter(
-                    Q(is_superuser=True) | Q(userprofile__role__is_super_admin=True)
-                ).distinct()
+                super_admin_users = get_super_admin_users_queryset()
 
                 superadmin_count = 0
                 for user in super_admin_users:
