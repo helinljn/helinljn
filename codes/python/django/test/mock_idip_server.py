@@ -199,7 +199,7 @@ def generate_command_response(command_id: str, command_def: Dict[str, Any]) -> D
 def get_request_id(command_def: Optional[Dict[str, Any]]) -> int:
     if not command_def:
         return 0
-    rid = command_def.get("id", 0)
+    rid = command_def.get("request_id", 0)
     try:
         return int(rid)
     except (TypeError, ValueError):

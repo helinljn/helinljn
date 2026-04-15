@@ -78,7 +78,7 @@ def upload_commands_api(request):
     if not isinstance(data, dict):
         return JsonResponse({'error': _('JSON 顶层必须是对象(dict)')}, status=400)
 
-    required_keys = {'tab', 'request', 'id', 'responseid', 'respone'}
+    required_keys = {'tab', 'request', 'request_id', 'responseid', 'respone'}
     for cmd_id, cmd_data in data.items():
         if not isinstance(cmd_data, dict):
             return JsonResponse({'error': _('命令 %(id)s 的值必须是对象') % {'id': cmd_id}}, status=400)

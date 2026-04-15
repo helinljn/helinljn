@@ -239,7 +239,7 @@ def add_gm_command(request):
             cmd_json_data = {
                 "tab": tab,
                 "request_desc": request_desc or f"{command_name}请求({command_name} request)",
-                "id": request_id,
+                "request_id": request_id,
                 "request": request_name,
                 "respone_desc": response_desc or f"{command_name}应答({command_name} response)",
                 response_name: response_params,

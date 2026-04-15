@@ -95,7 +95,7 @@ def validate_json_command_ids(data):
 
     for cmd_id, cmd_data in data.items():
         json_command_ids.append(cmd_id)
-        req_id = cmd_data.get('id', 0)
+        req_id = cmd_data.get('request_id', 0)
         rsp_id = cmd_data.get('responseid', 0)
         json_request_ids.append((cmd_id, req_id))
         json_response_ids.append((cmd_id, rsp_id))
@@ -316,7 +316,7 @@ def parse_commands(json_path=None):
             'command_name': command_name,
             'tab': cmd_data.get('tab', ''),
             'request_name': request_name,
-            'request_id': cmd_data.get('id', 0),
+            'request_id': cmd_data.get('request_id', 0),
             'response_name': response_name,
             'response_id': cmd_data.get('responseid', 0),
             'request_params': request_params,
