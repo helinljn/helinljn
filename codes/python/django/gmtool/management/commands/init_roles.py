@@ -34,7 +34,7 @@ class Command(BaseCommand):
         # 3. 为所有 Django 超级管理员自动绑定 GM 超级管理员角色
         bound_count = 0
         for user in User.objects.filter(is_superuser=True):
-            profile, _ = UserProfile.objects.get_or_create(
+            profile, created = UserProfile.objects.get_or_create(
                 user=user,
                 defaults={'role': role}
             )
