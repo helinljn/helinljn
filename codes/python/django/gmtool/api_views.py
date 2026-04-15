@@ -65,7 +65,15 @@ def upload_commands_api(request):
 
     # 校验文件大小
     if uploaded_file.size > settings.UPLOAD_MAX_SIZE:
-        return JsonResponse({'error': _('文件大小不能超过 5MB')}, status=400)
+        max_size_mb = settings.UPLOAD_MAX_SIZE / (1024 * 1024)
+        if max_size_mb.is_integer():
+            max_size_display = str(int(max_size_mb))
+        else:
+            max_size_display = f'{max_size_mb:.2f}'.rstrip('0').rstrip('.')
+        return JsonResponse(
+            {'error': _('文件大小不能超过 %(size)sMB') % {'size': max_size_display}},
+            status=400,
+        )
 
     # 解析并校验 JSON 内容
     try:

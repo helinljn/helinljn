@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 19:46+0800\n"
+"POT-Creation-Date: 2026-04-15 22:09+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,45 +25,45 @@ msgstr "Please select a file first"
 msgid "仅支持 .json 文件"
 msgstr "Only .json files are supported"
 
-#: .\gmtool\api_views.py:68
-msgid "文件大小不能超过 5MB"
-msgstr "File size cannot exceed 5MB"
+#: .\gmtool\api_views.py:74
+msgid "文件大小不能超过 %(size)sMB"
+msgstr "File size cannot exceed %(size)sMB"
 
-#: .\gmtool\api_views.py:75
+#: .\gmtool\api_views.py:83
 #, python-format
 msgid "JSON 解析失败: %(error)s"
 msgstr "JSON parsing failed: %(error)s"
 
-#: .\gmtool\api_views.py:79
+#: .\gmtool\api_views.py:87
 msgid "JSON 顶层必须是对象(dict)"
 msgstr "The top-level JSON must be an object (dict)"
 
-#: .\gmtool\api_views.py:84
+#: .\gmtool\api_views.py:92
 #, python-format
 msgid "命令 %(id)s 的值必须是对象"
 msgstr "The value of command %(id)s must be an object"
 
-#: .\gmtool\api_views.py:87
+#: .\gmtool\api_views.py:95
 #, python-format
 msgid "命令 %(id)s 缺少必要字段: %(fields)s"
 msgstr "Command %(id)s is missing required fields: %(fields)s"
 
-#: .\gmtool\api_views.py:91
+#: .\gmtool\api_views.py:99
 #, python-format
 msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
 msgstr "The request parameter %(name)s of command %(id)s must be an array"
 
-#: .\gmtool\api_views.py:96 .\gmtool\command_views.py:303
+#: .\gmtool\api_views.py:104 .\gmtool\command_views.py:303
 #, python-format
 msgid "检测到 ID 冲突: %(errors)s"
 msgstr "ID conflict detected: %(errors)s"
 
-#: .\gmtool\api_views.py:114
+#: .\gmtool\api_views.py:122
 #, python-format
 msgid "文件写入失败: %(error)s"
 msgstr "Failed to write file: %(error)s"
 
-#: .\gmtool\api_views.py:121
+#: .\gmtool\api_views.py:129
 msgid "文件已上传但同步失败"
 msgstr "File uploaded but sync failed"
 
@@ -103,11 +103,11 @@ msgstr "Incorrect username or password, %(remaining)d attempts remaining"
 msgid "页面已过期，请重新登录。"
 msgstr "Page has expired, please log in again."
 
-#: .\gmtool\command_parser.py:33 .\gmtool\forms.py:264
+#: .\gmtool\command_parser.py:33 .\gmtool\forms.py:265
 msgid "请求 ID 和响应 ID 不能相同"
 msgstr "Request ID and Response ID cannot be the same"
 
-#: .\gmtool\command_parser.py:40 .\gmtool\forms.py:230
+#: .\gmtool\command_parser.py:40 .\gmtool\forms.py:231
 #, python-format
 msgid "命令 ID %(id)s 已存在"
 msgstr "Command ID %(id)s already exists"
@@ -319,131 +319,131 @@ msgstr "Super admin role cannot be changed"
 msgid "超级管理员账号不可禁用"
 msgstr "Super admin account cannot be disabled"
 
-#: .\gmtool\forms.py:149 .\gmtool\models.py:37
+#: .\gmtool\forms.py:150 .\gmtool\models.py:37
 #: .\gmtool\templates\gmtool\role_list.html:26
 msgid "角色标识"
 msgstr "Role Identifier"
 
-#: .\gmtool\forms.py:150 .\gmtool\models.py:38
+#: .\gmtool\forms.py:151 .\gmtool\models.py:38
 #: .\gmtool\templates\gmtool\role_list.html:27
 msgid "显示名称"
 msgstr "Display Name"
 
-#: .\gmtool\forms.py:151 .\gmtool\models.py:39
+#: .\gmtool\forms.py:152 .\gmtool\models.py:39
 #: .\gmtool\templates\gmtool\role_list.html:29
 msgid "角色描述"
 msgstr "Description"
 
-#: .\gmtool\forms.py:154
+#: .\gmtool\forms.py:155
 msgid "不能为\"super_admin\"，该标识为系统保留"
 msgstr "Cannot be \"super_admin\", which is reserved for the system"
 
-#: .\gmtool\forms.py:160 .\gmtool\models.py:54
+#: .\gmtool\forms.py:161 .\gmtool\models.py:54
 msgid "角色标识\"super_admin\"为系统保留，不可使用"
 msgstr "The role identifier \"super_admin\" is reserved and cannot be used"
 
-#: .\gmtool\forms.py:167 .\gmtool\models.py:8
+#: .\gmtool\forms.py:168 .\gmtool\models.py:8
 #: .\gmtool\templates\gmtool\command_execute.html:144
 #: .\gmtool\templates\gmtool\command_list.html:37
 msgid "命令编号"
 msgstr "Command ID"
 
-#: .\gmtool\forms.py:170
+#: .\gmtool\forms.py:171
 msgid "唯一的命令标识符，如 10226011"
 msgstr "Unique command identifier, e.g. 10226011"
 
-#: .\gmtool\forms.py:173 .\gmtool\models.py:10
+#: .\gmtool\forms.py:174 .\gmtool\models.py:10
 msgid "分组标签"
 msgstr "Tab Group"
 
-#: .\gmtool\forms.py:175
+#: .\gmtool\forms.py:176
 msgid "e.g. 查询XXX"
 msgstr "e.g. Query XXX"
 
-#: .\gmtool\forms.py:178 .\gmtool\models.py:9
+#: .\gmtool\forms.py:179 .\gmtool\models.py:9
 #: .\gmtool\templates\gmtool\command_list.html:38
 msgid "命令名称"
 msgstr "Command Name"
 
-#: .\gmtool\forms.py:180
+#: .\gmtool\forms.py:181
 msgid "命令显示名称"
 msgstr "Command display name"
 
-#: .\gmtool\forms.py:183 .\gmtool\models.py:11
+#: .\gmtool\forms.py:184 .\gmtool\models.py:11
 #: .\gmtool\templates\gmtool\command_execute.html:148
 #: .\gmtool\templates\gmtool\command_list.html:39
 msgid "请求名"
 msgstr "Request Name"
 
-#: .\gmtool\forms.py:188 .\gmtool\models.py:12
+#: .\gmtool\forms.py:189 .\gmtool\models.py:12
 msgid "协议请求ID"
 msgstr "Request ID"
 
-#: .\gmtool\forms.py:190
+#: .\gmtool\forms.py:191
 msgid "必须在所有命令中唯一（包括请求ID和响应ID）"
 msgstr "Must be unique across all commands (both request and response IDs)"
 
-#: .\gmtool\forms.py:193
+#: .\gmtool\forms.py:194
 msgid "请求描述"
 msgstr "Request Description"
 
-#: .\gmtool\forms.py:196
+#: .\gmtool\forms.py:197
 msgid "请求描述（可选）"
 msgstr "Request description (optional)"
 
-#: .\gmtool\forms.py:199 .\gmtool\models.py:13
+#: .\gmtool\forms.py:200 .\gmtool\models.py:13
 #: .\gmtool\templates\gmtool\command_execute.html:156
 msgid "响应名"
 msgstr "Response Name"
 
-#: .\gmtool\forms.py:204 .\gmtool\models.py:14
+#: .\gmtool\forms.py:205 .\gmtool\models.py:14
 #: .\gmtool\templates\gmtool\command_execute.html:160
 msgid "协议响应ID"
 msgstr "Response ID"
 
-#: .\gmtool\forms.py:206
+#: .\gmtool\forms.py:207
 msgid "必须在所有命令中唯一，通常为请求ID + 1"
 msgstr "Must be unique across all commands, typically request_id + 1"
 
-#: .\gmtool\forms.py:209
+#: .\gmtool\forms.py:210
 msgid "响应描述"
 msgstr "Response Description"
 
-#: .\gmtool\forms.py:212
+#: .\gmtool\forms.py:213
 msgid "响应描述（可选）"
 msgstr "Response description (optional)"
 
-#: .\gmtool\forms.py:215
+#: .\gmtool\forms.py:216
 msgid "请求参数定义（JSON）"
 msgstr "Request Params (JSON)"
 
-#: .\gmtool\forms.py:218
+#: .\gmtool\forms.py:219
 msgid ""
 "请求参数定义的 JSON 数组。留空则使用默认的 AreaId/Partition/PlatId 字段。"
 msgstr ""
 "JSON array of request parameter definitions. Leave empty for default AreaId/"
 "Partition/PlatId fields."
 
-#: .\gmtool\forms.py:221
+#: .\gmtool\forms.py:222
 msgid "响应参数定义（JSON）"
 msgstr "Response Params (JSON)"
 
-#: .\gmtool\forms.py:224
+#: .\gmtool\forms.py:225
 msgid "响应参数定义的 JSON 数组。留空则使用默认的 Result/RetMsg 字段。"
 msgstr ""
 "JSON array of response parameter definitions. Leave empty for default Result/"
 "RetMsg fields."
 
-#: .\gmtool\forms.py:240
+#: .\gmtool\forms.py:241
 msgid "请求参数必须是 JSON 数组"
 msgstr "Request params must be a JSON array"
 
-#: .\gmtool\forms.py:243 .\gmtool\forms.py:255
+#: .\gmtool\forms.py:244 .\gmtool\forms.py:256
 #, python-format
 msgid "无效的 JSON: %(error)s"
 msgstr "Invalid JSON: %(error)s"
 
-#: .\gmtool\forms.py:252
+#: .\gmtool\forms.py:253
 msgid "响应参数必须是 JSON 数组"
 msgstr "Response params must be a JSON array"
 

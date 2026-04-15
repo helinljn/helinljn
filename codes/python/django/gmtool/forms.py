@@ -125,13 +125,14 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
             user.set_password(new_password)
         if commit:
             user.save()
-            UserProfile.objects.update_or_create(
-                user=user,
-                defaults={
-                    'role': self.cleaned_data.get('role'),
-                    'phone': self.cleaned_data.get('phone', ''),
-                }
-            )
+
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            role = profile.role if self.fields['role'].disabled else self.cleaned_data.get('role')
+            phone = profile.phone if self.fields['phone'].disabled else self.cleaned_data.get('phone', '')
+
+            profile.role = role
+            profile.phone = phone
+            profile.save(update_fields=['role', 'phone'])
         return user
 
 
