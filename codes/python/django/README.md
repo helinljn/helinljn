@@ -255,6 +255,29 @@ idip_commands.json
 - 命令分组
 - 展示标签
 
+当前命令对象约定使用统一字段顺序，便于人工维护：
+
+```json
+{
+  "10226000": {
+    "tab": "查询个人信息(Query personal information)",
+    "request_desc": "查询个人信息请求(Personal information query request)",
+    "request_id": 4097,
+    "request": "QueryUsrInfoReq",
+    "respone_desc": "查询个人信息应答(Personal information query response)",
+    "responseid": 4098,
+    "respone": "QueryUsrInfoRsp",
+    "QueryUsrInfoReq": [],
+    "QueryUsrInfoRsp": []
+  }
+}
+```
+
+说明：
+- 顶层请求协议 ID 使用 `request_id`
+- 顶层响应协议 ID 当前仍使用历史字段名 `responseid`
+- 请求/响应参数列表中的 `id` 表示字段名，例如 `AreaId`、`RoleId`、`Result`，不要改成 `request_id`
+
 ### 8.2 同步逻辑
 `command_parser.py` 中的同步逻辑会将 JSON 定义映射到数据库：
 
@@ -268,6 +291,33 @@ idip_commands.json
 - 管理命令：`python manage.py sync_commands`
 - 在线上传 JSON 后自动同步
 - 文件监控中间件检测变更后自动同步
+
+### 8.4 命令定义格式化
+为避免 `idip_commands.json` 中每个命令对象字段顺序变乱，项目提供格式化管理命令：
+
+```bash
+python manage.py format_idip_commands
+```
+
+仅检查是否符合格式，不写回文件：
+
+```bash
+python manage.py format_idip_commands --check
+```
+
+格式化规则：
+1. `tab`
+2. `request_desc`
+3. `request_id`
+4. `request`
+5. `respone_desc`
+6. `responseid`
+7. `respone`
+8. 请求参数定义
+9. 响应参数定义
+10. 其他结构体 / 扩展字段
+
+该命令只调整 JSON 字段显示顺序，不修改协议 ID、参数定义、命令名或文案内容。
 
 ---
 
@@ -472,6 +522,85 @@ python manage.py sync_commands
 ### 14.2 初始化角色与超管权限
 ```bash
 python manage.py init_roles
+```
+
+### 14.3 格式化命令定义文件
+格式化 `idip_commands.json` 中每个命令对象的字段顺序：
+
+```bash
+python manage.py format_idip_commands
+```
+
+仅检查是否需要格式化：
+
+```bash
+python manage.py format_idip_commands --check
+```
+
+### 14.4 导出 SQLite 数据
+导出当前 SQLite 数据到 SQL 文件（仅数据，不含建表语句）：
+
+```bash
+python manage.py export_db_data
+```
+
+常用参数：
+
+```bash
+python manage.py export_db_data --db db.sqlite3 --output database_data.sql
+python manage.py export_db_data --tables auth_user gmtool_gmcommand
+```
+
+### 14.5 导出 SQLite 表结构
+导出 SQLite 数据库表结构到 SQL 文件：
+
+```bash
+python manage.py export_db_schema
+```
+
+常用参数：
+
+```bash
+python manage.py export_db_schema --output database_schema.sql
+python manage.py export_db_schema --no-format
+```
+
+### 14.6 生成 Django 密码哈希
+生成与 Django `auth_user.password` 字段一致格式的 `pbkdf2_sha256` 密码哈希：
+
+```bash
+python manage.py generate_password_hash mypassword
+```
+
+不在命令行直接传明文密码时，会进入安全输入模式：
+
+```bash
+python manage.py generate_password_hash
+```
+
+仅输出哈希结果：
+
+```bash
+python manage.py generate_password_hash mypassword --raw
+```
+
+指定 salt：
+
+```bash
+python manage.py generate_password_hash mypassword --salt customsalt
+```
+
+### 14.7 生成 Django SECRET_KEY
+生成 Django `SECRET_KEY`：
+
+```bash
+python manage.py generate_secret_key
+```
+
+指定长度并仅输出密钥内容：
+
+```bash
+python manage.py generate_secret_key --length 64 --raw
 ```
 
 ---

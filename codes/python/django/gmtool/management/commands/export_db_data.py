@@ -1,12 +1,12 @@
+"""管理命令：导出 SQLite 当前数据到 SQL 文件（仅数据）"""
 import sqlite3
-import sys
 from datetime import datetime
+
+from django.core.management.base import BaseCommand, CommandError
 
 
 def quote_sql_value(value):
-    """
-    将 Python 值转换为可直接写入 SQLite SQL 的字面量
-    """
+    """将 Python 值转换为可直接写入 SQLite SQL 的字面量。"""
     if value is None:
         return 'NULL'
     if isinstance(value, bool):
@@ -21,9 +21,7 @@ def quote_sql_value(value):
 
 
 def get_user_tables(cursor):
-    """
-    获取用户表（排除 sqlite 内部表）
-    """
+    """获取用户表（排除 sqlite 内部表）。"""
     cursor.execute("""
         SELECT name
         FROM sqlite_master
@@ -35,9 +33,7 @@ def get_user_tables(cursor):
 
 
 def export_table_data(cursor, table_name, file_obj):
-    """
-    导出单表数据为 DELETE + INSERT 语句
-    """
+    """导出单表数据为 DELETE + INSERT 语句。"""
     cursor.execute(f'PRAGMA table_info("{table_name}")')
     columns_info = cursor.fetchall()
     column_names = [col[1] for col in columns_info]
@@ -54,7 +50,6 @@ def export_table_data(cursor, table_name, file_obj):
     file_obj.write(f"-- 行数: {len(rows)}\n")
     file_obj.write(f"-- {'=' * 76}\n\n")
 
-    # 先清空目标表，避免重复导入
     file_obj.write(f'DELETE FROM "{table_name}";\n')
 
     for row in rows:
@@ -68,9 +63,7 @@ def export_table_data(cursor, table_name, file_obj):
 
 
 def export_data_to_sql(database_path, output_path, tables=None):
-    """
-    导出 SQLite 当前数据到 SQL 文件（仅数据，不含建表语句）
-    """
+    """导出 SQLite 当前数据到 SQL 文件（仅数据，不含建表语句）。"""
     total_rows = 0
 
     with sqlite3.connect(database_path) as conn:
@@ -101,31 +94,39 @@ def export_data_to_sql(database_path, output_path, tables=None):
 
             f.write("COMMIT;\n")
 
-    print(f"✅ 数据已导出到: {output_path}")
-    print(f"📊 共导出 {len(selected_tables)} 个表")
-    print(f"📈 总行数: {total_rows}")
+    return len(selected_tables), total_rows
 
 
-def main():
-    import argparse
+class Command(BaseCommand):
+    help = '导出 SQLite 当前数据到 SQL 文件（仅数据）'
 
-    parser = argparse.ArgumentParser(description='导出 SQLite 当前数据到 SQL 文件（仅数据）')
-    parser.add_argument('--db', default='db.sqlite3', help='数据库文件路径 (默认: db.sqlite3)')
-    parser.add_argument('--output', default='database_data.sql', help='输出文件路径 (默认: database_data.sql)')
-    parser.add_argument(
-        '--tables',
-        nargs='*',
-        help='仅导出指定表，多个表用空格分隔，例如: --tables auth_user gmtool_gmcommand'
-    )
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--db',
+            default='db.sqlite3',
+            help='数据库文件路径 (默认: db.sqlite3)',
+        )
+        parser.add_argument(
+            '--output',
+            default='database_data.sql',
+            help='输出文件路径 (默认: database_data.sql)',
+        )
+        parser.add_argument(
+            '--tables',
+            nargs='*',
+            help='仅导出指定表，多个表用空格分隔，例如: --tables auth_user gmtool_gmcommand',
+        )
 
-    args = parser.parse_args()
+    def handle(self, *args, **options):
+        try:
+            table_count, total_rows = export_data_to_sql(
+                options['db'],
+                options['output'],
+                tables=options.get('tables'),
+            )
+        except Exception as e:
+            raise CommandError(f'导出失败: {e}') from e
 
-    try:
-        export_data_to_sql(args.db, args.output, tables=args.tables)
-    except Exception as e:
-        print(f"❌ 导出失败: {e}")
-        sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()
+        self.stdout.write(self.style.SUCCESS(f'数据已导出到: {options["output"]}'))
+        self.stdout.write(self.style.SUCCESS(f'共导出 {table_count} 个表'))
+        self.stdout.write(self.style.SUCCESS(f'总行数: {total_rows}'))
