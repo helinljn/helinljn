@@ -350,17 +350,31 @@ def user_permissions(request, user_id):
 def role_delete(request, role_id):
     """删除角色"""
     role = get_object_or_404(Role, pk=role_id)
-    if not role.is_super_admin:
-        # 验证确认令牌
-        confirm_token = request.POST.get('confirm_token', '')
-        if not _verify_confirm_token(role_id, role.name, confirm_token):
-            messages.error(request, _('删除确认失败，请重试'))
-            return redirect('gmtool:role_list')
-        role_name = role.name
-        role.delete()
-        log_operation('role', 'delete', user=request.user,
-                      ip_address=get_client_ip(request),
-                      detail={'role_id': role_id, 'role_name': role_name})
+    if role.is_super_admin:
+        messages.warning(request, _('超级管理员角色不可删除'))
+        return redirect('gmtool:role_list')
+
+    # 验证确认令牌
+    confirm_token = request.POST.get('confirm_token', '')
+    if not _verify_confirm_token(role_id, role.name, confirm_token):
+        messages.error(request, _('删除确认失败，请重试'))
+        return redirect('gmtool:role_list')
+
+    related_user_count = UserProfile.objects.filter(role=role).count()
+    if related_user_count > 0:
+        messages.warning(
+            request,
+            _('当前角色下还有 %(count)d 个用户，无法删除。请先为这些用户更换角色或删除相关用户后再试') % {
+                'count': related_user_count
+            }
+        )
+        return redirect('gmtool:role_list')
+
+    role_name = role.name
+    role.delete()
+    log_operation('role', 'delete', user=request.user,
+                  ip_address=get_client_ip(request),
+                  detail={'role_id': role_id, 'role_name': role_name})
     return redirect('gmtool:role_list')
 
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 17:57+0800\n"
+"POT-Creation-Date: 2026-04-15 18:20+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1268,7 +1268,7 @@ msgstr ""
 msgid "不能删除超级管理员账号"
 msgstr ""
 
-#: .\gmtool\user_views.py:167 .\gmtool\user_views.py:357
+#: .\gmtool\user_views.py:167 .\gmtool\user_views.py:360
 msgid "删除确认失败，请重试"
 msgstr ""
 
@@ -1278,6 +1278,17 @@ msgstr ""
 
 #: .\gmtool\user_views.py:244
 msgid "编辑角色"
+msgstr ""
+
+#: .\gmtool\user_views.py:354
+msgid "超级管理员角色不可删除"
+msgstr ""
+
+#: .\gmtool\user_views.py:367
+#, python-format
+msgid ""
+"当前角色下还有 %(count)d 个用户，无法删除。请先为这些用户更换角色或删除相关用"
+"户后再试"
 msgstr ""
 
 #: .\gmtool\utils.py:62
