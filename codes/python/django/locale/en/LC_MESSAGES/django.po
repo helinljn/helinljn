@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 19:01+0800\n"
+"POT-Creation-Date: 2026-04-15 19:46+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,33 +71,35 @@ msgstr "File uploaded but sync failed"
 msgid "GM命令管理"
 msgstr "GM Command Management"
 
-#: .\gmtool\auth_views.py:96
+#: .\gmtool\auth_views.py:113
 msgid "尝试次数过多"
 msgstr "Too many login attempts"
 
-#: .\gmtool\auth_views.py:99 .\gmtool\auth_views.py:141
+#: .\gmtool\auth_views.py:116 .\gmtool\auth_views.py:147
+#: .\gmtool\auth_views.py:165
 #, python-format
 msgid "登录尝试次数过多，请 %(minutes)d 分钟后再试"
 msgstr "Too many login attempts, please try again in %(minutes)d minutes"
 
-#: .\gmtool\auth_views.py:124 .\gmtool\auth_views.py:127
+#: .\gmtool\auth_views.py:141 .\gmtool\auth_views.py:144
 msgid "账号已禁用"
 msgstr "Account disabled"
 
-#: .\gmtool\auth_views.py:128
-msgid "账号已被禁用"
-msgstr "This account has been disabled"
+#: .\gmtool\auth_views.py:151
+#, python-format
+msgid "账号已被禁用，还可尝试 %(remaining)d 次"
+msgstr "Account has been disabled, %(remaining)d attempts remaining"
 
-#: .\gmtool\auth_views.py:134 .\gmtool\auth_views.py:137
+#: .\gmtool\auth_views.py:158 .\gmtool\auth_views.py:161
 msgid "用户名或密码错误"
 msgstr "Incorrect username or password"
 
-#: .\gmtool\auth_views.py:139
+#: .\gmtool\auth_views.py:163
 #, python-format
 msgid "用户名或密码错误，还可尝试 %(remaining)d 次"
 msgstr "Incorrect username or password, %(remaining)d attempts remaining"
 
-#: .\gmtool\auth_views.py:182
+#: .\gmtool\auth_views.py:206
 msgid "页面已过期，请重新登录。"
 msgstr "Page has expired, please log in again."
 

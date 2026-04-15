@@ -46,7 +46,7 @@
 - `.env` 驱动核心配置
 - 支持 Nginx / 反向代理场景
 - 支持 `request.is_secure()` 正确识别 HTTPS
-- 支持命令定义文件自动监控同步
+- 支持命令定义文件监控同步（开发便利功能）
 - 支持国际化（`zh-hans` / `en`）
 
 ---
@@ -290,9 +290,20 @@ idip_commands.json
 
 - 管理命令：`python manage.py sync_commands`
 - 在线上传 JSON 后自动同步
-- 文件监控中间件检测变更后自动同步
+- 文件监控中间件检测变更后自动同步（主要用于开发联调）
 
-### 8.4 命令定义格式化
+### 8.4 文件监控定位
+项目保留了 `idip_commands.json` 文件监控能力，但其定位是**开发便利功能**，不是生产环境的主同步机制。
+
+建议：
+- 开发环境：可开启 `ENABLE_IDIP_FILE_MONITOR=True`，减少手工同步操作
+- 生产环境：建议关闭文件监控，通过以下方式同步：
+  - `python manage.py sync_commands`
+  - 在线上传 JSON 后自动同步
+
+该能力当前基于请求中间件触发，且使用 `LocMemCache` 与进程内锁，更适合单进程开发联调场景。
+
+### 8.5 命令定义格式化
 为避免 `idip_commands.json` 中每个命令对象字段顺序变乱，项目提供格式化管理命令：
 
 ```bash

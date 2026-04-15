@@ -1,4 +1,4 @@
-"""文件变更监控中间件 — 检测 idip_commands.json 变更并自动同步"""
+"""文件变更监控中间件 — 开发环境下检测 idip_commands.json 变更并自动同步"""
 import hashlib
 import os
 import logging
@@ -16,7 +16,7 @@ CACHE_KEY_HASH = 'gmtool:idip_json_hash'
 CACHE_KEY_LAST_CHECK = 'gmtool:idip_json_last_check'
 # 检查间隔（秒），避免每次请求都读取文件，可通过环境变量配置
 CHECK_INTERVAL = getattr(settings, 'IDIP_FILE_CHECK_INTERVAL', 30)
-# 是否启用文件监控（默认为True）
+# 是否启用文件监控（默认仅开发环境启用）
 ENABLE_FILE_MONITOR = getattr(settings, 'ENABLE_IDIP_FILE_MONITOR', True)
 # 是否使用文件哈希进行变更检测（更准确但稍慢）
 USE_HASH_CHECK = getattr(settings, 'IDIP_USE_HASH_CHECK', False)
@@ -31,6 +31,11 @@ class IDIPFileMonitorMiddleware:
     2. 支持两种变更检测方式：修改时间（默认）或文件哈希（更准确）
     3. 如果文件被修改，自动调用 sync_commands_to_db 同步命令
     4. 同步时新增的命令会自动授予超级管理员（由 command_parser 保证）
+
+    设计定位：
+    - 该能力主要用于开发联调时减少手工同步操作
+    - 生产环境建议通过显式执行 `python manage.py sync_commands`
+      或上传 JSON 后自动同步，不建议依赖请求中间件作为主同步机制
 
     注意：当前使用 LocMemCache 和线程锁，仅在单进程部署下有效。
     多进程（如 gunicorn 多 worker）环境下，各进程的缓存不共享，

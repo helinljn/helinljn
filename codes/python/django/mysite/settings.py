@@ -185,8 +185,8 @@ BATCH_EXECUTE_MAX_TARGETS = config('BATCH_EXECUTE_MAX_TARGETS', default=100, cas
 BATCH_EXECUTE_INTERVAL_MS = config('BATCH_EXECUTE_INTERVAL_MS', default=100, cast=int)
 PAGE_SIZE = config('PAGE_SIZE', default=20, cast=int)
 
-# 文件监控
-ENABLE_IDIP_FILE_MONITOR = config('ENABLE_IDIP_FILE_MONITOR', default=True, cast=bool)
+# 文件监控（仅作为开发便利功能；生产环境建议通过显式同步命令或上传后同步）
+ENABLE_IDIP_FILE_MONITOR = config('ENABLE_IDIP_FILE_MONITOR', default=DEBUG, cast=bool)
 IDIP_FILE_CHECK_INTERVAL = config('IDIP_FILE_CHECK_INTERVAL', default=30, cast=int)
 IDIP_USE_HASH_CHECK = config('IDIP_USE_HASH_CHECK', default=False, cast=bool)
 

@@ -37,6 +37,33 @@ def _build_login_throttle_cache_keys(ip, username):
     return key_ip, key_ip_user
 
 
+def _get_login_failure_attempts(ip, username):
+    """读取当前失败次数（IP 维度 + IP+用户名维度）。"""
+    cache_key_ip, cache_key_ip_user = _build_login_throttle_cache_keys(ip, username)
+    attempts_ip = int(cache.get(cache_key_ip, 0) or 0)
+    attempts_ip_user = int(cache.get(cache_key_ip_user, 0) or 0)
+    return attempts_ip, attempts_ip_user
+
+
+def _increment_login_failure_attempts(ip, username):
+    """登录失败后递增失败计数，返回递增后的双维度次数。"""
+    cache_key_ip, cache_key_ip_user = _build_login_throttle_cache_keys(ip, username)
+
+    try:
+        attempts_ip = cache.incr(cache_key_ip)
+    except ValueError:
+        attempts_ip = 1
+        cache.set(cache_key_ip, attempts_ip, timeout=LOGIN_LOCKOUT_SECONDS)
+
+    try:
+        attempts_ip_user = cache.incr(cache_key_ip_user)
+    except ValueError:
+        attempts_ip_user = 1
+        cache.set(cache_key_ip_user, attempts_ip_user, timeout=LOGIN_LOCKOUT_SECONDS)
+
+    return attempts_ip, attempts_ip_user
+
+
 def _get_safe_next_url(request):
     """获取安全的登录后跳转地址，仅允许本站内相对路径"""
     next_url = request.GET.get('next', '')
@@ -74,21 +101,11 @@ def login_view(request):
         username = request.POST.get('username', '')
         password = request.POST.get('password', '')
 
-        # 登录失败限速检查（IP + username 双维度，使用原子递增避免竞态）
         cache_key_ip, cache_key_ip_user = _build_login_throttle_cache_keys(ip, username)
-        # 原子递增：key不存在时初始化为1，已存在时+1
-        try:
-            attempts_ip = cache.incr(cache_key_ip)
-        except ValueError:
-            attempts_ip = 1
-            cache.set(cache_key_ip, 1, timeout=LOGIN_LOCKOUT_SECONDS)
-        try:
-            attempts_ip_user = cache.incr(cache_key_ip_user)
-        except ValueError:
-            attempts_ip_user = 1
-            cache.set(cache_key_ip_user, 1, timeout=LOGIN_LOCKOUT_SECONDS)
-        # 任一维度达到上限即锁定
-        if attempts_ip > LOGIN_MAX_ATTEMPTS or attempts_ip_user > LOGIN_MAX_ATTEMPTS:
+
+        # 登录前先检查是否已被锁定；只统计失败次数，不统计总尝试次数
+        attempts_ip, attempts_ip_user = _get_login_failure_attempts(ip, username)
+        if attempts_ip >= LOGIN_MAX_ATTEMPTS or attempts_ip_user >= LOGIN_MAX_ATTEMPTS:
             LoginLog.objects.create(
                 user=None, username=username,
                 action='login_failed', ip_address=ip,
@@ -118,16 +135,23 @@ def login_view(request):
                     return redirect(next_url)
                 return redirect('gmtool:dashboard')
             else:
-                # 登录失败，计数已在上方原子递增，无需额外操作
+                attempts_ip, attempts_ip_user = _increment_login_failure_attempts(ip, username)
                 LoginLog.objects.create(
                     user=None, username=username, action='login_failed',
                     ip_address=ip, user_agent=ua, reason=_('账号已禁用'),
                 )
                 log_operation('auth', 'login_failed', ip_address=ip,
                               detail={'username': username, 'reason': str(_('账号已禁用'))})
-                return render(request, 'gmtool/login.html', {'error': _('账号已被禁用')})
+                if attempts_ip >= LOGIN_MAX_ATTEMPTS or attempts_ip_user >= LOGIN_MAX_ATTEMPTS:
+                    return render(request, 'gmtool/login.html', {
+                        'error': _('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
+                    })
+                remaining = LOGIN_MAX_ATTEMPTS - max(attempts_ip, attempts_ip_user)
+                return render(request, 'gmtool/login.html', {
+                    'error': _('账号已被禁用，还可尝试 %(remaining)d 次') % {'remaining': remaining},
+                })
         else:
-            # 登录失败，计数已在上方原子递增，无需额外操作
+            attempts_ip, attempts_ip_user = _increment_login_failure_attempts(ip, username)
             remaining = LOGIN_MAX_ATTEMPTS - max(attempts_ip, attempts_ip_user)
             LoginLog.objects.create(
                 user=None, username=username, action='login_failed',
