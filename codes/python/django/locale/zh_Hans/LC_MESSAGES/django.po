@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 22:09+0800\n"
+"POT-Creation-Date: 2026-04-15 22:25+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -182,7 +182,7 @@ msgstr ""
 msgid "该命令已被停用或删除，请刷新页面获取最新命令列表"
 msgstr ""
 
-#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:87
+#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:79
 msgid "该命令已被停用或删除"
 msgstr ""
 
@@ -234,15 +234,15 @@ msgstr ""
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr ""
 
-#: .\gmtool\decorators.py:57 .\gmtool\decorators.py:79
+#: .\gmtool\decorators.py:49 .\gmtool\decorators.py:71
 msgid "请先登录"
 msgstr ""
 
-#: .\gmtool\decorators.py:62 .\gmtool\decorators.py:63
+#: .\gmtool\decorators.py:54 .\gmtool\decorators.py:55
 msgid "您没有管理员权限"
 msgstr ""
 
-#: .\gmtool\decorators.py:105
+#: .\gmtool\decorators.py:97
 msgid "您没有执行该命令的权限"
 msgstr ""
 
@@ -449,17 +449,6 @@ msgstr ""
 msgid "无法连接到游戏服务器，请检查配置"
 msgstr ""
 
-#: .\gmtool\management\commands\init_roles.py:24 .\gmtool\models.py:40
-#: .\gmtool\signals.py:32 .\gmtool\signals.py:81
-#: .\gmtool\templates\gmtool\role_list.html:42
-msgid "超级管理员"
-msgstr ""
-
-#: .\gmtool\management\commands\init_roles.py:25 .\gmtool\signals.py:33
-#: .\gmtool\signals.py:82
-msgid "系统最高权限角色，拥有所有命令执行权限及管理功能"
-msgstr ""
-
 #: .\gmtool\models.py:15 .\gmtool\templates\gmtool\command_log.html:140
 msgid "请求参数定义"
 msgstr ""
@@ -478,6 +467,11 @@ msgstr ""
 
 #: .\gmtool\models.py:22 .\gmtool\models.py:23
 msgid "GM命令"
+msgstr ""
+
+#: .\gmtool\models.py:40 .\gmtool\templates\gmtool\role_list.html:42
+#: .\gmtool\utils.py:25
+msgid "超级管理员"
 msgstr ""
 
 #: .\gmtool\models.py:41 .\gmtool\models.py:109 .\gmtool\models.py:139
@@ -1298,26 +1292,30 @@ msgid ""
 "户后再试"
 msgstr ""
 
-#: .\gmtool\utils.py:62
+#: .\gmtool\utils.py:26
+msgid "系统最高权限角色，拥有所有命令执行权限及管理功能"
+msgstr ""
+
+#: .\gmtool\utils.py:104
 msgid "命令参数定义错误，请联系管理员"
 msgstr ""
 
-#: .\gmtool\utils.py:77
+#: .\gmtool\utils.py:119
 #, python-format
 msgid "缺少必填参数: %(field)s"
 msgstr ""
 
-#: .\gmtool\utils.py:87
+#: .\gmtool\utils.py:129
 #, python-format
 msgid "参数 %(field)s 必须为整数"
 msgstr ""
 
-#: .\gmtool\utils.py:89
+#: .\gmtool\utils.py:131
 #, python-format
 msgid "参数 %(field)s 不能为负数"
 msgstr ""
 
-#: .\gmtool\utils.py:111
+#: .\gmtool\utils.py:153
 #, python-format
 msgid "参数 %(field)s 必须为布尔值"
 msgstr ""

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 22:09+0800\n"
+"POT-Creation-Date: 2026-04-15 22:25+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,6 +26,7 @@ msgid "仅支持 .json 文件"
 msgstr "Only .json files are supported"
 
 #: .\gmtool\api_views.py:74
+#, python-format
 msgid "文件大小不能超过 %(size)sMB"
 msgstr "File size cannot exceed %(size)sMB"
 
@@ -194,7 +195,7 @@ msgstr ""
 "This command has been deactivated or deleted. Please refresh the page to get "
 "the latest command list."
 
-#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:87
+#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:79
 msgid "该命令已被停用或删除"
 msgstr "This command has been deactivated or deleted"
 
@@ -246,15 +247,15 @@ msgstr "Add GM Command"
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr "Failed to read JSON file: %(error)s"
 
-#: .\gmtool\decorators.py:57 .\gmtool\decorators.py:79
+#: .\gmtool\decorators.py:49 .\gmtool\decorators.py:71
 msgid "请先登录"
 msgstr "Please log in first"
 
-#: .\gmtool\decorators.py:62 .\gmtool\decorators.py:63
+#: .\gmtool\decorators.py:54 .\gmtool\decorators.py:55
 msgid "您没有管理员权限"
 msgstr "You do not have administrator privileges"
 
-#: .\gmtool\decorators.py:105
+#: .\gmtool\decorators.py:97
 msgid "您没有执行该命令的权限"
 msgstr "You do not have permission to execute this command"
 
@@ -465,19 +466,6 @@ msgstr "Request timed out, please try again later"
 msgid "无法连接到游戏服务器，请检查配置"
 msgstr "Unable to connect to game server, please check configuration"
 
-#: .\gmtool\management\commands\init_roles.py:24 .\gmtool\models.py:40
-#: .\gmtool\signals.py:32 .\gmtool\signals.py:81
-#: .\gmtool\templates\gmtool\role_list.html:42
-msgid "超级管理员"
-msgstr "Super Admin"
-
-#: .\gmtool\management\commands\init_roles.py:25 .\gmtool\signals.py:33
-#: .\gmtool\signals.py:82
-msgid "系统最高权限角色，拥有所有命令执行权限及管理功能"
-msgstr ""
-"The highest-privileged system role, with all command execution permissions "
-"and management capabilities"
-
 #: .\gmtool\models.py:15 .\gmtool\templates\gmtool\command_log.html:140
 msgid "请求参数定义"
 msgstr "Request Params"
@@ -499,6 +487,11 @@ msgstr ""
 #: .\gmtool\models.py:22 .\gmtool\models.py:23
 msgid "GM命令"
 msgstr "GM Command"
+
+#: .\gmtool\models.py:40 .\gmtool\templates\gmtool\role_list.html:42
+#: .\gmtool\utils.py:25
+msgid "超级管理员"
+msgstr "Super Admin"
 
 #: .\gmtool\models.py:41 .\gmtool\models.py:109 .\gmtool\models.py:139
 #: .\gmtool\templates\gmtool\role_list.html:30
@@ -1342,26 +1335,32 @@ msgstr ""
 "Please reassign those users to another role or delete the related user "
 "accounts first"
 
-#: .\gmtool\utils.py:62
+#: .\gmtool\utils.py:26
+msgid "系统最高权限角色，拥有所有命令执行权限及管理功能"
+msgstr ""
+"The highest-privileged system role, with all command execution permissions "
+"and management capabilities"
+
+#: .\gmtool\utils.py:104
 msgid "命令参数定义错误，请联系管理员"
 msgstr "Invalid command parameter schema, please contact the administrator"
 
-#: .\gmtool\utils.py:77
+#: .\gmtool\utils.py:119
 #, python-format
 msgid "缺少必填参数: %(field)s"
 msgstr "Missing required parameter: %(field)s"
 
-#: .\gmtool\utils.py:87
+#: .\gmtool\utils.py:129
 #, python-format
 msgid "参数 %(field)s 必须为整数"
 msgstr "Parameter %(field)s must be an integer"
 
-#: .\gmtool\utils.py:89
+#: .\gmtool\utils.py:131
 #, python-format
 msgid "参数 %(field)s 不能为负数"
 msgstr "Parameter %(field)s cannot be negative"
 
-#: .\gmtool\utils.py:111
+#: .\gmtool\utils.py:153
 #, python-format
 msgid "参数 %(field)s 必须为布尔值"
 msgstr "Parameter %(field)s must be a boolean"
