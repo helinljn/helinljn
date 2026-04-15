@@ -11,20 +11,35 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from decouple import config
+from django.core.exceptions import ImproperlyConfigured
+
+
+# =============================================================================
+# Paths
+# =============================================================================
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment-checklist/
+# =============================================================================
+# Environment helpers
+# =============================================================================
 
-# SECURITY WARNING: don't run with debug turned on in production!
+def csv_config(name, default=''):
+    """Read a comma-separated env var into a stripped list."""
+    raw = config(name, default=default)
+    return [item.strip() for item in raw.split(',') if item.strip()]
+
+
+# =============================================================================
+# Core runtime settings
+# =============================================================================
+
 # 开发环境默认开启 DEBUG，生产环境请显式设置 DJANGO_DEBUG=False
 DEBUG = config('DJANGO_DEBUG', default=True, cast=bool)
 
-# SECURITY WARNING: keep the secret key used in production secret!
 # 规则：
 # - 开发环境（DEBUG=True）允许使用本地临时密钥，便于开箱运行
 # - 非开发环境（DEBUG=False）必须显式通过环境变量 DJANGO_SECRET_KEY 提供
@@ -34,30 +49,28 @@ if _env_secret_key:
 elif DEBUG:
     SECRET_KEY = 'django-insecure-dev-key-only-for-development-do-not-use-in-production'
 else:
-    from django.core.exceptions import ImproperlyConfigured
     raise ImproperlyConfigured(
         '生产环境必须通过环境变量 DJANGO_SECRET_KEY 设置安全的 SECRET_KEY'
     )
 
 _allowed_hosts_default = '127.0.0.1,localhost' if DEBUG else ''
-ALLOWED_HOSTS = [h.strip() for h in config('DJANGO_ALLOWED_HOSTS', default=_allowed_hosts_default).split(',') if h.strip()]
+ALLOWED_HOSTS = csv_config('DJANGO_ALLOWED_HOSTS', default=_allowed_hosts_default)
 
-# 生产环境安全检查：确保关键配置不被遗漏
-if not DEBUG:
-    if not ALLOWED_HOSTS:
-        from django.core.exceptions import ImproperlyConfigured
-        raise ImproperlyConfigured(
-            '生产环境必须通过环境变量 DJANGO_ALLOWED_HOSTS 设置具体的允许主机'
-        )
+if not DEBUG and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        '生产环境必须通过环境变量 DJANGO_ALLOWED_HOSTS 设置具体的允许主机'
+    )
 
 
-# Application definition
+# =============================================================================
+# Django apps / middleware / templates
+# =============================================================================
 
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
     'gmtool',
 ]
@@ -95,20 +108,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
 
+# =============================================================================
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# =============================================================================
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {'timeout': 20},  # SQLite 并发写入等待锁的超时时间（秒）
+        'OPTIONS': {
+            'timeout': 20,  # SQLite 并发写入等待锁的超时时间（秒）
+        },
     }
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# =============================================================================
+# Auth / password validation
+# =============================================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -126,103 +143,97 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# =============================================================================
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# =============================================================================
 
 LANGUAGE_CODE = 'zh-hans'
-
 LANGUAGES = [
     ('zh-hans', '简体中文'),
     ('en', '英文'),
 ]
-
-LOCALE_PATHS = [
-    BASE_DIR / 'locale',
-]
-
+LOCALE_PATHS = [BASE_DIR / 'locale']
 TIME_ZONE = 'Asia/Shanghai'
-
 USE_I18N = True
-
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# =============================================================================
+# Static files
+# =============================================================================
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # collectstatic 输出目录，生产部署使用
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# GM命令管理系统配置
+
+# =============================================================================
+# Application settings
+# =============================================================================
+
 LOGIN_URL = '/gmtool/login/'
 CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 
-# 会话安全配置
-SESSION_COOKIE_AGE = 86400              # Session 有效期 1 天（秒），GM 管理系统缩短有效期更安全
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 浏览器关闭时过期
-SESSION_COOKIE_HTTPONLY = True          # 禁止 JS 访问 Session Cookie，防止 XSS 窃取
-
-# IDIP API 配置
-IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:18080/cy_idip')  # 游戏IDIP接口地址（部署时修改）
-IDIP_TIMEOUT = config('IDIP_TIMEOUT', default=30, cast=int)                      # 请求超时时间（秒）
-
-# 批量执行配置
-BATCH_EXECUTE_MAX_TARGETS = 200  # 单次批量最大目标数（玩家/RoleId等）
-BATCH_EXECUTE_INTERVAL_MS = 200  # 批量请求间隔（毫秒）
-
-# 文件变更监控配置
-IDIP_FILE_CHECK_INTERVAL = config('IDIP_FILE_CHECK_INTERVAL', default=30, cast=int)          # 文件监控检查间隔（秒）
-ENABLE_IDIP_FILE_MONITOR = config('ENABLE_IDIP_FILE_MONITOR', default=True, cast=bool)       # 是否启用文件监控
-IDIP_USE_HASH_CHECK = config('IDIP_USE_HASH_CHECK', default=False, cast=bool)                # 是否使用文件哈希检测变更（更准确但稍慢）
-
-# 敏感字段名（用于日志脱敏）
-SENSITIVE_FIELDS = frozenset(config(
-    'SENSITIVE_FIELDS',
-    default='password,passwd,pwd,token,access_token,refresh_token,secret,sign,signature,sessionid,cookie,authorization',
-).split(','))
-
-# IDIP 命令文件路径
+# IDIP / 命令定义
+IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:18080/cy_idip')
+IDIP_TIMEOUT = config('IDIP_TIMEOUT', default=30, cast=int)
 IDIP_JSON_PATH = config('IDIP_JSON_PATH', default=str(BASE_DIR / 'idip_commands.json'))
+UPLOAD_MAX_SIZE = config('UPLOAD_MAX_SIZE', default=10 * 1024 * 1024, cast=int)
 
-# 分页配置
-PAGE_SIZE = config('PAGE_SIZE', default=20, cast=int)  # 每页条数
+# 命令执行 / 展示
+BATCH_EXECUTE_MAX_TARGETS = config('BATCH_EXECUTE_MAX_TARGETS', default=100, cast=int)
+BATCH_EXECUTE_INTERVAL_MS = config('BATCH_EXECUTE_INTERVAL_MS', default=100, cast=int)
+PAGE_SIZE = config('PAGE_SIZE', default=20, cast=int)
 
-# 上传文件大小限制
-UPLOAD_MAX_SIZE = config('UPLOAD_MAX_SIZE', default=5 * 1024 * 1024, cast=int)  # 默认5MB
+# 文件监控
+ENABLE_IDIP_FILE_MONITOR = config('ENABLE_IDIP_FILE_MONITOR', default=True, cast=bool)
+IDIP_FILE_CHECK_INTERVAL = config('IDIP_FILE_CHECK_INTERVAL', default=30, cast=int)
+IDIP_USE_HASH_CHECK = config('IDIP_USE_HASH_CHECK', default=False, cast=bool)
 
-# 登录限速配置
-LOGIN_MAX_ATTEMPTS = config('LOGIN_MAX_ATTEMPTS', default=5, cast=int)                       # 登录最大尝试次数
-LOGIN_LOCKOUT_SECONDS = config('LOGIN_LOCKOUT_SECONDS', default=300, cast=int)               # 登录锁定时间（秒）
+# 登录安全
+LOGIN_MAX_ATTEMPTS = config('LOGIN_MAX_ATTEMPTS', default=5, cast=int)
+LOGIN_LOCKOUT_SECONDS = config('LOGIN_LOCKOUT_SECONDS', default=300, cast=int)
 
-# 是否信任反向代理的 X-Forwarded-For 头（生产环境使用 Nginx 等反向代理时设为 True）
+# 日志脱敏
+SENSITIVE_FIELDS = frozenset(
+    csv_config(
+        'SENSITIVE_FIELDS',
+        default='password,passwd,pwd,token,access_token,refresh_token,secret,sign,signature,sessionid,cookie,authorization',
+    )
+)
+
+
+# =============================================================================
+# Proxy / session / CSRF
+# =============================================================================
+
+# 反向代理
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 TRUSTED_PROXY = config('DJANGO_TRUSTED_PROXY', default=False, cast=bool)
-# 可信代理数量（从 X-Forwarded-For 右侧起，跳过这么多个代理 IP 后取客户端 IP）
 TRUSTED_PROXY_COUNT = config('DJANGO_TRUSTED_PROXY_COUNT', default=1, cast=int)
 
-# Clickjacking 防护
-X_FRAME_OPTIONS = 'DENY'
-# 防止 MIME 类型嗅探
+# 会话 / Cookie
+SESSION_COOKIE_AGE = 86400              # Session 有效期 1 天（秒）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 浏览器关闭时过期
+SESSION_COOKIE_HTTPONLY = True          # 禁止 JS 访问 Session Cookie
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=not DEBUG, cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=not DEBUG, cast=bool)
+
+
+# =============================================================================
+# Security headers
+# =============================================================================
+
 SECURE_CONTENT_TYPE_NOSNIFF = True
-# XSS 防护：已移除 SECURE_BROWSER_XSS_FILTER（X-XSS-Protection 已被现代浏览器废弃，改用 CSP 防护）
-# Referer 头发送策略
-SECURE_REFERRER_POLICY = 'same-origin'
-# Cross-Origin 策略
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
 
-# 生产环境 HTTPS 安全配置（DEBUG=False 时自动启用）
-# SESSION_COOKIE_SECURE = not DEBUG      # Session Cookie 仅通过 HTTPS 传输
-# CSRF_COOKIE_SECURE = not DEBUG         # CSRF Cookie 仅通过 HTTPS 传输
-# SECURE_SSL_REDIRECT = not DEBUG        # 强制 HTTPS
-# SECURE_HSTS_SECONDS = 31536000         # HSTS: 1 year
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # HSTS 包含子域名
-# SECURE_HSTS_PRELOAD = True             # HSTS 预加载
 
-# 缓存配置（中间件文件监控使用）
+# =============================================================================
+# Cache
+# =============================================================================
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -230,8 +241,13 @@ CACHES = {
     }
 }
 
-# 日志配置
+
+# =============================================================================
+# Logging
+# =============================================================================
+
 LOG_DIR = BASE_DIR / 'logs'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -256,8 +272,8 @@ LOGGING = {
             'level': 'INFO',
             'class': 'gmtool.logging_handlers.SafeTimedRotatingFileHandler',
             'filename': str(LOG_DIR / 'audit.log'),
-            'when': 'midnight',  # 每天午夜轮转
-            'backupCount': 30,   # 保留30天日志
+            'when': 'midnight',
+            'backupCount': 30,
             'encoding': 'utf-8',
             'formatter': 'audit',
         },
@@ -265,8 +281,8 @@ LOGGING = {
             'level': 'INFO',
             'class': 'gmtool.logging_handlers.SafeTimedRotatingFileHandler',
             'filename': str(LOG_DIR / 'gmtool.log'),
-            'when': 'midnight',  # 每天午夜轮转
-            'backupCount': 30,   # 保留30天
+            'when': 'midnight',
+            'backupCount': 30,
             'encoding': 'utf-8',
             'formatter': 'verbose',
         },

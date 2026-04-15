@@ -146,7 +146,7 @@ def get_conversion_type(ext: str) -> Optional[str]:
     unix_extensions = {'.py', '.po'}
 
     # DOS转换（LF -> CRLF）
-    dos_extensions = {'.md', '.sql', '.yml', '.html', '.json'}
+    dos_extensions = {'.md', '.yml', '.html', '.json'}
 
     if ext in unix_extensions:
         return 'unix'

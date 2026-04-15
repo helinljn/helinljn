@@ -1,545 +1,565 @@
 # 游戏 GM 命令后台管理系统（Django）
 
----
-
-## 1. 项目概述
-
-本系统是基于 Django 的 GM 命令后台管理平台，核心能力如下：
-
-- 用户登录与权限控制
-- GM 命令列表、动态表单执行、执行日志记录
-- 用户管理、角色分组管理（角色仅用于分组标记）
-- 用户级命令权限分配（`UserCommandPermission`）
-- 命令定义文件（`idip_commands.json`）解析与同步
-- 命令定义在线上传/同步与自动文件变更监控
-- 操作审计日志与应用日志
-- 中英文国际化（`zh-hans` / `en`）
+基于 Django 的 GM 命令后台管理平台，提供命令执行、权限控制、日志审计、命令定义同步与中英文国际化等能力。
 
 ---
 
-## 2. 技术栈
+## 1. 项目简介
 
-| 项目 | 技术 |
+本项目用于承载游戏 GM 命令的后台管理场景，核心目标是：
+
+- 为不同用户提供受控的 GM 命令执行入口
+- 支持命令定义从 `idip_commands.json` 解析并同步到数据库
+- 支持命令动态表单渲染与结构化结果展示
+- 支持用户、角色、命令权限管理
+- 记录登录日志、命令执行日志与审计日志
+- 支持通过反向代理部署在 HTTPS 环境下运行
+- 支持中英文国际化
+
+---
+
+## 2. 当前特性
+
+### 2.1 认证与权限
+- 用户登录 / 登出
+- 登录失败限速
+- 超级管理员保护
+- 用户级命令权限控制（`UserCommandPermission`）
+- 用户分组角色（`Role`）与扩展资料（`UserProfile`）
+
+### 2.2 命令管理
+- 命令列表按分组展示
+- 动态表单执行 GM 命令
+- 支持批量执行参数下发
+- 命令在线新增
+- 命令定义 JSON 上传并自动同步
+- 命令停用后自动禁止执行
+
+### 2.3 日志与审计
+- 登录日志 `LoginLog`
+- 命令执行日志 `CommandLog`
+- 审计日志 `gmtool.audit`
+- 应用日志 `gmtool`
+- 日志详情敏感字段脱敏
+
+### 2.4 运行与配置
+- `.env` 驱动核心配置
+- 支持 Nginx / 反向代理场景
+- 支持 `request.is_secure()` 正确识别 HTTPS
+- 支持命令定义文件自动监控同步
+- 支持国际化（`zh-hans` / `en`）
+
+---
+
+## 3. 技术栈
+
+| 类别 | 技术 |
 |---|---|
 | 后端框架 | Django 5.2.12 |
-| 语言 | Python 3.11 |
-| 数据库 | SQLite（开发环境） |
-| 前端 UI | Tabler（CDN，Bootstrap 5） |
+| Python | 3.11 |
+| 数据库 | SQLite（当前默认） |
+| 前端 UI | Tabler（CDN） / Bootstrap 5 |
 | 图标 | Tabler Icons |
 | HTTP 客户端 | requests |
-| 国际化 | Django i18n（`zh-hans` / `en`） |
+| 配置管理 | python-decouple |
+| 国际化 | Django i18n |
 | 日志轮转 | 自定义 `SafeTimedRotatingFileHandler` |
 
 ---
 
-## 3. 项目结构（当前仓库）
+## 4. 项目结构
 
 ```text
 c:\helin\helinljn\codes\python\django\
+├── .env
 ├── manage.py
 ├── db.sqlite3
-├── idip_commands.json
-├── schema.sql
 ├── environment.yml
-├── 开发文档.md
+├── idip_commands.json
+├── README.md
 ├── mysite/
+│   ├── __init__.py
+│   ├── asgi.py
 │   ├── settings.py
 │   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
+│   └── wsgi.py
 ├── gmtool/
+│   ├── __init__.py
+│   ├── api_views.py
 │   ├── apps.py
-│   ├── models.py
-│   ├── views.py（统一导出模块，向后兼容）
-│   ├── auth_views.py（新增：认证相关视图）
-│   ├── command_views.py（新增：命令管理视图）
-│   ├── user_views.py（新增：用户和角色管理视图）
-│   ├── api_views.py（新增：API相关视图）
-│   ├── utils.py（新增：公共辅助函数）
-│   ├── urls.py
-│   ├── forms.py
-│   ├── decorators.py
-│   ├── idip_client.py
-│   ├── command_parser.py
-│   ├── middleware.py
-│   ├── signals.py
 │   ├── audit_log.py
+│   ├── auth_views.py
+│   ├── command_parser.py
+│   ├── command_views.py
+│   ├── decorators.py
+│   ├── forms.py
+│   ├── idip_client.py
 │   ├── logging_handlers.py
-│   ├── templatetags/
-│   │   ├── __init__.py
-│   │   └── gmtool_tags.py（自定义模板标签：确认令牌等）
+│   ├── middleware.py
+│   ├── models.py
+│   ├── signals.py
+│   ├── urls.py
+│   ├── user_views.py
+│   ├── utils.py
+│   ├── views.py
 │   ├── management/commands/
-│   │   ├── init_roles.py
-│   │   └── sync_commands.py
 │   ├── migrations/
-│   │   ├── 0001_initial.py
-│   │   ├── 0002_loginlog.py
-│   │   ├── 0003_alter_userprofile_role_usercommandpermission.py
-│   │   ├── 0004_remove_rolecommandpermission.py
-│   │   ├── 0005_add_request_content.py
-│   │   └── 0006_alter_usercommandpermission_unique_together_and_more.py
-│   └── templates/gmtool/
-│       ├── base.html
-│       ├── login.html
-│       ├── dashboard.html
-│       ├── command_list.html
-│       ├── command_execute.html
-│       ├── command_add.html
-│       ├── user_list.html
-│       ├── user_form.html
-│       ├── user_permissions.html
-│       ├── role_list.html
-│       ├── role_form.html
-│       ├── command_log.html
-│       ├── login_log.html
-│       ├── 403.html / 404.html / 500.html
+│   ├── templates/gmtool/
+│   └── templatetags/
 ├── locale/
-│   ├── en/LC_MESSAGES/django.po(.mo)
-│   └── zh_Hans/LC_MESSAGES/django.po(.mo)
-└── logs/
-    ├── audit.log
-    └── gmtool.log
+├── logs/
+└── test/
+    ├── README.md
+    └── mock_idip_server.py
 ```
 
 ---
 
-## 4. 核心业务与权限模型
+## 5. 核心模块说明
 
-### 4.1 权限原则
+### 5.1 `mysite/`
+项目级配置与入口：
 
-1. **命令权限按用户直接分配**（`UserCommandPermission`）。
-2. 角色（`Role`）用于用户分组标记，不直接承载命令授权。
-3. 超级管理员判断兼容两种来源：
+- `settings.py`：项目配置、环境变量读取、安全设置、日志、缓存等
+- `urls.py`：项目级路由与错误处理入口
+- `asgi.py` / `wsgi.py`：部署入口
+
+### 5.2 `gmtool/`
+业务主应用：
+
+- `auth_views.py`：登录、登出、错误页、CSRF 失败处理
+- `command_views.py`：仪表盘、命令列表、命令执行、同步、操作日志
+- `user_views.py`：用户管理、角色管理、权限分配、登录日志
+- `api_views.py`：日志详情、命令定义上传接口
+- `models.py`：命令、角色、用户扩展、日志、权限关联等模型
+- `forms.py`：用户、角色、命令新增相关表单
+- `decorators.py`：超级管理员与命令权限装饰器
+- `command_parser.py`：命令定义解析与同步逻辑
+- `idip_client.py`：与 IDIP 服务交互
+- `middleware.py`：命令定义文件变更监控
+- `signals.py`：超管角色/权限自动补齐
+- `audit_log.py`：审计日志封装
+- `logging_handlers.py`：Windows 友好的日志轮转处理器
+
+### 5.3 `test/mock_idip_server.py`
+本地联调用的 Mock IDIP 服务，用于在开发环境验证命令链路。
+
+---
+
+## 6. 权限模型
+
+### 6.1 设计原则
+1. **命令权限按用户直接分配**
+2. **角色只做分组标签，不直接承载命令权限**
+3. 超级管理员兼容两种判断来源：
    - Django 内置：`user.is_superuser`
-   - GM 角色：`user.userprofile.role.is_super_admin == True`
+   - 业务角色：`user.userprofile.role.is_super_admin`
 
-### 4.2 超级管理员保护规则（代码已实现）
+### 6.2 涉及模型
+- `Role`
+- `UserProfile`
+- `UserCommandPermission`
 
-- 不可通过普通用户编辑流程将用户提升为超级管理员
-- 超级管理员角色（`super_admin`）不可在角色管理中编辑/删除
-- 超级管理员用户不可删除
-- 编辑目标为超级管理员时，角色与启用状态不可更改
-- 用户不能禁用自己账号
-
-### 4.3 自动绑定机制（signals）
-
-- `post_save(User)`：当用户是 Django 超管时，自动绑定 `super_admin` 角色并授予全部活跃命令权限
-- `post_migrate`（仅 gmtool app）：迁移后为已有 Django 超管补齐角色绑定与权限
-
----
-
-## 5. 数据模型设计（`gmtool/models.py`）
-
-### 5.1 GMCommand
-
-- 命令基础信息：`command_id`, `command_name`, `tab`
-- 协议信息：`request_name`, `request_id`, `response_name`, `response_id`
-- 参数定义：`request_params`, `response_params`（JSON）
-- 状态：`is_active`
-- 索引：`command_id`、`(is_active, command_id)`、`request_id`、`response_id`
-
-### 5.2 Role
-
-- 字段：`name`, `display_name`, `description`, `is_super_admin`, `created_at`
-- `name` 唯一；`super_admin` 为系统保留角色名
-
-### 5.3 UserCommandPermission
-
-- 字段：`user`, `command`
-- 使用数据库约束 `UniqueConstraint(fields=['user', 'command'])` 保证唯一
-
-### 5.4 UserProfile
-
-- 字段：`user`（一对一）、`role`（可空）、`phone`
-
-### 5.5 CommandLog
-
-- 记录命令执行：
-  - `request_data`（表单参数）
-  - `request_content`（完整请求 JSON 字符串）
-  - `response_data`
-  - `status`（`success` / `failed` / `timeout`）
-  - `ip_address`, `created_at`
-- 索引：按用户/状态/命令 + 时间组合索引
-
-### 5.6 LoginLog
-
-- 登录相关动作：`login` / `logout` / `login_failed`
-- 字段：`username`, `reason`, `ip_address`, `user_agent`, `created_at`
-- 索引：按动作、用户名 + 时间
+### 6.3 已实现的保护规则
+- 普通用户编辑流程中不能把目标用户提升为超级管理员
+- 超级管理员角色不能编辑或删除
+- 超级管理员用户不能删除
+- 用户不能禁用自己
+- 编辑超级管理员时，角色与启用状态不可改
+- 超级管理员自动拥有全部活跃命令权限
 
 ---
 
-## 6. 命令定义与同步机制（`idip_commands.json` + `command_parser.py`）
+## 7. 数据模型概览
 
-### 6.1 解析
+### 7.1 `GMCommand`
+GM 命令定义模型，来源于 `idip_commands.json` 同步结果。
 
-`parse_commands()` 从 JSON 提取命令元信息及请求/响应参数列表。
+关键字段：
+- `command_id`
+- `command_name`
+- `tab`
+- `request_name`
+- `request_id`
+- `response_name`
+- `response_id`
+- `request_params`
+- `response_params`
+- `field_labels`
+- `is_active`
 
-### 6.2 同步
+### 7.2 `Role`
+用户分组角色。
 
-`sync_commands_to_db()`（事务保护）：
+关键字段：
+- `name`
+- `display_name`
+- `description`
+- `is_super_admin`
 
-- JSON 有、数据库无：创建并启用命令
-- JSON 有、数据库有：更新命令
-- JSON 无、数据库有：标记为 `is_active=False`
-- 对新增命令自动授予所有 Django 超级管理员用户权限
+### 7.3 `UserCommandPermission`
+用户与命令的直接权限关联。
 
-返回值：`(created_count, updated_count, deactivated_count)`。
+关键约束：
+- `UniqueConstraint(fields=['user', 'command'])`
 
-### 6.3 ID 冲突校验
+### 7.4 `UserProfile`
+用户扩展信息。
 
-- `validate_command_ids()`：校验新增单条命令的 command/request/response ID 冲突
-- `validate_json_command_ids()`：校验整个 JSON 文件与数据库冲突
+关键字段：
+- `user`
+- `role`
+- `phone`
 
-### 6.4 在线新增命令
+### 7.5 `CommandLog`
+命令执行日志。
 
-- 页面/路由：`/gmtool/commands/add/`
-- 视图：`add_gm_command`
-- 表单：`AddGMCommandForm`
-- 流程：
-  1. 表单校验 + 协议 ID 校验
-  2. 原子写入 `idip_commands.json`
-  3. 调用同步逻辑入库
-  4. 记录审计日志
+关键字段：
+- `user`
+- `command`
+- `partition`
+- `request_data`
+- `request_content`
+- `response_data`
+- `status`
+- `ip_address`
+- `created_at`
+
+### 7.6 `LoginLog`
+登录行为日志。
+
+关键字段：
+- `user`
+- `username`
+- `action`
+- `reason`
+- `ip_address`
+- `user_agent`
+- `created_at`
 
 ---
 
-## 7. IDIP API 转发协议（`idip_client.py`）
+## 8. 命令定义与同步机制
 
-### 7.1 请求格式
+### 8.1 命令定义文件
+项目根目录下使用：
 
-- `POST {IDIP_API_URL}`
+```text
+idip_commands.json
+```
+
+用于定义：
+- 命令编号
+- 请求/响应协议 ID
+- 请求/响应字段结构
+- 命令分组
+- 展示标签
+
+### 8.2 同步逻辑
+`command_parser.py` 中的同步逻辑会将 JSON 定义映射到数据库：
+
+- JSON 有、数据库无 → 创建命令
+- JSON 有、数据库有 → 更新命令
+- JSON 无、数据库有 → 标记为停用
+
+### 8.3 触发方式
+可通过以下方式触发同步：
+
+- 管理命令：`python manage.py sync_commands`
+- 在线上传 JSON 后自动同步
+- 文件监控中间件检测变更后自动同步
+
+---
+
+## 9. IDIP 调用协议
+
+### 9.1 请求方式
+向配置项 `IDIP_API_URL` 发起：
+
+- `POST`
 - `Content-Type: application/x-www-form-urlencoded`
-- 参数：
-  - `id`: 命令编号
-  - `GSA`: 固定空字符串
-  - `content`: URL 编码后的 JSON 字符串（包含 `head` 与 `body`）
 
-> 使用本仓库的 mock 服务时，`IDIP_API_URL` 应配置为：`http://127.0.0.1:18080/cy_idip`
+请求参数：
+- `id`
+- `GSA`
+- `content`
 
-### 7.2 返回约定
-
-`send_idip_command(command, params)` 返回四元组：
+### 9.2 Python 返回值
+`send_idip_command(command, params)` 返回：
 
 ```python
 (response_data, error_message, request_content_str, error_type)
 ```
 
-其中：
-
-- `request_content_str` 始终可用于日志落库（完整请求 JSON）
-- `error_type` 典型值：`timeout` / `connection` / `error` / `''`
-
-### 7.3 包装响应兼容（mock 新协议）
-
-`idip_client.py` 兼容以下包装格式：
+### 9.3 包装响应支持
+支持如下格式：
 
 ```json
 {
-  "status": true/false,
-  "id": request_id,
-  "json": {...}
+  "status": true,
+  "id": 123,
+  "json": {}
 }
 ```
 
-处理规则：
+以及：
 
-1. `status=true`：
-   - `json` 为业务 JSON 对象（兼容历史字符串并自动解析）
-   - 客户端标准化后将其返回给页面
-
-2. `status=false`：
-   - `json` 为对象，包含 `Result` / `RetMsg`
-   - 客户端提取错误并按失败流程返回（写日志 + 前端提示）
-
-3. 非包装格式：
-   - 视为旧协议，自动包装成新结构后再返回，保证上层处理一致
-
----
-
-## 8. 路由设计（当前代码）
-
-### 8.1 项目级路由（`mysite/urls.py`）
-
-| 路径 | 说明 |
-|---|---|
-| `/i18n/` | Django 语言切换相关路由 |
-| `/jsi18n/` | JavaScript 国际化 catalog（`django.gettext` 等） |
-| `/gmtool/` | gmtool 子路由入口 |
-| `/` | 重定向至 `/gmtool/` |
-
-错误处理器已绑定：`handler403` / `handler404` / `handler500`。
-
-### 8.2 gmtool 路由（`gmtool/urls.py`）
-
-视图模块化拆分后，路由映射保持不变，但视图函数的导入来源已更新：
-
-| 路径 | 视图 | 权限 | 所属模块 |
-|---|---|---|---|
-| `/gmtool/` | `dashboard` | 登录 | `command_views` |
-| `/gmtool/login/` | `login_view` | 匿名 | `auth_views` |
-| `/gmtool/logout/` | `logout_view` | 登录（POST） | `auth_views` |
-| `/gmtool/commands/` | `command_list` | 登录 | `command_views` |
-| `/gmtool/commands/add/` | `add_gm_command` | 超管 | `command_views` |
-| `/gmtool/commands/<cmd_id>/execute/` | `command_execute` | 命令权限 | `command_views` |
-| `/gmtool/users/...` | 用户管理相关 | 超管 | `user_views` |
-| `/gmtool/roles/...` | 角色管理相关 | 超管 | `user_views` |
-| `/gmtool/users/<id>/permissions/` | `user_permissions` | 超管 | `user_views` |
-| `/gmtool/logs/` | `command_log_list` | 登录（普通用户仅看自己） | `command_views` |
-| `/gmtool/logs/login/` | `login_log_list` | 超管 | `user_views` |
-| `/gmtool/api/commands/sync/` | `sync_commands_api` | 超管（POST） | `command_views` |
-| `/gmtool/api/commands/upload/` | `upload_commands_api` | 超管（POST） | `api_views` |
-| `/gmtool/api/logs/<id>/` | `log_detail_api` | 登录（含权限校验） | `api_views` |
-
-> **向后兼容性**：原有的 `views.py` 作为统一导出模块，仍然提供所有视图函数的导出，确保第三方代码导入不受影响。
+```json
+{
+  "status": false,
+  "id": 123,
+  "json": {
+    "Result": 5001,
+    "RetMsg": "error"
+  }
+}
+```
 
 ---
 
-## 9. 视图模块化设计（2026年4月重构）
+## 10. 路由说明
 
-为了提高代码可维护性，原有的 `gmtool/views.py`（约1000行）已拆分为四个功能模块，并保持了向后兼容性：
+### 10.1 项目级路由
+`mysite/urls.py`
 
-| 模块 | 功能 | 包含视图函数示例 |
-|---|---|---|
-| `auth_views.py` | 认证相关 | `login_view`, `logout_view`, `custom_404`, `custom_500`, `custom_403`, `csrf_failure` |
-| `command_views.py` | 命令管理 | `dashboard`, `command_list`, `command_execute`, `add_gm_command`, `sync_commands_api`, `command_log_list` |
-| `user_views.py` | 用户和角色管理 | `user_list`, `user_create`, `user_edit`, `user_delete`, `role_list`, `role_create`, `role_edit`, `user_permissions`, `role_delete`, `login_log_list` |
-| `api_views.py` | API接口 | `log_detail_api`, `upload_commands_api` |
-| `utils.py` | 公共辅助函数 | `get_client_ip`, `_group_commands_by_tab`, `_validate_command_params_basic`, `_mask_sensitive_data`, `assign_super_admin_permissions`, `parse_time_range_filters` |
+- `/i18n/`
+- `/jsi18n/`
+- `/gmtool/`
+- `/` → 重定向到 `/gmtool/`
 
-### 9.1 登录与安全（`auth_views.py`）
+### 10.2 gmtool 路由
+`gmtool/urls.py`
 
-- 已登录访问登录页：显示“已登录提示页”，非静默跳转
-- 登录失败限速：同 IP 连续失败 5 次，锁定 5 分钟（缓存实现），支持 IP 和 IP+用户名双维度限速
-- 登出仅允许 POST，避免 CSRF 强制登出
+主要包括：
 
-### 9.2 命令执行（`command_views.py`）
+- 仪表盘：`/gmtool/`
+- 登录：`/gmtool/login/`
+- 登出：`/gmtool/logout/`
+- 命令列表：`/gmtool/commands/`
+- 命令执行：`/gmtool/commands/<cmd_id>/execute/`
+- 新增命令：`/gmtool/commands/add/`
+- 用户管理：`/gmtool/users/...`
+- 角色管理：`/gmtool/roles/...`
+- 权限分配：`/gmtool/users/<id>/permissions/`
+- 命令日志：`/gmtool/logs/`
+- 登录日志：`/gmtool/logs/login/`
+- 同步接口：`/gmtool/api/v1/commands/sync/`
+- 上传接口：`/gmtool/api/v1/commands/upload/`
+- 日志详情接口：`/gmtool/api/v1/logs/<id>/`
 
-- GET：动态渲染请求参数表单，并下发响应 schema（`response_params`）
-- POST：JSON 请求体校验（含 `Partition` 类型/范围校验）
-- 若命令已停用/删除：
-  - POST 返回 `410` + `command_deactivated=true`
-  - GET 消息提示后重定向列表
-- 记录 `CommandLog` 与审计日志
+---
 
-#### 执行结果展示（动态列表化）
+## 11. 配置说明
 
-`command_execute.html` 的单次执行结果已改为结构化展示，不再只显示原始 JSON：
+项目配置主要位于：
 
-1. 顶层响应信息（如 `Result/RetMsg/CommandId/...`）显示为键值列表
-2. `Data` 区域按 `idip_commands.json` 同步到数据库的 `response_params` 动态渲染
-3. 数组/对象字段自动展开为子表格
-4. 若 schema 与实际返回不匹配，自动回退到“原始JSON（兜底）”区域
+- `mysite/settings.py`
+- `.env`
 
-该机制确保不同 GM 命令可根据各自响应定义动态调整展示列表。
+### 11.1 配置组织方式
+当前 `settings.py` 已按以下结构整理：
 
-### 9.3 数据库查询优化
+1. Core runtime settings
+2. Django apps / middleware / templates
+3. Database
+4. Auth / password validation
+5. Internationalization
+6. Static files
+7. Application settings
+8. Proxy / session / CSRF
+9. Security headers
+10. Cache
+11. Logging
 
-- **超级管理员**：直接获取所有活跃命令，避免权限检查开销
-- **普通用户**：通过关联表查询 `GMCommand.objects.filter(usercommandpermission__user=request.user)`，避免 `command_id__in` 子查询
-- **关联查询**：在关键视图使用 `select_related` 和 `prefetch_related` 减少 N+1 查询
-- **分页优化**：对日志列表等进行适当分页控制
+`.env` 也按近似顺序进行了分组，便于维护。
 
-### 9.4 批量执行参数（配置注入前端）
+### 11.2 常用环境变量
+常用环境变量包括：
 
+- `DJANGO_DEBUG`
+- `DJANGO_SECRET_KEY`
+- `DJANGO_ALLOWED_HOSTS`
+- `IDIP_API_URL`
+- `IDIP_TIMEOUT`
+- `IDIP_JSON_PATH`
+- `UPLOAD_MAX_SIZE`
 - `BATCH_EXECUTE_MAX_TARGETS`
 - `BATCH_EXECUTE_INTERVAL_MS`
+- `PAGE_SIZE`
+- `ENABLE_IDIP_FILE_MONITOR`
+- `IDIP_FILE_CHECK_INTERVAL`
+- `IDIP_USE_HASH_CHECK`
+- `LOGIN_MAX_ATTEMPTS`
+- `LOGIN_LOCKOUT_SECONDS`
+- `SENSITIVE_FIELDS`
+- `DJANGO_TRUSTED_PROXY`
+- `DJANGO_TRUSTED_PROXY_COUNT`
+- `SESSION_COOKIE_SECURE`
+- `CSRF_COOKIE_SECURE`
 
-### 9.5 日志详情脱敏（`api_views.py`）
+### 11.3 Secure Cookie 与 HTTPS 感知
+当前项目采用以下策略：
 
-`log_detail_api` 对敏感字段递归脱敏（例如 password/token/cookie/authorization 等），并对 `request_content` 做结构化脱敏后返回。
+- **反向代理层负责**
+  - HTTP → HTTPS 跳转
+  - HSTS
 
-### 9.6 命令定义文件上传（`api_views.py`）
+- **Django 负责**
+  - `SESSION_COOKIE_SECURE`
+  - `CSRF_COOKIE_SECURE`
+  - `SECURE_PROXY_SSL_HEADER`
 
-`upload_commands_api` 包含：
+这样在 Nginx / SLB / Ingress 场景下，Django 可以正确识别：
 
-- 扩展名、大小、JSON 结构、关键字段校验
-- ID 冲突校验
-- 临时文件 + `os.replace` 原子覆盖
-- 成功后自动同步并记录审计日志
-
-### 9.7 前端安全与性能优化
-
-#### CDN 资源 SRI 校验
-
-`base.html` 中所有 CDN 引用（Tabler CSS/JS、Tabler Icons CSS）已添加 `integrity` 和 `crossorigin="anonymous"` 属性，防止 CDN 篡改攻击。
-
-#### 模板内联 JS
-
-命令执行页面（`command_execute.html`）和操作日志页面（`command_log.html`）使用内联 JavaScript 实现：
-
-- `command_execute.html`：命令执行、批量执行、结构化结果展示
-- `command_log.html`：日志详情弹窗（`showDetail`/`closeDetail`/`escapeHtml`）
-
-模板→JS 数据传递方式：
-
-- `command_execute.html`：使用 Django `json_script` 模板标签安全传递 `response_params_json`、`response_field_labels_json`、`batch_max_targets`、`batch_interval_ms`
-- `command_log.html`：使用 `json_script` 传递 `log_detail_i18n`（i18n 字符串字典）
-
-#### JavaScript 国际化
-
-- 项目级路由 `/jsi18n/` 提供 Django JavaScript Catalog（`domain='django'`）
-- `base.html` 中全局加载 `<script src="{% url 'javascript-catalog' %}"></script>`
-- 页面内联 JS 中通过 `django.gettext()` 实现前端 i18n，内置 fallback（catalog 未加载时返回原文）
-
-### 9.8 日志查询优化
-
-#### 默认时间范围筛选
-
-操作日志和登录日志列表默认筛选最近 7 天数据，避免全量查询导致的性能问题。用户可通过「开始时间」和「结束时间」输入框自定义范围。
-
-#### 分页上限保护
-
-日志列表分页改用 `Paginator.get_elided_page_range()`，只渲染当前页前后各 2 页 + 首尾各 1 页 + 省略号，避免总页数过大时渲染数百个页码按钮。
-
-### 9.9 删除确认令牌（防 CSRF 误触）
-
-用户删除和角色删除操作增加了基于 SHA256 的确认令牌校验机制：
-
-- 后端 `_make_confirm_token(obj_id, obj_name)` 使用 `settings.SECRET_KEY` 生成令牌
-- 前端删除表单中通过自定义模板标签 `{% confirm_token obj_id obj_name %}` 注入隐藏字段
-- 后端 `_verify_confirm_token()` 校验令牌一致性，防止 CSRF 或直接 POST 请求误删
-
-模板标签定义在 `gmtool/templatetags/gmtool_tags.py`，使用时需 `{% load gmtool_tags %}`。
-
-### 9.10 自定义模板标签库（`gmtool_tags`）
-
-| 标签 | 用法 | 说明 |
-|---|---|---|
-| `confirm_token` | `{% confirm_token obj_id obj_name %}` | 输出隐藏 `<input>` 含 SHA256 确认令牌 |
+```python
+request.is_secure()
+```
 
 ---
 
-## 10. 表单规则（`gmtool/forms.py`）
+## 12. 安全设计
 
-- `UserCreateForm` / `UserEditForm`：共享 `widgets` 和 `labels` 常量定义，避免重复
-- `UserCreateForm`：
-  - 必填密码与确认密码一致
-  - 角色下拉过滤 `is_super_admin=False`
-- `UserEditForm`：
-  - 可修改密码（可选）
-  - 编辑自己：禁用 `is_active`
-  - 编辑超管目标：禁用角色与 `is_active`
-- `RoleForm`：
-  - 不包含 `is_super_admin` 字段
-  - 禁止 `name` 为 `Role.RESERVED_NAMES` 中的保留名
-- `AddGMCommandForm`：
-  - 支持请求/响应参数 JSON 输入
-  - 校验 ID 唯一性与 request/response 冲突
-
----
-
-## 11. 中间件与装饰器
-
-### 11.1 `IDIPFileMonitorMiddleware`（已增强）
-
-- 检查间隔：30 秒（可通过 `IDIP_FILE_CHECK_INTERVAL` 配置，缓存节流）
-- 双模式变更检测：
-  - **修改时间检测**（默认）：快速轻量，适合大多数场景
-  - **文件哈希检测**（`IDIP_USE_HASH_CHECK=True`）：通过 MD5 哈希精确检测文件内容变更，避免误报
-- 线程锁避免并发重复同步
-- 可配置是否启用（`ENABLE_IDIP_FILE_MONITOR`）
-- 监控文件路径通过 `settings.IDIP_JSON_PATH` 配置（默认项目根目录 `idip_commands.json`）
-- 自动调用 `sync_commands_to_db()`
-
-### 11.2 权限装饰器（`decorators.py`）
-
-- `is_super_admin(user)`
-- `super_admin_required`
-- `command_permission_required`（AJAX 返回 JSON 错误）
-- `get_user_permissions(user)`
-
----
-
-## 12. 配置说明（`mysite/settings.py`）
-
-### 12.1 关键配置
-
-- `DEBUG`：由 `DJANGO_DEBUG` 控制
-- `ALLOWED_HOSTS`：由 `DJANGO_ALLOWED_HOSTS` 解析（开发默认回退 `127.0.0.1, localhost`）
-- `LOGIN_URL = '/gmtool/login/'`
-- `CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'`
-- `IDIP_API_URL`, `IDIP_TIMEOUT`
-- `IDIP_JSON_PATH`：命令定义文件路径（默认项目根目录 `idip_commands.json`）
-- `TRUSTED_PROXY`：控制是否信任 `X-Forwarded-For`
-- `TRUSTED_PROXY_COUNT`：可信代理数量（从 XFF 右侧起跳过 N 个代理 IP 后取客户端 IP）
-- `BATCH_EXECUTE_MAX_TARGETS`, `BATCH_EXECUTE_INTERVAL_MS`
-- `UPLOAD_MAX_SIZE`：命令定义文件上传大小限制（默认 5MB）
-- `SENSITIVE_FIELDS`：日志脱敏敏感字段名集合
-- `PAGE_SIZE`：列表分页每页条数（默认 20）
-- `LOGIN_MAX_ATTEMPTS`, `LOGIN_LOCKOUT_SECONDS`：登录限速配置
-- `SESSION_COOKIE_HTTPONLY = True`：禁止 JS 访问 Session Cookie
-- `STATIC_ROOT = BASE_DIR / 'staticfiles'`：`collectstatic` 输出目录
+### 12.1 已启用的安全措施
+- 登录失败限速
+- 登录跳转地址安全校验
+- 登出仅允许 `POST`
+- 删除确认令牌
+- 敏感日志脱敏
+- `SESSION_COOKIE_HTTPONLY`
+- `SESSION_COOKIE_SECURE`
+- `CSRF_COOKIE_SECURE`
+- `SECURE_PROXY_SSL_HEADER`
 - `X_FRAME_OPTIONS = 'DENY'`
-
-### 12.2 国际化
-
-- `LANGUAGE_CODE = 'zh-hans'`
-- `LANGUAGES = [('zh-hans', '简体中文'), ('en', '英文')]`
-- `LOCALE_PATHS = [BASE_DIR / 'locale']`
-- 启用 `LocaleMiddleware`
-
-### 12.3 生产安全（`DEBUG=False`）
-
-- 强制安全检查：`SECRET_KEY`、`ALLOWED_HOSTS`
-- `SESSION_COOKIE_HTTPONLY = True`：禁止 JS 访问 Session Cookie
-- `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`
-- `SECURE_SSL_REDIRECT`
-- HSTS（`SECURE_HSTS_*`）
+- `SECURE_CONTENT_TYPE_NOSNIFF`
 - `SECURE_REFERRER_POLICY = 'same-origin'`
-- `SECURE_CONTENT_TYPE_NOSNIFF = True`
+
+### 12.2 反向代理部署建议
+若使用 Nginx 等反向代理：
+
+- 确保代理透传 `X-Forwarded-Proto: https`
+- 确保外部流量不能绕过代理直接访问 Django
+- 若信任 `X-Forwarded-For`，再开启 `DJANGO_TRUSTED_PROXY=True`
+- 根据代理层数设置 `DJANGO_TRUSTED_PROXY_COUNT`
 
 ---
 
 ## 13. 日志体系
 
 ### 13.1 数据库日志
-
-- `CommandLog`：命令执行日志
-- `LoginLog`：登录行为日志
+- `CommandLog`
+- `LoginLog`
 
 ### 13.2 文件日志
+- `logs/audit.log`
+- `logs/gmtool.log`
 
-- `logs/audit.log`：审计日志（`gmtool.audit`）
-- `logs/gmtool.log`：应用日志（`gmtool`）
+### 13.3 日志轮转
+使用自定义 `SafeTimedRotatingFileHandler`：
 
-当前代码中两个日志文件 `backupCount` 均为 `30`（按天轮转）。
-
-### 13.3 安全轮转 Handler
-
-`SafeTimedRotatingFileHandler` 针对 Windows 文件锁导致轮转失败场景做容错：
-
-- `rotate` 失败不阻断后续日志写入
-- 强制恢复流句柄
-- 始终推进 `rolloverAt`
+- 适配 Windows 文件锁场景
+- 轮转失败时尽量不中断日志写入
+- 默认按天轮转，保留 30 份
 
 ---
 
 ## 14. 管理命令
 
 ### 14.1 同步命令定义
-
 ```bash
 python manage.py sync_commands
 ```
 
-### 14.2 初始化角色并绑定超管
-
+### 14.2 初始化角色与超管权限
 ```bash
 python manage.py init_roles
 ```
 
-行为包括：
+---
 
-1. 同步命令定义
-2. 确保 `super_admin` 角色存在
-3. 为所有 Django 超管绑定 GM 超管角色
-4. 授予超管用户级命令权限
+## 15. 本地开发与联调
+
+### 15.1 创建环境
+项目提供 `environment.yml`：
+
+```bash
+conda env create -f environment.yml
+conda activate django-admin
+```
+
+### 15.2 初始化数据库
+```bash
+python manage.py migrate
+python manage.py sync_commands
+python manage.py init_roles
+```
+
+### 15.3 创建管理员
+```bash
+python manage.py createsuperuser
+```
+
+### 15.4 启动项目
+```bash
+python manage.py runserver
+```
+
+访问：
+
+```text
+http://127.0.0.1:8000/gmtool/
+```
+
+### 15.5 启动 Mock IDIP 服务
+```bash
+python test/mock_idip_server.py
+```
+
+默认联调地址：
+
+```text
+http://127.0.0.1:18080/cy_idip
+```
 
 ---
 
-## 15. 国际化维护流程
+## 16. 生产部署检查清单
+
+上线前建议至少检查以下内容：
+
+### 16.1 基础配置
+- 设置 `DJANGO_DEBUG=False`
+- 设置安全的 `DJANGO_SECRET_KEY`
+- 设置正确的 `DJANGO_ALLOWED_HOSTS`
+
+### 16.2 HTTPS / 代理
+- 确认 HTTPS 已启用
+- 确认代理透传 `X-Forwarded-Proto: https`
+- 确认 `SESSION_COOKIE_SECURE=True`
+- 确认 `CSRF_COOKIE_SECURE=True`
+- 确认 Django 无法被绕过代理直接访问
+- 确认 `request.is_secure()` 在线上表现正确
+
+### 16.3 Django 自检
+```bash
+python manage.py check --deploy
+```
+
+### 16.4 命令链路验证
+- 验证至少一条成功命令
+- 验证至少一条失败命令
+- 验证日志是否正常落库
+- 验证上传命令定义与同步是否正常
+
+---
+
+## 17. 国际化
+
+当前支持：
+
+- `zh-hans`
+- `en`
+
+常用命令：
 
 ```bash
 python manage.py makemessages -l zh_Hans
@@ -547,303 +567,25 @@ python manage.py makemessages -l en
 python manage.py compilemessages
 ```
 
-模板中使用 `{% trans %}` / `{% blocktrans %}`，Python 中按场景使用 `gettext_lazy` 或 `gettext`。
+---
 
-### 15.1 本次新增国际化点（命令执行页）
+## 18. 维护建议
 
-- 结构化结果区域新增文案（如“响应概览”“原始JSON（兜底）”等）已纳入 `django.po`
-- 中英文语言包均已补充对应词条
-- 修改模板文案后需重新执行 `makemessages + compilemessages`，避免页面出现未翻译文本
+- 新增配置项后，同步更新：
+  - `mysite/settings.py`
+  - `.env`
+  - `README.md`
+
+- 新增路由、视图、模型后，同步更新文档说明
+- 调整安全策略后，同步更新部署章节
+- 调整日志策略后，同步更新日志章节
 
 ---
 
-## 16. 完整部署与初始化指南
-
-### 16.1 环境准备（基于 Conda）
-
-#### 16.1.1 安装 Miniconda（Windows）
-
-如果您尚未安装 Conda，请按以下步骤安装 Miniconda：
-
-1. **下载 Miniconda**（推荐版本）：
-   - 下载地址：https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D
-   - 首选版本：`Miniconda3-py38_23.11.0-2-Windows-x86_64.exe`
-
-2. **安装选项**：
-   - 运行安装程序，选择"Install for all users"
-   - 勾选所有选项（特别是"Add Miniconda3 to my PATH environment variable"）
-   - 按照默认设置完成安装
-
-3. **验证安装**：
-   ```bash
-   conda --version
-   python --version
-   ```
-
-4. **初始化Conda**：
-   安装完成后，需要执行以下命令初始化Conda，以便在终端中使用`conda activate`命令：
-   ```bash
-   conda init
-   ```
-   执行后**关闭并重新打开终端**，然后就可以使用`conda activate`命令激活环境了。
-
-#### 16.1.2 创建项目环境
-
-项目提供了 `environment.yml` 文件用于创建 Conda 环境：
-
-```bash
-# 创建并激活环境（环境名：django-admin）
-conda env create -f environment.yml
-conda activate django-admin
-
-# 如果已存在环境，可以更新：
-conda env update -f environment.yml --prune
-```
-
-环境文件中已包含所有必需的依赖：
-- Django 5.2.12
-- Python 3.11
-- SQLite 3
-- 国际化工具（gettext）
-- Python-decouple（环境变量管理）
-- requests（HTTP 客户端）
-
-### 16.2 数据库初始化
-
-#### 16.2.1 SQLite（默认，开发环境）
-
-项目默认使用SQLite数据库，无需额外配置：
-
-```bash
-# 1. 应用数据库迁移
-python manage.py migrate
-
-# 2. 同步命令定义（从 idip_commands.json 同步到数据库）
-python manage.py sync_commands
-
-# 3. 初始化角色并绑定超级管理员
-python manage.py init_roles
-```
-
-#### 16.2.2 MySQL（生产环境）
-
-如果需要切换到MySQL数据库，请按以下步骤操作：
-
-##### 步骤1：安装MySQL客户端和Python驱动
-
-```bash
-# 安装MySQL客户端库（Windows）
-# 从 https://dev.mysql.com/downloads/installer/ 下载并安装MySQL
-
-# 或者使用conda安装
-conda install mysqlclient
-```
-
-##### 步骤2：创建MySQL数据库和用户
-
-```sql
--- 登录MySQL
-mysql -u root -p
-
--- 创建数据库
-CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- 创建用户并授权
-CREATE USER 'gmtool_user'@'localhost' IDENTIFIED BY 'your_password_here';
-GRANT ALL PRIVILEGES ON gmtool.* TO 'gmtool_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
-##### 步骤3：配置Django连接MySQL
-
-修改 `mysite/settings.py` 中的数据库配置：
-
-```python
-# 注释或替换原有的SQLite配置
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# 添加MySQL配置
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gmtool',                     # 数据库名
-        'USER': 'gmtool_user',                # 用户名
-        'PASSWORD': 'your_password_here',     # 密码
-        'HOST': 'localhost',                  # 数据库主机
-        'PORT': '3306',                       # 端口（默认3306）
-        'OPTIONS': {
-            'charset': 'utf8mb4',             # 字符集
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
-    }
-}
-```
-
-##### 步骤4：执行数据库迁移
-
-```bash
-# 应用所有迁移
-python manage.py migrate
-
-# 同步命令定义
-python manage.py sync_commands
-
-# 初始化角色
-python manage.py init_roles
-```
-
-##### 步骤5：注意事项
-
-1. **字符集问题**：
-   - MySQL需要配置为 `utf8mb4` 字符集以支持完整的Unicode字符（包括emoji）
-   - Django默认使用 `utf8mb4`，确保MySQL服务器也使用相同配置
-
-2. **时区设置**：
-   - 确保MySQL时区与Django时区一致
-   - 可在MySQL中执行：`SET GLOBAL time_zone = '+8:00';`（根据实际时区调整）
-
-3. **性能优化**：
-   - 生产环境建议启用连接池
-   - 考虑使用 `django-db-connection-pool` 等库
-
-4. **备份与恢复**：
-   ```bash
-   # 备份MySQL数据库
-   mysqldump -u gmtool_user -p gmtool > backup_$(date +%Y%m%d).sql
-
-   # 恢复数据库
-   mysql -u gmtool_user -p gmtool < backup_file.sql
-   ```
-
-### 16.3 创建超级管理员
-
-系统提供两种超级管理员创建方式：
-
-#### 方式一：使用 Django 内置命令（推荐）
-```bash
-# 创建 Django 超级管理员（自动绑定 GM 超级管理员角色和权限）
-python manage.py createsuperuser
-
-# 按照提示输入用户名、邮箱和密码
-```
-
-#### 方式二：通过信号自动绑定
-如果已有 Django 超级管理员用户（`is_superuser=True`），系统会自动：
-1. 绑定 `super_admin` 角色
-2. 授予所有活跃命令的权限
-
-### 16.4 运行开发服务器
-
-```bash
-# 启动开发服务器（默认端口 8000）
-python manage.py runserver
-
-# 指定端口启动
-python manage.py runserver 8080
-```
-
-访问地址：`http://localhost:8000/gmtool/`
-
-### 16.5 本地 Mock IDIP 服务（`test/mock_idip_server.py`）
-
-仓库已新增可直接联调用的 Mock 服务脚本：`test/mock_idip_server.py`。
-
-#### 启动方式
-
-```bash
-python test/mock_idip_server.py
-```
-
-可选参数：
-
-```bash
-python test/mock_idip_server.py --host 127.0.0.1 --port 18080
-```
-
-#### 联调配置
-
-在 Django 配置中将：
-
-- `IDIP_API_URL = http://127.0.0.1:18080/cy_idip`
-
-与当前 `idip_client.py` 的调用协议保持一致（`application/x-www-form-urlencoded`，字段 `id/GSA/content`）。
-
-#### 提供接口
-
-- `POST /cy_idip`：模拟 IDIP 命令执行
-- `GET /health`：健康检查，返回 `{"status":"ok","service":"mock-idip-server"}`
-
-#### 返回协议（统一包装）
-
-- 成功：
-
-```json
-{"status": true, "id": request_id, "json": {...}}
-```
-
-- 失败：
-
-```json
-{"status": false, "id": request_id, "json": {"Result": error_code, "RetMsg": "error_msg"}}
-```
-
-#### 数据来源与生成规则
-
-1. 启动时读取项目根目录 `idip_commands.json`
-2. 按命令定义自动生成响应字段（含结构体/列表）
-3. 支持按 `command_id` 固定覆盖（见脚本内 `CUSTOM_RESPONSES`）
-
-#### 失败注入（联调建议）
-
-可通过以下任一方式主动触发失败返回（`Result=5001`）：
-
-- 表单字段：`__mock_fail=1`
-- `content.body` 中传：`"_mock_fail": true`
-
----
-
-### 16.6 部署前安全检查清单（建议）
-
-在生产环境（`DJANGO_DEBUG=False`）上线前，至少完成以下检查：
-
-1. 必填环境变量
-   - `DJANGO_SECRET_KEY`：必须显式配置，禁止使用默认/临时值
-   - `DJANGO_ALLOWED_HOSTS`：必须配置为实际域名或主机列表（逗号分隔）
-
-2. 传输与 Cookie 安全
-   - 确认已启用 HTTPS
-   - 确认 `SESSION_COOKIE_SECURE=True`、`CSRF_COOKIE_SECURE=True`
-   - 反向代理场景按需配置 `DJANGO_TRUSTED_PROXY=True`，并根据代理层数设置 `DJANGO_TRUSTED_PROXY_COUNT`
-
-3. Django 部署自检
-   - 执行：
-     ```bash
-     python manage.py check --deploy
-     ```
-   - 目标：高危告警清零后再上线
-
-4. 命令链路联调
-   - 配置正确的 `IDIP_API_URL`
-   - 使用 mock 或测试环境完成至少一条成功调用与一条失败调用验证（含日志落库）
-
----
-
-## 17. 维护规范（建议）
-
-1. 新增路由、视图、配置项后，优先更新本文第 8/9/12 章。
-2. 新增模型字段、索引或约束后，更新第 5 章并注明迁移文件。
-3. 调整日志策略（保留天数、格式、处理器）后，更新第 13 章。
-4. 避免在文档中写死“固定数量”（命令数/模板数/翻译条目数），改为“以仓库当前代码为准”。
-
----
-
-## 18. 备注
-
-- 本项目不依赖 Django Admin 进行业务管理，主要后台能力通过 `gmtool` 页面提供。
-- 角色是分组标签，命令权限以 `UserCommandPermission` 为准。
-- 命令同步与权限分配关键路径已加入事务或差集更新策略，降低数据不一致风险。
+## 19. 备注
+
+- 本项目不依赖 Django Admin 进行业务管理
+- 角色仅用于分组，不直接承载命令权限
+- 命令权限以 `UserCommandPermission` 为准
+- 当前默认数据库为 SQLite，更适合开发或轻量部署场景
+- 若进入更高并发或生产化环境，建议评估 MySQL / PostgreSQL、Redis、任务队列等组件
