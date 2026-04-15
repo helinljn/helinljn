@@ -56,6 +56,12 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
         widgets = _USER_WIDGETS
         labels = _USER_LABELS
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['role'].required = True
+        self.fields['role'].empty_label = _('请选择角色')
+        self.fields['role'].error_messages['required'] = _('请选择角色')
+
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
