@@ -146,6 +146,7 @@ def command_execute(request, cmd_id):
 
             CommandLog.objects.create(
                 user=request.user,
+                operator_username=request.user.username,
                 command=command,
                 partition=partition,
                 request_data=params,

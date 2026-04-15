@@ -80,6 +80,10 @@ def user_list(request):
 @super_admin_required
 def user_create(request):
     """创建用户"""
+    if not Role.objects.filter(is_super_admin=False).exists():
+        messages.warning(request, _('当前没有可分配的普通角色，请先创建一个普通角色后再创建用户'))
+        return redirect('gmtool:role_create')
+
     if request.method == 'POST':
         form = UserCreateForm(request.POST)
         if form.is_valid():

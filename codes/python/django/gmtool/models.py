@@ -98,6 +98,7 @@ class CommandLog(models.Model):
         ('timeout', _('超时')),
     ]
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_('用户'))
+    operator_username = models.CharField(_('操作用户名'), max_length=150, blank=True, default='')
     command = models.ForeignKey(GMCommand, on_delete=models.SET_NULL, null=True, verbose_name=_('命令'))
     partition = models.IntegerField(_('服务器组号'))
     request_data = models.JSONField(_('请求数据'))

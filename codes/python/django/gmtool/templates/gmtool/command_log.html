@@ -147,7 +147,15 @@
                 {% for log in page_obj %}
                 <tr>
                     <td class="text-muted">{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
-                    <td>{{ log.user.username|default:"-" }}</td>
+                    <td>
+                        {% if log.operator_username %}
+                        {{ log.operator_username }}
+                        {% elif log.user %}
+                        {{ log.user.username }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
                     <td>{{ log.command.command_name|default:"-" }}</td>
                     <td>{{ log.partition }}</td>
                     <td>
@@ -218,19 +226,29 @@
     <div id="detailBody" class="detail-modal-body"></div>
 </div>
 
+{% trans "无数据" as no_data_text %}
+{% trans "无响应数据" as no_resp_text %}
+{% trans "加载中..." as loading_text %}
+{% trans "完整请求JSON" as request_content_title %}
+{% trans "请求数据（表单参数）" as request_data_title %}
+{% trans "响应数据" as response_data_title %}
+{% trans "加载失败，请重试" as load_failed_text %}
+
 <script>
 function escapeHtml(text) {
-    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    var div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
 }
 
 function showDetail(id) {
     var modal = document.getElementById('detailModal');
     var apiUrl = modal.getAttribute('data-api-url').replace(/\/0\/$/, '/' + id + '/');
-    var noData = '{% trans "无数据" %}';
-    var noResp = '{% trans "无响应数据" %}';
+    var noData = '{{ no_data_text|escapejs }}';
+    var noResp = '{{ no_resp_text|escapejs }}';
 
     document.getElementById('detailBody').innerHTML =
-        '<div class="text-center py-4"><span class="text-muted">{% trans "加载中..." %}</span></div>';
+        '<div class="text-center py-4"><span class="text-muted">{{ loading_text|escapejs }}</span></div>';
     document.getElementById('detailOverlay').style.display = 'block';
     document.getElementById('detailModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -242,16 +260,16 @@ function showDetail(id) {
             var rdVal = data.request_data || noData;
             var rsVal = data.response_data || noResp;
             document.getElementById('detailBody').innerHTML =
-                '<h4 class="detail-section-title">{% trans "完整请求JSON" %}</h4>' +
+                '<h4 class="detail-section-title">{{ request_content_title|escapejs }}</h4>' +
                 '<pre class="detail-pre">' + escapeHtml(rcVal) + '</pre>' +
-                '<h4 class="detail-section-title">{% trans "请求数据（表单参数）" %}</h4>' +
+                '<h4 class="detail-section-title">{{ request_data_title|escapejs }}</h4>' +
                 '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rdVal) + '</pre>' +
-                '<h4 class="detail-section-title">{% trans "响应数据" %}</h4>' +
+                '<h4 class="detail-section-title">{{ response_data_title|escapejs }}</h4>' +
                 '<pre class="detail-pre detail-pre-sm">' + escapeHtml(rsVal) + '</pre>';
         })
         .catch(function() {
             document.getElementById('detailBody').innerHTML =
-                '<div class="text-center py-4 text-danger">{% trans "加载失败，请重试" %}</div>';
+                '<div class="text-center py-4 text-danger">{{ load_failed_text|escapejs }}</div>';
         });
 }
 
