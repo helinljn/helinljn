@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 17:30+0800\n"
+"POT-Creation-Date: 2026-04-15 17:57+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -453,11 +453,6 @@ msgstr ""
 msgid "系统最高权限角色，拥有所有命令执行权限及管理功能"
 msgstr ""
 
-#: .\gmtool\migrations\0010_commandlog_operator_username.py:15
-#: .\gmtool\models.py:101
-msgid "操作用户名"
-msgstr ""
-
 #: .\gmtool\models.py:15 .\gmtool\templates\gmtool\command_log.html:140
 msgid "请求参数定义"
 msgstr ""
@@ -523,6 +518,10 @@ msgstr ""
 #: .\gmtool\templates\gmtool\command_log.html:174
 #: .\gmtool\templates\gmtool\dashboard.html:113
 msgid "超时"
+msgstr ""
+
+#: .\gmtool\models.py:101
+msgid "操作用户名"
 msgstr ""
 
 #: .\gmtool\models.py:103

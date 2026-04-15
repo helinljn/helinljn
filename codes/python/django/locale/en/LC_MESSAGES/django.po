@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 17:30+0800\n"
+"POT-Creation-Date: 2026-04-15 17:57+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -472,11 +472,6 @@ msgstr ""
 "System highest privilege role, with all command execution permissions and "
 "management features"
 
-#: .\gmtool\migrations\0010_commandlog_operator_username.py:15
-#: .\gmtool\models.py:101
-msgid "操作用户名"
-msgstr "Operator Username"
-
 #: .\gmtool\models.py:15 .\gmtool\templates\gmtool\command_log.html:140
 msgid "请求参数定义"
 msgstr "Request Params"
@@ -545,6 +540,10 @@ msgstr "Failed"
 #: .\gmtool\templates\gmtool\dashboard.html:113
 msgid "超时"
 msgstr "Timeout"
+
+#: .\gmtool\models.py:101
+msgid "操作用户名"
+msgstr "Operator Username"
 
 #: .\gmtool\models.py:103
 msgid "服务器组号"
@@ -1295,7 +1294,9 @@ msgstr "Save Permissions"
 
 #: .\gmtool\user_views.py:84
 msgid "当前没有可分配的普通角色，请先创建一个普通角色后再创建用户"
-msgstr "There are no assignable regular roles available. Please create a regular role before creating a user."
+msgstr ""
+"There are no assignable regular roles available. Please create a regular "
+"role before creating a user."
 
 #: .\gmtool\user_views.py:145
 msgid "编辑用户"
