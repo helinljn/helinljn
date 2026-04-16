@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 22:25+0800\n"
+"POT-Creation-Date: 2026-04-16 11:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,7 +35,7 @@ msgstr "File size cannot exceed %(size)sMB"
 msgid "JSON 解析失败: %(error)s"
 msgstr "JSON parsing failed: %(error)s"
 
-#: .\gmtool\api_views.py:87
+#: .\gmtool\api_views.py:87 .\gmtool\command_parser.py:40
 msgid "JSON 顶层必须是对象(dict)"
 msgstr "The top-level JSON must be an object (dict)"
 
@@ -54,17 +54,17 @@ msgstr "Command %(id)s is missing required fields: %(fields)s"
 msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
 msgstr "The request parameter %(name)s of command %(id)s must be an array"
 
-#: .\gmtool\api_views.py:104 .\gmtool\command_views.py:303
+#: .\gmtool\api_views.py:104 .\gmtool\command_views.py:302
 #, python-format
 msgid "检测到 ID 冲突: %(errors)s"
 msgstr "ID conflict detected: %(errors)s"
 
-#: .\gmtool\api_views.py:122
+#: .\gmtool\api_views.py:121
 #, python-format
 msgid "文件写入失败: %(error)s"
 msgstr "Failed to write file: %(error)s"
 
-#: .\gmtool\api_views.py:129
+#: .\gmtool\api_views.py:128
 msgid "文件已上传但同步失败"
 msgstr "File uploaded but sync failed"
 
@@ -72,79 +72,84 @@ msgstr "File uploaded but sync failed"
 msgid "GM命令管理"
 msgstr "GM Command Management"
 
-#: .\gmtool\auth_views.py:113
+#: .\gmtool\auth_views.py:110
 msgid "尝试次数过多"
 msgstr "Too many login attempts"
 
-#: .\gmtool\auth_views.py:116 .\gmtool\auth_views.py:147
-#: .\gmtool\auth_views.py:165
+#: .\gmtool\auth_views.py:113 .\gmtool\auth_views.py:144
+#: .\gmtool\auth_views.py:162
 #, python-format
 msgid "登录尝试次数过多，请 %(minutes)d 分钟后再试"
 msgstr "Too many login attempts, please try again in %(minutes)d minutes"
 
-#: .\gmtool\auth_views.py:141 .\gmtool\auth_views.py:144
+#: .\gmtool\auth_views.py:138 .\gmtool\auth_views.py:141
 msgid "账号已禁用"
 msgstr "Account disabled"
 
-#: .\gmtool\auth_views.py:151
+#: .\gmtool\auth_views.py:148
 #, python-format
 msgid "账号已被禁用，还可尝试 %(remaining)d 次"
 msgstr "Account has been disabled, %(remaining)d attempts remaining"
 
-#: .\gmtool\auth_views.py:158 .\gmtool\auth_views.py:161
+#: .\gmtool\auth_views.py:155 .\gmtool\auth_views.py:158
 msgid "用户名或密码错误"
 msgstr "Incorrect username or password"
 
-#: .\gmtool\auth_views.py:163
+#: .\gmtool\auth_views.py:160
 #, python-format
 msgid "用户名或密码错误，还可尝试 %(remaining)d 次"
 msgstr "Incorrect username or password, %(remaining)d attempts remaining"
 
-#: .\gmtool\auth_views.py:206
+#: .\gmtool\auth_views.py:203
 msgid "页面已过期，请重新登录。"
 msgstr "Page has expired, please log in again."
 
-#: .\gmtool\command_parser.py:33 .\gmtool\forms.py:265
+#: .\gmtool\command_parser.py:27
+#, python-format
+msgid "JSON 中存在重复键: %(keys)s"
+msgstr ""
+
+#: .\gmtool\command_parser.py:66 .\gmtool\forms.py:228
 msgid "请求 ID 和响应 ID 不能相同"
 msgstr "Request ID and Response ID cannot be the same"
 
-#: .\gmtool\command_parser.py:40 .\gmtool\forms.py:231
+#: .\gmtool\command_parser.py:73 .\gmtool\forms.py:194
 #, python-format
 msgid "命令 ID %(id)s 已存在"
 msgstr "Command ID %(id)s already exists"
 
-#: .\gmtool\command_parser.py:55
+#: .\gmtool\command_parser.py:88
 #, python-format
 msgid "请求 ID %(req)s 已被命令 %(cmd)s 使用（作为请求 ID）"
 msgstr "Request ID %(req)s is already used by command %(cmd)s (as request ID)"
 
-#: .\gmtool\command_parser.py:60
+#: .\gmtool\command_parser.py:93
 #, python-format
 msgid "响应 ID %(rsp)s 已被命令 %(cmd)s 使用（作为请求 ID）"
 msgstr "Response ID %(rsp)s is already used by command %(cmd)s (as request ID)"
 
-#: .\gmtool\command_parser.py:65
+#: .\gmtool\command_parser.py:98
 #, python-format
 msgid "请求 ID %(req)s 已被命令 %(cmd)s 使用（作为响应 ID）"
 msgstr "Request ID %(req)s is already used by command %(cmd)s (as response ID)"
 
-#: .\gmtool\command_parser.py:70
+#: .\gmtool\command_parser.py:103
 #, python-format
 msgid "响应 ID %(rsp)s 已被命令 %(cmd)s 使用（作为响应 ID）"
 msgstr ""
 "Response ID %(rsp)s is already used by command %(cmd)s (as response ID)"
 
-#: .\gmtool\command_parser.py:105
+#: .\gmtool\command_parser.py:138
 #, python-format
 msgid "命令 %(cmd)s：请求 ID 和响应 ID 不能相同"
 msgstr "Command %(cmd)s: Request ID and Response ID cannot be the same"
 
-#: .\gmtool\command_parser.py:113
+#: .\gmtool\command_parser.py:146
 #, python-format
 msgid "命令 ID %(id)s 在 JSON 文件中重复"
 msgstr "Command ID %(id)s is duplicated in JSON file"
 
-#: .\gmtool\command_parser.py:130
+#: .\gmtool\command_parser.py:163
 #, python-format
 msgid ""
 "协议 ID %(pid)s 同时被命令 %(prev_cmd)s（%(prev_type)s）和命令 %(cmd)s"
@@ -153,7 +158,7 @@ msgstr ""
 "Protocol ID %(pid)s is used by both command %(prev_cmd)s (%(prev_type)s) and "
 "command %(cmd)s (%(id_type)s)"
 
-#: .\gmtool\command_parser.py:167
+#: .\gmtool\command_parser.py:200
 #, python-format
 msgid ""
 "命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（请求 ID）"
@@ -161,7 +166,7 @@ msgstr ""
 "Request ID %(req)s of command %(json_cmd)s conflicts with existing command "
 "%(db_cmd)s (request ID)"
 
-#: .\gmtool\command_parser.py:175
+#: .\gmtool\command_parser.py:208
 #, python-format
 msgid ""
 "命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（响应 ID）"
@@ -169,7 +174,7 @@ msgstr ""
 "Request ID %(req)s of command %(json_cmd)s conflicts with existing command "
 "%(db_cmd)s (response ID)"
 
-#: .\gmtool\command_parser.py:187
+#: .\gmtool\command_parser.py:220
 #, python-format
 msgid ""
 "命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（请求 ID）"
@@ -177,7 +182,7 @@ msgstr ""
 "Response ID %(rsp)s of command %(json_cmd)s conflicts with existing command "
 "%(db_cmd)s (request ID)"
 
-#: .\gmtool\command_parser.py:195
+#: .\gmtool\command_parser.py:228
 #, python-format
 msgid ""
 "命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（响应 ID）"
@@ -185,7 +190,7 @@ msgstr ""
 "Response ID %(rsp)s of command %(json_cmd)s conflicts with existing command "
 "%(db_cmd)s (response ID)"
 
-#: .\gmtool\command_parser.py:226
+#: .\gmtool\command_parser.py:259
 msgid "command_data 中缺少 command_id"
 msgstr "Missing command_id in command_data"
 
@@ -195,7 +200,8 @@ msgstr ""
 "This command has been deactivated or deleted. Please refresh the page to get "
 "the latest command list."
 
-#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:79
+#: .\gmtool\command_views.py:102 .\gmtool\decorators.py:88
+#: .\gmtool\decorators.py:91
 msgid "该命令已被停用或删除"
 msgstr "This command has been deactivated or deleted"
 
@@ -219,7 +225,7 @@ msgstr "Partition cannot be negative"
 msgid "请求数据格式错误"
 msgstr "Invalid request data format"
 
-#: .\gmtool\command_views.py:183 .\gmtool\command_views.py:322
+#: .\gmtool\command_views.py:183 .\gmtool\command_views.py:321
 msgid "服务器内部错误"
 msgstr "Internal server error"
 
@@ -242,24 +248,24 @@ msgstr "Command %(id)s added successfully"
 msgid "添加GM命令"
 msgstr "Add GM Command"
 
-#: .\gmtool\command_views.py:299
+#: .\gmtool\command_views.py:298
 #, python-format
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr "Failed to read JSON file: %(error)s"
 
-#: .\gmtool\decorators.py:49 .\gmtool\decorators.py:71
+#: .\gmtool\decorators.py:57 .\gmtool\decorators.py:78
 msgid "请先登录"
 msgstr "Please log in first"
 
-#: .\gmtool\decorators.py:54 .\gmtool\decorators.py:55
+#: .\gmtool\decorators.py:62 .\gmtool\decorators.py:63
 msgid "您没有管理员权限"
 msgstr "You do not have administrator privileges"
 
-#: .\gmtool\decorators.py:97
+#: .\gmtool\decorators.py:109 .\gmtool\decorators.py:110
 msgid "您没有执行该命令的权限"
 msgstr "You do not have permission to execute this command"
 
-#: .\gmtool\forms.py:19 .\gmtool\models.py:134
+#: .\gmtool\forms.py:20 .\gmtool\models.py:111
 #: .\gmtool\templates\gmtool\command_log.html:91
 #: .\gmtool\templates\gmtool\login.html:55
 #: .\gmtool\templates\gmtool\login_log.html:17
@@ -268,183 +274,145 @@ msgstr "You do not have permission to execute this command"
 msgid "用户名"
 msgstr "Username"
 
-#: .\gmtool\forms.py:20 .\gmtool\templates\gmtool\user_list.html:35
+#: .\gmtool\forms.py:21 .\gmtool\templates\gmtool\user_list.html:35
 msgid "邮箱"
 msgstr "Email"
 
-#: .\gmtool\forms.py:21 .\gmtool\models.py:19
+#: .\gmtool\forms.py:22 .\gmtool\models.py:22
 msgid "是否启用"
 msgstr "Active"
 
-#: .\gmtool\forms.py:28 .\gmtool\models.py:46 .\gmtool\models.py:47
-#: .\gmtool\models.py:82 .\gmtool\templates\gmtool\base.html:45
-#: .\gmtool\templates\gmtool\role_list.html:4
-#: .\gmtool\templates\gmtool\role_list.html:7
+#: .\gmtool\forms.py:29 .\gmtool\models.py:60
 #: .\gmtool\templates\gmtool\user_list.html:36
-msgid "角色"
-msgstr "Role"
-
-#: .\gmtool\forms.py:34 .\gmtool\models.py:83
 msgid "联系电话"
 msgstr "Phone"
 
-#: .\gmtool\forms.py:44 .\gmtool\templates\gmtool\login.html:65
+#: .\gmtool\forms.py:39 .\gmtool\templates\gmtool\login.html:65
 msgid "密码"
 msgstr "Password"
 
-#: .\gmtool\forms.py:49
+#: .\gmtool\forms.py:44
 msgid "确认密码"
 msgstr "Confirm Password"
 
-#: .\gmtool\forms.py:62 .\gmtool\forms.py:63
-msgid "请选择角色"
-msgstr "Please select a role"
-
-#: .\gmtool\forms.py:70
+#: .\gmtool\forms.py:59
 msgid "两次密码输入不一致"
 msgstr "Passwords do not match"
 
-#: .\gmtool\forms.py:90
+#: .\gmtool\forms.py:78
 msgid "新密码（留空不修改）"
 msgstr "New Password (leave blank to keep unchanged)"
 
-#: .\gmtool\forms.py:113 .\gmtool\user_views.py:126
+#: .\gmtool\forms.py:106 .\gmtool\user_views.py:107
 msgid "不能禁用自己的账号"
 msgstr "You cannot disable your own account"
 
-#: .\gmtool\forms.py:117
-msgid "超级管理员角色不可更改"
-msgstr "Super admin role cannot be changed"
-
-#: .\gmtool\forms.py:119
+#: .\gmtool\forms.py:111
 msgid "超级管理员账号不可禁用"
 msgstr "Super admin account cannot be disabled"
 
-#: .\gmtool\forms.py:150 .\gmtool\models.py:37
-#: .\gmtool\templates\gmtool\role_list.html:26
-msgid "角色标识"
-msgstr "Role Identifier"
-
-#: .\gmtool\forms.py:151 .\gmtool\models.py:38
-#: .\gmtool\templates\gmtool\role_list.html:27
-msgid "显示名称"
-msgstr "Display Name"
-
-#: .\gmtool\forms.py:152 .\gmtool\models.py:39
-#: .\gmtool\templates\gmtool\role_list.html:29
-msgid "角色描述"
-msgstr "Description"
-
-#: .\gmtool\forms.py:155
-msgid "不能为\"super_admin\"，该标识为系统保留"
-msgstr "Cannot be \"super_admin\", which is reserved for the system"
-
-#: .\gmtool\forms.py:161 .\gmtool\models.py:54
-msgid "角色标识\"super_admin\"为系统保留，不可使用"
-msgstr "The role identifier \"super_admin\" is reserved and cannot be used"
-
-#: .\gmtool\forms.py:168 .\gmtool\models.py:8
-#: .\gmtool\templates\gmtool\command_execute.html:144
+#: .\gmtool\forms.py:131 .\gmtool\models.py:8
+#: .\gmtool\templates\gmtool\command_execute.html:148
 #: .\gmtool\templates\gmtool\command_list.html:37
 msgid "命令编号"
 msgstr "Command ID"
 
-#: .\gmtool\forms.py:171
+#: .\gmtool\forms.py:134
 msgid "唯一的命令标识符，如 10226011"
 msgstr "Unique command identifier, e.g. 10226011"
 
-#: .\gmtool\forms.py:174 .\gmtool\models.py:10
+#: .\gmtool\forms.py:137 .\gmtool\models.py:10
 msgid "分组标签"
 msgstr "Tab Group"
 
-#: .\gmtool\forms.py:176
+#: .\gmtool\forms.py:139
 msgid "e.g. 查询XXX"
 msgstr "e.g. Query XXX"
 
-#: .\gmtool\forms.py:179 .\gmtool\models.py:9
+#: .\gmtool\forms.py:142 .\gmtool\models.py:9
 #: .\gmtool\templates\gmtool\command_list.html:38
 msgid "命令名称"
 msgstr "Command Name"
 
-#: .\gmtool\forms.py:181
+#: .\gmtool\forms.py:144
 msgid "命令显示名称"
 msgstr "Command display name"
 
-#: .\gmtool\forms.py:184 .\gmtool\models.py:11
-#: .\gmtool\templates\gmtool\command_execute.html:148
+#: .\gmtool\forms.py:147 .\gmtool\models.py:11
+#: .\gmtool\templates\gmtool\command_execute.html:152
 #: .\gmtool\templates\gmtool\command_list.html:39
 msgid "请求名"
 msgstr "Request Name"
 
-#: .\gmtool\forms.py:189 .\gmtool\models.py:12
+#: .\gmtool\forms.py:152 .\gmtool\models.py:12
 msgid "协议请求ID"
 msgstr "Request ID"
 
-#: .\gmtool\forms.py:191
+#: .\gmtool\forms.py:154
 msgid "必须在所有命令中唯一（包括请求ID和响应ID）"
 msgstr "Must be unique across all commands (both request and response IDs)"
 
-#: .\gmtool\forms.py:194
+#: .\gmtool\forms.py:157
 msgid "请求描述"
 msgstr "Request Description"
 
-#: .\gmtool\forms.py:197
+#: .\gmtool\forms.py:160
 msgid "请求描述（可选）"
 msgstr "Request description (optional)"
 
-#: .\gmtool\forms.py:200 .\gmtool\models.py:13
-#: .\gmtool\templates\gmtool\command_execute.html:156
+#: .\gmtool\forms.py:163 .\gmtool\models.py:13
+#: .\gmtool\templates\gmtool\command_execute.html:160
 msgid "响应名"
 msgstr "Response Name"
 
-#: .\gmtool\forms.py:205 .\gmtool\models.py:14
-#: .\gmtool\templates\gmtool\command_execute.html:160
+#: .\gmtool\forms.py:168 .\gmtool\models.py:14
+#: .\gmtool\templates\gmtool\command_execute.html:164
 msgid "协议响应ID"
 msgstr "Response ID"
 
-#: .\gmtool\forms.py:207
+#: .\gmtool\forms.py:170
 msgid "必须在所有命令中唯一，通常为请求ID + 1"
 msgstr "Must be unique across all commands, typically request_id + 1"
 
-#: .\gmtool\forms.py:210
+#: .\gmtool\forms.py:173
 msgid "响应描述"
 msgstr "Response Description"
 
-#: .\gmtool\forms.py:213
+#: .\gmtool\forms.py:176
 msgid "响应描述（可选）"
 msgstr "Response description (optional)"
 
-#: .\gmtool\forms.py:216
+#: .\gmtool\forms.py:179
 msgid "请求参数定义（JSON）"
 msgstr "Request Params (JSON)"
 
-#: .\gmtool\forms.py:219
+#: .\gmtool\forms.py:182
 msgid ""
 "请求参数定义的 JSON 数组。留空则使用默认的 AreaId/Partition/PlatId 字段。"
 msgstr ""
 "JSON array of request parameter definitions. Leave empty for default AreaId/"
 "Partition/PlatId fields."
 
-#: .\gmtool\forms.py:222
+#: .\gmtool\forms.py:185
 msgid "响应参数定义（JSON）"
 msgstr "Response Params (JSON)"
 
-#: .\gmtool\forms.py:225
+#: .\gmtool\forms.py:188
 msgid "响应参数定义的 JSON 数组。留空则使用默认的 Result/RetMsg 字段。"
 msgstr ""
 "JSON array of response parameter definitions. Leave empty for default Result/"
 "RetMsg fields."
 
-#: .\gmtool\forms.py:241
+#: .\gmtool\forms.py:204
 msgid "请求参数必须是 JSON 数组"
 msgstr "Request params must be a JSON array"
 
-#: .\gmtool\forms.py:244 .\gmtool\forms.py:256
+#: .\gmtool\forms.py:207 .\gmtool\forms.py:219
 #, python-format
 msgid "无效的 JSON: %(error)s"
 msgstr "Invalid JSON: %(error)s"
 
-#: .\gmtool\forms.py:253
+#: .\gmtool\forms.py:216
 msgid "响应参数必须是 JSON 数组"
 msgstr "Response params must be a JSON array"
 
@@ -466,7 +434,7 @@ msgstr "Request timed out, please try again later"
 msgid "无法连接到游戏服务器，请检查配置"
 msgstr "Unable to connect to game server, please check configuration"
 
-#: .\gmtool\models.py:15 .\gmtool\templates\gmtool\command_log.html:140
+#: .\gmtool\models.py:15
 msgid "请求参数定义"
 msgstr "Request Params"
 
@@ -474,148 +442,142 @@ msgstr "Request Params"
 msgid "响应参数定义"
 msgstr "Response Params"
 
-#: .\gmtool\models.py:17
+#: .\gmtool\models.py:18
 msgid "字段标签映射"
 msgstr "Field Label Mapping"
 
-#: .\gmtool\models.py:18
+#: .\gmtool\models.py:20
 msgid "所有字段（含嵌套结构体）的 id -> name 映射，用于结果展示"
 msgstr ""
 "Mapping of all fields (including nested structs) from id to name, used for "
 "displaying results"
 
-#: .\gmtool\models.py:22 .\gmtool\models.py:23
+#: .\gmtool\models.py:25 .\gmtool\models.py:26
 msgid "GM命令"
 msgstr "GM Command"
 
-#: .\gmtool\models.py:40 .\gmtool\templates\gmtool\role_list.html:42
-#: .\gmtool\utils.py:25
-msgid "超级管理员"
-msgstr "Super Admin"
-
-#: .\gmtool\models.py:41 .\gmtool\models.py:109 .\gmtool\models.py:139
-#: .\gmtool\templates\gmtool\role_list.html:30
-msgid "创建时间"
-msgstr "Created At"
-
-#: .\gmtool\models.py:62 .\gmtool\models.py:81 .\gmtool\models.py:100
-#: .\gmtool\models.py:133 .\gmtool\templates\gmtool\command_log.html:137
+#: .\gmtool\models.py:40 .\gmtool\models.py:59 .\gmtool\models.py:77
+#: .\gmtool\models.py:110 .\gmtool\templates\gmtool\command_log.html:137
 msgid "用户"
 msgstr "User"
 
-#: .\gmtool\models.py:63 .\gmtool\models.py:102
+#: .\gmtool\models.py:41 .\gmtool\models.py:79
 #: .\gmtool\templates\gmtool\command_log.html:95
 #: .\gmtool\templates\gmtool\command_log.html:138
 #: .\gmtool\templates\gmtool\dashboard.html:99
 msgid "命令"
 msgstr "Command"
 
-#: .\gmtool\models.py:66 .\gmtool\models.py:67
+#: .\gmtool\models.py:44 .\gmtool\models.py:45
 msgid "用户命令权限"
 msgstr "User Command Permission"
 
-#: .\gmtool\models.py:86 .\gmtool\models.py:87
+#: .\gmtool\models.py:63 .\gmtool\models.py:64
 msgid "用户信息"
 msgstr "User Profile"
 
-#: .\gmtool\models.py:96 .\gmtool\templates\gmtool\command_execute.html:556
-#: .\gmtool\templates\gmtool\command_execute.html:623
+#: .\gmtool\models.py:73 .\gmtool\templates\gmtool\command_execute.html:559
+#: .\gmtool\templates\gmtool\command_execute.html:626
 #: .\gmtool\templates\gmtool\command_log.html:109
-#: .\gmtool\templates\gmtool\command_log.html:170
+#: .\gmtool\templates\gmtool\command_log.html:171
 #: .\gmtool\templates\gmtool\dashboard.html:109
 msgid "成功"
 msgstr "Success"
 
-#: .\gmtool\models.py:97 .\gmtool\templates\gmtool\command_execute.html:564
-#: .\gmtool\templates\gmtool\command_execute.html:623
+#: .\gmtool\models.py:74 .\gmtool\templates\gmtool\command_execute.html:567
+#: .\gmtool\templates\gmtool\command_execute.html:626
 #: .\gmtool\templates\gmtool\command_log.html:110
-#: .\gmtool\templates\gmtool\command_log.html:172
+#: .\gmtool\templates\gmtool\command_log.html:173
 #: .\gmtool\templates\gmtool\dashboard.html:111
 msgid "失败"
 msgstr "Failed"
 
-#: .\gmtool\models.py:98 .\gmtool\templates\gmtool\command_log.html:111
-#: .\gmtool\templates\gmtool\command_log.html:174
+#: .\gmtool\models.py:75 .\gmtool\templates\gmtool\command_log.html:111
+#: .\gmtool\templates\gmtool\command_log.html:175
 #: .\gmtool\templates\gmtool\dashboard.html:113
 msgid "超时"
 msgstr "Timeout"
 
-#: .\gmtool\models.py:101
+#: .\gmtool\models.py:78
 msgid "操作用户名"
 msgstr "Operator Username"
 
-#: .\gmtool\models.py:103
+#: .\gmtool\models.py:80
 msgid "服务器组号"
 msgstr "Partition"
 
-#: .\gmtool\models.py:104
+#: .\gmtool\models.py:81
 msgid "请求数据"
 msgstr "Request Data"
 
-#: .\gmtool\models.py:105 .\gmtool\templates\gmtool\command_log.html:232
+#: .\gmtool\models.py:82 .\gmtool\templates\gmtool\command_log.html:233
 msgid "完整请求JSON"
 msgstr "Full Request JSON"
 
-#: .\gmtool\models.py:105
+#: .\gmtool\models.py:82
 msgid "IDIP协议完整请求内容"
 msgstr "Full IDIP request content"
 
-#: .\gmtool\models.py:106 .\gmtool\templates\gmtool\command_execute.html:188
-#: .\gmtool\templates\gmtool\command_log.html:234
+#: .\gmtool\models.py:83 .\gmtool\templates\gmtool\command_execute.html:192
+#: .\gmtool\templates\gmtool\command_log.html:235
 msgid "响应数据"
 msgstr "Response Data"
 
-#: .\gmtool\models.py:107 .\gmtool\templates\gmtool\command_execute.html:222
-#: .\gmtool\templates\gmtool\command_execute.html:422
+#: .\gmtool\models.py:84 .\gmtool\templates\gmtool\command_execute.html:226
+#: .\gmtool\templates\gmtool\command_execute.html:426
 #: .\gmtool\templates\gmtool\command_log.html:106
-#: .\gmtool\templates\gmtool\command_log.html:141
+#: .\gmtool\templates\gmtool\command_log.html:142
 #: .\gmtool\templates\gmtool\dashboard.html:99
 #: .\gmtool\templates\gmtool\user_list.html:38
 msgid "状态"
 msgstr "Status"
 
-#: .\gmtool\models.py:108 .\gmtool\models.py:136
+#: .\gmtool\models.py:85 .\gmtool\models.py:113
 #: .\gmtool\templates\gmtool\login_log.html:54
 msgid "IP地址"
 msgstr "IP Address"
 
-#: .\gmtool\models.py:112 .\gmtool\models.py:113
+#: .\gmtool\models.py:86 .\gmtool\models.py:116
+msgid "创建时间"
+msgstr "Created At"
+
+#: .\gmtool\models.py:89 .\gmtool\models.py:90
 msgid "命令日志"
 msgstr "Command Log"
 
-#: .\gmtool\models.py:129 .\gmtool\templates\gmtool\login.html:6
+#: .\gmtool\models.py:106 .\gmtool\templates\gmtool\login.html:6
 #: .\gmtool\templates\gmtool\login.html:76
 #: .\gmtool\templates\gmtool\login_log.html:24
 #: .\gmtool\templates\gmtool\login_log.html:66
 msgid "登录"
 msgstr "Login"
 
-#: .\gmtool\models.py:130 .\gmtool\templates\gmtool\base.html:113
+#: .\gmtool\models.py:107 .\gmtool\templates\gmtool\base.html:107
 #: .\gmtool\templates\gmtool\login_log.html:25
 #: .\gmtool\templates\gmtool\login_log.html:68
 msgid "登出"
 msgstr "Logout"
 
-#: .\gmtool\models.py:131 .\gmtool\templates\gmtool\login_log.html:26
+#: .\gmtool\models.py:108 .\gmtool\templates\gmtool\login_log.html:26
 #: .\gmtool\templates\gmtool\login_log.html:70
 msgid "登录失败"
 msgstr "Login Failed"
 
-#: .\gmtool\models.py:135 .\gmtool\templates\gmtool\login_log.html:21
+#: .\gmtool\models.py:112 .\gmtool\templates\gmtool\login_log.html:21
 #: .\gmtool\templates\gmtool\login_log.html:53
 msgid "操作类型"
 msgstr "Action"
 
-#: .\gmtool\models.py:137
+#: .\gmtool\models.py:114
 msgid "浏览器标识"
 msgstr "User Agent"
 
-#: .\gmtool\models.py:138 .\gmtool\templates\gmtool\login_log.html:56
+#: .\gmtool\models.py:115 .\gmtool\templates\gmtool\login_log.html:56
 msgid "失败原因"
 msgstr "Failure Reason"
 
-#: .\gmtool\models.py:142 .\gmtool\models.py:143
-#: .\gmtool\templates\gmtool\base.html:59
+#: .\gmtool\models.py:119 .\gmtool\models.py:120
+#: .\gmtool\templates\gmtool\base.html:53
 #: .\gmtool\templates\gmtool\login_log.html:4
 #: .\gmtool\templates\gmtool\login_log.html:7
 msgid "登录日志"
@@ -637,8 +599,6 @@ msgstr "Access Denied"
 #: .\gmtool\templates\gmtool\login.html:15
 #: .\gmtool\templates\gmtool\login.html:98
 #: .\gmtool\templates\gmtool\login_log.html:4
-#: .\gmtool\templates\gmtool\role_form.html:4
-#: .\gmtool\templates\gmtool\role_list.html:4
 #: .\gmtool\templates\gmtool\user_form.html:4
 #: .\gmtool\templates\gmtool\user_list.html:4
 #: .\gmtool\templates\gmtool\user_permissions.html:4
@@ -674,7 +634,7 @@ msgstr ""
 "try again later."
 
 #: .\gmtool\templates\gmtool\base.html:26
-#: .\gmtool\templates\gmtool\base.html:79
+#: .\gmtool\templates\gmtool\base.html:73
 #: .\gmtool\templates\gmtool\dashboard.html:4
 #: .\gmtool\templates\gmtool\dashboard.html:7
 msgid "仪表盘"
@@ -695,33 +655,34 @@ msgstr "Commands"
 msgid "用户管理"
 msgstr "Users"
 
-#: .\gmtool\templates\gmtool\base.html:52
+#: .\gmtool\templates\gmtool\base.html:46
 #: .\gmtool\templates\gmtool\command_log.html:4
 #: .\gmtool\templates\gmtool\command_log.html:7
 msgid "操作日志"
 msgstr "Operation Logs"
 
-#: .\gmtool\templates\gmtool\base.html:77
+#: .\gmtool\templates\gmtool\base.html:71
 #: .\gmtool\templates\gmtool\dashboard.html:6
 msgid "首页"
 msgstr "Home"
 
-#: .\gmtool\templates\gmtool\base.html:87
+#: .\gmtool\templates\gmtool\base.html:81
 msgid "中文"
 msgstr "Chinese"
 
-#: .\gmtool\templates\gmtool\base.html:87
-#: .\gmtool\templates\gmtool\base.html:101
+#: .\gmtool\templates\gmtool\base.html:81
+#: .\gmtool\templates\gmtool\base.html:95
 #: .\gmtool\templates\gmtool\login.html:89
 msgid "英文"
 msgstr "English"
 
-#: .\gmtool\templates\gmtool\base.html:94
+#: .\gmtool\templates\gmtool\base.html:88
 #: .\gmtool\templates\gmtool\login.html:95
 msgid "简体中文"
 msgstr "Simplified Chinese"
 
-#: .\gmtool\templates\gmtool\base.html:108
+#: .\gmtool\templates\gmtool\base.html:102
+#: .\gmtool\templates\gmtool\user_list.html:52
 msgid "管理员"
 msgstr "Admin"
 
@@ -740,7 +701,6 @@ msgstr "Basic Information"
 #: .\gmtool\templates\gmtool\command_add.html:79
 #: .\gmtool\templates\gmtool\command_add.html:116
 #: .\gmtool\templates\gmtool\command_add.html:126
-#: .\gmtool\templates\gmtool\role_form.html:26
 #: .\gmtool\templates\gmtool\user_form.html:33
 msgid "必填"
 msgstr "Required"
@@ -759,15 +719,13 @@ msgid "添加命令"
 msgstr "Add Command"
 
 #: .\gmtool\templates\gmtool\command_add.html:161
-#: .\gmtool\templates\gmtool\command_execute.html:125
-#: .\gmtool\templates\gmtool\role_form.html:38
+#: .\gmtool\templates\gmtool\command_execute.html:129
 #: .\gmtool\templates\gmtool\user_form.html:48
 #: .\gmtool\templates\gmtool\user_permissions.html:55
 msgid "取消"
 msgstr "Cancel"
 
 #: .\gmtool\templates\gmtool\command_execute.html:40
-#: .\gmtool\templates\gmtool\role_form.html:12
 #: .\gmtool\templates\gmtool\user_form.html:12
 #: .\gmtool\templates\gmtool\user_permissions.html:12
 msgid "返回列表"
@@ -785,7 +743,7 @@ msgstr "Optional"
 msgid "批量"
 msgstr "Batch"
 
-#: .\gmtool\templates\gmtool\command_execute.html:108
+#: .\gmtool\templates\gmtool\command_execute.html:112
 msgid "输入多个值，每行一个或用逗号分隔，如：&#10;值1&#10;值2&#10;值3"
 msgstr ""
 "Enter multiple values, one per line or comma-separated, e.g.:\n"
@@ -793,136 +751,134 @@ msgstr ""
 "Value2\n"
 "Value3"
 
-#: .\gmtool\templates\gmtool\command_execute.html:111
+#: .\gmtool\templates\gmtool\command_execute.html:115
 msgid "支持逗号分隔、换行分隔"
 msgstr "Supports comma-separated or newline-separated input"
 
-#: .\gmtool\templates\gmtool\command_execute.html:113
+#: .\gmtool\templates\gmtool\command_execute.html:117
 msgid "从文件导入"
 msgstr "Import from file"
 
-#: .\gmtool\templates\gmtool\command_execute.html:122
-#: .\gmtool\templates\gmtool\command_execute.html:494
+#: .\gmtool\templates\gmtool\command_execute.html:126
+#: .\gmtool\templates\gmtool\command_execute.html:497
 msgid "执行命令"
 msgstr "Execute Command"
 
-#: .\gmtool\templates\gmtool\command_execute.html:128
+#: .\gmtool\templates\gmtool\command_execute.html:132
 msgid "重置"
 msgstr "Reset"
 
-#: .\gmtool\templates\gmtool\command_execute.html:139
+#: .\gmtool\templates\gmtool\command_execute.html:143
 msgid "命令信息"
 msgstr "Command Info"
 
-#: .\gmtool\templates\gmtool\command_execute.html:152
+#: .\gmtool\templates\gmtool\command_execute.html:156
 #: .\gmtool\templates\gmtool\command_list.html:40
 msgid "协议ID"
 msgstr "Protocol ID"
 
-#: .\gmtool\templates\gmtool\command_execute.html:172
+#: .\gmtool\templates\gmtool\command_execute.html:176
 msgid "执行结果"
 msgstr "Execution Result"
 
-#: .\gmtool\templates\gmtool\command_execute.html:181
+#: .\gmtool\templates\gmtool\command_execute.html:185
 msgid "响应概览"
 msgstr "Response Overview"
 
-#: .\gmtool\templates\gmtool\command_execute.html:193
+#: .\gmtool\templates\gmtool\command_execute.html:197
 msgid "原始JSON（兜底）"
 msgstr "Raw JSON (Fallback)"
 
-#: .\gmtool\templates\gmtool\command_execute.html:202
+#: .\gmtool\templates\gmtool\command_execute.html:206
 msgid "批量执行结果"
 msgstr "Batch Execution Results"
 
-#: .\gmtool\templates\gmtool\command_execute.html:206
+#: .\gmtool\templates\gmtool\command_execute.html:210
 msgid "导出"
 msgstr "Export"
 
-#: .\gmtool\templates\gmtool\command_execute.html:221
+#: .\gmtool\templates\gmtool\command_execute.html:225
 msgid "目标"
 msgstr "Target"
 
-#: .\gmtool\templates\gmtool\command_execute.html:223
-#: .\gmtool\templates\gmtool\command_execute.html:454
+#: .\gmtool\templates\gmtool\command_execute.html:227
+#: .\gmtool\templates\gmtool\command_execute.html:458
 msgid "结果"
 msgstr "Result"
 
-#: .\gmtool\templates\gmtool\command_execute.html:237
+#: .\gmtool\templates\gmtool\command_execute.html:241
 msgid "请求发送中..."
 msgstr "Sending request..."
 
-#: .\gmtool\templates\gmtool\command_execute.html:303
-#: .\gmtool\templates\gmtool\command_execute.html:328
-#: .\gmtool\templates\gmtool\command_execute.html:454
-#: .\gmtool\templates\gmtool\command_log.html:229
+#: .\gmtool\templates\gmtool\command_execute.html:307
+#: .\gmtool\templates\gmtool\command_execute.html:332
+#: .\gmtool\templates\gmtool\command_execute.html:458
+#: .\gmtool\templates\gmtool\command_log.html:230
 msgid "无数据"
 msgstr "No data"
 
-#: .\gmtool\templates\gmtool\command_execute.html:422
+#: .\gmtool\templates\gmtool\command_execute.html:426
 msgid "无"
 msgstr "None"
 
-#: .\gmtool\templates\gmtool\command_execute.html:492
+#: .\gmtool\templates\gmtool\command_execute.html:495
 msgid "批量执行"
 msgstr "Batch Execute"
 
-#: .\gmtool\templates\gmtool\command_execute.html:539
-#: .\gmtool\templates\gmtool\command_execute.html:545
-#: .\gmtool\templates\gmtool\command_execute.html:565
-#: .\gmtool\templates\gmtool\command_execute.html:718
+#: .\gmtool\templates\gmtool\command_execute.html:542
+#: .\gmtool\templates\gmtool\command_execute.html:548
+#: .\gmtool\templates\gmtool\command_execute.html:568
+#: .\gmtool\templates\gmtool\command_execute.html:721
 #: .\gmtool\templates\gmtool\dashboard.html:221
 #: .\gmtool\templates\gmtool\dashboard.html:243
 msgid "未知错误"
 msgstr "Unknown error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:560
+#: .\gmtool\templates\gmtool\command_execute.html:563
 #: .\gmtool\templates\gmtool\dashboard.html:217
 #: .\gmtool\templates\gmtool\dashboard.html:240
 msgid "已停用"
 msgstr "Deactivated"
 
-#: .\gmtool\templates\gmtool\command_execute.html:561
-#: .\gmtool\templates\gmtool\command_execute.html:713
+#: .\gmtool\templates\gmtool\command_execute.html:564
+#: .\gmtool\templates\gmtool\command_execute.html:716
 msgid "命令已失效"
 msgstr "Command deactivated"
 
-#: .\gmtool\templates\gmtool\command_execute.html:653
-#: .\gmtool\templates\gmtool\command_execute.html:822
+#: .\gmtool\templates\gmtool\command_execute.html:656
 msgid "时间格式无效"
 msgstr "Invalid time format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:661
-#: .\gmtool\templates\gmtool\command_execute.html:830
+#: .\gmtool\templates\gmtool\command_execute.html:664
 msgid "数值格式无效"
 msgstr "Invalid number format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:713
+#: .\gmtool\templates\gmtool\command_execute.html:716
 msgid "该命令已被停用或删除，即将跳转到命令列表..."
 msgstr ""
 "This command has been deactivated or deleted, redirecting to command list..."
 
-#: .\gmtool\templates\gmtool\command_execute.html:718
+#: .\gmtool\templates\gmtool\command_execute.html:721
 msgid "错误"
 msgstr "Error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:724
+#: .\gmtool\templates\gmtool\command_execute.html:727
 msgid "请求异常"
 msgstr "Request error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:743
+#: .\gmtool\templates\gmtool\command_execute.html:746
 msgid "请为批量字段输入至少一个值"
 msgstr "Please enter at least one value for batch fields"
 
-#: .\gmtool\templates\gmtool\command_execute.html:747
+#: .\gmtool\templates\gmtool\command_execute.html:750
 msgid "值数量超过限制"
 msgstr "Value count exceeds limit"
 
-#: .\gmtool\templates\gmtool\command_execute.html:764
+#: .\gmtool\templates\gmtool\command_execute.html:767
 msgid "批量字段数量不匹配"
 msgstr "Batch field count mismatch"
 
-#: .\gmtool\templates\gmtool\command_execute.html:764
+#: .\gmtool\templates\gmtool\command_execute.html:767
 msgid "每个批量字段的值数量必须相同，或仅输入1个值以对所有目标复用"
 msgstr ""
 "Each batch field must have the same number of values, or enter only 1 value "
@@ -937,8 +893,7 @@ msgid "搜索"
 msgstr "Search"
 
 #: .\gmtool\templates\gmtool\command_list.html:41
-#: .\gmtool\templates\gmtool\command_log.html:143
-#: .\gmtool\templates\gmtool\role_list.html:31
+#: .\gmtool\templates\gmtool\command_log.html:144
 #: .\gmtool\templates\gmtool\user_list.html:39
 msgid "操作"
 msgstr "Actions"
@@ -1006,36 +961,40 @@ msgstr "Time"
 msgid "服务器"
 msgstr "Server"
 
-#: .\gmtool\templates\gmtool\command_log.html:142
+#: .\gmtool\templates\gmtool\command_log.html:140
+msgid "请求内容预览"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\command_log.html:143
 msgid "IP"
 msgstr "IP"
 
-#: .\gmtool\templates\gmtool\command_log.html:163
+#: .\gmtool\templates\gmtool\command_log.html:164
 msgid "点击查看完整内容"
 msgstr "Click to view full content"
 
-#: .\gmtool\templates\gmtool\command_log.html:185
+#: .\gmtool\templates\gmtool\command_log.html:186
 #: .\gmtool\templates\gmtool\login_log.html:82
 msgid "暂无日志数据"
 msgstr "No log data"
 
-#: .\gmtool\templates\gmtool\command_log.html:223
+#: .\gmtool\templates\gmtool\command_log.html:224
 msgid "日志详情"
 msgstr "Log Details"
 
-#: .\gmtool\templates\gmtool\command_log.html:230
+#: .\gmtool\templates\gmtool\command_log.html:231
 msgid "无响应数据"
 msgstr "No response data"
 
-#: .\gmtool\templates\gmtool\command_log.html:231
+#: .\gmtool\templates\gmtool\command_log.html:232
 msgid "加载中..."
 msgstr "Loading..."
 
-#: .\gmtool\templates\gmtool\command_log.html:233
+#: .\gmtool\templates\gmtool\command_log.html:234
 msgid "请求数据（表单参数）"
 msgstr "Request Data (Form Params)"
 
-#: .\gmtool\templates\gmtool\command_log.html:235
+#: .\gmtool\templates\gmtool\command_log.html:236
 msgid "加载失败，请重试"
 msgstr "Failed to load, please retry"
 
@@ -1048,13 +1007,16 @@ msgid "命令分组"
 msgstr "Command Groups"
 
 #: .\gmtool\templates\gmtool\dashboard.html:45
-msgid "用户角色"
-msgstr "User Role"
+msgid "账号类型"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\dashboard.html:49
+msgid "超级管理员"
+msgstr "Super Admin"
 
 #: .\gmtool\templates\gmtool\dashboard.html:51
-#: .\gmtool\templates\gmtool\user_list.html:57
-msgid "未分配"
-msgstr "Unassigned"
+msgid "普通用户"
+msgstr ""
 
 #: .\gmtool\templates\gmtool\dashboard.html:65
 msgid "命令快捷入口"
@@ -1186,90 +1148,60 @@ msgstr "All Types"
 msgid "浏览器"
 msgstr "Browser"
 
-#: .\gmtool\templates\gmtool\role_form.html:6
-#: .\gmtool\templates\gmtool\role_list.html:6
 #: .\gmtool\templates\gmtool\user_form.html:6
 #: .\gmtool\templates\gmtool\user_list.html:6
 #: .\gmtool\templates\gmtool\user_permissions.html:6
 msgid "管理"
 msgstr "Management"
 
-#: .\gmtool\templates\gmtool\role_form.html:36
+#: .\gmtool\templates\gmtool\user_form.html:19
+msgid "这是超级管理员账号，启用状态不可更改。"
+msgstr ""
+"This is a super admin account. Only active status cannot be changed."
+
 #: .\gmtool\templates\gmtool\user_form.html:46
 msgid "保存"
 msgstr "Save"
-
-#: .\gmtool\templates\gmtool\role_list.html:14 .\gmtool\user_views.py:213
-msgid "创建角色"
-msgstr "Create Role"
-
-#: .\gmtool\templates\gmtool\role_list.html:28
-msgid "类型"
-msgstr "Type"
-
-#: .\gmtool\templates\gmtool\role_list.html:44
-msgid "普通角色"
-msgstr "Regular Role"
-
-#: .\gmtool\templates\gmtool\role_list.html:51
-#: .\gmtool\templates\gmtool\user_list.html:75
-msgid "编辑"
-msgstr "Edit"
-
-#: .\gmtool\templates\gmtool\role_list.html:55
-#, python-format
-msgid "确认删除角色 %(name)s？"
-msgstr "Are you sure you want to delete role %(name)s?"
-
-#: .\gmtool\templates\gmtool\role_list.html:58
-#: .\gmtool\templates\gmtool\user_list.html:87
-msgid "删除"
-msgstr "Delete"
-
-#: .\gmtool\templates\gmtool\role_list.html:63
-msgid "系统保留"
-msgstr "System reserved"
-
-#: .\gmtool\templates\gmtool\role_list.html:68
-msgid "暂无角色数据"
-msgstr "No role data"
-
-#: .\gmtool\templates\gmtool\user_form.html:19
-msgid "这是超级管理员账号，角色和启用状态不可更改。"
-msgstr ""
-"This is a super admin account. Role and active status cannot be changed."
 
 #: .\gmtool\templates\gmtool\user_list.html:16
 msgid "搜索用户名..."
 msgstr "Search username..."
 
-#: .\gmtool\templates\gmtool\user_list.html:22 .\gmtool\user_views.py:104
+#: .\gmtool\templates\gmtool\user_list.html:22 .\gmtool\user_views.py:82
 msgid "创建用户"
 msgstr "Create User"
 
 #: .\gmtool\templates\gmtool\user_list.html:37
-#: .\gmtool\templates\gmtool\user_list.html:79
+#: .\gmtool\templates\gmtool\user_list.html:83
 msgid "权限数"
 msgstr "Permissions"
 
-#: .\gmtool\templates\gmtool\user_list.html:62
+#: .\gmtool\templates\gmtool\user_list.html:66
 msgid "全部"
 msgstr "All"
 
-#: .\gmtool\templates\gmtool\user_list.html:69
+#: .\gmtool\templates\gmtool\user_list.html:73
 msgid "已启用"
 msgstr "Enabled"
 
-#: .\gmtool\templates\gmtool\user_list.html:71
+#: .\gmtool\templates\gmtool\user_list.html:75
 msgid "已禁用"
 msgstr "Disabled"
 
-#: .\gmtool\templates\gmtool\user_list.html:84
+#: .\gmtool\templates\gmtool\user_list.html:79
+msgid "编辑"
+msgstr "Edit"
+
+#: .\gmtool\templates\gmtool\user_list.html:88
 #, python-format
 msgid "确认删除用户 %(username)s？"
 msgstr "Are you sure you want to delete user %(username)s?"
 
-#: .\gmtool\templates\gmtool\user_list.html:96
+#: .\gmtool\templates\gmtool\user_list.html:91
+msgid "删除"
+msgstr "Delete"
+
+#: .\gmtool\templates\gmtool\user_list.html:100
 msgid "暂无用户数据"
 msgstr "No user data"
 
@@ -1291,76 +1223,48 @@ msgstr ""
 msgid "保存权限"
 msgstr "Save Permissions"
 
-#: .\gmtool\user_views.py:84
-msgid "当前没有可分配的普通角色，请先创建一个普通角色后再创建用户"
-msgstr ""
-"There are no assignable regular roles available. Please create a regular "
-"role before creating a user."
-
-#: .\gmtool\user_views.py:145
+#: .\gmtool\user_views.py:133
 msgid "编辑用户"
 msgstr "Edit User"
 
-#: .\gmtool\user_views.py:160
+#: .\gmtool\user_views.py:148
 msgid "不能删除自己的账号"
 msgstr "You cannot delete your own account"
 
-#: .\gmtool\user_views.py:162
+#: .\gmtool\user_views.py:150
 msgid "不能删除超级管理员账号"
 msgstr "You cannot delete the super admin account"
 
-#: .\gmtool\user_views.py:167 .\gmtool\user_views.py:360
+#: .\gmtool\user_views.py:155
 msgid "删除确认失败，请重试"
 msgstr "Deletion confirmation failed. Please try again"
 
-#: .\gmtool\user_views.py:225
-msgid "超级管理员角色不可编辑"
-msgstr "Super admin role cannot be edited"
-
-#: .\gmtool\user_views.py:244
-msgid "编辑角色"
-msgstr "Edit Role"
-
-#: .\gmtool\user_views.py:354
-msgid "超级管理员角色不可删除"
-msgstr "The super administrator role cannot be deleted"
-
-#: .\gmtool\user_views.py:367
+#: .\gmtool\utils.py:90 .\gmtool\utils.py:101 .\gmtool\utils.py:116
+#: .\gmtool\utils.py:122
 #, python-format
-msgid ""
-"当前角色下还有 %(count)d 个用户，无法删除。请先为这些用户更换角色或删除相关用"
-"户后再试"
-msgstr ""
-"This role is still assigned to %(count)d user(s) and cannot be deleted. "
-"Please reassign those users to another role or delete the related user "
-"accounts first"
+msgid "参数 %(field)s 必须为时间戳或 ISO 时间"
+msgstr "Parameter %(field)s must be a timestamp or ISO time"
 
-#: .\gmtool\utils.py:26
-msgid "系统最高权限角色，拥有所有命令执行权限及管理功能"
-msgstr ""
-"The highest-privileged system role, with all command execution permissions "
-"and management capabilities"
-
-#: .\gmtool\utils.py:104
-msgid "命令参数定义错误，请联系管理员"
-msgstr "Invalid command parameter schema, please contact the administrator"
-
-#: .\gmtool\utils.py:119
-#, python-format
-msgid "缺少必填参数: %(field)s"
-msgstr "Missing required parameter: %(field)s"
-
-#: .\gmtool\utils.py:129
-#, python-format
-msgid "参数 %(field)s 必须为整数"
-msgstr "Parameter %(field)s must be an integer"
-
-#: .\gmtool\utils.py:131
+#: .\gmtool\utils.py:95 .\gmtool\utils.py:106 .\gmtool\utils.py:163
 #, python-format
 msgid "参数 %(field)s 不能为负数"
 msgstr "Parameter %(field)s cannot be negative"
 
-#: .\gmtool\utils.py:153
+#: .\gmtool\utils.py:136
+msgid "命令参数定义错误，请联系管理员"
+msgstr "Invalid command parameter schema, please contact the administrator"
+
+#: .\gmtool\utils.py:151
+#, python-format
+msgid "缺少必填参数: %(field)s"
+msgstr "Missing required parameter: %(field)s"
+
+#: .\gmtool\utils.py:161
+#, python-format
+msgid "参数 %(field)s 必须为整数"
+msgstr "Parameter %(field)s must be an integer"
+
+#: .\gmtool\utils.py:193
 #, python-format
 msgid "参数 %(field)s 必须为布尔值"
 msgstr "Parameter %(field)s must be a boolean"

@@ -11,7 +11,8 @@
 - 为不同用户提供受控的 GM 命令执行入口
 - 支持命令定义从 `idip_commands.json` 解析并同步到数据库
 - 支持命令动态表单渲染与结构化结果展示
-- 支持用户、角色、命令权限管理
+- 支持用户、扩展资料与命令权限管理
+
 - 记录登录日志、命令执行日志与审计日志
 - 支持通过反向代理部署在 HTTPS 环境下运行
 - 支持中英文国际化
@@ -129,15 +130,19 @@ c:\helin\helinljn\codes\python\django\
 
 - `auth_views.py`：登录、登出、错误页、CSRF 失败处理
 - `command_views.py`：仪表盘、命令列表、命令执行、同步、操作日志
-- `user_views.py`：用户管理、角色管理、权限分配、登录日志
+- `user_views.py`：用户管理、权限分配、登录日志
+
 - `api_views.py`：日志详情、命令定义上传接口
-- `models.py`：命令、角色、用户扩展、日志、权限关联等模型
-- `forms.py`：用户、角色、命令新增相关表单
+- `models.py`：命令、用户扩展、日志、权限关联等模型
+
+- `forms.py`：用户、命令新增相关表单
+
 - `decorators.py`：超级管理员与命令权限装饰器
 - `command_parser.py`：命令定义解析与同步逻辑
 - `idip_client.py`：与 IDIP 服务交互
 - `middleware.py`：命令定义文件变更监控
-- `signals.py`：超管角色/权限自动补齐
+- `signals.py`：UserProfile 与超管权限自动补齐
+
 - `audit_log.py`：审计日志封装
 - `logging_handlers.py`：Windows 友好的日志轮转处理器
 
@@ -708,7 +713,8 @@ python manage.py compilemessages
 ## 19. 备注
 
 - 本项目不依赖 Django Admin 进行业务管理
-- 角色仅用于分组，不直接承载命令权限
+- 用户扩展资料由 `UserProfile` 承载，命令权限以 `UserCommandPermission` 为准
+
 - 命令权限以 `UserCommandPermission` 为准
 - 当前默认数据库为 SQLite，更适合开发或轻量部署场景
 - 若进入更高并发或生产化环境，建议评估 MySQL / PostgreSQL、Redis、任务队列等组件

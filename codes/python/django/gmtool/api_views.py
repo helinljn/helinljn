@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
 from .audit_log import log_operation
-from .command_parser import sync_commands_to_db, validate_json_command_ids
+from .command_parser import load_commands_json_content, sync_commands_to_db, validate_json_command_ids
 from .decorators import is_super_admin, super_admin_required
 from .models import CommandLog
 from .utils import get_client_ip, _mask_sensitive_data
@@ -106,7 +106,6 @@ def upload_commands_api(request):
     # 原子写入 idip_commands.json（先写临时文件再替换，防止中途崩溃损坏文件）
     try:
         json_path = getattr(settings, 'IDIP_JSON_PATH', settings.BASE_DIR / 'idip_commands.json')
-        content_str = raw.decode('utf-8') if isinstance(raw, bytes) else raw
         fd, tmp_path = tempfile.mkstemp(suffix='.json.tmp')
         try:
             with os.fdopen(fd, 'w', encoding='utf-8') as f:

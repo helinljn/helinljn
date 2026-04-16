@@ -1,5 +1,4 @@
 """认证相关视图"""
-import logging
 
 from django.conf import settings
 from django.contrib import messages

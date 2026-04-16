@@ -14,6 +14,39 @@ from .models import GMCommand, UserCommandPermission
 logger = logging.getLogger(__name__)
 
 
+def _json_object_pairs_no_duplicates(pairs):
+    """在 JSON 解析阶段拒绝重复键，避免静默覆盖。"""
+    data = {}
+    duplicates = []
+    for key, value in pairs:
+        if key in data:
+            duplicates.append(str(key))
+        data[key] = value
+    if duplicates:
+        duplicate_keys = ', '.join(dict.fromkeys(duplicates))
+        raise ValueError(_('JSON 中存在重复键: %(keys)s') % {'keys': duplicate_keys})
+    return data
+
+
+def load_commands_json_content(raw_content):
+    """解析命令 JSON 原文，并在解析阶段检测重复键。"""
+    if isinstance(raw_content, bytes):
+        raw_text = raw_content.decode('utf-8')
+    else:
+        raw_text = str(raw_content)
+
+    data = json.loads(raw_text, object_pairs_hook=_json_object_pairs_no_duplicates)
+    if not isinstance(data, dict):
+        raise ValueError(_('JSON 顶层必须是对象(dict)'))
+    return raw_text, data
+
+
+def load_commands_json_file(json_path):
+    """从文件读取命令 JSON，并在解析阶段检测重复键。"""
+    with open(json_path, 'r', encoding='utf-8') as f:
+        return load_commands_json_content(f.read())
+
+
 def validate_command_ids(command_id, request_id, response_id, exclude_command_id=None):
     """
     校验命令ID和协议ID是否重复。
@@ -289,8 +322,7 @@ def parse_commands(json_path=None):
     if json_path is None:
         json_path = getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
 
-    with open(json_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    _, data = load_commands_json_file(json_path)
 
     commands = []
     for cmd_id, cmd_data in data.items():

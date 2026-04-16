@@ -91,14 +91,18 @@
                                    id="single_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="string"
+                                   data-required="{% if param.isnull != "true" %}true{% else %}false{% endif %}"
                                    {% if param.isnull != "true" %}required{% endif %}>
+
                         {% else %}
                             <input type="number"
                                    class="form-control single-input param-field"
                                    id="single_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="{{ param.type }}"
+                                   data-required="{% if param.isnull != "true" %}true{% else %}false{% endif %}"
                                    {% if param.isnull != "true" %}required{% endif %}>
+
                         {% endif %}
                         {# Batch textarea (hidden by default) #}
                         <textarea class="form-control batch-textarea"
@@ -476,10 +480,9 @@ function toggleFieldBatchMode(paramId, checked) {
     } else {
         batchFields.delete(paramId);
         singleInput.classList.remove('hidden');
-        if (singleInput.dataset.paramType !== undefined) {
-            // Restore required based on original param
-        }
+        restoreSingleInputRequired(singleInput);
         batchInput.classList.remove('active');
+
         batchInput.removeAttribute('required');
         hint.style.display = 'none';
     }
@@ -815,25 +818,15 @@ async function batchExecute() {
             // Type conversion
             const textarea = document.getElementById('batch_' + paramId);
             const paramType = textarea ? textarea.dataset.paramType : 'string';
-            if (paramType === 'time') {
-                const ts = Math.floor(new Date(value).getTime() / 1000);
-                if (!Number.isFinite(ts)) {
-                    iterationHasError = true;
-                    iterationErrorMsg = '{% trans "时间格式无效" %}: ' + paramId;
-                    break;
-                }
-                value = ts;
-            } else if (['uint32','uint64','int32','uint8'].includes(paramType)) {
-                const intValue = Number.parseInt(value, 10);
-                if (!Number.isFinite(intValue)) {
-                    iterationHasError = true;
-                    iterationErrorMsg = '{% trans "数值格式无效" %}: ' + paramId;
-                    break;
-                }
-                value = intValue;
+            const converted = convertParamValue(paramType, value, paramId);
+            if (!converted.ok) {
+                iterationHasError = true;
+                iterationErrorMsg = converted.error;
+                break;
             }
 
-            params[paramId] = value;
+            params[paramId] = converted.value;
+
         }
 
         // If targetLabel is still empty, use first batch field

@@ -293,9 +293,8 @@ def sync_commands_api(request):
     # 先校验 JSON 文件中的 ID 是否有冲突
     json_path = getattr(settings, 'IDIP_JSON_PATH', settings.BASE_DIR / 'idip_commands.json')
     try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError) as e:
+        _, data = load_commands_json_file(json_path)
+    except (json.JSONDecodeError, UnicodeDecodeError, FileNotFoundError, ValueError) as e:
         return JsonResponse({'error': _('读取 JSON 文件失败: %(error)s') % {'error': str(e)}}, status=400)
 
     is_valid_ids, id_error_msg = validate_json_command_ids(data)

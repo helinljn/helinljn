@@ -45,7 +45,8 @@
                     <td>{{ u.id }}</td>
                     <td>
                         <div class="d-flex align-items-center">
-                            <span class="avatar avatar-xs me-2 rounded" style="background-image: url(https://api.dicebear.com/7.x/initials/svg?seed={{ u.username }})"></span>
+                            <span class="avatar avatar-xs me-2 rounded bg-blue-lt text-blue fw-bold">{{ u.username|first|upper|default:'?' }}</span>
+
                             {{ u.username }}
                             {% if u.is_superuser %}
                             <span class="badge bg-warning-lt ms-2">{% trans "管理员" %}</span>
