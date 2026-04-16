@@ -25,26 +25,6 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
-# 确认令牌有效期（秒），5 分钟窗口
-_CONFIRM_TOKEN_TTL = 300
-
-
-def _make_confirm_token(obj_id, obj_name):
-    """生成删除确认令牌，使用 HMAC-SHA256 + 时间窗口防重放"""
-    timestamp = str(int(time.time() // _CONFIRM_TOKEN_TTL))
-    raw = f'delete:{obj_id}:{obj_name}:{timestamp}'
-    return hmac.new(
-        django_settings.SECRET_KEY.encode(),
-        raw.encode(),
-        hashlib.sha256,
-    ).hexdigest()[:32]
-
-
-def _verify_confirm_token(obj_id, obj_name, token):
-    """验证删除确认令牌"""
-    return hmac.compare_digest(token, _make_confirm_token(obj_id, obj_name))
-
-
 @login_required
 @super_admin_required
 def user_list(request):
@@ -171,7 +151,7 @@ def user_delete(request, user_id):
     else:
         # 验证确认令牌，防止绕过前端直接 POST 删除
         confirm_token = request.POST.get('confirm_token', '')
-        if not _verify_confirm_token(user_id, user_obj.username, confirm_token):
+        if not verify_confirm_token(user_id, user_obj.username, confirm_token):
             messages.error(request, _('删除确认失败，请重试'))
             return redirect('gmtool:user_list')
         target_name = user_obj.username

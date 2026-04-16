@@ -16,8 +16,6 @@ from .audit_log import log_operation
 from .models import LoginLog
 from .utils import get_client_ip
 
-logger = logging.getLogger(__name__)
-
 # 登录失败限速配置
 LOGIN_MAX_ATTEMPTS = getattr(settings, 'LOGIN_MAX_ATTEMPTS', 5)          # 最大尝试次数
 LOGIN_LOCKOUT_SECONDS = getattr(settings, 'LOGIN_LOCKOUT_SECONDS', 300)  # 锁定时长（秒），5分钟

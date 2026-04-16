@@ -1,17 +1,21 @@
 """公共辅助函数"""
-import json
-import logging
+import hashlib
+import hmac
+import time
+from datetime import datetime
 
 from django.conf import settings
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-
-logger = logging.getLogger(__name__)
 
 # 脱敏字段（日志详情接口返回前处理）— 从 settings 获取，便于扩展
 SENSITIVE_FIELD_NAMES = getattr(settings, 'SENSITIVE_FIELDS', {
     'password', 'passwd', 'pwd', 'token', 'access_token', 'refresh_token',
     'secret', 'sign', 'signature', 'sessionid', 'cookie', 'authorization',
 })
+
+# 删除确认令牌有效期（秒），5 分钟窗口
+CONFIRM_TOKEN_TTL = 300
 
 
 def is_super_admin_user(user):
@@ -25,6 +29,25 @@ def get_super_admin_users_queryset():
 
     User = get_user_model()
     return User.objects.filter(is_superuser=True)
+
+
+def make_confirm_token(obj_id, obj_name, ttl=CONFIRM_TOKEN_TTL):
+    """生成删除确认令牌，使用 HMAC-SHA256 + 时间窗口防重放。"""
+    timestamp = str(int(time.time() // ttl))
+    raw = f'delete:{obj_id}:{obj_name}:{timestamp}'
+    return hmac.new(
+        settings.SECRET_KEY.encode(),
+        raw.encode(),
+        hashlib.sha256,
+    ).hexdigest()[:32]
+
+
+def verify_confirm_token(obj_id, obj_name, token, ttl=CONFIRM_TOKEN_TTL):
+    """验证删除确认令牌。"""
+    if not token:
+        return False
+    expected = make_confirm_token(obj_id, obj_name, ttl=ttl)
+    return hmac.compare_digest(str(token), expected)
 
 
 def get_client_ip(request):
@@ -61,11 +84,49 @@ def _group_commands_by_tab(commands):
     return tab_groups
 
 
+def _parse_time_param_value(field_id, value):
+    """将 time 类型参数归一化为 Unix 时间戳（秒）。"""
+    if isinstance(value, bool):
+        return False, _('参数 %(field)s 必须为时间戳或 ISO 时间') % {'field': field_id}
+
+    if isinstance(value, (int, float)):
+        timestamp = int(value)
+        if timestamp < 0:
+            return False, _('参数 %(field)s 不能为负数') % {'field': field_id}
+        return True, timestamp
+
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return False, _('参数 %(field)s 必须为时间戳或 ISO 时间') % {'field': field_id}
+
+        if stripped.isdigit() or (stripped.startswith('-') and stripped[1:].isdigit()):
+            timestamp = int(stripped)
+            if timestamp < 0:
+                return False, _('参数 %(field)s 不能为负数') % {'field': field_id}
+            return True, timestamp
+
+        normalized = stripped.replace('Z', '+00:00')
+        try:
+            if 'T' in normalized or '+' in normalized:
+                parsed_dt = datetime.fromisoformat(normalized)
+            else:
+                parsed_dt = datetime.strptime(normalized, '%Y-%m-%d %H:%M:%S')
+        except ValueError:
+            return False, _('参数 %(field)s 必须为时间戳或 ISO 时间') % {'field': field_id}
+
+        if timezone.is_naive(parsed_dt):
+            parsed_dt = timezone.make_aware(parsed_dt, timezone.get_current_timezone())
+        return True, int(parsed_dt.timestamp())
+
+    return False, _('参数 %(field)s 必须为时间戳或 ISO 时间') % {'field': field_id}
+
+
 def _validate_command_params_basic(command, params):
     """
     基于 command.request_params 做基础参数校验：
     - 必填字段校验（isnull=false）
-    - 基础类型校验（int/uint/string/bool）
+    - 基础类型校验（int/uint/string/bool/time）
 
     注意：此函数会原地修改 params dict（如将字符串"123"转为整数123），
     调用者应知晓此副作用。如需保留原始 params，请传入副本。
@@ -103,6 +164,14 @@ def _validate_command_params_basic(command, params):
             params[field_id] = int_value
             continue
 
+        # 时间类型：支持 Unix 时间戳和 ISO / datetime-local 字符串
+        if raw_type == 'time':
+            success, parsed_value = _parse_time_param_value(field_id, value)
+            if not success:
+                return False, parsed_value
+            params[field_id] = parsed_value
+            continue
+
         # string 系列
         if raw_type.startswith('string'):
             if not isinstance(value, str):
@@ -131,10 +200,8 @@ def parse_time_range_filters(request, default_days=7):
     从请求参数中解析时间范围筛选条件。
 
     通用逻辑：如果未指定任何时间范围，默认筛选最近 default_days 天。
-    返回: (start_time_filter, end_time_filter, qs) 其中 qs 是已应用时间过滤的 QuerySet
-    用法: start_filter, end_filter, qs = parse_time_range_filters(request, qs, 'created_at')
+    返回: (start_time_filter, end_time_filter, start_dt, end_dt)
     """
-    from django.utils import timezone
     from datetime import timedelta
 
     start_time_filter = request.GET.get('start_time', '')
