@@ -2,8 +2,11 @@
 import logging
 
 from django.contrib.auth import get_user_model
+from django.db import DatabaseError
 from django.db.models.signals import post_migrate, post_save
 from django.dispatch import receiver
+
+from .permission_service import assign_super_admin_permissions, get_super_admin_users_queryset
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +21,6 @@ def ensure_user_profile_and_superuser_permissions(sender, instance, created, **k
     """
     try:
         from .models import UserProfile
-        from .utils import assign_super_admin_permissions
 
         _, profile_created = UserProfile.objects.get_or_create(user=instance)
         new_perm_count = assign_super_admin_permissions(instance) if instance.is_superuser else 0
@@ -31,7 +33,7 @@ def ensure_user_profile_and_superuser_permissions(sender, instance, created, **k
                 new_perm_count,
             )
 
-    except Exception as e:
+    except DatabaseError as e:
         # 数据库未就绪时（如迁移阶段）忽略错误
         logger.debug('用户资料/超管权限自动补齐跳过: %s', e)
 
@@ -47,7 +49,6 @@ def auto_bind_existing_superusers(sender, **kwargs):
 
     try:
         from .models import UserProfile
-        from .utils import assign_super_admin_permissions, get_super_admin_users_queryset
 
         total_new_profiles = 0
         total_new_perms = 0
@@ -63,6 +64,6 @@ def auto_bind_existing_superusers(sender, **kwargs):
                 total_new_perms,
             )
 
-    except Exception as e:
+    except DatabaseError as e:
         # 数据库表可能还未创建，安全忽略
         logger.debug('迁移后超级管理员自动补齐跳过: %s', e)

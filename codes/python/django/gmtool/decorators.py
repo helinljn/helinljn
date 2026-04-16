@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
 from .models import GMCommand, UserCommandPermission
-from .utils import is_super_admin_user
+from .permission_service import is_super_admin_user
 
 
 def _wants_json_response(request):

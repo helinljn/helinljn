@@ -51,6 +51,7 @@
                     {% endif %}
                     <form method="post" autocomplete="off">
                         {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next_url }}">
                         <div class="mb-3">
                             <label class="form-label required">{% trans "用户名" %}</label>
                             <div class="input-group input-group-flat">

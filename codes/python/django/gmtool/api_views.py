@@ -11,11 +11,13 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
+from django.db import DatabaseError
+
 from .audit_log import log_operation
 from .command_parser import load_commands_json_content, sync_commands_to_db, validate_json_command_ids
 from .decorators import is_super_admin, super_admin_required
 from .models import CommandLog
-from .utils import get_client_ip, _mask_sensitive_data
+from .security_utils import get_client_ip, mask_sensitive_data
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +31,15 @@ def log_detail_api(request, log_id):
 
     log = get_object_or_404(logs, pk=log_id)
 
-    masked_request_data = _mask_sensitive_data(log.request_data) if log.request_data else ''
-    masked_response_data = _mask_sensitive_data(log.response_data) if log.response_data else ''
+    masked_request_data = mask_sensitive_data(log.request_data) if log.request_data else ''
+    masked_response_data = mask_sensitive_data(log.response_data) if log.response_data else ''
 
     # request_content 为 JSON 字符串时进行结构化脱敏，失败则返回空串避免透传敏感原文
     masked_request_content = ''
     if log.request_content:
         try:
             parsed_content = json.loads(log.request_content)
-            masked_request_content = json.dumps(_mask_sensitive_data(parsed_content), ensure_ascii=False)
+            masked_request_content = json.dumps(mask_sensitive_data(parsed_content), ensure_ascii=False)
         except (TypeError, ValueError, json.JSONDecodeError):
             masked_request_content = ''
 
@@ -78,8 +80,8 @@ def upload_commands_api(request):
     # 解析并校验 JSON 内容
     try:
         raw = uploaded_file.read()
-        data = json.loads(raw)
-    except json.JSONDecodeError as e:
+        content_str, data = load_commands_json_content(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as e:
         return JsonResponse({'error': _('JSON 解析失败: %(error)s') % {'error': str(e)}}, status=400)
 
     # 校验顶层结构：必须是 dict，且每个值包含必要字段
@@ -111,19 +113,19 @@ def upload_commands_api(request):
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
                 f.write(content_str)
             os.replace(tmp_path, str(json_path))
-        except Exception:
+        except OSError:
             # 清理临时文件
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
             raise
-    except Exception as e:
+    except OSError as e:
         logger.exception('Failed to write JSON file: %s', e)
         return JsonResponse({'error': _('文件写入失败: %(error)s') % {'error': str(e)}}, status=500)
 
     # 自动执行同步
     try:
         created, updated, deactivated = sync_commands_to_db()
-    except Exception as e:
+    except (DatabaseError, OSError, ValueError, json.JSONDecodeError, UnicodeDecodeError) as e:
         logger.exception('Command sync error: %s', e)
         return JsonResponse({'error': _('文件已上传但同步失败')}, status=500)
 

@@ -46,7 +46,6 @@ class IDIPFileMonitorMiddleware:
         self.get_response = get_response
         # 线程锁，防止并发同步
         self._lock = threading.Lock()
-        # 初始化状态
         self._enabled = ENABLE_FILE_MONITOR
         self._json_path = getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
 

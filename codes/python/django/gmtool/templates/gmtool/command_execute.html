@@ -77,6 +77,7 @@
                                    id="single_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="{{ param.type }}"
+                                   data-required="{% if param.isnull != "true" %}true{% else %}false{% endif %}"
                                    {% if param.isnull != "true" %}required{% endif %}>
                         {% elif param.type == "time" %}
                             <input type="datetime-local"
@@ -84,6 +85,7 @@
                                    id="single_{{ param.id }}"
                                    data-param-id="{{ param.id }}"
                                    data-param-type="time"
+                                   data-required="{% if param.isnull != "true" %}true{% else %}false{% endif %}"
                                    {% if param.isnull != "true" %}required{% endif %}>
                         {% elif param.type == "string" %}
                             <input type="text"
@@ -496,6 +498,52 @@ function updateSubmitButtonText() {
     } else {
         btnText.textContent = '{% trans "执行命令" %}';
     }
+}
+
+function restoreSingleInputRequired(input) {
+    if (!input) return;
+    if (input.dataset.required === 'true') {
+        input.setAttribute('required', '');
+    } else {
+        input.removeAttribute('required');
+    }
+}
+
+function convertParamValue(paramType, value, paramId) {
+    const normalizedType = String(paramType || 'string').toLowerCase();
+    const rawValue = typeof value === 'string' ? value.trim() : value;
+
+    if (normalizedType === 'time') {
+        const timestamp = Math.floor(new Date(rawValue).getTime() / 1000);
+        if (!Number.isFinite(timestamp)) {
+            return { ok: false, error: '{% trans "时间格式无效" %}: ' + paramId };
+        }
+        return { ok: true, value: timestamp };
+    }
+
+    if (['uint8', 'uint16', 'uint32', 'uint64', 'int8', 'int16', 'int32', 'int64'].includes(normalizedType)) {
+        const intValue = Number.parseInt(rawValue, 10);
+        if (!Number.isFinite(intValue)) {
+            return { ok: false, error: '{% trans "数值格式无效" %}: ' + paramId };
+        }
+        if (normalizedType.startsWith('uint') && intValue < 0) {
+            return { ok: false, error: '{% trans "数值不能为负数" %}: ' + paramId };
+        }
+        return { ok: true, value: intValue };
+    }
+
+    if (normalizedType.startsWith('bool')) {
+        const lowered = String(rawValue).toLowerCase();
+        if (['true', '1', 'yes', 'on'].includes(lowered)) {
+            return { ok: true, value: true };
+        }
+        if (['false', '0', 'no', 'off'].includes(lowered)) {
+            return { ok: true, value: false };
+        }
+        return { ok: false, error: '{% trans "布尔值格式无效" %}: ' + paramId };
+    }
+
+    return { ok: true, value: rawValue };
 }
 
 function parseBatchValues(input) {

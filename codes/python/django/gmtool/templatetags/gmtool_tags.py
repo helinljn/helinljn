@@ -1,7 +1,7 @@
 """GM工具自定义模板标签"""
 from django import template
 
-from gmtool.utils import make_confirm_token
+from gmtool.security_utils import make_confirm_token
 
 register = template.Library()
 

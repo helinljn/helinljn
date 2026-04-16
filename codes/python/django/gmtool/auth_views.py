@@ -13,7 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .audit_log import log_operation
 from .models import LoginLog
-from .utils import get_client_ip
+from .security_utils import get_client_ip
 
 # 登录失败限速配置
 LOGIN_MAX_ATTEMPTS = getattr(settings, 'LOGIN_MAX_ATTEMPTS', 5)          # 最大尝试次数
@@ -63,7 +63,7 @@ def _increment_login_failure_attempts(ip, username):
 
 def _get_safe_next_url(request):
     """获取安全的登录后跳转地址，仅允许本站内相对路径"""
-    next_url = request.GET.get('next', '')
+    next_url = request.POST.get('next') or request.GET.get('next', '')
     if not next_url:
         return ''
 
@@ -86,13 +86,16 @@ def _get_safe_next_url(request):
     return next_url
 
 
+def _render_login(request, **context):
+    """统一渲染登录页，并带上安全的 next 参数。"""
+    context.setdefault('next_url', _get_safe_next_url(request))
+    return render(request, 'gmtool/login.html', context)
+
+
 def login_view(request):
     """登录页面"""
     if request.user.is_authenticated:
-        return render(request, 'gmtool/login.html', {
-            'already_logged_in': True,
-            'current_user': request.user,
-        })
+        return _render_login(request, already_logged_in=True, current_user=request.user)
     if request.method == 'POST':
         ip = get_client_ip(request)
         username = request.POST.get('username', '')
@@ -109,9 +112,10 @@ def login_view(request):
                 user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
                 reason=_('尝试次数过多'),
             )
-            return render(request, 'gmtool/login.html', {
-                'error': _('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
-            })
+            return _render_login(
+                request,
+                error=_('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
+            )
 
         user = authenticate(request, username=username, password=password)
         ua = request.META.get('HTTP_USER_AGENT', '')[:500]
@@ -140,13 +144,15 @@ def login_view(request):
                 log_operation('auth', 'login_failed', ip_address=ip,
                               detail={'username': username, 'reason': str(_('账号已禁用'))})
                 if attempts_ip >= LOGIN_MAX_ATTEMPTS or attempts_ip_user >= LOGIN_MAX_ATTEMPTS:
-                    return render(request, 'gmtool/login.html', {
-                        'error': _('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
-                    })
+                    return _render_login(
+                        request,
+                        error=_('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60},
+                    )
                 remaining = LOGIN_MAX_ATTEMPTS - max(attempts_ip, attempts_ip_user)
-                return render(request, 'gmtool/login.html', {
-                    'error': _('账号已被禁用，还可尝试 %(remaining)d 次') % {'remaining': remaining},
-                })
+                return _render_login(
+                    request,
+                    error=_('账号已被禁用，还可尝试 %(remaining)d 次') % {'remaining': remaining},
+                )
         else:
             attempts_ip, attempts_ip_user = _increment_login_failure_attempts(ip, username)
             remaining = LOGIN_MAX_ATTEMPTS - max(attempts_ip, attempts_ip_user)
@@ -160,8 +166,8 @@ def login_view(request):
                 error_msg = _('用户名或密码错误，还可尝试 %(remaining)d 次') % {'remaining': remaining}
             else:
                 error_msg = _('登录尝试次数过多，请 %(minutes)d 分钟后再试') % {'minutes': LOGIN_LOCKOUT_SECONDS // 60}
-            return render(request, 'gmtool/login.html', {'error': error_msg})
-    return render(request, 'gmtool/login.html')
+            return _render_login(request, error=error_msg)
+    return _render_login(request)
 
 
 @login_required

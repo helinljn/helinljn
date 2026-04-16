@@ -1,14 +1,10 @@
 """用户管理相关视图"""
-import hashlib
-import hmac
 import logging
-import time
 
 from django.conf import settings as django_settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,7 +15,8 @@ from .audit_log import log_operation
 from .decorators import is_super_admin, super_admin_required
 from .forms import UserCreateForm, UserEditForm
 from .models import GMCommand, LoginLog, UserCommandPermission, UserProfile
-from .utils import get_client_ip, parse_time_range_filters
+from .query_utils import apply_time_range_filters_to_queryset, paginate_request_queryset
+from .security_utils import get_client_ip, verify_confirm_token
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -41,10 +38,7 @@ def user_list(request):
     # 添加排序以避免分页警告，按用户ID升序排列
     users = users.order_by('id')
 
-    paginator = Paginator(users, django_settings.PAGE_SIZE)
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
-    elided_page_range = list(paginator.get_elided_page_range(page_obj.number, on_each_side=2, on_ends=1))
+    page_obj, elided_page_range = paginate_request_queryset(users, request, django_settings.PAGE_SIZE)
 
     return render(request, 'gmtool/user_list.html', {
         'page_obj': page_obj,
@@ -282,20 +276,12 @@ def login_log_list(request):
     if user_filter:
         logs = logs.filter(username__icontains=user_filter)
 
-    # 时间范围筛选（默认最近7天）
-    start_time_filter, end_time_filter, start_dt, end_dt = parse_time_range_filters(request)
-    if start_dt:
-        logs = logs.filter(created_at__gte=start_dt)
-    if end_dt:
-        logs = logs.filter(created_at__lte=end_dt)
+    logs, start_time_filter, end_time_filter = apply_time_range_filters_to_queryset(logs, request)
 
     # 添加排序以避免分页警告
     logs = logs.order_by('-created_at')
 
-    paginator = Paginator(logs, django_settings.PAGE_SIZE)
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
-    elided_page_range = list(paginator.get_elided_page_range(page_obj.number, on_each_side=2, on_ends=1))
+    page_obj, elided_page_range = paginate_request_queryset(logs, request, django_settings.PAGE_SIZE)
 
     return render(request, 'gmtool/login_log.html', {
         'page_obj': page_obj,

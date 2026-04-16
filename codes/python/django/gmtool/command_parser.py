@@ -5,11 +5,12 @@ import os
 import tempfile
 
 from django.conf import settings
-from django.db import transaction
+from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.utils.translation import gettext as _
 
-from .models import GMCommand, UserCommandPermission
+from .models import GMCommand
+from .permission_service import assign_permissions_to_all_super_admins
 
 logger = logging.getLogger(__name__)
 
@@ -269,11 +270,11 @@ def add_command_to_json(command_data):
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
                 f.write(content_str)
             os.replace(tmp_path, str(json_path))
-        except Exception:
+        except OSError:
             if os.path.exists(tmp_path):
                 os.unlink(tmp_path)
             raise
-    except Exception as e:
+    except (OSError, TypeError, ValueError) as e:
         logger.exception('Failed to write JSON file: %s', e)
         return False, str(e)
 
@@ -282,10 +283,10 @@ def add_command_to_json(command_data):
 
 def _extract_field_labels(cmd_data):
     """
-    从命令 JSON 数据中提取所有字段 id -> name 映射（含嵌套结构体）。
+    从命令 JSON 数据中提取字段 id -> name 映射。
 
-    遍历命令对象中所有列表类型的值，收集其中的 id 和 name 字段。
-    这样可以获取包括嵌套结构体（如 SUsrInfo）在内的所有字段标签。
+    当前实现只扫描命令对象第一层中值为 list 的字段，收集列表项里的
+    id / name；不会递归深入更深层的嵌套结构。
     """
     labels = {}
     for val in cmd_data.values():
@@ -340,7 +341,7 @@ def parse_commands(json_path=None):
             or cmd_data.get('tab', '')
         )
 
-        # 提取所有字段标签（含嵌套结构体）
+        # 提取字段标签映射（按 `_extract_field_labels()` 的当前扫描范围）
         field_labels = _extract_field_labels(cmd_data)
 
         commands.append({
@@ -409,18 +410,14 @@ def sync_commands_to_db(json_path=None):
         # 将新增命令自动授予所有 Django 超级管理员用户
         if new_commands:
             try:
-                from .utils import assign_super_admin_permissions, get_super_admin_users_queryset
-
-                super_admin_users = get_super_admin_users_queryset()
-
-                superadmin_count = 0
-                for user in super_admin_users:
-                    assign_super_admin_permissions(user, new_commands=new_commands)
-                    superadmin_count += 1
-
+                superadmin_count, created_permission_count = assign_permissions_to_all_super_admins(new_commands)
                 if superadmin_count > 0:
-                    logger.info('新增权限已自动授予 %d 个超级管理员用户', superadmin_count)
-            except Exception as e:
+                    logger.info(
+                        '新增权限已自动授予 %d 个超级管理员用户，新增权限=%d',
+                        superadmin_count,
+                        created_permission_count,
+                    )
+            except DatabaseError as e:
                 logger.warning('超级管理员用户权限自动授权跳过: %s', e)
 
     return created_count, updated_count, deactivated_count

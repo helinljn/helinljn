@@ -87,6 +87,7 @@ def send_idip_command(command, params):
     logger.info('IDIP请求发送: command=%s, request_id=%s, content=%s',
                 command.command_id, command.request_id, content_str)
 
+    response = None
     try:
         response = req.post(
             settings.IDIP_API_URL,
@@ -152,9 +153,21 @@ def send_idip_command(command, params):
         logger.error('IDIP API连接失败: url=%s', settings.IDIP_API_URL)
         return None, _('无法连接到游戏服务器，请检查配置'), request_content_str, 'connection'
     except Exception as e:
-        # 兼容不同版本 requests 的 JSONDecodeError
+        # 兼容不同版本 requests / json 的响应解析异常，并保留原始响应供日志排查
+        is_json_decode_error = isinstance(e, json.JSONDecodeError)
         if hasattr(req, 'JSONDecodeError') and isinstance(e, req.JSONDecodeError):
-            logger.error('IDIP API响应解析失败: response=%s', getattr(response, 'text', str(e)))
-            return {'raw_response': getattr(response, 'text', str(e))}, None, request_content_str, ''
+            is_json_decode_error = True
+        elif response is not None and isinstance(e, ValueError):
+            is_json_decode_error = True
+
+        if is_json_decode_error:
+            raw_response = getattr(response, 'text', str(e))
+            logger.error('IDIP API响应解析失败: response=%s', raw_response)
+            return (
+                {'raw_response': raw_response},
+                _('请求失败: 响应不是有效 JSON'),
+                request_content_str,
+                'invalid_response',
+            )
         logger.error('IDIP API请求异常: %s', e)
         return None, _('请求失败: %(error)s') % {'error': str(e)}, request_content_str, 'error'

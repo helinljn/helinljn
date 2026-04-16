@@ -5,20 +5,21 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
+from django.db import DatabaseError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.utils import timezone
 from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
 
 from .audit_log import log_operation
-from .command_parser import add_command_to_json, sync_commands_to_db, validate_json_command_ids
+from .command_parser import add_command_to_json, load_commands_json_file, sync_commands_to_db, validate_json_command_ids
+from .command_services import get_visible_commands_queryset, group_commands_by_tab, validate_command_params_basic
 from .decorators import command_permission_required, is_super_admin, super_admin_required
 from .forms import AddGMCommandForm
 from .idip_client import send_idip_command
 from .models import CommandLog, GMCommand
-from .utils import get_client_ip, _group_commands_by_tab, _validate_command_params_basic, parse_time_range_filters
+from .query_utils import apply_time_range_filters_to_queryset, paginate_request_queryset
+from .security_utils import get_client_ip
 
 logger = logging.getLogger(__name__)
 
@@ -27,20 +28,13 @@ logger = logging.getLogger(__name__)
 def dashboard(request):
     """仪表盘首页"""
     is_admin = is_super_admin(request.user, request)
-    # 优化查询：超级管理员直接获取所有活跃命令，普通用户通过关联表获取
-    if is_admin:
-        commands = GMCommand.objects.filter(is_active=True).only(
-            'id', 'command_id', 'command_name', 'tab'
-        )
-    else:
-        commands = GMCommand.objects.filter(
-            is_active=True,
-            usercommandpermission__user=request.user
-        ).distinct().only(
-            'id', 'command_id', 'command_name', 'tab'
-        )
+    commands = get_visible_commands_queryset(
+        request.user,
+        is_admin=is_admin,
+        only_fields=('id', 'command_id', 'command_name', 'tab'),
+    )
 
-    tab_groups = _group_commands_by_tab(commands)
+    tab_groups = group_commands_by_tab(commands)
     # 利用已加载的数据计算命令数量，避免额外 COUNT 查询
     command_count = sum(len(cmds) for cmds in tab_groups.values())
 
@@ -58,25 +52,18 @@ def dashboard(request):
 def command_list(request):
     """可用命令列表"""
     is_admin = is_super_admin(request.user, request)
-    # 优化查询：超级管理员直接获取所有活跃命令，普通用户通过关联表获取
-    if is_admin:
-        commands = GMCommand.objects.filter(is_active=True).only(
-            'id', 'command_id', 'command_name', 'tab', 'request_name', 'request_id'
-        )
-    else:
-        commands = GMCommand.objects.filter(
-            is_active=True,
-            usercommandpermission__user=request.user
-        ).distinct().only(
-            'id', 'command_id', 'command_name', 'tab', 'request_name', 'request_id'
-        )
+    commands = get_visible_commands_queryset(
+        request.user,
+        is_admin=is_admin,
+        only_fields=('id', 'command_id', 'command_name', 'tab', 'request_name', 'request_id'),
+    )
 
     # 搜索
     search = request.GET.get('search', '')
     if search:
         commands = commands.filter(command_name__icontains=search)
 
-    tab_groups = _group_commands_by_tab(commands)
+    tab_groups = group_commands_by_tab(commands)
 
     return render(request, 'gmtool/command_list.html', {
         'tab_groups': tab_groups,
@@ -113,7 +100,7 @@ def command_execute(request, cmd_id):
                 return JsonResponse({'success': False, 'error': _('参数 Params 必须是对象')}, status=400)
 
             # 基础 schema 校验（必填 + 基础类型）
-            valid, schema_error = _validate_command_params_basic(command, params)
+            valid, schema_error = validate_command_params_basic(command, params)
             if not valid:
                 return JsonResponse({'success': False, 'error': schema_error}, status=400)
 
@@ -178,13 +165,13 @@ def command_execute(request, cmd_id):
 
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'error': _('请求数据格式错误')}, status=400)
-        except Exception as e:
-            logger.exception('Command execution error: %s', e)
-            return JsonResponse({'success': False, 'error': _('服务器内部错误')}, status=500)
+        except DatabaseError as e:
+            logger.exception('Command execution persistence error: %s', e)
+            return JsonResponse({'success': False, 'error': _('执行结果记录失败，请联系管理员')}, status=500)
 
     # GET: 显示执行表单
 
-    # 直接使用数据库中同步存储的 field_labels（含嵌套结构体字段的中英文标签）
+    # 直接使用数据库中同步存储的 field_labels
     # 无需每次请求读取 idip_commands.json，标签在命令同步时已一并入库
     response_field_labels = command.field_labels or {}
 
@@ -232,8 +219,16 @@ def add_gm_command(request):
             request_params_raw = form.cleaned_data.get('request_params', '').strip()
             response_params_raw = form.cleaned_data.get('response_params', '').strip()
 
-            request_params = json.loads(request_params_raw) if request_params_raw else default_request_params
-            response_params = json.loads(response_params_raw) if response_params_raw else default_response_params
+            try:
+                request_params = json.loads(request_params_raw) if request_params_raw else default_request_params
+                response_params = json.loads(response_params_raw) if response_params_raw else default_response_params
+            except json.JSONDecodeError as e:
+                form.add_error(None, _('参数 JSON 格式错误: %(error)s') % {'error': str(e)})
+                return render(request, 'gmtool/command_add.html', {
+                    'form': form,
+                    'title': _('添加GM命令'),
+                    'is_admin': True,
+                })
 
             # 构建 JSON 格式的命令数据
             cmd_json_data = {
@@ -259,7 +254,7 @@ def add_gm_command(request):
                 # 同步到数据库
                 try:
                     sync_commands_to_db()
-                except Exception as e:
+                except (DatabaseError, OSError, ValueError, json.JSONDecodeError, UnicodeDecodeError) as e:
                     logger.exception('Command sync error after add: %s', e)
                     messages.warning(request, _('命令已添加到 JSON 文件，但数据库同步失败'))
 
@@ -316,7 +311,7 @@ def sync_commands_api(request):
             'updated': updated,
             'deactivated': deactivated,
         })
-    except Exception as e:
+    except (DatabaseError, OSError, ValueError, json.JSONDecodeError, UnicodeDecodeError) as e:
         logger.exception('Command sync error: %s', e)
         return JsonResponse({'error': str(_('服务器内部错误'))}, status=500)
 
@@ -344,24 +339,16 @@ def command_log_list(request):
     if user_filter and is_admin:
         logs = logs.filter(user__username__icontains=user_filter)
 
-    # 时间范围筛选（默认最近7天）
-    start_time_filter, end_time_filter, start_dt, end_dt = parse_time_range_filters(request)
-    if start_dt:
-        logs = logs.filter(created_at__gte=start_dt)
-    if end_dt:
-        logs = logs.filter(created_at__lte=end_dt)
+    logs, start_time_filter, end_time_filter = apply_time_range_filters_to_queryset(logs, request)
 
     # 添加排序以避免分页警告（按创建时间降序，最新的在前）
     logs = logs.order_by('-created_at')
 
-    paginator = Paginator(logs, settings.PAGE_SIZE)
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
-    elided_page_range = list(paginator.get_elided_page_range(page_obj.number, on_each_side=2, on_ends=1))
+    page_obj, elided_page_range = paginate_request_queryset(logs, request, settings.PAGE_SIZE)
 
     # 普通用户只展示其日志中出现过的命令，避免暴露全量命令信息
     if is_admin:
-        commands_qs = GMCommand.objects.filter(is_active=True)
+        commands_qs = get_visible_commands_queryset(request.user, is_admin=True)
     else:
         command_ids = logs.exclude(command__isnull=True).values_list('command_id', flat=True).distinct()
         commands_qs = GMCommand.objects.filter(id__in=command_ids, is_active=True)
