@@ -10,7 +10,7 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from .command_parser import validate_json_command_ids
-from .models import GMCommand, UserCommandPermission, UserProfile
+from .models import CommandLog, GMCommand, UserCommandPermission, UserProfile
 from .security_utils import get_client_ip
 
 
@@ -237,6 +237,157 @@ class UploadCommandsRollbackTests(TestCase):
         self.assertIn('已回滚', response.json()['error'])
         self.assertEqual(self.json_path.read_text(encoding='utf-8'), self.original_content)
         mocked_sync.assert_called_once()
+
+
+class AddGmCommandRollbackTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_superuser(
+            username='rollbacker',
+            email='rollbacker@example.com',
+            password='password123',
+        )
+        self.client.force_login(self.user)
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.json_path = Path(self.temp_dir.name) / 'idip_commands.json'
+        self.original_content = '{}'
+        self.json_path.write_text(self.original_content, encoding='utf-8')
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    @patch('gmtool.command_views.sync_commands_to_db', side_effect=DatabaseError('sync failed'))
+    def test_add_gm_command_rolls_back_json_file_when_sync_fails(self, mocked_sync):
+        with override_settings(IDIP_JSON_PATH=str(self.json_path)):
+            response = self.client.post(
+                reverse('gmtool:add_gm_command'),
+                data={
+                    'command_id': '10229998',
+                    'tab': '运营工具',
+                    'command_name': '回滚测试命令',
+                    'request_name': 'RollbackReq',
+                    'request_id': 6198,
+                    'response_name': 'RollbackRsp',
+                    'response_id': 6199,
+                    'request_desc': '',
+                    'response_desc': '',
+                    'request_params': '',
+                    'response_params': '',
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.json_path.read_text(encoding='utf-8'), self.original_content)
+        self.assertFalse(GMCommand.objects.filter(command_id='10229998').exists())
+        mocked_sync.assert_called_once()
+
+
+class AddGmCommandNamePersistenceTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.user = user_model.objects.create_superuser(
+            username='creator',
+            email='creator@example.com',
+            password='password123',
+        )
+        self.client.force_login(self.user)
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.json_path = Path(self.temp_dir.name) / 'idip_commands.json'
+        self.json_path.write_text('{}', encoding='utf-8')
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_add_gm_command_persists_command_name_to_json_and_database(self):
+        with override_settings(IDIP_JSON_PATH=str(self.json_path)):
+            response = self.client.post(
+                reverse('gmtool:add_gm_command'),
+                data={
+                    'command_id': '10229999',
+                    'tab': '运营工具',
+                    'command_name': '精准封禁',
+                    'request_name': 'DoExactBanReq',
+                    'request_id': 6200,
+                    'response_name': 'DoExactBanRsp',
+                    'response_id': 6201,
+                    'request_desc': '',
+                    'response_desc': '',
+                    'request_params': '',
+                    'response_params': '',
+                },
+            )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers['Location'], reverse('gmtool:dashboard'))
+
+        stored_json = json.loads(self.json_path.read_text(encoding='utf-8'))
+        self.assertEqual(stored_json['10229999']['command_name'], '精准封禁')
+
+        command = GMCommand.objects.get(command_id='10229999')
+        self.assertEqual(command.command_name, '精准封禁')
+        self.assertEqual(command.tab, '运营工具')
+
+
+class LogDetailApiTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.owner = user_model.objects.create_user(
+            username='owner',
+            email='owner@example.com',
+            password='password123',
+        )
+        self.other = user_model.objects.create_user(
+            username='other',
+            email='other@example.com',
+            password='password123',
+        )
+        self.command = GMCommand.objects.create(
+            command_id='10002',
+            command_name='日志测试命令',
+            tab='测试',
+            request_name='LogReq',
+            request_id=5100,
+            response_name='LogRsp',
+            response_id=5101,
+            request_params=[],
+            response_params=[],
+            field_labels={},
+            is_active=True,
+        )
+        self.log = CommandLog.objects.create(
+            user=self.owner,
+            operator_username=self.owner.username,
+            command=self.command,
+            partition=1,
+            request_data={'password': 'plain-secret', 'nickname': 'alice'},
+            request_content=json.dumps({
+                'head': {'token': 'head-secret'},
+                'body': {'nickname': 'alice', 'nested': {'access_token': 'nested-secret'}},
+            }, ensure_ascii=False),
+            response_data={'Result': 0, 'token': 'response-secret'},
+            status='success',
+            ip_address='127.0.0.1',
+        )
+
+    def test_owner_can_fetch_masked_log_detail(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.get(reverse('gmtool:log_detail_api', args=[self.log.id]))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertIn('"password": "***"', payload['request_data'])
+        self.assertIn('"token": "***"', payload['request_content'])
+        self.assertIn('"access_token": "***"', payload['request_content'])
+        self.assertIn('"nickname": "alice"', payload['request_content'])
+        self.assertIn('"token": "***"', payload['response_data'])
+
+    def test_non_owner_cannot_access_other_users_log_detail(self):
+        self.client.force_login(self.other)
+
+        response = self.client.get(reverse('gmtool:log_detail_api', args=[self.log.id]))
+
+        self.assertEqual(response.status_code, 404)
 
 
 class SuperuserPermissionSourceTests(TestCase):

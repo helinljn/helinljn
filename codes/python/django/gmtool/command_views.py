@@ -270,6 +270,7 @@ def add_gm_command(request):
             # 构建 JSON 格式的命令数据
             cmd_json_data = {
                 "tab": tab,
+                "command_name": command_name,
                 "request_desc": request_desc or f"{command_name}请求({command_name} request)",
                 "request_id": request_id,
                 "request": request_name,

@@ -42,6 +42,8 @@
 - 审计日志 `gmtool.audit`
 - 应用日志 `gmtool`
 - 日志详情敏感字段脱敏
+- 远端执行已完成但本地日志落库失败时，接口返回 `warning` 与 `log_persisted=false`
+
 
 ### 2.4 运行与配置
 - `.env` 驱动核心配置
@@ -138,10 +140,11 @@ c:\helin\helinljn\codes\python\django\
 - `forms.py`：用户、命令新增相关表单
 
 - `decorators.py`：超级管理员与命令权限装饰器
-- `command_parser.py`：命令定义解析与同步逻辑
+- `command_parser.py`：命令定义解析、JSON 快照读写与数据库同步
 - `idip_client.py`：与 IDIP 服务交互
 - `middleware.py`：命令定义文件变更监控
-- `signals.py`：UserProfile 与超管权限自动补齐
+- `signals.py`：自动补齐 `UserProfile`
+
 
 - `audit_log.py`：审计日志封装
 - `logging_handlers.py`：Windows 友好的日志轮转处理器
@@ -167,7 +170,8 @@ c:\helin\helinljn\codes\python\django\
 - 超级管理员用户不能删除
 - 用户不能禁用自己
 - 编辑超级管理员时，启用状态不可改
-- 超级管理员自动拥有全部活跃命令权限
+- 超级管理员可直接访问全部活跃命令，无需冗余写入 `UserCommandPermission`
+
 
 ---
 
@@ -189,8 +193,13 @@ GM 命令定义模型，来源于 `idip_commands.json` 同步结果。
 - `field_labels`
 - `is_active`
 
+补充说明：
+- `field_labels` 当前只提取命令对象第一层 list 中的 `id -> name` 映射，不递归更深层嵌套
+- `request_id` / `response_id` 在各自列内唯一，且同一命令内两者不能相同
+
 ### 7.2 `UserCommandPermission`
-用户与命令的直接权限关联。
+用户与命令的直接权限关联，仅用于普通用户授权；超级管理员不依赖此表。
+
 
 关键约束：
 - `UniqueConstraint(fields=['user', 'command'])`
@@ -275,6 +284,8 @@ idip_commands.json
 - JSON 有、数据库无 → 创建命令
 - JSON 有、数据库有 → 更新命令
 - JSON 无、数据库有 → 标记为停用
+- 在线新增 / 上传命令定义时，会先更新 JSON，再同步数据库；若同步失败，会回滚到写入前快照
+
 
 ### 8.3 触发方式
 可通过以下方式触发同步：
@@ -522,7 +533,8 @@ python manage.py sync_commands
 ```
 
 ### 14.2 超级管理员权限说明
-无需单独初始化角色。使用 `python manage.py createsuperuser` 创建超级管理员后，系统会自动补齐 `UserProfile` 与全部活跃命令权限。
+无需单独初始化角色。使用 `python manage.py createsuperuser` 创建超级管理员后，系统会自动补齐 `UserProfile`；超级管理员身份仅由 Django `is_superuser` 决定，可直接访问全部活跃命令，不再冗余写入 `UserCommandPermission`。
+
 
 ### 14.3 格式化命令定义文件
 格式化 `idip_commands.json` 中每个命令对象的字段顺序：
@@ -713,8 +725,8 @@ python manage.py compilemessages
 ## 19. 备注
 
 - 本项目不依赖 Django Admin 进行业务管理
-- 用户扩展资料由 `UserProfile` 承载，命令权限以 `UserCommandPermission` 为准
-
-- 命令权限以 `UserCommandPermission` 为准
+- 用户扩展资料由 `UserProfile` 承载
+- 普通用户命令权限由 `UserCommandPermission` 控制；超级管理员直接以 Django `is_superuser` 为准
 - 当前默认数据库为 SQLite，更适合开发或轻量部署场景
+
 - 若进入更高并发或生产化环境，建议评估 MySQL / PostgreSQL、Redis、任务队列等组件
