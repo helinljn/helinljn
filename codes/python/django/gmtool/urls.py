@@ -1,6 +1,7 @@
 """GM命令后台管理系统 - URL路由"""
 from django.urls import path
-from . import auth_views, command_views, user_views, api_views
+
+from . import api_views, auth_views, command_views, user_views
 
 app_name = 'gmtool'
 
@@ -20,14 +21,6 @@ urlpatterns = [
     path('users/create/', user_views.user_create, name='user_create'),
     path('users/<int:user_id>/edit/', user_views.user_edit, name='user_edit'),
     path('users/<int:user_id>/delete/', user_views.user_delete, name='user_delete'),
-
-    # 角色管理
-    path('roles/', user_views.role_list, name='role_list'),
-    path('roles/create/', user_views.role_create, name='role_create'),
-    path('roles/<int:role_id>/edit/', user_views.role_edit, name='role_edit'),
-    path('roles/<int:role_id>/delete/', user_views.role_delete, name='role_delete'),
-
-    # 用户权限分配
     path('users/<int:user_id>/permissions/', user_views.user_permissions, name='user_permissions'),
 
     # 操作日志

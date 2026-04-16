@@ -374,7 +374,7 @@ def sync_commands_to_db(json_path=None):
             command_id__in=deactivated_ids
         ).update(is_active=False)
 
-        # 将新增命令自动授予所有超级管理员用户（Django 超管 + GM 超管角色）
+        # 将新增命令自动授予所有 Django 超级管理员用户
         if new_commands:
             try:
                 from .utils import assign_super_admin_permissions, get_super_admin_users_queryset

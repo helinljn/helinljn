@@ -14,7 +14,7 @@ def log_operation(category, action, user=None, detail=None, ip_address=None):
     记录用户操作审计日志。
 
     Args:
-        category: 操作分类，如 auth/user/role/permission/command
+        category: 操作分类，如 auth/user/permission/command
         action: 操作动作，如 login/logout/create/update/delete/assign
         user: 操作用户对象（Django User），未登录时为 None
         detail: 操作详情（dict 或 str）

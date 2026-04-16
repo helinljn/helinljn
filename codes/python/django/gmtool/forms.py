@@ -4,8 +4,9 @@ import json
 from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from .models import Role, UserProfile, GMCommand
+
 from .command_parser import validate_command_ids
+from .models import GMCommand, UserProfile
 
 User = get_user_model()
 
@@ -22,14 +23,8 @@ _USER_LABELS = {
 }
 
 
-class RoleAndPhoneMixin(forms.Form):
-    """角色分组和联系电话字段的共享定义"""
-    role = forms.ModelChoiceField(
-        label=_('角色'),
-        queryset=Role.objects.filter(is_super_admin=False),
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-select'}),
-    )
+class PhoneMixin(forms.Form):
+    """联系电话字段共享定义"""
     phone = forms.CharField(
         label=_('联系电话'),
         max_length=20,
@@ -38,8 +33,8 @@ class RoleAndPhoneMixin(forms.Form):
     )
 
 
-class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
-    """创建用户表单 — 不允许选择超级管理员角色（超管仅通过初始化创建）"""
+class UserCreateForm(PhoneMixin, forms.ModelForm):
+    """创建用户表单"""
     password = forms.CharField(
         label=_('密码'),
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
@@ -56,12 +51,6 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
         widgets = _USER_WIDGETS
         labels = _USER_LABELS
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['role'].required = True
-        self.fields['role'].empty_label = _('请选择角色')
-        self.fields['role'].error_messages['required'] = _('请选择角色')
-
     def clean(self):
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
@@ -77,15 +66,14 @@ class UserCreateForm(RoleAndPhoneMixin, forms.ModelForm):
             UserProfile.objects.update_or_create(
                 user=user,
                 defaults={
-                    'role': self.cleaned_data.get('role'),
                     'phone': self.cleaned_data.get('phone', ''),
                 }
             )
         return user
 
 
-class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
-    """编辑用户表单 — 禁止提升/降级超级管理员权限"""
+class UserEditForm(PhoneMixin, forms.ModelForm):
+    """编辑用户表单"""
     new_password = forms.CharField(
         label=_('新密码（留空不修改）'),
         required=False,
@@ -103,18 +91,22 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
         self.is_self = kwargs.pop('is_self', False)
         self.is_target_super_admin = kwargs.pop('is_target_super_admin', False)
         super().__init__(*args, **kwargs)
-        # 填充当前角色和电话
-        if self.instance and hasattr(self.instance, 'userprofile'):
-            self.fields['role'].initial = self.instance.userprofile.role
-            self.fields['phone'].initial = self.instance.userprofile.phone
+
+        try:
+            profile = self.instance.userprofile
+        except UserProfile.DoesNotExist:
+            profile = None
+
+        if profile is not None:
+            self.fields['phone'].initial = profile.phone
+
         # 如果编辑的是自己，禁用 is_active 复选框
         if self.is_self:
             self.fields['is_active'].disabled = True
             self.fields['is_active'].help_text = _('不能禁用自己的账号')
-        # 如果编辑的目标是超级管理员，禁用角色和 is_active 字段（禁止降级）
+
+        # 如果编辑的目标是超级管理员，禁用 is_active 字段（禁止禁用）
         if self.is_target_super_admin:
-            self.fields['role'].disabled = True
-            self.fields['role'].help_text = _('超级管理员角色不可更改')
             self.fields['is_active'].disabled = True
             self.fields['is_active'].help_text = _('超级管理员账号不可禁用')
 
@@ -127,39 +119,10 @@ class UserEditForm(RoleAndPhoneMixin, forms.ModelForm):
             user.save()
 
             profile, _ = UserProfile.objects.get_or_create(user=user)
-            role = profile.role if self.fields['role'].disabled else self.cleaned_data.get('role')
             phone = profile.phone if self.fields['phone'].disabled else self.cleaned_data.get('phone', '')
-
-            profile.role = role
             profile.phone = phone
-            profile.save(update_fields=['role', 'phone'])
+            profile.save(update_fields=['phone'])
         return user
-
-
-class RoleForm(forms.ModelForm):
-    """角色表单 — 不允许创建或编辑超级管理员角色（仅通过初始化创建）"""
-    class Meta:
-        model = Role
-        fields = ['name', 'display_name', 'description']
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'display_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
-        labels = {
-            'name': _('角色标识'),
-            'display_name': _('显示名称'),
-            'description': _('角色描述'),
-        }
-        help_texts = {
-            'name': _('不能为"super_admin"，该标识为系统保留'),
-        }
-
-    def clean_name(self):
-        name = self.cleaned_data.get('name', '')
-        if name in Role.RESERVED_NAMES:
-            raise forms.ValidationError(_('角色标识"super_admin"为系统保留，不可使用'))
-        return name
 
 
 class AddGMCommandForm(forms.Form):

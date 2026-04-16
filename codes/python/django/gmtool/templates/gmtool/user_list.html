@@ -33,7 +33,7 @@
                     <th>ID</th>
                     <th>{% trans "用户名" %}</th>
                     <th>{% trans "邮箱" %}</th>
-                    <th>{% trans "角色" %}</th>
+                    <th>{% trans "联系电话" %}</th>
                     <th>{% trans "权限数" %}</th>
                     <th>{% trans "状态" %}</th>
                     <th>{% trans "操作" %}</th>
@@ -47,14 +47,17 @@
                         <div class="d-flex align-items-center">
                             <span class="avatar avatar-xs me-2 rounded" style="background-image: url(https://api.dicebear.com/7.x/initials/svg?seed={{ u.username }})"></span>
                             {{ u.username }}
+                            {% if u.is_superuser %}
+                            <span class="badge bg-warning-lt ms-2">{% trans "管理员" %}</span>
+                            {% endif %}
                         </div>
                     </td>
                     <td>{{ u.email|default:"-" }}</td>
                     <td>
-                        {% if u.userprofile and u.userprofile.role %}
-                        <span class="badge bg-info-lt">{{ u.userprofile.role.display_name }}</span>
+                        {% if u.userprofile and u.userprofile.phone %}
+                        {{ u.userprofile.phone }}
                         {% else %}
-                        <span class="text-muted">{% trans "未分配" %}</span>
+                        <span class="text-muted">-</span>
                         {% endif %}
                     </td>
                     <td>

@@ -42,13 +42,13 @@
         <div class="card">
             <div class="card-body">
                 <div class="d-flex align-items-center">
-                    <div class="subheader">{% trans "用户角色" %}</div>
+                    <div class="subheader">{% trans "账号类型" %}</div>
                 </div>
                 <div class="h1 mt-2 mb-0">
-                    {% if request.user.userprofile.role %}
-                        {{ request.user.userprofile.role.display_name }}
+                    {% if request.user.is_superuser %}
+                        {% trans "超级管理员" %}
                     {% else %}
-                        <span class="text-muted">{% trans "未分配" %}</span>
+                        {% trans "普通用户" %}
                     {% endif %}
                 </div>
             </div>

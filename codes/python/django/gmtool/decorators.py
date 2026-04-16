@@ -13,9 +13,7 @@ from .utils import is_super_admin_user
 def is_super_admin(user, request=None):
     """
     判断用户是否为超级管理员。
-    优先检查 Django 内置 is_superuser，同时检查 GM 系统角色。
-    两者任一为 True 即视为超级管理员，确保唯一绑定。
-    支持请求级缓存（基于 user.id 的字典），同一请求中对不同用户的多次调用互不干扰。
+    仅检查 Django 内置 is_superuser，并支持请求级缓存。
     """
     if not user.is_authenticated:
         return False
@@ -101,13 +99,11 @@ def command_permission_required(view_func):
 def get_user_permissions(user):
     """
     获取用户可执行的命令ID列表。
-    超级管理员(Django is_superuser 或 GM角色)返回所有活跃命令。
+    超级管理员（Django is_superuser）返回所有活跃命令。
     普通用户从 UserCommandPermission 读取直接分配的权限。
     """
-    # Django 超级管理员 或 GM 超级管理员角色 → 所有活跃命令
     if is_super_admin(user):  # get_user_permissions 通常不在请求上下文中调用，不传 request
         return list(GMCommand.objects.filter(is_active=True).values_list('command_id', flat=True))
-    # 普通用户：直接权限
     return list(UserCommandPermission.objects.filter(
         user=user,
         command__is_active=True,

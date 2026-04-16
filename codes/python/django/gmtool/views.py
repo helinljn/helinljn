@@ -28,11 +28,7 @@ from .user_views import (
     user_create,
     user_edit,
     user_delete,
-    role_list,
-    role_create,
-    role_edit,
     user_permissions,
-    role_delete,
     login_log_list,
 )
 
@@ -59,16 +55,12 @@ __all__ = [
     'sync_commands_api',
     'command_log_list',
 
-    # 用户和角色管理
+    # 用户管理
     'user_list',
     'user_create',
     'user_edit',
     'user_delete',
-    'role_list',
-    'role_create',
-    'role_edit',
     'user_permissions',
-    'role_delete',
     'login_log_list',
 
     # API

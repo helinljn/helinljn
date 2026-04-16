@@ -14,8 +14,11 @@ class GMCommand(models.Model):
     response_id = models.IntegerField(_('协议响应ID'))
     request_params = models.JSONField(_('请求参数定义'), default=list)
     response_params = models.JSONField(_('响应参数定义'), default=list)
-    field_labels = models.JSONField(_('字段标签映射'), default=dict,
-                                    help_text=_('所有字段（含嵌套结构体）的 id -> name 映射，用于结果展示'))
+    field_labels = models.JSONField(
+        _('字段标签映射'),
+        default=dict,
+        help_text=_('所有字段（含嵌套结构体）的 id -> name 映射，用于结果展示'),
+    )
     is_active = models.BooleanField(_('是否启用'), default=True)
 
     class Meta:
@@ -30,31 +33,6 @@ class GMCommand(models.Model):
 
     def __str__(self):
         return f'{self.command_id} - {self.command_name}'
-
-
-class Role(models.Model):
-    """角色定义"""
-    name = models.CharField(_('角色标识'), max_length=50, unique=True)
-    display_name = models.CharField(_('显示名称'), max_length=100)
-    description = models.TextField(_('角色描述'), blank=True)
-    is_super_admin = models.BooleanField(_('超级管理员'), default=False)
-    created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
-
-    RESERVED_NAMES = {'super_admin'}
-
-    class Meta:
-        verbose_name = _('角色')
-        verbose_name_plural = _('角色')
-        ordering = ['-is_super_admin', 'name']
-
-    def clean(self):
-        super().clean()
-        if self.name in self.RESERVED_NAMES and not self.is_super_admin:
-            from django.core.exceptions import ValidationError
-            raise ValidationError({'name': _('角色标识"super_admin"为系统保留，不可使用')})
-
-    def __str__(self):
-        return self.display_name
 
 
 class UserCommandPermission(models.Model):
@@ -79,7 +57,6 @@ class UserCommandPermission(models.Model):
 class UserProfile(models.Model):
     """用户扩展信息"""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_('用户'))
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_('角色'))
     phone = models.CharField(_('联系电话'), max_length=20, blank=True)
 
     class Meta:
@@ -87,7 +64,7 @@ class UserProfile(models.Model):
         verbose_name_plural = _('用户信息')
 
     def __str__(self):
-        return f'{self.user.username} - {self.role.display_name if self.role else _("无分组")}'
+        return self.user.username
 
 
 class CommandLog(models.Model):

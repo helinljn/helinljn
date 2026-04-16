@@ -25,7 +25,7 @@
 - 登录失败限速
 - 超级管理员保护
 - 用户级命令权限控制（`UserCommandPermission`）
-- 用户分组角色（`Role`）与扩展资料（`UserProfile`）
+- 用户扩展资料（`UserProfile`）与用户级命令权限
 
 ### 2.2 命令管理
 - 命令列表按分组展示
@@ -150,22 +150,18 @@ c:\helin\helinljn\codes\python\django\
 
 ### 6.1 设计原则
 1. **命令权限按用户直接分配**
-2. **角色只做分组标签，不直接承载命令权限**
-3. 超级管理员兼容两种判断来源：
-   - Django 内置：`user.is_superuser`
-   - 业务角色：`user.userprofile.role.is_super_admin`
+2. **超级管理员唯一来源为 Django `user.is_superuser`**
+3. **`UserProfile` 仅承载扩展资料（如 `phone`）**
 
 ### 6.2 涉及模型
-- `Role`
 - `UserProfile`
 - `UserCommandPermission`
 
 ### 6.3 已实现的保护规则
 - 普通用户编辑流程中不能把目标用户提升为超级管理员
-- 超级管理员角色不能编辑或删除
 - 超级管理员用户不能删除
 - 用户不能禁用自己
-- 编辑超级管理员时，角色与启用状态不可改
+- 编辑超级管理员时，启用状态不可改
 - 超级管理员自动拥有全部活跃命令权限
 
 ---
@@ -188,30 +184,20 @@ GM 命令定义模型，来源于 `idip_commands.json` 同步结果。
 - `field_labels`
 - `is_active`
 
-### 7.2 `Role`
-用户分组角色。
-
-关键字段：
-- `name`
-- `display_name`
-- `description`
-- `is_super_admin`
-
-### 7.3 `UserCommandPermission`
+### 7.2 `UserCommandPermission`
 用户与命令的直接权限关联。
 
 关键约束：
 - `UniqueConstraint(fields=['user', 'command'])`
 
-### 7.4 `UserProfile`
+### 7.3 `UserProfile`
 用户扩展信息。
 
 关键字段：
 - `user`
-- `role`
 - `phone`
 
-### 7.5 `CommandLog`
+### 7.4 `CommandLog`
 命令执行日志。
 
 关键字段：
@@ -225,7 +211,7 @@ GM 命令定义模型，来源于 `idip_commands.json` 同步结果。
 - `ip_address`
 - `created_at`
 
-### 7.6 `LoginLog`
+### 7.5 `LoginLog`
 登录行为日志。
 
 关键字段：
@@ -400,8 +386,8 @@ python manage.py format_idip_commands --check
 - 命令执行：`/gmtool/commands/<cmd_id>/execute/`
 - 新增命令：`/gmtool/commands/add/`
 - 用户管理：`/gmtool/users/...`
-- 角色管理：`/gmtool/roles/...`
 - 权限分配：`/gmtool/users/<id>/permissions/`
+
 - 命令日志：`/gmtool/logs/`
 - 登录日志：`/gmtool/logs/login/`
 - 同步接口：`/gmtool/api/v1/commands/sync/`
@@ -530,10 +516,8 @@ request.is_secure()
 python manage.py sync_commands
 ```
 
-### 14.2 初始化角色与超管权限
-```bash
-python manage.py init_roles
-```
+### 14.2 超级管理员权限说明
+无需单独初始化角色。使用 `python manage.py createsuperuser` 创建超级管理员后，系统会自动补齐 `UserProfile` 与全部活跃命令权限。
 
 ### 14.3 格式化命令定义文件
 格式化 `idip_commands.json` 中每个命令对象的字段顺序：
@@ -630,7 +614,6 @@ conda activate django-admin
 ```bash
 python manage.py migrate
 python manage.py sync_commands
-python manage.py init_roles
 ```
 
 ### 15.3 创建管理员

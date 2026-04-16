@@ -39,12 +39,6 @@
                                 <span class="nav-link-title">{% trans "用户管理" %}</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% block nav_roles %}{% endblock %}" href="{% url 'gmtool:role_list' %}">
-                                <span class="nav-link-icon"><i class="ti ti-tags"></i></span>
-                                <span class="nav-link-title">{% trans "角色" %}</span>
-                            </a>
-                        </li>
                         {% endif %}
                         <li class="nav-item">
                             <a class="nav-link {% block nav_logs %}{% endblock %}" href="{% url 'gmtool:command_log_list' %}">
