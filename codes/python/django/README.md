@@ -265,7 +265,7 @@ idip_commands.json
     "request_id": 4097,
     "request": "QueryUsrInfoReq",
     "respone_desc": "查询个人信息应答(Personal information query response)",
-    "responseid": 4098,
+    "response_id": 4098,
     "respone": "QueryUsrInfoRsp",
     "QueryUsrInfoReq": [],
     "QueryUsrInfoRsp": []
@@ -275,7 +275,7 @@ idip_commands.json
 
 说明：
 - 顶层请求协议 ID 使用 `request_id`
-- 顶层响应协议 ID 当前仍使用历史字段名 `responseid`
+- 顶层响应协议 ID 当前仍使用历史字段名 `response_id`
 - 请求/响应参数列表中的 `id` 表示字段名，例如 `AreaId`、`RoleId`、`Result`，不要改成 `request_id`
 
 ### 8.2 同步逻辑
@@ -324,7 +324,7 @@ python manage.py format_idip_commands --check
 3. `request_id`
 4. `request`
 5. `respone_desc`
-6. `responseid`
+6. `response_id`
 7. `respone`
 8. 请求参数定义
 9. 响应参数定义

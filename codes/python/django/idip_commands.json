@@ -5,7 +5,7 @@
         "request_id": 4097,
         "request": "QueryUsrInfoReq",
         "respone_desc": "查询个人信息应答(Response to Query Personal Information)",
-        "responseid": 4098,
+        "response_id": 4098,
         "respone": "QueryUsrInfoRsp",
         "QueryUsrInfoReq": [
             {
@@ -224,7 +224,7 @@
         "request_id": 4105,
         "request": "DoSendRollingMsgReq",
         "respone_desc": "发公告应答(Response to Send Announcement)",
-        "responseid": 4106,
+        "response_id": 4106,
         "respone": "DoSendRollingMsgRsp",
         "DoSendRollingMsgReq": [
             {
@@ -297,7 +297,7 @@
         "request_id": 4107,
         "request": "QueryRollingReq",
         "respone_desc": "查询公告应答(Response to Query Announcement)",
-        "responseid": 4108,
+        "response_id": 4108,
         "respone": "QueryRollingRsp",
         "QueryRollingReq": [
             {
@@ -390,7 +390,7 @@
         "request_id": 4109,
         "request": "DoDelRollingReq",
         "respone_desc": "删除公告应答(Response to Delete Announcement)",
-        "responseid": 4110,
+        "response_id": 4110,
         "respone": "DoDelRollingRsp",
         "DoDelRollingReq": [
             {
@@ -439,7 +439,7 @@
         "request_id": 4145,
         "request": "AqDoBanUserReq",
         "respone_desc": "封号应答(Response to Account Suspension)",
-        "responseid": 4146,
+        "response_id": 4146,
         "respone": "AqDoBanUserRsp",
         "AqDoBanUserReq": [
             {
@@ -506,7 +506,7 @@
         "request_id": 4147,
         "request": "AqDoBanCharacReq",
         "respone_desc": "封角色应答(Response to Character Suspension)",
-        "responseid": 4148,
+        "response_id": 4148,
         "respone": "AqDoBanCharacRsp",
         "AqDoBanCharacReq": [
             {
@@ -573,7 +573,7 @@
         "request_id": 4149,
         "request": "AqDoBanChatReq",
         "respone_desc": "禁言应答(Response to Mute)",
-        "responseid": 4150,
+        "response_id": 4150,
         "respone": "AqDoBanChatRsp",
         "AqDoBanChatReq": [
             {
@@ -640,7 +640,7 @@
         "request_id": 4155,
         "request": "AqDoUnpunishReq",
         "respone_desc": "解除处罚应答(Response to Remove Punishment)",
-        "responseid": 4156,
+        "response_id": 4156,
         "respone": "AqDoUnpunishRsp",
         "AqDoUnpunishReq": [
             {
@@ -713,7 +713,7 @@
         "request_id": 4203,
         "request": "DoSendMailReq",
         "respone_desc": "发邮件送道具应答(Response to Send Items via Mail)",
-        "responseid": 4204,
+        "response_id": 4204,
         "respone": "DoSendMailRsp",
         "DoSendMailReq": [
             {
@@ -810,7 +810,7 @@
         "request_id": 4237,
         "request": "DelSecPwdReq",
         "respone_desc": "删除二级密码应答(Response to Remove Secondary Password)",
-        "responseid": 4238,
+        "response_id": 4238,
         "respone": "DelSecPwdRsp",
         "DelSecPwdReq": [
             {
@@ -865,7 +865,7 @@
         "request_id": 4143,
         "request": "ModifyTextReq",
         "respone_desc": "修改玩家文本信息应答(Response to Modify Player Text Information)",
-        "responseid": 4144,
+        "response_id": 4144,
         "respone": "ModifyTextRsp",
         "ModifyTextReq": [
             {

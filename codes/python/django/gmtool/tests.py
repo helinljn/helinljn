@@ -112,7 +112,7 @@ class ValidateJsonCommandIdsTests(TestCase):
         data = {
             'cmd_a': {
                 'request_id': 200,
-                'responseid': 301,
+                'response_id': 301,
             }
         }
 
@@ -127,11 +127,11 @@ class ValidateJsonCommandIdsTests(TestCase):
         data = {
             'cmd_a': {
                 'request_id': 200,
-                'responseid': 202,
+                'response_id': 202,
             },
             'cmd_b': {
                 'request_id': 300,
-                'responseid': 301,
+                'response_id': 301,
             },
         }
 
@@ -189,7 +189,7 @@ class UploadCommandsRollbackTests(TestCase):
                     'tab': '查询',
                     'request': 'OldReq',
                     'request_id': 5000,
-                    'responseid': 5001,
+                    'response_id': 5001,
                     'respone': 'OldRsp',
                     'OldReq': [],
                     'OldRsp': [],
@@ -212,7 +212,7 @@ class UploadCommandsRollbackTests(TestCase):
                     'tab': '查询',
                     'request': 'NewReq',
                     'request_id': 6000,
-                    'responseid': 6001,
+                    'response_id': 6001,
                     'respone': 'NewRsp',
                     'NewReq': [],
                     'NewRsp': [],

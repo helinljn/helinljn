@@ -276,7 +276,7 @@ def add_gm_command(request):
                 "request": request_name,
                 "respone_desc": response_desc or f"{command_name}应答({command_name} response)",
                 response_name: response_params,
-                "responseid": response_id,
+                "response_id": response_id,
                 "respone": response_name,
                 request_name: request_params,
             }
