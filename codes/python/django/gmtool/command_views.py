@@ -12,7 +12,13 @@ from django.views.decorators.http import require_POST
 from django.utils.translation import gettext_lazy as _
 
 from .audit_log import log_operation
-from .command_parser import add_command_to_json, load_commands_json_file, sync_commands_to_db, validate_json_command_ids
+from .command_parser import (
+    add_command_to_json,
+    load_commands_json_file,
+    restore_commands_json_snapshot,
+    sync_commands_to_db,
+    validate_json_command_ids,
+)
 from .command_services import get_visible_commands_queryset, group_commands_by_tab, validate_command_params_basic
 from .decorators import command_permission_required, is_super_admin, super_admin_required
 from .forms import AddGMCommandForm
@@ -22,6 +28,30 @@ from .query_utils import apply_time_range_filters_to_queryset, paginate_request_
 from .security_utils import get_client_ip
 
 logger = logging.getLogger(__name__)
+
+
+_COMMAND_LOG_PERSISTENCE_WARNING = _('命令请求已完成，但执行结果记录失败，请联系管理员核查应用日志')
+
+
+def _build_command_execute_response(response_data, error, *, log_persisted=True, warning=None):
+    """根据远端执行结果和本地持久化结果构造响应。"""
+    extra = {}
+    if not log_persisted:
+        extra['log_persisted'] = False
+        if warning:
+            extra['warning'] = warning
+
+    if error:
+        return JsonResponse({'success': False, 'error': error, **extra})
+
+    if isinstance(response_data, dict) and 'status' in response_data and 'json' in response_data:
+        payload = dict(response_data)
+        payload.update(extra)
+        return JsonResponse(payload)
+
+    payload = {'success': True, 'data': response_data}
+    payload.update(extra)
+    return JsonResponse(payload)
 
 
 @login_required
@@ -116,7 +146,7 @@ def command_execute(request, cmd_id):
             # 归一化写回，确保后续下游与日志类型一致
             params['Partition'] = partition
 
-            # 调用IDIP API
+            # 调用 IDIP API
             response_data, error, request_content, error_type = send_idip_command(command, params)
 
             # 包装协议语义失败（status=false）视为失败
@@ -124,24 +154,36 @@ def command_execute(request, cmd_id):
             if isinstance(response_data, dict) and 'status' in response_data and 'json' in response_data:
                 wrapped_failed = not bool(response_data.get('status'))
 
-            # 记录日志
             status = 'success'
             if error or wrapped_failed:
                 status = 'timeout' if error_type == 'timeout' else 'failed'
 
             client_ip = get_client_ip(request)
+            log_persisted = True
+            persistence_warning = None
 
-            CommandLog.objects.create(
-                user=request.user,
-                operator_username=request.user.username,
-                command=command,
-                partition=partition,
-                request_data=params,
-                request_content=request_content,
-                response_data=response_data,
-                status=status,
-                ip_address=client_ip,
-            )
+            try:
+                CommandLog.objects.create(
+                    user=request.user,
+                    operator_username=request.user.username,
+                    command=command,
+                    partition=partition,
+                    request_data=params,
+                    request_content=request_content,
+                    response_data=response_data,
+                    status=status,
+                    ip_address=client_ip,
+                )
+            except DatabaseError as e:
+                log_persisted = False
+                persistence_warning = _COMMAND_LOG_PERSISTENCE_WARNING
+                logger.exception(
+                    'Command execution log persistence failed after remote response: cmd=%s, user=%s, status=%s, error=%s',
+                    cmd_id,
+                    request.user.username,
+                    status,
+                    e,
+                )
 
             # 审计日志
             log_operation('command', 'execute', user=request.user,
@@ -151,23 +193,18 @@ def command_execute(request, cmd_id):
                               'command_name': command.command_name,
                               'partition': partition,
                               'status': status,
+                              'log_persisted': log_persisted,
                           })
 
-            if error:
-                return JsonResponse({'success': False, 'error': error})
-
-            # 新包装协议：直接透传给前端
-            if isinstance(response_data, dict) and 'status' in response_data and 'json' in response_data:
-                return JsonResponse(response_data)
-
-            # 旧协议：保持兼容
-            return JsonResponse({'success': True, 'data': response_data})
+            return _build_command_execute_response(
+                response_data,
+                error,
+                log_persisted=log_persisted,
+                warning=persistence_warning,
+            )
 
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'error': _('请求数据格式错误')}, status=400)
-        except DatabaseError as e:
-            logger.exception('Command execution persistence error: %s', e)
-            return JsonResponse({'success': False, 'error': _('执行结果记录失败，请联系管理员')}, status=500)
 
     # GET: 显示执行表单
 
@@ -244,19 +281,30 @@ def add_gm_command(request):
             }
 
             # 写入 idip_commands.json
-            success, error_msg = add_command_to_json({
+            success, error_msg, previous_snapshot = add_command_to_json({
                 'command_id': command_id,
                 'data': cmd_json_data,
             })
             if not success:
                 messages.error(request, _('写入命令到 JSON 文件失败: %(error)s') % {'error': error_msg})
             else:
-                # 同步到数据库
+                # 同步到数据库；若失败则回滚 JSON 文件，避免磁盘状态与数据库状态分叉
                 try:
                     sync_commands_to_db()
                 except (DatabaseError, OSError, ValueError, json.JSONDecodeError, UnicodeDecodeError) as e:
-                    logger.exception('Command sync error after add: %s', e)
-                    messages.warning(request, _('命令已添加到 JSON 文件，但数据库同步失败'))
+                    logger.exception('Command sync error after add, rolling back JSON file: %s', e)
+                    try:
+                        restore_commands_json_snapshot(previous_snapshot)
+                    except OSError as rollback_error:
+                        logger.exception('Failed to rollback JSON file after add command sync error: %s', rollback_error)
+                        messages.error(request, _('命令同步失败，且 JSON 文件回滚失败，请立即人工核查'))
+                    else:
+                        messages.error(request, _('命令同步失败，JSON 文件已回滚，命令未生效'))
+                    return render(request, 'gmtool/command_add.html', {
+                        'form': form,
+                        'title': _('添加GM命令'),
+                        'is_admin': True,
+                    })
 
                 log_operation('command', 'add', user=request.user,
                               ip_address=get_client_ip(request),

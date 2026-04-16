@@ -41,12 +41,17 @@ def get_client_ip(request):
     if getattr(settings, 'TRUSTED_PROXY', False):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
-            ips = [ip.strip() for ip in x_forwarded_for.split(',')]
-            proxy_count = getattr(settings, 'TRUSTED_PROXY_COUNT', 1)
-            idx = len(ips) - proxy_count
-            if idx >= 0:
-                return ips[idx]
-            return ips[0]
+            ips = [ip.strip() for ip in x_forwarded_for.split(',') if ip.strip()]
+            if ips:
+                try:
+                    proxy_count = max(int(getattr(settings, 'TRUSTED_PROXY_COUNT', 1)), 0)
+                except (TypeError, ValueError):
+                    proxy_count = 1
+
+                client_index = len(ips) - proxy_count - 1
+                if client_index >= 0:
+                    return ips[client_index]
+                return ips[0]
     return request.META.get('REMOTE_ADDR', '0.0.0.0')
 
 

@@ -1,8 +1,6 @@
 """权限与超级管理员相关服务。"""
 from django.contrib.auth import get_user_model
 
-from .models import GMCommand, UserCommandPermission
-
 
 
 def is_super_admin_user(user):
@@ -19,38 +17,18 @@ def get_super_admin_users_queryset():
 
 
 def assign_super_admin_permissions(user, new_commands=None):
-    """为超级管理员授予命令权限。"""
+    """
+    兼容保留：超级管理员的命令权限直接由 Django `is_superuser` 决定，
+    不再冗余写入 `UserCommandPermission`。
+    """
     if not is_super_admin_user(user):
         return 0
-
-    if new_commands is None:
-        new_commands = GMCommand.objects.filter(is_active=True)
-
-    existing_perm_ids = set(
-        UserCommandPermission.objects.filter(user=user).values_list('command_id', flat=True)
-    )
-
-    new_user_perms = [
-        UserCommandPermission(user=user, command=cmd)
-        for cmd in new_commands
-        if cmd.id not in existing_perm_ids
-    ]
-
-    if new_user_perms:
-        UserCommandPermission.objects.bulk_create(new_user_perms)
-
-    return len(new_user_perms)
+    return 0
 
 
 
 def assign_permissions_to_all_super_admins(new_commands):
-    """将一批新命令授权给所有 Django 超级管理员。"""
+    """兼容保留的批量接口：超级管理员不再需要额外权限写入。"""
     if not new_commands:
         return 0, 0
-
-    assigned_user_count = 0
-    created_permission_count = 0
-    for user in get_super_admin_users_queryset():
-        created_permission_count += assign_super_admin_permissions(user, new_commands=new_commands)
-        assigned_user_count += 1
-    return assigned_user_count, created_permission_count
+    return get_super_admin_users_queryset().count(), 0

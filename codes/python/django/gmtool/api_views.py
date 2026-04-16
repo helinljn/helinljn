@@ -1,8 +1,6 @@
 """API相关视图"""
 import json
 import logging
-import os
-import tempfile
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -14,7 +12,14 @@ from django.views.decorators.http import require_POST
 from django.db import DatabaseError
 
 from .audit_log import log_operation
-from .command_parser import load_commands_json_content, sync_commands_to_db, validate_json_command_ids
+from .command_parser import (
+    load_commands_json_content,
+    read_commands_json_snapshot,
+    restore_commands_json_snapshot,
+    sync_commands_to_db,
+    validate_json_command_ids,
+    write_commands_json_content,
+)
 from .decorators import is_super_admin, super_admin_required
 from .models import CommandLog
 from .security_utils import get_client_ip, mask_sensitive_data
@@ -105,29 +110,27 @@ def upload_commands_api(request):
     if not is_valid_ids:
         return JsonResponse({'error': _('检测到 ID 冲突: %(errors)s') % {'errors': id_error_msg}}, status=400)
 
+    json_path = getattr(settings, 'IDIP_JSON_PATH', settings.BASE_DIR / 'idip_commands.json')
+    previous_snapshot = read_commands_json_snapshot(json_path)
+
     # 原子写入 idip_commands.json（先写临时文件再替换，防止中途崩溃损坏文件）
     try:
-        json_path = getattr(settings, 'IDIP_JSON_PATH', settings.BASE_DIR / 'idip_commands.json')
-        fd, tmp_path = tempfile.mkstemp(suffix='.json.tmp')
-        try:
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
-                f.write(content_str)
-            os.replace(tmp_path, str(json_path))
-        except OSError:
-            # 清理临时文件
-            if os.path.exists(tmp_path):
-                os.unlink(tmp_path)
-            raise
+        write_commands_json_content(content_str, json_path)
     except OSError as e:
         logger.exception('Failed to write JSON file: %s', e)
         return JsonResponse({'error': _('文件写入失败: %(error)s') % {'error': str(e)}}, status=500)
 
-    # 自动执行同步
+    # 自动执行同步；若失败则回滚 JSON 文件，避免磁盘与数据库状态分叉
     try:
-        created, updated, deactivated = sync_commands_to_db()
+        created, updated, deactivated = sync_commands_to_db(json_path)
     except (DatabaseError, OSError, ValueError, json.JSONDecodeError, UnicodeDecodeError) as e:
-        logger.exception('Command sync error: %s', e)
-        return JsonResponse({'error': _('文件已上传但同步失败')}, status=500)
+        logger.exception('Command sync error after upload, rolling back JSON file: %s', e)
+        try:
+            restore_commands_json_snapshot(previous_snapshot, json_path)
+        except OSError as rollback_error:
+            logger.exception('Failed to rollback uploaded JSON file after sync error: %s', rollback_error)
+            return JsonResponse({'error': _('命令同步失败，且回滚上传文件失败，请立即联系管理员人工核查')}, status=500)
+        return JsonResponse({'error': _('命令同步失败，上传内容已回滚')}, status=500)
 
     log_operation('command', 'upload_and_sync', user=request.user,
                   ip_address=get_client_ip(request),

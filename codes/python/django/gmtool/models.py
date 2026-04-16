@@ -17,7 +17,7 @@ class GMCommand(models.Model):
     field_labels = models.JSONField(
         _('字段标签映射'),
         default=dict,
-        help_text=_('所有字段（含嵌套结构体）的 id -> name 映射，用于结果展示'),
+        help_text=_('已同步字段的 id -> name 映射，用于结果展示（当前不递归展开更深层嵌套结构）'),
     )
     is_active = models.BooleanField(_('是否启用'), default=True)
 
@@ -27,8 +27,14 @@ class GMCommand(models.Model):
         ordering = ['command_id']
         indexes = [
             models.Index(fields=['is_active', 'command_id'], name='gmcmd_active_cmd_idx'),
-            models.Index(fields=['request_id'], name='gmcmd_reqid_idx'),
-            models.Index(fields=['response_id'], name='gmcmd_respid_idx'),
+        ]
+        constraints = [
+            models.UniqueConstraint(fields=['request_id'], name='uniq_gmcmd_request_id'),
+            models.UniqueConstraint(fields=['response_id'], name='uniq_gmcmd_response_id'),
+            models.CheckConstraint(
+                condition=~models.Q(request_id=models.F('response_id')),
+                name='gmcmd_req_resp_distinct',
+            ),
         ]
 
     def __str__(self):

@@ -5,14 +5,60 @@ import os
 import tempfile
 
 from django.conf import settings
-from django.db import DatabaseError, transaction
+from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import gettext as _
 
 from .models import GMCommand
-from .permission_service import assign_permissions_to_all_super_admins
 
 logger = logging.getLogger(__name__)
+
+
+def _get_commands_json_path(json_path=None):
+    """统一解析命令 JSON 文件路径。"""
+    return json_path or getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
+
+
+def _write_text_atomically(target_path, content):
+    """以临时文件替换方式原子写入文本文件。"""
+    fd, tmp_path = tempfile.mkstemp(suffix='.json.tmp')
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            f.write(content)
+        os.replace(tmp_path, str(target_path))
+    except OSError:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
+
+
+def read_commands_json_snapshot(json_path=None):
+    """读取当前命令 JSON 的原始文本，用于失败回滚。"""
+    resolved_path = _get_commands_json_path(json_path)
+    try:
+        with open(resolved_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        return None
+
+
+def write_commands_json_content(raw_content, json_path=None):
+    """原子写入命令 JSON 原文。"""
+    resolved_path = _get_commands_json_path(json_path)
+    content = raw_content if isinstance(raw_content, str) else str(raw_content)
+    _write_text_atomically(resolved_path, content)
+
+
+def restore_commands_json_snapshot(snapshot, json_path=None):
+    """将命令 JSON 恢复到指定快照；快照为 None 时删除当前文件。"""
+    resolved_path = _get_commands_json_path(json_path)
+    if snapshot is None:
+        try:
+            os.remove(resolved_path)
+        except FileNotFoundError:
+            return
+        return
+    write_commands_json_content(snapshot, resolved_path)
 
 
 def _json_object_pairs_no_duplicates(pairs):
@@ -42,9 +88,10 @@ def load_commands_json_content(raw_content):
     return raw_text, data
 
 
-def load_commands_json_file(json_path):
+def load_commands_json_file(json_path=None):
     """从文件读取命令 JSON，并在解析阶段检测重复键。"""
-    with open(json_path, 'r', encoding='utf-8') as f:
+    resolved_path = _get_commands_json_path(json_path)
+    with open(resolved_path, 'r', encoding='utf-8') as f:
         return load_commands_json_content(f.read())
 
 
@@ -174,15 +221,18 @@ def validate_json_command_ids(data):
         seen_protocol[key] = (cmd_id, id_type)
 
     # 检查与数据库中已有命令的冲突（一次查询 + 内存比对）
-    db_commands = list(GMCommand.objects.values('command_id', 'request_id', 'response_id'))
-    db_cmd_map = {}
+    # 对于本次 JSON 中已出现的命令，统一以 JSON 的目标值为准，不再与数据库中的旧值比较，
+    # 避免“同批更新 / 交换协议 ID”时误报；仅与 JSON 之外仍存在于数据库的命令比较。
+    json_command_id_set = set(json_command_ids)
+    db_commands = list(
+        GMCommand.objects.exclude(command_id__in=json_command_id_set).values('command_id', 'request_id', 'response_id')
+    )
     db_req_map = {}
     db_rsp_map = {}
     for db_cmd in db_commands:
         cid = db_cmd['command_id']
         rid = db_cmd['request_id']
         rpid = db_cmd['response_id']
-        db_cmd_map[cid] = db_cmd
         if rid not in db_req_map:
             db_req_map[rid] = []
         db_req_map[rid].append(cid)
@@ -191,45 +241,36 @@ def validate_json_command_ids(data):
         db_rsp_map[rpid].append(cid)
 
     for json_cmd_id, req_id in json_request_ids:
-        # 同一命令更新，跳过
-        if json_cmd_id in db_cmd_map:
-            continue
         for db_cid in db_req_map.get(req_id, []):
-            if db_cid != json_cmd_id:
-                errors.append(
-                    _(
-                        '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
-                    )
-                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': db_cid}
+            errors.append(
+                _(
+                    '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
                 )
+                % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': db_cid}
+            )
         for db_cid in db_rsp_map.get(req_id, []):
-            if db_cid != json_cmd_id:
-                errors.append(
-                    _(
-                        '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
-                    )
-                    % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': db_cid}
+            errors.append(
+                _(
+                    '命令 %(json_cmd)s 的请求 ID %(req)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
                 )
+                % {'json_cmd': json_cmd_id, 'req': req_id, 'db_cmd': db_cid}
+            )
 
     for json_cmd_id, rsp_id in json_response_ids:
-        if json_cmd_id in db_cmd_map:
-            continue
         for db_cid in db_req_map.get(rsp_id, []):
-            if db_cid != json_cmd_id:
-                errors.append(
-                    _(
-                        '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
-                    )
-                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': db_cid}
+            errors.append(
+                _(
+                    '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（请求 ID）'
                 )
+                % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': db_cid}
+            )
         for db_cid in db_rsp_map.get(rsp_id, []):
-            if db_cid != json_cmd_id:
-                errors.append(
-                    _(
-                        '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
-                    )
-                    % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': db_cid}
+            errors.append(
+                _(
+                    '命令 %(json_cmd)s 的响应 ID %(rsp)s 与现有命令 %(db_cmd)s 冲突（响应 ID）'
                 )
+                % {'json_cmd': json_cmd_id, 'rsp': rsp_id, 'db_cmd': db_cid}
+            )
 
     # 去重
     errors = list(dict.fromkeys(errors))
@@ -244,41 +285,30 @@ def add_command_to_json(command_data):
     将新命令追加写入 idip_commands.json 文件。
 
     command_data: dict，包含完整的命令定义（符合 idip_commands.json 中单个命令的格式）
-    返回: (success, error_message)
+    返回: (success, error_message, previous_snapshot)
     """
-    json_path = getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
+    json_path = _get_commands_json_path()
+    previous_snapshot = read_commands_json_snapshot(json_path)
 
     try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-    except (json.JSONDecodeError, FileNotFoundError) as e:
-        return False, str(e)
+        _, data = load_commands_json_file(json_path)
+    except (json.JSONDecodeError, FileNotFoundError, ValueError) as e:
+        return False, str(e), None
 
-    # 获取 command_id
     command_id = command_data.get('command_id')
     if not command_id:
-        return False, _('command_data 中缺少 command_id')
+        return False, _('command_data 中缺少 command_id'), None
 
-    # 添加到 JSON 数据中
     data[command_id] = command_data['data']
 
-    # 原子写入
     try:
         content_str = json.dumps(data, ensure_ascii=False, indent=4)
-        fd, tmp_path = tempfile.mkstemp(suffix='.json.tmp')
-        try:
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
-                f.write(content_str)
-            os.replace(tmp_path, str(json_path))
-        except OSError:
-            if os.path.exists(tmp_path):
-                os.unlink(tmp_path)
-            raise
+        write_commands_json_content(content_str, json_path)
     except (OSError, TypeError, ValueError) as e:
         logger.exception('Failed to write JSON file: %s', e)
-        return False, str(e)
+        return False, str(e), None
 
-    return True, ''
+    return True, '', previous_snapshot
 
 
 def _extract_field_labels(cmd_data):
@@ -320,8 +350,7 @@ def parse_commands(json_path=None):
         ...
     ]
     """
-    if json_path is None:
-        json_path = getattr(settings, 'IDIP_JSON_PATH', os.path.join(settings.BASE_DIR, 'idip_commands.json'))
+    json_path = _get_commands_json_path(json_path)
 
     _, data = load_commands_json_file(json_path)
 
@@ -364,7 +393,7 @@ def sync_commands_to_db(json_path=None):
     """
     将idip_commands.json中的命令定义同步到数据库。
     - 已存在的命令：更新内容
-    - 新增的命令：创建记录，并自动授予超级管理员权限
+    - 新增的命令：创建记录
     - JSON中不存在的命令：标记为不活跃(is_active=False)
     返回 (created_count, updated_count, deactivated_count)
     """
@@ -376,11 +405,10 @@ def sync_commands_to_db(json_path=None):
 
         created_count = 0
         updated_count = 0
-        new_commands = []
 
         for cmd in commands:
             json_ids.add(cmd['command_id'])
-            obj, created = GMCommand.objects.update_or_create(
+            _, created = GMCommand.objects.update_or_create(
                 command_id=cmd['command_id'],
                 defaults={
                     'command_name': cmd['command_name'],
@@ -397,7 +425,6 @@ def sync_commands_to_db(json_path=None):
             )
             if created:
                 created_count += 1
-                new_commands.append(obj)
             else:
                 updated_count += 1
 
@@ -406,18 +433,5 @@ def sync_commands_to_db(json_path=None):
         deactivated_count = GMCommand.objects.filter(
             command_id__in=deactivated_ids
         ).update(is_active=False)
-
-        # 将新增命令自动授予所有 Django 超级管理员用户
-        if new_commands:
-            try:
-                superadmin_count, created_permission_count = assign_permissions_to_all_super_admins(new_commands)
-                if superadmin_count > 0:
-                    logger.info(
-                        '新增权限已自动授予 %d 个超级管理员用户，新增权限=%d',
-                        superadmin_count,
-                        created_permission_count,
-                    )
-            except DatabaseError as e:
-                logger.warning('超级管理员用户权限自动授权跳过: %s', e)
 
     return created_count, updated_count, deactivated_count
