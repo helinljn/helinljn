@@ -2,6 +2,8 @@
 
 set ROOT_INIT_DIR=%~dp0
 set BRYNET_INIT_DIR=%ROOT_INIT_DIR%/3rd/brynet
+set UTFCPP_INIT_DIR=%ROOT_INIT_DIR%/3rd/utfcpp
+set OPENCC_INIT_DIR=%ROOT_INIT_DIR%/3rd/opencc
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
 
@@ -17,6 +19,34 @@ if not exist %BRYNET_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git pull
+)
+
+echo ------------------
+echo -- utfcpp
+cd %ROOT_INIT_DIR%
+if not exist %UTFCPP_INIT_DIR% (
+    git clone -b v4.0.9 https://github.com/nemtrif/utfcpp.git %UTFCPP_INIT_DIR%
+) else (
+    cd %UTFCPP_INIT_DIR%
+    git remote set-url origin https://github.com/nemtrif/utfcpp.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v4.0.9
+)
+
+echo ------------------
+echo -- opencc
+cd %ROOT_INIT_DIR%
+if not exist %OPENCC_INIT_DIR% (
+    git clone -b ver.1.2.0 https://github.com/BYVoid/OpenCC.git %OPENCC_INIT_DIR%
+) else (
+    cd %OPENCC_INIT_DIR%
+    git remote set-url origin https://github.com/BYVoid/OpenCC.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout ver.1.2.0
 )
 
 echo ------------------

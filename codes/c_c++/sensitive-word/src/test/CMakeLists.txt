@@ -5,6 +5,11 @@ PROJECT(test)
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/src
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/deps/marisa-0.2.6/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/deps/marisa-0.2.6/lib
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/deps/rapidjson-1.1.0
 )
 
 # 宏定义、编译选项、链接库
@@ -21,7 +26,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        # ...
+        opencc
     )
 ELSE()
     # 宏定义
@@ -36,7 +41,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        # ...
+        opencc
     )
 ENDIF()
 
