@@ -135,6 +135,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         FILES ${OPENCC_SRC_SRC_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/deps/marisa-0.2.6 PREFIX "marisa"
         FILES ${MARISA_SRC_LIST})
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/deps/rapidjson-1.1.0 PREFIX "rapidjson"
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/deps/rapidjson-1.1.0/rapidjson PREFIX "rapidjson"
         FILES ${RAPIDJSON_SRC_LIST})
 ENDIF()
