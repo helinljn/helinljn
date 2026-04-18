@@ -5,6 +5,7 @@ PROJECT(test)
 SET(CURRENT_INCLUDE_DIR
     ${PROJECT_SOURCE_DIR}
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/src
 )
