@@ -43,7 +43,7 @@ ELSE()
     )
 ENDIF()
 
-# tests源文件
+# test源文件
 FILE(GLOB_RECURSE TEST_SRC_LIST
     ${PROJECT_SOURCE_DIR}/*.h
     ${PROJECT_SOURCE_DIR}/*.inl
