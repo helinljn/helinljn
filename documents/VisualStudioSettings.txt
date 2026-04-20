@@ -1,5 +1,5 @@
 【常用设置】
-    1. 工具 -> 选项 -> 环境 -> 常规 -> 颜色主题(One Dark Pro)
+    1. 工具 -> 选项 -> 环境 -> 常规 -> 颜色主题(浅色)
 
     2. 工具 -> 选项 -> 环境 -> 常规 -> 除了基于客户端性能自动调整视觉体验，其余全部勾选
 
@@ -55,11 +55,9 @@
         ],
 
 【安装插件】
-    1. One Dark Pro
+    1. Force UTF-8 (No BOM)
 
-    2. Force UTF-8 (No BOM)
-
-    3. Trailing Whitespace Visualizer
+    2. Trailing Whitespace Visualizer
 
 【设置Visual Assist X快捷键，如果安装了此插件则只需要设置 视图.向后导航 即可】
     1. 打开VS -> 工具 -> 选项 -> 环境 -> 键盘 -> 应用 (Visual Studio Code) 键盘方案
