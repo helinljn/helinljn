@@ -7,17 +7,15 @@
 
     4. Python
 
-    5. One Dark Pro
+    5. Markdown All in One
 
-    6. Markdown All in One
-
-    7. Cline Chinese
+    6. Cline Chinese
         1. 自动批准：读取，编辑，所有命令
         2. API配置：
             API提供商：OpenAI Compatible
-            基础URL：  https://api.clawsocket.com/v1
+            基础URL：  https://api3.wlai.vip/v1
             API密钥：  xxxxxx
-            模型ID：   claude-sonnet-4-6
+            模型ID：   gpt-5.4
             模型配置：
                 上下文窗口大小：512000
             关闭所有设置和配置
@@ -46,13 +44,9 @@
                 在设置搜索栏中输入 “Integrated: Windows Enable Conpty”
                 取消选中该选项
 
-    8. Tencent Cloud CodeBuddy
-        Craft
-        GLM-5.1
+    7. Tencent Cloud CodeBuddy
 
-    9. TRAE AI
-        Builder
-        DeepSeek-V3.1
+    8. TRAE AI
 
 【下载地址】
     https://update.code.visualstudio.com/1.111.0/win32-x64/stable
@@ -60,11 +54,8 @@
 【常用设置】
 {
     // VSCode version: VSCodeSetup-x64-1.111.0
-    "workbench.colorTheme": "One Dark Pro",
+    "workbench.colorTheme": "Default Light Modern",
     "workbench.startupEditor": "none",
-
-    "oneDarkPro.bold": false,
-    "oneDarkPro.italic": false,
 
     "workbench.editor.tabSizing": "shrink",
     "workbench.editor.enablePreview": false,
@@ -138,17 +129,6 @@
     "C_Cpp.intelliSenseUpdateDelay": 500,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
-
-    "codingcopilot.autoRun": true,
-    "codingcopilot.taskList": false,
-    "codingcopilot.enableCodelens": false,
-    "codingcopilot.enableInlineChat": false,
-    "codingcopilot.standaloneTerminal": false,
-    "codingcopilot.enableFloatShortcut": false,
-    "codingcopilot.enableAutoCompletions": false,
-    "codingcopilot.enableNextEditSuggestions": false,
-    "codingcopilot.generationPreference": "intelligentMode",
-    "codingcopilot.commitMessageLanguage": "zh_CN",
 
     "trae.enableInlineCommand": false,
     "trae.enableAddToChatTips": false,
