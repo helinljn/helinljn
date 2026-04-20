@@ -98,7 +98,7 @@ ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
     # 公共链接选项
     SET(PROJECT_COMMON_EXE_LINK_OPTIONS
-        -rdynamic
+        # ...
     )
 
     SET(PROJECT_COMMON_SHARED_LINK_OPTIONS
