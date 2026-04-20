@@ -5,7 +5,6 @@ set ROOT_DIR=%~dp0
 set SENSITIVE_WORLD_DEBUG_DIR=%ROOT_DIR%/.build/windows/x64-Debug
 
 @rem sensitive-word debug config
-cd %ROOT_DIR%
 mkdir "%SENSITIVE_WORLD_DEBUG_DIR%" 2>nul
 cd %SENSITIVE_WORLD_DEBUG_DIR%
 
