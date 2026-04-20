@@ -78,20 +78,6 @@ FOREACH(DICT ${DICTS_GENERATED})
     SET(DICT_${DICT}_INPUT ${OPENCC_DATA_GENERATED_DIR}/${DICT}.txt)
 ENDFOREACH()
 
-# 复制opencc动态库到opencc_dict目录
-ADD_CUSTOM_TARGET(
-    copy_libopencc_to_dir_of_opencc_dict
-    COMMENT
-        "Copying libopencc to directory of opencc_dict"
-    COMMAND
-        ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:opencc>" "$<TARGET_FILE_DIR:opencc_dict>"
-    DEPENDS
-        opencc
-        opencc_dict
-)
-
-SET(DICT_PLATFORM_DEPENDS copy_libopencc_to_dir_of_opencc_dict)
-
 # 生成自动反向词典txt
 FOREACH(DICT ${DICTS_GENERATED})
     ADD_CUSTOM_COMMAND(
@@ -129,7 +115,6 @@ FOREACH(DICT ${DICTS})
                 --from text
                 --to ocd2
         DEPENDS
-            ${DICT_PLATFORM_DEPENDS}
             opencc_dict
             ${DICT_${DICT}_INPUT}
         VERBATIM
@@ -172,6 +157,5 @@ ADD_CUSTOM_TARGET(
 # 其它设置
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # VS工程设置
-    SET_PROPERTY(TARGET ${DICT_PLATFORM_DEPENDS} PROPERTY FOLDER "cmake")
-    SET_PROPERTY(TARGET ${PROJECT_NAME}          PROPERTY FOLDER "cmake")
+    SET_PROPERTY(TARGET ${PROJECT_NAME} PROPERTY FOLDER "cmake")
 ENDIF()
