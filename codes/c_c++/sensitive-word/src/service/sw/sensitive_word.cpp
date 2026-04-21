@@ -1,12 +1,11 @@
-#include "sensitive_word.h"
-
-#include "num_detector.h"
-#include "text_normalizer.h"
-#include "trie_dictionary.h"
-#include "word_detector.h"
-#include "result_condition.h"
-#include "replace_strategy.h"
-#include "word_dictionary_loader.h"
+#include "sw/sensitive_word.h"
+#include "sw/num_detector.h"
+#include "sw/text_normalizer.h"
+#include "sw/trie_dictionary.h"
+#include "sw/word_detector.h"
+#include "sw/result_condition.h"
+#include "sw/replace_strategy.h"
+#include "sw/word_dictionary_loader.h"
 
 #include <algorithm>
 #include <memory>

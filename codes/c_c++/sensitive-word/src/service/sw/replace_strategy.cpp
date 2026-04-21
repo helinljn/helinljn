@@ -1,6 +1,5 @@
-#include "replace_strategy.h"
-
-#include "text_normalizer.h"
+#include "sw/replace_strategy.h"
+#include "sw/text_normalizer.h"
 
 namespace sensitive_word
 {

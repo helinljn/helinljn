@@ -71,23 +71,9 @@ FILE(GLOB_RECURSE UTFCPP_SRC_LIST
 )
 
 # sensitive-word源文件
-SET(SENSITIVE_WORD_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/num_detector.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/num_detector.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/replace_strategy.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/replace_strategy.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/result_condition.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/result_condition.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/sensitive_word.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/sensitive_word.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/text_normalizer.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/text_normalizer.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/trie_dictionary.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/trie_dictionary.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_detector.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_detector.cpp
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_dictionary_loader.h
-    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_dictionary_loader.cpp
+FILE(GLOB_RECURSE SENSITIVE_WORD_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/sw/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/sw/*.cpp
 )
 
 # 生成可执行文件

@@ -1,6 +1,5 @@
-#include "result_condition.h"
-
-#include "text_normalizer.h"
+#include "sw/result_condition.h"
+#include "sw/text_normalizer.h"
 #include "utf8.h"
 
 #include <cstddef>

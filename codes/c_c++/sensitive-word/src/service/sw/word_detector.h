@@ -1,8 +1,8 @@
 #pragma once
 
-#include "sensitive_word.h"
-#include "text_normalizer.h"
-#include "trie_dictionary.h"
+#include "sw/sensitive_word.h"
+#include "sw/text_normalizer.h"
+#include "sw/trie_dictionary.h"
 
 #include <cstddef>
 #include <memory>

@@ -1,6 +1,6 @@
 #include <tuple>
 #include <cstdlib>
-#include "brynet.h"
+#include "net/brynet.h"
 
 int main(int argc, char** argv)
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sensitive_word.h"
+#include "sw/sensitive_word.h"
 
 #include <memory>
 #include <string_view>

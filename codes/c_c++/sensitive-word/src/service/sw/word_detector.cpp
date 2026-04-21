@@ -1,4 +1,4 @@
-#include "word_detector.h"
+#include "sw/word_detector.h"
 
 #include <algorithm>
 #include <utility>

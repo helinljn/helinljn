@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include "sensitive_word.h"
+#include "sw/sensitive_word.h"
 
 #include <filesystem>
 #include <fstream>

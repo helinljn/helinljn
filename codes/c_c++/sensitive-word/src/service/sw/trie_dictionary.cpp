@@ -1,4 +1,4 @@
-#include "trie_dictionary.h"
+#include "sw/trie_dictionary.h"
 
 namespace sensitive_word
 {

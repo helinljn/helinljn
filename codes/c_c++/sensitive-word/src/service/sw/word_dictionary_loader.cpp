@@ -1,4 +1,4 @@
-#include "word_dictionary_loader.h"
+#include "sw/word_dictionary_loader.h"
 
 #include <fstream>
 #include <sstream>
