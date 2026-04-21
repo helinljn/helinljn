@@ -105,6 +105,6 @@ IF(WIN32)
         FILES ${SPDLOG_SRC_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source PREFIX "utfcpp"
         FILES ${UTFCPP_SRC_LIST})
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/src/service PREFIX "sensitive-word"
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/src/service/sw PREFIX "sensitive-word"
         FILES ${SENSITIVE_WORD_SRC_LIST})
 ENDIF()
