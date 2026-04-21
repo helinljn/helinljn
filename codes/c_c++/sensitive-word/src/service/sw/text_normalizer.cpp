@@ -578,6 +578,11 @@ std::u32string decode_utf8(std::string_view text)
     }
 }
 
+std::size_t count_code_points(std::string_view text)
+{
+    return decode_utf8(text).size();
+}
+
 std::vector<std::string> opencc_search_paths()
 {
     const auto root = std::filesystem::path(".");

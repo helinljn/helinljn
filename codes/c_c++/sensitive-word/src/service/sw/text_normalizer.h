@@ -63,6 +63,13 @@ std::string encode_utf8(char32_t code_point);
 std::string encode_utf8(const std::u32string& text);
 std::u32string decode_utf8(std::string_view text);
 
+/**
+ * @brief 统计字符串中代码点的数量(实际字符个数，count_code_points("你好111") == 5)
+ * @param text 输入字符串
+ * @return 代码点数量
+ */
+std::size_t count_code_points(std::string_view text);
+
 std::vector<std::string> opencc_search_paths();
 
 }  // namespace sensitive_word

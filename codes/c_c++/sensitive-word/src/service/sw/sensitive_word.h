@@ -65,14 +65,16 @@ public:
         std::string_view text) const = 0;
 };
 
+//////////////////////////////////////////////////////////////
+// 字符串替换策略
+// 用于将敏感词替换为指定的字符
+//////////////////////////////////////////////////////////////
 class replace_strategy
 {
 public:
-    virtual ~replace_strategy() = default;
+    virtual ~replace_strategy(void) = default;
 
-    virtual std::string replacement_for(
-        const word_result& result,
-        std::string_view original_text) const = 0;
+    virtual std::string replacement_for(const word_result& result, std::string_view original_text) const = 0;
 };
 
 class sensitive_word_engine;
