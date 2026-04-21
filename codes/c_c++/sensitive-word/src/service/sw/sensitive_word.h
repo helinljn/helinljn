@@ -55,14 +55,16 @@ public:
     virtual bool ignore(char32_t raw_code_point, char32_t normalized_code_point) const = 0;
 };
 
+//////////////////////////////////////////////////////////////
+// 敏感词匹配条件
+// 用于判断敏感词是否匹配
+//////////////////////////////////////////////////////////////
 class result_condition
 {
 public:
-    virtual ~result_condition() = default;
+    virtual ~result_condition(void) = default;
 
-    virtual bool match(
-        const word_result& result,
-        std::string_view text) const = 0;
+    virtual bool match(const word_result& result, std::string_view text) const = 0;
 };
 
 //////////////////////////////////////////////////////////////

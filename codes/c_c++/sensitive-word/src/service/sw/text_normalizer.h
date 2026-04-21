@@ -54,10 +54,40 @@ private:
     std::unique_ptr<impl> impl_ {};
 };
 
+/**
+ * @brief 检查字符是否为ASCII字母
+ * @param ch 输入字符
+ * @return true 字符是ASCII字母，否则返回false
+ */
 bool is_ascii_alpha(char32_t ch);
+
+/**
+ * @brief 检查字符是否为ASCII数字
+ * @param ch 输入字符
+ * @return true 字符是ASCII数字，否则返回false
+ */
 bool is_ascii_digit(char32_t ch);
+
+/**
+ * @brief 检查字符是否为ASCII字母、数字
+ * @param ch 输入字符
+ * @return true 字符是ASCII字母、数字，否则返回false
+ */
 bool is_ascii_alnum(char32_t ch);
+
+/**
+ * @brief 检查字符是否为ASCII字母、数字、CJK、拉丁扩展
+ * @param ch 输入字符
+ * @return true 字符是ASCII字母、数字、CJK、拉丁扩展，否则返回false
+ */
 bool is_word_like_code_point(char32_t ch);
+
+/**
+ * @brief 检查字符是否不是ASCII字母或数字
+ * @param ch 输入字符
+ * @return true 字符不是ASCII字母或数字，否则返回false
+ */
+bool is_ascii_word_boundary(char32_t ch);
 
 std::string encode_utf8(char32_t code_point);
 std::string encode_utf8(const std::u32string& text);

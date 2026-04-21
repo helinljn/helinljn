@@ -538,6 +538,11 @@ bool is_word_like_code_point(char32_t ch)
     return is_ascii_alnum(ch) || is_cjk(ch) || is_latin_extended(ch);
 }
 
+bool is_ascii_word_boundary(char32_t ch)
+{
+    return !is_ascii_alnum(ch);
+}
+
 std::string encode_utf8(char32_t cp)
 {
     std::string out;
