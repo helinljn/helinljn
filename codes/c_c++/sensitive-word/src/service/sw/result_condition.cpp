@@ -1,51 +1,10 @@
 #include "sw/result_condition.h"
 #include "sw/text_normalizer.h"
-#include "utf8.h"
 
-#include <cstddef>
 #include <string_view>
 
 namespace sensitive_word
 {
-
-char32_t previous_code_point(std::string_view text, std::size_t begin)
-{
-    if (begin == 0 || begin > text.size())
-    {
-        return 0;
-    }
-
-    auto text_begin = text.begin();
-    auto it = text.begin() + static_cast<std::ptrdiff_t>(begin);
-
-    try
-    {
-        return utf8::prior(it, text_begin);
-    }
-    catch (...)
-    {
-        return 0;
-    }
-}
-
-char32_t next_code_point(std::string_view text, std::size_t end)
-{
-    if (end >= text.size())
-    {
-        return 0;
-    }
-
-    auto it = text.begin() + static_cast<std::ptrdiff_t>(end);
-
-    try
-    {
-        return utf8::next(it, text.end());
-    }
-    catch (...)
-    {
-        return 0;
-    }
-}
 
 bool contains_ascii_letter(std::string_view text)
 {
@@ -85,22 +44,20 @@ bool always_true_result_condition::match(const word_result&, std::string_view) c
 
 bool english_word_match_result_condition::match(
     const word_result& result,
-    std::string_view text) const
+    std::string_view) const
 {
     if (!contains_ascii_letter(result.normalized_word))
     {
         return true;
     }
 
-    const char32_t left = previous_code_point(text, result.raw_begin);
-    const char32_t right = next_code_point(text, result.raw_end);
-
-    return is_ascii_word_boundary(left) && is_ascii_word_boundary(right);
+    return is_ascii_word_boundary(result.left_normalized_code_point) &&
+           is_ascii_word_boundary(result.right_normalized_code_point);
 }
 
 bool english_word_num_match_result_condition::match(
     const word_result& result,
-    std::string_view text) const
+    std::string_view) const
 {
     if (!contains_ascii_letter(result.normalized_word) &&
         !contains_ascii_digit_text(result.normalized_word))
@@ -108,10 +65,8 @@ bool english_word_num_match_result_condition::match(
         return true;
     }
 
-    const char32_t left = previous_code_point(text, result.raw_begin);
-    const char32_t right = next_code_point(text, result.raw_end);
-
-    return is_ascii_word_boundary(left) && is_ascii_word_boundary(right);
+    return is_ascii_word_boundary(result.left_normalized_code_point) &&
+           is_ascii_word_boundary(result.right_normalized_code_point);
 }
 
 }  // namespace sensitive_word

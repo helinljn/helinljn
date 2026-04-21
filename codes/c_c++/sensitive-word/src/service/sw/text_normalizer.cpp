@@ -4,13 +4,22 @@
 
 #include <filesystem>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 namespace sensitive_word
 {
 
 namespace
 {
+
+struct raw_code_point
+{
+    char32_t value = 0;
+    std::size_t byte_begin = 0;
+    std::size_t byte_end = 0;
+};
 
 bool is_cjk(char32_t ch)
 {
@@ -281,25 +290,29 @@ public:
         }
     }
 
-    char32_t convert_char(char32_t ch) const
+    std::string convert_text(std::string_view text) const
     {
         if (!converter_)
         {
-            return ch;
+            return std::string(text);
         }
 
         try
         {
-            const std::string input = encode_utf8(ch);
-            const std::string output = converter_->Convert(input);
-            const std::u32string converted = decode_utf8(output);
-            if (!converted.empty())
-            {
-                return converted.front();
-            }
+            return converter_->Convert(std::string(text));
         }
         catch (...)
         {
+            return std::string(text);
+        }
+    }
+
+    char32_t convert_char(char32_t ch) const
+    {
+        const std::u32string converted = decode_utf8(convert_text(encode_utf8(ch)));
+        if (!converted.empty())
+        {
+            return converted.front();
         }
 
         return ch;
@@ -308,6 +321,40 @@ public:
 private:
     std::unique_ptr<opencc::SimpleConverter> converter_ {};
 };
+
+std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
+{
+    std::vector<raw_code_point> result;
+
+    auto it = text.begin();
+    while (it != text.end())
+    {
+        const auto begin_it = it;
+        const std::size_t begin = static_cast<std::size_t>(begin_it - text.begin());
+
+        try
+        {
+            const char32_t cp = utf8::next(it, text.end());
+            const std::size_t end = static_cast<std::size_t>(it - text.begin());
+            result.push_back(raw_code_point{cp, begin, end});
+        }
+        catch (...)
+        {
+            it = begin_it;
+            ++it;
+            const std::size_t end = static_cast<std::size_t>(it - text.begin());
+            result.push_back(raw_code_point{0xFFFD, begin, end});
+        }
+    }
+
+    return result;
+}
+
+std::vector<char32_t> decode_utf8_to_code_points(std::string_view text)
+{
+    const std::u32string decoded = decode_utf8(text);
+    return std::vector<char32_t>(decoded.begin(), decoded.end());
+}
 
 }  // namespace
 
@@ -353,13 +400,16 @@ public:
 
     std::u32string normalize_word(std::string_view word) const
     {
+        const std::string chinese_normalized_word =
+            options_.ignore_chinese_style ? chinese_converter_.convert_text(word) : std::string(word);
+
         std::u32string normalized;
-        const std::u32string decoded = decode_utf8(word);
+        const std::u32string decoded = decode_utf8(chinese_normalized_word);
         normalized.reserve(decoded.size());
 
         for (char32_t ch : decoded)
         {
-            normalized.push_back(normalize_code_point(ch));
+            normalized.push_back(normalize_non_chinese_code_point(ch));
         }
 
         return normalized;
@@ -368,18 +418,70 @@ public:
     normalized_text normalize_text(std::string_view text) const
     {
         normalized_text result;
-        result.raw_text = std::string(text);
-        result.raw_code_points = decode_utf8_with_positions(text);
-        result.normalized_chars.reserve(result.raw_code_points.size());
+        const auto raw_code_points = decode_utf8_with_positions(text);
+        result.normalized_chars.reserve(raw_code_points.size());
 
-        for (const auto& raw : result.raw_code_points)
+        std::vector<char32_t> chinese_normalized_code_points;
+        if (options_.ignore_chinese_style)
         {
+            chinese_normalized_code_points = decode_utf8_to_code_points(chinese_converter_.convert_text(text));
+        }
+
+        const bool can_align_by_index =
+            !options_.ignore_chinese_style ||
+            chinese_normalized_code_points.size() == raw_code_points.size();
+
+        for (std::size_t i = 0; i < raw_code_points.size(); ++i)
+        {
+            const auto& raw = raw_code_points[i];
+            char32_t normalized_code_point = raw.value;
+
+            if (options_.ignore_chinese_style)
+            {
+                if (can_align_by_index)
+                {
+                    normalized_code_point = chinese_normalized_code_points[i];
+                }
+                else
+                {
+                    normalized_code_point = chinese_converter_.convert_char(raw.value);
+                }
+            }
+
             result.normalized_chars.push_back(normalized_char{
                 raw.value,
-                normalize_code_point(raw.value),
+                normalize_non_chinese_code_point(normalized_code_point),
                 raw.byte_begin,
                 raw.byte_end,
             });
+        }
+
+        return result;
+    }
+
+private:
+    char32_t normalize_non_chinese_code_point(char32_t code_point) const
+    {
+        char32_t result = code_point;
+
+        if (options_.ignore_width)
+        {
+            result = fold_width(result);
+        }
+
+        if (options_.ignore_english_style)
+        {
+            result = fold_english_style(result);
+        }
+
+        if (options_.ignore_num_style)
+        {
+            result = fold_num_style(result);
+        }
+
+        if (options_.ignore_case)
+        {
+            result = fold_ascii_case(result);
         }
 
         return result;
@@ -391,9 +493,15 @@ private:
 };
 
 text_normalizer::text_normalizer(text_normalizer_options options)
-    : impl_(std::make_shared<impl>(std::move(options)))
+    : impl_(std::make_unique<impl>(std::move(options)))
 {
 }
+
+text_normalizer::~text_normalizer() = default;
+
+text_normalizer::text_normalizer(text_normalizer&& other) noexcept = default;
+
+text_normalizer& text_normalizer::operator=(text_normalizer&& other) noexcept = default;
 
 char32_t text_normalizer::normalize_code_point(char32_t code_point) const
 {
@@ -468,34 +576,6 @@ std::u32string decode_utf8(std::string_view text)
         }
         return result;
     }
-}
-
-std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
-{
-    std::vector<raw_code_point> result;
-
-    auto it = text.begin();
-    while (it != text.end())
-    {
-        const auto begin_it = it;
-        const std::size_t begin = static_cast<std::size_t>(begin_it - text.begin());
-
-        try
-        {
-            const char32_t cp = utf8::next(it, text.end());
-            const std::size_t end = static_cast<std::size_t>(it - text.begin());
-            result.push_back(raw_code_point{cp, begin, end});
-        }
-        catch (...)
-        {
-            it = begin_it;
-            ++it;
-            const std::size_t end = static_cast<std::size_t>(it - text.begin());
-            result.push_back(raw_code_point{0xFFFD, begin, end});
-        }
-    }
-
-    return result;
 }
 
 std::vector<std::string> opencc_search_paths()

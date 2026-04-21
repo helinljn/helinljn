@@ -1,10 +1,8 @@
 #include "sw/sensitive_word.h"
-#include "sw/num_detector.h"
+#include "sw/replace_strategy.h"
+#include "sw/result_condition.h"
 #include "sw/text_normalizer.h"
 #include "sw/trie_dictionary.h"
-#include "sw/word_detector.h"
-#include "sw/result_condition.h"
-#include "sw/replace_strategy.h"
 #include "sw/word_dictionary_loader.h"
 
 #include <algorithm>
@@ -36,6 +34,14 @@ public:
         return !is_word_like_code_point(normalized_code_point);
     }
 };
+
+void append_words(std::vector<std::string>& target, std::vector<std::string> words)
+{
+    target.insert(
+        target.end(),
+        std::make_move_iterator(words.begin()),
+        std::make_move_iterator(words.end()));
+}
 
 }  // namespace
 
@@ -69,32 +75,7 @@ public:
             replace_strategy_ = replace_strategies::stars();
         }
 
-        normalizer_ = std::make_shared<text_normalizer>(text_normalizer_options{
-            config_.ignore_case,
-            config_.ignore_width,
-            config_.ignore_num_style,
-            config_.ignore_chinese_style,
-            config_.ignore_english_style,
-        });
-
-        allow_trie_ = std::make_shared<trie_dictionary>();
-        deny_trie_ = std::make_shared<trie_dictionary>();
-
-        detector_ = std::make_shared<word_detector>(
-            word_detector_options{
-                config_.ignore_repeat,
-                config_.word_fail_fast,
-            },
-            char_ignore_,
-            normalizer_,
-            allow_trie_,
-            deny_trie_);
-
-        num_detector_ = std::make_shared<num_detector>(
-            num_detector_options{
-                config_.num_check_len,
-            },
-            char_ignore_);
+        rebuild_runtime();
 
         for (const auto& word : deny_words)
         {
@@ -107,78 +88,29 @@ public:
         }
     }
 
-    std::vector<word_result> find_all(std::string_view text, bool stop_after_first) const
+    impl(const impl& other)
+        : config_(other.config_)
+        , char_ignore_(other.char_ignore_)
+        , result_condition_(other.result_condition_)
+        , replace_strategy_(other.replace_strategy_)
+        , dictionary_(other.dictionary_)
     {
-        std::vector<word_result> results;
+        rebuild_runtime();
+    }
 
-        if (text.empty() || (!config_.enable_word_check && !config_.enable_num_check))
+    impl& operator=(const impl& other)
+    {
+        if (this != &other)
         {
-            return results;
+            config_ = other.config_;
+            char_ignore_ = other.char_ignore_;
+            result_condition_ = other.result_condition_;
+            replace_strategy_ = other.replace_strategy_;
+            dictionary_ = other.dictionary_;
+            rebuild_runtime();
         }
 
-        const normalized_text normalized = normalizer_->normalize_text(text);
-        if (normalized.normalized_chars.empty())
-        {
-            return results;
-        }
-
-        for (std::size_t i = 0; i < normalized.normalized_chars.size(); ++i)
-        {
-            std::size_t allow_length = 0;
-            std::size_t deny_length = 0;
-            std::u32string normalized_deny_word;
-            match_type detected_type = match_type::word;
-
-            if (config_.enable_word_check)
-            {
-                const word_detector_result detect_result = detector_->detect_at(normalized, i);
-                if (detect_result.allow_length > 0 || detect_result.deny_length > 0)
-                {
-                    allow_length = detect_result.allow_length;
-                    deny_length = detect_result.deny_length;
-                    normalized_deny_word = detect_result.normalized_deny_word;
-                    detected_type = match_type::word;
-                }
-            }
-
-            if (allow_length == 0 && deny_length == 0 && config_.enable_num_check)
-            {
-                const num_detector_result detect_result = num_detector_->detect_at(normalized, i);
-                if (detect_result.deny_length > 0)
-                {
-                    deny_length = detect_result.deny_length;
-                    normalized_deny_word = detect_result.normalized_deny_word;
-                    detected_type = match_type::num;
-                }
-            }
-
-            if (allow_length < deny_length && deny_length > 0)
-            {
-                word_result result;
-                result.raw_begin = normalized.normalized_chars[i].raw_byte_begin;
-                result.raw_end = normalized.normalized_chars[i + deny_length - 1].raw_byte_end;
-                result.word = std::string(text.substr(result.raw_begin, result.raw_end - result.raw_begin));
-                result.normalized_word = encode_utf8(normalized_deny_word);
-                result.type = detected_type;
-
-                if (!result_condition_ || result_condition_->match(result, text))
-                {
-                    results.push_back(result);
-                    if (stop_after_first)
-                    {
-                        break;
-                    }
-                }
-
-                i += deny_length - 1;
-            }
-            else if (allow_length > 0)
-            {
-                i += allow_length - 1;
-            }
-        }
-
-        return results;
+        return *this;
     }
 
     bool contains(std::string_view text) const
@@ -188,13 +120,22 @@ public:
 
     std::optional<word_result> find_first(std::string_view text) const
     {
-        std::vector<word_result> results = find_all(text, true);
-        if (results.empty())
-        {
-            return std::nullopt;
-        }
+        std::optional<word_result> first;
+        scan_matches(text, [&](word_result result) {
+            first = std::move(result);
+            return false;
+        });
+        return first;
+    }
 
-        return results.front();
+    std::vector<word_result> find_all(std::string_view text) const
+    {
+        std::vector<word_result> results;
+        scan_matches(text, [&](word_result result) {
+            results.push_back(std::move(result));
+            return true;
+        });
+        return results;
     }
 
     std::string replace(std::string_view text) const
@@ -204,7 +145,7 @@ public:
 
     std::string replace(std::string_view text, const replace_strategy& strategy) const
     {
-        const std::vector<word_result> results = find_all(text, false);
+        const std::vector<word_result> results = find_all(text);
         if (results.empty())
         {
             return std::string(text);
@@ -240,7 +181,7 @@ public:
             return;
         }
 
-        deny_trie_->add_word(normalized);
+        dictionary_.add_word(normalized, trie_word_kind::deny);
     }
 
     void remove_word(std::string_view word)
@@ -251,7 +192,7 @@ public:
             return;
         }
 
-        deny_trie_->remove_word(normalized);
+        dictionary_.remove_word(normalized, trie_word_kind::deny);
     }
 
     void add_allow_word(std::string_view word)
@@ -262,7 +203,7 @@ public:
             return;
         }
 
-        allow_trie_->add_word(normalized);
+        dictionary_.add_word(normalized, trie_word_kind::allow);
     }
 
     void remove_allow_word(std::string_view word)
@@ -273,7 +214,7 @@ public:
             return;
         }
 
-        allow_trie_->remove_word(normalized);
+        dictionary_.remove_word(normalized, trie_word_kind::allow);
     }
 
     const sensitive_word_config& config() const noexcept
@@ -282,15 +223,269 @@ public:
     }
 
 private:
+    struct word_scan_result
+    {
+        std::size_t allow_length = 0;
+        std::size_t deny_length = 0;
+        std::u32string normalized_deny_word {};
+    };
+
+    struct num_scan_result
+    {
+        std::size_t deny_length = 0;
+        std::u32string normalized_deny_word {};
+    };
+
+    void rebuild_runtime()
+    {
+        normalizer_ = std::make_unique<text_normalizer>(text_normalizer_options{
+            config_.ignore_case,
+            config_.ignore_width,
+            config_.ignore_num_style,
+            config_.ignore_chinese_style,
+            config_.ignore_english_style,
+        });
+    }
+
+    template <typename OnMatch>
+    void scan_matches(std::string_view text, OnMatch&& on_match) const
+    {
+        if (text.empty() || (!config_.enable_word_check && !config_.enable_num_check))
+        {
+            return;
+        }
+
+        const normalized_text normalized = normalizer_->normalize_text(text);
+        if (normalized.normalized_chars.empty())
+        {
+            return;
+        }
+
+        for (std::size_t i = 0; i < normalized.normalized_chars.size(); ++i)
+        {
+            std::size_t allow_length = 0;
+            std::size_t deny_length = 0;
+            std::u32string normalized_deny_word;
+            match_type detected_type = match_type::word;
+
+            if (config_.enable_word_check)
+            {
+                const word_scan_result detect_result = detect_word_at(normalized, i);
+                allow_length = detect_result.allow_length;
+                deny_length = detect_result.deny_length;
+                normalized_deny_word = detect_result.normalized_deny_word;
+            }
+
+            if (allow_length == 0 && deny_length == 0 && config_.enable_num_check)
+            {
+                const num_scan_result detect_result = detect_num_at(normalized, i);
+                if (detect_result.deny_length > 0)
+                {
+                    deny_length = detect_result.deny_length;
+                    normalized_deny_word = detect_result.normalized_deny_word;
+                    detected_type = match_type::num;
+                }
+            }
+
+            if (allow_length < deny_length && deny_length > 0)
+            {
+                word_result result = make_word_result(
+                    text,
+                    normalized,
+                    i,
+                    deny_length,
+                    std::move(normalized_deny_word),
+                    detected_type);
+
+                if ((!result_condition_ || result_condition_->match(result, text)) &&
+                    !on_match(std::move(result)))
+                {
+                    return;
+                }
+
+                i += deny_length - 1;
+            }
+            else if (allow_length > 0)
+            {
+                i += allow_length - 1;
+            }
+        }
+    }
+
+    word_scan_result detect_word_at(
+        const normalized_text& text,
+        std::size_t begin_index) const
+    {
+        word_scan_result result {};
+
+        if (begin_index >= text.normalized_chars.size())
+        {
+            return result;
+        }
+
+        std::u32string builder;
+        std::size_t temp_len = 0;
+        std::size_t best_deny_builder_size = 0;
+        std::size_t best_allow_builder_size = 0;
+
+        auto state = dictionary_.root_state();
+        bool allow_active = true;
+        bool deny_active = true;
+
+        for (std::size_t i = begin_index; i < text.normalized_chars.size(); ++i)
+        {
+            const auto& item = text.normalized_chars[i];
+
+            if (temp_len != 0 && char_ignore_ &&
+                char_ignore_->ignore(item.raw_code_point, item.normalized_code_point))
+            {
+                ++temp_len;
+                continue;
+            }
+
+            builder.push_back(item.normalized_code_point);
+            ++temp_len;
+
+            const bool ignore_repeated_char =
+                config_.ignore_repeat &&
+                builder.size() > 1 &&
+                builder[builder.size() - 2] == builder.back();
+
+            if (!ignore_repeated_char)
+            {
+                state = dictionary_.advance(state, item.normalized_code_point);
+                if (!state.valid())
+                {
+                    break;
+                }
+            }
+
+            const trie_terminal_flags flags = dictionary_.terminal_flags(state);
+
+            if (allow_active && flags.allow)
+            {
+                result.allow_length = temp_len;
+                best_allow_builder_size = builder.size();
+
+                if (config_.word_fail_fast)
+                {
+                    allow_active = false;
+                }
+            }
+
+            if (deny_active && flags.deny)
+            {
+                result.deny_length = temp_len;
+                best_deny_builder_size = builder.size();
+
+                if (config_.word_fail_fast)
+                {
+                    deny_active = false;
+                }
+            }
+
+            if (!allow_active && !deny_active)
+            {
+                break;
+            }
+        }
+
+        if (best_allow_builder_size > best_deny_builder_size)
+        {
+            best_allow_builder_size = best_allow_builder_size;
+        }
+
+        result.normalized_deny_word = builder.substr(
+            0,
+            std::min(best_deny_builder_size, builder.size()));
+
+        return result;
+    }
+
+    num_scan_result detect_num_at(
+        const normalized_text& text,
+        std::size_t begin_index) const
+    {
+        num_scan_result result {};
+
+        if (begin_index >= text.normalized_chars.size())
+        {
+            return result;
+        }
+
+        std::u32string builder;
+        std::size_t temp_len = 0;
+
+        for (std::size_t i = begin_index; i < text.normalized_chars.size(); ++i)
+        {
+            const auto& item = text.normalized_chars[i];
+
+            if (!builder.empty() && char_ignore_ &&
+                char_ignore_->ignore(item.raw_code_point, item.normalized_code_point))
+            {
+                ++temp_len;
+                continue;
+            }
+
+            if (!is_ascii_digit(item.normalized_code_point))
+            {
+                break;
+            }
+
+            builder.push_back(item.normalized_code_point);
+            ++temp_len;
+        }
+
+        if (builder.size() >= config_.num_check_len)
+        {
+            result.deny_length = temp_len;
+            result.normalized_deny_word = std::move(builder);
+        }
+
+        return result;
+    }
+
+    word_result make_word_result(
+        std::string_view text,
+        const normalized_text& normalized,
+        std::size_t begin_index,
+        std::size_t deny_length,
+        std::u32string normalized_deny_word,
+        match_type detected_type) const
+    {
+        word_result result;
+        result.raw_begin = normalized.normalized_chars[begin_index].raw_byte_begin;
+        result.raw_end = normalized.normalized_chars[begin_index + deny_length - 1].raw_byte_end;
+        result.raw_code_point_length = deny_length;
+        result.word = std::string(text.substr(result.raw_begin, result.raw_end - result.raw_begin));
+        result.normalized_word = encode_utf8(normalized_deny_word);
+        result.type = detected_type;
+
+        if (begin_index > 0)
+        {
+            const auto& left = normalized.normalized_chars[begin_index - 1];
+            result.left_raw_code_point = left.raw_code_point;
+            result.left_normalized_code_point = left.normalized_code_point;
+        }
+
+        const std::size_t right_index = begin_index + deny_length;
+        if (right_index < normalized.normalized_chars.size())
+        {
+            const auto& right = normalized.normalized_chars[right_index];
+            result.right_raw_code_point = right.raw_code_point;
+            result.right_normalized_code_point = right.normalized_code_point;
+        }
+
+        return result;
+    }
+
+private:
     sensitive_word_config config_ {};
     std::shared_ptr<class char_ignore> char_ignore_ {};
     std::shared_ptr<class result_condition> result_condition_ {};
     std::shared_ptr<class replace_strategy> replace_strategy_ {};
-    std::shared_ptr<text_normalizer> normalizer_ {};
-    std::shared_ptr<trie_dictionary> allow_trie_ {};
-    std::shared_ptr<trie_dictionary> deny_trie_ {};
-    std::shared_ptr<word_detector> detector_ {};
-    std::shared_ptr<num_detector> num_detector_ {};
+    std::unique_ptr<text_normalizer> normalizer_ {};
+    trie_dictionary dictionary_ {};
 };
 
 sensitive_word_builder& sensitive_word_builder::ignore_case(bool value)
@@ -379,41 +574,25 @@ sensitive_word_builder& sensitive_word_builder::add_allow_word(std::string word)
 
 sensitive_word_builder& sensitive_word_builder::add_deny_words_from_text(std::string text)
 {
-    auto words = load_words_from_text(text);
-    deny_words_.insert(
-        deny_words_.end(),
-        std::make_move_iterator(words.begin()),
-        std::make_move_iterator(words.end()));
+    append_words(deny_words_, load_words_from_text(text));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_allow_words_from_text(std::string text)
 {
-    auto words = load_words_from_text(text);
-    allow_words_.insert(
-        allow_words_.end(),
-        std::make_move_iterator(words.begin()),
-        std::make_move_iterator(words.end()));
+    append_words(allow_words_, load_words_from_text(text));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_deny_words_from_file(const std::string& file_path)
 {
-    auto words = load_words_from_file(file_path);
-    deny_words_.insert(
-        deny_words_.end(),
-        std::make_move_iterator(words.begin()),
-        std::make_move_iterator(words.end()));
+    append_words(deny_words_, load_words_from_file(file_path));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_allow_words_from_file(const std::string& file_path)
 {
-    auto words = load_words_from_file(file_path);
-    allow_words_.insert(
-        allow_words_.end(),
-        std::make_move_iterator(words.begin()),
-        std::make_move_iterator(words.end()));
+    append_words(allow_words_, load_words_from_file(file_path));
     return *this;
 }
 
@@ -457,6 +636,27 @@ sensitive_word_engine::sensitive_word_engine()
 {
 }
 
+sensitive_word_engine::~sensitive_word_engine() = default;
+
+sensitive_word_engine::sensitive_word_engine(const sensitive_word_engine& other)
+    : impl_(other.impl_ ? std::make_unique<impl>(*other.impl_) : nullptr)
+{
+}
+
+sensitive_word_engine& sensitive_word_engine::operator=(const sensitive_word_engine& other)
+{
+    if (this != &other)
+    {
+        impl_ = other.impl_ ? std::make_unique<impl>(*other.impl_) : nullptr;
+    }
+
+    return *this;
+}
+
+sensitive_word_engine::sensitive_word_engine(sensitive_word_engine&& other) noexcept = default;
+
+sensitive_word_engine& sensitive_word_engine::operator=(sensitive_word_engine&& other) noexcept = default;
+
 sensitive_word_engine::sensitive_word_engine(
     sensitive_word_config config,
     std::vector<std::string> deny_words,
@@ -464,7 +664,7 @@ sensitive_word_engine::sensitive_word_engine(
     std::shared_ptr<class char_ignore> char_ignore,
     std::shared_ptr<class result_condition> result_condition,
     std::shared_ptr<class replace_strategy> replace_strategy)
-    : impl_(std::make_shared<impl>(
+    : impl_(std::make_unique<impl>(
           std::move(config),
           std::move(deny_words),
           std::move(allow_words),
@@ -486,7 +686,7 @@ std::optional<word_result> sensitive_word_engine::find_first(std::string_view te
 
 std::vector<word_result> sensitive_word_engine::find_all(std::string_view text) const
 {
-    return impl_->find_all(text, false);
+    return impl_->find_all(text);
 }
 
 std::optional<std::string> sensitive_word_engine::find_first_word(std::string_view text) const

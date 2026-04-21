@@ -51,12 +51,10 @@ bool should_skip_line(const std::string& line)
     return false;
 }
 
-}  // namespace
-
-std::vector<std::string> load_words_from_text(std::string_view text)
+template <typename InputStream>
+std::vector<std::string> load_words_from_stream(InputStream& input)
 {
     std::vector<std::string> words;
-    std::istringstream input{std::string(text)};
     std::string line;
 
     while (std::getline(input, line))
@@ -73,6 +71,14 @@ std::vector<std::string> load_words_from_text(std::string_view text)
     return words;
 }
 
+}  // namespace
+
+std::vector<std::string> load_words_from_text(std::string_view text)
+{
+    std::istringstream input{std::string(text)};
+    return load_words_from_stream(input);
+}
+
 std::vector<std::string> load_words_from_file(const std::string& file_path)
 {
     std::ifstream input(file_path, std::ios::binary);
@@ -81,9 +87,7 @@ std::vector<std::string> load_words_from_file(const std::string& file_path)
         throw std::runtime_error("failed to open word dictionary file: " + file_path);
     }
 
-    std::ostringstream buffer;
-    buffer << input.rdbuf();
-    return load_words_from_text(buffer.str());
+    return load_words_from_stream(input);
 }
 
 }  // namespace sensitive_word

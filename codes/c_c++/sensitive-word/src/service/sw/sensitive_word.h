@@ -20,9 +20,15 @@ struct word_result
 {
     std::size_t raw_begin = 0;
     std::size_t raw_end = 0;
+    std::size_t raw_code_point_length = 0;
     std::string word;
     std::string normalized_word;
     match_type type = match_type::word;
+
+    char32_t left_raw_code_point = 0;
+    char32_t right_raw_code_point = 0;
+    char32_t left_normalized_code_point = 0;
+    char32_t right_normalized_code_point = 0;
 };
 
 struct sensitive_word_config
@@ -116,6 +122,14 @@ class sensitive_word_engine
 {
 public:
     sensitive_word_engine();
+    ~sensitive_word_engine();
+
+    sensitive_word_engine(const sensitive_word_engine& other);
+    sensitive_word_engine& operator=(const sensitive_word_engine& other);
+
+    sensitive_word_engine(sensitive_word_engine&& other) noexcept;
+    sensitive_word_engine& operator=(sensitive_word_engine&& other) noexcept;
+
     sensitive_word_engine(
         sensitive_word_config config,
         std::vector<std::string> deny_words,
@@ -145,7 +159,7 @@ public:
 
 private:
     class impl;
-    std::shared_ptr<impl> impl_ {};
+    std::unique_ptr<impl> impl_ {};
 };
 
 namespace char_ignores

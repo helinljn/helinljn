@@ -8,9 +8,6 @@
 namespace sensitive_word
 {
 
-char32_t previous_code_point(std::string_view text, std::size_t begin);
-char32_t next_code_point(std::string_view text, std::size_t end);
-
 bool contains_ascii_letter(std::string_view text);
 bool contains_ascii_digit_text(std::string_view text);
 bool is_ascii_word_boundary(char32_t ch);
