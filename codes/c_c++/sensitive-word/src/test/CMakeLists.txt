@@ -9,6 +9,7 @@ SET(CURRENT_INCLUDE_DIR
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/opencc/src
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service
 )
 
 # 宏定义、编译选项、链接库
@@ -69,8 +70,28 @@ FILE(GLOB_RECURSE UTFCPP_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source/*.h
 )
 
+# sensitive-word源文件
+SET(SENSITIVE_WORD_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/num_detector.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/num_detector.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/replace_strategy.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/replace_strategy.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/result_condition.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/result_condition.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/sensitive_word.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/sensitive_word.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/text_normalizer.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/text_normalizer.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/trie_dictionary.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/trie_dictionary.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_detector.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_detector.cpp
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_dictionary_loader.h
+    ${CMAKE_PROJECT_ROOT_DIR}/src/service/word_dictionary_loader.cpp
+)
+
 # 生成可执行文件
-ADD_EXECUTABLE(${CURRENT_TARGET_NAME} ${TEST_SRC_LIST} ${DOCTEST_SRC_LIST} ${SPDLOG_SRC_LIST} ${UTFCPP_SRC_LIST})
+ADD_EXECUTABLE(${CURRENT_TARGET_NAME} ${TEST_SRC_LIST} ${DOCTEST_SRC_LIST} ${SPDLOG_SRC_LIST} ${UTFCPP_SRC_LIST} ${SENSITIVE_WORD_SRC_LIST})
 PROJECT_TARGET_APPLY_COMMON_OPTIONS(${CURRENT_TARGET_NAME})
 TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
 TARGET_COMPILE_DEFINITIONS(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_COMPILE_DEFINITIONS})
@@ -98,4 +119,6 @@ IF(WIN32)
         FILES ${SPDLOG_SRC_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source PREFIX "utfcpp"
         FILES ${UTFCPP_SRC_LIST})
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/src/service PREFIX "sensitive-word"
+        FILES ${SENSITIVE_WORD_SRC_LIST})
 ENDIF()
