@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef SENSITIVE_WORD_H
+#define SENSITIVE_WORD_H
+
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -7,44 +10,54 @@
 #include <string_view>
 #include <vector>
 
-namespace sensitive_word
-{
+namespace sensitive_word {
 
+class sensitive_word_engine;
+
+//////////////////////////////////////////////////////////////
+// 敏感词匹配类型
+//////////////////////////////////////////////////////////////
 enum class match_type
 {
     word,
     num,
 };
 
+//////////////////////////////////////////////////////////////
+// 敏感词匹配结果
+//////////////////////////////////////////////////////////////
 struct word_result
 {
-    std::size_t raw_begin = 0;
-    std::size_t raw_end = 0;
-    std::size_t raw_code_point_length = 0;
-    std::string word;
-    std::string normalized_word;
-    match_type type = match_type::word;
+    size_t      raw_begin             = 0;  // 原始文本中敏感词的起始位置
+    size_t      raw_end               = 0;  // 原始文本中敏感词的结束位置
+    size_t      raw_code_point_length = 0;  // 原始文本中敏感词的字符数
+    std::string word;                       // 原始文本中敏感词
+    std::string normalized_word;            // 敏感词的归一化表示
+    match_type  type = match_type::word;    // 敏感词的匹配类型
 
-    char32_t left_raw_code_point = 0;
-    char32_t right_raw_code_point = 0;
-    char32_t left_normalized_code_point = 0;
-    char32_t right_normalized_code_point = 0;
+    char32_t left_raw_code_point         = 0;  // 敏感词左侧的原始代码点
+    char32_t right_raw_code_point        = 0;  // 敏感词右侧的原始代码点
+    char32_t left_normalized_code_point  = 0;  // 敏感词左侧的归一化代码点
+    char32_t right_normalized_code_point = 0;  // 敏感词右侧的归一化代码点
 };
 
+//////////////////////////////////////////////////////////////
+// 敏感词匹配配置
+//////////////////////////////////////////////////////////////
 struct sensitive_word_config
 {
-    bool ignore_case = true;
-    bool ignore_width = true;
-    bool ignore_num_style = true;
-    bool ignore_chinese_style = true;
-    bool ignore_english_style = true;
-    bool ignore_repeat = false;
+    bool ignore_case          = true;   // 是否忽略大小写
+    bool ignore_width         = true;   // 是否忽略宽度字符(全角/半角宽度)
+    bool ignore_num_style     = true;   // 是否忽略数字样式
+    bool ignore_chinese_style = true;   // 是否忽略中文字符
+    bool ignore_english_style = true;   // 是否忽略英文字符
+    bool ignore_repeat        = false;  // 是否忽略重复字符
 
-    bool enable_word_check = true;
-    bool enable_num_check = false;
+    bool enable_word_check    = true;   // 是否启用敏感词匹配
+    bool enable_num_check     = false;  // 是否启用数字匹配
 
-    bool word_fail_fast = true;
-    std::size_t num_check_len = 8;
+    bool   word_fail_fast     = true;   // 是否快速失败
+    size_t num_check_len      = 8;      // 数字匹配的长度
 };
 
 //////////////////////////////////////////////////////////////
@@ -83,8 +96,10 @@ public:
     virtual std::string replacement_for(const word_result& result, std::string_view original_text) const = 0;
 };
 
-class sensitive_word_engine;
-
+//////////////////////////////////////////////////////////////
+// 敏感词匹配构建器
+// 用于构建敏感词匹配引擎
+//////////////////////////////////////////////////////////////
 class sensitive_word_builder
 {
 public:
@@ -98,8 +113,8 @@ public:
     sensitive_word_builder& enable_word_check(bool value);
     sensitive_word_builder& enable_num_check(bool value);
 
-    sensitive_word_builder& num_check_len(std::size_t value);
     sensitive_word_builder& word_fail_fast(bool value);
+    sensitive_word_builder& num_check_len(size_t value);
 
     sensitive_word_builder& deny_words(std::vector<std::string> words);
     sensitive_word_builder& allow_words(std::vector<std::string> words);
@@ -115,22 +130,26 @@ public:
     sensitive_word_builder& result_condition(std::shared_ptr<class result_condition> value);
     sensitive_word_builder& replace_strategy(std::shared_ptr<class replace_strategy> value);
 
-    sensitive_word_engine build() const;
+    sensitive_word_engine build(void) const;
 
 private:
-    sensitive_word_config config_ {};
-    std::vector<std::string> deny_words_ {};
-    std::vector<std::string> allow_words_ {};
-    std::shared_ptr<class char_ignore> char_ignore_ {};
-    std::shared_ptr<class result_condition> result_condition_ {};
-    std::shared_ptr<class replace_strategy> replace_strategy_ {};
+    sensitive_word_config                   config_;
+    std::vector<std::string>                deny_words_;
+    std::vector<std::string>                allow_words_;
+    std::shared_ptr<class char_ignore>      char_ignore_;
+    std::shared_ptr<class result_condition> result_condition_;
+    std::shared_ptr<class replace_strategy> replace_strategy_;
 };
 
+//////////////////////////////////////////////////////////////
+// 敏感词匹配引擎
+// 用于匹配敏感词
+//////////////////////////////////////////////////////////////
 class sensitive_word_engine
 {
 public:
-    sensitive_word_engine();
-    ~sensitive_word_engine();
+    sensitive_word_engine(void);
+    ~sensitive_word_engine(void);
 
     sensitive_word_engine(const sensitive_word_engine& other);
     sensitive_word_engine& operator=(const sensitive_word_engine& other);
@@ -139,10 +158,10 @@ public:
     sensitive_word_engine& operator=(sensitive_word_engine&& other) noexcept;
 
     sensitive_word_engine(
-        sensitive_word_config config,
-        std::vector<std::string> deny_words,
-        std::vector<std::string> allow_words,
-        std::shared_ptr<class char_ignore> char_ignore,
+        sensitive_word_config                   config,
+        std::vector<std::string>                deny_words,
+        std::vector<std::string>                allow_words,
+        std::shared_ptr<class char_ignore>      char_ignore,
         std::shared_ptr<class result_condition> result_condition,
         std::shared_ptr<class replace_strategy> replace_strategy);
 
@@ -163,11 +182,11 @@ public:
     void add_allow_word(std::string_view word);
     void remove_allow_word(std::string_view word);
 
-    const sensitive_word_config& config() const noexcept;
+    const sensitive_word_config& config(void) const noexcept;
 
 private:
     class impl;
-    std::unique_ptr<impl> impl_ {};
+    std::unique_ptr<impl> impl_;
 };
 
 namespace char_ignores {
@@ -231,3 +250,5 @@ std::shared_ptr<replace_strategy> chars(char replacement);
 
 } // namespace replace_strategies
 } // namespace sensitive_word
+
+#endif // SENSITIVE_WORD_H

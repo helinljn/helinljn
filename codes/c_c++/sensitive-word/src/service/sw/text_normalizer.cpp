@@ -774,14 +774,14 @@ public:
             chinese_normalized_code_points = decode_utf8_to_code_points(chinese_converter_.convert_text(text));
 
         const bool can_align_by_index =!options_.ignore_chinese_style || chinese_normalized_code_points.size() == raw_code_points.size();
-        for (size_t i = 0; i < raw_code_points.size(); ++i)
+        for (size_t idx = 0; idx < raw_code_points.size(); ++idx)
         {
-            const auto& raw                   = raw_code_points[i];
+            const auto& raw                   = raw_code_points[idx];
             char32_t    normalized_code_point = raw.value;
             if (options_.ignore_chinese_style)
             {
                 if (can_align_by_index)
-                    normalized_code_point = chinese_normalized_code_points[i];
+                    normalized_code_point = chinese_normalized_code_points[idx];
                 else
                     normalized_code_point = chinese_converter_.convert_char(raw.value);
             }
