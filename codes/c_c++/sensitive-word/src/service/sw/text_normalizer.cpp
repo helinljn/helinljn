@@ -19,34 +19,39 @@ struct raw_code_point
 };
 
 /**
- * @brief 检查字符是否为CJK字符
+ * @brief 检查字符是否为 CJK 汉字代码点
+ *        这里的“CJK”仅指汉字/兼容汉字本体，用于中文分词和敏感词匹配中的“字”判断；
+ *        不包含中文标点、部首、注音符号、日文假名、韩文等其它东亚文字。
  * @param ch 输入字符
- * @return true 字符是CJK字符，否则返回false
+ * @return true 字符是 CJK 汉字或兼容汉字，否则返回 false
  */
 bool is_cjk(char32_t ch)
 {
     return (ch >= 0x4E00  && ch <= 0x9FFF)  ||  // CJK Unified Ideographs
-           (ch >= 0x3400  && ch <= 0x4DBF)  ||  // CJK Extension A
-           (ch >= 0x20000 && ch <= 0x2A6DF) ||  // CJK Extension B
-           (ch >= 0x2A700 && ch <= 0x2B73F) ||  // CJK Extension C
-           (ch >= 0x2B740 && ch <= 0x2B81F) ||  // CJK Extension D
-           (ch >= 0x2B820 && ch <= 0x2CEAF) ||  // CJK Extension E
-           (ch >= 0x2CEB0 && ch <= 0x2EBEF) ||  // CJK Extension F
-           (ch >= 0x30000 && ch <= 0x3134F) ||  // CJK Extension G
-           (ch >= 0x31350 && ch <= 0x323AF) ||  // CJK Extension H
-           (ch >= 0x2EBF0 && ch <= 0x2EE5D) ||  // CJK Extension I
+           (ch >= 0x3400  && ch <= 0x4DBF)  ||  // CJK Unified Ideographs Extension A
+           (ch >= 0x20000 && ch <= 0x2A6DF) ||  // CJK Unified Ideographs Extension B
+           (ch >= 0x2A700 && ch <= 0x2B73F) ||  // CJK Unified Ideographs Extension C
+           (ch >= 0x2B740 && ch <= 0x2B81F) ||  // CJK Unified Ideographs Extension D
+           (ch >= 0x2B820 && ch <= 0x2CEAF) ||  // CJK Unified Ideographs Extension E
+           (ch >= 0x2CEB0 && ch <= 0x2EBEF) ||  // CJK Unified Ideographs Extension F
+           (ch >= 0x30000 && ch <= 0x3134F) ||  // CJK Unified Ideographs Extension G
+           (ch >= 0x31350 && ch <= 0x323AF) ||  // CJK Unified Ideographs Extension H
+           (ch >= 0x2EBF0 && ch <= 0x2EE5D) ||  // CJK Unified Ideographs Extension I
            (ch >= 0xF900  && ch <= 0xFAFF)  ||  // CJK Compatibility Ideographs
            (ch >= 0x2F800 && ch <= 0x2FA1F);    // CJK Compatibility Ideographs Supplement
 }
 
 /**
- * @brief 检查字符是否为拉丁扩展字符
+ * @brief 检查字符是否属于常用拉丁扩展字母范围
+ *        这里采用“按 Unicode 拉丁相关字母块近似判断”的策略，目标是覆盖
+ *        中文环境中常见的扩展拉丁字母（如 é, ü, ç, ñ, ā, ō 等），用于 word-like 判断；
+ *        它不是严格意义上的 Unicode Alphabetic 属性判定。
  * @param ch 输入字符
- * @return true 字符是拉丁扩展字符，否则返回false
+ * @return true 字符落在常用拉丁扩展字母范围内，否则返回 false
  */
 bool is_latin_extended(char32_t ch)
 {
-    if (ch == 0x00D7 || ch == 0x00F7) // × ÷ 不是字母
+    if (ch == 0x00D7 || ch == 0x00F7) // × ÷ 为运算符，不视为字母
         return false;
 
     return (ch >= 0x00C0 && ch <= 0x024F)   ||  // Latin-1 Supplement + Latin Extended-A/B
@@ -99,9 +104,15 @@ char32_t fold_halfwidth_katakana(char32_t ch)
 }
 
 /**
- * @brief 折叠全角符号为半角等价形式
- *        仅处理纯符号的宽度折叠；全角英文字母和全角数字分别由
- *        fold_english_style 和 fold_num_style 处理
+ * @brief 折叠全角/半角宽度差异
+ *        仅处理“单字符可无损近似折叠”的宽度形式：
+ *        - 全角空格、全角 ASCII 符号
+ *        - 若干全角兼容符号
+ *        - 半角片假名到全角片假名的单字符映射
+ *        不处理：
+ *        - 全角英文字母（由 fold_english_style 处理）
+ *        - 全角数字（由 fold_num_style 处理）
+ *        - 需要前后文组合的半角片假名浊音/半浊音（如 ｶﾞ -> ガ）
  * @param ch 输入字符
  * @return 折叠后的字符
  */
@@ -143,8 +154,13 @@ char32_t fold_width(char32_t ch)
 }
 
 /**
- * @brief 折叠ASCII大小写字符
- *        当前仅忽略 ASCII 大小写，不处理希腊字母、德语 ß、土耳其语 I 等 Unicode 特例
+ * @brief 折叠大小写字符
+ *        以 ASCII case-fold 为主，并额外覆盖中文环境里较常见的 Latin-1
+ *        大写重音字母（À..Ö, Ø..Þ）到对应小写。
+ *        不处理：
+ *        - 需要多字符展开的特殊大小写（如 ß -> ss）
+ *        - 复杂语言相关规则（如土耳其语 I/i）
+ *        - 更大范围的完整 Unicode case folding
  * @param ch 输入字符
  * @return 折叠后的字符
  */
@@ -153,23 +169,59 @@ char32_t fold_ascii_case(char32_t ch)
     if (ch >= U'A' && ch <= U'Z')
         return ch - U'A' + U'a';
 
-    // Latin-1 Supplement 大写 → 小写（排除 U+00D7 × 和 U+00DF ß）
-    // if ((ch >= 0x00C0 && ch <= 0x00D6) || (ch >= 0x00D8 && ch <= 0x00DE))
-    //     return ch + 0x20;
+    // 常见 Latin-1 Supplement 大写重音字母 → 小写
+    // 排除 U+00D7 ×；U+00DF ß 本身已是小写，不在此分支内。
+    if ((ch >= 0x00C0 && ch <= 0x00D6) || (ch >= 0x00D8 && ch <= 0x00DE))
+        return ch + 0x20;
 
     return ch;
 }
 
 /**
  * @brief 折叠英文样式字符
- *        覆盖常见样式，不保证完整 Unicode 数学字母集
- *        包含: 全角英文字母、带圈字母、数学粗体/斜体/花体/哥特体/双线体/无衬线/等宽体等
- *        不含: 全角数字（由 fold_num_style 处理）、全角符号（由 fold_width 处理）
+ *        面向中文环境下的“常用英文样式规避”：
+ *        - 全角英文字母
+ *        - 带圈字母
+ *        - 数学字母样式（粗体/斜体/花体/哥特体/双线体/无衬线/等宽体等）
+ *        - BMP 中若干与数学字母样式等价的兼容字母符号（如 ℂ ℍ ℕ ℙ ℚ ℝ ℤ）
+ *
+ *        说明：
+ *        1. 该函数目标是将“视觉样式不同、语义仍是英文字母”的单字符折叠回普通拉丁字母；
+ *        2. 不处理全角数字（由 fold_num_style 处理）；
+ *        3. 不处理全角符号（由 fold_width 处理）；
+ *        4. 不追求完整 Unicode 兼容分解，只覆盖常见英文规避写法。
  * @param ch 输入字符
  * @return 折叠后的字符
  */
 char32_t fold_english_style(char32_t ch)
 {
+    // Letterlike Symbols / 兼容字母：这些字符在视觉和语义上等价于英文字母，
+    // 但没有落在连续的 SMP 数学字母区间中，需要单独映射。
+    switch (ch)
+    {
+    case 0x2102: return U'C'; // ℂ DOUBLE-STRUCK CAPITAL C
+    case 0x210B: return U'H'; // ℋ SCRIPT CAPITAL H
+    case 0x210C: return U'H'; // ℌ FRAKTUR CAPITAL H
+    case 0x210D: return U'H'; // ℍ DOUBLE-STRUCK CAPITAL H
+    case 0x2110: return U'I'; // ℐ SCRIPT CAPITAL I
+    case 0x2111: return U'I'; // ℑ FRAKTUR CAPITAL I
+    case 0x2112: return U'L'; // ℒ SCRIPT CAPITAL L
+    case 0x2115: return U'N'; // ℕ DOUBLE-STRUCK CAPITAL N
+    case 0x2119: return U'P'; // ℙ DOUBLE-STRUCK CAPITAL P
+    case 0x211A: return U'Q'; // ℚ DOUBLE-STRUCK CAPITAL Q
+    case 0x211B: return U'R'; // ℛ SCRIPT CAPITAL R
+    case 0x211C: return U'R'; // ℜ FRAKTUR CAPITAL R
+    case 0x211D: return U'R'; // ℝ DOUBLE-STRUCK CAPITAL R
+    case 0x2124: return U'Z'; // ℤ DOUBLE-STRUCK CAPITAL Z
+    case 0x2128: return U'Z'; // ℨ FRAKTUR CAPITAL Z
+    case 0x212C: return U'B'; // ℬ SCRIPT CAPITAL B
+    case 0x212D: return U'C'; // ℭ FRAKTUR CAPITAL C
+    case 0x2130: return U'E'; // ℰ SCRIPT CAPITAL E
+    case 0x2131: return U'F'; // ℱ SCRIPT CAPITAL F
+    case 0x2133: return U'M'; // ℳ SCRIPT CAPITAL M
+    case 0x212A: return U'K'; // K KELVIN SIGN，常见兼容英文 K
+    default: break;
+    }
     // 全角英文字母 (U+FF21-FF3A, U+FF41-FF5A)
     if (ch >= 0xFF21 && ch <= 0xFF3A)
         return static_cast<char32_t>(U'A' + (ch - 0xFF21));
@@ -194,10 +246,11 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x1D41A && ch <= 0x1D433)
         return static_cast<char32_t>(U'a' + (ch - 0x1D41A));
 
-    // 数学斜体 (Mathematical Italic) — 大写空洞: U+1D439 (ℎ, Planck Constant, 不属于斜体字母序列)
+    // 数学斜体 (Mathematical Italic)。
+    // 注：该区间中缺失的字母通常以 BMP 兼容字符形式存在，已在函数开头单独处理。
     if (ch >= 0x1D434 && ch <= 0x1D44D)
     {
-        if (ch == 0x1D439)  // ℎ 不属于斜体字母序列，跳过
+        if (ch == 0x1D439)  // 该码位不是连续字母序列成员，跳过
             return ch;
         return static_cast<char32_t>(U'A' + (ch - 0x1D434 - (ch > 0x1D439 ? 1 : 0)));
     }
@@ -213,8 +266,9 @@ char32_t fold_english_style(char32_t ch)
         return static_cast<char32_t>(U'a' + (ch - 0x1D482));
 
     // 数学花体 (Mathematical Script)
-    //    大写空洞: 1D49D,1D4A0,1D4A1,1D4A3,1D4A4,1D4A7,1D4A8,1D4AD
-    //    小写空洞: 1D4BA,1D4BC
+    //    大写空洞对应的兼容字母在 BMP 中单独编码，已在函数开头处理：
+    //    1D49D,1D4A0,1D4A1,1D4A3,1D4A4,1D4A7,1D4A8,1D4AD
+    //    小写空洞: 1D4BA,1D4BC（当前保持原样，不做多余猜测）
     if (ch >= 0x1D49C && ch <= 0x1D4B5)
     {
         if (ch == 0x1D49D || ch == 0x1D4AD
@@ -259,7 +313,8 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x1D4EA && ch <= 0x1D503)
         return static_cast<char32_t>(U'a' + (ch - 0x1D4EA));
 
-    // 数学哥特体 (Mathematical Fraktur) — 大写空洞: 1D506→ℭ
+    // 数学哥特体 (Mathematical Fraktur)。
+    // 大写空洞对应的兼容字母在 BMP 中单独编码，已在函数开头处理。
     if (ch >= 0x1D504 && ch <= 0x1D51C)
     {
         if (ch == 0x1D506)
@@ -277,7 +332,8 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x1D586 && ch <= 0x1D59F)
         return static_cast<char32_t>(U'a' + (ch - 0x1D586));
 
-    // 数学双线体 (Mathematical Double-struck) — 大写空洞: 1D53A,1D53F,1D545,1D547-1D549
+    // 数学双线体 (Mathematical Double-struck)。
+    // 大写空洞对应的兼容字母在 BMP 中单独编码，已在函数开头处理。
     if (ch >= 0x1D538 && ch <= 0x1D54F)
     {
         if (ch == 0x1D53A || ch == 0x1D53F || ch == 0x1D545 || (ch >= 0x1D547 && ch <= 0x1D549))
@@ -332,7 +388,17 @@ char32_t fold_english_style(char32_t ch)
 
 /**
  * @brief 折叠数字样式字符
- *        仅将能够无歧义映射为单个十进制数字 0-9 的单字符样式数字折叠为 ASCII 数字；不处理表示多位数、序号或复合数值的单字符
+ *        仅将能够“无歧义映射为单个十进制数字 0-9”的单字符数字样式
+ *        折叠为 ASCII 数字。
+ *
+ *        设计边界：
+ *        - 处理：全角数字、上下标数字、数学样式数字、部分带圈/括号/装饰数字、
+ *                常见中文单数字（零~九、壹~玖、两/兩 等）
+ *        - 不处理：表示多位数的单字符（如 ⑩、⑪、⑳）、序号语义字符、
+ *                  中文复合数词（十、百、千、万、亿、廿、卅 等）
+ *
+ *        说明：将 ○ / ◯ 视为数字 0 是面向文本过滤/规避场景的策略性折叠，
+ *        并非严格的通用数值语义规则。
  * @param ch 输入字符
  * @return 折叠后的字符
  */
