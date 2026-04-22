@@ -32,6 +32,9 @@ bool is_cjk(char32_t ch)
            (ch >= 0x2B740 && ch <= 0x2B81F) ||  // CJK Extension D
            (ch >= 0x2B820 && ch <= 0x2CEAF) ||  // CJK Extension E
            (ch >= 0x2CEB0 && ch <= 0x2EBEF) ||  // CJK Extension F
+           (ch >= 0x30000 && ch <= 0x3134F) ||  // CJK Extension G
+           (ch >= 0x31350 && ch <= 0x323AF) ||  // CJK Extension H
+           (ch >= 0x2EBF0 && ch <= 0x2EE5D) ||  // CJK Extension I
            (ch >= 0xF900  && ch <= 0xFAFF)  ||  // CJK Compatibility Ideographs
            (ch >= 0x2F800 && ch <= 0x2FA1F);    // CJK Compatibility Ideographs Supplement
 }
@@ -46,11 +49,59 @@ bool is_latin_extended(char32_t ch)
     if (ch == 0x00D7 || ch == 0x00F7) // × ÷ 不是字母
         return false;
 
-    return (ch >= 0x00C0 && ch <= 0x024F) || (ch >= 0x1E00 && ch <= 0x1EFF);
+    return (ch >= 0x00C0 && ch <= 0x024F)   ||  // Latin-1 Supplement + Latin Extended-A/B
+           (ch >= 0x1E00 && ch <= 0x1EFF)   ||  // Latin Extended Additional
+           (ch >= 0x2C60 && ch <= 0x2C7F)   ||  // Latin Extended-C
+           (ch >= 0xA720 && ch <= 0xA7FF)   ||  // Latin Extended-D
+           (ch >= 0xAB30 && ch <= 0xAB6F);      // Latin Extended-E
 }
 
 /**
- * @brief 折叠全角 ASCII 兼容字符
+ * @brief 折叠半角片假名为全角片假名
+ *        半角片假名 (U+FF61..U+FF9F) 没有简单的线性偏移关系，
+ *        需要查表映射到对应的全角片假名
+ * @param ch 输入字符（必须为半角片假名范围）
+ * @return 全角片假名字符
+ */
+char32_t fold_halfwidth_katakana(char32_t ch)
+{
+    // 半角片假名→全角片假名映射表
+    // U+FF61..U+FF9F → 对应全角片假名
+    // 参考 Unicode Standard 的 Halfwidth and Fullwidth Forms 块
+    static const char32_t table[] =
+    {
+        // FF61..FF6F: 句号、浊点、半浊点、长音及小写片假名
+        U'。', U'「', U'」', U'、', U'・', U'ヲ', U'ァ', U'ィ',
+        U'ゥ', U'ェ', U'ォ', U'ャ', U'ュ', U'ョ', U'ッ',
+        // FF70: 长音符
+        U'ー',
+        // FF71..FF83: 标准片假名 ア..ト
+        U'ア', U'イ', U'ウ', U'エ', U'オ',
+        U'カ', U'キ', U'ク', U'ケ', U'コ',
+        U'サ', U'シ', U'ス', U'セ', U'ソ',
+        U'タ', U'チ', U'ツ', U'テ', U'ト',
+        // FF84..FF8C: ナ..ノ, ハ..ホ
+        U'ナ', U'ニ', U'ヌ', U'ネ', U'ノ',
+        U'ハ', U'ヒ', U'フ', U'ヘ', U'ホ',
+        // FF8D..FF94: マ..モ, ヤ, ユ, ヨ
+        U'マ', U'ミ', U'ム', U'メ', U'モ',
+        U'ヤ', U'ユ', U'ヨ',
+        // FF95..FF9F: ラ..ロ, ワ, ン, 浊点, 半浊点
+        U'ラ', U'リ', U'ル', U'レ', U'ロ',
+        U'ワ', U'ン', U'゛', U'゜'
+    };
+
+    const size_t index = static_cast<size_t>(ch - 0xFF61);
+    if (index < sizeof(table) / sizeof(table[0]))
+        return table[index];
+
+    return ch;
+}
+
+/**
+ * @brief 折叠全角符号为半角等价形式
+ *        仅处理纯符号的宽度折叠；全角英文字母和全角数字分别由
+ *        fold_english_style 和 fold_num_style 处理
  * @param ch 输入字符
  * @return 折叠后的字符
  */
@@ -59,7 +110,11 @@ char32_t fold_width(char32_t ch)
     if (ch == 0x3000)
         return U' ';
 
-    if (ch >= 0xFF01 && ch <= 0xFF5E)
+    // 全角符号 → 半角符号 (U+FF01..0xFF5E，排除数字和英文字母)
+    if ((ch >= 0xFF01 && ch <= 0xFF0F) ||
+        (ch >= 0xFF1A && ch <= 0xFF20) ||
+        (ch >= 0xFF3B && ch <= 0xFF40) ||
+        (ch >= 0xFF5B && ch <= 0xFF5E))
         return ch - 0xFEE0;
 
     // 全角符号映射
@@ -67,6 +122,22 @@ char32_t fold_width(char32_t ch)
     if (ch == 0xFFE0) return U'¢';  // 全角￠ → ¢
     if (ch == 0xFFE1) return U'£';  // 全角￡ → £
     if (ch == 0xFFE4) return U'¦';  // 全角￤ → ¦
+    if (ch == 0xFFE2) return U'¬';  // 全角￢ → ¬
+    if (ch == 0xFFE3) return U'‾';  // 全角￣ → ‾
+
+    // 全角箭头映射
+    if (ch == 0xFFE9) return U'←';  // 全角← → ←
+    if (ch == 0xFFEA) return U'↑';  // 全角↑ → ↑
+    if (ch == 0xFFEB) return U'→';  // 全角→ → →
+    if (ch == 0xFFEC) return U'↓';  // 全角↓ → ↓
+
+    // 全角白角括号映射
+    if (ch == 0xFF5F) return U'⟨';  // 全角⟨ → ⟨
+    if (ch == 0xFF60) return U'⟩';  // 全角⟩ → ⟩
+
+    // 半角片假名 → 全角片假名
+    if (ch >= 0xFF61 && ch <= 0xFF9F)
+        return fold_halfwidth_katakana(ch);
 
     return ch;
 }
@@ -92,6 +163,8 @@ char32_t fold_ascii_case(char32_t ch)
 /**
  * @brief 折叠英文样式字符
  *        覆盖常见样式，不保证完整 Unicode 数学字母集
+ *        包含: 全角英文字母、带圈字母、数学粗体/斜体/花体/哥特体/双线体/无衬线/等宽体等
+ *        不含: 全角数字（由 fold_num_style 处理）、全角符号（由 fold_width 处理）
  * @param ch 输入字符
  * @return 折叠后的字符
  */
@@ -186,7 +259,7 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x1D4EA && ch <= 0x1D503)
         return static_cast<char32_t>(U'a' + (ch - 0x1D4EA));
 
-    // 数学花体 (Mathematical Fraktur) — 大写空洞: 1D506→ℭ
+    // 数学哥特体 (Mathematical Fraktur) — 大写空洞: 1D506→ℭ
     if (ch >= 0x1D504 && ch <= 0x1D51C)
     {
         if (ch == 0x1D506)
@@ -197,7 +270,7 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x1D51E && ch <= 0x1D537)
         return static_cast<char32_t>(U'a' + (ch - 0x1D51E));
 
-    // 数学粗花体 (Mathematical Bold Fraktur) — 无空洞
+    // 数学粗哥特体 (Mathematical Bold Fraktur) — 无空洞
     if (ch >= 0x1D56C && ch <= 0x1D585)
         return static_cast<char32_t>(U'A' + (ch - 0x1D56C));
 
@@ -403,6 +476,7 @@ class opencc_t2s_converter
 {
 public:
     opencc_t2s_converter(void)
+        : converter_(nullptr)
     {
         try
         {
@@ -451,9 +525,14 @@ public:
     }
 
 private:
-    std::unique_ptr<opencc::SimpleConverter> converter_ {};
+    std::unique_ptr<opencc::SimpleConverter> converter_;
 };
 
+/**
+ * @brief 解码 UTF-8 字符串为原始代码点
+ * @param text 输入 UTF-8 字符串
+ * @return 原始代码点向量
+ */
 std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
 {
     std::vector<raw_code_point> result;
@@ -461,19 +540,20 @@ std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
     auto it = text.begin();
     while (it != text.end())
     {
-        const auto begin_it = it;
-        const size_t begin = static_cast<size_t>(begin_it - text.begin());
+        const auto   begin_it = it;
+        const size_t begin    = static_cast<size_t>(begin_it - text.begin());
 
         try
         {
-            const char32_t cp = utf8::next(it, text.end());
-            const size_t end = static_cast<size_t>(it - text.begin());
+            const char32_t cp  = utf8::next(it, text.end());
+            const size_t   end = static_cast<size_t>(it - text.begin());
             result.push_back(raw_code_point{cp, begin, end});
         }
         catch (...)
         {
             it = begin_it;
             ++it;
+
             const size_t end = static_cast<size_t>(it - text.begin());
             result.push_back(raw_code_point{0xFFFD, begin, end});
         }
@@ -482,6 +562,11 @@ std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
     return result;
 }
 
+/**
+ * @brief 解码 UTF-8 字符串为代码点向量
+ * @param text 输入 UTF-8 字符串
+ * @return 代码点向量
+ */
 std::vector<char32_t> decode_utf8_to_code_points(std::string_view text)
 {
     const std::u32string decoded = decode_utf8(text);
@@ -490,53 +575,58 @@ std::vector<char32_t> decode_utf8_to_code_points(std::string_view text)
 
 } // namespace
 
+//////////////////////////////////////////////////////////////
+// 文本归一化器实现
+// 用于对文本进行归一化处理
+//////////////////////////////////////////////////////////////
 class text_normalizer::impl
 {
 public:
     explicit impl(text_normalizer_options options)
         : options_(std::move(options))
+        , chinese_converter_()
     {
     }
 
+    /**
+     * @brief 对代码点进行归一化处理
+     * @param code_point 输入代码点
+     * @return 归一化后的代码点
+     */
     char32_t normalize_code_point(char32_t code_point) const
     {
         char32_t result = code_point;
 
         if (options_.ignore_width)
-        {
             result = fold_width(result);
-        }
 
         if (options_.ignore_english_style)
-        {
             result = fold_english_style(result);
-        }
 
         if (options_.ignore_num_style)
-        {
             result = fold_num_style(result);
-        }
 
         if (options_.ignore_chinese_style)
-        {
             result = chinese_converter_.convert_char(result);
-        }
 
         if (options_.ignore_case)
-        {
             result = fold_ascii_case(result);
-        }
 
         return result;
     }
 
+    /**
+     * @brief 对单词进行归一化处理
+     * @param word 输入单词
+     * @return 归一化后的单词
+     */
     std::u32string normalize_word(std::string_view word) const
     {
         const std::string chinese_normalized_word =
             options_.ignore_chinese_style ? chinese_converter_.convert_text(word) : std::string(word);
 
-        std::u32string normalized;
         const std::u32string decoded = decode_utf8(chinese_normalized_word);
+        std::u32string       normalized;
         normalized.reserve(decoded.size());
 
         for (char32_t ch : decoded)
@@ -547,37 +637,33 @@ public:
         return normalized;
     }
 
+    /**
+     * @brief 对文本进行归一化处理
+     * @param text 输入文本
+     * @return 归一化后的文本
+     */
     normalized_text normalize_text(std::string_view text) const
     {
-        normalized_text result;
         const auto raw_code_points = decode_utf8_with_positions(text);
+
+        normalized_text result;
         result.normalized_chars.reserve(raw_code_points.size());
 
         std::vector<char32_t> chinese_normalized_code_points;
         if (options_.ignore_chinese_style)
-        {
             chinese_normalized_code_points = decode_utf8_to_code_points(chinese_converter_.convert_text(text));
-        }
 
-        const bool can_align_by_index =
-            !options_.ignore_chinese_style ||
-            chinese_normalized_code_points.size() == raw_code_points.size();
-
+        const bool can_align_by_index =!options_.ignore_chinese_style || chinese_normalized_code_points.size() == raw_code_points.size();
         for (size_t i = 0; i < raw_code_points.size(); ++i)
         {
-            const auto& raw = raw_code_points[i];
-            char32_t normalized_code_point = raw.value;
-
+            const auto& raw                   = raw_code_points[i];
+            char32_t    normalized_code_point = raw.value;
             if (options_.ignore_chinese_style)
             {
                 if (can_align_by_index)
-                {
                     normalized_code_point = chinese_normalized_code_points[i];
-                }
                 else
-                {
                     normalized_code_point = chinese_converter_.convert_char(raw.value);
-                }
             }
 
             result.normalized_chars.push_back(normalized_char{
@@ -592,36 +678,33 @@ public:
     }
 
 private:
+    /**
+     * @brief 对非中文代码点进行归一化处理，不考虑中文字符
+     * @param code_point 输入代码点
+     * @return 归一化后的代码点
+     */
     char32_t normalize_non_chinese_code_point(char32_t code_point) const
     {
         char32_t result = code_point;
 
         if (options_.ignore_width)
-        {
             result = fold_width(result);
-        }
 
         if (options_.ignore_english_style)
-        {
             result = fold_english_style(result);
-        }
 
         if (options_.ignore_num_style)
-        {
             result = fold_num_style(result);
-        }
 
         if (options_.ignore_case)
-        {
             result = fold_ascii_case(result);
-        }
 
         return result;
     }
 
 private:
-    text_normalizer_options options_ {};
-    opencc_t2s_converter chinese_converter_ {};
+    text_normalizer_options options_;
+    opencc_t2s_converter    chinese_converter_;
 };
 
 text_normalizer::text_normalizer(text_normalizer_options options)
@@ -693,6 +776,7 @@ std::u32string decode_utf8(std::string_view text)
     {
         std::u32string result;
         auto it = text.begin();
+
         while (it != text.end())
         {
             const auto begin = it;
@@ -707,6 +791,7 @@ std::u32string decode_utf8(std::string_view text)
                 ++it;
             }
         }
+
         return result;
     }
 }
