@@ -28,17 +28,17 @@ enum class match_type
 //////////////////////////////////////////////////////////////
 struct word_result
 {
-    size_t      raw_begin             = 0;  // 原始文本中敏感词的起始位置
-    size_t      raw_end               = 0;  // 原始文本中敏感词的结束位置
-    size_t      raw_code_point_length = 0;  // 原始文本中敏感词的字符数
-    std::string word;                       // 原始文本中敏感词
-    std::string normalized_word;            // 敏感词的归一化表示
-    match_type  type = match_type::word;    // 敏感词的匹配类型
+    size_t      raw_begin             = 0;  // 命中片段在原始文本中的起始字节位置
+    size_t      raw_end               = 0;  // 命中片段在原始文本中的结束字节位置(右开区间)
+    size_t      raw_code_point_length = 0;  // 命中片段覆盖的原始代码点数量
+    std::string word;                       // 原始文本中的命中片段
+    std::string normalized_word;            // 命中词的归一化结果
+    match_type  type = match_type::word;    // 命中类型
 
-    char32_t left_raw_code_point         = 0;  // 敏感词左侧的原始代码点
-    char32_t right_raw_code_point        = 0;  // 敏感词右侧的原始代码点
-    char32_t left_normalized_code_point  = 0;  // 敏感词左侧的归一化代码点
-    char32_t right_normalized_code_point = 0;  // 敏感词右侧的归一化代码点
+    char32_t left_raw_code_point         = 0;  // 命中片段左侧相邻的原始代码点
+    char32_t right_raw_code_point        = 0;  // 命中片段右侧相邻的原始代码点
+    char32_t left_normalized_code_point  = 0;  // 命中片段左侧相邻代码点的归一化结果
+    char32_t right_normalized_code_point = 0;  // 命中片段右侧相邻代码点的归一化结果
 };
 
 //////////////////////////////////////////////////////////////
@@ -46,23 +46,23 @@ struct word_result
 //////////////////////////////////////////////////////////////
 struct sensitive_word_config
 {
-    bool ignore_case          = true;   // 是否忽略大小写
-    bool ignore_width         = true;   // 是否忽略宽度字符(全角/半角宽度)
-    bool ignore_num_style     = true;   // 是否忽略数字样式
-    bool ignore_chinese_style = true;   // 是否忽略中文繁体(繁体转简体)
-    bool ignore_english_style = true;   // 是否忽略英文字符
-    bool ignore_repeat        = false;  // 是否忽略重复字符
+    bool ignore_case          = true;   // 是否忽略英文大小写差异
+    bool ignore_width         = true;   // 是否忽略全角/半角宽度差异
+    bool ignore_num_style     = true;   // 是否忽略数字样式差异
+    bool ignore_chinese_style = true;   // 是否忽略中文繁简体差异(繁体转简体)
+    bool ignore_english_style = true;   // 是否忽略英文字符的样式变体
+    bool ignore_repeat        = false;  // 是否忽略连续重复字符对词匹配的影响
 
-    bool enable_word_check    = true;   // 是否启用敏感词匹配
-    bool enable_num_check     = false;  // 是否启用数字匹配
+    bool enable_word_check    = true;   // 是否启用敏感词字典匹配
+    bool enable_num_check     = false;  // 是否启用纯数字片段匹配
 
-    bool   word_fail_fast     = true;   // 是否快速失败
-    size_t num_check_len      = 2;      // 数字匹配的长度
+    bool   word_fail_fast     = true;   // 是否在当前位置命中后优先停止继续尝试更长的词匹配
+    size_t num_check_len      = 2;      // 触发数字匹配所需的最小数字长度
 };
 
 //////////////////////////////////////////////////////////////
 // 字符忽略策略
-// 用于判断是否忽略指定的字符
+// 用于判断扫描过程中是否跳过当前字符
 //////////////////////////////////////////////////////////////
 class char_ignore
 {
@@ -74,7 +74,7 @@ public:
 
 //////////////////////////////////////////////////////////////
 // 敏感词匹配条件
-// 用于判断敏感词是否匹配
+// 用于对候选命中结果做进一步过滤
 //////////////////////////////////////////////////////////////
 class result_condition
 {
@@ -86,7 +86,7 @@ public:
 
 //////////////////////////////////////////////////////////////
 // 字符串替换策略
-// 用于将敏感词替换为指定的字符
+// 用于为命中结果生成替换文本
 //////////////////////////////////////////////////////////////
 class replace_strategy
 {
@@ -98,7 +98,7 @@ public:
 
 //////////////////////////////////////////////////////////////
 // 敏感词匹配构建器
-// 用于构建敏感词匹配引擎
+// 用于组装配置、词库和策略并构建匹配引擎
 //////////////////////////////////////////////////////////////
 class sensitive_word_builder
 {
@@ -143,7 +143,7 @@ private:
 
 //////////////////////////////////////////////////////////////
 // 敏感词匹配引擎
-// 用于匹配敏感词
+// 用于执行命中检测、结果提取和替换操作
 //////////////////////////////////////////////////////////////
 class sensitive_word_engine
 {
@@ -193,15 +193,13 @@ namespace char_ignores {
 
 /**
  * @brief 创建一个字符忽略策略，不忽略任何字符
- * @param
- * @return
+ * @return 不会跳过任何字符的忽略策略
  */
 std::shared_ptr<char_ignore> none(void);
 
 /**
- * @brief 创建一个字符忽略策略，忽略所有特殊字符
- * @param
- * @return
+ * @brief 创建一个字符忽略策略，忽略归一化后不属于词字符的字符
+ * @return 会跳过非词字符的忽略策略
  */
 std::shared_ptr<char_ignore> special_chars(void);
 
@@ -210,23 +208,20 @@ std::shared_ptr<char_ignore> special_chars(void);
 namespace result_conditions {
 
 /**
- * @brief 创建一个结果条件，始终返回true
- * @param
- * @return
+ * @brief 创建一个结果条件，不过滤任何命中结果
+ * @return 始终返回 true 的结果条件
  */
 std::shared_ptr<result_condition> always_true(void);
 
 /**
- * @brief 创建一个结果条件，匹配英文单词
- * @param
- * @return
+ * @brief 创建一个结果条件，仅要求包含 ASCII 字母的命中满足英文单词边界
+ * @return 英文单词边界匹配条件
  */
 std::shared_ptr<result_condition> english_word_match(void);
 
 /**
- * @brief 创建一个结果条件，匹配英文单词和数字
- * @param
- * @return
+ * @brief 创建一个结果条件，仅要求包含 ASCII 字母或数字的命中满足单词边界
+ * @return 英文单词和数字边界匹配条件
  */
 std::shared_ptr<result_condition> english_word_num_match(void);
 
@@ -235,16 +230,15 @@ std::shared_ptr<result_condition> english_word_num_match(void);
 namespace replace_strategies {
 
 /**
- * @brief 创建一个替换策略，用星号替换敏感词
- * @param
- * @return
+ * @brief 创建一个替换策略，用星号按命中长度生成替换文本
+ * @return 星号替换策略
  */
 std::shared_ptr<replace_strategy> stars(void);
 
 /**
- * @brief 创建一个替换策略，用指定字符替换敏感词
- * @param replacement 替换字符
- * @return
+ * @brief 创建一个替换策略，用指定字符按命中长度生成替换文本
+ * @param replacement 用于替换命中片段的字符
+ * @return 指定字符替换策略
  */
 std::shared_ptr<replace_strategy> chars(char replacement);
 

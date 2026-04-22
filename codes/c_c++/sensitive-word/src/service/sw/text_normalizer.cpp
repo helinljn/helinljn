@@ -9,13 +9,13 @@ namespace                {
 
 //////////////////////////////////////////////////////////////
 // 原始代码点结构体
-// 存储原始代码点的信息，包括代码点值、字节开始位置、字节结束位置，用于后续的文本处理
+// 用于保存 UTF-8 解码后的代码点及其在原始文本中的字节区间
 //////////////////////////////////////////////////////////////
 struct raw_code_point
 {
-    char32_t value      = 0;  // 代码点值
-    size_t   byte_begin = 0;  // 字节开始位置
-    size_t   byte_end   = 0;  // 字节结束位置
+    char32_t value      = 0;  // 解码得到的代码点
+    size_t   byte_begin = 0;  // 该代码点在原始文本中的起始字节位置
+    size_t   byte_end   = 0;  // 该代码点在原始文本中的结束字节位置(右开区间)
 };
 
 /**
@@ -590,7 +590,7 @@ char32_t fold_num_style(char32_t ch)
 
 //////////////////////////////////////////////////////////////
 // OpenCC 转换器
-// 用于将文本从繁体转换为简体
+// 用于在归一化阶段执行繁体到简体的转换
 //////////////////////////////////////////////////////////////
 class opencc_t2s_converter
 {
@@ -609,10 +609,10 @@ public:
     }
 
     /**
-     * @brief 将文本从繁体转换为简体
-     *        当整句繁简转换长度变化时，字节位置与归一化字符的一一映射只能做近似处理
+     * @brief 将整段文本按 OpenCC 规则转换为简体
+     *        当整句繁简转换导致长度变化时，后续只能近似对齐原始字节位置与归一化字符
      * @param text 输入文本
-     * @return 转换后的文本
+     * @return 转换后的文本；如果 OpenCC 不可用或转换失败则返回原文本
      */
     std::string convert_text(std::string_view text) const
     {
@@ -630,10 +630,10 @@ public:
     }
 
     /**
-     * @brief 将字符从繁体转换为简体
-     *        单字符 fallback 是保守退化，不保证上下文语义最优
+     * @brief 将单个字符按 OpenCC 规则转换为简体
+     *        单字符 fallback 不依赖上下文，因此只保证保守的一对一近似转换
      * @param ch 输入字符
-     * @return 转换后的字符
+     * @return 转换后的字符；如果无法转换则返回原字符
      */
     char32_t convert_char(char32_t ch) const
     {
@@ -649,9 +649,9 @@ private:
 };
 
 /**
- * @brief 解码 UTF-8 字符串为原始代码点
+ * @brief 解码 UTF-8 字符串并保留每个代码点对应的原始字节区间
  * @param text 输入 UTF-8 字符串
- * @return 原始代码点向量
+ * @return 带原始字节位置信息的代码点序列
  */
 std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
 {
@@ -683,9 +683,9 @@ std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
 }
 
 /**
- * @brief 解码 UTF-8 字符串为代码点向量
+ * @brief 解码 UTF-8 字符串为代码点序列
  * @param text 输入 UTF-8 字符串
- * @return 代码点向量
+ * @return 按顺序排列的代码点向量
  */
 std::vector<char32_t> decode_utf8_to_code_points(std::string_view text)
 {
@@ -697,7 +697,7 @@ std::vector<char32_t> decode_utf8_to_code_points(std::string_view text)
 
 //////////////////////////////////////////////////////////////
 // 文本归一化器实现
-// 用于对文本进行归一化处理
+// 用于执行字符折叠、繁简转换以及位置映射构建
 //////////////////////////////////////////////////////////////
 class text_normalizer::impl
 {
@@ -760,7 +760,7 @@ public:
     /**
      * @brief 对文本进行归一化处理
      * @param text 输入文本
-     * @return 归一化后的文本
+     * @return 包含归一化字符及原始字节位置映射的文本结果
      */
     normalized_text normalize_text(std::string_view text) const
     {
@@ -799,7 +799,7 @@ public:
 
 private:
     /**
-     * @brief 对非中文代码点进行归一化处理，不考虑中文字符
+     * @brief 对已完成中文繁简处理的代码点继续执行其余归一化步骤
      * @param code_point 输入代码点
      * @return 归一化后的代码点
      */
