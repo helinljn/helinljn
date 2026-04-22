@@ -130,6 +130,17 @@
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
 
+    "codingcopilot.autoRun": true,
+    "codingcopilot.taskList": false,
+    "codingcopilot.enableCodelens": false,
+    "codingcopilot.enableInlineChat": false,
+    "codingcopilot.standaloneTerminal": false,
+    "codingcopilot.enableFloatShortcut": false,
+    "codingcopilot.enableAutoCompletions": false,
+    "codingcopilot.enableNextEditSuggestions": false,
+    "codingcopilot.generationPreference": "intelligentMode",
+    "codingcopilot.commitMessageLanguage": "zh_CN",
+
     "trae.enableInlineCommand": false,
     "trae.enableAddToChatTips": false,
 }
