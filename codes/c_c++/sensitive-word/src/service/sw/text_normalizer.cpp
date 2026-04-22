@@ -42,23 +42,39 @@ bool is_cjk(char32_t ch)
 }
 
 /**
- * @brief 检查字符是否属于常用拉丁扩展字母范围
- *        这里采用“按 Unicode 拉丁相关字母块近似判断”的策略，目标是覆盖
- *        中文环境中常见的扩展拉丁字母（如 é, ü, ç, ñ, ā, ō 等），用于 word-like 判断；
- *        它不是严格意义上的 Unicode Alphabetic 属性判定。
+ * @brief 检查字符是否属于中文环境下常见的拉丁扩展字母
+ *        采用“保守白名单范围 + 少量显式补充”的策略，避免把整块中少数非字母
+ *        或过于冷门的拉丁相关字符误判为英文词字符。
+ *        目标覆盖：
+ *        - Latin-1 中常见西欧重音字母（é, ü, ç, ñ 等）
+ *        - Latin Extended-A 中常见扩展拉丁字母
+ *        - 中文环境常见拼音带声调元音（ĀÁǍÀ / ǕǗǙǛ 等）
+ *        - Latin Extended Additional 中常见带附加符号字母
  * @param ch 输入字符
- * @return true 字符落在常用拉丁扩展字母范围内，否则返回 false
+ * @return true 字符属于常用拉丁扩展字母，否则返回 false
  */
 bool is_latin_extended(char32_t ch)
 {
-    if (ch == 0x00D7 || ch == 0x00F7) // × ÷ 为运算符，不视为字母
-        return false;
+    // Latin-1 Supplement 中的拉丁字母；显式排除乘除号
+    if ((ch >= 0x00C0 && ch <= 0x00D6) || (ch >= 0x00D8 && ch <= 0x00F6) || (ch >= 0x00F8 && ch <= 0x00FF))
+        return true;
 
-    return (ch >= 0x00C0 && ch <= 0x024F)   ||  // Latin-1 Supplement + Latin Extended-A/B
-           (ch >= 0x1E00 && ch <= 0x1EFF)   ||  // Latin Extended Additional
-           (ch >= 0x2C60 && ch <= 0x2C7F)   ||  // Latin Extended-C
-           (ch >= 0xA720 && ch <= 0xA7FF)   ||  // Latin Extended-D
-           (ch >= 0xAB30 && ch <= 0xAB6F);      // Latin Extended-E
+    // Latin Extended-A：中文环境中常见的扩展拉丁字母、拼音/音译字母大多落在此块
+    if (ch >= 0x0100 && ch <= 0x017F)
+        return true;
+
+    // 中文环境下较常见的 Extended-B：拼音带声调元音与少量常见扩展字母
+    if ((ch >= 0x01CD && ch <= 0x01DC) ||  // Ǎǎ Ǐǐ Ǒǒ Ǔǔ Ǖǖ Ǘǘ Ǚǚ Ǜǜ
+        (ch >= 0x01DE && ch <= 0x01E3) ||  // Ǟǟ Ǡǡ Ǣǣ
+        (ch >= 0x01F4 && ch <= 0x01F5) ||  // Ǵǵ
+        (ch >= 0x01F8 && ch <= 0x021B))    // Ǹǹ..Țț，覆盖常见单字符大小写扩展字母
+        return true;
+
+    // Latin Extended Additional：主要是带附加符号的拉丁字母
+    if (ch >= 0x1E00 && ch <= 0x1EFF)
+        return true;
+
+    return false;
 }
 
 /**
@@ -155,11 +171,13 @@ char32_t fold_width(char32_t ch)
 
 /**
  * @brief 折叠大小写字符
- *        以 ASCII case-fold 为主，并额外覆盖中文环境里较常见的 Latin-1
- *        大写重音字母（À..Ö, Ø..Þ）到对应小写。
+ *        以 ASCII case-fold 为主，并额外覆盖中文环境里较常见的扩展拉丁大写字母：
+ *        - Latin-1 大写重音字母（À..Ö, Ø..Þ）
+ *        - Latin Extended-A 中规则的一对一大小写
+ *        - 常见拼音大写元音（ĀÁǍÀ / ǕǗǙǛ 等）
  *        不处理：
  *        - 需要多字符展开的特殊大小写（如 ß -> ss）
- *        - 复杂语言相关规则（如土耳其语 I/i）
+ *        - 复杂语言相关规则（如土耳其语 İ -> i + combining dot）
  *        - 更大范围的完整 Unicode case folding
  * @param ch 输入字符
  * @return 折叠后的字符
@@ -174,7 +192,34 @@ char32_t fold_ascii_case(char32_t ch)
     if ((ch >= 0x00C0 && ch <= 0x00D6) || (ch >= 0x00D8 && ch <= 0x00DE))
         return ch + 0x20;
 
-    return ch;
+    // Latin Extended-A 中大量字符按“偶数大写 / 奇数小写”成对排列。
+    // 这里保守处理最常见且能稳定一对一映射的区段。
+    if ((ch >= 0x0100 && ch <= 0x012F && (ch % 2 == 0)) ||
+        (ch >= 0x0132 && ch <= 0x0137 && (ch % 2 == 0)) ||
+        (ch >= 0x014A && ch <= 0x0177 && (ch % 2 == 0)))
+        return ch + 1;
+
+    if ((ch >= 0x0139 && ch <= 0x0148 && (ch % 2 == 1)) ||
+        (ch >= 0x0179 && ch <= 0x017E && (ch % 2 == 1)))
+        return ch + 1;
+
+    switch (ch)
+    {
+    // Latin Extended-A / B 中中文环境常见但不适合用统一奇偶规则处理的字符
+    case 0x0178: return 0x00FF; // Ÿ -> ÿ
+
+    // 常见拼音大写元音
+    case 0x01CD: return 0x01CE; // Ǎ -> ǎ
+    case 0x01CF: return 0x01D0; // Ǐ -> ǐ
+    case 0x01D1: return 0x01D2; // Ǒ -> ǒ
+    case 0x01D3: return 0x01D4; // Ǔ -> ǔ
+    case 0x01D5: return 0x01D6; // Ǖ -> ǖ
+    case 0x01D7: return 0x01D8; // Ǘ -> ǘ
+    case 0x01D9: return 0x01DA; // Ǚ -> ǚ
+    case 0x01DB: return 0x01DC; // Ǜ -> ǜ
+    default:
+        return ch;
+    }
 }
 
 /**
@@ -200,12 +245,14 @@ char32_t fold_english_style(char32_t ch)
     switch (ch)
     {
     case 0x2102: return U'C'; // ℂ DOUBLE-STRUCK CAPITAL C
+    case 0x210A: return U'g'; // ℊ SCRIPT SMALL G
     case 0x210B: return U'H'; // ℋ SCRIPT CAPITAL H
     case 0x210C: return U'H'; // ℌ FRAKTUR CAPITAL H
     case 0x210D: return U'H'; // ℍ DOUBLE-STRUCK CAPITAL H
     case 0x2110: return U'I'; // ℐ SCRIPT CAPITAL I
     case 0x2111: return U'I'; // ℑ FRAKTUR CAPITAL I
     case 0x2112: return U'L'; // ℒ SCRIPT CAPITAL L
+    case 0x2113: return U'l'; // ℓ SCRIPT SMALL L
     case 0x2115: return U'N'; // ℕ DOUBLE-STRUCK CAPITAL N
     case 0x2119: return U'P'; // ℙ DOUBLE-STRUCK CAPITAL P
     case 0x211A: return U'Q'; // ℚ DOUBLE-STRUCK CAPITAL Q
@@ -214,12 +261,14 @@ char32_t fold_english_style(char32_t ch)
     case 0x211D: return U'R'; // ℝ DOUBLE-STRUCK CAPITAL R
     case 0x2124: return U'Z'; // ℤ DOUBLE-STRUCK CAPITAL Z
     case 0x2128: return U'Z'; // ℨ FRAKTUR CAPITAL Z
+    case 0x212A: return U'K'; // K KELVIN SIGN，常见兼容英文 K
     case 0x212C: return U'B'; // ℬ SCRIPT CAPITAL B
     case 0x212D: return U'C'; // ℭ FRAKTUR CAPITAL C
+    case 0x212F: return U'e'; // ℯ SCRIPT SMALL E
     case 0x2130: return U'E'; // ℰ SCRIPT CAPITAL E
     case 0x2131: return U'F'; // ℱ SCRIPT CAPITAL F
     case 0x2133: return U'M'; // ℳ SCRIPT CAPITAL M
-    case 0x212A: return U'K'; // K KELVIN SIGN，常见兼容英文 K
+    case 0x2134: return U'o'; // ℴ SCRIPT SMALL O
     default: break;
     }
     // 全角英文字母 (U+FF21-FF3A, U+FF41-FF5A)
@@ -247,10 +296,9 @@ char32_t fold_english_style(char32_t ch)
         return static_cast<char32_t>(U'a' + (ch - 0x1D41A));
 
     // 数学斜体 (Mathematical Italic)。
-    // 注：该区间中缺失的字母通常以 BMP 兼容字符形式存在，已在函数开头单独处理。
     if (ch >= 0x1D434 && ch <= 0x1D44D)
     {
-        if (ch == 0x1D439)  // 该码位不是连续字母序列成员，跳过
+        if (ch == 0x1D439)
             return ch;
         return static_cast<char32_t>(U'A' + (ch - 0x1D434 - (ch > 0x1D439 ? 1 : 0)));
     }
@@ -355,6 +403,13 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x1D552 && ch <= 0x1D56B)
         return static_cast<char32_t>(U'a' + (ch - 0x1D552));
 
+    // 数学无衬线体 (Mathematical Sans-serif) — 无空洞
+    if (ch >= 0x1D5A0 && ch <= 0x1D5B9)
+        return static_cast<char32_t>(U'A' + (ch - 0x1D5A0));
+
+    if (ch >= 0x1D5BA && ch <= 0x1D5D3)
+        return static_cast<char32_t>(U'a' + (ch - 0x1D5BA));
+
     // 数学无衬线粗体 (Mathematical Sans-serif Bold) — 无空洞
     if (ch >= 0x1D5D4 && ch <= 0x1D5ED)
         return static_cast<char32_t>(U'A' + (ch - 0x1D5D4));
@@ -396,7 +451,6 @@ char32_t fold_english_style(char32_t ch)
  *                常见中文单数字（零~九、壹~玖、两/兩 等）
  *        - 不处理：表示多位数的单字符（如 ⑩、⑪、⑳）、序号语义字符、
  *                  中文复合数词（十、百、千、万、亿、廿、卅 等）
- *
  *        说明：将 ○ / ◯ 视为数字 0 是面向文本过滤/规避场景的策略性折叠，
  *        并非严格的通用数值语义规则。
  * @param ch 输入字符
