@@ -466,8 +466,25 @@ private:
                 break;
         }
 
-        if (best_allow_builder_size > best_deny_builder_size)
-            best_allow_builder_size = best_allow_builder_size;
+        if (config_.ignore_repeat && best_deny_builder_size > 0 && best_deny_builder_size <= builder.size())
+        {
+            const char32_t tail = builder[best_deny_builder_size - 1];
+            while (result.deny_length < builder.size() && builder[result.deny_length] == tail)
+            {
+                ++result.deny_length;
+                ++best_deny_builder_size;
+            }
+        }
+
+        if (config_.ignore_repeat && best_allow_builder_size > 0 && best_allow_builder_size <= builder.size())
+        {
+            const char32_t tail = builder[best_allow_builder_size - 1];
+            while (result.allow_length < builder.size() && builder[result.allow_length] == tail)
+            {
+                ++result.allow_length;
+                ++best_allow_builder_size;
+            }
+        }
 
         result.normalized_deny_word = builder.substr(0, std::min(best_deny_builder_size, builder.size()));
 

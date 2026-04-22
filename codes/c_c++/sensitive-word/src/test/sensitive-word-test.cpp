@@ -34,6 +34,19 @@ TEST_SUITE("sensitive word usage")
 
         CHECK(engine.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
         CHECK(engine.replace(text, '0') == "0000迎风飘扬，000的画像屹立在000前。");
+
+        sensitive_word_engine engine1 = sensitive_word_builder()
+                                           .enable_word_check(true)
+                                           .ignore_repeat(true)
+                                           .add_deny_words_from_file("./res/dict-2026-04-20.txt")
+                                           .build();
+
+        CHECK(engine1.replace("你怕是个大傻逼吧") == "你怕是个大**吧");
+        CHECK(engine1.replace("你怕是个大傻傻傻逼逼逼吧") == "你怕是个大******吧");
+        CHECK(engine1.replace("ⒻⒻⒻfⓤuⓤ⒰cⓒ⒦ you!") == "*********** you!");
+        CHECK(engine1.replace("FFFUUUCCCKKK you!") == "************ you!");
+        CHECK(engine.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
+        CHECK(engine1.replace("64事件") == "**事件");
     }
 
     TEST_CASE("忽略大小写和全半角")
@@ -163,6 +176,7 @@ TEST_SUITE("sensitive word usage")
 
         CHECK_FALSE(engine.contains("订单号 1234567"));
         CHECK(engine.contains("订单号 12345678"));
+        CHECK(engine.replace("订单号 12345678") == "订单号 ********");
 
         const auto result = engine.find_first("订单号 12345678");
         REQUIRE(result.has_value());
@@ -222,6 +236,7 @@ TEST_SUITE("sensitive word usage")
         REQUIRE(result.has_value());
         CHECK(result->normalized_word == "902498354455");
         CHECK(result->type == sensitive_word::match_type::num);
+        CHECK(engine.replace(text) == "这个是我的微信：************");
     }
 
     TEST_CASE("词语匹配遵循ignore_num_style开关")
