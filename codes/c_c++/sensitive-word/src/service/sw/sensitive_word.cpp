@@ -247,20 +247,32 @@ public:
 
     std::string replace(std::string_view text, const replace_strategy& strategy) const
     {
-        const std::vector<word_result> results = find_all(text);
+        return replace(text, find_all(text), strategy);
+    }
+
+    std::string replace(std::string_view text, const std::vector<word_result>& results) const
+    {
+        return replace(text, results, *replace_strategy_);
+    }
+
+    std::string replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const
+    {
         if (results.empty())
             return std::string(text);
 
         std::string out;
-        size_t cursor = 0;
+        size_t      cursor = 0;
 
         for (const auto& result : results)
         {
+            if (result.raw_begin > result.raw_end || result.raw_end > text.size() || result.raw_begin < cursor)
+                continue;
+
             if (cursor < result.raw_begin)
                 out.append(text.substr(cursor, result.raw_begin - cursor));
 
             out   += strategy.replacement_for(result, text);
-            cursor = std::max(cursor, result.raw_end);
+            cursor = result.raw_end;
         }
 
         if (cursor < text.size())
@@ -668,6 +680,21 @@ std::string sensitive_word_engine::replace(std::string_view text, char replaceme
 std::string sensitive_word_engine::replace(std::string_view text, const replace_strategy& strategy) const
 {
     return impl_->replace(text, strategy);
+}
+
+std::string sensitive_word_engine::replace(std::string_view text, const std::vector<word_result>& results) const
+{
+    return impl_->replace(text, results);
+}
+
+std::string sensitive_word_engine::replace(std::string_view text, const std::vector<word_result>& results, char replacement) const
+{
+    return impl_->replace(text, results, *replace_strategies::chars(replacement));
+}
+
+std::string sensitive_word_engine::replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const
+{
+    return impl_->replace(text, results, strategy);
 }
 
 void sensitive_word_engine::add_word(std::string_view word)

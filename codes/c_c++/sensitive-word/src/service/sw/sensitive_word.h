@@ -186,6 +186,10 @@ public:
     std::string replace(std::string_view text, char replacement) const;
     std::string replace(std::string_view text, const replace_strategy& strategy) const;
 
+    std::string replace(std::string_view text, const std::vector<word_result>& results) const;
+    std::string replace(std::string_view text, const std::vector<word_result>& results, char replacement) const;
+    std::string replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const;
+
     void add_word(std::string_view word);
     void remove_word(std::string_view word);
 

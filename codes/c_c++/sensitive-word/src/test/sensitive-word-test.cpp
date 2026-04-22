@@ -32,8 +32,13 @@ TEST_SUITE("sensitive word usage")
         CHECK(all_words[1] == "毛主席");
         CHECK(all_words[2] == "天安门");
 
+        const auto results = engine.find_all(text);
+        REQUIRE(results.size() == 3);
         CHECK(engine.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
         CHECK(engine.replace(text, '0') == "0000迎风飘扬，000的画像屹立在000前。");
+        CHECK(engine.replace(text, results) == "****迎风飘扬，***的画像屹立在***前。");
+        CHECK(engine.replace(text, results, '0') == "0000迎风飘扬，000的画像屹立在000前。");
+        CHECK(engine.replace(text, results, *chars('#')) == "####迎风飘扬，###的画像屹立在###前。");
 
         sensitive_word_engine engine1 = sensitive_word_builder()
                                            .enable_word_check(true)
@@ -47,6 +52,24 @@ TEST_SUITE("sensitive word usage")
         CHECK(engine1.replace("FFFUUUCCCKKK you!") == "************ you!");
         CHECK(engine.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
         CHECK(engine1.replace("64事件") == "**事件");
+    }
+
+    TEST_CASE("基于find_all结果复用替换")
+    {
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"坏词", "敏感词", "违规"})
+                                           .build();
+
+        const std::string text = "这里有坏词，也有敏感词，还有违规内容。";
+        const auto        results = engine.find_all(text);
+        REQUIRE(results.size() == 3);
+
+        CHECK(engine.replace(text, results) == "这里有**，也有***，还有**内容。");
+        CHECK(engine.replace(text, results, '#') == "这里有##，也有###，还有##内容。");
+
+        std::vector<sensitive_word::word_result> filtered_results;
+        filtered_results.push_back(results[1]);
+        CHECK(engine.replace(text, filtered_results) == "这里有坏词，也有***，还有违规内容。");
     }
 
     TEST_CASE("忽略大小写和全半角")
