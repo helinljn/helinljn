@@ -338,6 +338,9 @@ private:
     template <typename OnMatch>
     void scan_matches(std::string_view text, OnMatch&& on_match) const
     {
+        // 统一扫描入口：
+        // 1. 优先尝试词库匹配；
+        // 2. 只有当前位置既没有 allow 也没有 deny 词命中时，才退化到数字匹配。
         if (text.empty() || (!config_.enable_word_check && !config_.enable_num_check))
             return;
 
@@ -370,6 +373,9 @@ private:
                 }
             }
 
+            // allow / deny 同起点同时命中时，采用“更长者优先”。
+            // 只有 deny 明确长于 allow 时，当前位置才会被判定为 deny 命中；
+            // 否则由 allow 覆盖，并直接跳过 allow 的跨度。
             if (allow_length < deny_length && deny_length > 0)
             {
                 word_result result = make_word_result(text, normalized, idx, deny_length, std::move(normalized_deny_word), detected_type);
@@ -391,6 +397,9 @@ private:
         if (begin_index >= text.normalized_chars.size())
             return result;
 
+        // builder 只保存真正参与字典树推进的归一化字符；
+        // temp_len 统计的是原始扫描跨度，包含中间被 ignore 的字符。
+        // 这样最终既能按“净化后的字符序列”匹配，又能返回原文本中的完整命中区间。
         std::u32string builder;
         size_t         temp_len                = 0;
         size_t         best_deny_builder_size  = 0;
@@ -457,6 +466,8 @@ private:
         if (begin_index >= text.normalized_chars.size())
             return result;
 
+        // 数字匹配允许在已经开始构造数字串之后跳过可忽略字符，
+        // 例如忽略连接符时，“1-2-3”仍然可以视为一个连续数字片段。
         std::u32string builder;
         size_t         temp_len = 0;
 

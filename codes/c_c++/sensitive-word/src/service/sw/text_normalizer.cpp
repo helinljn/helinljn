@@ -742,6 +742,8 @@ public:
      */
     std::u32string normalize_word(std::string_view word) const
     {
+        // 词条路径只关心最终归一化后的字符序列，
+        // 不需要保留原始字节位置，因此可以直接先做整段繁转简，再继续后续字符折叠。
         const std::string chinese_normalized_word =
             options_.ignore_chinese_style ? chinese_converter_.convert_text(word) : std::string(word);
 
@@ -773,6 +775,8 @@ public:
         if (options_.ignore_chinese_style)
             chinese_normalized_code_points = decode_utf8_to_code_points(chinese_converter_.convert_text(text));
 
+        // 正文路径优先尝试“整句繁转简后按索引对齐”，尽量利用 OpenCC 的上下文能力；
+        // 只有转换前后长度变化时，才退化为逐字符转换。
         const bool can_align_by_index =!options_.ignore_chinese_style || chinese_normalized_code_points.size() == raw_code_points.size();
         for (size_t idx = 0; idx < raw_code_points.size(); ++idx)
         {
@@ -786,6 +790,8 @@ public:
                     normalized_code_point = chinese_converter_.convert_char(raw.value);
             }
 
+            // 这里始终保留原始字节区间，只替换 normalized_code_point，
+            // 后续匹配结果才能同时兼顾“归一化匹配”和“原文定位”。
             result.normalized_chars.push_back(normalized_char{
                 raw.value,
                 normalize_non_chinese_code_point(normalized_code_point),
@@ -805,6 +811,8 @@ private:
      */
     char32_t normalize_non_chinese_code_point(char32_t code_point) const
     {
+        // 这里故意不再处理中文繁简，
+        // 因为中文相关转换要么已经在整句路径完成，要么已经在单字符 fallback 中完成。
         char32_t result = code_point;
 
         if (options_.ignore_width)
