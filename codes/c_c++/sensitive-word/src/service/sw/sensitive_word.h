@@ -47,10 +47,14 @@ struct sensitive_word_config
     std::size_t num_check_len = 8;
 };
 
+//////////////////////////////////////////////////////////////
+// 字符忽略策略
+// 用于判断是否忽略指定的字符
+//////////////////////////////////////////////////////////////
 class char_ignore
 {
 public:
-    virtual ~char_ignore() = default;
+    virtual ~char_ignore(void) = default;
 
     virtual bool ignore(char32_t raw_code_point, char32_t normalized_code_point) const = 0;
 };
@@ -166,23 +170,64 @@ private:
     std::unique_ptr<impl> impl_ {};
 };
 
-namespace char_ignores
-{
-std::shared_ptr<char_ignore> none();
-std::shared_ptr<char_ignore> special_chars();
-}
+namespace char_ignores {
 
-namespace result_conditions
-{
-std::shared_ptr<result_condition> always_true();
-std::shared_ptr<result_condition> english_word_match();
-std::shared_ptr<result_condition> english_word_num_match();
-}
+/**
+ * @brief 创建一个字符忽略策略，不忽略任何字符
+ * @param
+ * @return
+ */
+std::shared_ptr<char_ignore> none(void);
 
-namespace replace_strategies
-{
-std::shared_ptr<replace_strategy> stars();
+/**
+ * @brief 创建一个字符忽略策略，忽略所有特殊字符
+ * @param
+ * @return
+ */
+std::shared_ptr<char_ignore> special_chars(void);
+
+} // namespace char_ignores
+
+namespace result_conditions {
+
+/**
+ * @brief 创建一个结果条件，始终返回true
+ * @param
+ * @return
+ */
+std::shared_ptr<result_condition> always_true(void);
+
+/**
+ * @brief 创建一个结果条件，匹配英文单词
+ * @param
+ * @return
+ */
+std::shared_ptr<result_condition> english_word_match(void);
+
+/**
+ * @brief 创建一个结果条件，匹配英文单词和数字
+ * @param
+ * @return
+ */
+std::shared_ptr<result_condition> english_word_num_match(void);
+
+} // namespace result_conditions
+
+namespace replace_strategies {
+
+/**
+ * @brief 创建一个替换策略，用星号替换敏感词
+ * @param
+ * @return
+ */
+std::shared_ptr<replace_strategy> stars(void);
+
+/**
+ * @brief 创建一个替换策略，用指定字符替换敏感词
+ * @param replacement 替换字符
+ * @return
+ */
 std::shared_ptr<replace_strategy> chars(char replacement);
-}
 
-}  // namespace sensitive_word
+} // namespace replace_strategies
+} // namespace sensitive_word

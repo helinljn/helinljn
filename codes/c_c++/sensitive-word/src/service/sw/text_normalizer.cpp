@@ -377,7 +377,7 @@ std::vector<char32_t> decode_utf8_to_code_points(std::string_view text)
     return std::vector<char32_t>(decoded.begin(), decoded.end());
 }
 
-}  // namespace
+} // namespace
 
 class text_normalizer::impl
 {
@@ -517,6 +517,8 @@ text_normalizer::text_normalizer(text_normalizer_options options)
     : impl_(std::make_unique<impl>(std::move(options)))
 {
 }
+
+text_normalizer::~text_normalizer(void) = default;
 
 char32_t text_normalizer::normalize_code_point(char32_t code_point) const
 {

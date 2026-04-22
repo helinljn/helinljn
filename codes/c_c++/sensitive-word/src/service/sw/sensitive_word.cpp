@@ -1,4 +1,5 @@
 #include "sw/sensitive_word.h"
+#include "sw/char_ignore.h"
 #include "sw/replace_strategy.h"
 #include "sw/result_condition.h"
 #include "sw/text_normalizer.h"
@@ -11,29 +12,8 @@
 #include <utility>
 #include <vector>
 
-namespace sensitive_word
-{
-
-namespace
-{
-
-class none_char_ignore final : public char_ignore
-{
-public:
-    bool ignore(char32_t, char32_t) const override
-    {
-        return false;
-    }
-};
-
-class special_char_ignore final : public char_ignore
-{
-public:
-    bool ignore(char32_t, char32_t normalized_code_point) const override
-    {
-        return !is_word_like_code_point(normalized_code_point);
-    }
-};
+namespace sensitive_word {
+namespace                {
 
 void append_words(std::vector<std::string>& target, std::vector<std::string> words)
 {
@@ -43,7 +23,7 @@ void append_words(std::vector<std::string>& target, std::vector<std::string> wor
         std::make_move_iterator(words.end()));
 }
 
-}  // namespace
+} // namespace
 
 class sensitive_word_engine::impl
 {
@@ -754,50 +734,47 @@ const sensitive_word_config& sensitive_word_engine::config() const noexcept
     return impl_->config();
 }
 
-namespace char_ignores
-{
+namespace char_ignores {
 
-std::shared_ptr<char_ignore> none()
+std::shared_ptr<char_ignore> none(void)
 {
     static auto instance = std::make_shared<none_char_ignore>();
     return instance;
 }
 
-std::shared_ptr<char_ignore> special_chars()
+std::shared_ptr<char_ignore> special_chars(void)
 {
     static auto instance = std::make_shared<special_char_ignore>();
     return instance;
 }
 
-}  // namespace char_ignores
+} // namespace char_ignores
 
-namespace result_conditions
-{
+namespace result_conditions {
 
-std::shared_ptr<result_condition> always_true()
+std::shared_ptr<result_condition> always_true(void)
 {
     static auto instance = std::make_shared<always_true_result_condition>();
     return instance;
 }
 
-std::shared_ptr<result_condition> english_word_match()
+std::shared_ptr<result_condition> english_word_match(void)
 {
     static auto instance = std::make_shared<english_word_match_result_condition>();
     return instance;
 }
 
-std::shared_ptr<result_condition> english_word_num_match()
+std::shared_ptr<result_condition> english_word_num_match(void)
 {
     static auto instance = std::make_shared<english_word_num_match_result_condition>();
     return instance;
 }
 
-}  // namespace result_conditions
+} // namespace result_conditions
 
-namespace replace_strategies
-{
+namespace replace_strategies {
 
-std::shared_ptr<replace_strategy> stars()
+std::shared_ptr<replace_strategy> stars(void)
 {
     static auto instance = std::make_shared<chars_replace_strategy>('*');
     return instance;
@@ -808,6 +785,5 @@ std::shared_ptr<replace_strategy> chars(char replacement)
     return std::make_shared<chars_replace_strategy>(replacement);
 }
 
-}  // namespace replace_strategies
-
-}  // namespace sensitive_word
+} // namespace replace_strategies
+} // namespace sensitive_word

@@ -49,7 +49,7 @@ class text_normalizer
 {
 public:
     explicit text_normalizer(text_normalizer_options options);
-    ~text_normalizer(void) = default;
+    ~text_normalizer(void);
 
     text_normalizer(const text_normalizer&) = delete;
     text_normalizer& operator=(const text_normalizer&) = delete;
