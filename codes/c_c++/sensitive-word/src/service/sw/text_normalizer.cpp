@@ -25,9 +25,15 @@ struct raw_code_point
  */
 bool is_cjk(char32_t ch)
 {
-    return (ch >= 0x4E00 && ch <= 0x9FFF) ||
-           (ch >= 0x3400 && ch <= 0x4DBF) ||
-           (ch >= 0xF900 && ch <= 0xFAFF);
+    return (ch >= 0x4E00  && ch <= 0x9FFF)  ||  // CJK Unified Ideographs
+           (ch >= 0x3400  && ch <= 0x4DBF)  ||  // CJK Extension A
+           (ch >= 0x20000 && ch <= 0x2A6DF) ||  // CJK Extension B
+           (ch >= 0x2A700 && ch <= 0x2B73F) ||  // CJK Extension C
+           (ch >= 0x2B740 && ch <= 0x2B81F) ||  // CJK Extension D
+           (ch >= 0x2B820 && ch <= 0x2CEAF) ||  // CJK Extension E
+           (ch >= 0x2CEB0 && ch <= 0x2EBEF) ||  // CJK Extension F
+           (ch >= 0xF900  && ch <= 0xFAFF)  ||  // CJK Compatibility Ideographs
+           (ch >= 0x2F800 && ch <= 0x2FA1F);    // CJK Compatibility Ideographs Supplement
 }
 
 /**
@@ -37,12 +43,14 @@ bool is_cjk(char32_t ch)
  */
 bool is_latin_extended(char32_t ch)
 {
-    return (ch >= 0x00C0 && ch <= 0x024F) ||
-           (ch >= 0x1E00 && ch <= 0x1EFF);
+    if (ch == 0x00D7 || ch == 0x00F7) // × ÷ 不是字母
+        return false;
+
+    return (ch >= 0x00C0 && ch <= 0x024F) || (ch >= 0x1E00 && ch <= 0x1EFF);
 }
 
 /**
- * @brief 折叠宽度字符
+ * @brief 折叠全角 ASCII 兼容字符
  * @param ch 输入字符
  * @return 折叠后的字符
  */
@@ -54,26 +62,36 @@ char32_t fold_width(char32_t ch)
     if (ch >= 0xFF01 && ch <= 0xFF5E)
         return ch - 0xFEE0;
 
+    // 全角符号映射
+    if (ch == 0xFFE5) return U'¥';  // 全角￥ → ¥
+    if (ch == 0xFFE0) return U'¢';  // 全角￠ → ¢
+    if (ch == 0xFFE1) return U'£';  // 全角￡ → £
+    if (ch == 0xFFE4) return U'¦';  // 全角￤ → ¦
+
     return ch;
 }
 
 /**
  * @brief 折叠ASCII大小写字符
+ *        当前仅忽略 ASCII 大小写，不处理希腊字母、德语 ß、土耳其语 I 等 Unicode 特例
  * @param ch 输入字符
  * @return 折叠后的字符
  */
 char32_t fold_ascii_case(char32_t ch)
 {
     if (ch >= U'A' && ch <= U'Z')
-    {
         return ch - U'A' + U'a';
-    }
+
+    // Latin-1 Supplement 大写 → 小写（排除 U+00D7 × 和 U+00DF ß）
+    // if ((ch >= 0x00C0 && ch <= 0x00D6) || (ch >= 0x00D8 && ch <= 0x00DE))
+    //     return ch + 0x20;
 
     return ch;
 }
 
 /**
  * @brief 折叠英文样式字符
+ *        覆盖常见样式，不保证完整 Unicode 数学字母集
  * @param ch 输入字符
  * @return 折叠后的字符
  */
@@ -86,7 +104,7 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0xFF41 && ch <= 0xFF5A)
         return static_cast<char32_t>(U'a' + (ch - 0xFF41));
 
-    // 带圈字母 (U+249C-24B5, U+24B6-24CF, U+24D0-24E9)
+    // 带圈字母 (U+249C-24B5 小写, U+24B6-24CF 大写, U+24D0-24E9 小写)
     if (ch >= 0x249C && ch <= 0x24B5)
         return static_cast<char32_t>(U'a' + (ch - 0x249C));
 
@@ -96,57 +114,136 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x24D0 && ch <= 0x24E9)
         return static_cast<char32_t>(U'a' + (ch - 0x24D0));
 
-    // 数学花式字母
+    // 数学粗体 (Mathematical Bold) — 无空洞
     if (ch >= 0x1D400 && ch <= 0x1D419)
         return static_cast<char32_t>(U'A' + (ch - 0x1D400));
 
     if (ch >= 0x1D41A && ch <= 0x1D433)
         return static_cast<char32_t>(U'a' + (ch - 0x1D41A));
 
+    // 数学斜体 (Mathematical Italic) — 大写有空洞: 1D439→ℎ
     if (ch >= 0x1D434 && ch <= 0x1D44D)
         return static_cast<char32_t>(U'A' + (ch - 0x1D434));
 
     if (ch >= 0x1D44E && ch <= 0x1D467)
         return static_cast<char32_t>(U'a' + (ch - 0x1D44E));
 
+    // 数学粗斜体 (Mathematical Bold Italic) — 无空洞
     if (ch >= 0x1D468 && ch <= 0x1D481)
         return static_cast<char32_t>(U'A' + (ch - 0x1D468));
 
     if (ch >= 0x1D482 && ch <= 0x1D49B)
         return static_cast<char32_t>(U'a' + (ch - 0x1D482));
 
+    // 数学花体 (Mathematical Script)
+    //    大写空洞: 1D49D,1D4A0,1D4A1,1D4A3,1D4A4,1D4A7,1D4A8,1D4AD
+    //    小写空洞: 1D4BA,1D4BC
+    if (ch >= 0x1D49C && ch <= 0x1D4B5)
+    {
+        if (ch == 0x1D49D || ch == 0x1D4AD
+            || (ch >= 0x1D4A0 && ch <= 0x1D4A1)
+            || (ch >= 0x1D4A3 && ch <= 0x1D4A4)
+            || (ch >= 0x1D4A7 && ch <= 0x1D4A8))
+            return ch;
+
+        int offset = static_cast<int>(ch - 0x1D49C);
+        int holes  = 0;
+
+        if (ch > 0x1D49D) holes++;
+        if (ch > 0x1D4A0) holes++;
+        if (ch > 0x1D4A1) holes++;
+        if (ch > 0x1D4A3) holes++;
+        if (ch > 0x1D4A4) holes++;
+        if (ch > 0x1D4A7) holes++;
+        if (ch > 0x1D4A8) holes++;
+        if (ch > 0x1D4AD) holes++;
+
+        return static_cast<char32_t>(U'A' + offset - holes);
+    }
+
+    if (ch >= 0x1D4B6 && ch <= 0x1D4CF)
+    {
+        if (ch == 0x1D4BA || ch == 0x1D4BC)
+            return ch;
+
+        int offset = static_cast<int>(ch - 0x1D4B6);
+        int holes  = 0;
+
+        if (ch > 0x1D4BA) holes++;
+        if (ch > 0x1D4BC) holes++;
+
+        return static_cast<char32_t>(U'a' + offset - holes);
+    }
+
+    // 数学粗花体 (Mathematical Bold Script) — 无空洞
     if (ch >= 0x1D4D0 && ch <= 0x1D4E9)
         return static_cast<char32_t>(U'A' + (ch - 0x1D4D0));
 
     if (ch >= 0x1D4EA && ch <= 0x1D503)
         return static_cast<char32_t>(U'a' + (ch - 0x1D4EA));
 
+    // 数学花体 (Mathematical Fraktur) — 大写空洞: 1D506→ℭ
+    if (ch >= 0x1D504 && ch <= 0x1D51C)
+    {
+        if (ch == 0x1D506)
+            return ch;
+        return static_cast<char32_t>(U'A' + (ch - 0x1D504 - (ch > 0x1D506 ? 1 : 0)));
+    }
+
+    if (ch >= 0x1D51E && ch <= 0x1D537)
+        return static_cast<char32_t>(U'a' + (ch - 0x1D51E));
+
+    // 数学粗花体 (Mathematical Bold Fraktur) — 无空洞
     if (ch >= 0x1D56C && ch <= 0x1D585)
         return static_cast<char32_t>(U'A' + (ch - 0x1D56C));
 
     if (ch >= 0x1D586 && ch <= 0x1D59F)
         return static_cast<char32_t>(U'a' + (ch - 0x1D586));
 
-    // 无衬线字体
+    // 数学双线体 (Mathematical Double-struck) — 大写空洞: 1D53A,1D53F,1D545,1D547-1D549
+    if (ch >= 0x1D538 && ch <= 0x1D54F)
+    {
+        if (ch == 0x1D53A || ch == 0x1D53F || ch == 0x1D545 || (ch >= 0x1D547 && ch <= 0x1D549))
+            return ch;
+
+        int offset = static_cast<int>(ch - 0x1D538);
+        int holes  = 0;
+
+        if (ch > 0x1D53A) holes++;
+        if (ch > 0x1D53F) holes++;
+        if (ch > 0x1D545) holes++;
+        if (ch > 0x1D547) holes++;
+        if (ch > 0x1D548) holes++;
+        if (ch > 0x1D549) holes++;
+
+        return static_cast<char32_t>(U'A' + offset - holes);
+    }
+
+    if (ch >= 0x1D550 && ch <= 0x1D56B)
+        return static_cast<char32_t>(U'a' + (ch - 0x1D550));
+
+    // 数学无衬线粗体 (Mathematical Sans-serif Bold) — 无空洞
     if (ch >= 0x1D5D4 && ch <= 0x1D5ED)
         return static_cast<char32_t>(U'A' + (ch - 0x1D5D4));
 
     if (ch >= 0x1D5EE && ch <= 0x1D607)
         return static_cast<char32_t>(U'a' + (ch - 0x1D5EE));
 
+    // 数学无衬线斜体 (Mathematical Sans-serif Italic) — 无空洞
     if (ch >= 0x1D608 && ch <= 0x1D621)
         return static_cast<char32_t>(U'A' + (ch - 0x1D608));
 
     if (ch >= 0x1D622 && ch <= 0x1D63B)
         return static_cast<char32_t>(U'a' + (ch - 0x1D622));
 
+    // 数学无衬线粗斜体 (Mathematical Sans-serif Bold Italic) — 无空洞
     if (ch >= 0x1D63C && ch <= 0x1D655)
         return static_cast<char32_t>(U'A' + (ch - 0x1D63C));
 
     if (ch >= 0x1D656 && ch <= 0x1D66F)
         return static_cast<char32_t>(U'a' + (ch - 0x1D656));
 
-    // 等宽字体
+    // 数学等宽体 (Mathematical Monospace) — 无空洞
     if (ch >= 0x1D670 && ch <= 0x1D689)
         return static_cast<char32_t>(U'A' + (ch - 0x1D670));
 
@@ -158,6 +255,7 @@ char32_t fold_english_style(char32_t ch)
 
 /**
  * @brief 折叠数字样式字符
+ *        仅将能够无歧义映射为单个十进制数字 0-9 的单字符样式数字折叠为 ASCII 数字；不处理表示多位数、序号或复合数值的单字符
  * @param ch 输入字符
  * @return 折叠后的字符
  */
@@ -211,9 +309,6 @@ char32_t fold_num_style(char32_t ch)
 
     if (ch >= 0x278A && ch <= 0x2792)
         return static_cast<char32_t>(U'1' + (ch - 0x278A));
-
-    if (ch >= 0x278C && ch <= 0x2794)
-        return static_cast<char32_t>(U'1' + (ch - 0x278C));
 
     // 中文/兼容汉字数字样式
     if (ch >= 0x3220 && ch <= 0x3228)
@@ -296,10 +391,14 @@ char32_t fold_num_style(char32_t ch)
     }
 }
 
+//////////////////////////////////////////////////////////////
+// OpenCC 转换器
+// 用于将文本从繁体转换为简体
+//////////////////////////////////////////////////////////////
 class opencc_t2s_converter
 {
 public:
-    opencc_t2s_converter()
+    opencc_t2s_converter(void)
     {
         try
         {
@@ -311,12 +410,16 @@ public:
         }
     }
 
+    /**
+     * @brief 将文本从繁体转换为简体
+     *        当整句繁简转换长度变化时，字节位置与归一化字符的一一映射只能做近似处理
+     * @param text 输入文本
+     * @return 转换后的文本
+     */
     std::string convert_text(std::string_view text) const
     {
         if (!converter_)
-        {
             return std::string(text);
-        }
 
         try
         {
@@ -328,13 +431,17 @@ public:
         }
     }
 
+    /**
+     * @brief 将字符从繁体转换为简体
+     *        单字符 fallback 是保守退化，不保证上下文语义最优
+     * @param ch 输入字符
+     * @return 转换后的字符
+     */
     char32_t convert_char(char32_t ch) const
     {
         const std::u32string converted = decode_utf8(convert_text(encode_utf8(ch)));
         if (!converted.empty())
-        {
             return converted.front();
-        }
 
         return ch;
     }
