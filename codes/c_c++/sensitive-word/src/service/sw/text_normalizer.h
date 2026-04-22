@@ -37,7 +37,7 @@ struct text_normalizer_options
     bool ignore_case          = true;  // 是否忽略大小写
     bool ignore_width         = true;  // 是否忽略宽度
     bool ignore_num_style     = true;  // 是否忽略数字样式
-    bool ignore_chinese_style = true;  // 是否忽略中文样式
+    bool ignore_chinese_style = true;  // 是否忽略中文繁体(繁体转简体)
     bool ignore_english_style = true;  // 是否忽略英文样式
 };
 

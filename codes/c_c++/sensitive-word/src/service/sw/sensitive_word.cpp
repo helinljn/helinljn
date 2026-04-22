@@ -594,22 +594,20 @@ std::optional<std::string> sensitive_word_engine::find_first_word(std::string_vi
 {
     const auto result = find_first(text);
     if (!result)
-    {
         return std::nullopt;
-    }
 
     return result->word;
 }
 
 std::vector<std::string> sensitive_word_engine::find_all_words(std::string_view text) const
 {
-    const auto results = find_all(text);
+    auto results = find_all(text);
     std::vector<std::string> words;
     words.reserve(results.size());
 
-    for (const auto& result : results)
+    for (auto& result : results)
     {
-        words.push_back(result.word);
+        words.push_back(std::move(result.word));
     }
 
     return words;

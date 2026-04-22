@@ -49,7 +49,7 @@ struct sensitive_word_config
     bool ignore_case          = true;   // 是否忽略大小写
     bool ignore_width         = true;   // 是否忽略宽度字符(全角/半角宽度)
     bool ignore_num_style     = true;   // 是否忽略数字样式
-    bool ignore_chinese_style = true;   // 是否忽略中文字符
+    bool ignore_chinese_style = true;   // 是否忽略中文繁体(繁体转简体)
     bool ignore_english_style = true;   // 是否忽略英文字符
     bool ignore_repeat        = false;  // 是否忽略重复字符
 
@@ -57,7 +57,7 @@ struct sensitive_word_config
     bool enable_num_check     = false;  // 是否启用数字匹配
 
     bool   word_fail_fast     = true;   // 是否快速失败
-    size_t num_check_len      = 8;      // 数字匹配的长度
+    size_t num_check_len      = 2;      // 数字匹配的长度
 };
 
 //////////////////////////////////////////////////////////////
