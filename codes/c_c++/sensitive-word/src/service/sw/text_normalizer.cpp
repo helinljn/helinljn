@@ -121,9 +121,13 @@ char32_t fold_english_style(char32_t ch)
     if (ch >= 0x1D41A && ch <= 0x1D433)
         return static_cast<char32_t>(U'a' + (ch - 0x1D41A));
 
-    // 数学斜体 (Mathematical Italic) — 大写有空洞: 1D439→ℎ
+    // 数学斜体 (Mathematical Italic) — 大写空洞: U+1D439 (ℎ, Planck Constant, 不属于斜体字母序列)
     if (ch >= 0x1D434 && ch <= 0x1D44D)
-        return static_cast<char32_t>(U'A' + (ch - 0x1D434));
+    {
+        if (ch == 0x1D439)  // ℎ 不属于斜体字母序列，跳过
+            return ch;
+        return static_cast<char32_t>(U'A' + (ch - 0x1D434 - (ch > 0x1D439 ? 1 : 0)));
+    }
 
     if (ch >= 0x1D44E && ch <= 0x1D467)
         return static_cast<char32_t>(U'a' + (ch - 0x1D44E));
@@ -219,8 +223,8 @@ char32_t fold_english_style(char32_t ch)
         return static_cast<char32_t>(U'A' + offset - holes);
     }
 
-    if (ch >= 0x1D550 && ch <= 0x1D56B)
-        return static_cast<char32_t>(U'a' + (ch - 0x1D550));
+    if (ch >= 0x1D552 && ch <= 0x1D56B)
+        return static_cast<char32_t>(U'a' + (ch - 0x1D552));
 
     // 数学无衬线粗体 (Mathematical Sans-serif Bold) — 无空洞
     if (ch >= 0x1D5D4 && ch <= 0x1D5ED)
