@@ -44,6 +44,9 @@ TEST_SUITE("sensitive word usage")
 
         CHECK(engine.find_first_word("fuCK the bad words.").value_or("") == "fuCK");
         CHECK(engine.find_first_word("ｆｕｃｋ the bad words.").value_or("") == "ｆｕｃｋ");
+
+        CHECK(engine.replace("fuCK the bad words.") == "**** the bad words.");
+        CHECK(engine.replace("ｆｕｃｋ the bad words.", '0') == "0000 the bad words.");
     }
 
     TEST_CASE("忽略英文样式变体")
@@ -55,6 +58,8 @@ TEST_SUITE("sensitive word usage")
         const auto words = engine.find_all_words("Ⓕⓤc⒦ the bad words");
         REQUIRE(words.size() == 1);
         CHECK(words[0] == "Ⓕⓤc⒦");
+
+        CHECK(engine.replace("Ⓕⓤc⒦ the bad words") == "**** the bad words");
     }
 
     TEST_CASE("忽略繁体中文变体（opencc）")
@@ -66,6 +71,8 @@ TEST_SUITE("sensitive word usage")
         const auto result = engine.find_first("我爱我的祖国和五星紅旗。");
         REQUIRE(result.has_value());
         CHECK(result->word == "五星紅旗");
+
+        CHECK(engine.replace("我爱我的祖国和五星紅旗。") == "我爱我的祖国和****。");
     }
 
     TEST_CASE("忽略特殊字符")
@@ -79,6 +86,8 @@ TEST_SUITE("sensitive word usage")
         REQUIRE(words.size() == 2);
         CHECK(words[0] == "傻@冒");
         CHECK(words[1] == "狗+东西");
+
+        CHECK(engine.replace("傻@&%￥#！冒，狗+东西") == "********，****");
     }
 
     TEST_CASE("替换覆盖原始范围内被忽略的特殊字符")
@@ -102,6 +111,9 @@ TEST_SUITE("sensitive word usage")
         const auto words = engine.find_all_words("<p>傻逼</p>");
         REQUIRE(words.size() == 1);
         CHECK(words[0] == "傻逼");
+
+        CHECK(engine.replace("<p>傻逼</p>") == "<p>**</p>");
+        CHECK(engine.replace("<p>大傻逼</p>") == "<p>大**</p>");
     }
 
     TEST_CASE("英文单词匹配是默认的结果条件")
@@ -111,6 +123,7 @@ TEST_SUITE("sensitive word usage")
                                            .build();
 
         CHECK_FALSE(engine.contains("I have a nice day。"));
+        CHECK(engine.replace("I have a nice day。") == "I have a nice day。");
 
         sensitive_word_engine engine2 = sensitive_word_builder()
                                             .deny_words({"av"})
@@ -118,6 +131,7 @@ TEST_SUITE("sensitive word usage")
                                             .build();
 
         CHECK(engine2.contains("I have a nice day。"));
+        CHECK(engine2.replace("I have a nice day。") == "I h**e a nice day。");
     }
 
     TEST_CASE("英文单词数字匹配过滤部分数字命中")
@@ -130,11 +144,13 @@ TEST_SUITE("sensitive word usage")
         const auto words1 = engine.find_all_words("cp cpm trade deficit totaled 695 billion yen");
         REQUIRE(words1.size() == 1);
         CHECK(words1[0] == "cp");
+        CHECK(engine.replace("cp cpm trade deficit totaled 695 billion yen") == "** cpm trade deficit totaled 695 billion yen");
 
         const auto words2 = engine.find_all_words("cp cpm trade deficit totaled 695 billion yen 69");
         REQUIRE(words2.size() == 2);
         CHECK(words2[0] == "cp");
         CHECK(words2[1] == "69");
+        CHECK(engine.replace("cp cpm trade deficit totaled 695 billion yen 69") == "** cpm trade deficit totaled 695 billion yen **");
     }
 
     TEST_CASE("数字检测识别满足最小长度的连续数字")
@@ -329,6 +345,45 @@ TEST_SUITE("sensitive word usage")
 
         engine.remove_word("测试");
         CHECK(engine.find_all_words(text).empty());
+    }
+
+    TEST_CASE("查询词条状态")
+    {
+        sensitive_word_engine engine = sensitive_word_builder().build();
+
+        const auto empty_status = engine.query_word_status("hello");
+        CHECK_FALSE(empty_status.exists);
+        CHECK_FALSE(empty_status.in_deny);
+        CHECK_FALSE(empty_status.in_allow);
+
+        engine.add_word("hello");
+        const auto deny_status = engine.query_word_status("hello");
+        CHECK(deny_status.exists);
+        CHECK(deny_status.in_deny);
+        CHECK_FALSE(deny_status.in_allow);
+
+        engine.add_allow_word("world");
+        const auto allow_status = engine.query_word_status("world");
+        CHECK(allow_status.exists);
+        CHECK_FALSE(allow_status.in_deny);
+        CHECK(allow_status.in_allow);
+
+        engine.add_allow_word("hello");
+        const auto both_status = engine.query_word_status("hello");
+        CHECK(both_status.exists);
+        CHECK(both_status.in_deny);
+        CHECK(both_status.in_allow);
+    }
+
+    TEST_CASE("查询词条状态遵循当前引擎的归一化配置")
+    {
+        sensitive_word_engine engine = sensitive_word_builder().build();
+
+        engine.add_word("fuck");
+        const auto status = engine.query_word_status("ＦＵＣＫ");
+        CHECK(status.exists);
+        CHECK(status.in_deny);
+        CHECK_FALSE(status.in_allow);
     }
 
     TEST_CASE("动态白名单词语立即生效")

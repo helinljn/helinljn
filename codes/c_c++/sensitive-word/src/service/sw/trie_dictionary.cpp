@@ -78,6 +78,22 @@ trie_terminal_flags trie_dictionary::terminal_flags(traversal_state state) const
     return node->terminal;
 }
 
+trie_terminal_flags trie_dictionary::find_word(const std::u32string& word) const noexcept
+{
+    if (word.empty())
+        return {};
+
+    auto state = root_state();
+    for (char32_t ch : word)
+    {
+        state = advance(state, ch);
+        if (!state.valid())
+            return {};
+    }
+
+    return terminal_flags(state);
+}
+
 bool trie_dictionary::remove_word_recursive(trie_node& node, const std::u32string& word, size_t index, trie_word_kind kind)
 {
     // 返回值表示“当前节点是否已经可以被父节点安全擦除”，

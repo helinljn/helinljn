@@ -305,6 +305,20 @@ public:
         dictionary_.remove_word(normalized, trie_word_kind::allow);
     }
 
+    word_entry_status query_word_status(std::string_view word) const
+    {
+        const std::u32string normalized = normalizer_->normalize_word(word);
+        if (normalized.empty())
+            return {};
+
+        const trie_terminal_flags flags = dictionary_.find_word(normalized);
+        return word_entry_status{
+            flags.any(),
+            flags.deny,
+            flags.allow,
+        };
+    }
+
     const sensitive_word_config& config(void) const noexcept
     {
         return config_;
@@ -657,6 +671,11 @@ void sensitive_word_engine::add_allow_word(std::string_view word)
 void sensitive_word_engine::remove_allow_word(std::string_view word)
 {
     impl_->remove_allow_word(word);
+}
+
+word_entry_status sensitive_word_engine::query_word_status(std::string_view word) const
+{
+    return impl_->query_word_status(word);
 }
 
 const sensitive_word_config& sensitive_word_engine::config(void) const noexcept

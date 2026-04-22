@@ -42,6 +42,16 @@ struct word_result
 };
 
 //////////////////////////////////////////////////////////////
+// 词条状态
+//////////////////////////////////////////////////////////////
+struct word_entry_status
+{
+    bool exists   = false;  // 词条是否存在于字典中
+    bool in_deny  = false;  // 词条是否存在于黑名单
+    bool in_allow = false;  // 词条是否存在于白名单
+};
+
+//////////////////////////////////////////////////////////////
 // 敏感词匹配配置
 //////////////////////////////////////////////////////////////
 struct sensitive_word_config
@@ -182,6 +192,7 @@ public:
     void add_allow_word(std::string_view word);
     void remove_allow_word(std::string_view word);
 
+    word_entry_status query_word_status(std::string_view word) const;
     const sensitive_word_config& config(void) const noexcept;
 
 private:

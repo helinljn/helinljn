@@ -103,6 +103,13 @@ public:
      */
     trie_terminal_flags terminal_flags(traversal_state state) const noexcept;
 
+    /**
+     * @brief 查询完整词条的终端标志
+     * @param word 要查询的归一化词条
+     * @return 词条终点对应的 allow / deny 终端标志；不存在则返回空标志
+     */
+    trie_terminal_flags find_word(const std::u32string& word) const noexcept;
+
 private:
     //////////////////////////////////////////////////////////////
     // 字典树节点
