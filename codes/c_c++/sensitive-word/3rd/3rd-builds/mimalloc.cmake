@@ -22,7 +22,7 @@ IF(WIN32)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        /wd4702
+        # ...
     )
 
     # 链接库

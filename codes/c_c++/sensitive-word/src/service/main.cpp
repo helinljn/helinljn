@@ -3,6 +3,12 @@
 #include "mimalloc.h"
 #include "net/brynet.h"
 
+namespace {
+
+/**
+ * @brief 验证 mimalloc 库是否被正确加载
+ * @return true 如果 mimalloc 库被正确加载，否则返回 false
+ */
 bool veriry_mimalloc(void)
 {
     // 1. 验证 mimalloc 库版本
@@ -31,6 +37,8 @@ bool veriry_mimalloc(void)
 
     return true;
 }
+
+} // namespace
 
 int main(int argc, char** argv)
 {
