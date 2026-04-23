@@ -13,6 +13,7 @@ namespace                {
 
 void append_words(std::vector<std::string>& target, std::vector<std::string> words)
 {
+    target.reserve(target.size() + words.size());
     target.insert(target.end(), std::make_move_iterator(words.begin()), std::make_move_iterator(words.end()));
 }
 
@@ -104,25 +105,25 @@ sensitive_word_builder& sensitive_word_builder::add_allow_word(std::string word)
 
 sensitive_word_builder& sensitive_word_builder::add_deny_words_from_text(std::string text)
 {
-    append_words(deny_words_, load_words_from_text(text));
+    append_words(deny_words_, std::move(load_words_from_text(text)));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_allow_words_from_text(std::string text)
 {
-    append_words(allow_words_, load_words_from_text(text));
+    append_words(allow_words_, std::move(load_words_from_text(text)));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_deny_words_from_file(const std::string& file_path)
 {
-    append_words(deny_words_, load_words_from_file(file_path));
+    append_words(deny_words_, std::move(load_words_from_file(file_path)));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_allow_words_from_file(const std::string& file_path)
 {
-    append_words(allow_words_, load_words_from_file(file_path));
+    append_words(allow_words_, std::move(load_words_from_file(file_path)));
     return *this;
 }
 
@@ -144,9 +145,15 @@ sensitive_word_builder& sensitive_word_builder::replace_strategy(std::shared_ptr
     return *this;
 }
 
-sensitive_word_engine sensitive_word_builder::build(void) const
+sensitive_word_engine sensitive_word_builder::build(void)
 {
-    return sensitive_word_engine(config_, deny_words_, allow_words_, char_ignore_, result_condition_, replace_strategy_);
+    return sensitive_word_engine(
+        std::move(config_),
+        std::move(deny_words_),
+        std::move(allow_words_),
+        std::move(char_ignore_),
+        std::move(result_condition_),
+        std::move(replace_strategy_));
 }
 
 ////////////////////////////////////////////////////////////
@@ -257,12 +264,13 @@ public:
 
     std::string replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const
     {
-        if (results.empty())
-            return std::string(text);
-
         std::string out;
-        size_t      cursor = 0;
+        out.reserve(text.size());
 
+        if (results.empty())
+            return out.assign(text);
+
+        size_t cursor = 0;
         for (const auto& result : results)
         {
             if (result.raw_begin > result.raw_end || result.raw_end > text.size() || result.raw_begin < cursor)
@@ -674,7 +682,8 @@ std::string sensitive_word_engine::replace(std::string_view text) const
 
 std::string sensitive_word_engine::replace(std::string_view text, char replacement) const
 {
-    return impl_->replace(text, *replace_strategies::chars(replacement));
+    chars_replace_strategy strategy(replacement);
+    return impl_->replace(text, strategy);
 }
 
 std::string sensitive_word_engine::replace(std::string_view text, const replace_strategy& strategy) const
@@ -689,7 +698,8 @@ std::string sensitive_word_engine::replace(std::string_view text, const std::vec
 
 std::string sensitive_word_engine::replace(std::string_view text, const std::vector<word_result>& results, char replacement) const
 {
-    return impl_->replace(text, results, *replace_strategies::chars(replacement));
+    chars_replace_strategy strategy(replacement);
+    return impl_->replace(text, results, strategy);
 }
 
 std::string sensitive_word_engine::replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const

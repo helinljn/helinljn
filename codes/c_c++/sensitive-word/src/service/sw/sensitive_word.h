@@ -140,7 +140,7 @@ public:
     sensitive_word_builder& result_condition(std::shared_ptr<class result_condition> value);
     sensitive_word_builder& replace_strategy(std::shared_ptr<class replace_strategy> value);
 
-    sensitive_word_engine build(void) const;
+    sensitive_word_engine build(void);
 
 private:
     sensitive_word_config                   config_;
