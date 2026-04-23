@@ -23,7 +23,7 @@ IF(WIN32)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        /wd4702
     )
 
     # 链接库
@@ -89,22 +89,6 @@ SET(MIMALLOC_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/stats.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/prim/prim.c
 )
-
-# mimalloc 在 Windows 下的特殊设置
-IF(WIN32)
-    # mimalloc 在 MSVC 下按 C++ 编译，以使用较新的原子实现
-    SET_SOURCE_FILES_PROPERTIES(${MIMALLOC_SRC_LIST} PROPERTIES LANGUAGE CXX)
-
-    # Windows 下使用 mimalloc 官方 redirect 机制
-    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/bin/mimalloc-redirect.lib"
-        "${PROJECT_DEBUGGER_WORKING_DIRECTORY}/mimalloc-redirect.lib"
-    )
-    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/bin/mimalloc-redirect.dll"
-        "${PROJECT_DEBUGGER_WORKING_DIRECTORY}/mimalloc-redirect.dll"
-    )
-ENDIF()
 
 # 生成动态库
 ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED ${MIMALLOC_INCLUDE_LIST} ${MIMALLOC_SRC_LIST})

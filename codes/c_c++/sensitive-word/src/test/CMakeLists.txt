@@ -29,7 +29,6 @@ IF(WIN32)
     SET(CURRENT_LINK_LIBS
         opencc
         mimalloc
-        mimalloc-redirect
     )
 ELSE()
     # 宏定义
