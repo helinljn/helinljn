@@ -5,6 +5,7 @@ SET(CURRENT_SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR})
 # 头文件目录
 SET(CURRENT_INCLUDE_DIR
     ${CURRENT_SOURCE_DIR}
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source
@@ -28,6 +29,7 @@ IF(WIN32)
     SET(CURRENT_LINK_LIBS
         opencc
         mimalloc
+        mimalloc-redirect
     )
 ELSE()
     # 宏定义

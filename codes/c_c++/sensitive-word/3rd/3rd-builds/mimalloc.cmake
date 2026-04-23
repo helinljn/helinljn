@@ -14,6 +14,7 @@ IF(WIN32)
         -DMI_SHARED_LIB
         -DMI_SHARED_LIB_EXPORT
         -DMI_MALLOC_OVERRIDE
+        -DMI_WIN_NOREDIRECT
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
@@ -27,7 +28,6 @@ IF(WIN32)
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        mimalloc-redirect
         psapi
         user32
         bcrypt
