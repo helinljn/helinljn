@@ -345,11 +345,16 @@ public:
     }
 
 private:
+    struct match_span
+    {
+        size_t raw_length       = 0;
+        size_t effective_length = 0;
+    };
+
     struct word_scan_result
     {
-        size_t         allow_length = 0;
-        size_t         deny_length  = 0;
-        std::u32string normalized_deny_word{};
+        match_span allow{};
+        match_span deny{};
     };
 
     struct num_scan_result
@@ -384,43 +389,44 @@ private:
 
         for (size_t idx = 0; idx < normalized.normalized_chars.size(); ++idx)
         {
-            size_t         allow_length  = 0;
-            size_t         deny_length   = 0;
-            match_type     detected_type = match_type::word;
+            match_span     allow_match{};
+            match_span     deny_match{};
+            match_type     detected_type{match_type::word};
             std::u32string normalized_deny_word;
+
             if (config_.enable_word_check)
             {
                 const word_scan_result detect_result = detect_word_at(normalized, idx);
-                allow_length         = detect_result.allow_length;
-                deny_length          = detect_result.deny_length;
-                normalized_deny_word = detect_result.normalized_deny_word;
+                allow_match = detect_result.allow;
+                deny_match  = detect_result.deny;
             }
 
-            if (allow_length == 0 && deny_length == 0 && config_.enable_num_check)
+            if (allow_match.raw_length == 0 && deny_match.raw_length == 0 && config_.enable_num_check)
             {
                 const num_scan_result detect_result = detect_num_at(normalized, idx);
                 if (detect_result.deny_length > 0)
                 {
-                    deny_length          = detect_result.deny_length;
-                    normalized_deny_word = detect_result.normalized_deny_word;
-                    detected_type        = match_type::num;
+                    deny_match.raw_length       = detect_result.deny_length;
+                    deny_match.effective_length = detect_result.normalized_deny_word.size();
+                    normalized_deny_word        = detect_result.normalized_deny_word;
+                    detected_type               = match_type::num;
                 }
             }
 
             // allow / deny 同起点同时命中时，采用“更长者优先”。
             // 只有 deny 明确长于 allow 时，当前位置才会被判定为 deny 命中；
             // 否则由 allow 覆盖，并直接跳过 allow 的跨度。
-            if (allow_length < deny_length && deny_length > 0)
+            if (allow_match.raw_length < deny_match.raw_length && deny_match.raw_length > 0)
             {
-                word_result result = make_word_result(text, normalized, idx, deny_length, std::move(normalized_deny_word), detected_type);
+                auto result = make_word_result(text, normalized, idx, deny_match, std::move(normalized_deny_word), detected_type);
                 if ((!result_condition_ || result_condition_->match(result, text)) && !on_match(std::move(result)))
                     return;
 
-                idx += deny_length - 1;
+                idx += deny_match.raw_length - 1;
             }
-            else if (allow_length > 0)
+            else if (allow_match.raw_length > 0)
             {
-                idx += allow_length - 1;
+                idx += allow_match.raw_length - 1;
             }
         }
     }
@@ -431,32 +437,26 @@ private:
         if (begin_index >= text.normalized_chars.size())
             return result;
 
-        // builder 只保存真正参与字典树推进的归一化字符；
-        // temp_len 统计的是原始扫描跨度，包含中间被 ignore 的字符。
-        // 这样最终既能按“净化后的字符序列”匹配，又能返回原文本中的完整命中区间。
-        std::u32string builder;
-        size_t         temp_len                = 0;
-        size_t         best_deny_builder_size  = 0;
-        size_t         best_allow_builder_size = 0;
-
         auto state        = dictionary_.root_state();
         bool allow_active = true;
         bool deny_active  = true;
 
+        size_t   raw_length         = 0;
+        size_t   effective_length   = 0;
+        char32_t last_effective     = 0;
+        bool     has_last_effective = false;
+
         for (size_t idx = begin_index; idx < text.normalized_chars.size(); ++idx)
         {
             const auto& item = text.normalized_chars[idx];
-            if (temp_len != 0 && char_ignore_ && char_ignore_->ignore(item.raw_code_point, item.normalized_code_point))
-            {
-                ++temp_len;
+            ++raw_length;
+
+            if (bool ignored = raw_length != 1 && char_ignore_ && char_ignore_->ignore(item.raw_code_point, item.normalized_code_point); ignored)
                 continue;
-            }
 
-            builder.push_back(item.normalized_code_point);
-            ++temp_len;
+            ++effective_length;
 
-            const bool ignore_repeated_char = config_.ignore_repeat && builder.size() > 1 && builder[builder.size() - 2] == builder.back();
-            if (!ignore_repeated_char)
+            if (bool ignored = config_.ignore_repeat && has_last_effective && last_effective == item.normalized_code_point; !ignored)
             {
                 state = dictionary_.advance(state, item.normalized_code_point);
                 if (!state.valid())
@@ -466,8 +466,8 @@ private:
             const trie_terminal_flags flags = dictionary_.terminal_flags(state);
             if (allow_active && flags.allow)
             {
-                result.allow_length     = temp_len;
-                best_allow_builder_size = builder.size();
+                result.allow.raw_length       = raw_length;
+                result.allow.effective_length = effective_length;
 
                 if (config_.word_fail_fast)
                     allow_active = false;
@@ -475,8 +475,8 @@ private:
 
             if (deny_active && flags.deny)
             {
-                result.deny_length     = temp_len;
-                best_deny_builder_size = builder.size();
+                result.deny.raw_length       = raw_length;
+                result.deny.effective_length = effective_length;
 
                 if (config_.word_fail_fast)
                     deny_active = false;
@@ -484,29 +484,46 @@ private:
 
             if (!allow_active && !deny_active)
                 break;
+
+            last_effective     = item.normalized_code_point;
+            has_last_effective = true;
         }
 
-        if (config_.ignore_repeat && best_deny_builder_size > 0 && best_deny_builder_size <= builder.size())
+        if (config_.ignore_repeat)
         {
-            const char32_t tail = builder[best_deny_builder_size - 1];
-            while (result.deny_length < builder.size() && builder[result.deny_length] == tail)
+            auto extend_repeat_tail = [&](match_span& match)
             {
-                ++result.deny_length;
-                ++best_deny_builder_size;
-            }
-        }
+                if (match.raw_length == 0)
+                    return;
 
-        if (config_.ignore_repeat && best_allow_builder_size > 0 && best_allow_builder_size <= builder.size())
-        {
-            const char32_t tail = builder[best_allow_builder_size - 1];
-            while (result.allow_length < builder.size() && builder[result.allow_length] == tail)
-            {
-                ++result.allow_length;
-                ++best_allow_builder_size;
-            }
-        }
+                size_t tail_index = begin_index + match.raw_length - 1;
+                while (tail_index > begin_index)
+                {
+                    const auto& tail_item = text.normalized_chars[tail_index];
+                    if (!(char_ignore_ && char_ignore_->ignore(tail_item.raw_code_point, tail_item.normalized_code_point)))
+                        break;
 
-        result.normalized_deny_word = builder.substr(0, std::min(best_deny_builder_size, builder.size()));
+                    --tail_index;
+                }
+
+                const char32_t tail = text.normalized_chars[tail_index].normalized_code_point;
+                for (size_t idx = begin_index + match.raw_length; idx < text.normalized_chars.size(); ++idx)
+                {
+                    const auto& item = text.normalized_chars[idx];
+                    if (char_ignore_ && char_ignore_->ignore(item.raw_code_point, item.normalized_code_point))
+                        break;
+
+                    if (item.normalized_code_point != tail)
+                        break;
+
+                    ++match.raw_length;
+                    ++match.effective_length;
+                }
+            };
+
+            extend_repeat_tail(result.deny);
+            extend_repeat_tail(result.allow);
+        }
 
         return result;
     }
@@ -547,21 +564,44 @@ private:
         return result;
     }
 
+    std::u32string build_normalized_word(const normalized_text& normalized, size_t begin_index, match_span deny_match) const
+    {
+        std::u32string normalized_word;
+        normalized_word.reserve(deny_match.effective_length);
+
+        for (size_t idx = begin_index; idx < begin_index + deny_match.raw_length && idx < normalized.normalized_chars.size(); ++idx)
+        {
+            const auto& item = normalized.normalized_chars[idx];
+            if (!normalized_word.empty() && char_ignore_ && char_ignore_->ignore(item.raw_code_point, item.normalized_code_point))
+                continue;
+
+            normalized_word.push_back(item.normalized_code_point);
+            if (normalized_word.size() == deny_match.effective_length)
+                break;
+        }
+
+        return normalized_word;
+    }
+
     word_result make_word_result(
         std::string_view       text,
         const normalized_text& normalized,
         size_t                 begin_index,
-        size_t                 deny_length,
+        match_span             deny_match,
         std::u32string         normalized_deny_word,
         match_type             detected_type) const
     {
         word_result result;
         result.raw_begin             = normalized.normalized_chars[begin_index].raw_byte_begin;
-        result.raw_end               = normalized.normalized_chars[begin_index + deny_length - 1].raw_byte_end;
-        result.raw_code_point_length = deny_length;
+        result.raw_end               = normalized.normalized_chars[begin_index + deny_match.raw_length - 1].raw_byte_end;
+        result.raw_code_point_length = deny_match.raw_length;
         result.word                  = std::string(text.substr(result.raw_begin, result.raw_end - result.raw_begin));
-        result.normalized_word       = encode_utf8(normalized_deny_word);
-        result.type                  = detected_type;
+
+        if (normalized_deny_word.empty() && deny_match.effective_length > 0)
+            normalized_deny_word = build_normalized_word(normalized, begin_index, deny_match);
+
+        result.normalized_word = encode_utf8(normalized_deny_word);
+        result.type            = detected_type;
 
         if (begin_index > 0)
         {
@@ -570,7 +610,7 @@ private:
             result.left_normalized_code_point = left.normalized_code_point;
         }
 
-        const size_t right_index = begin_index + deny_length;
+        const size_t right_index = begin_index + deny_match.raw_length;
         if (right_index < normalized.normalized_chars.size())
         {
             const auto& right = normalized.normalized_chars[right_index];
