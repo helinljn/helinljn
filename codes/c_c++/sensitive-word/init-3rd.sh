@@ -6,6 +6,7 @@ UTFCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/utfcpp
 OPENCC_INIT_DIR=$ROOT_INIT_DIR/3rd/opencc
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
+MIMALLOC_INIT_DIR=$ROOT_INIT_DIR/3rd/mimalloc
 
 echo ------------------
 echo -- brynet
@@ -75,4 +76,18 @@ else
     git checkout .
     git fetch -p origin
     git checkout v2.4.12
+fi
+
+echo ------------------
+echo -- mimalloc
+cd $ROOT_INIT_DIR
+if [ ! -d $MIMALLOC_INIT_DIR ]; then
+    git clone -b v2.3.1 https://github.com/microsoft/mimalloc.git $MIMALLOC_INIT_DIR
+else
+    cd $MIMALLOC_INIT_DIR
+    git remote set-url origin https://github.com/microsoft/mimalloc.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v2.3.1
 fi
