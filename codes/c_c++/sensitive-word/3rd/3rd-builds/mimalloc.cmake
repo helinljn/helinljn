@@ -46,6 +46,8 @@ ELSE()
     SET(CURRENT_COMPILE_OPTIONS
         -Wno-pedantic
         -fno-builtin-malloc
+        -fvisibility=hidden
+        -ftls-model=initial-exec
     )
 
     # 链接库
