@@ -27,8 +27,8 @@ IF(WIN32)
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        opencc
         mimalloc
+        opencc
     )
 ELSE()
     # 宏定义
@@ -43,8 +43,8 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        opencc
         mimalloc
+        opencc
     )
 ENDIF()
 
