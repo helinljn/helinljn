@@ -43,6 +43,7 @@ TEST_SUITE("sensitive word usage")
         sensitive_word_engine engine1 = sensitive_word_builder()
                                            .enable_word_check(true)
                                            .ignore_repeat(true)
+                                           .word_fail_fast(false)
                                            .add_deny_words_from_file("./res/dict-2026-04-20.txt")
                                            .build();
 
@@ -51,7 +52,14 @@ TEST_SUITE("sensitive word usage")
         CHECK(engine1.replace("ⒻⒻⒻfⓤuⓤ⒰cⓒ⒦ you!") == "*********** you!");
         CHECK(engine1.replace("FFFUUUCCCKKK you!") == "************ you!");
         CHECK(engine.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
-        CHECK(engine1.replace("64事件") == "**事件");
+        CHECK(engine1.replace("64事件") == "****");
+        CHECK(engine1.replace("我草泥马") == "**泥马");
+        CHECK(engine1.replace("草泥女马") == "*泥**");
+        CHECK(engine1.replace("小草草地艹") == "小**地*");
+
+        engine1.add_allow_word("小草");
+        engine1.add_allow_word("草地");
+        CHECK(engine1.replace("小草草地艹") == "小草草地*");
     }
 
     TEST_CASE("基于find_all结果复用替换")
@@ -60,7 +68,7 @@ TEST_SUITE("sensitive word usage")
                                            .deny_words({"坏词", "敏感词", "违规"})
                                            .build();
 
-        const std::string text = "这里有坏词，也有敏感词，还有违规内容。";
+        const std::string text    = "这里有坏词，也有敏感词，还有违规内容。";
         const auto        results = engine.find_all(text);
         REQUIRE(results.size() == 3);
 
