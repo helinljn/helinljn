@@ -214,6 +214,7 @@ TEST_SUITE("sensitive word usage")
         CHECK(result->word == "12345678");
         CHECK(result->normalized_word == "12345678");
         CHECK(result->type == sensitive_word::match_type::num);
+        CHECK(engine.replace("订单号 12345678", {result.value()}) == "订单号 ********");
     }
 
     TEST_CASE("数字检测在原始范围内尊重被忽略的特殊字符")
@@ -241,6 +242,7 @@ TEST_SUITE("sensitive word usage")
                                                    .enable_num_check(true)
                                                    .build();
         CHECK(default_engine.find_all_words(text) == std::vector<std::string>{"12345678"});
+        CHECK(default_engine.replace(text) == "你懂得：********");
 
         sensitive_word_engine custom_len_engine = sensitive_word_builder()
                                                       .enable_word_check(false)
@@ -273,7 +275,7 @@ TEST_SUITE("sensitive word usage")
     TEST_CASE("词语匹配遵循ignore_num_style开关")
     {
         const std::string chinese_text = "花豹用下三滥招式对付疣猪，没想到疣猪居然也有绝招";
-        const std::string digit_text = "花豹用下3滥招式对付疣猪，没想到疣猪居然也有绝招";
+        const std::string digit_text   = "花豹用下3滥招式对付疣猪，没想到疣猪居然也有绝招";
 
         sensitive_word_engine engine_true = sensitive_word_builder()
                                                 .ignore_num_style(true)
@@ -382,9 +384,7 @@ TEST_SUITE("sensitive word usage")
 
         engine.add_word("测试");
         engine.add_word("新增");
-        CHECK(
-            engine.find_all_words(text) ==
-            std::vector<std::string>{"测试", "新增", "新增"});
+        CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试", "新增", "新增"});
 
         engine.remove_word("新增");
         CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试"});
@@ -441,9 +441,7 @@ TEST_SUITE("sensitive word usage")
                                            .word_fail_fast(false)
                                            .build();
 
-        CHECK(
-            engine.find_all_words(text) ==
-            std::vector<std::string>{"测试", "新增", "新增"});
+        CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试", "新增", "新增"});
 
         engine.add_allow_word("测试");
         engine.add_allow_word("新增");
@@ -453,9 +451,7 @@ TEST_SUITE("sensitive word usage")
         CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试"});
 
         engine.remove_allow_word("新增");
-        CHECK(
-            engine.find_all_words(text) ==
-            std::vector<std::string>{"测试", "新增", "新增"});
+        CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试", "新增", "新增"});
     }
 
     TEST_CASE("构建器从文本加载黑名单和白名单")
@@ -480,7 +476,7 @@ TEST_SUITE("sensitive word usage")
 
     TEST_CASE("构建器从文件加载黑名单和白名单")
     {
-        const auto deny_file = std::filesystem::path("temp_deny_words.txt");
+        const auto deny_file  = std::filesystem::path("temp_deny_words.txt");
         const auto allow_file = std::filesystem::path("temp_allow_words.txt");
 
         {
@@ -587,16 +583,12 @@ TEST_SUITE("sensitive word usage")
                                                 .deny_words({"我的世界", "我的"})
                                                 .word_fail_fast(false)
                                                 .build();
-        CHECK(
-            over_engine.find_all_words(text) ==
-            std::vector<std::string>{"我的", "我的世界"});
+        CHECK(over_engine.find_all_words(text) == std::vector<std::string>{"我的", "我的世界"});
 
         sensitive_word_engine fast_engine = sensitive_word_builder()
                                                 .deny_words({"我的世界", "我的"})
                                                 .build();
-        CHECK(
-            fast_engine.find_all_words(text) ==
-            std::vector<std::string>{"我的", "我的"});
+        CHECK(fast_engine.find_all_words(text) == std::vector<std::string>{"我的", "我的"});
     }
 
     TEST_CASE("完整匹配在近似未命中时无误报")
@@ -637,12 +629,6 @@ TEST_SUITE("sensitive word usage")
         CHECK(result->word == "ⒻⒻⒻfⓤuⓤ⒰cⓒ⒦");
     }
 
-    // ============================================================
-    // text_normalizer 补充测试
-    // ============================================================
-
-    // --- fold_ascii_case: Latin-1 / Latin Extended 大小写折叠 ---
-
     TEST_CASE("折叠Latin-1带重音大写字母的大小写")
     {
         // É(0x00C9) -> é(0x00E9), Ü(0x00DC) -> ü(0x00FC)
@@ -678,8 +664,6 @@ TEST_SUITE("sensitive word usage")
         REQUIRE(result.has_value());
         CHECK(result->word == "ǍBǍ");
     }
-
-    // --- fold_width: 全角符号 → 半角符号 ---
 
     TEST_CASE("全角符号折叠为半角符号")
     {
@@ -734,8 +718,6 @@ TEST_SUITE("sensitive word usage")
         // 因此通过数字检测验证半角片假名不会干扰附近的数字检测
         CHECK_FALSE(engine.contains("ﾊﾝｶﾅ"));
     }
-
-    // --- fold_english_style: 数学样式字母 ---
 
     TEST_CASE("数学粗体字母的英文样式折叠")
     {
@@ -996,8 +978,6 @@ TEST_SUITE("sensitive word usage")
         CHECK(result->normalized_word == "12345678");
     }
 
-    // --- fold_num_style: 数学样式数字 ---
-
     TEST_CASE("数学粗体数字的数字样式折叠")
     {
         // 数学粗体数字: 𝟎(U+1D7CE)-𝟗(U+1D7D7)
@@ -1044,8 +1024,6 @@ TEST_SUITE("sensitive word usage")
         REQUIRE(result.has_value());
         CHECK(result->normalized_word == "01234567");
     }
-
-    // --- fold_num_style: 带圈/括号/句点数字 ---
 
     TEST_CASE("带圈数字①-⑨的数字样式折叠")
     {
@@ -1100,8 +1078,6 @@ TEST_SUITE("sensitive word usage")
         CHECK(result->normalized_word == "01234567");
     }
 
-    // --- fold_num_style: 苏州码子 ---
-
     TEST_CASE("苏州码子的数字样式折叠")
     {
         // 〡(U+3021)-〩(U+3029) -> 1-9
@@ -1114,8 +1090,6 @@ TEST_SUITE("sensitive word usage")
         REQUIRE(result.has_value());
         CHECK(result->normalized_word == "12345678");
     }
-
-    // --- fold_num_style: 中文数字样式 ---
 
     TEST_CASE("中文大写数字的数字样式折叠")
     {
@@ -1168,8 +1142,6 @@ TEST_SUITE("sensitive word usage")
         // 它不应被折叠，所以 ⑩ 单独不应形成数字序列
         CHECK_FALSE(engine.contains("⑩"));
     }
-
-    // --- 配置开关关闭状态测试 ---
 
     TEST_CASE("ignore_case=false保留大写字母")
     {
@@ -1255,8 +1227,6 @@ TEST_SUITE("sensitive word usage")
         CHECK_FALSE(engine.contains("Ⓕⓤc⒦"));
     }
 
-    // --- ignore_repeat 补充测试 ---
-
     TEST_CASE("忽略重复（中文字符）")
     {
         sensitive_word_engine engine = sensitive_word_builder()
@@ -1280,8 +1250,6 @@ TEST_SUITE("sensitive word usage")
         CHECK_FALSE(engine.contains("ffuuck"));
     }
 
-    // --- 边界场景测试 ---
-
     TEST_CASE("空字符串输入")
     {
         sensitive_word_engine engine = sensitive_word_builder()
@@ -1303,8 +1271,6 @@ TEST_SUITE("sensitive word usage")
         CHECK_FALSE(engine.contains("@#$%^&*"));
         CHECK_FALSE(engine.contains("！！！"));
     }
-
-    // --- fold_num_style 在 word 匹配中的交互 ---
 
     TEST_CASE("词语匹配中混合数字样式和中文数字")
     {
