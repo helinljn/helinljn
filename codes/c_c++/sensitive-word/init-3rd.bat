@@ -7,6 +7,7 @@ set OPENCC_INIT_DIR=%ROOT_INIT_DIR%/3rd/opencc
 set SPDLOG_INIT_DIR=%ROOT_INIT_DIR%/3rd/spdlog
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
 set MIMALLOC_INIT_DIR=%ROOT_INIT_DIR%/3rd/mimalloc
+set NANOBENCH_INIT_DIR=%ROOT_INIT_DIR%/3rd/nanobench
 
 echo ------------------
 echo -- brynet
@@ -90,6 +91,20 @@ if not exist %MIMALLOC_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout v2.3.1
+)
+
+echo ------------------
+echo -- nanobench
+cd %ROOT_INIT_DIR%
+if not exist %NANOBENCH_INIT_DIR% (
+    git clone -b v4.3.11 https://github.com/martinus/nanobench.git %NANOBENCH_INIT_DIR%
+) else (
+    cd %NANOBENCH_INIT_DIR%
+    git remote set-url origin https://github.com/martinus/nanobench.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v4.3.11
 )
 
 pause

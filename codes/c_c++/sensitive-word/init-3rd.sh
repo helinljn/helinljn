@@ -7,6 +7,7 @@ OPENCC_INIT_DIR=$ROOT_INIT_DIR/3rd/opencc
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
 MIMALLOC_INIT_DIR=$ROOT_INIT_DIR/3rd/mimalloc
+NANOBENCH_INIT_DIR=$ROOT_INIT_DIR/3rd/nanobench
 
 echo ------------------
 echo -- brynet
@@ -90,4 +91,18 @@ else
     git checkout .
     git fetch -p origin
     git checkout v2.3.1
+fi
+
+echo ------------------
+echo -- nanobench
+cd $ROOT_INIT_DIR
+if [ ! -d $NANOBENCH_INIT_DIR ]; then
+    git clone -b v4.3.11 https://github.com/martinus/nanobench.git $NANOBENCH_INIT_DIR
+else
+    cd $NANOBENCH_INIT_DIR
+    git remote set-url origin https://github.com/martinus/nanobench.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v4.3.11
 fi
