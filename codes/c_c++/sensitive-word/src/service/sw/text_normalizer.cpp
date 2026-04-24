@@ -3,7 +3,9 @@
 #include "utf8.h"
 #include <utility>
 #include <iterator>
+#include <algorithm>
 #include <filesystem>
+#include <unordered_map>
 
 namespace sensitive_word {
 namespace                {
@@ -463,7 +465,6 @@ public:
         }
         catch (...)
         {
-            converter_.reset();
         }
     }
 
@@ -499,15 +500,22 @@ public:
         if (!is_cjk(ch))
             return ch;
 
+        if (auto it = char_cache_.find(ch); it != char_cache_.end())
+            return it->second;
+
+        char32_t result = ch;
         const std::u32string converted = decode_utf8(convert_text(encode_utf8(ch)));
         if (!converted.empty())
-            return converted.front();
+            result = converted.front();
 
-        return ch;
+        char_cache_[ch] = result;
+
+        return result;
     }
 
 private:
-    std::unique_ptr<opencc::SimpleConverter> converter_;
+    std::unique_ptr<opencc::SimpleConverter>       converter_;
+    mutable std::unordered_map<char32_t, char32_t> char_cache_;
 };
 
 /**
@@ -518,6 +526,9 @@ private:
 std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
 {
     std::vector<raw_code_point> result;
+    // 使用字节长度预分配容量来空间换时间：
+    // UTF-8 字符通常占 1~4 字节，预分配 text.size() 可能会浪费些许内存，
+    // 但可完全避免 vector 在插入过程中的重分配和内存拷贝开销。
     result.reserve(text.size());
 
     auto it = text.begin();
@@ -530,7 +541,7 @@ std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
         {
             const char32_t cp  = utf8::next(it, text.end());
             const size_t   end = static_cast<size_t>(it - text.begin());
-            result.push_back(raw_code_point{cp, begin, end});
+            result.push_back({cp, begin, end});
         }
         catch (...)
         {
@@ -538,7 +549,7 @@ std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
             ++it;
 
             const size_t end = static_cast<size_t>(it - text.begin());
-            result.push_back(raw_code_point{0xFFFD, begin, end});
+            result.push_back({0xFFFD, begin, end});
         }
     }
 
@@ -603,10 +614,10 @@ public:
         std::u32string normalized;
         normalized.reserve(decoded.size());
 
-        for (char32_t ch : decoded)
-        {
-            normalized.push_back(normalize_non_chinese_code_point(ch));
-        }
+        std::transform(decoded.begin(), decoded.end(), std::back_inserter(normalized),
+                        [this](char32_t ch) {
+                            return normalize_non_chinese_code_point(ch);
+                        });
 
         return normalized;
     }
@@ -730,6 +741,9 @@ std::string encode_utf8(const std::u32string& text)
 std::u32string decode_utf8(std::string_view text)
 {
     std::u32string result;
+    // 使用字节长度预分配容量来空间换时间：
+    // UTF-8 字符通常占 1~4 字节，预分配 text.size() 可能会浪费些许内存，
+    // 但可完全避免 vector 在插入过程中的重分配和内存拷贝开销。
     result.reserve(text.size());
 
     try
