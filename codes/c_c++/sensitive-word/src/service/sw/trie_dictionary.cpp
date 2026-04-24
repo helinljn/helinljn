@@ -4,6 +4,7 @@
 namespace sensitive_word {
 
 trie_dictionary::trie_dictionary()
+    : node_pool_()
 {
     std::fill(std::begin(root_ascii_cache_), std::end(root_ascii_cache_), 0xFFFFFFFF);
     // 预分配根节点，索引始终为 0
@@ -23,6 +24,7 @@ trie_dictionary& trie_dictionary::operator=(const trie_dictionary& other)
         node_pool_ = other.node_pool_;
         std::copy(std::begin(other.root_ascii_cache_), std::end(other.root_ascii_cache_), std::begin(root_ascii_cache_));
     }
+
     return *this;
 }
 
@@ -49,14 +51,8 @@ trie_dictionary& trie_dictionary::operator=(trie_dictionary&& other) noexcept
         if (other.node_pool_.empty())
             other.allocate_node();
     }
-    return *this;
-}
 
-uint32_t trie_dictionary::allocate_node()
-{
-    uint32_t idx = static_cast<uint32_t>(node_pool_.size());
-    node_pool_.emplace_back();
-    return idx;
+    return *this;
 }
 
 void trie_dictionary::add_word(const std::u32string& word, trie_word_kind kind)
@@ -64,7 +60,8 @@ void trie_dictionary::add_word(const std::u32string& word, trie_word_kind kind)
     if (word.empty())
         return;
 
-    uint32_t curr_idx = 0; // 根节点固定为 0
+    // 根节点固定为 0
+    uint32_t curr_idx = 0;
     for (size_t i = 0; i < word.size(); ++i)
     {
         char32_t ch = word[i];
@@ -171,6 +168,13 @@ trie_terminal_flags trie_dictionary::find_word(const std::u32string& word) const
     }
 
     return terminal_flags(state);
+}
+
+uint32_t trie_dictionary::allocate_node()
+{
+    uint32_t idx = static_cast<uint32_t>(node_pool_.size());
+    node_pool_.emplace_back();
+    return idx;
 }
 
 bool trie_dictionary::remove_word_recursive(uint32_t node_idx, const std::u32string& word, size_t index, trie_word_kind kind)

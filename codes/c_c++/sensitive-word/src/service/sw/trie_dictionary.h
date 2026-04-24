@@ -12,12 +12,12 @@ namespace sensitive_word {
 
 //////////////////////////////////////////////////////////////
 // 字典树敏感词类型
-// 用于区分词条在字典树中的 deny / allow 类型
+// 用于区分词条在字典树中的 allow / deny 类型
 //////////////////////////////////////////////////////////////
 enum class trie_word_kind
 {
-    deny,   // 拒绝词
     allow,  // 允许词
+    deny,   // 拒绝词
 };
 
 //////////////////////////////////////////////////////////////
@@ -122,6 +122,12 @@ private:
     };
 
     /**
+     * @brief 分配一个新节点
+     * @return 新节点在 node_pool_ 中的索引
+     */
+    uint32_t allocate_node();
+
+    /**
      * @brief 递归删除词条
      * @param node_idx  当前节点在内存池中的索引
      * @param word      要删除的归一化词条
@@ -131,15 +137,9 @@ private:
      */
     bool remove_word_recursive(uint32_t node_idx, const std::u32string& word, size_t index, trie_word_kind kind);
 
-    /**
-     * @brief 分配一个新节点
-     * @return 新节点在 node_pool_ 中的索引
-     */
-    uint32_t allocate_node();
-
 private:
     std::vector<trie_node> node_pool_;
-    uint32_t               root_ascii_cache_[128]; // 缓存根节点的 ASCII 子节点索引，0xFFFFFFFF 表示不存在
+    uint32_t               root_ascii_cache_[128];  // 缓存根节点的 ASCII 子节点索引，0xFFFFFFFF 表示不存在
 };
 
 } // namespace sensitive_word
