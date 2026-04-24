@@ -18,7 +18,7 @@
  *
  * 这样测试就不依赖“当前工作目录必须正好是某个特定目录”。
  */
-static std::vector<std::string> opencc_search_paths(void)
+static std::vector<std::string> opencc_search_paths()
 {
     const auto root = std::filesystem::path(".");
     return {
