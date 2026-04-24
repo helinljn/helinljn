@@ -1263,4 +1263,84 @@ TEST_SUITE("sensitive word usage")
         REQUIRE(result.has_value());
         CHECK(result->normalized_word == "53204");
     }
+
+    TEST_CASE("高级边界测试：连续干扰符与忽略重复的复杂组合")
+    {
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"大傻逼"})
+                                           .word_fail_fast(true) // 测试尾部扩展逻辑
+                                           .ignore_repeat(true)
+                                           .char_ignore(special_chars())
+                                           .build();
+
+        // 验证连续多个干扰符
+        CHECK(engine.replace("你个大傻--逼---逼") == "你个*********");
+        // 验证尾部干扰符不会被错误合并
+        CHECK(engine.replace("大傻逼--") == "***--");
+        // 验证中间有正常字符打断的情况
+        CHECK(engine.replace("大傻-啊-逼") == "大傻-啊-逼");
+    }
+
+    TEST_CASE("高级边界测试：快速失败(fail_fast)与最大贪婪匹配")
+    {
+        // 验证贪婪匹配(word_fail_fast=false)对更长词汇的捕获
+        sensitive_word_engine over_engine = sensitive_word_builder()
+                                                .deny_words({"中国", "中国人"})
+                                                .word_fail_fast(false)
+                                                .build();
+
+        const auto over_words = over_engine.find_all_words("我是中国人");
+        REQUIRE(over_words.size() == 1);
+        CHECK(over_words[0] == "中国人"); // 贪婪模式下，从同一位置出发会匹配更长的词
+
+        // 对比：快速失败模式(word_fail_fast=true)会停留在第一个匹配项
+        sensitive_word_engine fast_engine = sensitive_word_builder()
+                                                .deny_words({"中国", "中国人"})
+                                                .word_fail_fast(true)
+                                                .build();
+
+        const auto fast_words = fast_engine.find_all_words("我是中国人");
+        REQUIRE(fast_words.size() == 1);
+        CHECK(fast_words[0] == "中国");
+
+        // 验证重叠词：使用中文避免默认英文单词边界(english_word_match)的干扰
+        // 引擎在匹配到一个词后，主循环会跳过该词的跨度，因此不会发生重叠重复匹配
+        sensitive_word_engine overlap_engine = sensitive_word_builder()
+                                                   .deny_words({"北京大", "京大学"})
+                                                   .word_fail_fast(false)
+                                                   .build();
+        const auto overlap_words = overlap_engine.find_all_words("北京大学");
+        REQUIRE(overlap_words.size() == 1);
+        CHECK(overlap_words[0] == "北京大"); // 匹配完"北京大"后，跳过了"京"和"大"，直接从"学"继续
+    }
+
+    TEST_CASE("高级边界测试：黑白名单的极端重叠情况")
+    {
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"敏感词"})
+                                           .allow_words({"大敏感词", "敏感词汇", "不敏感词语"})
+                                           .word_fail_fast(false)
+                                           .build();
+
+        // 前缀包含白名单
+        CHECK(engine.find_all_words("这是一个大敏感词").empty());
+        // 后缀包含白名单
+        CHECK(engine.find_all_words("这是一个敏感词汇").empty());
+        // 夹心包含白名单
+        CHECK(engine.find_all_words("这是一个不敏感词语").empty());
+        // 独立敏感词
+        CHECK(engine.find_all_words("这是一个敏感词").size() == 1);
+    }
+
+    TEST_CASE("高级边界测试：不可见零宽字符的穿透")
+    {
+        // 测试插入零宽空格 \u200B
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"操你妈"})
+                                           .char_ignore(special_chars())
+                                           .build();
+
+        // 正常应该能穿透这些特殊不可见字符
+        CHECK(engine.replace("操\u200B你\u200B妈") == "*****");
+    }
 }
