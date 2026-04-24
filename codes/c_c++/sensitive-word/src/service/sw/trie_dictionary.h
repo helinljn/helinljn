@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <array>
 
 namespace sensitive_word {
 
@@ -47,13 +48,19 @@ public:
     // 字典树遍历状态
     // 用于表示当前遍历所处的节点状态
     //////////////////////////////////////////////////////////////
+    static constexpr uint32_t invalid_index = 0xFFFFFFFF;
+
+    //////////////////////////////////////////////////////////////
+    // 字典树遍历状态
+    // 用于表示当前遍历所处的节点状态
+    //////////////////////////////////////////////////////////////
     struct traversal_state
     {
-        uint32_t node_index = 0xFFFFFFFF;
+        uint32_t node_index = invalid_index;
 
         bool valid() const noexcept
         {
-            return node_index != 0xFFFFFFFF;
+            return node_index != invalid_index;
         }
     };
 
@@ -61,8 +68,8 @@ public:
     trie_dictionary();
     ~trie_dictionary() = default;
 
-    trie_dictionary(const trie_dictionary& other);
-    trie_dictionary& operator=(const trie_dictionary& other);
+    trie_dictionary(const trie_dictionary& other) = default;
+    trie_dictionary& operator=(const trie_dictionary& other) = default;
 
     trie_dictionary(trie_dictionary&& other) noexcept;
     trie_dictionary& operator=(trie_dictionary&& other) noexcept;
@@ -121,6 +128,22 @@ private:
     {
         std::vector<std::pair<char32_t, uint32_t>> next{};
         trie_terminal_flags                        terminal{};
+
+        auto find_child(char32_t ch)
+        {
+            return std::lower_bound(next.begin(), next.end(), ch,
+                                    [](const auto& pair, char32_t val) {
+                                        return pair.first < val;
+                                    });
+        }
+
+        auto find_child(char32_t ch) const
+        {
+            return std::lower_bound(next.begin(), next.end(), ch,
+                                    [](const auto& pair, char32_t val) {
+                                        return pair.first < val;
+                                    });
+        }
     };
 
     /**
@@ -144,8 +167,8 @@ private:
     std::vector<trie_node> node_pool_;
 
     // 根节点 ASCII 快速通道。用于以 O(1) 的时间复杂度直接映射 0-127 的 ASCII 字符，加速长文本起手匹配。
-    // 值为 0xFFFFFFFF 时表示不存在对应的子节点分支。
-    uint32_t root_ascii_cache_[128];
+    // 值为 invalid_index 时表示不存在对应的子节点分支。
+    std::array<uint32_t, 128> root_ascii_cache_;
 };
 
 } // namespace sensitive_word
