@@ -18,7 +18,7 @@ TEST_SUITE("sensitive word usage")
     TEST_CASE("包含判断、查找首个、查找全部、替换基本流程")
     {
         sensitive_word_engine engine = sensitive_word_builder()
-                                           .deny_words({"五星红旗", "毛主席", "天安门"})
+                                           .deny_words({"五星红旗", "毛主席", "天安门", "草", "草地"})
                                            .build();
 
         const std::string text = "五星红旗迎风飘扬，毛主席的画像屹立在天安门前。";
@@ -39,6 +39,8 @@ TEST_SUITE("sensitive word usage")
         CHECK(engine.replace(text, results) == "****迎风飘扬，***的画像屹立在***前。");
         CHECK(engine.replace(text, results, '0') == "0000迎风飘扬，000的画像屹立在000前。");
         CHECK(engine.replace(text, results, *chars('#')) == "####迎风飘扬，###的画像屹立在###前。");
+        CHECK(engine.replace("草-草-草") == "*-*-*");
+        CHECK(engine.replace("草-草地") == "*-*地");
 
         sensitive_word_engine engine1 = sensitive_word_builder()
                                            .enable_word_check(true)
@@ -60,6 +62,21 @@ TEST_SUITE("sensitive word usage")
         engine1.add_allow_word("小草");
         engine1.add_allow_word("草地");
         CHECK(engine1.replace("小草草地艹") == "小草草地*");
+        CHECK(engine.replace("草-草-草") == "*-*-*");
+
+        engine1.remove_allow_word("草地");
+        engine1.add_word("草");
+        engine1.add_word("草地");
+        CHECK(engine1.replace("草-草地") == "*-**");
+
+        sensitive_word_engine engine2 = sensitive_word_builder()
+                                                    .deny_words({"大傻逼"})
+                                                    .word_fail_fast(true)
+                                                    .ignore_repeat(true)
+                                                    .char_ignore(special_chars())
+                                                    .build();
+
+        CHECK(engine2.replace("大傻逼-逼") == "*****");
     }
 
     TEST_CASE("基于find_all结果复用替换")

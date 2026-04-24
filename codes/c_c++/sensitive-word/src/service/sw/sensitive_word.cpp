@@ -103,13 +103,13 @@ sensitive_word_builder& sensitive_word_builder::add_allow_word(std::string word)
     return *this;
 }
 
-sensitive_word_builder& sensitive_word_builder::add_deny_words_from_text(std::string text)
+sensitive_word_builder& sensitive_word_builder::add_deny_words_from_text(std::string_view text)
 {
     append_words(deny_words_, load_words_from_text(text));
     return *this;
 }
 
-sensitive_word_builder& sensitive_word_builder::add_allow_words_from_text(std::string text)
+sensitive_word_builder& sensitive_word_builder::add_allow_words_from_text(std::string_view text)
 {
     append_words(allow_words_, load_words_from_text(text));
     return *this;
@@ -506,18 +506,23 @@ private:
                     --tail_index;
                 }
 
-                const char32_t tail = text.normalized_chars[tail_index].normalized_code_point;
+                const char32_t tail               = text.normalized_chars[tail_index].normalized_code_point;
+                size_t         pending_raw_length = 0;
                 for (size_t idx = begin_index + match.raw_length; idx < text.normalized_chars.size(); ++idx)
                 {
                     const auto& item = text.normalized_chars[idx];
                     if (char_ignore_ && char_ignore_->ignore(item.raw_code_point, item.normalized_code_point))
-                        break;
+                    {
+                        ++pending_raw_length;
+                        continue;
+                    }
 
                     if (item.normalized_code_point != tail)
                         break;
 
-                    ++match.raw_length;
+                    match.raw_length += pending_raw_length + 1;
                     ++match.effective_length;
+                    pending_raw_length = 0;
                 }
             };
 
@@ -537,8 +542,9 @@ private:
         // 数字匹配允许在已经开始构造数字串之后跳过可忽略字符，
         // 例如忽略连接符时，“1-2-3”仍然可以视为一个连续数字片段。
         std::u32string builder;
-        size_t         temp_len = 0;
+        builder.reserve(config_.num_check_len);
 
+        size_t temp_len = 0;
         for (size_t idx = begin_index; idx < text.normalized_chars.size(); ++idx)
         {
             const auto& item = text.normalized_chars[idx];

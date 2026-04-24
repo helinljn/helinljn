@@ -79,7 +79,7 @@ class char_ignore
 public:
     virtual ~char_ignore() = default;
 
-    virtual bool ignore(char32_t raw_code_point, char32_t normalized_code_point) const = 0;
+    [[nodiscard]] virtual bool ignore(char32_t raw_code_point, char32_t normalized_code_point) const = 0;
 };
 
 //////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ class result_condition
 public:
     virtual ~result_condition() = default;
 
-    virtual bool match(const word_result& result, std::string_view text) const = 0;
+    [[nodiscard]] virtual bool match(const word_result& result, std::string_view text) const = 0;
 };
 
 //////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ class replace_strategy
 public:
     virtual ~replace_strategy() = default;
 
-    virtual std::string replacement_for(const word_result& result, std::string_view original_text) const = 0;
+    [[nodiscard]] virtual std::string replacement_for(const word_result& result, std::string_view original_text) const = 0;
 };
 
 //////////////////////////////////////////////////////////////
@@ -131,8 +131,8 @@ public:
 
     sensitive_word_builder& add_deny_word(std::string word);
     sensitive_word_builder& add_allow_word(std::string word);
-    sensitive_word_builder& add_deny_words_from_text(std::string text);
-    sensitive_word_builder& add_allow_words_from_text(std::string text);
+    sensitive_word_builder& add_deny_words_from_text(std::string_view text);
+    sensitive_word_builder& add_allow_words_from_text(std::string_view text);
     sensitive_word_builder& add_deny_words_from_file(const std::string& file_path);
     sensitive_word_builder& add_allow_words_from_file(const std::string& file_path);
 
