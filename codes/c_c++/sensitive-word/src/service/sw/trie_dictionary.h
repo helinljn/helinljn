@@ -113,7 +113,8 @@ public:
 private:
     //////////////////////////////////////////////////////////////
     // 字典树节点
-    // 用于保存子节点和当前节点的终端标志
+    // 采用连续内存数组存储子节点索引，并保持按字符排序，
+    // 以支持极速的二分查找和超高 CPU 缓存命中率。
     //////////////////////////////////////////////////////////////
     struct trie_node
     {
@@ -122,7 +123,7 @@ private:
     };
 
     /**
-     * @brief 分配一个新节点
+     * @brief 从内存池中分配一个新节点
      * @return 新节点在 node_pool_ 中的索引
      */
     uint32_t allocate_node();
@@ -138,8 +139,12 @@ private:
     bool remove_word_recursive(uint32_t node_idx, const std::u32string& word, size_t index, trie_word_kind kind);
 
 private:
+    // 全局节点内存池 (Arena)。通过一维数组扁平化存储所有节点，消除动态内存分配的碎片化开销。
     std::vector<trie_node> node_pool_;
-    uint32_t               root_ascii_cache_[128];  // 缓存根节点的 ASCII 子节点索引，0xFFFFFFFF 表示不存在
+
+    // 根节点 ASCII 快速通道。用于以 O(1) 的时间复杂度直接映射 0-127 的 ASCII 字符，加速长文本起手匹配。
+    // 值为 0xFFFFFFFF 时表示不存在对应的子节点分支。
+    uint32_t root_ascii_cache_[128];
 };
 
 } // namespace sensitive_word
