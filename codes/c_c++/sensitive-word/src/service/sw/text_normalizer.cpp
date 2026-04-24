@@ -456,7 +456,7 @@ constexpr char32_t fold_num_style(char32_t ch)
 class opencc_t2s_converter
 {
 public:
-    opencc_t2s_converter(void)
+    opencc_t2s_converter()
         : converter_(nullptr)
     {
         try
@@ -465,6 +465,7 @@ public:
         }
         catch (...)
         {
+            // TODO: 添加日志记录 OpenCC 初始化失败的信息，提示繁转简功能降级
         }
     }
 
