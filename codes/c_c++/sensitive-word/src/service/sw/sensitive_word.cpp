@@ -703,8 +703,9 @@ std::optional<std::string> sensitive_word_engine::find_first_word(std::string_vi
 
 std::vector<std::string> sensitive_word_engine::find_all_words(std::string_view text) const
 {
-    auto results = find_all(text);
     std::vector<std::string> words;
+
+    auto results = find_all(text);
     words.reserve(results.size());
 
     for (auto& result : results)
