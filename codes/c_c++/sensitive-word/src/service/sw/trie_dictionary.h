@@ -4,9 +4,9 @@
 #define SW_TRIE_DICTIONARY_H
 
 #include <cstddef>
-#include <memory>
 #include <string>
-#include <unordered_map>
+#include <vector>
+#include <utility>
 
 namespace sensitive_word {
 
@@ -29,7 +29,7 @@ struct trie_terminal_flags
     bool allow = false;
     bool deny  = false;
 
-    bool any(void) const noexcept
+    bool any() const noexcept
     {
         return allow || deny;
     }
@@ -48,23 +48,23 @@ public:
     //////////////////////////////////////////////////////////////
     struct traversal_state
     {
-        const void* node = nullptr;
+        uint32_t node_index = 0xFFFFFFFF;
 
-        bool valid(void) const noexcept
+        bool valid() const noexcept
         {
-            return node != nullptr;
+            return node_index != 0xFFFFFFFF;
         }
     };
 
 public:
-    trie_dictionary(void) = default;
+    trie_dictionary();
     ~trie_dictionary() = default;
 
     trie_dictionary(const trie_dictionary& other);
     trie_dictionary& operator=(const trie_dictionary& other);
 
-    trie_dictionary(trie_dictionary&& other) noexcept = default;
-    trie_dictionary& operator=(trie_dictionary&& other) noexcept = default;
+    trie_dictionary(trie_dictionary&& other) noexcept;
+    trie_dictionary& operator=(trie_dictionary&& other) noexcept;
 
     /**
      * @brief 添加词条
@@ -86,7 +86,7 @@ public:
      * @brief 获取字典树根节点的遍历状态
      * @return 根节点对应的遍历状态
      */
-    traversal_state root_state(void) const noexcept;
+    traversal_state root_state() const noexcept;
 
     /**
      * @brief 按字符推进一次字典树遍历
@@ -117,29 +117,29 @@ private:
     //////////////////////////////////////////////////////////////
     struct trie_node
     {
-        std::unordered_map<char32_t, std::unique_ptr<trie_node>> next{};
-        trie_terminal_flags                                      terminal{};
+        std::vector<std::pair<char32_t, uint32_t>> next{};
+        trie_terminal_flags                        terminal{};
     };
 
     /**
      * @brief 递归删除词条
-     * @param node  当前节点
-     * @param word  要删除的归一化词条
-     * @param index 当前处理的字符索引
-     * @param kind  词条类型
+     * @param node_idx  当前节点在内存池中的索引
+     * @param word      要删除的归一化词条
+     * @param index     当前处理的字符索引
+     * @param kind      词条类型
      * @return 删除后当前节点是否已无子节点且不是任何词条的终点
      */
-    static bool remove_word_recursive(trie_node& node, const std::u32string& word, size_t index, trie_word_kind kind);
+    bool remove_word_recursive(uint32_t node_idx, const std::u32string& word, size_t index, trie_word_kind kind);
 
     /**
-     * @brief 深拷贝字典树节点
-     * @param node 要深拷贝的节点
-     * @return 深拷贝后的节点
+     * @brief 分配一个新节点
+     * @return 新节点在 node_pool_ 中的索引
      */
-    static trie_node clone_node(const trie_node& node);
+    uint32_t allocate_node();
 
 private:
-    trie_node root_;
+    std::vector<trie_node> node_pool_;
+    uint32_t               root_ascii_cache_[128]; // 缓存根节点的 ASCII 子节点索引，0xFFFFFFFF 表示不存在
 };
 
 } // namespace sensitive_word
