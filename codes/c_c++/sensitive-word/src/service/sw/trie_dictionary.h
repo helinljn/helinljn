@@ -4,6 +4,7 @@
 #define SW_TRIE_DICTIONARY_H
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <utility>

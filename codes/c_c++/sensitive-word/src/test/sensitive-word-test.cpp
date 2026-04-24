@@ -629,42 +629,6 @@ TEST_SUITE("sensitive word usage")
         CHECK(result->word == "ⒻⒻⒻfⓤuⓤ⒰cⓒ⒦");
     }
 
-    TEST_CASE("折叠Latin-1带重音大写字母的大小写")
-    {
-        // É(0x00C9) -> é(0x00E9), Ü(0x00DC) -> ü(0x00FC)
-        sensitive_word_engine engine = sensitive_word_builder()
-                                           .deny_words({"café"})
-                                           .build();
-
-        const auto result = engine.find_first("CAFÉ");
-        REQUIRE(result.has_value());
-        CHECK(result->word == "CAFÉ");
-    }
-
-    TEST_CASE("折叠Latin Extended-A大写字母的大小写")
-    {
-        // Ō(0x014C) -> ō(0x014D)
-        sensitive_word_engine engine = sensitive_word_builder()
-                                           .deny_words({"ōsaka"})
-                                           .build();
-
-        const auto result = engine.find_first("ŌSAKA");
-        REQUIRE(result.has_value());
-        CHECK(result->word == "ŌSAKA");
-    }
-
-    TEST_CASE("折叠拼音大写元音的大小写")
-    {
-        // Ǎ(0x01CD) -> ǎ(0x01CE), Ǖ(0x01D5) -> ǖ(0x01D6)
-        sensitive_word_engine engine = sensitive_word_builder()
-                                           .deny_words({"ǎbǎ"})
-                                           .build();
-
-        const auto result = engine.find_first("ǍBǍ");
-        REQUIRE(result.has_value());
-        CHECK(result->word == "ǍBǍ");
-    }
-
     TEST_CASE("全角符号折叠为半角符号")
     {
         // 全角！(0xFF01) -> !(0x21), 全角＠(0xFF20) -> @(0x40)
@@ -689,20 +653,6 @@ TEST_SUITE("sensitive word usage")
         const auto result = engine.find_first("hello\u3000world");
         REQUIRE(result.has_value());
         CHECK(result->word == "hello\u3000world");
-    }
-
-    TEST_CASE("全角货币和箭头符号折叠")
-    {
-        // ￥(0xFFE5) -> ¥(0x00A5), ￠(0xFFE0) -> ¢(0x00A2)
-        // ￡(0xFFE1) -> £(0x00A3), ￢(0xFFE2) -> ¬(0x00AC)
-        sensitive_word_engine engine = sensitive_word_builder()
-                                           .deny_words({"¥100"})
-                                           .build();
-
-        // ￥ 是全角日元符号
-        const auto result = engine.find_first("￥100");
-        REQUIRE(result.has_value());
-        CHECK(result->word == "￥100");
     }
 
     TEST_CASE("半角片假名折叠为全角片假名")

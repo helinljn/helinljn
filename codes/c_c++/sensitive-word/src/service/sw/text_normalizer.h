@@ -49,7 +49,7 @@ class text_normalizer
 {
 public:
     explicit text_normalizer(text_normalizer_options options);
-    ~text_normalizer(void);
+    ~text_normalizer();
 
     text_normalizer(const text_normalizer&) = delete;
     text_normalizer& operator=(const text_normalizer&) = delete;
@@ -88,26 +88,35 @@ private:
  * @param ch 输入字符
  * @return true 字符是 ASCII 字母，否则返回 false
  */
-bool is_ascii_alpha(char32_t ch);
+constexpr inline bool is_ascii_alpha(char32_t ch)
+{
+    return (ch >= U'a' && ch <= U'z') || (ch >= U'A' && ch <= U'Z');
+}
 
 /**
  * @brief 检查字符是否为 ASCII 数字
  * @param ch 输入字符
  * @return true 字符是 ASCII 数字，否则返回 false
  */
-bool is_ascii_digit(char32_t ch);
+constexpr inline bool is_ascii_digit(char32_t ch)
+{
+    return ch >= U'0' && ch <= U'9';
+}
 
 /**
  * @brief 检查字符是否为 ASCII 字母或数字
  * @param ch 输入字符
  * @return true 字符是 ASCII 字母或数字，否则返回 false
  */
-bool is_ascii_alnum(char32_t ch);
+constexpr inline bool is_ascii_alnum(char32_t ch)
+{
+    return is_ascii_alpha(ch) || is_ascii_digit(ch);
+}
 
 /**
  * @brief 检查字符是否可视为词字符
  * @param ch 输入字符
- * @return true 字符属于 ASCII 字母/数字、CJK 汉字或常用拉丁扩展字母，否则返回 false
+ * @return true 字符属于 ASCII 字母/数字、CJK 汉字，否则返回 false
  */
 bool is_word_like_code_point(char32_t ch);
 
@@ -116,7 +125,10 @@ bool is_word_like_code_point(char32_t ch);
  * @param ch 输入字符
  * @return true 字符不是 ASCII 字母或数字，否则返回 false
  */
-bool is_ascii_word_boundary(char32_t ch);
+constexpr inline bool is_ascii_word_boundary(char32_t ch)
+{
+    return !is_ascii_alnum(ch);
+}
 
 /**
  * @brief 编码 UTF-8 字符
@@ -150,7 +162,7 @@ size_t count_code_points(std::string_view text);
  * @brief 搜索 OpenCC 配置和词典目录(统一为当前目录：./data/config 和 ./data/dictionary)
  * @return 可用于初始化 OpenCC 的配置目录和词典目录路径列表
  */
-std::vector<std::string> opencc_search_paths(void);
+std::vector<std::string> opencc_search_paths();
 
 } // namespace sensitive_word
 
