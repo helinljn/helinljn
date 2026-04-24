@@ -77,7 +77,7 @@ struct sensitive_word_config
 class char_ignore
 {
 public:
-    virtual ~char_ignore(void) = default;
+    virtual ~char_ignore() = default;
 
     virtual bool ignore(char32_t raw_code_point, char32_t normalized_code_point) const = 0;
 };
@@ -89,7 +89,7 @@ public:
 class result_condition
 {
 public:
-    virtual ~result_condition(void) = default;
+    virtual ~result_condition() = default;
 
     virtual bool match(const word_result& result, std::string_view text) const = 0;
 };
@@ -101,7 +101,7 @@ public:
 class replace_strategy
 {
 public:
-    virtual ~replace_strategy(void) = default;
+    virtual ~replace_strategy() = default;
 
     virtual std::string replacement_for(const word_result& result, std::string_view original_text) const = 0;
 };
@@ -140,7 +140,7 @@ public:
     sensitive_word_builder& result_condition(std::shared_ptr<class result_condition> value);
     sensitive_word_builder& replace_strategy(std::shared_ptr<class replace_strategy> value);
 
-    sensitive_word_engine build(void);
+    sensitive_word_engine build();
 
 private:
     sensitive_word_config                   config_;
@@ -158,8 +158,8 @@ private:
 class sensitive_word_engine
 {
 public:
-    sensitive_word_engine(void);
-    ~sensitive_word_engine(void);
+    sensitive_word_engine();
+    ~sensitive_word_engine();
 
     sensitive_word_engine(const sensitive_word_engine& other);
     sensitive_word_engine& operator=(const sensitive_word_engine& other);
@@ -175,20 +175,20 @@ public:
         std::shared_ptr<class result_condition> result_condition,
         std::shared_ptr<class replace_strategy> replace_strategy);
 
-    bool contains(std::string_view text) const;
-    std::optional<word_result> find_first(std::string_view text) const;
-    std::vector<word_result> find_all(std::string_view text) const;
+    [[nodiscard]] bool contains(std::string_view text) const;
+    [[nodiscard]] std::optional<word_result> find_first(std::string_view text) const;
+    [[nodiscard]] std::vector<word_result> find_all(std::string_view text) const;
 
-    std::optional<std::string> find_first_word(std::string_view text) const;
-    std::vector<std::string> find_all_words(std::string_view text) const;
+    [[nodiscard]] std::optional<std::string> find_first_word(std::string_view text) const;
+    [[nodiscard]] std::vector<std::string> find_all_words(std::string_view text) const;
 
-    std::string replace(std::string_view text) const;
-    std::string replace(std::string_view text, char replacement) const;
-    std::string replace(std::string_view text, const replace_strategy& strategy) const;
+    [[nodiscard]] std::string replace(std::string_view text) const;
+    [[nodiscard]] std::string replace(std::string_view text, char replacement) const;
+    [[nodiscard]] std::string replace(std::string_view text, const replace_strategy& strategy) const;
 
-    std::string replace(std::string_view text, const std::vector<word_result>& results) const;
-    std::string replace(std::string_view text, const std::vector<word_result>& results, char replacement) const;
-    std::string replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const;
+    [[nodiscard]] std::string replace(std::string_view text, const std::vector<word_result>& results) const;
+    [[nodiscard]] std::string replace(std::string_view text, const std::vector<word_result>& results, char replacement) const;
+    [[nodiscard]] std::string replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const;
 
     void add_word(std::string_view word);
     void remove_word(std::string_view word);
@@ -196,8 +196,8 @@ public:
     void add_allow_word(std::string_view word);
     void remove_allow_word(std::string_view word);
 
-    word_entry_status query_word_status(std::string_view word) const;
-    const sensitive_word_config& config(void) const noexcept;
+    [[nodiscard]] word_entry_status query_word_status(std::string_view word) const;
+    [[nodiscard]] const sensitive_word_config& config() const noexcept;
 
 private:
     class impl;
@@ -210,13 +210,13 @@ namespace char_ignores {
  * @brief 创建一个字符忽略策略，不忽略任何字符
  * @return 不会跳过任何字符的忽略策略
  */
-std::shared_ptr<char_ignore> none(void);
+std::shared_ptr<char_ignore> none();
 
 /**
  * @brief 创建一个字符忽略策略，忽略归一化后不属于词字符的字符
  * @return 会跳过非词字符的忽略策略
  */
-std::shared_ptr<char_ignore> special_chars(void);
+std::shared_ptr<char_ignore> special_chars();
 
 } // namespace char_ignores
 
@@ -226,19 +226,19 @@ namespace result_conditions {
  * @brief 创建一个结果条件，不过滤任何命中结果
  * @return 始终返回 true 的结果条件
  */
-std::shared_ptr<result_condition> always_true(void);
+std::shared_ptr<result_condition> always_true();
 
 /**
  * @brief 创建一个结果条件，仅要求包含 ASCII 字母的命中满足英文单词边界
  * @return 英文单词边界匹配条件
  */
-std::shared_ptr<result_condition> english_word_match(void);
+std::shared_ptr<result_condition> english_word_match();
 
 /**
  * @brief 创建一个结果条件，仅要求包含 ASCII 字母或数字的命中满足单词边界
  * @return 英文单词和数字边界匹配条件
  */
-std::shared_ptr<result_condition> english_word_num_match(void);
+std::shared_ptr<result_condition> english_word_num_match();
 
 } // namespace result_conditions
 
@@ -248,7 +248,7 @@ namespace replace_strategies {
  * @brief 创建一个替换策略，用星号按命中长度生成替换文本
  * @return 星号替换策略
  */
-std::shared_ptr<replace_strategy> stars(void);
+std::shared_ptr<replace_strategy> stars();
 
 /**
  * @brief 创建一个替换策略，用指定字符按命中长度生成替换文本

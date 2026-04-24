@@ -105,25 +105,25 @@ sensitive_word_builder& sensitive_word_builder::add_allow_word(std::string word)
 
 sensitive_word_builder& sensitive_word_builder::add_deny_words_from_text(std::string text)
 {
-    append_words(deny_words_, std::move(load_words_from_text(text)));
+    append_words(deny_words_, load_words_from_text(text));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_allow_words_from_text(std::string text)
 {
-    append_words(allow_words_, std::move(load_words_from_text(text)));
+    append_words(allow_words_, load_words_from_text(text));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_deny_words_from_file(const std::string& file_path)
 {
-    append_words(deny_words_, std::move(load_words_from_file(file_path)));
+    append_words(deny_words_, load_words_from_file(file_path));
     return *this;
 }
 
 sensitive_word_builder& sensitive_word_builder::add_allow_words_from_file(const std::string& file_path)
 {
-    append_words(allow_words_, std::move(load_words_from_file(file_path)));
+    append_words(allow_words_, load_words_from_file(file_path));
     return *this;
 }
 
@@ -145,15 +145,15 @@ sensitive_word_builder& sensitive_word_builder::replace_strategy(std::shared_ptr
     return *this;
 }
 
-sensitive_word_engine sensitive_word_builder::build(void)
+sensitive_word_engine sensitive_word_builder::build()
 {
     return sensitive_word_engine(
-        std::move(config_),
-        std::move(deny_words_),
-        std::move(allow_words_),
-        std::move(char_ignore_),
-        std::move(result_condition_),
-        std::move(replace_strategy_));
+                std::move(config_),
+                std::move(deny_words_),
+                std::move(allow_words_),
+                std::move(char_ignore_),
+                std::move(result_condition_),
+                std::move(replace_strategy_));
 }
 
 ////////////////////////////////////////////////////////////
@@ -230,7 +230,7 @@ public:
     std::optional<word_result> find_first(std::string_view text) const
     {
         std::optional<word_result> first;
-        scan_matches(text, [&](word_result result) {
+        scan_matches(text, [&](word_result&& result) {
             first = std::move(result);
             return false;
         });
@@ -240,7 +240,7 @@ public:
     std::vector<word_result> find_all(std::string_view text) const
     {
         std::vector<word_result> results;
-        scan_matches(text, [&](word_result result) {
+        scan_matches(text, [&](word_result&& result) {
             results.push_back(std::move(result));
             return true;
         });
@@ -264,11 +264,11 @@ public:
 
     std::string replace(std::string_view text, const std::vector<word_result>& results, const replace_strategy& strategy) const
     {
+        if (results.empty())
+            return std::string(text);
+
         std::string out;
         out.reserve(text.size());
-
-        if (results.empty())
-            return out.assign(text);
 
         size_t cursor = 0;
         for (const auto& result : results)
@@ -339,7 +339,7 @@ public:
         };
     }
 
-    const sensitive_word_config& config(void) const noexcept
+    const sensitive_word_config& config() const noexcept
     {
         return config_;
     }
@@ -363,7 +363,7 @@ private:
         std::u32string normalized_deny_word{};
     };
 
-    void rebuild_runtime(void)
+    void rebuild_runtime()
     {
         normalizer_ = std::make_unique<text_normalizer>(text_normalizer_options{
             config_.ignore_case,
@@ -630,7 +630,7 @@ private:
     trie_dictionary                         dictionary_;
 };
 
-sensitive_word_engine::sensitive_word_engine(void)
+sensitive_word_engine::sensitive_word_engine()
     : sensitive_word_engine(
         sensitive_word_config{},
         {},
@@ -641,7 +641,7 @@ sensitive_word_engine::sensitive_word_engine(void)
 {
 }
 
-sensitive_word_engine::~sensitive_word_engine(void) = default;
+sensitive_word_engine::~sensitive_word_engine() = default;
 
 sensitive_word_engine::sensitive_word_engine(const sensitive_word_engine& other)
     : impl_(other.impl_ ? std::make_unique<impl>(*other.impl_) : nullptr)
@@ -694,11 +694,11 @@ std::vector<word_result> sensitive_word_engine::find_all(std::string_view text) 
 
 std::optional<std::string> sensitive_word_engine::find_first_word(std::string_view text) const
 {
-    const auto result = find_first(text);
+    auto result = find_first(text);
     if (!result)
         return std::nullopt;
 
-    return result->word;
+    return std::move(result->word);
 }
 
 std::vector<std::string> sensitive_word_engine::find_all_words(std::string_view text) const
@@ -773,55 +773,49 @@ word_entry_status sensitive_word_engine::query_word_status(std::string_view word
     return impl_->query_word_status(word);
 }
 
-const sensitive_word_config& sensitive_word_engine::config(void) const noexcept
+const sensitive_word_config& sensitive_word_engine::config() const noexcept
 {
     return impl_->config();
 }
 
 namespace char_ignores {
 
-std::shared_ptr<char_ignore> none(void)
+std::shared_ptr<char_ignore> none()
 {
-    static auto instance = std::make_shared<none_char_ignore>();
-    return instance;
+    return std::make_shared<none_char_ignore>();
 }
 
-std::shared_ptr<char_ignore> special_chars(void)
+std::shared_ptr<char_ignore> special_chars()
 {
-    static auto instance = std::make_shared<special_char_ignore>();
-    return instance;
+    return std::make_shared<special_char_ignore>();
 }
 
 } // namespace char_ignores
 
 namespace result_conditions {
 
-std::shared_ptr<result_condition> always_true(void)
+std::shared_ptr<result_condition> always_true()
 {
-    static auto instance = std::make_shared<always_true_result_condition>();
-    return instance;
+    return std::make_shared<always_true_result_condition>();
 }
 
-std::shared_ptr<result_condition> english_word_match(void)
+std::shared_ptr<result_condition> english_word_match()
 {
-    static auto instance = std::make_shared<english_word_match_result_condition>();
-    return instance;
+    return std::make_shared<english_word_match_result_condition>();
 }
 
-std::shared_ptr<result_condition> english_word_num_match(void)
+std::shared_ptr<result_condition> english_word_num_match()
 {
-    static auto instance = std::make_shared<english_word_num_match_result_condition>();
-    return instance;
+    return std::make_shared<english_word_num_match_result_condition>();
 }
 
 } // namespace result_conditions
 
 namespace replace_strategies {
 
-std::shared_ptr<replace_strategy> stars(void)
+std::shared_ptr<replace_strategy> stars()
 {
-    static auto instance = std::make_shared<chars_replace_strategy>('*');
-    return instance;
+    return std::make_shared<chars_replace_strategy>('*');
 }
 
 std::shared_ptr<replace_strategy> chars(char replacement)
