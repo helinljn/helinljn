@@ -2,23 +2,45 @@
 # -*- coding: utf-8 -*-
 
 """
-敏感词库高级清洗与精简脚本
+敏感词库清洗与精简脚本。
 
-利用 C++ 引擎运行时强大的归一化能力（大小写折叠、全半角折叠、繁简转换等），
-在离线阶段对冗余词库进行“降维打击”。
+处理流程：
+1. 自动检测输入文件编码并读取文本；
+2. 跳过空行与注释行；
+3. 对词条做归一化：
+   - 繁体转简体
+   - 全角转半角
+   - 转小写
+4. 过滤无效词条：
+   - 纯数字
+   - 含 URL
+   - 含 IP 地址
+   - 纯符号串
+   - 数字过长的数字/符号混合串
+   - 超过长度上限的词条
+5. 对结果去重并排序；
+6. 以 UTF-8 输出优化后的词库文件。
 
-功能：
-1. 繁简转换：将繁体中文统一转换为简体。
-2. 全半角转换与小写：将全角字母数字转为半角，并转为小写。
-3. 长度过滤：移除过长的词条（默认 > 10 个字符），过长的长句命中率极低且浪费内存。
-4. 无效模式过滤：移除纯数字、纯网址等无意义词汇。
-5. 深度去重：基于归一化后的词根进行精确去重。
+说明：
+- 本脚本面向“敏感词词库”场景，不是通用文本处理工具。
+- 已吸收部分通用能力，包括自动编码检测、繁转简、无效模式过滤和最终排序输出。
 """
+
+from __future__ import annotations
 
 import argparse
 import re
 import sys
 from pathlib import Path
+from typing import Optional
+
+try:
+    from charset_normalizer import from_bytes
+except ImportError as exc:
+    raise SystemExit(
+        "缺少依赖：charset-normalizer\n"
+        "请先安装：pip install charset-normalizer"
+    ) from exc
 
 try:
     from opencc import OpenCC
@@ -28,9 +50,95 @@ except ImportError as exc:
         "建议安装：pip install opencc-python-reimplemented"
     ) from exc
 
+
+DEFAULT_MAX_LENGTH = 10
+DEFAULT_OUTPUT = "optimized_dict.txt"
+OUTPUT_ENCODING = "utf-8"
+
+# 常见 URL 形式：
+# - http://example.com
+# - https://example.com/path
+# - ftp://example.com
+# - www.example.com
+# - example.com/path
+URL_RE = re.compile(
+    r"(?i)\b("
+    r"(?:https?|ftp)://[^\s]+"
+    r"|www\.[^\s]+"
+    r"|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s]*)?"
+    r")\b"
+)
+
+PURE_NUMBER_RE = re.compile(r"^\d+$")
+IP_RE = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
+SYMBOL_AND_DIGIT_ONLY_RE = re.compile(r"^[\d\W_]+$")
+
+
+def detect_encoding(data: bytes) -> Optional[str]:
+    """检测字节串编码。"""
+    result = from_bytes(data).best()
+    if result is not None and result.encoding:
+        return result.encoding
+    return None
+
+
+def decode_text(data: bytes, forced_encoding: Optional[str] = None) -> tuple[str, str]:
+    """
+    将字节串解码为文本。
+
+    优先级：
+    1. 使用强制指定编码；
+    2. 使用自动检测出的编码；
+    3. 依次尝试常见中文文本编码。
+    """
+    if forced_encoding:
+        return data.decode(forced_encoding), forced_encoding
+
+    candidate_encodings: list[str] = []
+
+    detected = detect_encoding(data)
+    if detected:
+        candidate_encodings.append(detected)
+
+    candidate_encodings.extend(
+        [
+            "utf-8",
+            "utf-8-sig",
+            "gb18030",
+            "gbk",
+            "gb2312",
+            "big5",
+            "utf-16",
+            "utf-16-le",
+            "utf-16-be",
+        ]
+    )
+
+    tried: set[str] = set()
+    for encoding in candidate_encodings:
+        key = encoding.lower()
+        if key in tried:
+            continue
+        tried.add(key)
+        try:
+            return data.decode(encoding), encoding
+        except UnicodeDecodeError:
+            continue
+
+    raise UnicodeDecodeError("unknown", data, 0, len(data), "无法识别文件编码")
+
+
+def read_input_lines(input_file: Path) -> tuple[list[str], str]:
+    """读取输入文件并返回行列表及识别出的源编码。"""
+    raw = input_file.read_bytes()
+    text, source_encoding = decode_text(raw)
+    return text.splitlines(), source_encoding
+
+
 def full_to_half(text: str) -> str:
-    """全角转半角"""
-    chars = []
+    """将全角字符转换为半角字符。"""
+    chars: list[str] = []
+
     for char in text:
         code = ord(char)
         if code == 0x3000:
@@ -38,92 +146,152 @@ def full_to_half(text: str) -> str:
         elif 0xFF01 <= code <= 0xFF5E:
             code -= 0xFEE0
         chars.append(chr(code))
+
     return "".join(chars)
 
-def is_useless_pattern(text: str) -> bool:
-    """检查是否为无效模式（纯数字、网址、IP等）"""
 
-    # 1 & 2. 检查是否只包含数字和特殊符号（无英文字母、无中文等）
-    # \d 匹配数字，\W 匹配非单词字符（标点、空格等），_ 匹配下划线
-    if re.match(r'^[\d\W_]+$', text):
-        # 统计其中的数字个数
-        digits_count = sum(1 for c in text if c.isdigit())
-        # 如果完全没有数字，说明是纯符号串，过滤
+def normalize_word(raw_text: str, converter: OpenCC) -> str:
+    """
+    将原始词条归一化。
+
+    处理顺序：
+    1. 去首尾空白；
+    2. 繁体转简体；
+    3. 全角转半角；
+    4. 转小写。
+    """
+    word = raw_text.strip()
+    word = converter.convert(word)
+    word = full_to_half(word).lower()
+    return word
+
+
+def should_skip_source_line(line: str) -> bool:
+    """判断原始输入行是否应直接跳过。"""
+    stripped = line.strip()
+    return not stripped or stripped.startswith("#") or stripped.startswith("//")
+
+
+def has_url(text: str) -> bool:
+    """判断文本中是否包含 URL。"""
+    return URL_RE.search(text) is not None
+
+
+def is_pure_number(text: str) -> bool:
+    """判断文本是否为纯数字。"""
+    return PURE_NUMBER_RE.fullmatch(text.strip()) is not None
+
+
+def has_ip_address(text: str) -> bool:
+    """判断文本中是否包含 IP 地址形式。"""
+    return IP_RE.search(text) is not None
+
+
+def is_symbol_or_digit_only(text: str) -> bool:
+    """判断文本是否仅由数字、符号或下划线构成。"""
+    return SYMBOL_AND_DIGIT_ONLY_RE.fullmatch(text) is not None
+
+
+def is_useless_pattern(word: str) -> bool:
+    """
+    判断归一化后的词条是否属于无效词条。
+
+    过滤规则：
+    - 纯数字
+    - 含 URL
+    - 含 IP 地址
+    - 纯符号串
+    - 数字过长的数字/符号混合串
+    """
+    stripped = word.strip()
+    if not stripped:
+        return True
+
+    if is_pure_number(stripped):
+        return True
+
+    if has_url(stripped):
+        return True
+
+    if has_ip_address(stripped):
+        return True
+
+    if is_symbol_or_digit_only(stripped):
+        digits_count = sum(1 for ch in stripped if ch.isdigit())
+
         if digits_count == 0:
             return True
-        # 如果数字个数超过 4 个（例如电话号码、长QQ号、群号等），过滤
+
         if digits_count > 4:
             return True
-        # 数字个数 <= 4 的纯数字/符号组合（如 110, 911, 1-2），保留继续向下检测
-
-    # 3. 过滤 IP 格式 (如 192.168.1.1)
-    if re.search(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', text):
-        return True
-
-    # 4. 简单的 URL 匹配 (黑产经常在词库里塞大量具体的引流网址)
-    if re.match(r'^(https?://|www\.)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+', text):
-        return True
 
     return False
+
+
+def should_keep_word(word: str, max_length: int) -> bool:
+    """统一判断归一化后的词条是否应保留。"""
+    if not word:
+        return False
+
+    if len(word) > max_length:
+        return False
+
+    if is_useless_pattern(word):
+        return False
+
+    return True
+
+
+def sort_words(words: set[str], reverse: bool = False) -> list[str]:
+    """按词条内容排序，可选倒序。"""
+    return sorted(words, reverse=reverse)
+
+
+def write_output(output_file: Path, words: list[str], max_length: int) -> None:
+    """将结果词条写入输出文件。"""
+    with open(output_file, "w", encoding=OUTPUT_ENCODING) as f:
+        f.write("# Optimized Sensitive Word Dictionary\n")
+        f.write(f"# Auto-generated, Max Length: {max_length}\n\n")
+        for word in words:
+            f.write(f"{word}\n")
+
 
 def optimize_dictionary(
     input_file: Path,
     output_file: Path,
-    max_length: int = 10
+    max_length: int = DEFAULT_MAX_LENGTH,
+    reverse: bool = False,
 ) -> None:
-    converter = OpenCC('t2s')
+    """执行词库清洗、去重、排序和输出。"""
+    converter = OpenCC("t2s")
 
     print(f"正在读取文件: {input_file}")
     try:
-        with open(input_file, 'r', encoding='utf-8-sig') as f:
-            lines = f.readlines()
-    except UnicodeDecodeError:
-        try:
-            # 尝试兼容国标编码
-            with open(input_file, 'r', encoding='gb18030') as f:
-                lines = f.readlines()
-        except Exception as e:
-            print(f"文件读取失败: {e}")
-            return
+        lines, source_encoding = read_input_lines(input_file)
+        print(f"检测到输入编码: {source_encoding}")
+    except Exception as exc:
+        print(f"文件读取失败: {exc}")
+        return
 
     original_count = len(lines)
-    unique_words = set()
+    unique_words: set[str] = set()
 
     print("正在进行归一化清洗与精简...")
     for line in lines:
-        line = line.strip()
-        # 跳过空行和注释
-        if not line or line.startswith('#') or line.startswith('//'):
+        if should_skip_source_line(line):
             continue
 
-        # 1. 繁体转简体
-        word = converter.convert(line)
-
-        # 2. 全角转半角，大写转小写
-        word = full_to_half(word).lower()
-
-        # 3. 长度截断
-        if len(word) > max_length:
+        normalized = normalize_word(line, converter)
+        if not should_keep_word(normalized, max_length):
             continue
 
-        # 4. 无效模式过滤
-        if is_useless_pattern(word):
-            continue
+        unique_words.add(normalized)
 
-        unique_words.add(word)
-
-    optimized_count = len(unique_words)
-
-    # 排序输出以保证字典的稳定性
-    sorted_words = sorted(list(unique_words))
+    sorted_words = sort_words(unique_words, reverse=reverse)
+    optimized_count = len(sorted_words)
 
     print(f"清洗完成！准备写入: {output_file}")
-    with open(output_file, 'w', encoding='utf-8') as f:
-        # 在文件头加入注释说明
-        f.write("# Optimized Sensitive Word Dictionary\n")
-        f.write(f"# Auto-generated, Max Length: {max_length}\n\n")
-        for word in sorted_words:
-            f.write(f"{word}\n")
+    write_output(output_file, sorted_words, max_length)
 
     print("-" * 40)
     print("【精简统计报告】")
@@ -131,26 +299,60 @@ def optimize_dictionary(
     print(f"清洗后词条: {optimized_count:>8} 条")
 
     if original_count > 0:
-        reduced_ratio = (original_count - optimized_count) / original_count * 100
-        print(f"共计削减了: {original_count - optimized_count:>8} 条 (冗余率: {reduced_ratio:.2f}%)")
+        reduced_count = original_count - optimized_count
+        reduced_ratio = reduced_count / original_count * 100
+        print(f"共计削减了: {reduced_count:>8} 条 (冗余率: {reduced_ratio:.2f}%)")
+
     print("-" * 40)
 
-def main():
+
+def parse_args() -> argparse.Namespace:
+    """解析命令行参数。"""
     parser = argparse.ArgumentParser(description="敏感词库高级清洗与精简脚本")
     parser.add_argument("input", help="输入词库文件路径")
-    parser.add_argument("-o", "--output", default="optimized_dict.txt", help="输出词库文件路径 (默认: optimized_dict.txt)")
-    parser.add_argument("--max-len", type=int, default=10, help="保留的最大词条长度 (默认: 10)")
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=DEFAULT_OUTPUT,
+        help=f"输出词库文件路径 (默认: {DEFAULT_OUTPUT})",
+    )
+    parser.add_argument(
+        "--max-len",
+        type=int,
+        default=DEFAULT_MAX_LENGTH,
+        help=f"保留的最大词条长度 (默认: {DEFAULT_MAX_LENGTH})",
+    )
+    parser.add_argument(
+        "--reverse",
+        action="store_true",
+        help="按倒序输出词条。",
+    )
+    return parser.parse_args()
 
-    args = parser.parse_args()
+
+def main() -> int:
+    """程序入口。"""
+    args = parse_args()
 
     input_path = Path(args.input)
     output_path = Path(args.output)
 
     if not input_path.exists():
         print(f"错误: 找不到输入文件 {input_path}")
-        sys.exit(1)
+        return 1
 
-    optimize_dictionary(input_path, output_path, args.max_len)
+    if not input_path.is_file():
+        print(f"错误: 输入路径不是文件 {input_path}")
+        return 1
+
+    optimize_dictionary(
+        input_path,
+        output_path,
+        max_length=args.max_len,
+        reverse=args.reverse,
+    )
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
