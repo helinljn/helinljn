@@ -11,16 +11,17 @@
    - 繁体转简体
    - 全角转半角
    - 转小写
-4. 过滤无效词条：
+4. 去掉词条中的特殊符号；
+5. 过滤无效词条：
    - 纯数字
    - 含 URL
    - 含 IP 地址
    - 纯符号串
    - 数字过长的数字/符号混合串
    - 过短或过长词条
-5. 对保留词条去重并排序；
-6. 以 UTF-8 无 BOM 输出优化后的词库；
-7. 可选输出分析报告：
+6. 对保留词条去重并排序；
+7. 以 UTF-8 无 BOM 输出优化后的词库；
+8. 可选输出分析报告：
    - 归一化碰撞报告
    - 包含关系候选报告
    - 结构化统计 JSON
@@ -80,6 +81,7 @@ URL_RE = re.compile(
 PURE_NUMBER_RE = re.compile(r"^\d+$")
 IP_RE = re.compile(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 SYMBOL_AND_DIGIT_ONLY_RE = re.compile(r"^[\d\W_]+$")
+SPECIAL_CHAR_RE = re.compile(r"[^\w\u4e00-\u9fff]+", re.UNICODE)
 
 
 @dataclass
@@ -213,6 +215,23 @@ def full_to_half(text: str) -> str:
     return "".join(chars)
 
 
+def strip_special_chars(text: str) -> str:
+    """
+    去掉词条中的特殊符号。
+
+    默认保留：
+    - 中文
+    - 字母
+    - 数字
+    - 下划线（属于 \\w 范围）
+
+    说明：
+    - 该步骤用于折叠“插入符号规避”的变体形式；
+    - 放在归一化之后执行，可确保全/半角符号先被统一。
+    """
+    return SPECIAL_CHAR_RE.sub("", text)
+
+
 def normalize_word(raw_text: str, converter: OpenCC) -> str:
     """
     将原始词条归一化。
@@ -221,11 +240,15 @@ def normalize_word(raw_text: str, converter: OpenCC) -> str:
     1. 去首尾空白；
     2. 繁体转简体；
     3. 全角转半角；
-    4. 转小写。
+    4. 转小写；
+    5. 去掉特殊符号；
+    6. 再次去首尾空白。
     """
     word = raw_text.strip()
     word = converter.convert(word)
     word = full_to_half(word).lower()
+    word = strip_special_chars(word)
+    word = word.strip()
     return word
 
 
