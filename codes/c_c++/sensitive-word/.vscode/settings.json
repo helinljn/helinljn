@@ -13,6 +13,10 @@
         "-DCMAKE_BUILD_TYPE=Debug"
     ],
 
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python.defaultInterpreterPath": "C:\\Users\\${env:USERNAME}\\.conda\\envs\\django-admin\\python.exe",
+
     "search.exclude": {
         "**/aaa": true,
         "**/bbb": true
