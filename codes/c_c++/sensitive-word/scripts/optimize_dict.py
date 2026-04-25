@@ -955,7 +955,7 @@ def main() -> int:
         return 1
 
     optimize_dictionary(
-        input_path=input_path,
+        input_file=input_path,
         output_file=output_path,
         mode=mode,
         min_length=args.min_len,
