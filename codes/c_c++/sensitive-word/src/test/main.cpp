@@ -10,7 +10,7 @@ namespace {
  * @brief 验证 mimalloc 库是否被正确加载
  * @return true 如果 mimalloc 库被正确加载，否则返回 false
  */
-bool veriry_mimalloc()
+bool verify_mimalloc()
 {
     // 1. 验证 mimalloc 库版本
     if (mi_version() != MI_MALLOC_VERSION)
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 {
     static_assert(__cplusplus == 201703);
 
-    if (!veriry_mimalloc())
+    if (!verify_mimalloc())
         return EXIT_FAILURE;
 
     doctest::Context context;
