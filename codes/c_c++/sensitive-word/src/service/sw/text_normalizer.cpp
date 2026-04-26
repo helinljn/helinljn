@@ -1,6 +1,7 @@
 #include "sw/text_normalizer.h"
 #include "opencc.h"
 #include "utf8.h"
+#include <array>
 #include <utility>
 #include <iterator>
 #include <algorithm>
@@ -9,17 +10,6 @@
 
 namespace sensitive_word {
 namespace                {
-
-//////////////////////////////////////////////////////////////
-// 原始代码点结构体
-// 用于保存 UTF-8 解码后的代码点及其在原始文本中的字节区间
-//////////////////////////////////////////////////////////////
-struct raw_code_point
-{
-    char32_t value      = 0;  // 解码得到的代码点
-    size_t   byte_begin = 0;  // 该代码点在原始文本中的起始字节位置
-    size_t   byte_end   = 0;  // 该代码点在原始文本中的结束字节位置(右开区间)
-};
 
 /**
  * @brief 检查字符是否为 CJK 汉字代码点
@@ -458,6 +448,7 @@ class opencc_t2s_converter
 public:
     opencc_t2s_converter()
         : converter_(nullptr)
+        , ext_char_cache_()
     {
         try
         {
@@ -467,32 +458,14 @@ public:
         {
             // TODO: 添加日志记录 OpenCC 初始化失败的信息，提示繁转简功能降级
         }
-    }
 
-    /**
-     * @brief 将整段文本按 OpenCC 规则转换为简体
-     *        当整句繁简转换导致长度变化时，后续只能近似对齐原始字节位置与归一化字符
-     * @param text 输入文本
-     * @return 转换后的文本；如果 OpenCC 不可用或转换失败则返回原文本
-     */
-    std::string convert_text(std::string_view text) const
-    {
-        if (!converter_)
-            return std::string(text);
-
-        try
-        {
-            return converter_->Convert(std::string(text));
-        }
-        catch (...)
-        {
-            return std::string(text);
-        }
+        basic_cjk_cache_.fill(0);
     }
 
     /**
      * @brief 将单个字符按 OpenCC 规则转换为简体
-     *        单字符 fallback 不依赖上下文，因此只保证保守的一对一近似转换
+     *        单字符 fallback 不依赖上下文，因此只保证保守的一对一近似转换。
+     *        在敏感词匹配场景中，逐字转换可防范敏感词被符号打断时的漏判。
      * @param ch 输入字符
      * @return 转换后的字符；如果无法转换则返回原字符
      */
@@ -501,61 +474,55 @@ public:
         if (!is_cjk(ch))
             return ch;
 
-        if (auto it = char_cache_.find(ch); it != char_cache_.end())
+        // 基础 CJK 统一表意文字缓存 (纯数组极速访问，0x4E00 ~ 0x9FFF)
+        if (ch >= 0x4E00 && ch <= 0x9FFF)
+        {
+            const size_t   idx    = ch - 0x4E00;
+            const char32_t cached = basic_cjk_cache_[idx];
+            if (cached != 0)
+                return cached;
+
+            const char32_t result = convert_char_impl(ch);
+            basic_cjk_cache_[idx] = result;
+
+            return result;
+        }
+
+        // 其他兼容或扩展区汉字用 unordered_map 缓存
+        if (auto it = ext_char_cache_.find(ch); it != ext_char_cache_.end())
             return it->second;
 
-        char32_t result = ch;
-        const std::u32string converted = decode_utf8(convert_text(encode_utf8(ch)));
-        if (!converted.empty())
-            result = converted.front();
-
-        char_cache_[ch] = result;
+        const char32_t result = convert_char_impl(ch);
+        ext_char_cache_[ch]   = result;
 
         return result;
     }
 
 private:
-    std::unique_ptr<opencc::SimpleConverter>       converter_;
-    mutable std::unordered_map<char32_t, char32_t> char_cache_;
-};
-
-/**
- * @brief 解码 UTF-8 字符串并保留每个代码点对应的原始字节区间
- * @param text 输入 UTF-8 字符串
- * @return 带原始字节位置信息的代码点序列
- */
-std::vector<raw_code_point> decode_utf8_with_positions(std::string_view text)
-{
-    std::vector<raw_code_point> result;
-    // 使用字节长度预分配容量来空间换时间：
-    // UTF-8 字符通常占 1~4 字节，预分配 text.size() 可能会浪费些许内存，
-    // 但可完全避免 vector 在插入过程中的重分配和内存拷贝开销。
-    result.reserve(text.size());
-
-    auto it = text.begin();
-    while (it != text.end())
+    char32_t convert_char_impl(char32_t ch) const
     {
-        const auto   begin_it = it;
-        const size_t begin    = static_cast<size_t>(begin_it - text.begin());
+        if (!converter_)
+            return ch;
 
         try
         {
-            const char32_t cp  = utf8::next(it, text.end());
-            const size_t   end = static_cast<size_t>(it - text.begin());
-            result.push_back({cp, begin, end});
+            const std::string utf8_str      = encode_utf8(ch);
+            const std::string converted_str = converter_->Convert(utf8_str);
+            const std::u32string decoded    = decode_utf8(converted_str);
+            if (!decoded.empty())
+                return decoded.front();
         }
         catch (...)
         {
-            it = begin_it;
-            ++it;
-
-            const size_t end = static_cast<size_t>(it - text.begin());
-            result.push_back({0xFFFD, begin, end});
         }
+
+        return ch;
     }
 
-    return result;
-}
+    std::unique_ptr<opencc::SimpleConverter>          converter_;
+    mutable std::array<char32_t, 0x9FFF - 0x4E00 + 1> basic_cjk_cache_;
+    mutable std::unordered_map<char32_t, char32_t>    ext_char_cache_;
+};
 
 } // namespace
 
@@ -606,19 +573,33 @@ public:
      */
     std::u32string normalize_word(std::string_view word) const
     {
-        // 词条路径只关心最终归一化后的字符序列，
-        // 不需要保留原始字节位置，因此可以直接先做整段繁转简，再继续后续字符折叠。
-        const std::u32string decoded = options_.ignore_chinese_style
-                                        ? decode_utf8(chinese_converter_.convert_text(word))
-                                        : decode_utf8(word);
-
         std::u32string normalized;
-        normalized.reserve(decoded.size());
+        normalized.reserve(word.size());
 
-        std::transform(decoded.begin(), decoded.end(), std::back_inserter(normalized),
-                        [this](char32_t ch) {
-                            return normalize_non_chinese_code_point(ch);
-                        });
+        auto it = word.begin();
+        while (it != word.end())
+        {
+            const auto begin_it = it;
+            char32_t   raw_cp   = 0xFFFD;
+
+            try
+            {
+                raw_cp = utf8::next(it, word.end());
+            }
+            catch (...)
+            {
+                it = begin_it;
+                ++it;
+            }
+
+            char32_t normalized_cp = raw_cp;
+            if (options_.ignore_chinese_style)
+                normalized_cp = chinese_converter_.convert_char(normalized_cp);
+
+            normalized_cp = normalize_non_chinese_code_point(normalized_cp);
+
+            normalized.push_back(normalized_cp);
+        }
 
         return normalized;
     }
@@ -630,37 +611,39 @@ public:
      */
     normalized_text normalize_text(std::string_view text) const
     {
-        const auto raw_code_points = decode_utf8_with_positions(text);
-
         normalized_text result;
-        result.normalized_chars.reserve(raw_code_points.size());
+        result.normalized_chars.reserve(text.size()); // 空间换时间
 
-        std::u32string chinese_normalized_code_points;
-        if (options_.ignore_chinese_style)
-            chinese_normalized_code_points = decode_utf8(chinese_converter_.convert_text(text));
-
-        // 正文路径优先尝试“整句繁转简后按索引对齐”，尽量利用 OpenCC 的上下文能力；
-        // 只有转换前后长度变化时，才退化为逐字符转换。
-        const bool can_align_by_index =!options_.ignore_chinese_style || chinese_normalized_code_points.size() == raw_code_points.size();
-        for (size_t idx = 0; idx < raw_code_points.size(); ++idx)
+        auto it = text.begin();
+        while (it != text.end())
         {
-            const auto& raw                   = raw_code_points[idx];
-            char32_t    normalized_code_point = raw.value;
-            if (options_.ignore_chinese_style)
+            const auto   begin_it = it;
+            const size_t begin    = static_cast<size_t>(begin_it - text.begin());
+            char32_t     raw_cp   = 0xFFFD;
+
+            try
             {
-                if (can_align_by_index)
-                    normalized_code_point = chinese_normalized_code_points[idx];
-                else
-                    normalized_code_point = chinese_converter_.convert_char(raw.value);
+                raw_cp = utf8::next(it, text.end());
+            }
+            catch (...)
+            {
+                it = begin_it;
+                ++it;
             }
 
-            // 这里始终保留原始字节区间，只替换 normalized_code_point，
-            // 后续匹配结果才能同时兼顾“归一化匹配”和“原文定位”。
+            const size_t end = static_cast<size_t>(it - text.begin());
+
+            char32_t normalized_cp = raw_cp;
+            if (options_.ignore_chinese_style)
+                normalized_cp = chinese_converter_.convert_char(normalized_cp);
+
+            normalized_cp = normalize_non_chinese_code_point(normalized_cp);
+
             result.normalized_chars.push_back(normalized_char{
-                raw.value,
-                normalize_non_chinese_code_point(normalized_code_point),
-                raw.byte_begin,
-                raw.byte_end,
+                raw_cp,
+                normalized_cp,
+                begin,
+                end,
             });
         }
 
