@@ -45,33 +45,33 @@ TEST_SUITE("sensitive word usage")
         sensitive_word_engine engine1 = sensitive_word_builder()
                                            .enable_word_check(true)
                                            .ignore_repeat(true)
-                                           .word_fail_fast(false)
                                            .add_deny_words_from_file("./res/dict-2026-04-20.txt")
                                            .build();
 
-        CHECK(engine1.replace("你怕是个大傻逼吧") == "你怕是个大**吧");
-        CHECK(engine1.replace("你怕是个大傻傻傻逼逼逼吧") == "你怕是个大******吧");
-        CHECK(engine1.replace("ⒻⒻⒻfⓤuⓤ⒰cⓒ⒦ you!") == "*********** you!");
-        CHECK(engine1.replace("FFFUUUCCCKKK you!") == "************ you!");
+        sensitive_word::match_options longest_opts{true};
+
+        CHECK(engine1.replace("你怕是个大傻逼吧", longest_opts) == "你怕是个大**吧");
+        CHECK(engine1.replace("你怕是个大傻傻傻逼逼逼吧", longest_opts) == "你怕是个大******吧");
+        CHECK(engine1.replace("ⒻⒻⒻfⓤuⓤ⒰cⓒ⒦ you!", longest_opts) == "*********** you!");
+        CHECK(engine1.replace("FFFUUUCCCKKK you!", longest_opts) == "************ you!");
         CHECK(engine.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
-        CHECK(engine1.replace("64事件") == "****");
-        CHECK(engine1.replace("我草泥马") == "**泥马");
-        CHECK(engine1.replace("草泥女马") == "*泥**");
-        CHECK(engine1.replace("小草草地艹") == "小**地*");
+        CHECK(engine1.replace("64事件", longest_opts) == "****");
+        CHECK(engine1.replace("我草泥马", longest_opts) == "**泥马");
+        CHECK(engine1.replace("草泥女马", longest_opts) == "*泥**");
+        CHECK(engine1.replace("小草草地艹", longest_opts) == "小**地*");
 
         engine1.add_allow_word("小草");
         engine1.add_allow_word("草地");
-        CHECK(engine1.replace("小草草地艹") == "小草草地*");
+        CHECK(engine1.replace("小草草地艹", longest_opts) == "小草草地*");
         CHECK(engine.replace("草-草-草") == "*-*-*");
 
         engine1.remove_allow_word("草地");
         engine1.add_word("草");
         engine1.add_word("草地");
-        CHECK(engine1.replace("草-草地") == "*-**");
+        CHECK(engine1.replace("草-草地", longest_opts) == "*-**");
 
         sensitive_word_engine engine2 = sensitive_word_builder()
                                                     .deny_words({"大傻逼"})
-                                                    .word_fail_fast(true)
                                                     .ignore_repeat(true)
                                                     .char_ignore(special_chars())
                                                     .build();
@@ -336,10 +336,10 @@ TEST_SUITE("sensitive word usage")
         sensitive_word_engine engine = sensitive_word_builder()
                                            .deny_words({"龟孙"})
                                            .allow_words({"龟孙可"})
-                                           .word_fail_fast(false)
                                            .build();
 
-        CHECK_FALSE(engine.contains("龟孙可"));
+        sensitive_word::match_options longest_opts{true};
+        CHECK(engine.find_all_words("龟孙可", longest_opts).empty());
     }
 
     TEST_CASE("白名单仅抑制重叠区域")
@@ -347,10 +347,11 @@ TEST_SUITE("sensitive word usage")
         sensitive_word_engine engine = sensitive_word_builder()
                                            .deny_words({"黄片"})
                                            .allow_words({"三黄片"})
-                                           .word_fail_fast(false)
                                            .build();
 
-        const auto words = engine.find_all_words("三黄片黄片");
+        sensitive_word::match_options longest_opts{true};
+
+        const auto words = engine.find_all_words("三黄片黄片", longest_opts);
         REQUIRE(words.size() == 1);
         CHECK(words[0] == "黄片");
     }
@@ -360,12 +361,12 @@ TEST_SUITE("sensitive word usage")
         sensitive_word_engine engine = sensitive_word_builder()
                                            .deny_words({"政府", "国家", "共产"})
                                            .allow_words({"共产党"})
-                                           .word_fail_fast(false)
                                            .build();
 
-        CHECK(engine.find_all_words("共产党是白名单不会被检测").empty());
+        sensitive_word::match_options longest_opts{true};
+        CHECK(engine.find_all_words("共产党是白名单不会被检测", longest_opts).empty());
 
-        const auto words = engine.find_all_words("共产党是白名单不会被检测，但是共产是黑名单");
+        const auto words = engine.find_all_words("共产党是白名单不会被检测，但是共产是黑名单", longest_opts);
         REQUIRE(words.size() == 1);
         CHECK(words[0] == "共产");
     }
@@ -455,20 +456,21 @@ TEST_SUITE("sensitive word usage")
 
         sensitive_word_engine engine = sensitive_word_builder()
                                            .deny_words({"测试", "新增"})
-                                           .word_fail_fast(false)
                                            .build();
 
-        CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试", "新增", "新增"});
+        sensitive_word::match_options longest_opts{true};
+
+        CHECK(engine.find_all_words(text, longest_opts) == std::vector<std::string>{"测试", "新增", "新增"});
 
         engine.add_allow_word("测试");
         engine.add_allow_word("新增");
-        CHECK(engine.find_all_words(text).empty());
+        CHECK(engine.find_all_words(text, longest_opts).empty());
 
         engine.remove_allow_word("测试");
-        CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试"});
+        CHECK(engine.find_all_words(text, longest_opts) == std::vector<std::string>{"测试"});
 
         engine.remove_allow_word("新增");
-        CHECK(engine.find_all_words(text) == std::vector<std::string>{"测试", "新增", "新增"});
+        CHECK(engine.find_all_words(text, longest_opts) == std::vector<std::string>{"测试", "新增", "新增"});
     }
 
     TEST_CASE("构建器从文本加载黑名单和白名单")
@@ -483,12 +485,12 @@ TEST_SUITE("sensitive word usage")
                                            .add_allow_words_from_text(
                                                "evil plan\n"
                                                "\n")
-                                           .word_fail_fast(false)
                                            .build();
 
-        CHECK(engine.contains("this is bad"));
-        CHECK_FALSE(engine.contains("evil plan"));
-        CHECK(engine.contains("evil idea"));
+        sensitive_word::match_options longest_opts{true};
+        CHECK(engine.find_all_words("this is bad", longest_opts).size() == 1);
+        CHECK(engine.find_all_words("evil plan", longest_opts).empty());
+        CHECK(engine.find_all_words("evil idea", longest_opts).size() == 1);
     }
 
     TEST_CASE("构建器从文件加载黑名单和白名单")
@@ -511,12 +513,12 @@ TEST_SUITE("sensitive word usage")
         sensitive_word_engine engine = sensitive_word_builder()
                                            .add_deny_words_from_file(deny_file.string())
                                            .add_allow_words_from_file(allow_file.string())
-                                           .word_fail_fast(false)
                                            .build();
 
-        CHECK(engine.contains("alpha value"));
-        CHECK_FALSE(engine.contains("beta test"));
-        CHECK(engine.contains("beta value"));
+        sensitive_word::match_options longest_opts{true};
+        CHECK(engine.find_all_words("alpha value", longest_opts).size() == 1);
+        CHECK(engine.find_all_words("beta test", longest_opts).empty());
+        CHECK(engine.find_all_words("beta value", longest_opts).size() == 1);
 
         std::filesystem::remove(deny_file);
         std::filesystem::remove(allow_file);
@@ -526,22 +528,19 @@ TEST_SUITE("sensitive word usage")
     {
         const std::string text = "我在我的家里玩我的世界";
 
-        sensitive_word_engine fast_engine = sensitive_word_builder()
-                                                .deny_words({"我的世界", "我的"})
-                                                .word_fail_fast(true)
-                                                .build();
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"我的世界", "我的"})
+                                           .build();
 
-        sensitive_word_engine over_engine = sensitive_word_builder()
-                                                .deny_words({"我的世界", "我的"})
-                                                .word_fail_fast(false)
-                                                .build();
+        sensitive_word::match_options fast_opts{false};
+        sensitive_word::match_options over_opts{true};
 
-        const auto fast_words = fast_engine.find_all_words(text);
+        const auto fast_words = engine.find_all_words(text, fast_opts);
         REQUIRE(fast_words.size() == 2);
         CHECK(fast_words[0] == "我的");
         CHECK(fast_words[1] == "我的");
 
-        const auto over_words = over_engine.find_all_words(text);
+        const auto over_words = engine.find_all_words(text, over_opts);
         REQUIRE(over_words.size() == 2);
         CHECK(over_words[0] == "我的");
         CHECK(over_words[1] == "我的世界");
@@ -549,79 +548,60 @@ TEST_SUITE("sensitive word usage")
 
     TEST_CASE("快速失败和完整匹配与黑白名单的交互")
     {
-        sensitive_word_engine fast_engine1 = sensitive_word_builder()
-                                                 .deny_words({"操你妈"})
-                                                 .allow_words({"你"})
-                                                 .word_fail_fast(true)
-                                                 .build();
-        CHECK(fast_engine1.find_all_words("操你妈") == std::vector<std::string>{"操你妈"});
+        sensitive_word::match_options fast_opts{false};
+        sensitive_word::match_options over_opts{true};
 
-        sensitive_word_engine fast_engine2 = sensitive_word_builder()
-                                                 .deny_words({"大傻逼"})
-                                                 .allow_words({"大"})
-                                                 .word_fail_fast(true)
-                                                 .build();
-        CHECK(fast_engine2.find_all_words("大傻逼") == std::vector<std::string>{"大傻逼"});
+        sensitive_word_engine engine1 = sensitive_word_builder()
+                                            .deny_words({"操你妈"})
+                                            .allow_words({"你"})
+                                            .build();
+        CHECK(engine1.find_all_words("操你妈", fast_opts) == std::vector<std::string>{"操你妈"});
 
-        sensitive_word_engine fast_engine3 = sensitive_word_builder()
-                                                 .deny_words({"口交"})
-                                                 .allow_words({"地铁口交易"})
-                                                 .word_fail_fast(true)
-                                                 .build();
-        CHECK(fast_engine3.find_all_words("地铁口交易").empty());
+        sensitive_word_engine engine2 = sensitive_word_builder()
+                                            .deny_words({"大傻逼"})
+                                            .allow_words({"大"})
+                                            .build();
+        CHECK(engine2.find_all_words("大傻逼", fast_opts) == std::vector<std::string>{"大傻逼"});
 
-        sensitive_word_engine over_engine1 = sensitive_word_builder()
-                                                 .deny_words({"操你妈"})
-                                                 .allow_words({"你"})
-                                                 .word_fail_fast(false)
-                                                 .build();
-        CHECK(over_engine1.find_all_words("操你妈") == std::vector<std::string>{"操你妈"});
+        sensitive_word_engine engine3 = sensitive_word_builder()
+                                            .deny_words({"口交"})
+                                            .allow_words({"地铁口交易"})
+                                            .build();
+        CHECK(engine3.find_all_words("地铁口交易", fast_opts).empty());
 
-        sensitive_word_engine over_engine2 = sensitive_word_builder()
-                                                 .deny_words({"大傻逼"})
-                                                 .allow_words({"大"})
-                                                 .word_fail_fast(false)
-                                                 .build();
-        CHECK(over_engine2.find_all_words("大傻逼") == std::vector<std::string>{"大傻逼"});
-
-        sensitive_word_engine over_engine3 = sensitive_word_builder()
-                                                 .deny_words({"口交"})
-                                                 .allow_words({"地铁口交易"})
-                                                 .word_fail_fast(false)
-                                                 .build();
-        CHECK(over_engine3.find_all_words("地铁口交易").empty());
+        CHECK(engine1.find_all_words("操你妈", over_opts) == std::vector<std::string>{"操你妈"});
+        CHECK(engine2.find_all_words("大傻逼", over_opts) == std::vector<std::string>{"大傻逼"});
+        CHECK(engine3.find_all_words("地铁口交易", over_opts).empty());
     }
 
     TEST_CASE("完整匹配在相同文本位置优先选择更长的后续匹配")
     {
         const std::string text = "他的世界它的世界和她的世界都不是我的也不是我的世界";
 
-        sensitive_word_engine over_engine = sensitive_word_builder()
-                                                .deny_words({"我的世界", "我的"})
-                                                .word_fail_fast(false)
-                                                .build();
-        CHECK(over_engine.find_all_words(text) == std::vector<std::string>{"我的", "我的世界"});
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"我的世界", "我的"})
+                                           .build();
 
-        sensitive_word_engine fast_engine = sensitive_word_builder()
-                                                .deny_words({"我的世界", "我的"})
-                                                .build();
-        CHECK(fast_engine.find_all_words(text) == std::vector<std::string>{"我的", "我的"});
+        sensitive_word::match_options over_opts{true};
+        sensitive_word::match_options fast_opts{false};
+
+        CHECK(engine.find_all_words(text, over_opts) == std::vector<std::string>{"我的", "我的世界"});
+        CHECK(engine.find_all_words(text, fast_opts) == std::vector<std::string>{"我的", "我的"});
     }
 
     TEST_CASE("完整匹配在近似未命中时无误报")
     {
         const std::string text = "他的世界它的世界和她的世界都不是我的也不是我的天界";
 
-        sensitive_word_engine over_engine = sensitive_word_builder()
-                                                .deny_words({"我的世界"})
-                                                .word_fail_fast(false)
-                                                .build();
-        CHECK(over_engine.find_all_words(text).empty());
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"我的世界"})
+                                           .build();
 
-        sensitive_word_engine fast_engine = sensitive_word_builder()
-                                                .deny_words({"我的世界"})
-                                                .build();
-        CHECK(fast_engine.find_all_words(text).empty());
+        sensitive_word::match_options over_opts{true};
+        sensitive_word::match_options fast_opts{false};
+
+        CHECK(engine.find_all_words(text, over_opts).empty());
+        CHECK(engine.find_all_words(text, fast_opts).empty());
     }
 
     TEST_CASE("构建器默认替换策略生效")
@@ -1268,38 +1248,37 @@ TEST_SUITE("sensitive word usage")
     {
         sensitive_word_engine engine = sensitive_word_builder()
                                            .deny_words({"大傻逼"})
-                                           .word_fail_fast(true) // 测试尾部扩展逻辑
                                            .ignore_repeat(true)
                                            .char_ignore(special_chars())
                                            .build();
 
+        // 测试尾部扩展逻辑，使用 shortest 匹配
+        sensitive_word::match_options shortest_opts{false};
+
         // 验证连续多个干扰符
-        CHECK(engine.replace("你个大傻--逼---逼") == "你个*********");
+        CHECK(engine.replace("你个大傻--逼---逼", shortest_opts) == "你个*********");
         // 验证尾部干扰符不会被错误合并
-        CHECK(engine.replace("大傻逼--") == "***--");
+        CHECK(engine.replace("大傻逼--", shortest_opts) == "***--");
         // 验证中间有正常字符打断的情况
-        CHECK(engine.replace("大傻-啊-逼") == "大傻-啊-逼");
+        CHECK(engine.replace("大傻-啊-逼", shortest_opts) == "大傻-啊-逼");
     }
 
-    TEST_CASE("高级边界测试：快速失败(fail_fast)与最大贪婪匹配")
+    TEST_CASE("高级边界测试：最短匹配(shortest)与最大贪婪匹配(longest)")
     {
-        // 验证贪婪匹配(word_fail_fast=false)对更长词汇的捕获
-        sensitive_word_engine over_engine = sensitive_word_builder()
-                                                .deny_words({"中国", "中国人"})
-                                                .word_fail_fast(false)
-                                                .build();
+        sensitive_word_engine engine = sensitive_word_builder()
+                                           .deny_words({"中国", "中国人"})
+                                           .build();
 
-        const auto over_words = over_engine.find_all_words("我是中国人");
+        sensitive_word::match_options longest_opts{true};
+        sensitive_word::match_options shortest_opts{false};
+
+        // 验证贪婪匹配对更长词汇的捕获
+        const auto over_words = engine.find_all_words("我是中国人", longest_opts);
         REQUIRE(over_words.size() == 1);
         CHECK(over_words[0] == "中国人"); // 贪婪模式下，从同一位置出发会匹配更长的词
 
-        // 对比：快速失败模式(word_fail_fast=true)会停留在第一个匹配项
-        sensitive_word_engine fast_engine = sensitive_word_builder()
-                                                .deny_words({"中国", "中国人"})
-                                                .word_fail_fast(true)
-                                                .build();
-
-        const auto fast_words = fast_engine.find_all_words("我是中国人");
+        // 对比：最短匹配模式会停留在第一个匹配项
+        const auto fast_words = engine.find_all_words("我是中国人", shortest_opts);
         REQUIRE(fast_words.size() == 1);
         CHECK(fast_words[0] == "中国");
 
@@ -1307,9 +1286,8 @@ TEST_SUITE("sensitive word usage")
         // 引擎在匹配到一个词后，主循环会跳过该词的跨度，因此不会发生重叠重复匹配
         sensitive_word_engine overlap_engine = sensitive_word_builder()
                                                    .deny_words({"北京大", "京大学"})
-                                                   .word_fail_fast(false)
                                                    .build();
-        const auto overlap_words = overlap_engine.find_all_words("北京大学");
+        const auto overlap_words = overlap_engine.find_all_words("北京大学", longest_opts);
         REQUIRE(overlap_words.size() == 1);
         CHECK(overlap_words[0] == "北京大"); // 匹配完"北京大"后，跳过了"京"和"大"，直接从"学"继续
     }
@@ -1319,17 +1297,18 @@ TEST_SUITE("sensitive word usage")
         sensitive_word_engine engine = sensitive_word_builder()
                                            .deny_words({"敏感词"})
                                            .allow_words({"大敏感词", "敏感词汇", "不敏感词语"})
-                                           .word_fail_fast(false)
                                            .build();
 
+        sensitive_word::match_options longest_opts{true};
+
         // 前缀包含白名单
-        CHECK(engine.find_all_words("这是一个大敏感词").empty());
+        CHECK(engine.find_all_words("这是一个大敏感词", longest_opts).empty());
         // 后缀包含白名单
-        CHECK(engine.find_all_words("这是一个敏感词汇").empty());
+        CHECK(engine.find_all_words("这是一个敏感词汇", longest_opts).empty());
         // 夹心包含白名单
-        CHECK(engine.find_all_words("这是一个不敏感词语").empty());
+        CHECK(engine.find_all_words("这是一个不敏感词语", longest_opts).empty());
         // 独立敏感词
-        CHECK(engine.find_all_words("这是一个敏感词").size() == 1);
+        CHECK(engine.find_all_words("这是一个敏感词", longest_opts).size() == 1);
     }
 
     TEST_CASE("高级边界测试：不可见零宽字符的穿透")

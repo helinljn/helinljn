@@ -67,12 +67,6 @@ sensitive_word_builder& sensitive_word_builder::enable_num_check(bool value)
     return *this;
 }
 
-sensitive_word_builder& sensitive_word_builder::word_fail_fast(bool value)
-{
-    config_.word_fail_fast = value;
-    return *this;
-}
-
 sensitive_word_builder& sensitive_word_builder::num_check_len(size_t value)
 {
     config_.num_check_len = value;
@@ -224,37 +218,41 @@ public:
 
     bool contains(std::string_view text) const
     {
-        return static_cast<bool>(find_first(text));
+        // contains 只需要知道是否包含，不需要找到最长的，所以强制使用最短匹配（longest_match = false）
+        match_options options;
+        options.longest_match = false;
+
+        return static_cast<bool>(find_first(text, options));
     }
 
-    std::optional<word_result> find_first(std::string_view text) const
+    std::optional<word_result> find_first(std::string_view text, const match_options& options) const
     {
         std::optional<word_result> first;
-        scan_matches(text, [&](word_result&& result) {
+        scan_matches(text, options, [&](word_result&& result) {
             first = std::move(result);
             return false;
         });
         return first;
     }
 
-    std::vector<word_result> find_all(std::string_view text) const
+    std::vector<word_result> find_all(std::string_view text, const match_options& options) const
     {
         std::vector<word_result> results;
-        scan_matches(text, [&](word_result&& result) {
+        scan_matches(text, options, [&](word_result&& result) {
             results.push_back(std::move(result));
             return true;
         });
         return results;
     }
 
-    std::string replace(std::string_view text) const
+    std::string replace(std::string_view text, const match_options& options) const
     {
-        return replace(text, *replace_strategy_);
+        return replace(text, options, *replace_strategy_);
     }
 
-    std::string replace(std::string_view text, const replace_strategy& strategy) const
+    std::string replace(std::string_view text, const match_options& options, const replace_strategy& strategy) const
     {
-        return replace(text, find_all(text), strategy);
+        return replace(text, find_all(text, options), strategy);
     }
 
     std::string replace(std::string_view text, const std::vector<word_result>& results) const
@@ -375,7 +373,7 @@ private:
     }
 
     template <typename OnMatch>
-    void scan_matches(std::string_view text, OnMatch&& on_match) const
+    void scan_matches(std::string_view text, const match_options& options, OnMatch&& on_match) const
     {
         // 统一扫描入口：
         // 1. 优先尝试词库匹配；
@@ -396,7 +394,7 @@ private:
 
             if (config_.enable_word_check)
             {
-                const word_scan_result detect_result = detect_word_at(normalized, idx);
+                const word_scan_result detect_result = detect_word_at(normalized, idx, options);
                 allow_match = detect_result.allow;
                 deny_match  = detect_result.deny;
             }
@@ -431,7 +429,7 @@ private:
         }
     }
 
-    word_scan_result detect_word_at(const normalized_text& text, size_t begin_index) const
+    word_scan_result detect_word_at(const normalized_text& text, size_t begin_index, const match_options& options) const
     {
         word_scan_result result{};
         if (begin_index >= text.normalized_chars.size())
@@ -469,7 +467,7 @@ private:
                 result.allow.raw_length       = raw_length;
                 result.allow.effective_length = effective_length;
 
-                if (config_.word_fail_fast)
+                if (!options.longest_match)
                     allow_active = false;
             }
 
@@ -478,7 +476,7 @@ private:
                 result.deny.raw_length       = raw_length;
                 result.deny.effective_length = effective_length;
 
-                if (config_.word_fail_fast)
+                if (!options.longest_match)
                     deny_active = false;
             }
 
@@ -688,30 +686,30 @@ bool sensitive_word_engine::contains(std::string_view text) const
     return impl_->contains(text);
 }
 
-std::optional<word_result> sensitive_word_engine::find_first(std::string_view text) const
+std::optional<word_result> sensitive_word_engine::find_first(std::string_view text, const match_options& options) const
 {
-    return impl_->find_first(text);
+    return impl_->find_first(text, options);
 }
 
-std::vector<word_result> sensitive_word_engine::find_all(std::string_view text) const
+std::vector<word_result> sensitive_word_engine::find_all(std::string_view text, const match_options& options) const
 {
-    return impl_->find_all(text);
+    return impl_->find_all(text, options);
 }
 
-std::optional<std::string> sensitive_word_engine::find_first_word(std::string_view text) const
+std::optional<std::string> sensitive_word_engine::find_first_word(std::string_view text, const match_options& options) const
 {
-    auto result = find_first(text);
+    auto result = find_first(text, options);
     if (!result)
         return std::nullopt;
 
     return std::move(result->word);
 }
 
-std::vector<std::string> sensitive_word_engine::find_all_words(std::string_view text) const
+std::vector<std::string> sensitive_word_engine::find_all_words(std::string_view text, const match_options& options) const
 {
     std::vector<std::string> words;
 
-    auto results = find_all(text);
+    auto results = find_all(text, options);
     words.reserve(results.size());
 
     for (auto& result : results)
@@ -722,20 +720,20 @@ std::vector<std::string> sensitive_word_engine::find_all_words(std::string_view 
     return words;
 }
 
-std::string sensitive_word_engine::replace(std::string_view text) const
+std::string sensitive_word_engine::replace(std::string_view text, const match_options& options) const
 {
-    return impl_->replace(text);
+    return impl_->replace(text, options);
 }
 
-std::string sensitive_word_engine::replace(std::string_view text, char replacement) const
+std::string sensitive_word_engine::replace(std::string_view text, char replacement, const match_options& options) const
 {
     chars_replace_strategy strategy(replacement);
-    return impl_->replace(text, strategy);
+    return impl_->replace(text, options, strategy);
 }
 
-std::string sensitive_word_engine::replace(std::string_view text, const replace_strategy& strategy) const
+std::string sensitive_word_engine::replace(std::string_view text, const replace_strategy& strategy, const match_options& options) const
 {
-    return impl_->replace(text, strategy);
+    return impl_->replace(text, options, strategy);
 }
 
 std::string sensitive_word_engine::replace(std::string_view text, const std::vector<word_result>& results) const

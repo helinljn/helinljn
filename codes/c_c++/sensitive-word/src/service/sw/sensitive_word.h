@@ -66,8 +66,18 @@ struct sensitive_word_config
     bool enable_word_check    = true;   // 是否启用敏感词字典匹配
     bool enable_num_check     = false;  // 是否启用纯数字片段匹配
 
-    bool   word_fail_fast     = true;   // 是否在当前位置命中后优先停止继续尝试更长的词匹配
     size_t num_check_len      = 2;      // 触发数字匹配所需的最小数字长度
+};
+
+//////////////////////////////////////////////////////////////
+// 敏感词匹配执行选项
+//////////////////////////////////////////////////////////////
+struct match_options
+{
+    // 是否启用最长匹配(贪婪匹配)
+    // false: 最短匹配，命中即返回(性能最高)
+    // true:  最长匹配，寻找包含起点的最长词(适合高亮、替换)
+    bool longest_match = false;
 };
 
 //////////////////////////////////////////////////////////////
@@ -123,7 +133,6 @@ public:
     sensitive_word_builder& enable_word_check(bool value);
     sensitive_word_builder& enable_num_check(bool value);
 
-    sensitive_word_builder& word_fail_fast(bool value);
     sensitive_word_builder& num_check_len(size_t value);
 
     sensitive_word_builder& deny_words(std::vector<std::string> words);
@@ -176,15 +185,15 @@ public:
         std::shared_ptr<class replace_strategy> replace_strategy);
 
     [[nodiscard]] bool contains(std::string_view text) const;
-    [[nodiscard]] std::optional<word_result> find_first(std::string_view text) const;
-    [[nodiscard]] std::vector<word_result> find_all(std::string_view text) const;
+    [[nodiscard]] std::optional<word_result> find_first(std::string_view text, const match_options& options = {}) const;
+    [[nodiscard]] std::vector<word_result> find_all(std::string_view text, const match_options& options = {}) const;
 
-    [[nodiscard]] std::optional<std::string> find_first_word(std::string_view text) const;
-    [[nodiscard]] std::vector<std::string> find_all_words(std::string_view text) const;
+    [[nodiscard]] std::optional<std::string> find_first_word(std::string_view text, const match_options& options = {}) const;
+    [[nodiscard]] std::vector<std::string> find_all_words(std::string_view text, const match_options& options = {}) const;
 
-    [[nodiscard]] std::string replace(std::string_view text) const;
-    [[nodiscard]] std::string replace(std::string_view text, char replacement) const;
-    [[nodiscard]] std::string replace(std::string_view text, const replace_strategy& strategy) const;
+    [[nodiscard]] std::string replace(std::string_view text, const match_options& options = {}) const;
+    [[nodiscard]] std::string replace(std::string_view text, char replacement, const match_options& options = {}) const;
+    [[nodiscard]] std::string replace(std::string_view text, const replace_strategy& strategy, const match_options& options = {}) const;
 
     [[nodiscard]] std::string replace(std::string_view text, const std::vector<word_result>& results) const;
     [[nodiscard]] std::string replace(std::string_view text, const std::vector<word_result>& results, char replacement) const;
