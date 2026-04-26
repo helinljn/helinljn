@@ -506,9 +506,9 @@ private:
 
         try
         {
-            const std::string utf8_str      = encode_utf8(ch);
-            const std::string converted_str = converter_->Convert(utf8_str);
-            const std::u32string decoded    = decode_utf8(converted_str);
+            const std::string    utf8_str      = encode_utf8(ch);
+            const std::string    converted_str = converter_->Convert(utf8_str);
+            const std::u32string decoded       = decode_utf8(converted_str);
             if (!decoded.empty())
                 return decoded.front();
         }
@@ -612,7 +612,7 @@ public:
     normalized_text normalize_text(std::string_view text) const
     {
         normalized_text result;
-        result.normalized_chars.reserve(text.size()); // 空间换时间
+        result.normalized_chars.reserve(text.size());
 
         auto it = text.begin();
         while (it != text.end())
