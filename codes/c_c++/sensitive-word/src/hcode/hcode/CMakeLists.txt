@@ -36,7 +36,7 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        -rdynamic
+        # ...
     )
 
     # 链接库
@@ -88,4 +88,7 @@ IF(WIN32)
         FILES ${HCODE_SRC_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest PREFIX "doctest"
         FILES ${DOCTEST_SRC_LIST})
+ELSE()
+    # 导出所有符号设置
+    TARGET_LINK_OPTIONS(${CURRENT_TARGET_NAME} PRIVATE -rdynamic)
 ENDIF()
