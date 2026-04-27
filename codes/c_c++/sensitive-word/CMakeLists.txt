@@ -44,6 +44,7 @@ IF(WIN32)
         /bigobj
         /W4
         /MP
+        /wd4251
     )
 
     SET(PROJECT_COMMON_COMPILE_OPTIONS_CXX
@@ -53,6 +54,7 @@ IF(WIN32)
         /bigobj
         /W4
         /MP
+        /wd4251
     )
 
     # 公共链接选项
