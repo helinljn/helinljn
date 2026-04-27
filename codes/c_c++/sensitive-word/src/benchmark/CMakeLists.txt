@@ -7,6 +7,7 @@ SET(CURRENT_INCLUDE_DIRS
     ${CURRENT_SOURCE_DIR}
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/nanobench/src/include
     ${CMAKE_PROJECT_ROOT_DIR}/src/service
+    ${CMAKE_PROJECT_ROOT_DIR}/src
 )
 
 # 宏定义、编译选项、链接库
