@@ -2,6 +2,7 @@
 #include <tuple>
 #include "mimalloc.h"
 #include "net/brynet.h"
+#include "spdlog/fmt/fmt.h"
 
 namespace {
 
@@ -49,6 +50,8 @@ int main(int argc, char** argv)
 
     if (!verify_mimalloc())
         return EXIT_FAILURE;
+
+    fmt::print("success\n");
 
     return EXIT_SUCCESS;
 }
