@@ -3,7 +3,7 @@
 #ifndef HOOK_H
 #define HOOK_H
 
-#include "core_port.h"
+#include "core.h"
 
 #if defined(CORE_PLATFORM_WINDOWS)
     #pragma warning(push)

@@ -3,7 +3,7 @@
 #ifndef SYMBOL_LOADER_H
 #define SYMBOL_LOADER_H
 
-#include "core_port.h"
+#include "core.h"
 #include <string>
 
 namespace core {
