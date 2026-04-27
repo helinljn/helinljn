@@ -319,10 +319,9 @@ std::string md5_string(const std::string& data, bool uppercase)
     size_t      remaining = data.size();
     while (remaining > 0)
     {
-        const unsigned int chunk =
-            (remaining > static_cast<size_t>(std::numeric_limits<unsigned int>::max()))
-                ? std::numeric_limits<unsigned int>::max()
-                : static_cast<unsigned int>(remaining);
+        const unsigned int chunk = remaining > static_cast<size_t>(std::numeric_limits<unsigned int>::max())
+                                    ? std::numeric_limits<unsigned int>::max()
+                                    : static_cast<unsigned int>(remaining);
 
         md5::MD5Update(&context, input, chunk);
 

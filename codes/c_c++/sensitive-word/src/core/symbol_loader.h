@@ -19,7 +19,7 @@ namespace core {
 //     2. Linux下需要添加-rdynamic链接选项
 // 获取符号：
 //     1. Windows下使用VS开发工具
-//         dumpbin /exports libcore.dll | findstr memory_to_hex_string
+//         dumpbin /exports core.dll | findstr memory_to_hex_string
 //     2. Linux下使用nm命令
 //         nm -D libcore.so | grep memory_to_hex_string
 ////////////////////////////////////////////////////////////////
@@ -44,8 +44,6 @@ public:
 
     /**
      * @brief 卸载已加载的动态库或可执行文件
-     * @param
-     * @return
      */
     void unload(void);
 
@@ -59,22 +57,21 @@ public:
     /**
      * @brief 分离已加载的动态库或可执行文件，放弃所有权
      *        主要用于Hook场景：将句柄转移给其他管理机制，避免析构时意外卸载
-     * @param
      * @return 原始句柄，调用者负责后续释放；若未加载则返回nullptr
      */
     void* detach(void)
     {
-        void* h = _handle;
+        void* h = handle_;
 
-        _handle        = nullptr;
-        _should_unload = false;
+        handle_        = nullptr;
+        should_unload_ = false;
 
         return h;
     }
 
 private:
-    void* _handle;
-    bool  _should_unload;
+    void* handle_;
+    bool  should_unload_;
 };
 
 } // namespace core

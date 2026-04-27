@@ -87,7 +87,7 @@ static inline char to_lower_char(unsigned char ch)
     return static_cast<char>(std::tolower(ch));
 }
 
-static inline uint64_t get_monotonic_time_ms(void)
+static inline uint64_t get_monotonic_time_ms()
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     return GetTickCount64();
@@ -185,7 +185,7 @@ static const uint64_t s_program_start_time = get_monotonic_time_ms();
 
 } // namespace details
 
-uint32_t get_free_memory(void)
+uint32_t get_free_memory()
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     MEMORYSTATUSEX memory_status;
@@ -206,7 +206,7 @@ uint32_t get_free_memory(void)
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-uint32_t get_total_memory(void)
+uint32_t get_total_memory()
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     MEMORYSTATUSEX memory_status;
@@ -227,7 +227,7 @@ uint32_t get_total_memory(void)
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-uint32_t get_cpu_logic_count(void)
+uint32_t get_cpu_logic_count()
 {
     // 使用 C++11 标准库的 std::thread::hardware_concurrency() 函数
     // 该函数返回系统中可用的硬件线程数
@@ -236,13 +236,13 @@ uint32_t get_cpu_logic_count(void)
     return count > 0 ? static_cast<uint32_t>(count) : 1;
 }
 
-uint64_t get_program_running_time(void)
+uint64_t get_program_running_time()
 {
     // 返回程序运行时间（毫秒）
     return details::get_monotonic_time_ms() - details::s_program_start_time;
 }
 
-uint32_t get_process_id(void)
+uint32_t get_process_id()
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     return static_cast<uint32_t>(GetCurrentProcessId());
@@ -251,7 +251,7 @@ uint32_t get_process_id(void)
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-uint32_t get_thread_id(void)
+uint32_t get_thread_id()
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     return static_cast<uint32_t>(GetCurrentThreadId());
@@ -923,7 +923,7 @@ std::string utf8_to_gbk(const std::string& utf8_str)
     });
 }
 
-uint32_t random_uint32(void)
+uint32_t random_uint32()
 {
     // 使用线程本地存储的随机数生成器，确保线程安全
     thread_local std::mt19937 generator(std::random_device{}());
@@ -932,7 +932,7 @@ uint32_t random_uint32(void)
     return distribution(generator);
 }
 
-uint64_t random_uint64(void)
+uint64_t random_uint64()
 {
     // 使用线程本地存储的随机数生成器，确保线程安全
     thread_local std::mt19937_64 generator(std::random_device{}());
@@ -941,7 +941,7 @@ uint64_t random_uint64(void)
     return distribution(generator);
 }
 
-float random_float(void)
+float random_float()
 {
     // 使用线程本地存储的随机数生成器，确保线程安全
     thread_local std::mt19937 generator(std::random_device{}());
@@ -950,7 +950,7 @@ float random_float(void)
     return distribution(generator);
 }
 
-double random_double(void)
+double random_double()
 {
     // 使用线程本地存储的随机数生成器，确保线程安全
     thread_local std::mt19937_64 generator(std::random_device{}());
@@ -1024,7 +1024,7 @@ bool env_set(const std::string& name, const std::string& value)
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-bool get_exepath(char* buf, uint32_t* buflen)
+bool exepath(char* buf, uint32_t* buflen)
 {
     if (!buf || !buflen)
         return false;
@@ -1033,17 +1033,17 @@ bool get_exepath(char* buf, uint32_t* buflen)
     return ret == 0;
 }
 
-std::string get_exepath(void)
+std::string exepath()
 {
     std::vector<char> buf(8192);
     uint32_t          len = static_cast<uint32_t>(buf.size());
-    if (!get_exepath(buf.data(), &len))
+    if (!exepath(buf.data(), &len))
         return std::string{};
 
     return std::string(buf.data(), len);
 }
 
-bool get_exedir(char* buf, uint32_t* buflen)
+bool exedir(char* buf, uint32_t* buflen)
 {
     if (!buf || !buflen)
         return false;
@@ -1080,11 +1080,11 @@ bool get_exedir(char* buf, uint32_t* buflen)
     return true;
 }
 
-std::string get_exedir(void)
+std::string exedir()
 {
     std::vector<char> buf(8192);
     uint32_t          len = static_cast<uint32_t>(buf.size());
-    if (!get_exedir(buf.data(), &len))
+    if (!exedir(buf.data(), &len))
         return std::string{};
 
     return std::string(buf.data(), len);

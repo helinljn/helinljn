@@ -767,22 +767,22 @@ TEST_SUITE("Misc")
 
     TEST_CASE("PathOperations")
     {
-        // 测试 get_exepath 函数
+        // 测试 exepath 函数
         char exepath_buf[2048];
         uint32_t exepath_len = sizeof(exepath_buf);
-        CHECK(core::get_exepath(exepath_buf, &exepath_len));
+        CHECK(core::exepath(exepath_buf, &exepath_len));
         CHECK(exepath_len > 0);
 
-        std::string exepath_str = core::get_exepath();
+        std::string exepath_str = core::exepath();
         CHECK(!exepath_str.empty());
 
-        // 测试 get_exedir 函数
+        // 测试 exedir 函数
         char exedir_buf[2048];
         uint32_t exedir_len = sizeof(exedir_buf);
-        CHECK(core::get_exedir(exedir_buf, &exedir_len));
+        CHECK(core::exedir(exedir_buf, &exedir_len));
         CHECK(exedir_len > 0);
 
-        std::string exedir_str = core::get_exedir();
+        std::string exedir_str = core::exedir();
         CHECK(!exedir_str.empty());
 
         fmt::print("exepath: {}, exedir: {}\n", exepath_str, exedir_str);

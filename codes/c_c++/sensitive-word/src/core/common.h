@@ -13,45 +13,34 @@ namespace core {
 
 /**
  * @brief 获取当前空闲内存(以MB为单位)
- * @param
- * @return
  */
-CORE_API uint32_t get_free_memory(void);
+CORE_API uint32_t get_free_memory();
 
 /**
  * @brief 获取系统总内存(以MB为单位)
- * @param
- * @return
  */
-CORE_API uint32_t get_total_memory(void);
+CORE_API uint32_t get_total_memory();
 
 /**
  * @brief 获取CPU逻辑单元数量
- * @param
- * @return
  */
-CORE_API uint32_t get_cpu_logic_count(void);
+CORE_API uint32_t get_cpu_logic_count();
 
 /**
  * @brief 获取当前程序已经运行的时间（毫秒）
- * @param
  * @return 程序运行时间，单位为毫秒
  */
-CORE_API uint64_t get_program_running_time(void);
+CORE_API uint64_t get_program_running_time();
 
 /**
  * @brief 获取进程Id
- * @param
- * @return
  */
-CORE_API uint32_t get_process_id(void);
+CORE_API uint32_t get_process_id();
 
 /**
  * @brief 获取当前线程Id
- * @param
- * @return
  */
-CORE_API uint32_t get_thread_id(void);
+CORE_API uint32_t get_thread_id();
 
 /**
  * @brief 将内存数据转换为16进制字符串(默认为大写形式)
@@ -204,7 +193,6 @@ CORE_API std::string join(const std::vector<std::string>& parts, std::string_vie
  * @param src_str    待拆分的字符串
  * @param separator  多分隔符字符串
  * @param out_result 存放最终的拆分结果
- * @return
  */
 CORE_API void split(std::string_view src_str, std::string_view separator, std::vector<std::string>& out_result);
 
@@ -336,36 +324,27 @@ CORE_API std::string utf8_to_gbk(const std::string& utf8_str);
 
 /**
  * @brief 随机uint32_t整数，生成[0, UINT32_MAX]之间的uint32_t
- * @param
- * @return
  */
-CORE_API uint32_t random_uint32(void);
+CORE_API uint32_t random_uint32();
 
 /**
  * @brief 随机uint64_t整数，生成[0, UINT64_MAX]之间的uint64_t
- * @param
- * @return
  */
-CORE_API uint64_t random_uint64(void);
+CORE_API uint64_t random_uint64();
 
 /**
  * @brief 随机浮点数，生成[0, 1)之间的float
- * @param
- * @return
  */
-CORE_API float random_float(void);
+CORE_API float random_float();
 
 /**
  * @brief 随机浮点数，生成[0, 1)之间的double
- * @param
- * @return
  */
-CORE_API double random_double(void);
+CORE_API double random_double();
 
 /**
  * @brief 生成[0, upper_bound)之间的随机数，不包括upper_bound
  * @param upper_bound 随机数上边界值(取值范围必须满足 0 < upper_bound <= 0x7FFFFFFF)
- * @return
  */
 CORE_API int32_t random_range(int32_t upper_bound);
 
@@ -400,8 +379,8 @@ CORE_API bool env_set(const std::string& name, const std::string& value);
  * @param buflen 缓冲区的大小(成功时，会修改为实际占用大小)
  * @return 成功返回true，失败返回false
  */
-CORE_API bool        get_exepath(char* buf, uint32_t* buflen);
-CORE_API std::string get_exepath(void);
+CORE_API bool        exepath(char* buf, uint32_t* buflen);
+CORE_API std::string exepath();
 
 /**
  * @brief 获取当前执行文件所在目录的绝对路径(【不包含】执行文件名)
@@ -412,8 +391,8 @@ CORE_API std::string get_exepath(void);
  * @param buflen 缓冲区的大小(成功时，会修改为实际占用大小)
  * @return 成功返回true，失败返回false
  */
-CORE_API bool        get_exedir(char* buf, uint32_t* buflen);
-CORE_API std::string get_exedir(void);
+CORE_API bool        exedir(char* buf, uint32_t* buflen);
+CORE_API std::string exedir();
 
 } // namespace core
 
