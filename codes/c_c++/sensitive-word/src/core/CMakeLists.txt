@@ -4,12 +4,13 @@ SET(CURRENT_SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR})
 
 # 头文件目录
 SET(CURRENT_PRIVATE_INCLUDE_DIRS
-    # ...
+    ${CURRENT_SOURCE_DIR}
 )
 
 SET(CURRENT_PUBLIC_INCLUDE_DIRS
-    ${CURRENT_SOURCE_DIR}
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source
 )
 
 # 宏定义、编译选项、链接库
@@ -30,7 +31,9 @@ IF(WIN32)
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        # ...
+        mimalloc
+        jsoncpp
+        opencc
     )
 ELSE()
     # 宏定义
@@ -49,7 +52,9 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        # ...
+        mimalloc
+        jsoncpp
+        opencc
     )
 ENDIF()
 
@@ -69,8 +74,18 @@ FILE(GLOB_RECURSE BRYNET_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet/*.hpp
 )
 
+# spdlog源文件
+FILE(GLOB_RECURSE SPDLOG_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include/spdlog/*.h
+)
+
+# utfcpp源文件
+FILE(GLOB_RECURSE UTFCPP_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source/*.h
+)
+
 # 生成动态库
-ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED  ${CORE_SRC_LIST} ${BRYNET_SRC_LIST})
+ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED  ${CORE_SRC_LIST} ${BRYNET_SRC_LIST} ${SPDLOG_SRC_LIST} ${UTFCPP_SRC_LIST})
 PROJECT_TARGET_APPLY_COMMON_OPTIONS(${CURRENT_TARGET_NAME})
 TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_PRIVATE_INCLUDE_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PUBLIC  ${CURRENT_PUBLIC_INCLUDE_DIRS})
@@ -93,4 +108,8 @@ IF(WIN32)
         FILES ${CORE_SRC_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet PREFIX "brynet"
         FILES ${BRYNET_SRC_LIST})
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include/spdlog PREFIX "spdlog"
+        FILES ${SPDLOG_SRC_LIST})
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source PREFIX "utfcpp"
+        FILES ${UTFCPP_SRC_LIST})
 ENDIF()
