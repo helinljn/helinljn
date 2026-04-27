@@ -18,15 +18,15 @@
     #include <stdio.h>
     #include <sys/mman.h>
     #include <unistd.h>
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 #ifdef _EFI
     #include <efi.h>
     #include <efilib.h>
 #endif
 
-#define hook_r (*b >> 4)
-#define hook_c (*b & 0xF)
+#define HOOK_R (*b >> 4)
+#define HOOK_C (*b & 0xF)
 
 /**
  * @brief 可读可写可执行保护标识
@@ -127,13 +127,13 @@ static int get_instruction_size(const void* address)
     int rex_w = 0;
     unsigned char* b = (unsigned char*)address;
 
-    for (int i = 0; (i < 14 && find_byte(prefixes, sizeof(prefixes), *b)) || hook_r == 4; i++, b++)
+    for (int i = 0; (i < 14 && find_byte(prefixes, sizeof(prefixes), *b)) || HOOK_R == 4; i++, b++)
     {
         if (*b == 0x66)
             operand_prefix = 1;
         else if (*b == 0x67)
             address_prefix = 1;
-        else if (hook_r == 4 && hook_c >= 8)
+        else if (HOOK_R == 4 && HOOK_C >= 8)
             rex_w = 1;
     }
 
@@ -149,24 +149,24 @@ static int get_instruction_size(const void* address)
         }
         else
         {
-            if (hook_r == 8)
+            if (HOOK_R == 8)
                 offset += 4;
-            else if ((hook_r == 7 && hook_c < 4) || *b == 0xA4 || *b == 0xC2 || (*b > 0xC3 && *b <= 0xC6) || *b == 0xBA || *b == 0xAC)
+            else if ((HOOK_R == 7 && HOOK_C < 4) || *b == 0xA4 || *b == 0xC2 || (*b > 0xC3 && *b <= 0xC6) || *b == 0xBA || *b == 0xAC)
                 offset++;
 
-            if (find_byte(op2_modrm, sizeof(op2_modrm), *b) || (hook_r != 3 && hook_r > 0 && hook_r < 7) || *b >= 0xD0 || (hook_r == 7 && hook_c != 7) || hook_r == 9 || hook_r == 0xB || (hook_r == 0xC && hook_c < 8) || (hook_r == 0 && hook_c < 4))
+            if (find_byte(op2_modrm, sizeof(op2_modrm), *b) || (HOOK_R != 3 && HOOK_R > 0 && HOOK_R < 7) || *b >= 0xD0 || (HOOK_R == 7 && HOOK_C != 7) || HOOK_R == 9 || HOOK_R == 0xB || (HOOK_R == 0xC && HOOK_C < 8) || (HOOK_R == 0 && HOOK_C < 4))
                 parse_modrm(&b, address_prefix);
         }
     }
     else
     {
-        if ((hook_r == 0xE && hook_c < 8) || (hook_r == 0xB && hook_c < 8) || hook_r == 7 || (hook_r < 4 && (hook_c == 4 || hook_c == 0xC)) || (*b == 0xF6 && !(*(b + 1) & 48)) || find_byte(op1_imm8, sizeof(op1_imm8), *b))
+        if ((HOOK_R == 0xE && HOOK_C < 8) || (HOOK_R == 0xB && HOOK_C < 8) || HOOK_R == 7 || (HOOK_R < 4 && (HOOK_C == 4 || HOOK_C == 0xC)) || (*b == 0xF6 && !(*(b + 1) & 48)) || find_byte(op1_imm8, sizeof(op1_imm8), *b))
             offset++;
         else if (*b == 0xC2 || *b == 0xCA)
             offset += 2;
         else if (*b == 0xC8)
             offset += 3;
-        else if ((hook_r < 4 && (hook_c == 5 || hook_c == 0xD)) || (hook_r == 0xB && hook_c >= 8) || (*b == 0xF7 && !(*(b + 1) & 48)) || find_byte(op1_imm32, sizeof(op1_imm32), *b))
+        else if ((HOOK_R < 4 && (HOOK_C == 5 || HOOK_C == 0xD)) || (HOOK_R == 0xB && HOOK_C >= 8) || (*b == 0xF7 && !(*(b + 1) & 48)) || find_byte(op1_imm32, sizeof(op1_imm32), *b))
         {
             if (*b == 0xB8 || (*b >= 0xB8 && *b <= 0xBF))
                 offset += rex_w ? 8 : 4;
@@ -177,7 +177,7 @@ static int get_instruction_size(const void* address)
             else
                 offset += operand_prefix ? 2 : 4;
         }
-        else if (hook_r == 0xA && hook_c < 4)
+        else if (HOOK_R == 0xA && HOOK_C < 4)
         {
             offset += rex_w ? 8 : (address_prefix ? 2 : 4);
         }
@@ -186,7 +186,7 @@ static int get_instruction_size(const void* address)
             offset += operand_prefix ? 4 : 6;
         }
 
-        if (find_byte(op1_modrm, sizeof(op1_modrm), *b) || (hook_r < 4 && (hook_c < 4 || (hook_c >= 8 && hook_c < 0xC))) || hook_r == 8 || (hook_r == 0xD && hook_c >= 8))
+        if (find_byte(op1_modrm, sizeof(op1_modrm), *b) || (HOOK_R < 4 && (HOOK_C < 4 || (HOOK_C >= 8 && HOOK_C < 0xC))) || HOOK_R == 8 || (HOOK_R == 0xD && HOOK_C >= 8))
             parse_modrm(&b, address_prefix);
     }
 
@@ -234,7 +234,7 @@ static void* platform_allocate(const unsigned long long size)
 #else
     (void)size;
     return 0;
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
 /**
@@ -265,7 +265,7 @@ static void platform_free(void* address, const unsigned long long size)
 #else
     (void)address;
     (void)size;
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
 /**
@@ -327,7 +327,7 @@ static unsigned long long platform_protect(void* address, unsigned long long siz
     (void)size;
     (void)protection;
     return 0;
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
 #define create_jump(name, target_address)                            \
