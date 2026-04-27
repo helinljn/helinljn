@@ -31,7 +31,6 @@ IF(WIN32)
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        mimalloc
         jsoncpp
         opencc
     )
@@ -52,7 +51,6 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        mimalloc
         jsoncpp
         opencc
     )

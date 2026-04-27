@@ -24,6 +24,7 @@ IF(WIN32)
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        mimalloc
         core
     )
 ELSE()
@@ -39,6 +40,7 @@ ELSE()
 
     # 链接库
     SET(CURRENT_LINK_LIBS
+        mimalloc
         core
     )
 ENDIF()
