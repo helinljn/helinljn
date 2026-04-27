@@ -5,6 +5,7 @@ BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
 UTFCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/utfcpp
 OPENCC_INIT_DIR=$ROOT_INIT_DIR/3rd/opencc
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
+JSONCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/jsoncpp
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
 MIMALLOC_INIT_DIR=$ROOT_INIT_DIR/3rd/mimalloc
 NANOBENCH_INIT_DIR=$ROOT_INIT_DIR/3rd/nanobench
@@ -63,6 +64,20 @@ else
     git checkout .
     git fetch -p origin
     git checkout v1.15.3
+fi
+
+echo ------------------
+echo -- jsoncpp
+cd $ROOT_INIT_DIR
+if [ ! -d $JSONCPP_INIT_DIR ]; then
+    git clone -b 1.9.7 https://github.com/open-source-parsers/jsoncpp.git $JSONCPP_INIT_DIR
+else
+    cd $JSONCPP_INIT_DIR
+    git remote set-url origin https://github.com/open-source-parsers/jsoncpp.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout 1.9.7
 fi
 
 echo ------------------
