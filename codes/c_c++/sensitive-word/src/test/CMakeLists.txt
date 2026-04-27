@@ -9,6 +9,7 @@ SET(CURRENT_INCLUDE_DIRS
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source
     ${CMAKE_PROJECT_ROOT_DIR}/src/service
+    ${CMAKE_PROJECT_ROOT_DIR}/src
 )
 
 # 宏定义、编译选项、链接库
@@ -26,6 +27,7 @@ IF(WIN32)
     # 链接库
     SET(CURRENT_LINK_LIBS
         mimalloc
+        core
         jsoncpp
         opencc
     )
@@ -43,6 +45,7 @@ ELSE()
     # 链接库
     SET(CURRENT_LINK_LIBS
         mimalloc
+        core
         jsoncpp
         opencc
     )

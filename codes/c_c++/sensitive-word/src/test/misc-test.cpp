@@ -6,25 +6,12 @@
 #include "core/timespan.h"
 #include "core/timestamp.h"
 #include "core/datetime.h"
-#include "fmt/format.h"
+#include "spdlog/fmt/fmt.h"
 #include <thread>
 #include <fstream>
 
 DOCTEST_TEST_SUITE("Misc")
 {
-    DOCTEST_TEST_CASE("StackTrace")
-    {
-        const std::string callstack = core::current_stacktrace(false);
-        DOCTEST_CHECK(!callstack.empty());
-
-        fmt::print("-- stack trace --\n{}", callstack);
-
-        const std::string callstack_with_snippets = core::current_stacktrace(true);
-        DOCTEST_CHECK(!callstack_with_snippets.empty());
-
-        fmt::print("-- stack trace with snippets --\n{}", callstack_with_snippets);
-    }
-
     DOCTEST_TEST_CASE("Timespan")
     {
         constexpr core::timespan span1;

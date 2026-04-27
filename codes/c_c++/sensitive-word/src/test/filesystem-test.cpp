@@ -1,5 +1,4 @@
 #include "doctest.h"
-#include "fmt/format.h"
 #include <filesystem>
 #include <fstream>
 #include <string>
