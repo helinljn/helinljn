@@ -8,83 +8,78 @@
 namespace core {
 
 ////////////////////////////////////////////////////////////////
-// A timestamp stores a monotonic* time value
-// with(theoretical) microseconds resolution.
-// Timestamps can be compared with each other
-// and simple arithmetic is supported.
+// 时间戳保存一个单调递增*的时间值，理论精度为微秒
+// 时间戳之间可以互相比较，并且支持简单的算术运算
 //
-// The internal reference time is the Unix epoch,
-// microseconds midnight, January 1, 1970.
+// 内部参考时间为 Unix 纪元，即 1970 年 1 月 1 日午夜的微秒数
 ////////////////////////////////////////////////////////////////
 class timestamp final
 {
 public:
-    // Resolution in units per second. Since the timestamp
-    // has microsecond resolution, the value is always 1000000.
+    // 每秒的分辨率单位数，由于时间戳的精度为微秒，因此该值始终为 1000000
     static inline constexpr time_t resolution = 1000000;
 
 public:
-    // Creates a timestamp with the current time.
-    explicit timestamp(void) : _tsval(0) {update();}
+    // 创建一个表示当前时间的时间戳
+    explicit timestamp() : tsval_(0) {update();}
 
-    // Creates a timestamp from Unix epoch(expressed in microseconds).
-    explicit timestamp(time_t epoch_microseconds) : _tsval(epoch_microseconds) {}
+    // 根据 Unix 纪元时间创建时间戳(以微秒表示)
+    explicit timestamp(time_t epoch_microseconds) : tsval_(epoch_microseconds) {}
 
-    // Copy & Move constructors.
+    // 拷贝构造与移动构造函数
     timestamp(const timestamp&) = default;
     timestamp(timestamp&&) = default;
 
-    // Copy & Move assignments.
+    // 拷贝赋值与移动赋值运算符
     timestamp& operator =(const timestamp&) = default;
     timestamp& operator =(timestamp&&) = default;
 
-    // Assigns a Unix epoch(expressed in microseconds).
+    // 赋值为一个 Unix 纪元时间(以微秒表示)
     timestamp& operator =(time_t epoch_microseconds) {return assign(epoch_microseconds);}
 
-    // Assigns a Unix epoch(expressed in microseconds).
-    timestamp& assign(time_t epoch_microseconds) {_tsval = epoch_microseconds; return *this;}
+    // 设置一个 Unix 纪元时间(以微秒表示)
+    timestamp& assign(time_t epoch_microseconds) {tsval_ = epoch_microseconds; return *this;}
 
-    // Updates the timestamp with the current time.
-    void update(void)
+    // 使用当前时间更新时间戳
+    void update()
     {
         const auto duration = std::chrono::system_clock::now().time_since_epoch();
-        _tsval = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+        tsval_ = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
     }
 
-    // Returns the time elapsed since the time denoted by the timestamp. Equivalent to timestamp() - *this.
-    time_t elapsed(void) const {return timestamp() - *this;}
+    // 返回自该时间戳所表示时刻起已经过去的时间，等价于 timestamp() - *this
+    time_t elapsed() const {return timestamp() - *this;}
 
-    // Returns true iff the given interval(expressed in microseconds)
-    // has passed since the time denoted by the timestamp.
+    // 当且仅当自该时间戳所表示时刻起，已经过了给定的时间间隔(以微秒表示)时返回 true
     bool is_elapsed(time_t interval) const {return elapsed() >= interval;}
 
-    // Returns the timestamp expressed in seconds.
-    time_t epoch_time(void) const {return _tsval / resolution;}
+    // 返回以秒表示的时间戳
+    time_t epoch_time() const {return tsval_ / resolution;}
 
-    // Returns the timestamp expressed in microseconds.
-    time_t epoch_microseconds(void) const {return _tsval;}
+    // 返回以微秒表示的时间戳
+    time_t epoch_microseconds() const {return tsval_;}
 
-    bool operator ==(const timestamp& ts) const {return _tsval == ts._tsval;}
-    bool operator !=(const timestamp& ts) const {return _tsval != ts._tsval;}
-    bool operator < (const timestamp& ts) const {return _tsval <  ts._tsval;}
-    bool operator <=(const timestamp& ts) const {return _tsval <= ts._tsval;}
-    bool operator > (const timestamp& ts) const {return _tsval >  ts._tsval;}
-    bool operator >=(const timestamp& ts) const {return _tsval >= ts._tsval;}
+    bool operator ==(const timestamp& ts) const {return tsval_ == ts.tsval_;}
+    bool operator !=(const timestamp& ts) const {return tsval_ != ts.tsval_;}
+    bool operator < (const timestamp& ts) const {return tsval_ <  ts.tsval_;}
+    bool operator <=(const timestamp& ts) const {return tsval_ <= ts.tsval_;}
+    bool operator > (const timestamp& ts) const {return tsval_ >  ts.tsval_;}
+    bool operator >=(const timestamp& ts) const {return tsval_ >= ts.tsval_;}
 
-    timestamp  operator + (const timespan& span) const {return timestamp(_tsval + span.total_microseconds());}
-    timestamp  operator - (const timespan& span) const {return timestamp(_tsval - span.total_microseconds());}
-    timestamp& operator +=(const timespan& span) {return assign(_tsval + span.total_microseconds());}
-    timestamp& operator -=(const timespan& span) {return assign(_tsval - span.total_microseconds());}
+    timestamp  operator + (const timespan& span) const {return timestamp(tsval_ + span.total_microseconds());}
+    timestamp  operator - (const timespan& span) const {return timestamp(tsval_ - span.total_microseconds());}
+    timestamp& operator +=(const timespan& span) {return assign(tsval_ + span.total_microseconds());}
+    timestamp& operator -=(const timespan& span) {return assign(tsval_ - span.total_microseconds());}
 
-    timestamp  operator + (time_t microseconds) const {return timestamp(_tsval + microseconds);}
-    timestamp  operator - (time_t microseconds) const {return timestamp(_tsval - microseconds);}
-    timestamp& operator +=(time_t microseconds) {return assign(_tsval + microseconds);}
-    timestamp& operator -=(time_t microseconds) {return assign(_tsval - microseconds);}
+    timestamp  operator + (time_t microseconds) const {return timestamp(tsval_ + microseconds);}
+    timestamp  operator - (time_t microseconds) const {return timestamp(tsval_ - microseconds);}
+    timestamp& operator +=(time_t microseconds) {return assign(tsval_ + microseconds);}
+    timestamp& operator -=(time_t microseconds) {return assign(tsval_ - microseconds);}
 
-    time_t operator -(const timestamp& ts) const {return _tsval - ts._tsval;}
+    time_t operator -(const timestamp& ts) const {return tsval_ - ts.tsval_;}
 
 private:
-    time_t _tsval;  // Expressed in microseconds
+    time_t tsval_;  // 以微秒表示
 };
 
 } // namespace core

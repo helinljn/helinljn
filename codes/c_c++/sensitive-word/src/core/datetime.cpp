@@ -6,16 +6,16 @@
 
 namespace core {
 
-datetime::datetime(void)
-    : _ts()
-    , _tmval()
+datetime::datetime()
+    : ts_()
+    , tmval_()
 {
     update_tm();
 }
 
 datetime::datetime(const timestamp& ts)
-    : _ts(ts)
-    , _tmval()
+    : ts_(ts)
+    , tmval_()
 {
     update_tm();
 }
@@ -26,17 +26,17 @@ datetime::datetime(const tm& tmval)
 }
 
 datetime::datetime(int year, int month, int day, int hour, int minute, int second, int millisecond, int microsecond)
-    : _ts(0)
-    , _tmval()
+    : ts_(0)
+    , tmval_()
 {
     assign(year, month, day, hour, minute, second, millisecond, microsecond);
 }
 
 datetime& datetime::assign(const timestamp& ts)
 {
-    if (_ts != ts)
+    if (ts_ != ts)
     {
-        _ts = ts;
+        ts_ = ts;
         update_tm();
     }
 
@@ -71,9 +71,9 @@ datetime& datetime::assign(int year, int month, int day, int hour, int minute, i
         tmval.tm_sec   = second;
         tmval.tm_isdst = -1;
 
-        _ts  = mktime(&tmval) * timestamp::resolution;
-        _ts += time_t{millisecond} * 1000;
-        _ts += microsecond;
+        ts_  = mktime(&tmval) * timestamp::resolution;
+        ts_ += time_t{millisecond} * 1000;
+        ts_ += microsecond;
 
         update_tm();
     }
@@ -81,9 +81,9 @@ datetime& datetime::assign(int year, int month, int day, int hour, int minute, i
     return *this;
 }
 
-void datetime::update(void)
+void datetime::update()
 {
-    _ts.update();
+    ts_.update();
     update_tm();
 }
 
@@ -108,27 +108,27 @@ std::string datetime::format(std::string_view fmt) const
         processed_fmt.replace(pos, 4, us_str);
 
     char buf[1024];
-    if (std::strftime(buf, sizeof(buf), processed_fmt.c_str(), &_tmval) == 0)
+    if (std::strftime(buf, sizeof(buf), processed_fmt.c_str(), &tmval_) == 0)
         return std::string{};
 
     return std::string(buf);
 }
 
-void datetime::update_tm(void)
+void datetime::update_tm()
 {
-    const auto t = _ts.epoch_time();
+    const auto t = ts_.epoch_time();
     if (t < 0)
         throw std::runtime_error("cannot get epoch time!");
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    if (localtime_s(&_tmval, &t) != 0)
+    if (localtime_s(&tmval_, &t) != 0)
         throw std::runtime_error("cannot get tm struct of timestamp!");
 #elif defined(CORE_PLATFORM_LINUX)
-    if (!localtime_r(&t, &_tmval))
+    if (!localtime_r(&t, &tmval_))
         throw std::runtime_error("cannot get tm struct of timestamp!");
 #endif
 
-    _tmval.tm_isdst = -1;
+    tmval_.tm_isdst = -1;
 }
 
 } // namespace core
