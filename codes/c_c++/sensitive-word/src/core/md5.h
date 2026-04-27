@@ -3,7 +3,7 @@
 #ifndef MD5_H
 #define MD5_H
 
-#include "core_port.h"
+#include "core.h"
 #include <string>
 
 namespace core {

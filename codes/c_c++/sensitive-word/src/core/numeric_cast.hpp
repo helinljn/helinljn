@@ -3,7 +3,7 @@
 #ifndef NUMERIC_CAST_HPP
 #define NUMERIC_CAST_HPP
 
-#include "core_port.h"
+#include "core.h"
 #include <string>
 #include <type_traits>
 
