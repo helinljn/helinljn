@@ -26,4 +26,5 @@
 如果审查的代码需要在以下 Windows 环境中编译或运行，请按指南操作：
 1. 若需运行 Python 脚本，请先执行：`conda activate django-admin`
 2. 编译命令：`build.windows.bat release`
-3. 运行测试：`cd .build/release && test`
+3. 运行测试(非hcode测试)：`cd .build/release && test`
+4. 运行测试(hcode测试)：`cd .build/release && hcode`
