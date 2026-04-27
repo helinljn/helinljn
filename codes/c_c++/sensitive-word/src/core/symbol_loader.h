@@ -16,7 +16,7 @@ namespace core {
 //             WINDOWS_EXPORT_ALL_SYMBOLS True
 //             ENABLE_EXPORTS             True
 //         )
-//     2. Linux下需要添加-rdynamic编译选项
+//     2. Linux下需要添加-rdynamic链接选项
 // 获取符号：
 //     1. Windows下使用VS开发工具
 //         dumpbin /exports libcore.dll | findstr memory_to_hex_string
