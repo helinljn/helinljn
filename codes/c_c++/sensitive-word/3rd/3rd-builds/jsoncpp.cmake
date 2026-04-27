@@ -49,16 +49,17 @@ ENDIF()
 
 # jsoncpp源文件
 FILE(GLOB_RECURSE JSONCPP_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.inl
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.hpp
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/*.inl
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/include/*.hpp
+
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.cc
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/jsoncpp/src/lib_json/*.cpp
 )
 
 # 生成动态库
-ADD_LIBRARY(${CURRENT_TARGET_NAME}                SHARED  ${JSONCPP_SRC_LIST})
+ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED ${JSONCPP_SRC_LIST})
 PROJECT_TARGET_APPLY_COMMON_OPTIONS(${CURRENT_TARGET_NAME})
 TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_INCLUDE_DIR})
 TARGET_COMPILE_DEFINITIONS(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
