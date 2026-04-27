@@ -8,19 +8,13 @@ namespace                {
 
 std::string trim_copy(const std::string& value)
 {
-    size_t begin = 0;
-    while (begin < value.size() && (value[begin] == ' ' || value[begin] == '\t' || value[begin] == '\r' || value[begin] == '\n'))
-    {
-        ++begin;
-    }
+    const char* whitespace = " \t\r\n";
+    auto        begin      = value.find_first_not_of(whitespace);
+    if (begin == std::string::npos)
+        return "";
 
-    size_t end = value.size();
-    while (end > begin && (value[end - 1] == ' ' || value[end - 1] == '\t' || value[end - 1] == '\r' || value[end - 1] == '\n'))
-    {
-        --end;
-    }
-
-    return value.substr(begin, end - begin);
+    auto end = value.find_last_not_of(whitespace);
+    return value.substr(begin, end - begin + 1);
 }
 
 bool should_skip_line(const std::string& line)

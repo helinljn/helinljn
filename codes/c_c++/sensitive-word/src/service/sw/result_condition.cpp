@@ -1,5 +1,7 @@
 #include "sw/result_condition.h"
 #include "sw/text_normalizer.h"
+#include <algorithm>
+#include <cctype>
 
 namespace sensitive_word {
 
@@ -28,24 +30,16 @@ bool english_word_num_match_result_condition::match(const word_result& result, s
 
 bool contains_ascii_letter(std::string_view text)
 {
-    for (unsigned char ch : text)
-    {
-        if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z'))
-            return true;
-    }
-
-    return false;
+    return std::any_of(text.begin(), text.end(), [](unsigned char ch) {
+        return std::isalpha(ch);
+    });
 }
 
 bool contains_ascii_digit_text(std::string_view text)
 {
-    for (unsigned char ch : text)
-    {
-        if (ch >= '0' && ch <= '9')
-            return true;
-    }
-
-    return false;
+    return std::any_of(text.begin(), text.end(), [](unsigned char ch) {
+        return std::isdigit(ch);
+    });
 }
 
 } // namespace sensitive_word

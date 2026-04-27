@@ -185,7 +185,6 @@ bool trie_dictionary::remove_word_recursive(uint32_t node_idx, const std::u32str
 
     const char32_t ch = word[index];
     auto           it = node.find_child(ch);
-
     if (it == node.next.end() || it->first != ch)
         return false;
 

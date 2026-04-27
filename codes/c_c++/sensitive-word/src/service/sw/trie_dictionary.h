@@ -132,18 +132,16 @@ private:
 
         auto find_child(char32_t ch)
         {
-            return std::lower_bound(next.begin(), next.end(), ch,
-                                    [](const auto& pair, char32_t val) {
-                                        return pair.first < val;
-                                    });
+            return std::lower_bound(next.begin(), next.end(), ch, [](const auto& pair, char32_t val) {
+                return pair.first < val;
+            });
         }
 
         auto find_child(char32_t ch) const
         {
-            return std::lower_bound(next.begin(), next.end(), ch,
-                                    [](const auto& pair, char32_t val) {
-                                        return pair.first < val;
-                                    });
+            return std::lower_bound(next.begin(), next.end(), ch, [](const auto& pair, char32_t val) {
+                return pair.first < val;
+            });
         }
     };
 
