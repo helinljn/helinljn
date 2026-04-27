@@ -1,6 +1,5 @@
 #include "doctest.h"
 #include "opencc.h"
-
 #include <cstring>
 #include <string>
 #include <vector>

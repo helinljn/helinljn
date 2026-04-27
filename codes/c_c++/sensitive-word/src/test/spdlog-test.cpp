@@ -159,7 +159,7 @@ make_oss_logger(const std::string& name = "oss_logger")
 
 } // namespace test_helpers
 
-DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
+TEST_SUITE("spdlog — 基础日志与默认 logger")
 {
     /**
      * 测试目的：验证默认 logger 的存在性与基本属性
@@ -167,16 +167,16 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
      * 预期行为：返回非空指针；raw 版本返回裸指针（同一对象）
      * 注意事项：默认 logger 在库初始化时自动创建，名称通常为空字符串
      */
-    DOCTEST_TEST_CASE("默认 logger 可获取")
+    TEST_CASE("默认 logger 可获取")
     {
         test_helpers::cleanup_loggers();
 
         auto sp  = spdlog::default_logger();
         auto raw = spdlog::default_logger_raw();
 
-        DOCTEST_CHECK(sp != nullptr);
-        DOCTEST_CHECK(raw != nullptr);
-        DOCTEST_CHECK_EQ(sp.get(), raw);
+        CHECK(sp != nullptr);
+        CHECK(raw != nullptr);
+        CHECK_EQ(sp.get(), raw);
 
         test_helpers::cleanup_loggers();
     }
@@ -187,7 +187,7 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
      * 预期行为：消息写入默认 logger 对应 sink 中
      * 注意事项：默认 logger 须先替换为 ostream_sink 才能捕获输出
      */
-    DOCTEST_TEST_CASE("全局便捷函数输出到默认 logger")
+    TEST_CASE("全局便捷函数输出到默认 logger")
     {
         test_helpers::cleanup_loggers();
 
@@ -204,12 +204,12 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
         logger->flush();
 
         const std::string out = oss->str();
-        DOCTEST_CHECK(out.find("trace msg")    != std::string::npos);
-        DOCTEST_CHECK(out.find("debug msg")    != std::string::npos);
-        DOCTEST_CHECK(out.find("info msg")     != std::string::npos);
-        DOCTEST_CHECK(out.find("warn msg")     != std::string::npos);
-        DOCTEST_CHECK(out.find("error msg")    != std::string::npos);
-        DOCTEST_CHECK(out.find("critical msg") != std::string::npos);
+        CHECK(out.find("trace msg")    != std::string::npos);
+        CHECK(out.find("debug msg")    != std::string::npos);
+        CHECK(out.find("info msg")     != std::string::npos);
+        CHECK(out.find("warn msg")     != std::string::npos);
+        CHECK(out.find("error msg")    != std::string::npos);
+        CHECK(out.find("critical msg") != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
@@ -220,7 +220,7 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
      * 预期行为：参数按位置替换占位符，输出正确字符串
      * 注意事项：spdlog 内部使用 fmtlib 进行格式化
      */
-    DOCTEST_TEST_CASE("格式化参数插值")
+    TEST_CASE("格式化参数插值")
     {
         test_helpers::cleanup_loggers();
 
@@ -234,10 +234,10 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
         logger->flush();
 
         const std::string out = oss->str();
-        DOCTEST_CHECK(out.find("Hello World")   != std::string::npos);
-        DOCTEST_CHECK(out.find("Number: 42")    != std::string::npos);
-        DOCTEST_CHECK(out.find("Float: 3.14")   != std::string::npos);
-        DOCTEST_CHECK(out.find("Multi: 1 2 3")  != std::string::npos);
+        CHECK(out.find("Hello World")   != std::string::npos);
+        CHECK(out.find("Number: 42")    != std::string::npos);
+        CHECK(out.find("Float: 3.14")   != std::string::npos);
+        CHECK(out.find("Multi: 1 2 3")  != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
@@ -247,7 +247,7 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
      * 使用的 API：spdlog::log(level, fmt, args...)
      * 预期行为：与对应级别便捷函数等价
      */
-    DOCTEST_TEST_CASE("spdlog::log 重载（level 参数）")
+    TEST_CASE("spdlog::log 重载（level 参数）")
     {
         test_helpers::cleanup_loggers();
 
@@ -261,9 +261,9 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
         logger->flush();
 
         const std::string out = oss->str();
-        DOCTEST_CHECK(out.find("info via log()") != std::string::npos);
-        DOCTEST_CHECK(out.find("warn via log()") != std::string::npos);
-        DOCTEST_CHECK(out.find("err via log()")  != std::string::npos);
+        CHECK(out.find("info via log()") != std::string::npos);
+        CHECK(out.find("warn via log()") != std::string::npos);
+        CHECK(out.find("err via log()")  != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
@@ -274,33 +274,33 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
      * 预期行为：日志消息正常写入；source_loc 字段可被 pattern 的 %s/%#/%! 引用
      * 注意事项：source_loc 为空时（filename==nullptr）也应正常工作
      */
-    DOCTEST_TEST_CASE("log 重载 — source_loc")
+    TEST_CASE("log 重载 — source_loc")
     {
         test_helpers::cleanup_loggers();
         auto [logger, oss] = test_helpers::make_oss_logger("src_loc");
         logger->set_level(spdlog::level::trace);
 
-        DOCTEST_SUBCASE("无 source_loc（空）")
+        SUBCASE("无 source_loc（空）")
         {
             logger->log(spdlog::source_loc{}, spdlog::level::info, "no location");
             logger->flush();
-            DOCTEST_CHECK(oss->str().find("no location") != std::string::npos);
+            CHECK(oss->str().find("no location") != std::string::npos);
         }
 
-        DOCTEST_SUBCASE("有 source_loc")
+        SUBCASE("有 source_loc")
         {
             spdlog::source_loc loc{"myfile.cpp", 42, "myFunc"};
             logger->log(loc, spdlog::level::warn, "has location");
             logger->flush();
-            DOCTEST_CHECK(oss->str().find("has location") != std::string::npos);
+            CHECK(oss->str().find("has location") != std::string::npos);
         }
 
-        DOCTEST_SUBCASE("SPDLOG_LOGGER_CALL 宏携带源码位置")
+        SUBCASE("SPDLOG_LOGGER_CALL 宏携带源码位置")
         {
             // SPDLOG_LOGGER_CALL 自动填入 __FILE__/__LINE__/__func__
             SPDLOG_LOGGER_CALL(logger.get(), spdlog::level::info, "macro call");
             logger->flush();
-            DOCTEST_CHECK(oss->str().find("macro call") != std::string::npos);
+            CHECK(oss->str().find("macro call") != std::string::npos);
         }
 
         test_helpers::cleanup_loggers();
@@ -312,7 +312,7 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
      * 预期行为：任意可输出到 ostream 的对象均可作为消息，无需格式字符串
      * 注意事项：此重载不走 fmt 格式化路径，直接 operator<< 输出
      */
-    DOCTEST_TEST_CASE("log 重载 — 无格式字符串（T 类型消息）")
+    TEST_CASE("log 重载 — 无格式字符串（T 类型消息）")
     {
         test_helpers::cleanup_loggers();
         auto [logger, oss] = test_helpers::make_oss_logger("t_msg");
@@ -324,48 +324,48 @@ DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
         logger->flush();
 
         const std::string out = oss->str();
-        DOCTEST_CHECK(out.find("std_string_msg") != std::string::npos);
-        DOCTEST_CHECK(out.find("42")             != std::string::npos);
+        CHECK(out.find("std_string_msg") != std::string::npos);
+        CHECK(out.find("42")             != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
-} // DOCTEST_TEST_SUITE("spdlog — 基础日志与默认 logger")
+} // TEST_SUITE("spdlog — 基础日志与默认 logger")
 
-DOCTEST_TEST_SUITE("spdlog — Registry 管理")
+TEST_SUITE("spdlog — Registry 管理")
 {
     /**
      * 测试目的：验证命名 logger 的创建与注册
      * 使用的 API：spdlog::register_logger(), spdlog::get()
      * 预期行为：注册后可通过名称获取；get() 不存在时返回 nullptr
      */
-    DOCTEST_TEST_CASE("register_logger 和 get")
+    TEST_CASE("register_logger 和 get")
     {
         test_helpers::cleanup_loggers();
 
         auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
 
-        DOCTEST_SUBCASE("注册后可 get")
+        SUBCASE("注册后可 get")
         {
             auto logger = std::make_shared<spdlog::logger>("reg_test", null_sink);
             spdlog::register_logger(logger);
 
             auto got = spdlog::get("reg_test");
-            DOCTEST_REQUIRE(got != nullptr);
-            DOCTEST_CHECK_EQ(got->name(), "reg_test");
+            REQUIRE(got != nullptr);
+            CHECK_EQ(got->name(), "reg_test");
             spdlog::drop("reg_test");
         }
 
-        DOCTEST_SUBCASE("不存在的 logger 返回 nullptr")
+        SUBCASE("不存在的 logger 返回 nullptr")
         {
-            DOCTEST_CHECK(spdlog::get("nonexistent___") == nullptr);
+            CHECK(spdlog::get("nonexistent___") == nullptr);
         }
 
-        DOCTEST_SUBCASE("重复注册同名 logger 抛异常")
+        SUBCASE("重复注册同名 logger 抛异常")
         {
             auto logger1 = std::make_shared<spdlog::logger>("dup", null_sink);
             spdlog::register_logger(logger1);
             auto logger2 = std::make_shared<spdlog::logger>("dup", null_sink);
-            DOCTEST_CHECK_THROWS(spdlog::register_logger(logger2));
+            CHECK_THROWS(spdlog::register_logger(logger2));
             spdlog::drop("dup");
         }
 
@@ -377,7 +377,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 使用的 API：spdlog::register_or_replace()
      * 预期行为：若同名 logger 已存在则替换，不抛异常
      */
-    DOCTEST_TEST_CASE("register_or_replace")
+    TEST_CASE("register_or_replace")
     {
         test_helpers::cleanup_loggers();
 
@@ -386,11 +386,11 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
         spdlog::register_logger(old_logger);
 
         auto new_logger = std::make_shared<spdlog::logger>("ror", null_sink);
-        DOCTEST_CHECK_NOTHROW(spdlog::register_or_replace(new_logger));
+        CHECK_NOTHROW(spdlog::register_or_replace(new_logger));
 
         auto got = spdlog::get("ror");
-        DOCTEST_REQUIRE(got != nullptr);
-        DOCTEST_CHECK_EQ(got.get(), new_logger.get()); // 指向新 logger
+        REQUIRE(got != nullptr);
+        CHECK_EQ(got.get(), new_logger.get()); // 指向新 logger
 
         test_helpers::cleanup_loggers();
     }
@@ -400,23 +400,23 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 使用的 API：spdlog::drop(), spdlog::drop_all()
      * 预期行为：drop 后 get 返回 nullptr；drop_all 后所有 logger 均消失
      */
-    DOCTEST_TEST_CASE("drop 和 drop_all")
+    TEST_CASE("drop 和 drop_all")
     {
         test_helpers::cleanup_loggers();
 
         auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
 
-        DOCTEST_SUBCASE("drop 单个 logger")
+        SUBCASE("drop 单个 logger")
         {
             auto l = std::make_shared<spdlog::logger>("drop_me", null_sink);
             spdlog::register_logger(l);
-            DOCTEST_CHECK(spdlog::get("drop_me") != nullptr);
+            CHECK(spdlog::get("drop_me") != nullptr);
 
             spdlog::drop("drop_me");
-            DOCTEST_CHECK(spdlog::get("drop_me") == nullptr);
+            CHECK(spdlog::get("drop_me") == nullptr);
         }
 
-        DOCTEST_SUBCASE("drop_all 清空全部")
+        SUBCASE("drop_all 清空全部")
         {
             for (int i = 0; i < 5; ++i)
             {
@@ -427,7 +427,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
             spdlog::drop_all();
             for (int i = 0; i < 5; ++i)
             {
-                DOCTEST_CHECK(spdlog::get("drop_all_" + std::to_string(i)) == nullptr);
+                CHECK(spdlog::get("drop_all_" + std::to_string(i)) == nullptr);
             }
         }
 
@@ -439,7 +439,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 使用的 API：spdlog::apply_all(fun)
      * 预期行为：回调被每个注册的 logger 调用一次
      */
-    DOCTEST_TEST_CASE("apply_all")
+    TEST_CASE("apply_all")
     {
         test_helpers::cleanup_loggers();
 
@@ -459,14 +459,14 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
 
         // 注册了 N 个 + 默认 logger（默认 logger 也在 registry 中）
         // 默认 logger 名为 "default"（由 cleanup_loggers 设置）
-        DOCTEST_CHECK(names.size() >= static_cast<size_t>(N));
+        CHECK(names.size() >= static_cast<size_t>(N));
 
         // 验证所有注册的 logger 均被遍历到
         for (int i = 0; i < N; ++i)
         {
             auto name = "aa_" + std::to_string(i);
             bool found = (std::find(names.begin(), names.end(), name) != names.end());
-            DOCTEST_CHECK(found);
+            CHECK(found);
         }
 
         test_helpers::cleanup_loggers();
@@ -477,7 +477,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 使用的 API：spdlog::set_default_logger(), spdlog::default_logger()
      * 预期行为：设置后 default_logger() 返回新设置的 logger
      */
-    DOCTEST_TEST_CASE("set_default_logger")
+    TEST_CASE("set_default_logger")
     {
         test_helpers::cleanup_loggers();
 
@@ -486,8 +486,8 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
         spdlog::set_default_logger(new_logger);
 
         auto got = spdlog::default_logger();
-        DOCTEST_REQUIRE(got != nullptr);
-        DOCTEST_CHECK_EQ(got->name(), "my_default");
+        REQUIRE(got != nullptr);
+        CHECK_EQ(got->name(), "my_default");
 
         test_helpers::cleanup_loggers();
     }
@@ -499,7 +499,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 注意事项：initialize_logger 通常在 factory 内部调用；手动调用相当于
      *           应用全局级别到已创建的 logger
      */
-    DOCTEST_TEST_CASE("initialize_logger")
+    TEST_CASE("initialize_logger")
     {
         test_helpers::cleanup_loggers();
 
@@ -508,9 +508,9 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
         auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger    = std::make_shared<spdlog::logger>("init_me", null_sink);
 
-        DOCTEST_CHECK_NOTHROW(spdlog::initialize_logger(logger));
+        CHECK_NOTHROW(spdlog::initialize_logger(logger));
         // 初始化后 logger 的级别应跟随全局设置
-        DOCTEST_CHECK_EQ(logger->level(), spdlog::level::warn);
+        CHECK_EQ(logger->level(), spdlog::level::warn);
 
         test_helpers::cleanup_loggers();
     }
@@ -520,7 +520,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 使用的 API：spdlog::create<spdlog::sinks::basic_file_sink_mt>()
      * 预期行为：工厂函数创建的 logger 自动注册到 registry
      */
-    DOCTEST_TEST_CASE("spdlog::create 工厂函数")
+    TEST_CASE("spdlog::create 工厂函数")
     {
         test_helpers::cleanup_loggers();
 
@@ -528,12 +528,12 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
         auto oss = std::make_shared<std::ostringstream>();
         auto logger = spdlog::create<spdlog::sinks::ostream_sink_mt>(
             "factory_l", *oss);
-        DOCTEST_REQUIRE(logger != nullptr);
-        DOCTEST_CHECK_EQ(logger->name(), "factory_l");
+        REQUIRE(logger != nullptr);
+        CHECK_EQ(logger->name(), "factory_l");
 
         // 工厂创建的 logger 应已在 registry 中
         auto got = spdlog::get("factory_l");
-        DOCTEST_CHECK(got != nullptr);
+        CHECK(got != nullptr);
 
         logger->set_level(spdlog::level::trace);
         logger->set_pattern("%v");
@@ -541,7 +541,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
         logger->flush();
 
         // 验证输出内容
-        DOCTEST_CHECK(oss->str().find("factory msg") != std::string::npos);
+        CHECK(oss->str().find("factory msg") != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
@@ -551,7 +551,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 使用的 API：spdlog::set_automatic_registration(bool)
      * 预期行为：设为 false 后 create() 不自动注册到 registry
      */
-    DOCTEST_TEST_CASE("set_automatic_registration")
+    TEST_CASE("set_automatic_registration")
     {
         test_helpers::cleanup_loggers();
 
@@ -562,10 +562,10 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
 
         auto logger = spdlog::create<spdlog::sinks::basic_file_sink_mt>(
             "no_auto_reg", path, /*truncate=*/true);
-        DOCTEST_REQUIRE(logger != nullptr);
+        REQUIRE(logger != nullptr);
 
         // 不应自动注册
-        DOCTEST_CHECK(spdlog::get("no_auto_reg") == nullptr);
+        CHECK(spdlog::get("no_auto_reg") == nullptr);
 
         // 恢复自动注册
         spdlog::set_automatic_registration(true);
@@ -579,7 +579,7 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
      * 使用的 API：spdlog::apply_logger_env_levels()
      * 预期行为：调用不崩溃（实际行为依赖 SPDLOG_LEVEL 环境变量）
      */
-    DOCTEST_TEST_CASE("apply_logger_env_levels — API 存在性验证")
+    TEST_CASE("apply_logger_env_levels — API 存在性验证")
     {
         test_helpers::cleanup_loggers();
 
@@ -588,36 +588,36 @@ DOCTEST_TEST_SUITE("spdlog — Registry 管理")
         spdlog::register_logger(logger);
 
         // 无 SPDLOG_LEVEL 环境变量时，此调用不应崩溃
-        DOCTEST_CHECK_NOTHROW(spdlog::apply_logger_env_levels(logger));
+        CHECK_NOTHROW(spdlog::apply_logger_env_levels(logger));
 
         test_helpers::cleanup_loggers();
     }
-} // DOCTEST_TEST_SUITE("spdlog — Registry 管理")
+} // TEST_SUITE("spdlog — Registry 管理")
 
-DOCTEST_TEST_SUITE("spdlog — 日志级别")
+TEST_SUITE("spdlog — 日志级别")
 {
     /**
      * 测试目的：验证 logger 默认级别与级别枚举值顺序
      * 使用的 API：logger->level(), spdlog::level 枚举
      * 预期行为：默认级别为 info；级别从低到高：trace < debug < info < warn < err < critical < off
      */
-    DOCTEST_TEST_CASE("级别枚举顺序与默认值")
+    TEST_CASE("级别枚举顺序与默认值")
     {
         auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger    = std::make_shared<spdlog::logger>("lv_def", null_sink);
 
-        DOCTEST_CHECK_EQ(logger->level(), spdlog::level::info); // 默认 info
+        CHECK_EQ(logger->level(), spdlog::level::info); // 默认 info
 
         // 枚举顺序
-        DOCTEST_CHECK(spdlog::level::trace    < spdlog::level::debug);
-        DOCTEST_CHECK(spdlog::level::debug    < spdlog::level::info);
-        DOCTEST_CHECK(spdlog::level::info     < spdlog::level::warn);
-        DOCTEST_CHECK(spdlog::level::warn     < spdlog::level::err);
-        DOCTEST_CHECK(spdlog::level::err      < spdlog::level::critical);
-        DOCTEST_CHECK(spdlog::level::critical < spdlog::level::off);
+        CHECK(spdlog::level::trace    < spdlog::level::debug);
+        CHECK(spdlog::level::debug    < spdlog::level::info);
+        CHECK(spdlog::level::info     < spdlog::level::warn);
+        CHECK(spdlog::level::warn     < spdlog::level::err);
+        CHECK(spdlog::level::err      < spdlog::level::critical);
+        CHECK(spdlog::level::critical < spdlog::level::off);
 
         // n_levels 哨兵值
-        DOCTEST_CHECK(spdlog::level::n_levels == 7);
+        CHECK(spdlog::level::n_levels == 7);
     }
 
     /**
@@ -625,20 +625,20 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
      * 使用的 API：logger->set_level(), logger->should_log(), logger->level()
      * 预期行为：should_log 返回 level >= 当前设定级别
      */
-    DOCTEST_TEST_CASE("set_level 与 should_log")
+    TEST_CASE("set_level 与 should_log")
     {
         auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger    = std::make_shared<spdlog::logger>("lv_filter", null_sink);
 
         logger->set_level(spdlog::level::warn);
-        DOCTEST_CHECK_EQ(logger->level(), spdlog::level::warn);
+        CHECK_EQ(logger->level(), spdlog::level::warn);
 
-        DOCTEST_CHECK_FALSE(logger->should_log(spdlog::level::trace));
-        DOCTEST_CHECK_FALSE(logger->should_log(spdlog::level::debug));
-        DOCTEST_CHECK_FALSE(logger->should_log(spdlog::level::info));
-        DOCTEST_CHECK(logger->should_log(spdlog::level::warn));
-        DOCTEST_CHECK(logger->should_log(spdlog::level::err));
-        DOCTEST_CHECK(logger->should_log(spdlog::level::critical));
+        CHECK_FALSE(logger->should_log(spdlog::level::trace));
+        CHECK_FALSE(logger->should_log(spdlog::level::debug));
+        CHECK_FALSE(logger->should_log(spdlog::level::info));
+        CHECK(logger->should_log(spdlog::level::warn));
+        CHECK(logger->should_log(spdlog::level::err));
+        CHECK(logger->should_log(spdlog::level::critical));
     }
 
     /**
@@ -646,7 +646,7 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
      * 使用的 API：logger->set_level(), logger->info/warn/error()
      * 预期行为：低于设定级别的消息不出现在输出中
      */
-    DOCTEST_TEST_CASE("级别过滤实际输出")
+    TEST_CASE("级别过滤实际输出")
     {
         auto [logger, oss] = test_helpers::make_oss_logger("lv_out");
         logger->set_level(spdlog::level::warn);
@@ -660,19 +660,19 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
         logger->flush();
 
         const std::string out = oss->str();
-        DOCTEST_CHECK(out.find("trace_hidden")    == std::string::npos);
-        DOCTEST_CHECK(out.find("debug_hidden")    == std::string::npos);
-        DOCTEST_CHECK(out.find("info_hidden")     == std::string::npos);
-        DOCTEST_CHECK(out.find("warn_visible")    != std::string::npos);
-        DOCTEST_CHECK(out.find("error_visible")   != std::string::npos);
-        DOCTEST_CHECK(out.find("critical_visible")!= std::string::npos);
+        CHECK(out.find("trace_hidden")    == std::string::npos);
+        CHECK(out.find("debug_hidden")    == std::string::npos);
+        CHECK(out.find("info_hidden")     == std::string::npos);
+        CHECK(out.find("warn_visible")    != std::string::npos);
+        CHECK(out.find("error_visible")   != std::string::npos);
+        CHECK(out.find("critical_visible")!= std::string::npos);
     }
 
     /**
      * 测试目的：验证 level::off 关闭所有日志
      * 预期行为：设为 off 后任何级别均不输出
      */
-    DOCTEST_TEST_CASE("level::off 关闭所有日志")
+    TEST_CASE("level::off 关闭所有日志")
     {
         auto [logger, oss] = test_helpers::make_oss_logger("lv_off");
         logger->set_level(spdlog::level::off);
@@ -680,7 +680,7 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
         logger->critical("should not appear");
         logger->flush();
 
-        DOCTEST_CHECK(oss->str().empty());
+        CHECK(oss->str().empty());
     }
 
     /**
@@ -689,7 +689,7 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
      * 预期行为：set_level 修改全局级别，get_level 返回当前全局级别
      * 注意事项：全局级别影响默认 logger；其他 logger 需单独 initialize
      */
-    DOCTEST_TEST_CASE("全局级别 set_level / get_level")
+    TEST_CASE("全局级别 set_level / get_level")
     {
         test_helpers::cleanup_loggers();
 
@@ -697,11 +697,11 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
         spdlog::set_default_logger(logger);
 
         spdlog::set_level(spdlog::level::err);
-        DOCTEST_CHECK_EQ(spdlog::get_level(), spdlog::level::err);
-        DOCTEST_CHECK_FALSE(spdlog::should_log(spdlog::level::info));
-        DOCTEST_CHECK_FALSE(spdlog::should_log(spdlog::level::warn));
-        DOCTEST_CHECK(spdlog::should_log(spdlog::level::err));
-        DOCTEST_CHECK(spdlog::should_log(spdlog::level::critical));
+        CHECK_EQ(spdlog::get_level(), spdlog::level::err);
+        CHECK_FALSE(spdlog::should_log(spdlog::level::info));
+        CHECK_FALSE(spdlog::should_log(spdlog::level::warn));
+        CHECK(spdlog::should_log(spdlog::level::err));
+        CHECK(spdlog::should_log(spdlog::level::critical));
 
         test_helpers::cleanup_loggers();
     }
@@ -711,29 +711,29 @@ DOCTEST_TEST_SUITE("spdlog — 日志级别")
      * 使用的 API：spdlog::level::to_string_view(), spdlog::level::from_str()
      * 预期行为：能从枚举得到字符串名称，也能反向解析
      */
-    DOCTEST_TEST_CASE("级别名称字符串互转")
+    TEST_CASE("级别名称字符串互转")
     {
-        DOCTEST_CHECK_EQ(
+        CHECK_EQ(
             std::string(spdlog::level::to_string_view(spdlog::level::info).data()),
             "info");
-        DOCTEST_CHECK_EQ(
+        CHECK_EQ(
             std::string(spdlog::level::to_string_view(spdlog::level::warn).data()),
             "warning");
-        DOCTEST_CHECK_EQ(
+        CHECK_EQ(
             std::string(spdlog::level::to_string_view(spdlog::level::err).data()),
             "error");
 
-        DOCTEST_CHECK_EQ(spdlog::level::from_str("info"),     spdlog::level::info);
-        DOCTEST_CHECK_EQ(spdlog::level::from_str("warn"),     spdlog::level::warn);
-        DOCTEST_CHECK_EQ(spdlog::level::from_str("error"),    spdlog::level::err);
-        DOCTEST_CHECK_EQ(spdlog::level::from_str("critical"), spdlog::level::critical);
-        DOCTEST_CHECK_EQ(spdlog::level::from_str("off"),      spdlog::level::off);
+        CHECK_EQ(spdlog::level::from_str("info"),     spdlog::level::info);
+        CHECK_EQ(spdlog::level::from_str("warn"),     spdlog::level::warn);
+        CHECK_EQ(spdlog::level::from_str("error"),    spdlog::level::err);
+        CHECK_EQ(spdlog::level::from_str("critical"), spdlog::level::critical);
+        CHECK_EQ(spdlog::level::from_str("off"),      spdlog::level::off);
         // 未知字符串应返回 off
-        DOCTEST_CHECK_EQ(spdlog::level::from_str("unknown"),  spdlog::level::off);
+        CHECK_EQ(spdlog::level::from_str("unknown"),  spdlog::level::off);
     }
-} // DOCTEST_TEST_SUITE("spdlog — 日志级别")
+} // TEST_SUITE("spdlog — 日志级别")
 
-DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
+TEST_SUITE("spdlog — Pattern 和 Formatter")
 {
     /**
      * 测试目的：验证各种 pattern 占位符的效果
@@ -741,56 +741,56 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
      * 预期行为：%v=消息, %l=级别, %n=logger名, %t=线程ID, %Y-%m-%d=日期等
      * 注意事项：时间相关占位符（%Y %m %d %H %M %S）输出依赖当前时间，不做精确断言
      */
-    DOCTEST_TEST_CASE("set_pattern — 各占位符")
+    TEST_CASE("set_pattern — 各占位符")
     {
         std::ostringstream oss;
         auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
         auto logger = std::make_shared<spdlog::logger>("pat_test", sink);
         logger->set_level(spdlog::level::trace);
 
-        DOCTEST_SUBCASE("仅消息 %v")
+        SUBCASE("仅消息 %v")
         {
             logger->set_pattern("%v");
             logger->info("hello");
             logger->flush();
             // 验证消息内容存在，不严格比较末尾空白（不同版本可能有差异）
             const std::string out = oss.str();
-            DOCTEST_CHECK(out.find("hello") != std::string::npos);
-            DOCTEST_CHECK(out.find('\n') != std::string::npos);
+            CHECK(out.find("hello") != std::string::npos);
+            CHECK(out.find('\n') != std::string::npos);
         }
 
-        DOCTEST_SUBCASE("消息 + 级别 %l")
+        SUBCASE("消息 + 级别 %l")
         {
             oss.str("");
             logger->set_pattern("[%l] %v");
             logger->info("msg");
             logger->warn("wmsg");
             logger->flush();
-            DOCTEST_CHECK(oss.str().find("[info]")    != std::string::npos);
-            DOCTEST_CHECK(oss.str().find("[warning]") != std::string::npos);
+            CHECK(oss.str().find("[info]")    != std::string::npos);
+            CHECK(oss.str().find("[warning]") != std::string::npos);
         }
 
-        DOCTEST_SUBCASE("Logger 名称 %n")
+        SUBCASE("Logger 名称 %n")
         {
             oss.str("");
             logger->set_pattern("[%n] %v");
             logger->info("n_msg");
             logger->flush();
-            DOCTEST_CHECK(oss.str().find("[pat_test]") != std::string::npos);
+            CHECK(oss.str().find("[pat_test]") != std::string::npos);
         }
 
-        DOCTEST_SUBCASE("线程 ID %t")
+        SUBCASE("线程 ID %t")
         {
             oss.str("");
             logger->set_pattern("[%t] %v");
             logger->info("t_msg");
             logger->flush();
             // 至少有 [ 和 ] 包围线程 ID
-            DOCTEST_CHECK(oss.str().find('[') != std::string::npos);
-            DOCTEST_CHECK(oss.str().find(']') != std::string::npos);
+            CHECK(oss.str().find('[') != std::string::npos);
+            CHECK(oss.str().find(']') != std::string::npos);
         }
 
-        DOCTEST_SUBCASE("日期时间 %Y-%m-%d %H:%M:%S")
+        SUBCASE("日期时间 %Y-%m-%d %H:%M:%S")
         {
             oss.str("");
             logger->set_pattern("%Y-%m-%d %H:%M:%S [%l] %v");
@@ -798,20 +798,20 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
             logger->flush();
             // 验证包含 logger 名称和消息体，时间格式不精确断言
             const std::string out = oss.str();
-            DOCTEST_CHECK(out.find("[info]")  != std::string::npos);
-            DOCTEST_CHECK(out.find("dt_msg")  != std::string::npos);
+            CHECK(out.find("[info]")  != std::string::npos);
+            CHECK(out.find("dt_msg")  != std::string::npos);
             // 年份应为 4 位数字（简单检验）
-            DOCTEST_CHECK(out.size() > 20);
+            CHECK(out.size() > 20);
         }
 
-        DOCTEST_SUBCASE("毫秒 %e")
+        SUBCASE("毫秒 %e")
         {
             oss.str("");
             logger->set_pattern("%e %v");
             logger->info("ms_msg");
             logger->flush();
             // 毫秒是 3 位数字，输出中至少有一个数字
-            DOCTEST_CHECK(!oss.str().empty());
+            CHECK(!oss.str().empty());
         }
     }
 
@@ -820,7 +820,7 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
      * 使用的 API：spdlog::set_pattern()
      * 预期行为：设置后默认 logger 所有 sink 采用新 pattern
      */
-    DOCTEST_TEST_CASE("spdlog::set_pattern（全局）")
+    TEST_CASE("spdlog::set_pattern（全局）")
     {
         test_helpers::cleanup_loggers();
 
@@ -833,7 +833,7 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
         spdlog::info("global_msg");
         logger->flush();
 
-        DOCTEST_CHECK(oss.str().find(">>> global_msg <<<") != std::string::npos);
+        CHECK(oss.str().find(">>> global_msg <<<") != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
@@ -844,7 +844,7 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
      * 预期行为：使用 pattern_formatter 构造，效果与 set_pattern 等价
      * 注意事项：set_formatter 转移 unique_ptr 所有权
      */
-    DOCTEST_TEST_CASE("set_formatter（pattern_formatter）")
+    TEST_CASE("set_formatter（pattern_formatter）")
     {
         std::ostringstream oss;
         auto sink   = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
@@ -858,7 +858,7 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
         logger->info("inside_brackets");
         logger->flush();
 
-        DOCTEST_CHECK(oss.str().find("[[inside_brackets]]") != std::string::npos);
+        CHECK(oss.str().find("[[inside_brackets]]") != std::string::npos);
     }
 
     /**
@@ -866,7 +866,7 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
      * 使用的 API：sink->set_pattern()
      * 预期行为：不同 sink 可有独立 pattern
      */
-    DOCTEST_TEST_CASE("sink 独立 pattern")
+    TEST_CASE("sink 独立 pattern")
     {
         std::ostringstream oss1, oss2;
         auto sink1 = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss1);
@@ -881,8 +881,8 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
         logger->info("shared_msg");
         logger->flush();
 
-        DOCTEST_CHECK(oss1.str().find("[SINK1] shared_msg") != std::string::npos);
-        DOCTEST_CHECK(oss2.str().find("[SINK2] shared_msg") != std::string::npos);
+        CHECK(oss1.str().find("[SINK1] shared_msg") != std::string::npos);
+        CHECK(oss2.str().find("[SINK2] shared_msg") != std::string::npos);
     }
 
     /**
@@ -890,7 +890,7 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
      * 使用的 API：spdlog::custom_flag_formatter, pattern_formatter::add_flag<T>()
      * 预期行为：自定义占位符在 pattern 中被正确解析和格式化
      */
-    DOCTEST_TEST_CASE("custom_flag_formatter — 自定义 pattern 占位符")
+    TEST_CASE("custom_flag_formatter — 自定义 pattern 占位符")
     {
         // 自定义 flag formatter：输出固定标记 "[TAG]"
         class tag_formatter : public spdlog::custom_flag_formatter {
@@ -920,18 +920,18 @@ DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
         logger->info("custom flag msg");
         logger->flush();
 
-        DOCTEST_CHECK(oss.str().find("[[TAG]] custom flag msg") != std::string::npos);
+        CHECK(oss.str().find("[[TAG]] custom flag msg") != std::string::npos);
     }
-} // DOCTEST_TEST_SUITE("spdlog — Pattern 和 Formatter")
+} // TEST_SUITE("spdlog — Pattern 和 Formatter")
 
-DOCTEST_TEST_SUITE("spdlog — Sinks")
+TEST_SUITE("spdlog — Sinks")
 {
     /**
      * 测试目的：验证 ostream_sink_mt 将日志写入 std::ostream
      * 使用的 API：spdlog::sinks::ostream_sink_mt
      * 预期行为：日志写入提供的 ostream 对象
      */
-    DOCTEST_TEST_CASE("ostream_sink_mt — 写入到 ostringstream")
+    TEST_CASE("ostream_sink_mt — 写入到 ostringstream")
     {
         std::ostringstream oss;
         auto sink   = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
@@ -942,8 +942,8 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->flush();
 
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("hello ostream mt") != std::string::npos);
-        DOCTEST_CHECK(out.find('\n') != std::string::npos);
+        CHECK(out.find("hello ostream mt") != std::string::npos);
+        CHECK(out.find('\n') != std::string::npos);
     }
 
     /**
@@ -951,7 +951,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 使用的 API：spdlog::sinks::ostream_sink_st
      * 预期行为：功能与 _mt 版本相同，接口一致
      */
-    DOCTEST_TEST_CASE("ostream_sink_st — 单线程版本")
+    TEST_CASE("ostream_sink_st — 单线程版本")
     {
         std::ostringstream oss;
         auto sink   = std::make_shared<spdlog::sinks::ostream_sink_st>(oss);
@@ -962,7 +962,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->flush();
 
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("hello ostream st") != std::string::npos);
+        CHECK(out.find("hello ostream st") != std::string::npos);
     }
 
     /**
@@ -970,22 +970,22 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 使用的 API：spdlog::sinks::null_sink_mt / null_sink_st
      * 预期行为：不崩溃，无输出（不可直接验证，但保证函数调用正常）
      */
-    DOCTEST_TEST_CASE("null_sink — 丢弃所有日志")
+    TEST_CASE("null_sink — 丢弃所有日志")
     {
-        DOCTEST_SUBCASE("null_sink_mt")
+        SUBCASE("null_sink_mt")
         {
             auto sink   = std::make_shared<spdlog::sinks::null_sink_mt>();
             auto logger = std::make_shared<spdlog::logger>("null_s_mt", sink);
-            DOCTEST_CHECK_NOTHROW(logger->info("gone mt"));
-            DOCTEST_CHECK_NOTHROW(logger->flush());
+            CHECK_NOTHROW(logger->info("gone mt"));
+            CHECK_NOTHROW(logger->flush());
         }
 
-        DOCTEST_SUBCASE("null_sink_st")
+        SUBCASE("null_sink_st")
         {
             auto sink   = std::make_shared<spdlog::sinks::null_sink_st>();
             auto logger = std::make_shared<spdlog::logger>("null_s_st", sink);
-            DOCTEST_CHECK_NOTHROW(logger->info("gone st"));
-            DOCTEST_CHECK_NOTHROW(logger->flush());
+            CHECK_NOTHROW(logger->info("gone st"));
+            CHECK_NOTHROW(logger->flush());
         }
     }
 
@@ -995,7 +995,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：日志内容可从文件中读取
      * 注意事项：truncate=true 每次创建时清空旧文件
      */
-    DOCTEST_TEST_CASE("basic_file_sink — 写文件并验证内容")
+    TEST_CASE("basic_file_sink — 写文件并验证内容")
     {
         const auto path = test_helpers::create_temp_file_path("basic_file");
 
@@ -1009,8 +1009,8 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         } // sink/logger 析构，确保文件句柄关闭
 
         const std::string content = test_helpers::read_file(path);
-        DOCTEST_CHECK(content.find("line one") != std::string::npos);
-        DOCTEST_CHECK(content.find("line two") != std::string::npos);
+        CHECK(content.find("line one") != std::string::npos);
+        CHECK(content.find("line two") != std::string::npos);
 
         test_helpers::remove_file(path);
     }
@@ -1019,7 +1019,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 测试目的：验证 basic_file_sink truncate=false 时追加写入
      * 预期行为：重新打开同一文件时旧内容保留
      */
-    DOCTEST_TEST_CASE("basic_file_sink — truncate=false 追加模式")
+    TEST_CASE("basic_file_sink — truncate=false 追加模式")
     {
         const auto path = test_helpers::create_temp_file_path("append_file");
 
@@ -1039,8 +1039,8 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         }
 
         const std::string content = test_helpers::read_file(path);
-        DOCTEST_CHECK(content.find("first run")  != std::string::npos);
-        DOCTEST_CHECK(content.find("second run") != std::string::npos);
+        CHECK(content.find("first run")  != std::string::npos);
+        CHECK(content.find("second run") != std::string::npos);
 
         test_helpers::remove_file(path);
     }
@@ -1051,7 +1051,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：主文件始终存在且包含最新日志；当内容超出 max_size 时创建备份文件
      * 注意事项：max_size 单位字节，max_files 为最大备份文件数
      */
-    DOCTEST_TEST_CASE("rotating_file_sink — 文件大小轮转")
+    TEST_CASE("rotating_file_sink — 文件大小轮转")
     {
         const auto base_path = test_helpers::create_temp_file_path("rotating");
         constexpr size_t max_size = 1024; // 1KB
@@ -1071,12 +1071,12 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         }
 
         // 主文件必须存在且包含内容
-        DOCTEST_CHECK(std::filesystem::exists(base_path));
+        CHECK(std::filesystem::exists(base_path));
         {
             const std::string main_content = test_helpers::read_file(base_path);
-            DOCTEST_CHECK(!main_content.empty());
+            CHECK(!main_content.empty());
             // 主文件应包含至少一条日志
-            DOCTEST_CHECK(main_content.find("message number") != std::string::npos);
+            CHECK(main_content.find("message number") != std::string::npos);
         }
 
         // 检查是否有至少一个备份文件
@@ -1089,10 +1089,10 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
                 ++backup_count;
                 // 备份文件也应包含日志内容
                 const std::string backup_content = test_helpers::read_file(backup_path);
-                DOCTEST_CHECK(!backup_content.empty());
+                CHECK(!backup_content.empty());
             }
         }
-        DOCTEST_CHECK(backup_count >= 1);
+        CHECK(backup_count >= 1);
 
         // 清理文件
         test_helpers::remove_file(base_path);
@@ -1111,7 +1111,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：日志写入带有日期后缀的文件，内容可读取
      * 注意事项：写入少量日志后验证文件存在且内容正确
      */
-    DOCTEST_TEST_CASE("daily_file_sink — 每日轮转文件")
+    TEST_CASE("daily_file_sink — 每日轮转文件")
     {
         const auto base_path = test_helpers::create_temp_file_path("daily");
         constexpr int rot_hour = 0;
@@ -1131,11 +1131,11 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         }
 
         // 文件应存在
-        DOCTEST_CHECK(std::filesystem::exists(daily_file_path));
+        CHECK(std::filesystem::exists(daily_file_path));
 
         // 验证文件内容
         const std::string content = test_helpers::read_file(daily_file_path);
-        DOCTEST_CHECK(content.find("daily log content") != std::string::npos);
+        CHECK(content.find("daily log content") != std::string::npos);
 
         test_helpers::remove_file(daily_file_path);
         // 清理可能残留的其他文件（以防 filename() 路径与扫描路径不同）
@@ -1161,7 +1161,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 使用的 API：spdlog::sinks::hourly_file_sink_mt(filename, truncate, max_files)
      * 预期行为：日志写入带小时后缀的文件，内容可读取
      */
-    DOCTEST_TEST_CASE("hourly_file_sink — 每小时轮转文件")
+    TEST_CASE("hourly_file_sink — 每小时轮转文件")
     {
         const auto base_path = test_helpers::create_temp_file_path("hourly");
 
@@ -1178,11 +1178,11 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         }
 
         // 文件应存在
-        DOCTEST_CHECK(std::filesystem::exists(hourly_file_path));
+        CHECK(std::filesystem::exists(hourly_file_path));
 
         // 验证文件内容
         const std::string content = test_helpers::read_file(hourly_file_path);
-        DOCTEST_CHECK(content.find("hourly log content") != std::string::npos);
+        CHECK(content.find("hourly log content") != std::string::npos);
 
         test_helpers::remove_file(hourly_file_path);
         // 清理可能残留的文件
@@ -1209,7 +1209,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：日志出现在每个子 sink 中
      * 注意事项：dist_sink 本身不持有 formatter，由子 sink 各自格式化
      */
-    DOCTEST_TEST_CASE("dist_sink — 分发到多个 sink")
+    TEST_CASE("dist_sink — 分发到多个 sink")
     {
         std::ostringstream oss1, oss2;
         auto s1 = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss1);
@@ -1226,15 +1226,15 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->info("broadcast msg");
         logger->flush();
 
-        DOCTEST_CHECK(oss1.str().find("[S1] broadcast msg") != std::string::npos);
-        DOCTEST_CHECK(oss2.str().find("[S2] broadcast msg") != std::string::npos);
+        CHECK(oss1.str().find("[S1] broadcast msg") != std::string::npos);
+        CHECK(oss2.str().find("[S2] broadcast msg") != std::string::npos);
     }
 
     /**
      * 测试目的：验证 dist_sink remove_sink 后消息不再分发
      * 预期行为：remove_sink 后该 sink 不再接收日志
      */
-    DOCTEST_TEST_CASE("dist_sink — remove_sink 后不再接收日志")
+    TEST_CASE("dist_sink — remove_sink 后不再接收日志")
     {
         std::ostringstream oss1, oss2;
         auto s1 = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss1);
@@ -1257,11 +1257,11 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->info("msg after remove");
         logger->flush();
 
-        DOCTEST_CHECK(oss1.str().find("msg before remove") != std::string::npos);
-        DOCTEST_CHECK(oss2.str().find("msg before remove") != std::string::npos);
-        DOCTEST_CHECK(oss1.str().find("msg after remove")  != std::string::npos);
+        CHECK(oss1.str().find("msg before remove") != std::string::npos);
+        CHECK(oss2.str().find("msg before remove") != std::string::npos);
+        CHECK(oss1.str().find("msg after remove")  != std::string::npos);
         // s2 被移除后，不应收到 "msg after remove"
-        DOCTEST_CHECK(oss2.str().find("msg after remove")  == std::string::npos);
+        CHECK(oss2.str().find("msg after remove")  == std::string::npos);
     }
 
     /**
@@ -1270,7 +1270,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：相同消息在窗口内只输出一次，之后输出"Skipped N duplicate messages"
      * 注意事项：dup_filter_sink 继承自 dist_sink，需添加子 sink 才能输出
      */
-    DOCTEST_TEST_CASE("dup_filter_sink — 过滤重复消息")
+    TEST_CASE("dup_filter_sink — 过滤重复消息")
     {
         std::ostringstream oss;
         auto inner_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
@@ -1293,11 +1293,11 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
 
         const std::string out = oss.str();
         // 第一条 "hello" 应出现
-        DOCTEST_CHECK(out.find("hello") != std::string::npos);
+        CHECK(out.find("hello") != std::string::npos);
         // "world" 应出现
-        DOCTEST_CHECK(out.find("world") != std::string::npos);
+        CHECK(out.find("world") != std::string::npos);
         // 应出现 "Skipped" 提示
-        DOCTEST_CHECK(out.find("Skipped") != std::string::npos);
+        CHECK(out.find("Skipped") != std::string::npos);
     }
 
     /**
@@ -1306,7 +1306,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：写入 > n 条后，last_formatted() 仅保留最后 n 条
      * 注意事项：ringbuffer_sink 适合事后回溯调试日志；spdlog 1.10+ 版本支持
      */
-    DOCTEST_TEST_CASE("ringbuffer_sink — 环形缓冲回读")
+    TEST_CASE("ringbuffer_sink — 环形缓冲回读")
     {
         constexpr size_t buf_size = 5;
         auto sink   = std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(buf_size);
@@ -1322,13 +1322,13 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->flush();
 
         auto formatted = sink->last_formatted();
-        DOCTEST_REQUIRE_EQ(formatted.size(), buf_size);
+        REQUIRE_EQ(formatted.size(), buf_size);
 
         // 最后 5 条是 msg 5 ~ msg 9
         for (size_t i = 0; i < buf_size; ++i)
         {
             const int expected_idx = static_cast<int>(i + 5);
-            DOCTEST_CHECK(formatted[i].find("msg " + std::to_string(expected_idx)) != std::string::npos);
+            CHECK(formatted[i].find("msg " + std::to_string(expected_idx)) != std::string::npos);
         }
     }
 
@@ -1337,7 +1337,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 使用的 API：spdlog::sinks::ringbuffer_sink_mt::last_raw()
      * 预期行为：last_raw() 返回包含 log_msg 原始信息的字符串
      */
-    DOCTEST_TEST_CASE("ringbuffer_sink — last_raw 回读")
+    TEST_CASE("ringbuffer_sink — last_raw 回读")
     {
         constexpr size_t buf_size = 3;
         auto sink   = std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(buf_size);
@@ -1349,10 +1349,10 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->flush();
 
         auto raw = sink->last_raw();
-        DOCTEST_REQUIRE_EQ(raw.size(), 2u);
+        REQUIRE_EQ(raw.size(), 2u);
         // last_raw 返回包含 log_msg 完整信息的 log_msg_buffer，payload 为原始消息
-        DOCTEST_CHECK(std::string(raw[0].payload.data(), raw[0].payload.size()).find("raw msg 1") != std::string::npos);
-        DOCTEST_CHECK(std::string(raw[1].payload.data(), raw[1].payload.size()).find("raw msg 2") != std::string::npos);
+        CHECK(std::string(raw[0].payload.data(), raw[0].payload.size()).find("raw msg 1") != std::string::npos);
+        CHECK(std::string(raw[1].payload.data(), raw[1].payload.size()).find("raw msg 2") != std::string::npos);
     }
 
     /**
@@ -1361,7 +1361,7 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 预期行为：每条日志调用一次回调，回调参数包含 log_msg 信息
      * 注意事项：callback_sink 常用于集成测试或将日志转发到自定义后端
      */
-    DOCTEST_TEST_CASE("callback_sink — 回调验证日志内容")
+    TEST_CASE("callback_sink — 回调验证日志内容")
     {
         std::vector<std::string> captured;
 
@@ -1379,16 +1379,16 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->warn("callback_two");
         logger->flush();
 
-        DOCTEST_REQUIRE_EQ(captured.size(), 2u);
-        DOCTEST_CHECK_EQ(captured[0], "callback_one");
-        DOCTEST_CHECK_EQ(captured[1], "callback_two");
+        REQUIRE_EQ(captured.size(), 2u);
+        CHECK_EQ(captured[0], "callback_one");
+        CHECK_EQ(captured[1], "callback_two");
     }
 
     /**
      * 测试目的：验证 callback_sink 级别过滤仍生效
      * 预期行为：低于 sink 设置级别的消息不触发回调
      */
-    DOCTEST_TEST_CASE("callback_sink — 级别过滤")
+    TEST_CASE("callback_sink — 级别过滤")
     {
         std::vector<std::string> captured;
 
@@ -1407,9 +1407,9 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
         logger->error("error_keep");
         logger->flush();
 
-        DOCTEST_REQUIRE_EQ(captured.size(), 2u);
-        DOCTEST_CHECK(captured[0].find("warn_keep")  != std::string::npos);
-        DOCTEST_CHECK(captured[1].find("error_keep") != std::string::npos);
+        REQUIRE_EQ(captured.size(), 2u);
+        CHECK(captured[0].find("warn_keep")  != std::string::npos);
+        CHECK(captured[1].find("error_keep") != std::string::npos);
     }
 
     /**
@@ -1420,35 +1420,35 @@ DOCTEST_TEST_SUITE("spdlog — Sinks")
      * 注意事项：stdout/stderr 输出无法在不重定向的情况下做内容断言
      *           这里仅验证 API 可用性
      */
-    DOCTEST_TEST_CASE("stdout/stderr sink — 创建与基本调用")
+    TEST_CASE("stdout/stderr sink — 创建与基本调用")
     {
-        DOCTEST_CHECK_NOTHROW([]()
+        CHECK_NOTHROW([]()
         {
             auto s = std::make_shared<spdlog::sinks::stdout_sink_mt>();
             auto l = std::make_shared<spdlog::logger>("out", s);
         }());
 
-        DOCTEST_CHECK_NOTHROW([]()
+        CHECK_NOTHROW([]()
         {
             auto s = std::make_shared<spdlog::sinks::stderr_sink_mt>();
             auto l = std::make_shared<spdlog::logger>("err", s);
         }());
 
-        DOCTEST_CHECK_NOTHROW([]()
+        CHECK_NOTHROW([]()
         {
             auto s = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
             auto l = std::make_shared<spdlog::logger>("color_out", s);
         }());
 
-        DOCTEST_CHECK_NOTHROW([]()
+        CHECK_NOTHROW([]()
         {
             auto s = std::make_shared<spdlog::sinks::stderr_color_sink_mt>();
             auto l = std::make_shared<spdlog::logger>("color_err", s);
         }());
     }
-} // DOCTEST_TEST_SUITE("spdlog — Sinks")
+} // TEST_SUITE("spdlog — Sinks")
 
-DOCTEST_TEST_SUITE("spdlog — Flush 控制")
+TEST_SUITE("spdlog — Flush 控制")
 {
     /**
      * 测试目的：验证手动 flush 将缓冲内容写入 sink
@@ -1456,14 +1456,14 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
      * 预期行为：flush 后 ostream 中可读到日志内容
      * 注意事项：ostream_sink 在不 flush 的情况下内容可能仍在内部缓冲区
      */
-    DOCTEST_TEST_CASE("手动 flush")
+    TEST_CASE("手动 flush")
     {
         auto [logger, oss] = test_helpers::make_oss_logger("flush_manual");
 
         logger->info("before flush");
         logger->flush();
 
-        DOCTEST_CHECK(oss->str().find("before flush") != std::string::npos);
+        CHECK(oss->str().find("before flush") != std::string::npos);
     }
 
     /**
@@ -1471,7 +1471,7 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
      * 使用的 API：logger->flush_on(level), logger->flush_level()
      * 预期行为：达到 flush_on 级别时自动刷写；使用 basic_file_sink 验证实际 flush 行为
      */
-    DOCTEST_TEST_CASE("flush_on — 用 basic_file_sink 验证")
+    TEST_CASE("flush_on — 用 basic_file_sink 验证")
     {
         const auto path = test_helpers::create_temp_file_path("flush_on");
 
@@ -1480,7 +1480,7 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
         logger->set_pattern("%v");
         logger->flush_on(spdlog::level::err);
 
-        DOCTEST_CHECK_EQ(logger->flush_level(), spdlog::level::err);
+        CHECK_EQ(logger->flush_level(), spdlog::level::err);
 
         // info 不触发自动 flush
         logger->info("info_no_flush");
@@ -1489,7 +1489,7 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
 
         // 验证文件内容：error 消息应存在
         const std::string content = test_helpers::read_file(path);
-        DOCTEST_CHECK(content.find("err_triggers_flush") != std::string::npos);
+        CHECK(content.find("err_triggers_flush") != std::string::npos);
 
         test_helpers::remove_file(path);
     }
@@ -1498,11 +1498,11 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
      * 测试目的：验证 flush_on 默认值为 off
      * 预期行为：默认 flush_level() == off（即不自动 flush）
      */
-    DOCTEST_TEST_CASE("flush_level 默认值为 off")
+    TEST_CASE("flush_level 默认值为 off")
     {
         auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger    = std::make_shared<spdlog::logger>("fl_def", null_sink);
-        DOCTEST_CHECK_EQ(logger->flush_level(), spdlog::level::off);
+        CHECK_EQ(logger->flush_level(), spdlog::level::off);
     }
 
     /**
@@ -1510,7 +1510,7 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
      * 使用的 API：spdlog::flush_on()
      * 预期行为：全局设置后默认 logger flush_level 更新
      */
-    DOCTEST_TEST_CASE("全局 spdlog::flush_on")
+    TEST_CASE("全局 spdlog::flush_on")
     {
         test_helpers::cleanup_loggers();
 
@@ -1518,7 +1518,7 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
         spdlog::set_default_logger(logger);
 
         spdlog::flush_on(spdlog::level::warn);
-        DOCTEST_CHECK_EQ(spdlog::default_logger()->flush_level(), spdlog::level::warn);
+        CHECK_EQ(spdlog::default_logger()->flush_level(), spdlog::level::warn);
 
         test_helpers::cleanup_loggers();
     }
@@ -1530,7 +1530,7 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
      * 注意事项：flush_every 基于时间触发，时序敏感，仅验证 API 可调用
      *           不做内容断言（避免因调度延迟导致假失败）
      */
-    DOCTEST_TEST_CASE("flush_every — API 存在性验证")
+    TEST_CASE("flush_every — API 存在性验证")
     {
         test_helpers::cleanup_loggers();
 
@@ -1539,19 +1539,19 @@ DOCTEST_TEST_SUITE("spdlog — Flush 控制")
         spdlog::set_default_logger(logger);
 
         // 启动定期 flush（每 1 秒），不崩溃即可
-        DOCTEST_CHECK_NOTHROW(spdlog::flush_every(std::chrono::seconds(1)));
+        CHECK_NOTHROW(spdlog::flush_every(std::chrono::seconds(1)));
 
         // 写入一条日志，不验证是否被 flush
-        DOCTEST_CHECK_NOTHROW(spdlog::info("flush_every test"));
+        CHECK_NOTHROW(spdlog::info("flush_every test"));
 
         // 关闭定期 flush（传入 0 秒）
-        DOCTEST_CHECK_NOTHROW(spdlog::flush_every(std::chrono::seconds(0)));
+        CHECK_NOTHROW(spdlog::flush_every(std::chrono::seconds(0)));
 
         test_helpers::cleanup_loggers();
     }
-} // DOCTEST_TEST_SUITE("spdlog — Flush 控制")
+} // TEST_SUITE("spdlog — Flush 控制")
 
-DOCTEST_TEST_SUITE("spdlog — Error Handler")
+TEST_SUITE("spdlog — Error Handler")
 {
     // 自定义抛异常 sink，用于测试 error handler
     struct ThrowingSink : public spdlog::sinks::base_sink<std::mutex> {
@@ -1569,7 +1569,7 @@ DOCTEST_TEST_SUITE("spdlog — Error Handler")
      * 注意事项：logger->set_error_handler 接受 std::function<void(const std::string&)>
      *           可使用捕获变量的 lambda
      */
-    DOCTEST_TEST_CASE("set_error_handler — sink 抛异常时调用")
+    TEST_CASE("set_error_handler — sink 抛异常时调用")
     {
         std::string captured_error;
 
@@ -1586,7 +1586,7 @@ DOCTEST_TEST_SUITE("spdlog — Error Handler")
         logger->flush();
 
         // error handler 应被调用
-        DOCTEST_CHECK(!captured_error.empty());
+        CHECK(!captured_error.empty());
     }
 
     /**
@@ -1596,7 +1596,7 @@ DOCTEST_TEST_SUITE("spdlog — Error Handler")
      * 注意事项：spdlog::set_error_handler 接受函数指针 void(*)(const std::string&)，
      *           不能使用捕获变量的 lambda，因此使用静态变量传递错误信息
      */
-    DOCTEST_TEST_CASE("spdlog::set_error_handler — 全局版本")
+    TEST_CASE("spdlog::set_error_handler — 全局版本")
     {
         test_helpers::cleanup_loggers();
 
@@ -1618,14 +1618,14 @@ DOCTEST_TEST_SUITE("spdlog — Error Handler")
         logger->flush();
 
         // 全局 error handler 应被调用
-        DOCTEST_CHECK(!s_global_error.empty());
+        CHECK(!s_global_error.empty());
         s_global_error.clear();
 
         test_helpers::cleanup_loggers();
     }
-} // DOCTEST_TEST_SUITE("spdlog — Error Handler")
+} // TEST_SUITE("spdlog — Error Handler")
 
-DOCTEST_TEST_SUITE("spdlog — Clone 与多 Sink")
+TEST_SUITE("spdlog — Clone 与多 Sink")
 {
     /**
      * 测试目的：验证 logger->clone() 创建同配置的新 logger
@@ -1633,7 +1633,7 @@ DOCTEST_TEST_SUITE("spdlog — Clone 与多 Sink")
      * 预期行为：clone 后的 logger 共享 sinks，但名称独立；级别/flush_level 相同
      * 注意事项：clone 共享同一组 sink 指针（浅拷贝 sinks）
      */
-    DOCTEST_TEST_CASE("logger->clone — 克隆共享 sink")
+    TEST_CASE("logger->clone — 克隆共享 sink")
     {
         std::ostringstream oss;
         auto sink   = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
@@ -1644,22 +1644,22 @@ DOCTEST_TEST_SUITE("spdlog — Clone 与多 Sink")
 
         auto cloned = logger->clone("cloned_logger");
 
-        DOCTEST_REQUIRE(cloned != nullptr);
-        DOCTEST_CHECK_EQ(cloned->name(), "cloned_logger");
+        REQUIRE(cloned != nullptr);
+        CHECK_EQ(cloned->name(), "cloned_logger");
         // 克隆后级别、flush_level 与原始相同
-        DOCTEST_CHECK_EQ(cloned->level(),       spdlog::level::warn);
-        DOCTEST_CHECK_EQ(cloned->flush_level(), spdlog::level::err);
+        CHECK_EQ(cloned->level(),       spdlog::level::warn);
+        CHECK_EQ(cloned->flush_level(), spdlog::level::err);
         // 共享同一 sink
-        DOCTEST_CHECK_EQ(cloned->sinks().size(), logger->sinks().size());
-        DOCTEST_CHECK_EQ(cloned->sinks()[0].get(), logger->sinks()[0].get());
+        CHECK_EQ(cloned->sinks().size(), logger->sinks().size());
+        CHECK_EQ(cloned->sinks()[0].get(), logger->sinks()[0].get());
 
         // 两个 logger 都可以写到同一 sink
         logger->warn("from original");
         cloned->warn("from cloned");
         logger->flush();
 
-        DOCTEST_CHECK(oss.str().find("from original") != std::string::npos);
-        DOCTEST_CHECK(oss.str().find("from cloned")   != std::string::npos);
+        CHECK(oss.str().find("from original") != std::string::npos);
+        CHECK(oss.str().find("from cloned")   != std::string::npos);
     }
 
     /**
@@ -1667,7 +1667,7 @@ DOCTEST_TEST_SUITE("spdlog — Clone 与多 Sink")
      * 使用的 API：logger(name, sinks_init_list), logger(name, begin, end)
      * 预期行为：一条日志同时写入所有 sink
      */
-    DOCTEST_TEST_CASE("多 sink logger — 构造与输出")
+    TEST_CASE("多 sink logger — 构造与输出")
     {
         std::ostringstream oss1, oss2, oss3;
         auto s1 = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss1);
@@ -1684,9 +1684,9 @@ DOCTEST_TEST_SUITE("spdlog — Clone 与多 Sink")
         logger->info("multi_msg");
         logger->flush();
 
-        DOCTEST_CHECK(oss1.str().find("A: multi_msg") != std::string::npos);
-        DOCTEST_CHECK(oss2.str().find("B: multi_msg") != std::string::npos);
-        DOCTEST_CHECK(oss3.str().find("C: multi_msg") != std::string::npos);
+        CHECK(oss1.str().find("A: multi_msg") != std::string::npos);
+        CHECK(oss2.str().find("B: multi_msg") != std::string::npos);
+        CHECK(oss3.str().find("C: multi_msg") != std::string::npos);
     }
 
     /**
@@ -1694,27 +1694,27 @@ DOCTEST_TEST_SUITE("spdlog — Clone 与多 Sink")
      * 使用的 API：logger->sinks()（返回可修改引用）
      * 预期行为：push_back 后新 sink 可接收日志
      */
-    DOCTEST_TEST_CASE("运行时动态添加 sink")
+    TEST_CASE("运行时动态添加 sink")
     {
         auto null_sink = std::make_shared<spdlog::sinks::null_sink_mt>();
         auto logger    = std::make_shared<spdlog::logger>("dyn_sink", null_sink);
-        DOCTEST_CHECK_EQ(logger->sinks().size(), 1u);
+        CHECK_EQ(logger->sinks().size(), 1u);
 
         // 动态添加第二个 sink
         std::ostringstream oss;
         auto new_sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
         new_sink->set_pattern("%v");
         logger->sinks().push_back(new_sink);
-        DOCTEST_CHECK_EQ(logger->sinks().size(), 2u);
+        CHECK_EQ(logger->sinks().size(), 2u);
 
         logger->info("dynamic_msg");
         logger->flush();
 
-        DOCTEST_CHECK(oss.str().find("dynamic_msg") != std::string::npos);
+        CHECK(oss.str().find("dynamic_msg") != std::string::npos);
     }
-} // DOCTEST_TEST_SUITE("spdlog — Clone 与多 Sink")
+} // TEST_SUITE("spdlog — Clone 与多 Sink")
 
-DOCTEST_TEST_SUITE("spdlog — Backtrace")
+TEST_SUITE("spdlog — Backtrace")
 {
     /**
      * 测试目的：验证 backtrace 功能：在 trace/debug 消息中静默积累，按需 dump
@@ -1728,7 +1728,7 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
      * 注意事项：backtrace 在 spdlog 1.8+ 可用；
      *            dump_backtrace 会将缓冲消息发到 sink（即使级别低于当前设定级别）
      */
-    DOCTEST_TEST_CASE("enable/disable/dump_backtrace")
+    TEST_CASE("enable/disable/dump_backtrace")
     {
         std::ostringstream oss;
         auto sink   = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
@@ -1736,20 +1736,20 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
         logger->set_pattern("%v");
         logger->set_level(spdlog::level::info); // info 级别，trace 正常不显示
 
-        DOCTEST_SUBCASE("默认 should_backtrace 为 false")
+        SUBCASE("默认 should_backtrace 为 false")
         {
-            DOCTEST_CHECK_FALSE(logger->should_backtrace());
+            CHECK_FALSE(logger->should_backtrace());
         }
 
-        DOCTEST_SUBCASE("开启 backtrace 后 should_backtrace 为 true")
+        SUBCASE("开启 backtrace 后 should_backtrace 为 true")
         {
             logger->enable_backtrace(10);
-            DOCTEST_CHECK(logger->should_backtrace());
+            CHECK(logger->should_backtrace());
             logger->disable_backtrace();
-            DOCTEST_CHECK_FALSE(logger->should_backtrace());
+            CHECK_FALSE(logger->should_backtrace());
         }
 
-        DOCTEST_SUBCASE("dump_backtrace 输出积累的 trace 消息")
+        SUBCASE("dump_backtrace 输出积累的 trace 消息")
         {
             logger->enable_backtrace(5);
 
@@ -1764,14 +1764,14 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
 
             const std::string out = oss.str();
             // dump 后缓冲消息应出现
-            DOCTEST_CHECK(out.find("trace_bt_1") != std::string::npos);
-            DOCTEST_CHECK(out.find("trace_bt_2") != std::string::npos);
-            DOCTEST_CHECK(out.find("debug_bt")   != std::string::npos);
+            CHECK(out.find("trace_bt_1") != std::string::npos);
+            CHECK(out.find("trace_bt_2") != std::string::npos);
+            CHECK(out.find("debug_bt")   != std::string::npos);
 
             logger->disable_backtrace();
         }
 
-        DOCTEST_SUBCASE("超出 backtrace 容量时覆盖旧消息")
+        SUBCASE("超出 backtrace 容量时覆盖旧消息")
         {
             logger->enable_backtrace(2); // 只保留 2 条
 
@@ -1784,9 +1784,9 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
 
             const std::string out = oss.str();
             // old_bt_1 应被覆盖
-            DOCTEST_CHECK(out.find("old_bt_1") == std::string::npos);
-            DOCTEST_CHECK(out.find("old_bt_2") != std::string::npos);
-            DOCTEST_CHECK(out.find("new_bt_3") != std::string::npos);
+            CHECK(out.find("old_bt_1") == std::string::npos);
+            CHECK(out.find("old_bt_2") != std::string::npos);
+            CHECK(out.find("new_bt_3") != std::string::npos);
 
             logger->disable_backtrace();
         }
@@ -1797,7 +1797,7 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
      * 使用的 API：spdlog::enable_backtrace(n), spdlog::dump_backtrace(), spdlog::disable_backtrace()
      * 预期行为：作用于默认 logger
      */
-    DOCTEST_TEST_CASE("全局 enable/dump/disable_backtrace")
+    TEST_CASE("全局 enable/dump/disable_backtrace")
     {
         test_helpers::cleanup_loggers();
 
@@ -1815,13 +1815,13 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
         logger->flush();
 
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("global_trace_1") != std::string::npos);
-        DOCTEST_CHECK(out.find("global_trace_2") != std::string::npos);
+        CHECK(out.find("global_trace_1") != std::string::npos);
+        CHECK(out.find("global_trace_2") != std::string::npos);
 
         spdlog::disable_backtrace();
         test_helpers::cleanup_loggers();
     }
-} // DOCTEST_TEST_SUITE("spdlog — Backtrace")
+} // TEST_SUITE("spdlog — Backtrace")
 
 /**
  * 【修复说明】原测试因以下竞态条件在 Linux 上偶发崩溃（use-after-free）：
@@ -1849,7 +1849,7 @@ DOCTEST_TEST_SUITE("spdlog — Backtrace")
  *   join 返回时，所有 log/flush 消息已被后台线程处理完毕，oss 内容已确定，
  *   可安全读取，不存在任何竞态。
  */
-DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
+TEST_SUITE("spdlog — 异步 Logger")
 {
     /**
      * 测试目的：验证异步 logger 与线程池的基本工作流程
@@ -1865,7 +1865,7 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
      *   3. async_logger::flush_() 是非阻塞的（只投队列不等待），
      *      不能依赖 flush() + sleep 来保证消息已处理完毕
      */
-    DOCTEST_TEST_CASE("async_logger — 基本异步写入")
+    TEST_CASE("async_logger — 基本异步写入")
     {
         test_helpers::cleanup_loggers();
         constexpr size_t queue_size   = 128;
@@ -1902,8 +1902,8 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
 
         // 所有异步写入已完成，可安全读取 oss
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("async msg 0") != std::string::npos);
-        DOCTEST_CHECK(out.find("async msg 9") != std::string::npos);
+        CHECK(out.find("async msg 0") != std::string::npos);
+        CHECK(out.find("async msg 9") != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
@@ -1920,7 +1920,7 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
      *     但最后一条消息（msg 19）保证被处理
      *   - 仍采用局部 thread_pool 模式，tp 析构 join 后方可读取 oss
      */
-    DOCTEST_TEST_CASE("async_logger — overrun_oldest 溢出策略")
+    TEST_CASE("async_logger — overrun_oldest 溢出策略")
     {
         test_helpers::cleanup_loggers();
         // 极小队列以增大溢出概率
@@ -1951,9 +1951,9 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
 
         // overrun_oldest：最后入队的消息不会被覆盖（之后无更新消息），必然写入
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("overrun msg 19") != std::string::npos);
+        CHECK(out.find("overrun msg 19") != std::string::npos);
         // 整体有输出（至少部分消息被写入）
-        DOCTEST_CHECK(!out.empty());
+        CHECK(!out.empty());
 
         test_helpers::cleanup_loggers();
     }
@@ -1968,7 +1968,7 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
      *   - 使用极小队列（queue_size=4）以增大触发丢弃的概率
      *   - tp 析构 join 是保证无竞态的唯一可靠手段
      */
-    DOCTEST_TEST_CASE("async_logger — discard_new 溢出策略")
+    TEST_CASE("async_logger — discard_new 溢出策略")
     {
         test_helpers::cleanup_loggers();
         // 极小队列以增大溢出概率
@@ -1999,9 +1999,9 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
 
         // discard_new：最先入队的消息（队列为空时）必然被处理
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("discard msg 0") != std::string::npos);
+        CHECK(out.find("discard msg 0") != std::string::npos);
         // 整体有输出（至少部分消息被写入）
-        DOCTEST_CHECK(!out.empty());
+        CHECK(!out.empty());
 
         test_helpers::cleanup_loggers();
     }
@@ -2012,7 +2012,7 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
      * 预期行为：init_thread_pool 创建全局线程池；thread_pool() 返回其 shared_ptr
      * 注意事项：全局线程池生命周期由 spdlib 管理，需在 shutdown 后重新 init
      */
-    DOCTEST_TEST_CASE("spdlog::init_thread_pool / thread_pool")
+    TEST_CASE("spdlog::init_thread_pool / thread_pool")
     {
         test_helpers::cleanup_loggers();
 
@@ -2025,7 +2025,7 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
         spdlog::init_thread_pool(queue_size, thread_count);
 
         auto tp = spdlog::thread_pool();
-        DOCTEST_REQUIRE(tp != nullptr);
+        REQUIRE(tp != nullptr);
 
         // 使用全局线程池创建 async_logger
         std::ostringstream oss;
@@ -2047,11 +2047,11 @@ DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
         tp.reset();
 
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("global tp msg") != std::string::npos);
+        CHECK(out.find("global tp msg") != std::string::npos);
 
         test_helpers::cleanup_loggers();
     }
-} // DOCTEST_TEST_SUITE("spdlog — 异步 Logger")
+} // TEST_SUITE("spdlog — 异步 Logger")
 
 /**
  * 自定义 sink：收集所有日志消息到 vector 中，供测试断言使用
@@ -2074,7 +2074,7 @@ protected:
 using collecting_sink_mt = collecting_sink<std::mutex>;
 using collecting_sink_st = collecting_sink<spdlog::details::null_mutex>;
 
-DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
+TEST_SUITE("spdlog — 自定义 Sink")
 {
     /**
      * 测试目的：验证自定义 sink 的实现和集成
@@ -2085,7 +2085,7 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
      *   - formatter_ 在基类中由 set_formatter / set_pattern 管理
      *   - _mt 使用 std::mutex，_st 使用 null_mutex（单线程）
      */
-    DOCTEST_TEST_CASE("collecting_sink — 自定义 sink 收集消息")
+    TEST_CASE("collecting_sink — 自定义 sink 收集消息")
     {
         auto sink   = std::make_shared<collecting_sink_mt>();
         auto logger = std::make_shared<spdlog::logger>("custom_s", sink);
@@ -2097,17 +2097,17 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
         logger->warn("warn_msg");
         logger->flush();
 
-        DOCTEST_REQUIRE_EQ(sink->messages.size(), 3u);
-        DOCTEST_CHECK(sink->messages[0].find("trace: trace_msg") != std::string::npos);
-        DOCTEST_CHECK(sink->messages[1].find("info: info_msg")   != std::string::npos);
-        DOCTEST_CHECK(sink->messages[2].find("warning: warn_msg")!= std::string::npos);
+        REQUIRE_EQ(sink->messages.size(), 3u);
+        CHECK(sink->messages[0].find("trace: trace_msg") != std::string::npos);
+        CHECK(sink->messages[1].find("info: info_msg")   != std::string::npos);
+        CHECK(sink->messages[2].find("warning: warn_msg")!= std::string::npos);
     }
 
     /**
      * 测试目的：验证 sink 级别过滤对自定义 sink 有效
      * 预期行为：sink 设定级别后，低级别消息不调用 sink_it_
      */
-    DOCTEST_TEST_CASE("collecting_sink — 级别过滤")
+    TEST_CASE("collecting_sink — 级别过滤")
     {
         auto sink   = std::make_shared<collecting_sink_mt>();
         sink->set_level(spdlog::level::warn); // sink 级别设为 warn
@@ -2122,16 +2122,16 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
         logger->error("keep_error");
         logger->flush();
 
-        DOCTEST_REQUIRE_EQ(sink->messages.size(), 2u);
-        DOCTEST_CHECK(sink->messages[0].find("keep_warn")  != std::string::npos);
-        DOCTEST_CHECK(sink->messages[1].find("keep_error") != std::string::npos);
+        REQUIRE_EQ(sink->messages.size(), 2u);
+        CHECK(sink->messages[0].find("keep_warn")  != std::string::npos);
+        CHECK(sink->messages[1].find("keep_error") != std::string::npos);
     }
 
     /**
      * 测试目的：验证 collecting_sink_st（单线程版本）同样正常工作
      * 预期行为：功能与 _mt 版本相同
      */
-    DOCTEST_TEST_CASE("collecting_sink_st — 单线程版本")
+    TEST_CASE("collecting_sink_st — 单线程版本")
     {
         auto sink   = std::make_shared<collecting_sink_st>();
         auto logger = std::make_shared<spdlog::logger>("custom_s_st", sink);
@@ -2141,10 +2141,10 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
         logger->info("st_msg");
         logger->flush();
 
-        DOCTEST_REQUIRE_EQ(sink->messages.size(), 1u);
-        DOCTEST_CHECK(sink->messages[0].find("st_msg") != std::string::npos);
+        REQUIRE_EQ(sink->messages.size(), 1u);
+        CHECK(sink->messages[0].find("st_msg") != std::string::npos);
     }
-} // DOCTEST_TEST_SUITE("spdlog — 自定义 Sink")
+} // TEST_SUITE("spdlog — 自定义 Sink")
 
 /**
  * 自定义 formatter：在消息前加 "[MY_FMT] " 前缀
@@ -2174,7 +2174,7 @@ private:
     std::string prefix_;
 };
 
-DOCTEST_TEST_SUITE("spdlog — 自定义 Formatter")
+TEST_SUITE("spdlog — 自定义 Formatter")
 {
     /**
      * 测试目的：验证自定义 formatter 实现和集成
@@ -2185,7 +2185,7 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Formatter")
      *   - clone() 用于 sink 内部复制 formatter（每个 sink 独立持有一份）
      *   - set_formatter 转移 unique_ptr 所有权
      */
-    DOCTEST_TEST_CASE("my_prefix_formatter — 自定义格式化器输出前缀")
+    TEST_CASE("my_prefix_formatter — 自定义格式化器输出前缀")
     {
         std::ostringstream oss;
         auto sink   = std::make_shared<spdlog::sinks::ostream_sink_mt>(oss);
@@ -2199,15 +2199,15 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Formatter")
         logger->flush();
 
         const std::string out = oss.str();
-        DOCTEST_CHECK(out.find("[MY_FMT] hello custom fmt") != std::string::npos);
-        DOCTEST_CHECK(out.find("[MY_FMT] warn custom fmt")  != std::string::npos);
+        CHECK(out.find("[MY_FMT] hello custom fmt") != std::string::npos);
+        CHECK(out.find("[MY_FMT] warn custom fmt")  != std::string::npos);
     }
 
     /**
      * 测试目的：验证 clone() 正确复制 formatter 到新 sink
      * 预期行为：克隆后的 formatter 产生相同格式
      */
-    DOCTEST_TEST_CASE("my_prefix_formatter — clone 正确复制")
+    TEST_CASE("my_prefix_formatter — clone 正确复制")
     {
         auto fmt    = std::make_unique<my_prefix_formatter>("[CLONE] ");
         auto cloned = fmt->clone();
@@ -2221,11 +2221,11 @@ DOCTEST_TEST_SUITE("spdlog — 自定义 Formatter")
 
         cloned->format(msg, dest);
         const std::string result(dest.data(), dest.size());
-        DOCTEST_CHECK(result.find("[CLONE] clone_msg") != std::string::npos);
+        CHECK(result.find("[CLONE] clone_msg") != std::string::npos);
     }
-} // DOCTEST_TEST_SUITE("spdlog — 自定义 Formatter")
+} // TEST_SUITE("spdlog — 自定义 Formatter")
 
-DOCTEST_TEST_SUITE("spdlog — MDC（Mapped Diagnostic Context）")
+TEST_SUITE("spdlog — MDC（Mapped Diagnostic Context）")
 {
     /**
      * 测试目的：验证 mdc 的 put/get/remove/clear 基本功能
@@ -2234,33 +2234,33 @@ DOCTEST_TEST_SUITE("spdlog — MDC（Mapped Diagnostic Context）")
      * 预期行为：mdc 是线程本地 key-value 存储，可独立读写
      * 注意事项：mdc 不支持异步模式（异步线程有不同的线程本地副本）
      */
-    DOCTEST_TEST_CASE("mdc — put/get/remove/clear")
+    TEST_CASE("mdc — put/get/remove/clear")
     {
         // 先清空，防止其他测试残留
         spdlog::mdc::clear();
 
-        DOCTEST_CHECK_EQ(spdlog::mdc::get("key1"), "");
+        CHECK_EQ(spdlog::mdc::get("key1"), "");
 
         spdlog::mdc::put("key1", "value1");
-        DOCTEST_CHECK_EQ(spdlog::mdc::get("key1"), "value1");
+        CHECK_EQ(spdlog::mdc::get("key1"), "value1");
 
         spdlog::mdc::put("key2", "value2");
-        DOCTEST_CHECK_EQ(spdlog::mdc::get("key2"), "value2");
+        CHECK_EQ(spdlog::mdc::get("key2"), "value2");
 
         spdlog::mdc::remove("key1");
-        DOCTEST_CHECK_EQ(spdlog::mdc::get("key1"), "");
+        CHECK_EQ(spdlog::mdc::get("key1"), "");
         // key2 不受影响
-        DOCTEST_CHECK_EQ(spdlog::mdc::get("key2"), "value2");
+        CHECK_EQ(spdlog::mdc::get("key2"), "value2");
 
         spdlog::mdc::clear();
-        DOCTEST_CHECK_EQ(spdlog::mdc::get("key2"), "");
+        CHECK_EQ(spdlog::mdc::get("key2"), "");
     }
 
     /**
      * 测试目的：验证 mdc 与 pattern %& 占位符配合使用
      * 预期行为：pattern 中的 %& 被替换为 mdc 内容（格式: key:value）
      */
-    DOCTEST_TEST_CASE("mdc — pattern %& 输出")
+    TEST_CASE("mdc — pattern %& 输出")
     {
         spdlog::mdc::clear();
 
@@ -2278,21 +2278,21 @@ DOCTEST_TEST_SUITE("spdlog — MDC（Mapped Diagnostic Context）")
 
         const std::string out = oss.str();
         // %& 应输出 mdc 内容（格式: request_id:abc123）
-        DOCTEST_CHECK(out.find("abc123") != std::string::npos);
-        DOCTEST_CHECK(out.find("mdc test msg") != std::string::npos);
+        CHECK(out.find("abc123") != std::string::npos);
+        CHECK(out.find("mdc test msg") != std::string::npos);
 
         spdlog::mdc::clear();
     }
-} // DOCTEST_TEST_SUITE("spdlog — MDC")
+} // TEST_SUITE("spdlog — MDC")
 
-DOCTEST_TEST_SUITE("spdlog — Stopwatch")
+TEST_SUITE("spdlog — Stopwatch")
 {
     /**
      * 测试目的：验证 stopwatch 的基本 API
      * 使用的 API：spdlog::stopwatch, elapsed(), elapsed_ms(), reset()
      * 预期行为：stopwatch 可构造，elapsed 返回合理时间，reset 重置计时
      */
-    DOCTEST_TEST_CASE("stopwatch — 基本功能")
+    TEST_CASE("stopwatch — 基本功能")
     {
         spdlog::stopwatch sw;
 
@@ -2301,47 +2301,47 @@ DOCTEST_TEST_SUITE("spdlog — Stopwatch")
 
         // elapsed() 应返回 > 0 的时间
         auto elapsed = sw.elapsed();
-        DOCTEST_CHECK(elapsed.count() > 0.0);
+        CHECK(elapsed.count() > 0.0);
 
         // elapsed_ms() 也应 > 0
         auto elapsed_ms = sw.elapsed_ms();
-        DOCTEST_CHECK(elapsed_ms.count() > 0);
+        CHECK(elapsed_ms.count() > 0);
 
         // reset 后重新计时
         sw.reset();
         auto elapsed_after_reset = sw.elapsed();
         // reset 后时间应小于 reset 前（因为是新起点）
-        DOCTEST_CHECK(elapsed_after_reset.count() <= elapsed.count() + 0.1);
+        CHECK(elapsed_after_reset.count() <= elapsed.count() + 0.1);
     }
-} // DOCTEST_TEST_SUITE("spdlog — Stopwatch")
+} // TEST_SUITE("spdlog — Stopwatch")
 
-DOCTEST_TEST_SUITE("spdlog — 版本信息")
+TEST_SUITE("spdlog — 版本信息")
 {
     /**
      * 测试目的：验证 spdlog 版本宏与运行时版本信息
      * 使用的 API：SPDLOG_VERSION, SPDLOG_VER_MAJOR/MINOR/PATCH
      * 预期行为：版本宏为正整数；SPDLOG_VERSION 与手动计算一致
      */
-    DOCTEST_TEST_CASE("版本宏")
+    TEST_CASE("版本宏")
     {
-        DOCTEST_CHECK(SPDLOG_VER_MAJOR >= 1);
-        DOCTEST_CHECK(SPDLOG_VER_MINOR >= 0);
-        DOCTEST_CHECK(SPDLOG_VER_PATCH >= 0);
+        CHECK(SPDLOG_VER_MAJOR >= 1);
+        CHECK(SPDLOG_VER_MINOR >= 0);
+        CHECK(SPDLOG_VER_PATCH >= 0);
 
         // SPDLOG_VERSION = major * 10000 + minor * 100 + patch
         const int expected_version = SPDLOG_VER_MAJOR * 10000 + SPDLOG_VER_MINOR * 100 + SPDLOG_VER_PATCH;
-        DOCTEST_CHECK_EQ(SPDLOG_VERSION, expected_version);
-        DOCTEST_CHECK(SPDLOG_VERSION >= 10000); // 至少 1.0.0
+        CHECK_EQ(SPDLOG_VERSION, expected_version);
+        CHECK(SPDLOG_VERSION >= 10000); // 至少 1.0.0
     }
-} // DOCTEST_TEST_SUITE("spdlog — 版本信息")
+} // TEST_SUITE("spdlog — 版本信息")
 
-DOCTEST_TEST_SUITE("spdlog — 综合场景")
+TEST_SUITE("spdlog — 综合场景")
 {
     /**
      * 测试目的：模拟实际使用场景：多个命名 logger，各自不同 level 和 sink
      * 预期行为：每个 logger 独立输出，互不干扰
      */
-    DOCTEST_TEST_CASE("多命名 logger 独立工作")
+    TEST_CASE("多命名 logger 独立工作")
     {
         test_helpers::cleanup_loggers();
 
@@ -2369,14 +2369,14 @@ DOCTEST_TEST_SUITE("spdlog — 综合场景")
         app_logger->flush();
         db_logger->flush();
 
-        DOCTEST_CHECK(oss_app.str().find("[APP] app started")  != std::string::npos);
-        DOCTEST_CHECK(oss_app.str().find("debug hidden")        == std::string::npos);
-        DOCTEST_CHECK(oss_db.str().find("[DB]  db warning")    != std::string::npos);
-        DOCTEST_CHECK(oss_db.str().find("db info hidden")       == std::string::npos);
+        CHECK(oss_app.str().find("[APP] app started")  != std::string::npos);
+        CHECK(oss_app.str().find("debug hidden")        == std::string::npos);
+        CHECK(oss_db.str().find("[DB]  db warning")    != std::string::npos);
+        CHECK(oss_db.str().find("db info hidden")       == std::string::npos);
 
         // 通过 registry 获取并再次验证
-        DOCTEST_CHECK(spdlog::get("app") != nullptr);
-        DOCTEST_CHECK(spdlog::get("db")  != nullptr);
+        CHECK(spdlog::get("app") != nullptr);
+        CHECK(spdlog::get("db")  != nullptr);
 
         test_helpers::cleanup_loggers();
     }
@@ -2385,7 +2385,7 @@ DOCTEST_TEST_SUITE("spdlog — 综合场景")
      * 测试目的：模拟 apply_all 批量修改所有 logger 级别
      * 预期行为：apply_all 后所有 logger 级别均被修改
      */
-    DOCTEST_TEST_CASE("apply_all 批量修改 logger 级别")
+    TEST_CASE("apply_all 批量修改 logger 级别")
     {
         test_helpers::cleanup_loggers();
 
@@ -2405,8 +2405,8 @@ DOCTEST_TEST_SUITE("spdlog — 综合场景")
         for (int i = 0; i < 3; ++i)
         {
             auto l = spdlog::get("batch_" + std::to_string(i));
-            DOCTEST_REQUIRE(l != nullptr);
-            DOCTEST_CHECK_EQ(l->level(), spdlog::level::err);
+            REQUIRE(l != nullptr);
+            CHECK_EQ(l->level(), spdlog::level::err);
         }
 
         test_helpers::cleanup_loggers();
@@ -2419,7 +2419,7 @@ DOCTEST_TEST_SUITE("spdlog — 综合场景")
      * 注意事项：shutdown 后应重新初始化才能继续使用 spdlog；
      *            由于 shutdown 影响全局状态，本测试放在最后
      */
-    DOCTEST_TEST_CASE("spdlog::shutdown 清理全局状态")
+    TEST_CASE("spdlog::shutdown 清理全局状态")
     {
         test_helpers::cleanup_loggers();
 
@@ -2427,15 +2427,15 @@ DOCTEST_TEST_SUITE("spdlog — 综合场景")
         auto l = std::make_shared<spdlog::logger>("pre_shutdown", null_sink);
         spdlog::register_logger(l);
 
-        DOCTEST_CHECK(spdlog::get("pre_shutdown") != nullptr);
+        CHECK(spdlog::get("pre_shutdown") != nullptr);
 
         // shutdown 停止后台线程，清空 registry
-        DOCTEST_CHECK_NOTHROW(spdlog::shutdown());
+        CHECK_NOTHROW(spdlog::shutdown());
 
         // shutdown 后 logger 在 registry 中已消失
-        DOCTEST_CHECK(spdlog::get("pre_shutdown") == nullptr);
+        CHECK(spdlog::get("pre_shutdown") == nullptr);
 
         // 恢复可用状态（重建默认 logger）
         test_helpers::cleanup_loggers();
     }
-} // DOCTEST_TEST_SUITE("spdlog — 综合场景")
+} // TEST_SUITE("spdlog — 综合场景")

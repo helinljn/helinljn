@@ -61,7 +61,7 @@ struct WsaListener : doctest::IReporter
     void log_message(const doctest::MessageData&) override {}
     void test_case_skipped(const doctest::TestCaseData&) override {};
 };
-DOCTEST_REGISTER_LISTENER("wsa-init", 1, WsaListener);
+REGISTER_LISTENER("wsa-init", 1, WsaListener);
 
 // ====================================================================
 //  第一层：基础工具模块
@@ -70,7 +70,7 @@ DOCTEST_REGISTER_LISTENER("wsa-init", 1, WsaListener);
 // --------------------------------------------------------------------
 //  1. Packet — BasePacketWriter / BasePacketReader
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("Packet - Writer/Reader 往返验证")
+TEST_CASE("Packet - Writer/Reader 往返验证")
 {
     // BasePacketWriter: 向缓冲区写入二进制数据，支持字节序转换
     // BasePacketReader: 从缓冲区读取二进制数据，与 Writer 配对使用
@@ -87,13 +87,13 @@ DOCTEST_TEST_CASE("Packet - Writer/Reader 往返验证")
 
     // 从同一缓冲区读回数据
     brynet::base::BasePacketReader reader(buf.data(), writer.getPos(), false);
-    DOCTEST_CHECK(reader.readUINT8()  == 0x42);
-    DOCTEST_CHECK(reader.readUINT16() == 1000);
-    DOCTEST_CHECK(reader.readUINT32() == 123456);
-    DOCTEST_CHECK(reader.readUINT64() == 0xDEADBEEFCAFEULL);
+    CHECK(reader.readUINT8()  == 0x42);
+    CHECK(reader.readUINT16() == 1000);
+    CHECK(reader.readUINT32() == 123456);
+    CHECK(reader.readUINT64() == 0xDEADBEEFCAFEULL);
 }
 
-DOCTEST_TEST_CASE("Packet - 大端模式写入与读取")
+TEST_CASE("Packet - 大端模式写入与读取")
 {
     // useBigEndian=true: 整数按网络字节序（大端）写入
     std::array<char, 256> buf{};
@@ -103,11 +103,11 @@ DOCTEST_TEST_CASE("Packet - 大端模式写入与读取")
     writer.writeUINT32(0x56789ABC);
 
     brynet::base::BasePacketReader reader(buf.data(), writer.getPos(), true);
-    DOCTEST_CHECK(reader.readUINT16() == 0x1234);
-    DOCTEST_CHECK(reader.readUINT32() == 0x56789ABC);
+    CHECK(reader.readUINT16() == 0x1234);
+    CHECK(reader.readUINT32() == 0x56789ABC);
 }
 
-DOCTEST_TEST_CASE("Packet - enough() 与 getLeft() 判断剩余数据")
+TEST_CASE("Packet - enough() 与 getLeft() 判断剩余数据")
 {
     // enough(size): 判断剩余数据是否 >= size
     // getLeft(): 获取剩余可读字节数
@@ -116,64 +116,64 @@ DOCTEST_TEST_CASE("Packet - enough() 与 getLeft() 判断剩余数据")
     writer.writeUINT32(0x42);
 
     brynet::base::BasePacketReader reader(buf.data(), writer.getPos(), false);
-    DOCTEST_CHECK(reader.enough(4));
-    DOCTEST_CHECK(reader.getLeft() == 4);
-    DOCTEST_CHECK(!reader.enough(5));
+    CHECK(reader.enough(4));
+    CHECK(reader.getLeft() == 4);
+    CHECK(!reader.enough(5));
 
     reader.readUINT8();
-    DOCTEST_CHECK(reader.getLeft() == 3);
+    CHECK(reader.getLeft() == 3);
 }
 
-DOCTEST_TEST_CASE("BigPacket - 预分配32KB数据包")
+TEST_CASE("BigPacket - 预分配32KB数据包")
 {
     // BigPacket: AutoMallocPacket<32*1024> 别名，适合大包写入
     // 参数: (useBigEndian, isAutoMalloc)
     brynet::base::BigPacket packet(false, false);
-    DOCTEST_CHECK(packet.getMaxLen() == 32 * 1024);
-    DOCTEST_CHECK(packet.getPos() == 0);
+    CHECK(packet.getMaxLen() == 32 * 1024);
+    CHECK(packet.getPos() == 0);
 
     packet.writeUINT32(0xDEADBEEF);
-    DOCTEST_CHECK(packet.getPos() == 4);
+    CHECK(packet.getPos() == 4);
 }
 
-DOCTEST_TEST_CASE("Packet - 流式写入 operator<<")
+TEST_CASE("Packet - 流式写入 operator<<")
 {
     // operator<<: 支持链式写入基本类型
     std::array<char, 128> buf{};
     brynet::base::BasePacketWriter writer(buf.data(), buf.size(), false, false);
 
     writer << uint8_t(0x01) << uint16_t(0x0203) << uint32_t(0x04050607);
-    DOCTEST_CHECK(writer.getPos() == 7);
+    CHECK(writer.getPos() == 7);
 
     brynet::base::BasePacketReader reader(buf.data(), writer.getPos(), false);
-    DOCTEST_CHECK(reader.readUINT8()  == 0x01);
-    DOCTEST_CHECK(reader.readUINT16() == 0x0203);
-    DOCTEST_CHECK(reader.readUINT32() == 0x04050607);
+    CHECK(reader.readUINT8()  == 0x01);
+    CHECK(reader.readUINT16() == 0x0203);
+    CHECK(reader.readUINT32() == 0x04050607);
 }
 
 // --------------------------------------------------------------------
 //  2. Buffer — 环形缓冲区
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("Buffer - 创建、写入与读取")
+TEST_CASE("Buffer - 创建、写入与读取")
 {
     // buffer_new(size): 分配指定大小的环形缓冲区
     // buffer_delete: 释放缓冲区（通过 RAII BufferPtr 管理）
     auto buf = make_buffer(1024);
-    DOCTEST_REQUIRE(buf != nullptr);
-    DOCTEST_CHECK(brynet::base::buffer_getsize(buf.get()) == 1024);
-    DOCTEST_CHECK(brynet::base::buffer_getwritevalidcount(buf.get()) == 1024);
-    DOCTEST_CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 0);
+    REQUIRE(buf != nullptr);
+    CHECK(brynet::base::buffer_getsize(buf.get()) == 1024);
+    CHECK(brynet::base::buffer_getwritevalidcount(buf.get()) == 1024);
+    CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 0);
 
     // buffer_write: 向缓冲区写入数据
     std::string_view data = "hello";
-    DOCTEST_CHECK(brynet::base::buffer_write(buf.get(), data.data(), data.size()));
-    DOCTEST_CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 5);
+    CHECK(brynet::base::buffer_write(buf.get(), data.data(), data.size()));
+    CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 5);
 
     // buffer_getreadptr: 获取可读数据起始指针
-    DOCTEST_CHECK(std::memcmp(brynet::base::buffer_getreadptr(buf.get()), "hello", 5) == 0);
+    CHECK(std::memcmp(brynet::base::buffer_getreadptr(buf.get()), "hello", 5) == 0);
 }
 
-DOCTEST_TEST_CASE("Buffer - adjustto_head 将数据移到头部")
+TEST_CASE("Buffer - adjustto_head 将数据移到头部")
 {
     // buffer_adjustto_head: 将未消费的数据移动到缓冲区头部，释放前方空间
     auto buf = make_buffer(64);
@@ -181,30 +181,30 @@ DOCTEST_TEST_CASE("Buffer - adjustto_head 将数据移到头部")
 
     // 消费前两个字节 "ab"
     brynet::base::buffer_addreadpos(buf.get(), 2);
-    DOCTEST_CHECK(brynet::base::buffer_getreadpos(buf.get()) == 2);
+    CHECK(brynet::base::buffer_getreadpos(buf.get()) == 2);
 
     // adjustto_head: 将剩余 "cd" 移到头部
     brynet::base::buffer_adjustto_head(buf.get());
-    DOCTEST_CHECK(brynet::base::buffer_getreadpos(buf.get()) == 0);
-    DOCTEST_CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 2);
+    CHECK(brynet::base::buffer_getreadpos(buf.get()) == 0);
+    CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 2);
 }
 
-DOCTEST_TEST_CASE("Buffer - buffer_init 重置读写位置")
+TEST_CASE("Buffer - buffer_init 重置读写位置")
 {
     // buffer_init: 将读写位置重置为 0
     auto buf = make_buffer(64);
     brynet::base::buffer_write(buf.get(), "test", 4);
-    DOCTEST_CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 4);
+    CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 4);
 
     brynet::base::buffer_init(buf.get());
-    DOCTEST_CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 0);
-    DOCTEST_CHECK(brynet::base::buffer_getwritevalidcount(buf.get()) == 64);
+    CHECK(brynet::base::buffer_getreadvalidcount(buf.get()) == 0);
+    CHECK(brynet::base::buffer_getwritevalidcount(buf.get()) == 64);
 }
 
 // --------------------------------------------------------------------
 //  3. Timer / RepeatTimer / TimerMgr
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("TimerMgr - 一次性定时器触发")
+TEST_CASE("TimerMgr - 一次性定时器触发")
 {
     // TimerMgr::addTimer(timeout, callback): 添加一次性定时器，返回 weak_ptr<Timer>
     // TimerMgr::schedule(): 执行到期定时器
@@ -215,14 +215,14 @@ DOCTEST_TEST_CASE("TimerMgr - 一次性定时器触发")
         fired = true;
     });
 
-    DOCTEST_CHECK(!mgr->isEmpty());
+    CHECK(!mgr->isEmpty());
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
     mgr->schedule();
-    DOCTEST_CHECK(fired);
-    DOCTEST_CHECK(mgr->isEmpty());
+    CHECK(fired);
+    CHECK(mgr->isEmpty());
 }
 
-DOCTEST_TEST_CASE("TimerMgr - 重复定时器与取消")
+TEST_CASE("TimerMgr - 重复定时器与取消")
 {
     // addIntervalTimer(interval, callback): 添加重复定时器，返回 shared_ptr<RepeatTimer>
     // RepeatTimer::cancel(): 取消重复定时器
@@ -238,13 +238,13 @@ DOCTEST_TEST_CASE("TimerMgr - 重复定时器与取消")
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
         mgr->schedule();
     }
-    DOCTEST_CHECK(count > 0);
+    CHECK(count > 0);
 
     repeat_t->cancel();
-    DOCTEST_CHECK(repeat_t->isCancel());
+    CHECK(repeat_t->isCancel());
 }
 
-DOCTEST_TEST_CASE("Timer - 取消一次性定时器")
+TEST_CASE("Timer - 取消一次性定时器")
 {
     // Timer::cancel(): 在触发前取消定时器，使其不再执行回调
     auto mgr = std::make_shared<brynet::base::TimerMgr>();
@@ -255,33 +255,33 @@ DOCTEST_TEST_CASE("Timer - 取消一次性定时器")
     if (auto t = weak_t.lock()) { t->cancel(); }
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     mgr->schedule();
-    DOCTEST_CHECK(!fired);
+    CHECK(!fired);
 }
 
-DOCTEST_TEST_CASE("TimerMgr - nearLeftTime 与 isEmpty / clear")
+TEST_CASE("TimerMgr - nearLeftTime 与 isEmpty / clear")
 {
     // isEmpty(): 管理器是否没有定时器
     // nearLeftTime(): 最近定时器剩余时间
     // clear(): 清空所有定时器
     auto mgr = std::make_shared<brynet::base::TimerMgr>();
-    DOCTEST_CHECK(mgr->isEmpty());
-    DOCTEST_CHECK(mgr->nearLeftTime() == std::chrono::nanoseconds::zero());
+    CHECK(mgr->isEmpty());
+    CHECK(mgr->nearLeftTime() == std::chrono::nanoseconds::zero());
 
     mgr->addTimer(std::chrono::milliseconds(10), [](){});
-    DOCTEST_CHECK(!mgr->isEmpty());
+    CHECK(!mgr->isEmpty());
 
     auto left = mgr->nearLeftTime();
-    DOCTEST_CHECK(left <= std::chrono::milliseconds(10));
-    DOCTEST_CHECK(left > std::chrono::nanoseconds::zero());
+    CHECK(left <= std::chrono::milliseconds(10));
+    CHECK(left > std::chrono::nanoseconds::zero());
 
     mgr->clear();
-    DOCTEST_CHECK(mgr->isEmpty());
+    CHECK(mgr->isEmpty());
 }
 
 // --------------------------------------------------------------------
 //  4. WaitGroup
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("WaitGroup - 多线程同步等待")
+TEST_CASE("WaitGroup - 多线程同步等待")
 {
     // WaitGroup::Create(): 创建 WaitGroup
     // add(n): 增加计数器 n
@@ -303,7 +303,7 @@ DOCTEST_TEST_CASE("WaitGroup - 多线程同步等待")
     });
     wg->wait();
 
-    DOCTEST_CHECK(counter.load() == 2);
+    CHECK(counter.load() == 2);
 
     if (t1.joinable())
         t1.join();
@@ -312,7 +312,7 @@ DOCTEST_TEST_CASE("WaitGroup - 多线程同步等待")
         t2.join();
 }
 
-DOCTEST_TEST_CASE("WaitGroup - 带超时的等待")
+TEST_CASE("WaitGroup - 带超时的等待")
 {
     // wait(timeout): 等待指定时间，超时后返回（不阻塞）
     auto wg = brynet::base::WaitGroup::Create();
@@ -324,7 +324,7 @@ DOCTEST_TEST_CASE("WaitGroup - 带超时的等待")
 // --------------------------------------------------------------------
 //  5. Endian
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("Endian - 字节序转换往返一致性")
+TEST_CASE("Endian - 字节序转换往返一致性")
 {
     using namespace brynet::base::endian;
     // hostToNetwork → networkToHost 往返后值不变
@@ -332,19 +332,19 @@ DOCTEST_TEST_CASE("Endian - 字节序转换往返一致性")
     const auto v32 = uint32_t{0x12345678};
     const auto v64 = uint64_t{0x0123456789ABCDEFULL};
 
-    DOCTEST_CHECK(networkToHost16(hostToNetwork16(v16)) == v16);
-    DOCTEST_CHECK(networkToHost32(hostToNetwork32(v32)) == v32);
-    DOCTEST_CHECK(networkToHost64(hostToNetwork64(v64)) == v64);
+    CHECK(networkToHost16(hostToNetwork16(v16)) == v16);
+    CHECK(networkToHost32(hostToNetwork32(v32)) == v32);
+    CHECK(networkToHost64(hostToNetwork64(v64)) == v64);
 
     // convert=false 时直接返回原值，不进行字节序转换
-    DOCTEST_CHECK(hostToNetwork32(v32, false) == v32);
-    DOCTEST_CHECK(networkToHost32(v32, false) == v32);
+    CHECK(hostToNetwork32(v32, false) == v32);
+    CHECK(networkToHost32(v32, false) == v32);
 }
 
 // --------------------------------------------------------------------
 //  6. Base64 / SHA1
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("Base64 - 编解码往返")
+TEST_CASE("Base64 - 编解码往返")
 {
     // base64_encode(bytes, len): 将二进制数据编码为 Base64 字符串
     // base64_decode(encoded): 将 Base64 字符串解码为原始数据
@@ -354,10 +354,10 @@ DOCTEST_TEST_CASE("Base64 - 编解码往返")
         reinterpret_cast<const unsigned char*>(original.data()),
         static_cast<unsigned int>(original.size()));
     auto decoded = base64_decode(encoded);
-    DOCTEST_CHECK(decoded == original);
+    CHECK(decoded == original);
 }
 
-DOCTEST_TEST_CASE("SHA1 - 标准测试向量")
+TEST_CASE("SHA1 - 标准测试向量")
 {
     // CSHA1: SHA1 哈希计算器
     // Update(data, len): 输入数据
@@ -370,18 +370,18 @@ DOCTEST_TEST_CASE("SHA1 - 标准测试向量")
     sha1.Final();
 
     std::array<unsigned char, 20> hash{};
-    DOCTEST_REQUIRE(sha1.GetHash(hash.data()));
-    DOCTEST_CHECK(hash[0] == 0xA9);
-    DOCTEST_CHECK(hash[1] == 0x99);
-    DOCTEST_CHECK(hash[2] == 0x3E);
-    DOCTEST_CHECK(hash[3] == 0x36);
+    REQUIRE(sha1.GetHash(hash.data()));
+    CHECK(hash[0] == 0xA9);
+    CHECK(hash[1] == 0x99);
+    CHECK(hash[2] == 0x3E);
+    CHECK(hash[3] == 0x36);
 
     std::string hex_str;
     sha1.ReportHashStl(hex_str, CSHA1::REPORT_HEX_SHORT);
-    DOCTEST_CHECK(hex_str.size() == 40);  // 20 字节 → 40 个十六进制字符
+    CHECK(hex_str.size() == 40);  // 20 字节 → 40 个十六进制字符
 }
 
-DOCTEST_TEST_CASE("SHA1 - Reset 后重新计算")
+TEST_CASE("SHA1 - Reset 后重新计算")
 {
     // Reset(): 重置 SHA1 状态，可重新计算
     CSHA1 sha1;
@@ -391,8 +391,8 @@ DOCTEST_TEST_CASE("SHA1 - Reset 后重新计算")
     sha1.Final();
 
     std::array<unsigned char, 20> hash{};
-    DOCTEST_REQUIRE(sha1.GetHash(hash.data()));
-    DOCTEST_CHECK(hash[0] == 0xA9);
+    REQUIRE(sha1.GetHash(hash.data()));
+    CHECK(hash[0] == 0xA9);
 }
 
 // ====================================================================
@@ -402,25 +402,25 @@ DOCTEST_TEST_CASE("SHA1 - Reset 后重新计算")
 // --------------------------------------------------------------------
 //  7. SocketLibFunction — Socket 初始化与工具
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("SocketLibFunction - InitSocket / DestroySocket")
+TEST_CASE("SocketLibFunction - InitSocket / DestroySocket")
 {
     // InitSocket(): 初始化 Socket 库（Windows 下执行 WSAStartup）— 已由全局 fixture 完成
     // DestroySocket(): 清理 Socket 库（Windows 下执行 WSACleanup）
     // 此处仅验证可调用性，不实际 DestroySocket（以免影响后续测试）
-    DOCTEST_CHECK(brynet::net::base::InitSocket()); // 重复调用应安全返回 true
+    CHECK(brynet::net::base::InitSocket()); // 重复调用应安全返回 true
 }
 
-DOCTEST_TEST_CASE("SocketLibFunction - Socket 创建与关闭")
+TEST_CASE("SocketLibFunction - Socket 创建与关闭")
 {
     // SocketCreate(af, type, protocol): 创建 socket 文件描述符
     // SocketClose(fd): 关闭 socket
     // SocketNonblock(fd): 设置非阻塞模式
     // SocketNodelay(fd): 禁用 Nagle 算法
     auto fd = brynet::net::base::SocketCreate(AF_INET, SOCK_STREAM, 0);
-    DOCTEST_REQUIRE(fd != BRYNET_INVALID_SOCKET);
+    REQUIRE(fd != BRYNET_INVALID_SOCKET);
 
-    DOCTEST_CHECK(brynet::net::base::SocketNonblock(fd));
-    DOCTEST_CHECK(brynet::net::base::SocketNodelay(fd) == 0);
+    CHECK(brynet::net::base::SocketNonblock(fd));
+    CHECK(brynet::net::base::SocketNodelay(fd) == 0);
 
     brynet::net::base::SocketClose(fd);
 }
@@ -428,26 +428,26 @@ DOCTEST_TEST_CASE("SocketLibFunction - Socket 创建与关闭")
 // --------------------------------------------------------------------
 //  8. Exception
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("Exception - ConnectException 与 BrynetCommonException")
+TEST_CASE("Exception - ConnectException 与 BrynetCommonException")
 {
     // ConnectException(msg): 网络连接失败的异常类型
     // BrynetCommonException(msg): brynet 通用运行时异常
     brynet::net::ConnectException ex("connection failed");
-    DOCTEST_CHECK(std::string_view{ex.what()} == "connection failed");
+    CHECK(std::string_view{ex.what()} == "connection failed");
 
     brynet::net::BrynetCommonException ex2("common error");
-    DOCTEST_CHECK(std::string_view{ex2.what()} == "common error");
+    CHECK(std::string_view{ex2.what()} == "common error");
 }
 
 // --------------------------------------------------------------------
 //  9. CurrentThread
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("CurrentThread - tid() 返回有效线程ID")
+TEST_CASE("CurrentThread - tid() 返回有效线程ID")
 {
     // tid(): 获取当前线程的唯一标识，同一线程多次调用应一致
     const auto id1 = brynet::net::current_thread::tid();
     const auto id2 = brynet::net::current_thread::tid();
-    DOCTEST_CHECK(id1 == id2);
+    CHECK(id1 == id2);
 }
 
 // ====================================================================
@@ -457,17 +457,17 @@ DOCTEST_TEST_CASE("CurrentThread - tid() 返回有效线程ID")
 // --------------------------------------------------------------------
 //  10. EventLoop
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("EventLoop - 构造与绑定线程")
+TEST_CASE("EventLoop - 构造与绑定线程")
 {
     // EventLoop(): 创建事件循环（内部创建 epoll/kqueue/IOCP）
     // bindCurrentThread(): 绑定到当前线程（必须先调用才能 loop）
     // isInLoopThread(): 判断当前线程是否为事件循环线程
     auto ev = std::make_shared<brynet::net::EventLoop>();
     ev->bindCurrentThread();
-    DOCTEST_CHECK(ev->isInLoopThread());
+    CHECK(ev->isInLoopThread());
 }
 
-DOCTEST_TEST_CASE("EventLoop - runAfter 一次性定时器")
+TEST_CASE("EventLoop - runAfter 一次性定时器")
 {
     // runAfter(timeout, callback): 注册一次性定时器
     // loop(milliseconds): 运行事件循环指定毫秒数
@@ -480,10 +480,10 @@ DOCTEST_TEST_CASE("EventLoop - runAfter 一次性定时器")
     for (int i = 0; i < 5 && !fired; ++i) {
         ev->loop(10);
     }
-    DOCTEST_CHECK(fired);
+    CHECK(fired);
 }
 
-DOCTEST_TEST_CASE("EventLoop - runIntervalTimer 重复定时器")
+TEST_CASE("EventLoop - runIntervalTimer 重复定时器")
 {
     // runIntervalTimer(timeout, callback): 注册重复定时器
     auto ev = std::make_shared<brynet::net::EventLoop>();
@@ -494,11 +494,11 @@ DOCTEST_TEST_CASE("EventLoop - runIntervalTimer 重复定时器")
     for (int i = 0; i < 5; ++i) {
         ev->loop(5);
     }
-    DOCTEST_CHECK(count > 0);
+    CHECK(count > 0);
     timer->cancel();
 }
 
-DOCTEST_TEST_CASE("EventLoop - runAsyncFunctor 跨线程投递")
+TEST_CASE("EventLoop - runAsyncFunctor 跨线程投递")
 {
     // runAsyncFunctor(f): 从其他线程投递 functor 到事件循环线程执行
     auto ev = std::make_shared<brynet::net::EventLoop>();
@@ -513,10 +513,10 @@ DOCTEST_TEST_CASE("EventLoop - runAsyncFunctor 跨线程投递")
         ev->loop(10);
     }
     t.join();
-    DOCTEST_CHECK(async_executed);
+    CHECK(async_executed);
 }
 
-DOCTEST_TEST_CASE("EventLoop - wakeup 跨线程唤醒")
+TEST_CASE("EventLoop - wakeup 跨线程唤醒")
 {
     // wakeup(): 从其他线程唤醒事件循环（使 loop 提前返回）
     auto ev = std::make_shared<brynet::net::EventLoop>();
@@ -534,7 +534,7 @@ DOCTEST_TEST_CASE("EventLoop - wakeup 跨线程唤醒")
     if (!woken) {
         ev->loop(50);
     }
-    DOCTEST_CHECK(woken);
+    CHECK(woken);
 }
 
 // ====================================================================
@@ -544,7 +544,7 @@ DOCTEST_TEST_CASE("EventLoop - wakeup 跨线程唤醒")
 // --------------------------------------------------------------------
 //  11. HttpFormat
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("HttpFormat - 构建 GET 请求")
+TEST_CASE("HttpFormat - 构建 GET 请求")
 {
     // HttpRequest: 构建客户端 HTTP 请求
     // setMethod: 设置 HTTP 方法
@@ -556,11 +556,11 @@ DOCTEST_TEST_CASE("HttpFormat - 构建 GET 请求")
     req.setUrl("/api/test");
     req.setHost("example.com");
     const auto req_str = req.getResult();
-    DOCTEST_CHECK(req_str.find("GET /api/test") != std::string::npos);
-    DOCTEST_CHECK(req_str.find("Host: example.com") != std::string::npos);
+    CHECK(req_str.find("GET /api/test") != std::string::npos);
+    CHECK(req_str.find("Host: example.com") != std::string::npos);
 }
 
-DOCTEST_TEST_CASE("HttpFormat - 构建 POST 请求")
+TEST_CASE("HttpFormat - 构建 POST 请求")
 {
     // setBody: 设置请求体
     // setContentType: 设置 Content-Type
@@ -573,11 +573,11 @@ DOCTEST_TEST_CASE("HttpFormat - 构建 POST 请求")
     req.setBody(R"({"key":"value"})");
     req.addHeadValue("X-Custom", "test");
     const auto req_str = req.getResult();
-    DOCTEST_CHECK(req_str.find("POST /api/data") != std::string::npos);
-    DOCTEST_CHECK(req_str.find(R"({"key":"value"})") != std::string::npos);
+    CHECK(req_str.find("POST /api/data") != std::string::npos);
+    CHECK(req_str.find(R"({"key":"value"})") != std::string::npos);
 }
 
-DOCTEST_TEST_CASE("HttpFormat - 构建 HTTP 响应")
+TEST_CASE("HttpFormat - 构建 HTTP 响应")
 {
     // HttpResponse: 构建服务端 HTTP 响应
     // setStatus: 设置 HTTP 状态码
@@ -587,11 +587,11 @@ DOCTEST_TEST_CASE("HttpFormat - 构建 HTTP 响应")
     resp.setContentType("application/json");
     resp.setBody(R"({"status":"ok"})");
     const auto resp_str = resp.getResult();
-    DOCTEST_CHECK(resp_str.find("HTTP/1.1 200 OK") != std::string::npos);
-    DOCTEST_CHECK(resp_str.find(R"({"status":"ok"})") != std::string::npos);
+    CHECK(resp_str.find("HTTP/1.1 200 OK") != std::string::npos);
+    CHECK(resp_str.find(R"({"status":"ok"})") != std::string::npos);
 }
 
-DOCTEST_TEST_CASE("HttpFormat - HttpQueryParameter 查询参数")
+TEST_CASE("HttpFormat - HttpQueryParameter 查询参数")
 {
     // HttpQueryParameter: 构建键值对查询参数
     // add(k, v): 添加参数
@@ -599,13 +599,13 @@ DOCTEST_TEST_CASE("HttpFormat - HttpQueryParameter 查询参数")
     brynet::net::http::HttpQueryParameter params;
     params.add("key1", "value1");
     params.add("key2", "value2");
-    DOCTEST_CHECK(params.getResult() == "key1=value1&key2=value2");
+    CHECK(params.getResult() == "key1=value1&key2=value2");
 }
 
 // --------------------------------------------------------------------
 //  12. HTTPParser
 // --------------------------------------------------------------------
-// DOCTEST_TEST_CASE("HTTPParser - 解析 GET 请求")
+// TEST_CASE("HTTPParser - 解析 GET 请求")
 // {
 //     // HTTPParser(type): 构造解析器（HTTP_REQUEST/HTTP_RESPONSE/HTTP_BOTH）
 //     // tryParse(buf, len): 尝试解析，返回已解析字节数
@@ -615,14 +615,14 @@ DOCTEST_TEST_CASE("HttpFormat - HttpQueryParameter 查询参数")
 //     brynet::net::http::HTTPParser parser(HTTP_BOTH);
 //     const std::string request = "GET /test?foo=bar HTTP/1.1\r\nHost: example.com\r\n\r\n";
 //     const auto parsed = parser.tryParse(request.data(), request.size());
-//     DOCTEST_CHECK(parsed == request.size());
-//     DOCTEST_CHECK(parser.isCompleted());
-//     DOCTEST_CHECK(parser.getPath() == "/test");
-//     DOCTEST_CHECK(parser.getQuery() == "foo=bar");
-//     DOCTEST_CHECK(parser.hasKey("Host"));
-//     DOCTEST_CHECK(parser.getValue("Host") == "example.com");
+//     CHECK(parsed == request.size());
+//     CHECK(parser.isCompleted());
+//     CHECK(parser.getPath() == "/test");
+//     CHECK(parser.getQuery() == "foo=bar");
+//     CHECK(parser.hasKey("Host"));
+//     CHECK(parser.getValue("Host") == "example.com");
 // }
-// DOCTEST_TEST_CASE("HTTPParser - 解析 POST 请求并获取 Body")
+// TEST_CASE("HTTPParser - 解析 POST 请求并获取 Body")
 // {
 //     // getBody(): 获取请求体内容
 //     // method(): 获取 HTTP 方法
@@ -634,33 +634,33 @@ DOCTEST_TEST_CASE("HttpFormat - HttpQueryParameter 查询参数")
 //         "\r\n"
 //         "hello, world!";
 //     const auto parsed = parser.tryParse(request.data(), request.size());
-//     DOCTEST_CHECK(parser.isCompleted());
-//     DOCTEST_CHECK(parser.getPath() == "/submit");
-//     DOCTEST_CHECK(parser.getBody() == "hello, world!");
+//     CHECK(parser.isCompleted());
+//     CHECK(parser.getPath() == "/submit");
+//     CHECK(parser.getBody() == "hello, world!");
 // }
-// DOCTEST_TEST_CASE("HTTPParser - isKeepAlive 判断")
+// TEST_CASE("HTTPParser - isKeepAlive 判断")
 // {
 //     // isKeepAlive(): 判断是否为 Keep-Alive 连接
 //     brynet::net::http::HTTPParser parser(HTTP_BOTH);
 //     const std::string request = "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n";
 //     parser.tryParse(request.data(), request.size());
-//     DOCTEST_CHECK(parser.isKeepAlive());
+//     CHECK(parser.isKeepAlive());
 // }
 
 // --------------------------------------------------------------------
 //  13. WebSocketFormat
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("WebSocketFormat - wsHandshake 生成握手响应")
+TEST_CASE("WebSocketFormat - wsHandshake 生成握手响应")
 {
     // wsHandshake(secKey): 根据 Sec-WebSocket-Key 生成握手响应
     using WSF = brynet::net::http::WebSocketFormat;
     const auto handshake = WSF::wsHandshake("dGhlIHNhbXBsZSBub25jZQ==");
-    DOCTEST_CHECK(handshake.find("HTTP/1.1 101 Switching Protocols") != std::string::npos);
-    DOCTEST_CHECK(handshake.find("Upgrade: websocket") != std::string::npos);
-    DOCTEST_CHECK(handshake.find("Sec-WebSocket-Accept:") != std::string::npos);
+    CHECK(handshake.find("HTTP/1.1 101 Switching Protocols") != std::string::npos);
+    CHECK(handshake.find("Upgrade: websocket") != std::string::npos);
+    CHECK(handshake.find("Sec-WebSocket-Accept:") != std::string::npos);
 }
 
-DOCTEST_TEST_CASE("WebSocketFormat - 帧 build→extract 往返")
+TEST_CASE("WebSocketFormat - 帧 build→extract 往返")
 {
     // wsFrameBuild: 构建 WebSocket 帧
     // wsFrameExtractBuffer: 解析 WebSocket 帧
@@ -668,38 +668,38 @@ DOCTEST_TEST_CASE("WebSocketFormat - 帧 build→extract 往返")
 
     const std::string payload = "Hello WebSocket";
     std::string frame;
-    DOCTEST_CHECK(WSF::wsFrameBuild(payload.data(), payload.size(), frame,
+    CHECK(WSF::wsFrameBuild(payload.data(), payload.size(), frame,
                              WSF::WebSocketFrameType::TEXT_FRAME, true, false));
 
     std::string parsed_payload;
     WSF::WebSocketFrameType opcode{};
     size_t frame_size = 0;
     bool is_fin = false;
-    DOCTEST_CHECK(WSF::wsFrameExtractBuffer(frame.data(), frame.size(),
+    CHECK(WSF::wsFrameExtractBuffer(frame.data(), frame.size(),
                                      parsed_payload, opcode, frame_size, is_fin));
-    DOCTEST_CHECK(parsed_payload == payload);
-    DOCTEST_CHECK(opcode == WSF::WebSocketFrameType::TEXT_FRAME);
-    DOCTEST_CHECK(is_fin);
+    CHECK(parsed_payload == payload);
+    CHECK(opcode == WSF::WebSocketFrameType::TEXT_FRAME);
+    CHECK(is_fin);
 }
 
-DOCTEST_TEST_CASE("WebSocketFormat - BINARY 帧与 masking")
+TEST_CASE("WebSocketFormat - BINARY 帧与 masking")
 {
     // masking=true: 客户端发送帧需要 mask
     using WSF = brynet::net::http::WebSocketFormat;
 
     const std::string payload = "binary data";
     std::string frame;
-    DOCTEST_CHECK(WSF::wsFrameBuild(payload.data(), payload.size(), frame,
+    CHECK(WSF::wsFrameBuild(payload.data(), payload.size(), frame,
                              WSF::WebSocketFrameType::BINARY_FRAME, true, true));
 
     std::string parsed_payload;
     WSF::WebSocketFrameType opcode{};
     size_t frame_size = 0;
     bool is_fin = false;
-    DOCTEST_CHECK(WSF::wsFrameExtractBuffer(frame.data(), frame.size(),
+    CHECK(WSF::wsFrameExtractBuffer(frame.data(), frame.size(),
                                      parsed_payload, opcode, frame_size, is_fin));
-    DOCTEST_CHECK(parsed_payload == payload);
-    DOCTEST_CHECK(opcode == WSF::WebSocketFrameType::BINARY_FRAME);
+    CHECK(parsed_payload == payload);
+    CHECK(opcode == WSF::WebSocketFrameType::BINARY_FRAME);
 }
 
 // ====================================================================
@@ -709,7 +709,7 @@ DOCTEST_TEST_CASE("WebSocketFormat - BINARY 帧与 masking")
 // --------------------------------------------------------------------
 //  14. TCP Echo 集成测试（ListenerBuilder + ConnectionBuilder）
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("集成 - TCP Echo 服务（Builder API）")
+TEST_CASE("集成 - TCP Echo 服务（Builder API）")
 {
     // ListenerBuilder: 流式构建 TCP 监听服务
     // ConnectionBuilder: 流式构建 TCP 连接
@@ -773,8 +773,8 @@ DOCTEST_TEST_CASE("集成 - TCP Echo 服务（Builder API）")
 
     // 等待收发完成或超时
     wg->wait(std::chrono::seconds(2));
-    DOCTEST_CHECK(server_received);
-    DOCTEST_CHECK(client_received);
+    CHECK(server_received);
+    CHECK(client_received);
 
     listener.stop();
     connector->stopWorkerThread();
@@ -784,7 +784,7 @@ DOCTEST_TEST_CASE("集成 - TCP Echo 服务（Builder API）")
 // --------------------------------------------------------------------
 //  15. HTTP 服务端+客户端 集成测试
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("集成 - HTTP 服务端与客户端")
+TEST_CASE("集成 - HTTP 服务端与客户端")
 {
     // HttpListenerBuilder: 流式构建 HTTP 监听服务
     // HttpConnectionBuilder: 流式构建 HTTP 连接
@@ -849,7 +849,7 @@ DOCTEST_TEST_CASE("集成 - HTTP 服务端与客户端")
                  handlers.setHttpEndCallback([&](const brynet::net::http::HTTPParser& parser,
                                                   const brynet::net::http::HttpSession::Ptr& /*session*/) {
                      http_response_received = true;
-                     DOCTEST_CHECK(parser.getBody() == "OK from server");
+                     CHECK(parser.getBody() == "OK from server");
                      wg->done();
                  });
              })
@@ -859,8 +859,8 @@ DOCTEST_TEST_CASE("集成 - HTTP 服务端与客户端")
              .asyncConnect();
 
     wg->wait(std::chrono::seconds(2));
-    DOCTEST_CHECK(http_request_received);
-    DOCTEST_CHECK(http_response_received);
+    CHECK(http_request_received);
+    CHECK(http_response_received);
 
     listener.stop();
     connector->stopWorkerThread();
@@ -870,7 +870,7 @@ DOCTEST_TEST_CASE("集成 - HTTP 服务端与客户端")
 // --------------------------------------------------------------------
 //  16. WebSocket 握手+帧收发 集成测试
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("集成 - WebSocket 握手与帧收发")
+TEST_CASE("集成 - WebSocket 握手与帧收发")
 {
     const auto port = get_random_port();
     auto wg = brynet::base::WaitGroup::Create();
@@ -956,7 +956,7 @@ DOCTEST_TEST_CASE("集成 - WebSocket 握手与帧收发")
                                             brynet::net::http::WebSocketFormat::WebSocketFrameType /*opcode*/,
                                              const std::string& payload) {
                      client_ws_echo_received = true;
-                     DOCTEST_CHECK(payload == "hello ws");
+                     CHECK(payload == "hello ws");
                      wg->done();
                  });
              })
@@ -966,9 +966,9 @@ DOCTEST_TEST_CASE("集成 - WebSocket 握手与帧收发")
              .asyncConnect();
 
     wg->wait(std::chrono::seconds(2));
-    DOCTEST_CHECK(ws_connected);
-    DOCTEST_CHECK(ws_frame_received);
-    DOCTEST_CHECK(client_ws_echo_received);
+    CHECK(ws_connected);
+    CHECK(ws_frame_received);
+    CHECK(client_ws_echo_received);
 
     ws_listener.stop();
     connector->stopWorkerThread();
@@ -978,7 +978,7 @@ DOCTEST_TEST_CASE("集成 - WebSocket 握手与帧收发")
 // --------------------------------------------------------------------
 //  17. 单线程 EventLoopTcpService 集成测试
 // --------------------------------------------------------------------
-DOCTEST_TEST_CASE("集成 - 单线程 EventLoopTcpService")
+TEST_CASE("集成 - 单线程 EventLoopTcpService")
 {
     // EventLoopTcpService: 使用指定 EventLoop 的单线程 TCP 服务
     // 适用于单线程事件驱动模型
@@ -1051,8 +1051,8 @@ DOCTEST_TEST_CASE("集成 - 单线程 EventLoopTcpService")
     });
 
     wg->wait(std::chrono::seconds(2));
-    DOCTEST_CHECK(server_received);
-    DOCTEST_CHECK(client_received);
+    CHECK(server_received);
+    CHECK(client_received);
 
     listener->stopListen();
     connector->stopWorkerThread();

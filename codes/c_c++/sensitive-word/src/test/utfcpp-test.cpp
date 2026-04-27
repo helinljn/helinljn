@@ -1,9 +1,8 @@
 #include "doctest.h"
 #include "utf8.h"
-
-#include <iterator>
 #include <string>
 #include <vector>
+#include <iterator>
 
 TEST_SUITE("utfcpp usage")
 {

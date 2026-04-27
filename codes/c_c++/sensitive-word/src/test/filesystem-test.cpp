@@ -18,7 +18,7 @@ static fs::path make_temp_dir(const std::string& name)
     return tmp;
 }
 
-DOCTEST_TEST_SUITE("FileSystem")
+TEST_SUITE("FileSystem")
 {
     /**
      * 测试用例 1：路径构造与路径组件操作
@@ -30,34 +30,34 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 is_absolute / is_relative 路径类型查询
      * - 演示 fs::path 的 operator== 比较语义
      */
-    DOCTEST_TEST_CASE("FilesystemPath")
+    TEST_CASE("FilesystemPath")
     {
         // 测试路径构造
         fs::path p1;
-        DOCTEST_CHECK(p1.empty());
+        CHECK(p1.empty());
 
         fs::path p2("test");
-        DOCTEST_CHECK(!p2.empty());
+        CHECK(!p2.empty());
 
         fs::path p3("test", fs::path::format::native_format);
-        DOCTEST_CHECK(!p3.empty());
+        CHECK(!p3.empty());
 
         // 测试路径操作 — 使用 generic_string() 统一比较
         fs::path p4 = p2 / "subdir" / "file.txt";
-        DOCTEST_CHECK(p4.generic_string() == "test/subdir/file.txt");
+        CHECK(p4.generic_string() == "test/subdir/file.txt");
 
         // 测试路径组件
-        DOCTEST_CHECK(p4.parent_path().generic_string() == "test/subdir");
-        DOCTEST_CHECK(p4.filename().string() == "file.txt");
-        DOCTEST_CHECK(p4.stem().string() == "file");
-        DOCTEST_CHECK(p4.extension().string() == ".txt");
+        CHECK(p4.parent_path().generic_string() == "test/subdir");
+        CHECK(p4.filename().string() == "file.txt");
+        CHECK(p4.stem().string() == "file");
+        CHECK(p4.extension().string() == ".txt");
 
         // 测试路径查询
-        DOCTEST_CHECK(p4.is_absolute() == false);
-        DOCTEST_CHECK(p4.is_relative() == true);
+        CHECK(p4.is_absolute() == false);
+        CHECK(p4.is_relative() == true);
 
         // 测试路径比较
-        DOCTEST_CHECK(fs::path("a/b") == fs::path("a") / "b");
+        CHECK(fs::path("a/b") == fs::path("a") / "b");
     }
 
     /**
@@ -69,21 +69,21 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::status 获取文件状态，验证 status_known 和 file_type
      * - 验证对不存在路径，status() 返回 file_type::not_found
      */
-    DOCTEST_TEST_CASE("FilesystemStatus")
+    TEST_CASE("FilesystemStatus")
     {
         // 测试文件状态
         fs::path current_dir(".");
-        DOCTEST_CHECK(fs::exists(current_dir));
-        DOCTEST_CHECK(fs::is_directory(current_dir));
+        CHECK(fs::exists(current_dir));
+        CHECK(fs::is_directory(current_dir));
 
         // 测试不存在的文件
         fs::path non_existent("non_existent_file.txt");
-        DOCTEST_CHECK(!fs::exists(non_existent));
+        CHECK(!fs::exists(non_existent));
 
         // 测试 status_known
         auto s = fs::status(non_existent);
-        DOCTEST_CHECK(fs::status_known(s));
-        DOCTEST_CHECK(s.type() == fs::file_type::not_found);
+        CHECK(fs::status_known(s));
+        CHECK(s.type() == fs::file_type::not_found);
     }
 
     /**
@@ -97,14 +97,14 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::file_size 获取文件大小
      * - 所有临时文件在隔离目录中创建，测试结束后统一清理
      */
-    DOCTEST_TEST_CASE("FilesystemOperations")
+    TEST_CASE("FilesystemOperations")
     {
         auto tmp = make_temp_dir("operations");
         fs::path test_dir = tmp / "test_dir";
 
-        DOCTEST_CHECK(fs::create_directory(test_dir));
-        DOCTEST_CHECK(fs::exists(test_dir));
-        DOCTEST_CHECK(fs::is_directory(test_dir));
+        CHECK(fs::create_directory(test_dir));
+        CHECK(fs::exists(test_dir));
+        CHECK(fs::is_directory(test_dir));
 
         // 测试创建和删除文件
         fs::path test_file = test_dir / "test_file.txt";
@@ -112,37 +112,37 @@ DOCTEST_TEST_SUITE("FileSystem")
             std::ofstream f(test_file.string());
             f << "test content";
         }
-        DOCTEST_CHECK(fs::exists(test_file));
-        DOCTEST_CHECK(fs::is_regular_file(test_file));
+        CHECK(fs::exists(test_file));
+        CHECK(fs::is_regular_file(test_file));
 
         // 测试文件大小
-        DOCTEST_CHECK(fs::file_size(test_file) > 0);
+        CHECK(fs::file_size(test_file) > 0);
 
         // 测试重命名文件
         fs::path renamed_file = test_dir / "renamed_file.txt";
         fs::rename(test_file, renamed_file);
-        DOCTEST_CHECK(!fs::exists(test_file));
-        DOCTEST_CHECK(fs::exists(renamed_file));
+        CHECK(!fs::exists(test_file));
+        CHECK(fs::exists(renamed_file));
 
         // 测试删除文件
         fs::remove(renamed_file);
-        DOCTEST_CHECK(!fs::exists(renamed_file));
+        CHECK(!fs::exists(renamed_file));
 
         // 测试递归删除目录
         fs::remove_all(test_dir);
-        DOCTEST_CHECK(!fs::exists(test_dir));
+        CHECK(!fs::exists(test_dir));
 
         // 测试 create_directories 创建多级目录
         fs::path deep_dir = tmp / "a" / "b" / "c";
-        DOCTEST_CHECK(fs::create_directories(deep_dir));
-        DOCTEST_CHECK(fs::exists(deep_dir));
-        DOCTEST_CHECK(fs::is_directory(deep_dir));
+        CHECK(fs::create_directories(deep_dir));
+        CHECK(fs::exists(deep_dir));
+        CHECK(fs::is_directory(deep_dir));
 
         // create_directory 对已存在的目录返回 false
-        DOCTEST_CHECK(fs::create_directory(deep_dir) == false);
+        CHECK(fs::create_directory(deep_dir) == false);
 
         // create_directories 对已存在的目录返回 false
-        DOCTEST_CHECK(fs::create_directories(deep_dir) == false);
+        CHECK(fs::create_directories(deep_dir) == false);
 
         fs::remove_all(tmp);
     }
@@ -156,7 +156,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::directory_entry 的缓存接口：exists / is_directory / is_regular_file / file_size
      * - 验证递归迭代器返回的条目数不少于非递归迭代器
      */
-    DOCTEST_TEST_CASE("FilesystemDirectoryIterator")
+    TEST_CASE("FilesystemDirectoryIterator")
     {
         auto tmp = make_temp_dir("iterator");
 
@@ -177,7 +177,7 @@ DOCTEST_TEST_SUITE("FileSystem")
             std::ignore = entry;
             ++count;
         }
-        DOCTEST_CHECK(count == 4); // sub1, sub2, file1.txt, file2.txt
+        CHECK(count == 4); // sub1, sub2, file1.txt, file2.txt
 
         // 测试递归目录迭代器
         int recursive_count = 0;
@@ -186,17 +186,17 @@ DOCTEST_TEST_SUITE("FileSystem")
             std::ignore = entry;
             ++recursive_count;
         }
-        DOCTEST_CHECK(recursive_count >= count);
+        CHECK(recursive_count >= count);
 
         // 测试 directory_entry 接口
         for (const auto& entry : fs::directory_iterator(tmp))
         {
-            DOCTEST_CHECK(entry.exists());
+            CHECK(entry.exists());
             bool is_dir_or_file = entry.is_directory() || entry.is_regular_file();
-            DOCTEST_CHECK(is_dir_or_file);
+            CHECK(is_dir_or_file);
             if (entry.is_regular_file())
             {
-                DOCTEST_CHECK(entry.file_size() > 0);
+                CHECK(entry.file_size() > 0);
             }
         }
 
@@ -212,7 +212,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 验证移除写权限后，权限位确实变化
      * - 验证恢复写权限后可正常删除文件
      */
-    DOCTEST_TEST_CASE("FilesystemPermissions")
+    TEST_CASE("FilesystemPermissions")
     {
         auto tmp = make_temp_dir("permissions");
         fs::path test_file = tmp / "test_perm.txt";
@@ -223,7 +223,7 @@ DOCTEST_TEST_SUITE("FileSystem")
 
         // 获取当前权限
         auto perms = fs::status(test_file).permissions();
-        DOCTEST_CHECK(perms != fs::perms::none);
+        CHECK(perms != fs::perms::none);
 
         // 测试修改权限：移除所有写权限
         fs::permissions(test_file,
@@ -231,7 +231,7 @@ DOCTEST_TEST_SUITE("FileSystem")
                         fs::perm_options::remove);
 
         auto new_perms = fs::status(test_file).permissions();
-        DOCTEST_CHECK((new_perms & fs::perms::owner_write) != fs::perms::owner_write);
+        CHECK((new_perms & fs::perms::owner_write) != fs::perms::owner_write);
 
         // 恢复写权限以便删除
         fs::permissions(test_file,
@@ -249,7 +249,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 验证异常对象中携带的错误码非零
      * - 验证 fs::create_directories 对合法路径不抛异常
      */
-    DOCTEST_TEST_CASE("FilesystemError")
+    TEST_CASE("FilesystemError")
     {
         // 测试操作不存在的文件确实会抛出 filesystem_error
         fs::path non_existent("non_existent_dir_xyz/file.txt");
@@ -261,9 +261,9 @@ DOCTEST_TEST_SUITE("FileSystem")
         catch (const fs::filesystem_error& e)
         {
             caught = true;
-            DOCTEST_CHECK(e.code().value() != 0);
+            CHECK(e.code().value() != 0);
         }
-        DOCTEST_CHECK(caught);
+        CHECK(caught);
 
         // 测试 create_directories 成功场景（不应抛异常）
         auto tmp = make_temp_dir("error");
@@ -271,11 +271,11 @@ DOCTEST_TEST_SUITE("FileSystem")
         try
         {
             fs::create_directories(nested);
-            DOCTEST_CHECK(fs::exists(nested));
+            CHECK(fs::exists(nested));
         }
         catch (const fs::filesystem_error&)
         {
-            DOCTEST_CHECK(false); // 不应该抛出异常
+            CHECK(false); // 不应该抛出异常
         }
 
         fs::remove_all(tmp);
@@ -292,37 +292,37 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::current_path 获取当前工作目录
      * - 演示 fs::canonical 解析符号链接并获取规范路径（需路径真实存在）
      */
-    DOCTEST_TEST_CASE("FilesystemPathOperations")
+    TEST_CASE("FilesystemPathOperations")
     {
         // 测试路径规范化 — 使用 generic_string()
         fs::path p1("test/../dir/file.txt");
-        DOCTEST_CHECK(p1.lexically_normal().generic_string() == "dir/file.txt");
+        CHECK(p1.lexically_normal().generic_string() == "dir/file.txt");
 
         // 测试相对路径
         fs::path p2("a/b/c");
         fs::path p3("a/d/e");
         fs::path relative = fs::relative(p2, p3.parent_path());
-        DOCTEST_CHECK(relative.generic_string() == "../b/c");
+        CHECK(relative.generic_string() == "../b/c");
 
         // 测试绝对路径
         fs::path p4("test");
         fs::path p4_absolute = fs::absolute(p4);
-        DOCTEST_CHECK(p4_absolute.is_absolute());
+        CHECK(p4_absolute.is_absolute());
 
         // 测试当前路径
         fs::path current = fs::current_path();
-        DOCTEST_CHECK(current.is_absolute());
+        CHECK(current.is_absolute());
 
         // 测试 canonical（需要路径真实存在）
         auto tmp = make_temp_dir("pathops");
         fs::path canon = tmp / "sub" / "..";
         fs::create_directory(tmp / "sub");
         fs::path result = fs::canonical(canon);
-        DOCTEST_CHECK(result == fs::canonical(tmp));
+        CHECK(result == fs::canonical(tmp));
 
         // 测试 proximate
         fs::path prox = fs::proximate(tmp / "a" / "b", tmp);
-        DOCTEST_CHECK(prox.generic_string() == "a/b");
+        CHECK(prox.generic_string() == "a/b");
 
         fs::remove_all(tmp);
     }
@@ -335,14 +335,14 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::status().type() 获取 file_type 枚举值
      * - 验证目录的 file_type 为 directory，普通文件的 file_type 为 regular
      */
-    DOCTEST_TEST_CASE("FilesystemFileTypes")
+    TEST_CASE("FilesystemFileTypes")
     {
         auto tmp = make_temp_dir("filetypes");
 
         // 测试目录类型
-        DOCTEST_CHECK(fs::is_directory(tmp));
-        DOCTEST_CHECK(!fs::is_regular_file(tmp));
-        DOCTEST_CHECK(!fs::is_symlink(tmp));
+        CHECK(fs::is_directory(tmp));
+        CHECK(!fs::is_regular_file(tmp));
+        CHECK(!fs::is_symlink(tmp));
 
         // 测试普通文件类型
         fs::path test_file = tmp / "test_file_type.txt";
@@ -350,15 +350,15 @@ DOCTEST_TEST_SUITE("FileSystem")
             std::ofstream f(test_file.string());
             f << "test";
         }
-        DOCTEST_CHECK(fs::is_regular_file(test_file));
-        DOCTEST_CHECK(!fs::is_directory(test_file));
+        CHECK(fs::is_regular_file(test_file));
+        CHECK(!fs::is_directory(test_file));
 
         // 测试 file_type
         auto status = fs::status(test_file);
-        DOCTEST_CHECK(status.type() == fs::file_type::regular);
+        CHECK(status.type() == fs::file_type::regular);
 
         auto dir_status = fs::status(tmp);
-        DOCTEST_CHECK(dir_status.type() == fs::file_type::directory);
+        CHECK(dir_status.type() == fs::file_type::directory);
 
         fs::remove_all(tmp);
     }
@@ -372,7 +372,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 copy_options::overwrite_existing 强制覆盖已存在目标
      * - 演示 fs::copy 配合 copy_options::recursive 递归复制目录
      */
-    DOCTEST_TEST_CASE("FilesystemCopyOperations")
+    TEST_CASE("FilesystemCopyOperations")
     {
         auto tmp = make_temp_dir("copy");
         fs::path src_file = tmp / "source_file.txt";
@@ -383,12 +383,12 @@ DOCTEST_TEST_SUITE("FileSystem")
             std::ofstream f(src_file.string());
             f << "test content";
         }
-        DOCTEST_CHECK(fs::exists(src_file));
+        CHECK(fs::exists(src_file));
 
         // 复制文件
         fs::copy_file(src_file, dest_file);
-        DOCTEST_CHECK(fs::exists(dest_file));
-        DOCTEST_CHECK(fs::file_size(src_file) == fs::file_size(dest_file));
+        CHECK(fs::exists(dest_file));
+        CHECK(fs::file_size(src_file) == fs::file_size(dest_file));
 
         // 测试 copy_options::skip_existing
         fs::path dest_file2 = tmp / "destination_file2.txt";
@@ -398,11 +398,11 @@ DOCTEST_TEST_SUITE("FileSystem")
         }
         auto orig_size = fs::file_size(dest_file2);
         fs::copy_file(src_file, dest_file2, fs::copy_options::skip_existing);
-        DOCTEST_CHECK(fs::file_size(dest_file2) == orig_size); // 不应覆盖
+        CHECK(fs::file_size(dest_file2) == orig_size); // 不应覆盖
 
         // 测试 copy_options::overwrite_existing
         fs::copy_file(src_file, dest_file2, fs::copy_options::overwrite_existing);
-        DOCTEST_CHECK(fs::file_size(dest_file2) == fs::file_size(src_file)); // 应覆盖
+        CHECK(fs::file_size(dest_file2) == fs::file_size(src_file)); // 应覆盖
 
         // 测试目录复制
         fs::path src_dir = tmp / "source_dir";
@@ -417,8 +417,8 @@ DOCTEST_TEST_SUITE("FileSystem")
 
         // 复制目录（递归）
         fs::copy(src_dir, dest_dir, fs::copy_options::recursive);
-        DOCTEST_CHECK(fs::exists(dest_dir));
-        DOCTEST_CHECK(fs::exists(dest_dir / "subfile.txt"));
+        CHECK(fs::exists(dest_dir));
+        CHECK(fs::exists(dest_dir / "subfile.txt"));
 
         fs::remove_all(tmp);
     }
@@ -435,7 +435,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::read_symlink 读取符号链接目标
      * - 注意：Windows 平台可能需要管理员权限，权限不足时跳过
      */
-    DOCTEST_TEST_CASE("FilesystemLinks")
+    TEST_CASE("FilesystemLinks")
     {
         auto tmp = make_temp_dir("links");
         fs::path target_file = tmp / "link_target.txt";
@@ -447,7 +447,7 @@ DOCTEST_TEST_SUITE("FileSystem")
             std::ofstream f(target_file.string());
             f << "link target";
         }
-        DOCTEST_CHECK(fs::exists(target_file));
+        CHECK(fs::exists(target_file));
 
         bool hard_link_ok = false;
         bool sym_link_ok = false;
@@ -457,19 +457,19 @@ DOCTEST_TEST_SUITE("FileSystem")
             // 创建硬链接
             fs::create_hard_link(target_file, hard_link_path);
             hard_link_ok = true;
-            DOCTEST_CHECK(fs::exists(hard_link_path));
-            DOCTEST_CHECK(fs::hard_link_count(target_file) >= 2);
-            DOCTEST_CHECK(fs::equivalent(target_file, hard_link_path));
+            CHECK(fs::exists(hard_link_path));
+            CHECK(fs::hard_link_count(target_file) >= 2);
+            CHECK(fs::equivalent(target_file, hard_link_path));
 
             // 创建符号链接
             fs::create_symlink(target_file, sym_link_path);
             sym_link_ok = true;
-            DOCTEST_CHECK(fs::exists(sym_link_path));
-            DOCTEST_CHECK(fs::is_symlink(sym_link_path));
+            CHECK(fs::exists(sym_link_path));
+            CHECK(fs::is_symlink(sym_link_path));
 
             // 测试 read_symlink
             fs::path link_target = fs::read_symlink(sym_link_path);
-            DOCTEST_CHECK(link_target == target_file);
+            CHECK(link_target == target_file);
         }
         catch (const fs::filesystem_error&)
         {
@@ -497,16 +497,16 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 验证 capacity >= free >= available 的逻辑关系
      * - 验证对不存在的路径调用 fs::space 会抛出 filesystem_error
      */
-    DOCTEST_TEST_CASE("FilesystemSpace")
+    TEST_CASE("FilesystemSpace")
     {
         // 测试空间信息
         fs::path current_dir(".");
         auto space_info = fs::space(current_dir);
-        DOCTEST_CHECK(space_info.capacity > 0);
-        DOCTEST_CHECK(space_info.free > 0);
-        DOCTEST_CHECK(space_info.available > 0);
-        DOCTEST_CHECK(space_info.capacity >= space_info.free);
-        DOCTEST_CHECK(space_info.free >= space_info.available);
+        CHECK(space_info.capacity > 0);
+        CHECK(space_info.free > 0);
+        CHECK(space_info.available > 0);
+        CHECK(space_info.capacity >= space_info.free);
+        CHECK(space_info.free >= space_info.available);
 
         // 测试不存在的路径应该抛异常
         bool caught = false;
@@ -518,7 +518,7 @@ DOCTEST_TEST_SUITE("FileSystem")
         {
             caught = true;
         }
-        DOCTEST_CHECK(caught);
+        CHECK(caught);
     }
 
     /**
@@ -529,7 +529,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::resize_file 缩小文件大小
      * - 验证调整后 file_size 与目标大小一致
      */
-    DOCTEST_TEST_CASE("FilesystemResize")
+    TEST_CASE("FilesystemResize")
     {
         auto tmp = make_temp_dir("resize");
         fs::path test_file = tmp / "test_resize.txt";
@@ -540,11 +540,11 @@ DOCTEST_TEST_SUITE("FileSystem")
 
         // 调整文件大小（扩大）
         fs::resize_file(test_file, 100);
-        DOCTEST_CHECK(fs::file_size(test_file) == 100);
+        CHECK(fs::file_size(test_file) == 100);
 
         // 调整文件大小（缩小）
         fs::resize_file(test_file, 10);
-        DOCTEST_CHECK(fs::file_size(test_file) == 10);
+        CHECK(fs::file_size(test_file) == 10);
 
         fs::remove_all(tmp);
     }
@@ -558,7 +558,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::last_write_time 设置文件最后修改时间
      * - 验证设置后再读取，时间戳与设置值一致
      */
-    DOCTEST_TEST_CASE("FilesystemLastWriteTime")
+    TEST_CASE("FilesystemLastWriteTime")
     {
         auto tmp = make_temp_dir("lwt");
         fs::path test_file = tmp / "test_lwt.txt";
@@ -576,12 +576,12 @@ DOCTEST_TEST_SUITE("FileSystem")
             f << " more";
         }
         auto ftime2 = fs::last_write_time(test_file);
-        DOCTEST_CHECK(ftime2 >= ftime);
+        CHECK(ftime2 >= ftime);
 
         // 设置最后修改时间
         fs::last_write_time(test_file, ftime);
         auto ftime3 = fs::last_write_time(test_file);
-        DOCTEST_CHECK(ftime3 == ftime);
+        CHECK(ftime3 == ftime);
 
         fs::remove_all(tmp);
     }
@@ -593,12 +593,12 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 演示 fs::temp_directory_path 获取系统临时目录
      * - 验证临时目录存在、是目录、且为绝对路径
      */
-    DOCTEST_TEST_CASE("FilesystemTempDirectory")
+    TEST_CASE("FilesystemTempDirectory")
     {
         fs::path tmp = fs::temp_directory_path();
-        DOCTEST_CHECK(fs::exists(tmp));
-        DOCTEST_CHECK(fs::is_directory(tmp));
-        DOCTEST_CHECK(tmp.is_absolute());
+        CHECK(fs::exists(tmp));
+        CHECK(fs::is_directory(tmp));
+        CHECK(tmp.is_absolute());
     }
 
     /**
@@ -609,7 +609,7 @@ DOCTEST_TEST_SUITE("FileSystem")
      * - 验证写入后可正确读取文件内容
      * - 这是 C++17 新增的 filesystem 与 fstream 的互操作特性
      */
-    DOCTEST_TEST_CASE("FilesystemFStreamWithFsPath")
+    TEST_CASE("FilesystemFStreamWithFsPath")
     {
         // 测试 fstream 直接接受 fs::path（C++17 特性）
         auto tmp = make_temp_dir("fstream_path");
@@ -617,16 +617,16 @@ DOCTEST_TEST_SUITE("FileSystem")
 
         {
             std::ofstream f(test_file); // 直接传 fs::path
-            DOCTEST_CHECK(f.is_open());
+            CHECK(f.is_open());
             f << "path test";
         }
 
         {
             std::ifstream f(test_file);
-            DOCTEST_CHECK(f.is_open());
+            CHECK(f.is_open());
             std::string content;
             std::getline(f, content);
-            DOCTEST_CHECK(content == "path test");
+            CHECK(content == "path test");
         }
 
         fs::remove_all(tmp);
