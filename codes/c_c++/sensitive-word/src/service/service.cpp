@@ -1,8 +1,12 @@
+#include <chrono>
 #include <cstdlib>
+#include <thread>
 #include <tuple>
 #include "mimalloc.h"
 #include "net/brynet.h"
+#include "net/sw_http_server.h"
 #include "spdlog/fmt/fmt.h"
+#include "spdlog/spdlog.h"
 
 namespace {
 
@@ -51,7 +55,25 @@ int main(int argc, char** argv)
     if (!verify_mimalloc())
         return EXIT_FAILURE;
 
-    fmt::print("success\n");
+    net::sw_http_server_config config;
+    config.listen_ip      = "0.0.0.0";
+    config.listen_port    = 9000;
+    config.worker_count   = 0;
+    config.admin_api_key  = "change-me";
 
+    net::sw_http_server server(std::move(config));
+    if (!server.start())
+    {
+        spdlog::error("failed to start sensitive-word http server");
+        return EXIT_FAILURE;
+    }
+
+    fmt::print("service started at http://0.0.0.0:9000\n");
+    fmt::print("press any key to exit...\n");
+
+    while (!brynet::base::app_kbhit())
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    server.stop();
     return EXIT_SUCCESS;
 }
