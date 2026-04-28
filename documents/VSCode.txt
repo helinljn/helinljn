@@ -44,14 +44,6 @@
                 在设置搜索栏中输入 “Integrated: Windows Enable Conpty”
                 取消选中该选项
 
-    7. Tencent Cloud CodeBuddy
-
-    8. TRAE AI
-
-    9. Claude Code for VS Code
-        https://github.com/farion1231/cc-switch
-        下载最新安装版，推荐安装至：C:/ProgramData/ccswitch
-
 【下载地址】
     https://update.code.visualstudio.com/1.111.0/win32-x64/stable
 
