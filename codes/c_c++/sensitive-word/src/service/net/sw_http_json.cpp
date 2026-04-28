@@ -22,12 +22,25 @@ bool starts_with_case_insensitive(std::string_view text, std::string_view prefix
     return true;
 }
 
+bool is_ascii_space(char ch)
+{
+    const auto value = static_cast<unsigned char>(ch);
+    return std::isspace(value) != 0;
+}
+
 } // namespace
 
 bool is_json_content_type(const HTTPParser& parser)
 {
     const auto& content_type = parser.getValue("Content-Type");
-    return starts_with_case_insensitive(content_type, k_content_type_json);
+    if (!starts_with_case_insensitive(content_type, k_content_type_json))
+        return false;
+
+    if (content_type.size() == std::char_traits<char>::length(k_content_type_json))
+        return true;
+
+    const auto next = content_type[std::char_traits<char>::length(k_content_type_json)];
+    return next == ';' || is_ascii_space(next);
 }
 
 std::optional<json_request> parse_json_request_body(const HTTPParser& parser, http_result& error_result)

@@ -2,6 +2,7 @@
 #include "sw/word_dictionary_loader.h"
 #include <filesystem>
 #include <fstream>
+#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -17,40 +18,72 @@ std::set<std::string> load_word_set_from_file(const std::string& path)
     return result;
 }
 
-bool write_word_set_to_file(const std::string& path, const std::set<std::string>& words)
+bool write_word_set_to_stream(std::ofstream& output, const std::set<std::string>& words)
 {
-    namespace fs = std::filesystem;
+    for (const auto& word : words)
+        output << word << '\n';
 
-    const fs::path target_path(path);
-    const fs::path temp_path = target_path.string() + ".tmp";
+    output.flush();
+    return output.good();
+}
 
-    if (target_path.has_parent_path())
-        fs::create_directories(target_path.parent_path());
+bool write_word_set_to_temp_file(const std::filesystem::path& temp_path,
+                                 const std::set<std::string>& words)
+{
+    std::ofstream output(temp_path, std::ios::binary | std::ios::trunc);
+    if (!output.is_open())
+        return false;
 
-    {
-        std::ofstream output(temp_path, std::ios::binary | std::ios::trunc);
-        if (!output.is_open())
-            return false;
+    return write_word_set_to_stream(output, words);
+}
 
-        for (const auto& word : words)
-            output << word << '\n';
-
-        output.flush();
-        if (!output.good())
-            return false;
-    }
-
+bool move_existing_file_to_backup(const std::filesystem::path& target_path,
+                                  const std::filesystem::path& backup_path)
+{
     std::error_code ec;
-    fs::remove(target_path, ec);
+    std::filesystem::remove(backup_path, ec);
     ec.clear();
-    fs::rename(temp_path, target_path, ec);
+
+    if (!std::filesystem::exists(target_path, ec))
+        return true;
+
+    ec.clear();
+    std::filesystem::rename(target_path, backup_path, ec);
+    return !ec;
+}
+
+bool promote_temp_file(const std::filesystem::path& temp_path,
+                       const std::filesystem::path& target_path)
+{
+    std::error_code ec;
+    std::filesystem::rename(temp_path, target_path, ec);
     if (ec)
     {
-        fs::remove(temp_path, ec);
+        std::filesystem::remove(temp_path, ec);
         return false;
     }
 
     return true;
+}
+
+void cleanup_file(const std::filesystem::path& path)
+{
+    std::error_code ec;
+    std::filesystem::remove(path, ec);
+}
+
+bool restore_backup_file(const std::filesystem::path& backup_path,
+                         const std::filesystem::path& target_path)
+{
+    std::error_code ec;
+    if (!std::filesystem::exists(backup_path, ec))
+        return true;
+
+    ec.clear();
+    std::filesystem::remove(target_path, ec);
+    ec.clear();
+    std::filesystem::rename(backup_path, target_path, ec);
+    return !ec;
 }
 
 } // namespace
@@ -130,8 +163,62 @@ update_command make_inverse_command(const update_command& command)
 bool persist_word_repository(const sw_http_server_config& config,
                              const word_repository&       repository)
 {
-    return write_word_set_to_file(config.deny_file_path, repository.deny_words) &&
-           write_word_set_to_file(config.allow_file_path, repository.allow_words);
+    namespace fs = std::filesystem;
+
+    const fs::path deny_path(config.deny_file_path);
+    const fs::path allow_path(config.allow_file_path);
+    const fs::path deny_temp_path    = deny_path.string() + ".tmp";
+    const fs::path allow_temp_path   = allow_path.string() + ".tmp";
+    const fs::path deny_backup_path  = deny_path.string() + ".bak";
+    const fs::path allow_backup_path = allow_path.string() + ".bak";
+
+    std::error_code ec;
+    if (deny_path.has_parent_path())
+    {
+        fs::create_directories(deny_path.parent_path(), ec);
+        if (ec)
+            return false;
+    }
+
+    ec.clear();
+    if (allow_path.has_parent_path())
+    {
+        fs::create_directories(allow_path.parent_path(), ec);
+        if (ec)
+            return false;
+    }
+
+    if (!write_word_set_to_temp_file(deny_temp_path, repository.deny_words) ||
+        !write_word_set_to_temp_file(allow_temp_path, repository.allow_words))
+    {
+        cleanup_file(deny_temp_path);
+        cleanup_file(allow_temp_path);
+        return false;
+    }
+
+    if (!move_existing_file_to_backup(deny_path, deny_backup_path) ||
+        !move_existing_file_to_backup(allow_path, allow_backup_path))
+    {
+        restore_backup_file(deny_backup_path, deny_path);
+        restore_backup_file(allow_backup_path, allow_path);
+        cleanup_file(deny_temp_path);
+        cleanup_file(allow_temp_path);
+        return false;
+    }
+
+    if (!promote_temp_file(deny_temp_path, deny_path) ||
+        !promote_temp_file(allow_temp_path, allow_path))
+    {
+        restore_backup_file(deny_backup_path, deny_path);
+        restore_backup_file(allow_backup_path, allow_path);
+        cleanup_file(deny_temp_path);
+        cleanup_file(allow_temp_path);
+        return false;
+    }
+
+    cleanup_file(deny_backup_path);
+    cleanup_file(allow_backup_path);
+    return true;
 }
 
 } // namespace net

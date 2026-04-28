@@ -52,10 +52,14 @@ http_result sw_update_coordinator::apply_update(const std::string& list_type,
                                                 bool                     is_add,
                                                 const std::string&       request_id)
 {
+    std::lock_guard<std::mutex> apply_lock(apply_mutex_);
+
     bool ok = false;
     const auto op = resolve_update_op(list_type, is_add, ok);
     if (!ok)
         return make_error_result(400, 40004, "list_type must be deny or allow", request_id);
+
+    const auto previous_version = committed_version_.load();
 
     update_command command;
     command.version = next_version_.fetch_add(1) + 1;
@@ -70,11 +74,16 @@ http_result sw_update_coordinator::apply_update(const std::string& list_type,
     apply_update_to_word_sets(candidate_repository, command);
 
     if (worker_registry_ == nullptr || !worker_registry_->broadcast_update(command))
+    {
+        degraded_.store(true);
         return make_error_result(500, 50002, "worker sync failed", request_id);
+    }
 
     if (config_ == nullptr || !persist_word_repository(*config_, candidate_repository))
     {
-        const auto rollback_command = make_inverse_command(command);
+        auto rollback_command    = make_inverse_command(command);
+        rollback_command.version = previous_version;
+
         const bool rollback_ok =
             worker_registry_ != nullptr && worker_registry_->broadcast_update(rollback_command);
         degraded_.store(!rollback_ok);

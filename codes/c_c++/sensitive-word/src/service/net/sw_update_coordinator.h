@@ -87,6 +87,7 @@ private:
     const sw_http_server_config* config_           = nullptr;
     sw_worker_registry*          worker_registry_  = nullptr;
 
+    std::mutex                   apply_mutex_;
     mutable std::mutex           state_mutex_;
     word_repository              repository_;
     std::atomic<uint64_t>        next_version_{0};

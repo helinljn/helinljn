@@ -1,5 +1,7 @@
 #include "net/sw_worker_registry.h"
+#include <atomic>
 #include <chrono>
+#include <memory>
 #include <utility>
 
 namespace net {
@@ -34,20 +36,22 @@ void sw_worker_registry::clear()
 
 bool sw_worker_registry::bind_worker_thread_locals()
 {
-    auto wg = brynet::base::WaitGroup::Create();
+    auto completed = std::make_shared<std::atomic<size_t>>(0);
+    auto wg        = brynet::base::WaitGroup::Create();
     wg->add(static_cast<int>(worker_contexts_.size()));
 
     for (size_t i = 0; i < worker_contexts_.size(); ++i)
     {
         auto* context = worker_contexts_[i].get();
-        event_loops_[i]->runAsyncFunctor([context, wg]() {
+        event_loops_[i]->runAsyncFunctor([context, completed, wg]() {
             tls_worker_context = context;
+            completed->fetch_add(1, std::memory_order_relaxed);
             wg->done();
         });
     }
 
     wg->wait(std::chrono::seconds(3));
-    return true;
+    return completed->load(std::memory_order_relaxed) == worker_contexts_.size();
 }
 
 worker_context* sw_worker_registry::current_worker() const noexcept
@@ -66,8 +70,8 @@ bool sw_worker_registry::broadcast_update(const update_command& command)
         return false;
 
     auto* current_context = tls_worker_context;
+    auto  completed       = std::make_shared<std::atomic<size_t>>(1);
     auto  wg              = brynet::base::WaitGroup::Create();
-    size_t async_count    = 0;
 
     apply_update_to_engine(current_context->engine, command);
     current_context->applied_version = command.version;
@@ -77,22 +81,19 @@ bool sw_worker_registry::broadcast_update(const update_command& command)
         if (context.get() == current_context)
             continue;
 
-        ++async_count;
         wg->add(1);
 
         auto* target_context = context.get();
-        target_context->event_loop->runAsyncFunctor([target_context, command, wg]() {
+        target_context->event_loop->runAsyncFunctor([target_context, command, completed, wg]() {
             apply_update_to_engine(target_context->engine, command);
             target_context->applied_version = command.version;
+            completed->fetch_add(1, std::memory_order_relaxed);
             wg->done();
         });
     }
 
-    if (async_count == 0)
-        return true;
-
     wg->wait(std::chrono::seconds(5));
-    return true;
+    return completed->load(std::memory_order_relaxed) == worker_contexts_.size();
 }
 
 void sw_worker_registry::apply_update_to_engine(sensitive_word::sensitive_word_engine& engine,

@@ -305,9 +305,8 @@ private:
         if (return_mode == return_mode_kind::contains)
         {
             const auto hit = current_worker->engine.contains(*text);
-            data["hit"]         = hit;
-            data["match_count"] = hit ? 1 : 0;
-            data["matches"]     = Json::arrayValue;
+            data["hit"]     = hit;
+            data["matches"] = Json::arrayValue;
             return make_ok_result(std::move(data), request->request_id);
         }
 
