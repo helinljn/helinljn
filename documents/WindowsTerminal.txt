@@ -1,0 +1,112 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": [],
+    "alwaysOnTop": false,
+    "alwaysShowNotificationIcon": false,
+    "autoHideWindow": false,
+    "centerOnLaunch": true,
+    "compatibility.allowHeadless": false,
+    "compatibility.enableUnfocusedAcrylic": true,
+    "copyFormatting": "none",
+    "copyOnSelect": false,
+    "defaultInputScope": "alphanumericHalfWidth",
+    "defaultProfile": "{c0adf1c2-a2c1-47d5-bf1a-ae026a8b0cbc}",
+    "disableAnimations": true,
+    "experimental.detectURLs": false,
+    "experimental.enableColorSelection": false,
+    "experimental.scrollToChangeOpacity": false,
+    "experimental.scrollToZoom": false,
+    "firstWindowPreference": "defaultProfile",
+    "focusFollowMouse": false,
+    "initialPosition": ",",
+    "initialRows": 30,
+    "keybindings":
+    [
+        {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.DuplicatePaneAuto",
+            "keys": "alt+shift+d"
+        }
+    ],
+    "language": "zh-Hans",
+    "minimizeToNotificationArea": false,
+    "newTabMenu":
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "newTabPosition": "afterLastTab",
+    "profiles":
+    {
+        "defaults":
+        {
+            "colorScheme": "Campbell",
+            "compatibility.allowOSC52": false,
+            "font":
+            {
+                "face": "Consolas"
+            },
+            "opacity": 99,
+            "scrollbarState": "always",
+            "useAcrylic": true
+        },
+        "list":
+        [
+            {
+                "commandline": "%SystemRoot%\\System32\\cmd.exe",
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "\u547d\u4ee4\u63d0\u793a\u7b26"
+            },
+            {
+                "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+                "hidden": false,
+                "name": "Ubuntu",
+                "source": "Windows.Terminal.Wsl"
+            },
+            {
+                "commandline": "\"C:\\Users\\helin\\AppData\\Local\\Microsoft\\WindowsApps\\Microsoft.PowerShell_8wekyb3d8bbwe\\pwsh.exe\"",
+                "guid": "{c0adf1c2-a2c1-47d5-bf1a-ae026a8b0cbc}",
+                "hidden": false,
+                "icon": "ms-appx:///ProfileIcons/pwsh.png",
+                "name": "PowerShell",
+                "startingDirectory": "%USERPROFILE%"
+            },
+            {
+                "commandline": "cmd.exe /k \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\" -startdir=none -arch=x64 -host_arch=x64",
+                "guid": "{1434b275-93e4-4bc3-be30-2cae3504caa8}",
+                "hidden": false,
+                "icon": "ms-appx:///ProfileIcons/vs-cmd.png",
+                "name": "Developer Command Prompt for VS 2022",
+                "startingDirectory": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community"
+            }
+        ]
+    },
+    "schemes": [],
+    "showAdminShield": true,
+    "showTabsFullscreen": false,
+    "showTabsInTitlebar": true,
+    "showTerminalTitleInTitlebar": false,
+    "snapToGridOnResize": true,
+    "tabSwitcherMode": "inOrder",
+    "tabWidthMode": "equal",
+    "theme": "dark",
+    "themes": [],
+    "trimBlockSelection": true,
+    "trimPaste": true,
+    "useAcrylicInTabRow": false,
+    "warning.confirmCloseAllTabs": true,
+    "warning.inputService": true,
+    "warning.largePaste": true,
+    "warning.multiLinePaste": "automatic",
+    "windowingBehavior": "useNew"
+}
