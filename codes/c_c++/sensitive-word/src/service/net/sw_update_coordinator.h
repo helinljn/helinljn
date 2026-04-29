@@ -90,7 +90,7 @@ private:
     std::mutex                   apply_mutex_;
     mutable std::mutex           state_mutex_;
     word_repository              repository_;
-    std::atomic<uint64_t>        next_version_{0};
+    uint64_t                     next_version_{0};
     std::atomic<uint64_t>        committed_version_{0};
     std::atomic<bool>            degraded_{false};
 };

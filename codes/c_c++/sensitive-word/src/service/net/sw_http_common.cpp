@@ -20,8 +20,12 @@ std::string status_reason_phrase(int status_code)
 
 std::string to_json_string(const Json::Value& value)
 {
-    Json::StreamWriterBuilder builder;
-    builder["indentation"] = "";
+    thread_local Json::StreamWriterBuilder builder = []() {
+        Json::StreamWriterBuilder b;
+        b["indentation"] = "";
+        return b;
+    }();
+
     return Json::writeString(builder, value);
 }
 

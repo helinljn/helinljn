@@ -104,6 +104,11 @@ public:
     {
     }
 
+    ~impl()
+    {
+        stop();
+    }
+
     /**
      * @brief 启动 HTTP 服务并初始化运行时依赖
      * @return true 表示启动成功；false 表示启动失败
@@ -325,8 +330,9 @@ private:
         }
 
         auto results = current_worker->engine.find_all(*text, options);
-        if (static_cast<int>(results.size()) > *max_results)
-            results.resize(static_cast<size_t>(*max_results));
+        const auto limit = static_cast<size_t>(*max_results);
+        if (results.size() > limit)
+            results.resize(limit);
 
         Json::Value matches(Json::arrayValue);
         for (const auto& item : results)

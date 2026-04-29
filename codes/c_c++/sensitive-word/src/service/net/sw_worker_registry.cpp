@@ -76,6 +76,8 @@ bool sw_worker_registry::broadcast_update(const update_command& command)
     apply_update_to_engine(current_context->engine, command);
     current_context->applied_version = command.version;
 
+    auto shared_command = std::make_shared<const update_command>(command);
+
     for (const auto& context : worker_contexts_)
     {
         if (context.get() == current_context)
@@ -84,9 +86,9 @@ bool sw_worker_registry::broadcast_update(const update_command& command)
         wg->add(1);
 
         auto* target_context = context.get();
-        target_context->event_loop->runAsyncFunctor([target_context, command, completed, wg]() {
-            apply_update_to_engine(target_context->engine, command);
-            target_context->applied_version = command.version;
+        target_context->event_loop->runAsyncFunctor([target_context, shared_command, completed, wg]() {
+            apply_update_to_engine(target_context->engine, *shared_command);
+            target_context->applied_version = shared_command->version;
             completed->fetch_add(1, std::memory_order_relaxed);
             wg->done();
         });

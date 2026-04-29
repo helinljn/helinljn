@@ -169,9 +169,9 @@ std::optional<std::vector<std::string>> require_string_array_field(
             return std::nullopt;
         }
 
-        const auto word = item.asString();
+        auto word = item.asString();
         if (!word.empty())
-            result.push_back(word);
+            result.push_back(std::move(word));
     }
 
     if (result.empty())

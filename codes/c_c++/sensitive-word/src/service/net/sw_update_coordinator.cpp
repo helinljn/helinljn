@@ -13,7 +13,7 @@ void sw_update_coordinator::initialize(const sw_http_server_config* config,
         std::lock_guard<std::mutex> lock(state_mutex_);
         repository_ = std::move(repository);
     }
-    next_version_.store(0);
+    next_version_ = 0;
     committed_version_.store(0);
     degraded_.store(false);
 }
@@ -26,7 +26,7 @@ void sw_update_coordinator::reset()
         std::lock_guard<std::mutex> lock(state_mutex_);
         repository_ = {};
     }
-    next_version_.store(0);
+    next_version_ = 0;
     committed_version_.store(0);
     degraded_.store(false);
 }
@@ -62,7 +62,7 @@ http_result sw_update_coordinator::apply_update(const std::string& list_type,
     const auto previous_version = committed_version_.load();
 
     update_command command;
-    command.version = next_version_.fetch_add(1) + 1;
+    command.version = next_version_ + 1;
     command.op      = op;
     command.words   = std::move(words);
 
@@ -75,8 +75,18 @@ http_result sw_update_coordinator::apply_update(const std::string& list_type,
 
     if (worker_registry_ == nullptr || !worker_registry_->broadcast_update(command))
     {
-        degraded_.store(true);
-        return make_error_result(500, 50002, "worker sync failed", request_id);
+        auto rollback_command    = make_inverse_command(command);
+        rollback_command.version = previous_version;
+
+        const bool rollback_ok =
+            worker_registry_ != nullptr && worker_registry_->broadcast_update(rollback_command);
+        degraded_.store(!rollback_ok);
+
+        return make_error_result(
+            500,
+            rollback_ok ? 50002 : 50005,
+            rollback_ok ? "worker sync failed" : "worker sync and rollback failed",
+            request_id);
     }
 
     if (config_ == nullptr || !persist_word_repository(*config_, candidate_repository))
@@ -101,6 +111,7 @@ http_result sw_update_coordinator::apply_update(const std::string& list_type,
     }
 
     committed_version_.store(command.version);
+    next_version_ = command.version;
     degraded_.store(false);
 
     Json::Value data(Json::objectValue);
