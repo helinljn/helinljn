@@ -62,6 +62,15 @@ public:
      */
     bool broadcast_update(const update_command& command);
 
+    /**
+     * @brief 向全部 worker 广播词库快照，重建引擎
+     * @param config 敏感词引擎构建配置
+     * @param repository 词库仓储快照
+     * @return true 表示广播成功；false 表示存在 worker 重建失败
+     */
+    bool broadcast_rebuild(const sensitive_word::sensitive_word_config& config,
+                           const word_repository&                       repository);
+
 private:
     /**
      * @brief 将更新命令应用到单个 worker 的本地引擎

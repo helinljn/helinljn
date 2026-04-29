@@ -147,19 +147,6 @@ void apply_update_to_word_sets(word_repository& repository, const update_command
     }
 }
 
-update_command make_inverse_command(const update_command& command)
-{
-    update_command inverse = command;
-    switch (command.op)
-    {
-        case update_op::add_deny:     inverse.op = update_op::remove_deny; break;
-        case update_op::remove_deny:  inverse.op = update_op::add_deny; break;
-        case update_op::add_allow:    inverse.op = update_op::remove_allow; break;
-        case update_op::remove_allow: inverse.op = update_op::add_allow; break;
-    }
-    return inverse;
-}
-
 bool persist_word_repository(const sw_http_server_config& config,
                              const word_repository&       repository)
 {

@@ -117,8 +117,12 @@
 ### HTTP 与 JSON 边界
 
 - `sw_http_server.*` 负责请求分发、响应组装与服务生命周期，不应演变成塞满业务逻辑的大型处理函数。
+  - 使用 brynet 的 `HttpListenerBuilder` 构建 HTTP 服务。
+  - 支持 HTTP keep-alive：根据 `parser.isKeepAlive()` 决定连接行为，keep-alive 时保持连接，否则在发送完成后调用 `postShutdown()`。
+  - 异步更新接口（`/v1/add_words`、`/v1/remove_words`）通过 callback 异步发送响应，不阻塞 IO 线程。
 - `sw_http_json.*` 负责 JSON 内容类型判断、解析、字段校验和错误映射。
 - `sw_http_auth.*` 负责鉴权边界，避免把鉴权逻辑散落到各 handler 中。
+  - 鉴权检查应在解析请求体之前执行，避免未授权请求消耗解析资源。
 - `sw_http_common.*` 中的共享结构和返回体语义需要保持稳定，避免无意改变通用响应格式。
 
 ### 接口兼容性
@@ -135,13 +139,20 @@
 ### 并发与 worker 协调
 
 - `sw_update_coordinator.*` 负责更新串行化、版本推进、降级状态与失败处理。
+  - 采用异步架构：更新操作在独立的后台工作线程执行，不阻塞 IO 线程。
+  - HTTP handler 通过 `apply_update_async` 投递任务到队列，通过 callback 异步返回结果。
+  - 失败回滚采用快照重建策略：通过 `broadcast_rebuild` 用完整词库快照重建所有 worker 引擎，而非反操作回滚。
 - `sw_worker_registry.*` 负责 worker 上下文、线程局部绑定和跨 worker 广播更新。
+  - `broadcast_update` 向所有 worker 异步广播增量更新命令。
+  - `broadcast_rebuild` 向所有 worker 异步广播完整快照，用于失败回滚或初始化。
+  - 广播操作不依赖调用线程身份，可从任意线程（如 coordinator 后台线程）调用。
 - 修改并发相关代码时，必须明确：
   - 共享状态由谁持有
   - 锁的作用范围与顺序
   - 更新对各 worker 的可见性
   - 失败后的回退或降级语义
 - 避免引入隐式竞态、锁顺序不明、长时间持锁或部分 worker 状态不一致的问题。
+- 特别注意：不要在 IO 线程（HTTP handler 上下文）中执行阻塞等待操作，这会卡住整个 EventLoop。
 
 ### 持久化与恢复语义
 
@@ -152,6 +163,7 @@
   - 不因半写入状态破坏现有词库
   - 内存态与磁盘态的语义一致
 - 不要在未验证回滚与异常路径的情况下改动文件替换流程。
+- 回滚策略：更新失败时，通过 `broadcast_rebuild` 用完整词库快照重建所有 worker 引擎，确保状态一致性。不使用反操作回滚，避免幂等性问题。
 
 ## `src/service/sw` 与核心匹配能力要求
 

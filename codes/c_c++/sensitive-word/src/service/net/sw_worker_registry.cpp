@@ -1,4 +1,5 @@
 #include "net/sw_worker_registry.h"
+#include "net/sw_dictionary_persistence.h"
 #include <atomic>
 #include <chrono>
 #include <memory>
@@ -66,29 +67,40 @@ size_t sw_worker_registry::size() const noexcept
 
 bool sw_worker_registry::broadcast_update(const update_command& command)
 {
-    if (tls_worker_context == nullptr)
-        return false;
-
-    auto* current_context = tls_worker_context;
-    auto  completed       = std::make_shared<std::atomic<size_t>>(1);
-    auto  wg              = brynet::base::WaitGroup::Create();
-
-    apply_update_to_engine(current_context->engine, command);
-    current_context->applied_version = command.version;
+    auto completed = std::make_shared<std::atomic<size_t>>(0);
+    auto wg        = brynet::base::WaitGroup::Create();
+    wg->add(static_cast<int>(worker_contexts_.size()));
 
     auto shared_command = std::make_shared<const update_command>(command);
 
     for (const auto& context : worker_contexts_)
     {
-        if (context.get() == current_context)
-            continue;
-
-        wg->add(1);
-
         auto* target_context = context.get();
         target_context->event_loop->runAsyncFunctor([target_context, shared_command, completed, wg]() {
             apply_update_to_engine(target_context->engine, *shared_command);
             target_context->applied_version = shared_command->version;
+            completed->fetch_add(1, std::memory_order_relaxed);
+            wg->done();
+        });
+    }
+
+    wg->wait(std::chrono::seconds(5));
+    return completed->load(std::memory_order_relaxed) == worker_contexts_.size();
+}
+
+bool sw_worker_registry::broadcast_rebuild(const sensitive_word::sensitive_word_config& config,
+                                           const word_repository&                       repository)
+{
+    auto base_engine = build_engine_from_repository(config, repository);
+    auto completed   = std::make_shared<std::atomic<size_t>>(0);
+    auto wg          = brynet::base::WaitGroup::Create();
+    wg->add(static_cast<int>(worker_contexts_.size()));
+
+    for (const auto& context : worker_contexts_)
+    {
+        auto* target_context = context.get();
+        target_context->event_loop->runAsyncFunctor([target_context, base_engine, completed, wg]() {
+            target_context->engine = base_engine;
             completed->fetch_add(1, std::memory_order_relaxed);
             wg->done();
         });

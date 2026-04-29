@@ -109,10 +109,14 @@ std::string to_json_string(const Json::Value& value);
  * @brief 构造完整 HTTP 响应报文
  * @param status_code HTTP 状态码
  * @param body HTTP 响应体
+ * @param keep_alive 是否使用 keep-alive 连接
  * @param content_type 响应 Content-Type
  * @return 可直接发送的 HTTP/1.1 响应报文
  */
-std::string make_http_response(int status_code, const std::string& body, std::string_view content_type = k_content_type_json);
+std::string make_http_response(int status_code,
+                               const std::string& body,
+                               bool keep_alive,
+                               std::string_view content_type = k_content_type_json);
 
 /**
  * @brief 构造统一格式的错误响应

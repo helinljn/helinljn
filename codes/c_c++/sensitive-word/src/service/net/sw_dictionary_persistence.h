@@ -36,13 +36,6 @@ void apply_update_to_word_sets(word_repository& repository,
                                const update_command& command);
 
 /**
- * @brief 生成一条更新命令的逆操作命令
- * @param command 原始更新命令
- * @return 用于回滚的逆操作命令
- */
-update_command make_inverse_command(const update_command& command);
-
-/**
  * @brief 将词库快照持久化到配置指定的 deny/allow 文件
  * @param config HTTP 服务运行配置
  * @param repository 待持久化的词库仓储快照

@@ -18,9 +18,6 @@ using HttpSession         = brynet::net::http::HttpSession;
 using HttpSessionHandlers = brynet::net::http::HttpSessionHandlers;
 using HTTPParser          = brynet::net::http::HTTPParser;
 
-//////////////////////////////////////////////////////////////
-// 规范化 worker 数量配置
-//////////////////////////////////////////////////////////////
 size_t normalize_worker_count(size_t worker_count) noexcept
 {
     if (worker_count != 0)
@@ -30,9 +27,6 @@ size_t normalize_worker_count(size_t worker_count) noexcept
     return hardware_count == 0 ? 1u : static_cast<size_t>(hardware_count);
 }
 
-//////////////////////////////////////////////////////////////
-// /v1/check 返回模式
-//////////////////////////////////////////////////////////////
 enum class return_mode_kind
 {
     contains,
@@ -40,17 +34,11 @@ enum class return_mode_kind
     all,
 };
 
-//////////////////////////////////////////////////////////////
-// 构造 HTTP 文本响应
-//////////////////////////////////////////////////////////////
-std::string build_http_response(const http_result& result)
+std::string build_http_response(const http_result& result, bool keep_alive)
 {
-    return make_http_response(result.http_status, to_json_string(result.root));
+    return make_http_response(result.http_status, to_json_string(result.root), keep_alive);
 }
 
-//////////////////////////////////////////////////////////////
-// 解析 /v1/check 的 return_mode 参数
-//////////////////////////////////////////////////////////////
 bool parse_return_mode(
     const Json::Value& root,
     const std::string& request_id,
@@ -93,9 +81,6 @@ bool parse_return_mode(
 
 } // namespace
 
-//////////////////////////////////////////////////////////////
-// sw_http_server 内部实现
-//////////////////////////////////////////////////////////////
 class sw_http_server::impl
 {
 public:
@@ -109,10 +94,6 @@ public:
         stop();
     }
 
-    /**
-     * @brief 启动 HTTP 服务并初始化运行时依赖
-     * @return true 表示启动成功；false 表示启动失败
-     */
     bool start()
     {
         if (running_)
@@ -132,6 +113,7 @@ public:
         catch (const std::exception& ex)
         {
             spdlog::error("failed to load dictionary files, error: {}", ex.what());
+            brynet::net::base::DestroySocket();
             return false;
         }
 
@@ -151,20 +133,24 @@ public:
 
         update_coordinator_.initialize(&config_, &worker_registry_, std::move(repository));
 
-        auto http_enter_callback = [this](const HttpSession::Ptr& /*http_session*/, HttpSessionHandlers& handlers) {
-            handlers.setHttpEndCallback([this](const HTTPParser& parser, const HttpSession::Ptr& session) {
-                const auto response = handle_http_request(parser);
-                session->send(response);
-            });
-        };
-
-        listener_.WithService(service_)
-                 .WithAddr(false, config_.listen_ip, config_.listen_port)
-                 .WithMaxRecvBufferSize(64 * 1024)
-                 .AddEnterCallback([http_enter_callback](const brynet::net::TcpConnection::Ptr& session) {
-                     brynet::net::http::HttpService::setup(session, http_enter_callback);
-                 })
-                 .asyncRun();
+        try
+        {
+            listener_.WithService(service_)
+                     .WithAddr(false, config_.listen_ip, config_.listen_port)
+                     .WithMaxRecvBufferSize(64 * 1024)
+                     .WithEnterCallback([this](const HttpSession::Ptr& session, HttpSessionHandlers& handlers) {
+                         handlers.setHttpEndCallback([this](const HTTPParser& parser, const HttpSession::Ptr& session) {
+                             handle_http_request(parser, session);
+                         });
+                     })
+                     .asyncRun();
+        }
+        catch (const std::exception& ex)
+        {
+            spdlog::error("failed to start listener: {}", ex.what());
+            stop();
+            return false;
+        }
 
         running_ = true;
         spdlog::info("sw http server started, listen={}:{}, workers={}",
@@ -174,21 +160,12 @@ public:
         return true;
     }
 
-    /**
-     * @brief 停止 HTTP 服务并清理运行时状态
-     */
     void stop() noexcept
     {
         if (!running_ && service_ == nullptr)
             return;
 
-        try
-        {
-            listener_.stop();
-        }
-        catch (...)
-        {
-        }
+        update_coordinator_.shutdown();
 
         if (service_ != nullptr)
         {
@@ -201,22 +178,19 @@ public:
             }
         }
 
-        update_coordinator_.reset();
         worker_registry_.clear();
         event_loops_.clear();
         service_.reset();
         running_ = false;
+
+        brynet::net::base::DestroySocket();
     }
 
 private:
-    /**
-     * @brief 处理 HTTP 请求并生成响应报文
-     * @param parser HTTP 请求解析器
-     * @return 可直接发送的 HTTP 响应报文
-     */
-    std::string handle_http_request(const HTTPParser& parser)
+    void handle_http_request(const HTTPParser& parser, const HttpSession::Ptr& session)
     {
-        const auto  path = parser.getPath();
+        const auto  path       = parser.getPath();
+        const bool  keep_alive = parser.isKeepAlive();
         http_result result;
 
         if (path == "/v1/healthz")
@@ -226,50 +200,64 @@ private:
             else
                 result = handle_healthz(parser);
 
-            return build_http_response(result);
+            send_response(session, result, keep_alive);
+            return;
         }
 
         if (parser.method() != HTTP_POST)
         {
             result = make_error_result(405, 40501, "only POST is supported");
-            return build_http_response(result);
+            send_response(session, result, keep_alive);
+            return;
         }
 
         if (!is_json_content_type(parser))
         {
             result = make_error_result(415, 41501, "content type must be application/json");
-            return build_http_response(result);
+            send_response(session, result, keep_alive);
+            return;
         }
 
         if (path == "/v1/check")
         {
             result = handle_check(parser);
+            send_response(session, result, keep_alive);
         }
         else if (path == "/v1/add_words")
         {
-            result = handle_update(parser, true);
+            handle_update_async(parser, true, session, keep_alive);
         }
         else if (path == "/v1/remove_words")
         {
-            result = handle_update(parser, false);
+            handle_update_async(parser, false, session, keep_alive);
         }
         else if (path == "/v1/query_word")
         {
             result = handle_query_word(parser);
+            send_response(session, result, keep_alive);
         }
         else
         {
             result = make_error_result(404, 40401, "route not found");
+            send_response(session, result, keep_alive);
         }
-
-        return build_http_response(result);
     }
 
-    /**
-     * @brief 处理 /v1/check 请求
-     * @param parser HTTP 请求解析器
-     * @return 检测结果对应的标准响应
-     */
+    void send_response(const HttpSession::Ptr& session, const http_result& result, bool keep_alive)
+    {
+        auto response = build_http_response(result, keep_alive);
+        if (keep_alive)
+        {
+            session->send(std::move(response));
+        }
+        else
+        {
+            session->send(std::move(response), [session]() {
+                session->postShutdown();
+            });
+        }
+    }
+
     http_result handle_check(const HTTPParser& parser)
     {
         http_result parse_error;
@@ -344,11 +332,6 @@ private:
         return make_ok_result(std::move(data), request->request_id);
     }
 
-    /**
-     * @brief 处理 /v1/query_word 请求
-     * @param parser HTTP 请求解析器
-     * @return 查询结果对应的标准响应
-     */
     http_result handle_query_word(const HTTPParser& parser)
     {
         http_result parse_error;
@@ -374,11 +357,6 @@ private:
         return make_ok_result(std::move(data), request->request_id);
     }
 
-    /**
-     * @brief 处理 /v1/healthz 请求
-     * @param parser HTTP 请求解析器
-     * @return 健康检查结果对应的标准响应
-     */
     http_result handle_healthz(const HTTPParser& /*parser*/)
     {
         Json::Value data(Json::objectValue);
@@ -388,41 +366,55 @@ private:
         return make_ok_result(std::move(data));
     }
 
-    /**
-     * @brief 处理 /v1/add_words 与 /v1/remove_words 请求
-     * @param parser HTTP 请求解析器
-     * @param is_add true 表示新增；false 表示删除
-     * @return 更新结果对应的标准响应
-     */
-    http_result handle_update(const HTTPParser& parser, bool is_add)
+    void handle_update_async(const HTTPParser& parser, bool is_add, const HttpSession::Ptr& session, bool keep_alive)
     {
+        if (!is_authorized_request(config_, parser))
+        {
+            auto result = make_error_result(401, 40101, "unauthorized");
+            send_response(session, result, keep_alive);
+            return;
+        }
+
         http_result parse_error;
         auto        request = parse_json_request_body(parser, parse_error);
         if (!request)
-            return parse_error;
-
-        if (!is_authorized_request(config_, parser))
-            return make_error_result(401, 40101, "unauthorized", request->request_id);
+        {
+            send_response(session, parse_error, keep_alive);
+            return;
+        }
 
         auto list_type = require_string_field(request->root, "list_type", parse_error, request->request_id);
         if (!list_type)
-            return parse_error;
+        {
+            send_response(session, parse_error, keep_alive);
+            return;
+        }
 
         auto words = require_string_array_field(request->root, "word_list", parse_error, request->request_id);
         if (!words)
-            return parse_error;
+        {
+            send_response(session, parse_error, keep_alive);
+            return;
+        }
 
-        return update_coordinator_.apply_update(*list_type, std::move(*words), is_add, request->request_id);
+        update_coordinator_.apply_update_async(
+            *list_type,
+            std::move(*words),
+            is_add,
+            request->request_id,
+            [session, keep_alive, this](http_result result) {
+                send_response(session, result, keep_alive);
+            });
     }
 
 private:
-    sw_http_server_config                  config_;
-    brynet::net::IOThreadTcpService::Ptr   service_;
-    brynet::net::wrapper::ListenerBuilder  listener_;
-    std::vector<EventLoopPtr>              event_loops_;
-    sw_worker_registry                     worker_registry_;
-    sw_update_coordinator                  update_coordinator_;
-    bool                                   running_ = false;
+    sw_http_server_config                        config_;
+    brynet::net::IOThreadTcpService::Ptr         service_;
+    brynet::net::wrapper::HttpListenerBuilder    listener_;
+    std::vector<EventLoopPtr>                    event_loops_;
+    sw_worker_registry                           worker_registry_;
+    sw_update_coordinator                        update_coordinator_;
+    bool                                         running_ = false;
 };
 
 sw_http_server::sw_http_server(sw_http_server_config config)

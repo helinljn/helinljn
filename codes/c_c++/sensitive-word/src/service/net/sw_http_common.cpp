@@ -29,7 +29,10 @@ std::string to_json_string(const Json::Value& value)
     return Json::writeString(builder, value);
 }
 
-std::string make_http_response(int status_code, const std::string& body, std::string_view content_type)
+std::string make_http_response(int status_code,
+                               const std::string& body,
+                               bool keep_alive,
+                               std::string_view content_type)
 {
     std::string response;
     response.reserve(body.size() + 256);
@@ -44,7 +47,7 @@ std::string make_http_response(int status_code, const std::string& body, std::st
     response += "Content-Length: ";
     response += std::to_string(body.size());
     response += "\r\n";
-    response += "Connection: close\r\n";
+    response += keep_alive ? "Connection: keep-alive\r\n" : "Connection: close\r\n";
     response += "\r\n";
     response += body;
     return response;
