@@ -134,6 +134,7 @@ http_result sw_update_coordinator::apply_update_internal(const std::string&     
     }
 
     const auto previous_version = committed_version_.load();
+    std::ignore                 = previous_version;
 
     update_command command;
     command.version = next_version_ + 1;

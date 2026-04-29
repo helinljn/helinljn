@@ -139,6 +139,7 @@ public:
                      .WithAddr(false, config_.listen_ip, config_.listen_port)
                      .WithMaxRecvBufferSize(64 * 1024)
                      .WithEnterCallback([this](const HttpSession::Ptr& session, HttpSessionHandlers& handlers) {
+                        std::ignore = session;
                          handlers.setHttpEndCallback([this](const HTTPParser& parser, const HttpSession::Ptr& session) {
                              handle_http_request(parser, session);
                          });
