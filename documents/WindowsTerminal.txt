@@ -11,7 +11,7 @@
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultInputScope": "alphanumericHalfWidth",
-    "defaultProfile": "{c0adf1c2-a2c1-47d5-bf1a-ae026a8b0cbc}",
+    "defaultProfile": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
     "disableAnimations": true,
     "experimental.detectURLs": false,
     "experimental.enableColorSelection": false,
@@ -72,14 +72,6 @@
                 "hidden": false,
                 "name": "Ubuntu",
                 "source": "Windows.Terminal.Wsl"
-            },
-            {
-                "commandline": "\"C:\\Users\\helin\\AppData\\Local\\Microsoft\\WindowsApps\\Microsoft.PowerShell_8wekyb3d8bbwe\\pwsh.exe\"",
-                "guid": "{c0adf1c2-a2c1-47d5-bf1a-ae026a8b0cbc}",
-                "hidden": false,
-                "icon": "ms-appx:///ProfileIcons/pwsh.png",
-                "name": "PowerShell",
-                "startingDirectory": "%USERPROFILE%"
             },
             {
                 "commandline": "cmd.exe /k \"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\Tools\\VsDevCmd.bat\" -startdir=none -arch=x64 -host_arch=x64",
