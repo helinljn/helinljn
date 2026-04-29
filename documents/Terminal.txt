@@ -3,7 +3,7 @@
     "$schema": "https://aka.ms/terminal-profiles-schema",
     "actions": [],
     "copyFormatting": "none",
-    "copyOnSelect": true,
+    "copyOnSelect": false,
     "defaultProfile": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
     "experimental.detectURLs": false,
     "experimental.enableColorSelection": false,
