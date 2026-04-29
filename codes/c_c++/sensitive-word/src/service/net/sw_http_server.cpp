@@ -7,6 +7,7 @@
 #include "net/sw_update_coordinator.h"
 #include "net/sw_worker_registry.h"
 #include "spdlog/spdlog.h"
+#include <atomic>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -17,6 +18,8 @@ namespace {
 using HttpSession         = brynet::net::http::HttpSession;
 using HttpSessionHandlers = brynet::net::http::HttpSessionHandlers;
 using HTTPParser          = brynet::net::http::HTTPParser;
+
+constexpr size_t k_max_recv_buffer_size = 64 * 1024;  // 64KB HTTP 接收缓冲区
 
 size_t normalize_worker_count(size_t worker_count) noexcept
 {
@@ -96,7 +99,7 @@ public:
 
     bool start()
     {
-        if (running_)
+        if (running_.load(std::memory_order_acquire))
             return true;
 
         if (!brynet::net::base::InitSocket())
@@ -137,7 +140,7 @@ public:
         {
             listener_.WithService(service_)
                      .WithAddr(false, config_.listen_ip, config_.listen_port)
-                     .WithMaxRecvBufferSize(64 * 1024)
+                     .WithMaxRecvBufferSize(k_max_recv_buffer_size)
                      .WithEnterCallback([this](const HttpSession::Ptr& session, HttpSessionHandlers& handlers) {
                         std::ignore = session;
                          handlers.setHttpEndCallback([this](const HTTPParser& parser, const HttpSession::Ptr& session) {
@@ -153,7 +156,7 @@ public:
             return false;
         }
 
-        running_ = true;
+        running_.store(true, std::memory_order_release);
         spdlog::info("sw http server started, listen={}:{}, workers={}",
                      config_.listen_ip,
                      config_.listen_port,
@@ -163,8 +166,10 @@ public:
 
     void stop() noexcept
     {
-        if (!running_ && service_ == nullptr)
+        if (!running_.load(std::memory_order_acquire) && service_ == nullptr)
             return;
+
+        running_.store(false, std::memory_order_release);
 
         update_coordinator_.shutdown();
 
@@ -182,7 +187,6 @@ public:
         worker_registry_.clear();
         event_loops_.clear();
         service_.reset();
-        running_ = false;
 
         brynet::net::base::DestroySocket();
     }
@@ -190,6 +194,9 @@ public:
 private:
     void handle_http_request(const HTTPParser& parser, const HttpSession::Ptr& session)
     {
+        if (!running_.load(std::memory_order_acquire))
+            return;
+
         const auto  path       = parser.getPath();
         const bool  keep_alive = parser.isKeepAlive();
         http_result result;
@@ -415,7 +422,7 @@ private:
     std::vector<EventLoopPtr>                    event_loops_;
     sw_worker_registry                           worker_registry_;
     sw_update_coordinator                        update_coordinator_;
-    bool                                         running_ = false;
+    std::atomic<bool>                            running_{false};
 };
 
 sw_http_server::sw_http_server(sw_http_server_config config)

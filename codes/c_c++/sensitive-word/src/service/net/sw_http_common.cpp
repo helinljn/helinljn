@@ -1,5 +1,4 @@
 #include "net/sw_http_common.h"
-#include <cctype>
 
 namespace net {
 
