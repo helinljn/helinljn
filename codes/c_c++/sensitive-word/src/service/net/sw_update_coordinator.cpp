@@ -143,7 +143,7 @@ http_result sw_update_coordinator::apply_update_internal(const std::string&     
 
     if (worker_registry_ == nullptr || !worker_registry_->broadcast_update(command))
     {
-        const bool rollback_ok = worker_registry_ != nullptr &&
+        const bool rollback_ok = worker_registry_ != nullptr && config_ != nullptr &&
                                  worker_registry_->broadcast_rebuild(config_->engine_config, previous_repository);
         degraded_.store(!rollback_ok);
 
@@ -157,7 +157,7 @@ http_result sw_update_coordinator::apply_update_internal(const std::string&     
 
     if (config_ == nullptr || !persist_word_repository(*config_, candidate_repository))
     {
-        const bool rollback_ok = worker_registry_ != nullptr &&
+        const bool rollback_ok = worker_registry_ != nullptr && config_ != nullptr &&
                                  worker_registry_->broadcast_rebuild(config_->engine_config, previous_repository);
         degraded_.store(!rollback_ok);
 
