@@ -112,9 +112,7 @@ std::string to_json_string(const Json::Value& value);
  * @param content_type 响应 Content-Type
  * @return 可直接发送的 HTTP/1.1 响应报文
  */
-std::string make_http_response(int status_code,
-                               const std::string& body,
-                               std::string_view content_type = k_content_type_json);
+std::string make_http_response(int status_code, const std::string& body, std::string_view content_type = k_content_type_json);
 
 /**
  * @brief 构造统一格式的错误响应
@@ -124,10 +122,7 @@ std::string make_http_response(int status_code,
  * @param request_id 请求链路标识
  * @return 标准错误响应结果
  */
-http_result make_error_result(int http_status,
-                              int code,
-                              std::string message,
-                              const std::string& request_id = {});
+http_result make_error_result(int http_status, int code, std::string message, const std::string& request_id = {});
 
 /**
  * @brief 构造统一格式的成功响应
@@ -135,8 +130,7 @@ http_result make_error_result(int http_status,
  * @param request_id 请求链路标识
  * @return 标准成功响应结果
  */
-http_result make_ok_result(Json::Value data,
-                           const std::string& request_id = {});
+http_result make_ok_result(Json::Value data, const std::string& request_id = {});
 
 /**
  * @brief 将命中结果转换为 JSON 对象

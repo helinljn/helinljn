@@ -14,8 +14,7 @@ namespace net {
  * @param parser HTTP 请求解析器
  * @return true 表示请求已授权；false 表示请求未授权
  */
-bool is_authorized_request(const sw_http_server_config& config,
-                           const HTTPParser&            parser);
+bool is_authorized_request(const sw_http_server_config& config, const HTTPParser& parser);
 
 } // namespace net
 
