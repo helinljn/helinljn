@@ -1,8 +1,12 @@
 @echo off
 setlocal
 
-rem gemini --list-sessions
-rem gemini --delete-session [id]
+@rem npm i -g @anthropic-ai/claude-code@latest
+@rem npm i -g @google/gemini-cli@latest
+@rem npm i -g @openai/codex@latest
+
+@rem gemini --list-sessions
+@rem gemini --delete-session [id]
 
 set "CODEX_DIR=%USERPROFILE%\.codex\sessions"
 set "CLAUDE_DIR=%USERPROFILE%\.claude\projects"
@@ -17,5 +21,5 @@ if exist "%CLAUDE_DIR%" (
     for /d %%D in ("%CLAUDE_DIR%\*") do rd /s /q "%%D"
 )
 
-echo Done.
-exit /b 0
+echo done
+pause
