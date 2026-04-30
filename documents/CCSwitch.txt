@@ -1,0 +1,68 @@
+1. 安装CCSwitch
+    https://github.com/farion1231/cc-switch/releases
+    CC-Switch-v3.14.1-Windows.msi
+
+    // 全部选择写入通用配置
+
+    // claude
+    {
+        "env": {
+            "ANTHROPIC_BASE_URL": "https://www.right.codes/claude-aws/v1",
+            "ANTHROPIC_AUTH_TOKEN": "xxx",
+            "ANTHROPIC_MODEL": "claude-sonnet-4-6",
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-sonnet-4-6",
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-sonnet-4-6"
+        },
+        "includeCoAuthoredBy": false
+    }
+
+    // codex
+    {
+        "OPENAI_API_KEY": "xxx"
+    }
+
+    model_provider = "custom"
+    model = "gpt-5.5"
+    model_context_window = 1000000
+    model_auto_compact_token_limit = 900000
+    model_reasoning_effort = "high"
+    disable_response_storage = true
+
+    [model_providers]
+    [model_providers.custom]
+    name = "custom"
+    wire_api = "responses"
+    requires_openai_auth = true
+    base_url = "https://www.right.codes/codex/v1"
+
+    [tui]
+    [tui.model_availability_nux]
+    "gpt-5.5" = 2
+
+    [windows]
+    sandbox = "elevated"
+
+    // gemini
+    GOOGLE_GEMINI_BASE_URL=https://www.right.codes/gemini
+    GEMINI_API_KEY=xxx
+    GEMINI_MODEL=gemini-3.1-pro-preview
+
+    {
+        "security": {
+            "auth": {
+                "selectedType": "gemini-api-key"
+            }
+        }
+    }
+
+2. 安装nodejs
+    https://nodejs.cn/download
+    node-v24.15.0-win-x64.zip
+
+    配置环境变量：
+        C:\ProgramData\node-v24.15.0-win-x64
+
+    npm i -g @anthropic-ai/claude-code@latest
+    npm i -g @google/gemini-cli@latest
+    npm i -g @openai/codex@latest
