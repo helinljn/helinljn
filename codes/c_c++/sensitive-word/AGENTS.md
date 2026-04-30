@@ -70,8 +70,13 @@
   - 默认不要把这里的实验性逻辑扩散到敏感词核心库或 HTTP 服务。
 
 - `res`
-  - OpenCC、词库等运行资源文件。
-  - 修改资源路径或内容时，需要关注构建后拷贝、服务默认路径和运行目录。
+  - 敏感词词库等项目运行资源文件。
+  - 修改词库路径或内容时，需要关注构建后拷贝、服务默认路径和运行目录。
+
+- 构建运行目录下的 `data/config` 与 `data/dictionary`
+  - OpenCC 配置与二进制词典资源。
+  - 由 `3rd/3rd-builds/opencc_data.cmake` 从 `3rd/opencc/data` 生成或复制。
+  - 修改 OpenCC 资源路径时，需要同时检查 `text_normalizer` 的搜索路径和构建后运行目录。
 
 - `scripts`
   - 辅助脚本目录。
@@ -196,13 +201,15 @@
 
 Windows 环境默认操作如下：
 
-1. 若需运行 Python 脚本，先执行 `conda activate django-admin`。
+1. 首次构建或第三方依赖缺失时，运行 `.\init-3rd.bat`。
 2. 构建命令：`.\build.windows.bat release`
 3. 运行测试：`cd .build\Release; .\test.exe`
 4. 若需运行 hcode 测试：`cd .build\Release; .\hcode.exe`
 
 补充约定：
 
+- 构建 OpenCC 数据目标需要可用的 Python3。
+- 若运行 `scripts/optimize_dict.py`，需要安装脚本依赖 `charset-normalizer` 与 `opencc-python-reimplemented`；本机可按需要先激活约定的 Python/conda 环境。
 - 若只验证普通单元测试，优先运行 `test.exe`。
 - 若修改影响核心匹配行为、归一化逻辑或词库装载逻辑，应至少执行相关测试。
 - 若修改 `src/service/net` 的接口、路由、服务生命周期、worker 绑定或并发逻辑，应至少执行相关验证；若缺少自动化覆盖，需要明确说明验证缺口，不要假设其安全。
