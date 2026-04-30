@@ -11,7 +11,7 @@
 namespace sensitive_word {
 namespace                {
 
-void append_words(std::vector<std::string>& target, std::vector<std::string> words)
+inline void append_words(std::vector<std::string>& target, std::vector<std::string> words)
 {
     target.reserve(target.size() + words.size());
     target.insert(target.end(), std::make_move_iterator(words.begin()), std::make_move_iterator(words.end()));

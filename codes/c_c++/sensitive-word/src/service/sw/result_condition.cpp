@@ -15,8 +15,7 @@ bool english_word_match_result_condition::match(const word_result& result, std::
     if (!contains_ascii_letter(result.normalized_word))
         return true;
 
-    return is_ascii_word_boundary(result.left_normalized_code_point) &&
-           is_ascii_word_boundary(result.right_normalized_code_point);
+    return is_ascii_word_boundary(result.left_normalized_code_point) && is_ascii_word_boundary(result.right_normalized_code_point);
 }
 
 bool english_word_num_match_result_condition::match(const word_result& result, std::string_view) const
@@ -24,8 +23,7 @@ bool english_word_num_match_result_condition::match(const word_result& result, s
     if (!contains_ascii_letter(result.normalized_word) && !contains_ascii_digit_text(result.normalized_word))
         return true;
 
-    return is_ascii_word_boundary(result.left_normalized_code_point) &&
-           is_ascii_word_boundary(result.right_normalized_code_point);
+    return is_ascii_word_boundary(result.left_normalized_code_point) && is_ascii_word_boundary(result.right_normalized_code_point);
 }
 
 bool contains_ascii_letter(std::string_view text)

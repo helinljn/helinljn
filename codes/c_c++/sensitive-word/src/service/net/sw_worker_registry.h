@@ -28,8 +28,7 @@ public:
      * @param event_loops worker 对应的事件循环列表
      * @param base_engine 初始化每个 worker 时使用的基准敏感词引擎
      */
-    void initialize(const std::vector<EventLoopPtr>&             event_loops,
-                    const sensitive_word::sensitive_word_engine& base_engine);
+    void initialize(const std::vector<EventLoopPtr>& event_loops, const sensitive_word_engine& base_engine);
 
     /**
      * @brief 清空全部 worker 状态

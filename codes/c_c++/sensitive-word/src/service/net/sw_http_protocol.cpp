@@ -1,44 +1,41 @@
 #include "net/sw_http_protocol.h"
 #include "core/brynet.h"
 #include "core/common.h"
+#include "core/numeric_cast.hpp"
 #include <cctype>
 #include <memory>
 
 namespace net {
-namespace {
+namespace     {
 
-bool starts_with_case_insensitive(std::string_view text, std::string_view prefix)
-{
-    if (text.size() < prefix.size())
-        return false;
-
-    return core::stringicmp(text.substr(0, prefix.size()), prefix) == 0;
-}
-
-bool is_ascii_space(char ch)
+inline bool is_ascii_space(char ch)
 {
     const auto value = static_cast<unsigned char>(ch);
     return std::isspace(value) != 0;
 }
 
-std::string_view get_content_type_value(const HTTPParser& parser)
+inline std::string_view get_content_type_value(const HTTPParser& parser)
 {
-    const auto& content_type = parser.getValue("Content-Type");
-    if (!content_type.empty())
-        return content_type;
+    const auto& content_type1 = parser.getValue("Content-Type");
+    if (!content_type1.empty())
+        return content_type1;
 
-    const auto& lower_content_type = parser.getValue("content-type");
-    if (!lower_content_type.empty())
-        return lower_content_type;
+    const auto& content_type2 = parser.getValue("content-type");
+    if (!content_type2.empty())
+        return content_type2;
+
+    const auto& content_type3 = parser.getValue("Content-type");
+    if (!content_type3.empty())
+        return content_type3;
+
+    const auto& content_type4 = parser.getValue("content-Type");
+    if (!content_type4.empty())
+        return content_type4;
 
     return parser.getValue("CONTENT-TYPE");
 }
 
 } // namespace
-
-//////////////////////////////////////////////////////////////
-// HTTP 响应构建
-//////////////////////////////////////////////////////////////
 
 std::string status_reason_phrase(int status_code)
 {
@@ -55,15 +52,13 @@ std::string status_reason_phrase(int status_code)
     }
 }
 
-std::string make_http_response(int status_code,
-                               const std::string& body,
-                               bool keep_alive,
-                               std::string_view content_type)
+std::string make_http_response(int status_code, const std::string& body, bool keep_alive, std::string_view content_type)
 {
     std::string response;
     response.reserve(body.size() + 256);
+
     response += "HTTP/1.1 ";
-    response += std::to_string(status_code);
+    response += core::to_string(status_code);
     response += ' ';
     response += status_reason_phrase(status_code);
     response += "\r\n";
@@ -71,25 +66,19 @@ std::string make_http_response(int status_code,
     response += content_type;
     response += "\r\n";
     response += "Content-Length: ";
-    response += std::to_string(body.size());
+    response += core::to_string(body.size());
     response += "\r\n";
     response += keep_alive ? "Connection: keep-alive\r\n" : "Connection: close\r\n";
     response += "\r\n";
     response += body;
+
     return response;
 }
 
-//////////////////////////////////////////////////////////////
-// JSON 序列化
-//////////////////////////////////////////////////////////////
-
 std::string to_json_string(const Json::Value& value)
 {
-    thread_local Json::StreamWriterBuilder builder = []() {
-        Json::StreamWriterBuilder b;
-        b["indentation"] = "";
-        return b;
-    }();
+    Json::StreamWriterBuilder builder;
+    builder["indentation"] = "";
 
     return Json::writeString(builder, value);
 }
@@ -97,51 +86,49 @@ std::string to_json_string(const Json::Value& value)
 Json::Value make_match_json(const sensitive_word::word_result& result)
 {
     Json::Value item(Json::objectValue);
+
     item["word"]                  = result.word;
     item["normalized_word"]       = result.normalized_word;
     item["type"]                  = result.type == sensitive_word::match_type::num ? "num" : "word";
     item["raw_begin"]             = Json::UInt64(result.raw_begin);
     item["raw_end"]               = Json::UInt64(result.raw_end);
     item["raw_code_point_length"] = Json::UInt64(result.raw_code_point_length);
+
     return item;
 }
-
-//////////////////////////////////////////////////////////////
-// 业务响应构建
-//////////////////////////////////////////////////////////////
 
 http_result make_error_result(int http_status, int code, std::string message, const std::string& request_id)
 {
     http_result result;
+
     result.http_status     = http_status;
     result.root["code"]    = code;
     result.root["message"] = std::move(message);
     if (!request_id.empty())
         result.root["request_id"] = request_id;
     result.root["data"] = Json::objectValue;
+
     return result;
 }
 
 http_result make_ok_result(Json::Value data, const std::string& request_id)
 {
     http_result result;
+
     result.http_status     = 200;
     result.root["code"]    = 0;
     result.root["message"] = "ok";
     if (!request_id.empty())
         result.root["request_id"] = request_id;
     result.root["data"] = std::move(data);
+
     return result;
 }
-
-//////////////////////////////////////////////////////////////
-// JSON 解析与字段提取
-//////////////////////////////////////////////////////////////
 
 bool is_json_content_type(const HTTPParser& parser)
 {
     const auto content_type = get_content_type_value(parser);
-    if (!starts_with_case_insensitive(content_type, k_content_type_json))
+    if (core::stringicmp(content_type, k_content_type_json) != 0)
         return false;
 
     if (content_type.size() == std::char_traits<char>::length(k_content_type_json))
@@ -159,10 +146,8 @@ std::optional<json_request> parse_json_request_body(const HTTPParser& parser, ht
     Json::CharReaderBuilder builder;
     builder["collectComments"] = false;
 
-    const auto& body = parser.getBody();
     std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
-
-    if (!reader->parse(body.data(), body.data() + body.size(), &request.root, &errors))
+    if (!reader->parse(parser.getBody().data(), parser.getBody().data() + parser.getBody().size(), &request.root, &errors))
     {
         error_result = make_error_result(400, 40001, "invalid json");
         return std::nullopt;
@@ -247,11 +232,10 @@ std::optional<int> get_optional_int_field(const Json::Value& root,
     return value.asInt();
 }
 
-std::optional<std::vector<std::string>> require_string_array_field(
-    const Json::Value& root,
-    const char*        key,
-    http_result&       error_result,
-    const std::string& request_id)
+std::optional<std::vector<std::string>> require_string_array_field(const Json::Value& root,
+                                                                   const char*        key,
+                                                                   http_result&       error_result,
+                                                                   const std::string& request_id)
 {
     if (!root.isMember(key))
     {

@@ -11,8 +11,7 @@ thread_local worker_context* tls_worker_context = nullptr;
 
 } // namespace
 
-void sw_worker_registry::initialize(const std::vector<EventLoopPtr>&             event_loops,
-                                    const sensitive_word::sensitive_word_engine& base_engine)
+void sw_worker_registry::initialize(const std::vector<EventLoopPtr>& event_loops, const sensitive_word_engine& base_engine)
 {
     event_loops_ = event_loops;
     worker_contexts_.clear();
