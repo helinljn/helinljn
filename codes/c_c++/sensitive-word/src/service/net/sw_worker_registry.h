@@ -5,7 +5,7 @@
 
 #include "net/sw_http_protocol.h"
 #include "net/sw_http_server.h"
-#include "net/brynet.h"
+#include "core/brynet.h"
 #include <memory>
 #include <vector>
 

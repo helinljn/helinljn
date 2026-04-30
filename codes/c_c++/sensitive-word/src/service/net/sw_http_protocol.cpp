@@ -1,5 +1,5 @@
 #include "net/sw_http_protocol.h"
-#include "net/brynet.h"
+#include "core/brynet.h"
 #include <cctype>
 #include <memory>
 

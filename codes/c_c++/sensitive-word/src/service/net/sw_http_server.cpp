@@ -1,8 +1,8 @@
 #include "net/sw_http_server.h"
-#include "net/brynet.h"
 #include "net/sw_http_protocol.h"
 #include "net/sw_worker_registry.h"
 #include "sw/word_dictionary_loader.h"
+#include "core/brynet.h"
 #include "spdlog/spdlog.h"
 #include <atomic>
 #include <thread>
