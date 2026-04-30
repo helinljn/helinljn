@@ -52,4 +52,6 @@ dependencies:
   - wheel=0.46.3
   - win_inet_pton=1.1.0
   - zstd=1.5.7
+  - pip:
+      - opencc-python-reimplemented==0.1.7
 prefix: C:\Users\helin\.conda\envs\django-admin
