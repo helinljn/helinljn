@@ -1,5 +1,6 @@
 #include "net/sw_http_protocol.h"
 #include "core/brynet.h"
+#include "core/common.h"
 #include <cctype>
 #include <memory>
 
@@ -11,21 +12,26 @@ bool starts_with_case_insensitive(std::string_view text, std::string_view prefix
     if (text.size() < prefix.size())
         return false;
 
-    for (size_t i = 0; i < prefix.size(); ++i)
-    {
-        const auto lhs = static_cast<unsigned char>(text[i]);
-        const auto rhs = static_cast<unsigned char>(prefix[i]);
-        if (std::tolower(lhs) != std::tolower(rhs))
-            return false;
-    }
-
-    return true;
+    return core::stringicmp(text.substr(0, prefix.size()), prefix) == 0;
 }
 
 bool is_ascii_space(char ch)
 {
     const auto value = static_cast<unsigned char>(ch);
     return std::isspace(value) != 0;
+}
+
+std::string_view get_content_type_value(const HTTPParser& parser)
+{
+    const auto& content_type = parser.getValue("Content-Type");
+    if (!content_type.empty())
+        return content_type;
+
+    const auto& lower_content_type = parser.getValue("content-type");
+    if (!lower_content_type.empty())
+        return lower_content_type;
+
+    return parser.getValue("CONTENT-TYPE");
 }
 
 } // namespace
@@ -134,7 +140,7 @@ http_result make_ok_result(Json::Value data, const std::string& request_id)
 
 bool is_json_content_type(const HTTPParser& parser)
 {
-    const auto& content_type = parser.getValueCaseInsensitive("Content-Type");
+    const auto content_type = get_content_type_value(parser);
     if (!starts_with_case_insensitive(content_type, k_content_type_json))
         return false;
 
