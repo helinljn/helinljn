@@ -60,12 +60,6 @@ int main(int argc, char** argv)
     config.listen_port    = 9000;
     config.worker_count   = 0;
 
-    if (config.admin_api_key.empty() || config.admin_api_key == "change-me")
-    {
-        spdlog::error("admin_api_key must be configured before starting the service");
-        return EXIT_FAILURE;
-    }
-
     net::sw_http_server server(std::move(config));
     if (!server.start())
     {

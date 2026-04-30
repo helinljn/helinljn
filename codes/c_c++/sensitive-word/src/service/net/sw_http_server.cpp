@@ -1,11 +1,8 @@
 #include "net/sw_http_server.h"
 #include "net/brynet.h"
-#include "net/sw_dictionary_persistence.h"
-#include "net/sw_http_auth.h"
-#include "net/sw_http_common.h"
-#include "net/sw_http_json.h"
-#include "net/sw_update_coordinator.h"
+#include "net/sw_http_protocol.h"
 #include "net/sw_worker_registry.h"
+#include "sw/word_dictionary_loader.h"
 #include "spdlog/spdlog.h"
 #include <atomic>
 #include <thread>
@@ -134,8 +131,6 @@ public:
             return false;
         }
 
-        update_coordinator_.initialize(&config_, &worker_registry_, std::move(repository));
-
         try
         {
             listener_.WithService(service_)
@@ -171,8 +166,6 @@ public:
 
         running_.store(false, std::memory_order_release);
 
-        update_coordinator_.shutdown();
-
         if (service_ != nullptr)
         {
             try
@@ -192,6 +185,52 @@ public:
     }
 
 private:
+    std::set<std::string> load_word_set_from_file(const std::string& path)
+    {
+        std::set<std::string> result;
+        for (auto& word : sensitive_word::load_words_from_file(path))
+            result.insert(std::move(word));
+        return result;
+    }
+
+    word_repository load_word_repository(const sw_http_server_config& config)
+    {
+        word_repository repository;
+        repository.deny_words  = load_word_set_from_file(config.deny_file_path);
+        repository.allow_words = load_word_set_from_file(config.allow_file_path);
+        return repository;
+    }
+
+    sensitive_word::sensitive_word_engine build_engine_from_repository(
+        const sensitive_word::sensitive_word_config& config,
+        const word_repository&                       repository)
+    {
+        sensitive_word::sensitive_word_builder builder;
+        builder.ignore_case(config.ignore_case)
+               .ignore_width(config.ignore_width)
+               .ignore_num_style(config.ignore_num_style)
+               .ignore_chinese_style(config.ignore_chinese_style)
+               .ignore_english_style(config.ignore_english_style)
+               .ignore_repeat(config.ignore_repeat)
+               .enable_word_check(config.enable_word_check)
+               .enable_num_check(config.enable_num_check)
+               .num_check_len(config.num_check_len);
+
+        std::vector<std::string> deny_list;
+        deny_list.reserve(repository.deny_words.size());
+        for (const auto& word : repository.deny_words)
+            deny_list.push_back(word);
+
+        std::vector<std::string> allow_list;
+        allow_list.reserve(repository.allow_words.size());
+        for (const auto& word : repository.allow_words)
+            allow_list.push_back(word);
+
+        builder.deny_words(std::move(deny_list));
+        builder.allow_words(std::move(allow_list));
+        return builder.build();
+    }
+
     void handle_http_request(const HTTPParser& parser, const HttpSession::Ptr& session)
     {
         if (!running_.load(std::memory_order_acquire))
@@ -230,14 +269,6 @@ private:
         {
             result = handle_check(parser);
             send_response(session, result, keep_alive);
-        }
-        else if (path == "/v1/add_words")
-        {
-            handle_update_async(parser, true, session, keep_alive);
-        }
-        else if (path == "/v1/remove_words")
-        {
-            handle_update_async(parser, false, session, keep_alive);
         }
         else if (path == "/v1/query_word")
         {
@@ -368,51 +399,9 @@ private:
     http_result handle_healthz(const HTTPParser& /*parser*/)
     {
         Json::Value data(Json::objectValue);
-        data["status"]       = update_coordinator_.degraded() ? "degraded" : "up";
+        data["status"]       = "up";
         data["worker_count"] = Json::UInt64(worker_registry_.size());
-        data["version"]      = Json::UInt64(update_coordinator_.committed_version());
         return make_ok_result(std::move(data));
-    }
-
-    void handle_update_async(const HTTPParser& parser, bool is_add, const HttpSession::Ptr& session, bool keep_alive)
-    {
-        if (!is_authorized_request(config_, parser))
-        {
-            auto result = make_error_result(401, 40101, "unauthorized");
-            send_response(session, result, keep_alive);
-            return;
-        }
-
-        http_result parse_error;
-        auto        request = parse_json_request_body(parser, parse_error);
-        if (!request)
-        {
-            send_response(session, parse_error, keep_alive);
-            return;
-        }
-
-        auto list_type = require_string_field(request->root, "list_type", parse_error, request->request_id);
-        if (!list_type)
-        {
-            send_response(session, parse_error, keep_alive);
-            return;
-        }
-
-        auto words = require_string_array_field(request->root, "word_list", parse_error, request->request_id);
-        if (!words)
-        {
-            send_response(session, parse_error, keep_alive);
-            return;
-        }
-
-        update_coordinator_.apply_update_async(
-            *list_type,
-            std::move(*words),
-            is_add,
-            request->request_id,
-            [session, keep_alive, this](http_result result) {
-                send_response(session, result, keep_alive);
-            });
     }
 
 private:
@@ -421,7 +410,6 @@ private:
     brynet::net::wrapper::HttpListenerBuilder    listener_;
     std::vector<EventLoopPtr>                    event_loops_;
     sw_worker_registry                           worker_registry_;
-    sw_update_coordinator                        update_coordinator_;
     std::atomic<bool>                            running_{false};
 };
 

@@ -3,7 +3,7 @@
 #ifndef SW_WORKER_REGISTRY_H
 #define SW_WORKER_REGISTRY_H
 
-#include "net/sw_http_common.h"
+#include "net/sw_http_protocol.h"
 #include "net/sw_http_server.h"
 #include "net/brynet.h"
 #include <memory>
@@ -16,8 +16,7 @@ namespace net {
  *
  * 负责管理：
  * 1. 每个业务线程对应的 worker_context；
- * 2. 当前线程 thread_local 上下文绑定；
- * 3. 词库更新命令向全部 worker 的广播同步。
+ * 2. 当前线程 thread_local 上下文绑定。
  */
 class sw_worker_registry
 {
@@ -54,31 +53,6 @@ public:
      * @return 当前已注册的 worker 数量
      */
     size_t size() const noexcept;
-
-    /**
-     * @brief 向全部 worker 广播一条更新命令
-     * @param command 待广播的更新命令
-     * @return true 表示广播成功；false 表示存在 worker 更新失败
-     */
-    bool broadcast_update(const update_command& command);
-
-    /**
-     * @brief 向全部 worker 广播词库快照，重建引擎
-     * @param config 敏感词引擎构建配置
-     * @param repository 词库仓储快照
-     * @return true 表示广播成功；false 表示存在 worker 重建失败
-     */
-    bool broadcast_rebuild(const sensitive_word::sensitive_word_config& config,
-                           const word_repository&                       repository);
-
-private:
-    /**
-     * @brief 将更新命令应用到单个 worker 的本地引擎
-     * @param engine 目标 worker 的本地敏感词引擎
-     * @param command 需要应用的更新命令
-     */
-    static void apply_update_to_engine(sensitive_word::sensitive_word_engine& engine,
-                                       const update_command&                  command);
 
 private:
     std::vector<EventLoopPtr>                    event_loops_;
