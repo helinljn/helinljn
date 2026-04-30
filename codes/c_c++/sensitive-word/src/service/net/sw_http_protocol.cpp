@@ -134,7 +134,7 @@ http_result make_ok_result(Json::Value data, const std::string& request_id)
 
 bool is_json_content_type(const HTTPParser& parser)
 {
-    const auto& content_type = parser.getValue("Content-Type");
+    const auto& content_type = parser.getValueCaseInsensitive("Content-Type");
     if (!starts_with_case_insensitive(content_type, k_content_type_json))
         return false;
 

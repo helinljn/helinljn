@@ -133,16 +133,19 @@ public:
 
         try
         {
-            listener_.WithService(service_)
-                     .WithAddr(false, config_.listen_ip, config_.listen_port)
-                     .WithMaxRecvBufferSize(k_max_recv_buffer_size)
-                     .WithEnterCallback([this](const HttpSession::Ptr& session, HttpSessionHandlers& handlers) {
+            auto listener = std::make_unique<brynet::net::wrapper::HttpListenerBuilder>();
+            listener->WithService(service_)
+                    .WithAddr(false, config_.listen_ip, config_.listen_port)
+                    .WithMaxRecvBufferSize(k_max_recv_buffer_size)
+                    .WithEnterCallback([this](const HttpSession::Ptr& session, HttpSessionHandlers& handlers) {
                         std::ignore = session;
-                         handlers.setHttpEndCallback([this](const HTTPParser& parser, const HttpSession::Ptr& session) {
-                             handle_http_request(parser, session);
-                         });
-                     })
-                     .asyncRun();
+                        handlers.setHttpEndCallback([this](const HTTPParser& parser, const HttpSession::Ptr& session) {
+                            handle_http_request(parser, session);
+                        });
+                    })
+                    .asyncRun();
+
+            listener_ = std::move(listener);
         }
         catch (const std::exception& ex)
         {
@@ -165,6 +168,7 @@ public:
             return;
 
         running_.store(false, std::memory_order_release);
+        listener_.reset();
 
         if (service_ != nullptr)
         {
@@ -258,6 +262,13 @@ private:
             return;
         }
 
+        if (path != "/v1/check" && path != "/v1/query_word")
+        {
+            result = make_error_result(404, 40401, "route not found");
+            send_response(session, result, keep_alive);
+            return;
+        }
+
         if (!is_json_content_type(parser))
         {
             result = make_error_result(415, 41501, "content type must be application/json");
@@ -268,18 +279,12 @@ private:
         if (path == "/v1/check")
         {
             result = handle_check(parser);
-            send_response(session, result, keep_alive);
         }
         else if (path == "/v1/query_word")
         {
             result = handle_query_word(parser);
-            send_response(session, result, keep_alive);
         }
-        else
-        {
-            result = make_error_result(404, 40401, "route not found");
-            send_response(session, result, keep_alive);
-        }
+        send_response(session, result, keep_alive);
     }
 
     void send_response(const HttpSession::Ptr& session, const http_result& result, bool keep_alive)
@@ -407,7 +412,7 @@ private:
 private:
     sw_http_server_config                        config_;
     brynet::net::IOThreadTcpService::Ptr         service_;
-    brynet::net::wrapper::HttpListenerBuilder    listener_;
+    std::unique_ptr<brynet::net::wrapper::HttpListenerBuilder> listener_;
     std::vector<EventLoopPtr>                    event_loops_;
     sw_worker_registry                           worker_registry_;
     std::atomic<bool>                            running_{false};

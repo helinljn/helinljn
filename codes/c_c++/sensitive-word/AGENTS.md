@@ -102,10 +102,10 @@
 
 ## 分层边界约束
 
-- `src/service/net` 负责协议接入、请求校验、鉴权、响应组织、更新编排与持久化协调。
+- `src/service/net` 负责协议接入、请求校验、响应组织与服务生命周期管理。
 - `src/service/sw` 负责词典、归一化、匹配、过滤、替换等领域逻辑。
 - `src/core` 负责通用基础设施，不承载具体 HTTP 协议或敏感词业务规则。
-- 不要把 HTTP/JSON 类型、状态码、认证细节渗透进 `src/service/sw` 或 `src/core`。
+- 不要把 HTTP/JSON 类型、状态码等协议细节渗透进 `src/service/sw` 或 `src/core`。
 - 不要把词库规则、匹配策略或文本处理细节硬编码在网络层。
 - 新增模块时，优先沿用现有分层，不随意绕过既有边界。
 
@@ -134,7 +134,7 @@
 ### Worker 管理
 
 - `sw_worker_registry.*` 负责 worker 上下文管理和线程局部绑定。
-- `sw_dictionary_persistence.*` 负责词库文件装载和引擎构建。
+- 词库文件装载和引擎构建应保持在服务编排边界内，不向 HTTP handler 深处扩散。
 
 ## `src/service/sw` 与核心匹配能力要求
 
