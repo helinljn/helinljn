@@ -2,20 +2,6 @@
     https://github.com/farion1231/cc-switch/releases
     CC-Switch-v3.14.1-Windows.msi
 
-    // claude -> claude-sonnet-4-6
-    // Anthropic Messages, AUTHROPIC_AUTH_TOKEN
-    // 写入通用配置
-    {
-        "env": {
-            "ANTHROPIC_AUTH_TOKEN": "xxx",
-            "ANTHROPIC_BASE_URL": "https://www.right.codes/claude-aws/v1",
-            "ANTHROPIC_MODEL": "claude-sonnet-4-6",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-sonnet-4-6",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-6",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-sonnet-4-6"
-        },
-        "includeCoAuthoredBy": false
-    }
     // claude -> deepseek-v4-pro
     // Anthropic Messages, AUTHROPIC_AUTH_TOKEN
     // 写入通用配置
@@ -36,7 +22,7 @@
     {
         "env": {
             "ANTHROPIC_AUTH_TOKEN": "xxx",
-            "ANTHROPIC_BASE_URL": "https://www.right.codes/codex/v1",
+            "ANTHROPIC_BASE_URL": "https://www.right.codes/codex",
             "ANTHROPIC_MODEL": "gpt-5.5",
             "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gpt-5.5",
             "ANTHROPIC_DEFAULT_SONNET_MODEL": "gpt-5.5",
