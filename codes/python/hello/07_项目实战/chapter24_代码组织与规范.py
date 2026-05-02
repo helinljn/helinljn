@@ -25,7 +25,7 @@
 # =============================================================================
 
 # ============================================================================
-# 1. 项目目录结构最佳实践
+# 24.1 项目目录结构最佳实践
 # ============================================================================
 
 # 标准 Python 项目结构如下（以注释形式展示）：
@@ -72,13 +72,14 @@
 print("=" * 60)
 print("第 24 章：代码组织与规范")
 print("=" * 60)
+print("\n--- 24.1 项目目录结构最佳实践 ---")
 
 
 # ============================================================================
-# 2. 模块化设计原则
+# 24.2 模块化设计原则
 # ============================================================================
 
-print("\n--- 2. 模块化设计原则 ---")
+print("\n--- 24.2 模块化设计原则 ---")
 
 # 模块化设计的四大核心原则：
 #
@@ -159,13 +160,13 @@ db.close()
 
 
 # ============================================================================
-# 3. PEP 8 代码规范详解
+# 24.3 PEP 8 代码规范详解
 # ============================================================================
 
-print("\n--- 3. PEP 8 代码规范详解 ---")
+print("\n--- 24.3 PEP 8 代码规范详解 ---")
 print("官方文档: https://peps.python.org/pep-0008/")
 
-# 3.1 缩进：使用 4 个空格（禁止使用 Tab）
+# 24.3.1 缩进：使用 4 个空格（禁止使用 Tab）
 
 def pep8_indentation_demo():
     """缩进规范演示"""
@@ -174,7 +175,7 @@ def pep8_indentation_demo():
             print(f"  正确缩进（4空格）: {i}")
 
 
-# 3.2 行长度：每行不超过 79 个字符（注释/文档字符串不超过 72 个字符）
+# 24.3.2 行长度：每行不超过 79 个字符（注释/文档字符串不超过 72 个字符）
 #
 # 长函数调用的正确换行方式（使用括号续行）：
 #
@@ -191,12 +192,12 @@ def pep8_indentation_demo():
 #       "这是第三部分文字。"
 #   )
 
-# 3.3 空行规范
+# 24.3.3 空行规范
 # - 顶层定义（类/函数）之间：空 2 行
 # - 类内方法之间：空 1 行
 # - 函数内逻辑分组：空 1 行
 
-# 3.4 导入规范（顺序：标准库 → 第三方库 → 本地模块，组间空一行）
+# 24.3.4 导入规范（顺序：标准库 → 第三方库 → 本地模块，组间空一行）
 #
 #   import os          # 标准库
 #   import sys
@@ -205,7 +206,7 @@ def pep8_indentation_demo():
 #
 #   from myapp import core   # 本地模块
 
-# 3.5 命名规范汇总
+# 24.3.5 命名规范汇总
 
 # 模块名：小写字母 + 下划线（my_module.py）
 # 包名：小写字母，尽量不用下划线（mypackage/）
@@ -237,7 +238,7 @@ class NamingConventions:
         return "内部方法"
 
 
-# 3.6 空格使用规范
+# 24.3.6 空格使用规范
 
 # ✓ 赋值、算术、比较运算符两边各一个空格
 correct_spacing = 1 + 2
@@ -256,7 +257,7 @@ def connect(host, port=8080, timeout=30):
 # def f(x =1):     # 默认参数 = 周围不应有空格
 # my_list=[1,2,3]  # 括号内侧不加空格
 
-# 3.7 字符串引号
+# 24.3.7 字符串引号
 # Python 中单引号和双引号等价，选择一种并保持一致
 # 推荐：优先使用双引号（与其他语言一致）
 
@@ -275,10 +276,10 @@ print(f"  字符串: {sentence2}")
 
 
 # ============================================================================
-# 4. 类型注解（Type Hints）
+# 24.4 类型注解（Type Hints）
 # ============================================================================
 
-print("\n--- 4. 类型注解（Type Hints）---")
+print("\n--- 24.4 类型注解（Type Hints）---")
 
 # 类型注解（PEP 484，Python 3.5+）的作用：
 # - 提升 IDE 代码补全和错误检测能力
@@ -289,7 +290,7 @@ print("\n--- 4. 类型注解（Type Hints）---")
 from typing import List, Dict, Tuple, Optional, Union, Any, Callable, Set
 from typing import TypeVar, Generic, Iterator, Generator
 
-# 4.1 基本类型注解
+# 24.4.1 基本类型注解
 def greet(name: str) -> str:
     return f"Hello, {name}!"
 
@@ -306,7 +307,7 @@ def is_positive(n: int) -> bool:
 def print_message(msg: str) -> None:
     print(f"  [消息] {msg}")
 
-# 4.2 容器类型注解
+# 24.4.2 容器类型注解
 def sum_numbers(numbers: List[int]) -> int:
     return sum(numbers)
 
@@ -319,13 +320,13 @@ def get_point() -> Tuple[float, float]:
 def get_unique_tags() -> Set[str]:
     return {"python", "coding", "tutorial"}
 
-# 4.3 Optional（可能为 None 的返回值）
+# 24.4.3 Optional（可能为 None 的返回值）
 def find_user_by_id(user_id: int) -> Optional[Dict[str, str]]:
     """Optional[X] 等价于 Union[X, None]"""
     users = {1: {"name": "Alice"}, 2: {"name": "Bob"}}
     return users.get(user_id)  # 找不到时返回 None
 
-# 4.4 Union（多种可能的类型）
+# 24.4.4 Union（多种可能的类型）
 def stringify(value: Union[int, float, bool]) -> str:
     """将数值类型转换为字符串"""
     return str(value)
@@ -333,19 +334,19 @@ def stringify(value: Union[int, float, bool]) -> str:
 # Python 3.10+ 可以用 | 语法代替 Union
 # def stringify(value: int | float | bool) -> str:
 
-# 4.5 Callable（函数类型）
+# 24.4.5 Callable（函数类型）
 def apply(func: Callable[[int, int], int], a: int, b: int) -> int:
     """接受一个二元整数函数并应用它"""
     return func(a, b)
 
-# 4.6 TypeVar（泛型）
+# 24.4.6 TypeVar（泛型）
 T = TypeVar('T')
 
 def first_element(items: List[T]) -> Optional[T]:
     """返回列表第一个元素，适用于任意类型"""
     return items[0] if items else None
 
-# 4.7 Python 3.9+ 新语法（直接使用内置类型）
+# 24.4.7 Python 3.9+ 新语法（直接使用内置类型）
 # Python 3.9+ 无需从 typing 导入 List/Dict/Tuple/Set
 # 可以直接写 list[int], dict[str, int], tuple[float, float]
 
@@ -357,7 +358,7 @@ def modern_lookup(data: dict[str, list[int]], key: str) -> list[int]:
     """嵌套的容器类型注解"""
     return data.get(key, [])
 
-# 4.8 类型注解在类中的使用
+# 24.4.8 类型注解在类中的使用
 class Point:
     """带类型注解的坐标类"""
     x: float
@@ -375,7 +376,7 @@ class Point:
     def __repr__(self) -> str:
         return f"Point({self.x}, {self.y})"
 
-# 4.9 使用 reveal_type（仅供 mypy 静态检查，运行时需注释掉）
+# 24.4.9 使用 reveal_type（仅供 mypy 静态检查，运行时需注释掉）
 # reveal_type(greet("Alice"))  # mypy 会输出推断的类型
 
 # 演示
@@ -394,10 +395,10 @@ print(f"  {p1} 到 {p2} 的距离: {p1.distance_to(p2)}")
 
 
 # ============================================================================
-# 5. 文档字符串（Docstring）规范
+# 24.5 文档字符串（Docstring）规范
 # ============================================================================
 
-print("\n--- 5. 文档字符串规范 ---")
+print("\n--- 24.5 文档字符串规范 ---")
 
 # Python 常见文档字符串风格：
 # 1. Google 风格（推荐，简洁易读）
@@ -549,10 +550,10 @@ print(f"    {doc_lines[0]}")  # 打印第一行
 
 
 # ============================================================================
-# 6. 单元测试（unittest）
+# 24.6 单元测试（unittest）
 # ============================================================================
 
-print("\n--- 6. 单元测试（unittest）---")
+print("\n--- 24.6 单元测试（unittest）---")
 
 import unittest
 import math
@@ -865,10 +866,10 @@ print(f"  测试{'全部通过 ✓' if test_success else '存在失败 ✗'}")
 
 
 # ============================================================================
-# 7. 虚拟环境（conda 与 venv）
+# 24.7 虚拟环境（conda 与 venv）
 # ============================================================================
 
-print("\n--- 7. 虚拟环境（conda 与 venv）---")
+print("\n--- 24.7 虚拟环境（conda 与 venv）---")
 
 import sys
 import os
@@ -1008,10 +1009,10 @@ print(f"    Bin 目录: {env_info['bin_path']}")
 
 
 # ============================================================================
-# 综合实战：应用所有规范编写一个小型计算器模块
+# 24.8 综合实战：应用所有规范编写一个小型计算器模块
 # ============================================================================
 
-print("\n--- 综合实战：规范化的计算器模块 ---")
+print("\n--- 24.8 综合实战：规范化的计算器模块 ---")
 
 from typing import Optional
 import math

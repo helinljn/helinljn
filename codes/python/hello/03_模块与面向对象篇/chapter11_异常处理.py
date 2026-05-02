@@ -538,100 +538,48 @@ DEBUG = true
 
 
 # =============================================================================
-# 主程序
+# 11.7 异常处理最佳实践
 # =============================================================================
 
-def main() -> None:
-    """运行所有演示。"""
-    demo_exception_basics()
-    demo_try_except_else_finally()
-    demo_multiple_exceptions()
-    demo_custom_exceptions()
-    demo_raise_assert()
-    demo_config_loader()
-    demo_exception_group()  # Python 3.11+ 新特性
+def demo_exception_best_practices() -> None:
+    """演示异常处理的常见最佳实践。"""
+    print("\n" + "=" * 60)
+    print("11.7 异常处理最佳实践")
+    print("=" * 60)
 
+    print("1. 优先捕获具体异常，而不是直接捕获 Exception")
+    try:
+        int("not-a-number")
+    except ValueError as e:
+        print(f"  具体处理 ValueError: {e}")
 
-if __name__ == "__main__":
-    main()
+    print("\n2. 记录异常时保留上下文")
+    try:
+        try:
+            int("bad")
+        except ValueError as e:
+            raise ConfigValueError("PORT", "整数", "'bad'") from e
+    except ConfigValueError as e:
+        print(f"  新异常: {e}")
+        print(f"  原始异常: {type(e.__cause__).__name__}: {e.__cause__}")
 
+    print("\n3. 使用 else 放置仅在成功时执行的逻辑")
+    data = "42"
+    try:
+        value = int(data)
+    except ValueError:
+        print("  转换失败")
+    else:
+        print(f"  转换成功后再继续处理: {value * 2}")
 
-# =============================================================================
-# 【语法总结】
-# =============================================================================
-#
-# ── 基本结构 ──
-# try:
-#     可能出错的代码
-# except SomeError as e:
-#     处理特定异常
-# except (Error1, Error2) as e:
-#     同时处理多种异常
-# except Exception as e:
-#     捕获所有异常（兜底，谨慎使用）
-# else:
-#     try 块没有异常时执行
-# finally:
-#     无论如何都执行（清理资源）
-#
-# ── 主动抛出 ──
-# raise ValueError("错误消息")
-# raise ValueError("新错误") from original_error  # 异常链
-# raise  # 重新抛出当前异常
-#
-# ── 断言 ──
-# assert 条件, "错误消息"
-#
-# ── 自定义异常 ──
-# class MyError(Exception):
-#     def __init__(self, message, code=0):
-#         super().__init__(message)
-#         self.code = code
-#
-# ── 常见内置异常 ──
-# Exception           所有非系统异常的基类
-# ValueError          值不合适
-# TypeError           类型不对
-# KeyError            字典键不存在
-# IndexError          列表索引越界
-# AttributeError      属性不存在
-# FileNotFoundError   文件不存在
-# ZeroDivisionError   除以零
-# ImportError         导入失败
-# PermissionError     权限不足
-# RuntimeError        运行时错误（通用）
-# StopIteration       迭代结束
-
-
-# =============================================================================
-# 【常见错误】
-# =============================================================================
-#
-# 错误 1：捕获太宽泛（隐藏真正的 bug）
-# try:
-#     ...
-# except:           # ❌ 捕获所有，包括 KeyboardInterrupt
-#     pass
-# except Exception: # ⚠️  也很宽泛，但至少不捕获系统异常
-#     pass
-#
-# 错误 2：忽略异常而不记录
-# try:
-#     risky()
-# except Exception:
-#     pass  # ❌ 静默忽略，调试困难
-#
-# 错误 3：在 finally 中 return 会覆盖异常
-# def func():
-#     try:
-#         raise ValueError("error")
-#     finally:
-#         return 42  # ❌ 异常被吞掉了！
-#
-# 错误 4：捕获异常后重新抛出时丢失上下文
-# except ValueError as e:
-#     raise RuntimeError("失败")       # ⚠️ 丢失原始异常
-#     raise RuntimeError("失败") from e # ✅ 保留异常链
+    print("\n4. 使用 finally 清理资源")
+    resource_open = False
+    try:
+        resource_open = True
+        print("  资源已打开")
+    finally:
+        resource_open = False
+        print(f"  资源已清理: {not resource_open}")
 
 
 # =============================================================================
@@ -722,6 +670,104 @@ def demo_exception_group() -> None:
             print(f"  📝 数据类错误 ({len(e.exceptions)}个): 记录日志")
         except* Exception as e:
             print(f"  ❓ 其他错误 ({len(e.exceptions)}个)")
+
+
+# =============================================================================
+# 主程序
+# =============================================================================
+
+def main() -> None:
+    """运行所有演示。"""
+    demo_exception_basics()
+    demo_try_except_else_finally()
+    demo_multiple_exceptions()
+    demo_custom_exceptions()
+    demo_raise_assert()
+    demo_config_loader()
+    demo_exception_best_practices()
+    demo_exception_group()  # Python 3.11+ 新特性
+
+
+if __name__ == "__main__":
+    main()
+
+
+# =============================================================================
+# 【语法总结】
+# =============================================================================
+#
+# ── 基本结构 ──
+# try:
+#     可能出错的代码
+# except SomeError as e:
+#     处理特定异常
+# except (Error1, Error2) as e:
+#     同时处理多种异常
+# except Exception as e:
+#     捕获所有异常（兜底，谨慎使用）
+# else:
+#     try 块没有异常时执行
+# finally:
+#     无论如何都执行（清理资源）
+#
+# ── 主动抛出 ──
+# raise ValueError("错误消息")
+# raise ValueError("新错误") from original_error  # 异常链
+# raise  # 重新抛出当前异常
+#
+# ── 断言 ──
+# assert 条件, "错误消息"
+#
+# ── 自定义异常 ──
+# class MyError(Exception):
+#     def __init__(self, message, code=0):
+#         super().__init__(message)
+#         self.code = code
+#
+# ── 常见内置异常 ──
+# Exception           所有非系统异常的基类
+# ValueError          值不合适
+# TypeError           类型不对
+# KeyError            字典键不存在
+# IndexError          列表索引越界
+# AttributeError      属性不存在
+# FileNotFoundError   文件不存在
+# ZeroDivisionError   除以零
+# ImportError         导入失败
+# PermissionError     权限不足
+# RuntimeError        运行时错误（通用）
+# StopIteration       迭代结束
+
+
+# =============================================================================
+# 【常见错误】
+# =============================================================================
+#
+# 错误 1：捕获太宽泛（隐藏真正的 bug）
+# try:
+#     ...
+# except:           # ❌ 捕获所有，包括 KeyboardInterrupt
+#     pass
+# except Exception: # ⚠️  也很宽泛，但至少不捕获系统异常
+#     pass
+#
+# 错误 2：忽略异常而不记录
+# try:
+#     risky()
+# except Exception:
+#     pass  # ❌ 静默忽略，调试困难
+#
+# 错误 3：在 finally 中 return 会覆盖异常
+# def func():
+#     try:
+#         raise ValueError("error")
+#     finally:
+#         return 42  # ❌ 异常被吞掉了！
+#
+# 错误 4：捕获异常后重新抛出时丢失上下文
+# except ValueError as e:
+#     raise RuntimeError("失败")       # ⚠️ 丢失原始异常
+#     raise RuntimeError("失败") from e # ✅ 保留异常链
 
 
 # =============================================================================

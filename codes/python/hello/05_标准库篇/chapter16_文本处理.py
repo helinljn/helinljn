@@ -595,7 +595,7 @@ def demo_config_converter() -> None:
 
 
 # =============================================================================
-# 16.? tomllib 模块（Python 3.11+ 新增）
+# 16.7 tomllib 模块（Python 3.11+ 新增）
 # =============================================================================
 #
 # TOML (Tom's Obvious, Minimal Language) 是一种配置文件的格式，
@@ -605,7 +605,7 @@ def demo_config_converter() -> None:
 def demo_toml_module() -> None:
     """演示 tomllib 模块（Python 3.11+ 标准库）。"""
     print("\n" + "=" * 60)
-    print("16.? tomllib 模块（Python 3.11+）")
+    print("16.7 tomllib 模块（Python 3.11+）")
     print("=" * 60)
 
     # Python 3.11+ 才支持，我们做一个兼容处理
