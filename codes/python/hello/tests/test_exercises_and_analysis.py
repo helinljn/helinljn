@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EXERCISES = ROOT / "练习题与答案"
 PROJECT26 = ROOT / "07_项目实战" / "chapter26_项目2_日志分析系统"
 CHAPTER11 = ROOT / "03_模块与面向对象篇" / "chapter11_异常处理.py"
+CHAPTER21_NETWORK = ROOT / "05_标准库篇" / "chapter21_网络与HTTP基础.py"
 
 
 def load_module(module_name: str, module_path: Path):
@@ -277,6 +278,7 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.chapter11 = load_module("chapter11_exceptions", CHAPTER11)
+        cls.chapter21_network = load_module("chapter21_network", CHAPTER21_NETWORK)
 
     def test_chapter11_new_exception_sections_run(self):
         buffer = io.StringIO()
@@ -288,6 +290,17 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
         output = buffer.getvalue()
         self.assertIn("11.7 异常处理最佳实践", output)
         self.assertIn("11.8 ExceptionGroup", output)
+
+    def test_chapter21_network_demos_run_locally(self):
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            self.chapter21_network.main()
+
+        text = output.getvalue()
+        self.assertIn("21.1 URL 解析与构造", text)
+        self.assertIn("/health 响应", text)
+        self.assertIn("客户端收到: echo: hello socket", text)
 
     def test_chapter11_main_runs(self):
         buffer = io.StringIO()
