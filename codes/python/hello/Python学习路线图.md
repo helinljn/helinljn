@@ -128,8 +128,8 @@
 - 抛出异常（raise）
 - 自定义异常
 - 异常链
-- 上下文管理器（with 语句）
-- contextlib 模块
+- 异常处理最佳实践
+- ExceptionGroup 与 except*（Python 3.11+）
 
 #### 第 12 章：文件操作
 - 文件的打开与关闭
@@ -176,6 +176,7 @@
 - **json 模块**：JSON 数据处理
 - **csv 模块**：CSV 文件读写
 - **configparser 模块**：配置文件解析
+- **tomllib 模块**：TOML 配置解析（Python 3.11+）
 - **pickle 模块**：Python 对象序列化（在 ch23 中实践）
 
 #### 第 17 章：日期与时间
@@ -396,6 +397,8 @@
 python-learning/
 │
 ├── Python学习路线图.md                  # 本文件
+├── README.md                            # 项目说明与运行入口
+├── .gitignore                           # 忽略本地缓存、日志、数据库等运行产物
 ├── environment.yml                      # conda 环境精确导出文件
 ├── main.py                              # 入口文件
 ├── .vscode/                             # VS Code 配置
@@ -431,7 +434,7 @@ python-learning/
 │
 ├── 05_标准库篇/
 │   ├── chapter15_系统与环境.py
-│   ├── chapter16_文本处理.py              # json, csv, re（数据序列化）
+│   ├── chapter16_文本处理.py              # json, csv, configparser, tomllib
 │   ├── chapter17_日期与时间.py
 │   ├── chapter18_数据结构工具.py
 │   ├── chapter19_函数式编程工具.py
@@ -462,6 +465,10 @@ python-learning/
 │       ├── sample_logs/
 │       │   └── access.log
 │       └── README.md
+│
+├── tests/
+│   ├── test_exercises_and_analysis.py   # 练习与章节烟雾测试
+│   └── test_project_examples.py         # 项目 25/26 示例测试
 │
 └── 练习题与答案/
     ├── exercises_01_基础.py              # 覆盖 ch01-05

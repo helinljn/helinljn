@@ -25,6 +25,7 @@ env/
 *.tmp
 tmp/
 temp/
+07_项目实战/chapter26_项目2_日志分析系统/reports/
 
 # Build artifacts
 build/
