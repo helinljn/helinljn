@@ -7,7 +7,7 @@
 ## 功能特性
 
 1. **日志解析**
-   - 支持多种日志格式（Apache、Nginx、自定义格式）
+   - 支持多种日志格式（Apache、Nginx、Combined）
    - 正则表达式模式匹配
    - 时间戳解析
 
@@ -57,8 +57,7 @@ chapter26_项目2_日志分析系统/
 ├── config.py            # 配置管理
 ├── config.ini           # 配置文件
 ├── sample_logs/         # 示例日志文件
-│   ├── access.log
-│   └── nginx.log
+│   └── access.log
 └── README.md            # 本文件
 ```
 
@@ -70,20 +69,17 @@ chapter26_项目2_日志分析系统/
 # 分析单个日志文件
 python main.py -f sample_logs/access.log
 
-# 分析多个日志文件
-python main.py -f sample_logs/access.log sample_logs/nginx.log
-
 # 指定日志格式
-python main.py -f access.log --format apache
+python main.py -f sample_logs/access.log --log-format apache
 
 # 生成 JSON 报告
-python main.py -f access.log -o report.json --format json
+python main.py -f sample_logs/access.log -o report.json --format json
 
 # 生成 CSV 报告
-python main.py -f access.log -o report.csv --format csv
+python main.py -f sample_logs/access.log -o report.csv --format csv
 
 # 使用多线程（4个线程）
-python main.py -f access.log --threads 4
+python main.py -f sample_logs/access.log --threads 4
 
 # 查看历史统计
 python main.py --history

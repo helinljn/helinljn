@@ -1,8 +1,14 @@
 import importlib.util
+import io
+import json
+import logging
+import os
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -82,6 +88,18 @@ class FileProcessorProjectTests(unittest.TestCase):
             self.assertEqual(result.success, 1)
             self.assertEqual(source.read_text(encoding="utf-8"), "version=2\n")
 
+    def test_project25_cli_search_missing_path_returns_error(self):
+        for module_name in ("config", "file_processor", "utils"):
+            sys.modules.pop(module_name, None)
+        main_module = load_module("project25_main", PROJECT25 / "main.py", PROJECT25)
+        missing = str(PROJECT25 / "__missing_dir__")
+
+        with patch.object(sys, "argv", ["main.py", "search", "--path", missing]):
+            with redirect_stdout(io.StringIO()):
+                exit_code = main_module.main()
+
+        self.assertEqual(exit_code, 1)
+
 
 class LogAnalyzerProjectTests(unittest.TestCase):
     @classmethod
@@ -140,6 +158,66 @@ class LogAnalyzerProjectTests(unittest.TestCase):
             self.assertEqual(parser.stats["failed_lines"], 1)
         finally:
             Path(log_path).unlink(missing_ok=True)
+
+    def test_project26_cli_help_works_from_repo_root(self):
+        for module_name in ("config", "database", "log_parser", "analyzer", "reporter"):
+            sys.modules.pop(module_name, None)
+        main_module = load_module("project26_main", PROJECT26 / "main.py", PROJECT26)
+        cwd = os.getcwd()
+
+        try:
+            with patch.object(sys, "argv", ["main.py", "--help"]):
+                with redirect_stdout(io.StringIO()):
+                    with self.assertRaises(SystemExit) as cm:
+                        main_module.main()
+        finally:
+            os.chdir(cwd)
+
+        self.assertEqual(cm.exception.code, 0)
+
+    def test_project26_cli_analyzes_sample_log_from_repo_root(self):
+        for module_name in ("config", "database", "log_parser", "analyzer", "reporter"):
+            sys.modules.pop(module_name, None)
+        main_module = load_module("project26_main_run", PROJECT26 / "main.py", PROJECT26)
+        cwd = os.getcwd()
+
+        try:
+            os.chdir(ROOT)
+            report_path = PROJECT26 / "__test_report.json"
+            db_path = PROJECT26 / "logs.db"
+            log_path = PROJECT26 / "analyzer.log"
+            for path in (report_path, db_path, log_path):
+                path.unlink(missing_ok=True)
+
+            with patch.object(
+                sys,
+                "argv",
+                [
+                    "main.py",
+                    "-f",
+                    "sample_logs/access.log",
+                    "--format",
+                    "json",
+                    "-o",
+                    str(report_path),
+                ],
+            ):
+                with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                    main_module.main()
+
+            self.assertTrue(report_path.exists())
+            self.assertGreater(report_path.stat().st_size, 0)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertGreater(report["basic_stats"]["total_requests"], 0)
+        finally:
+            os.chdir(cwd)
+            logging.shutdown()
+            root_logger = logging.getLogger()
+            for handler in root_logger.handlers[:]:
+                root_logger.removeHandler(handler)
+                handler.close()
+            for path in (PROJECT26 / "__test_report.json", PROJECT26 / "logs.db", PROJECT26 / "analyzer.log"):
+                path.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":

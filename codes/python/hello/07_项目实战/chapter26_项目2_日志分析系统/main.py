@@ -126,6 +126,7 @@ def analyze_logs(args, config, db: Database) -> None:
         for fp in args.files:
             tid = db.create_task(fp, log_format)
             try:
+                lp._reset_stats()
                 t, p, f = lp.parse_file_in_batches(fp, on_batch)
                 db.update_task(tid, t, p, f, 'completed')
                 stats['total'] += t
@@ -148,7 +149,8 @@ def analyze_logs(args, config, db: Database) -> None:
     # ---- 分析 ----
     logger.info("开始数据分析...")
     analyzer = LogAnalyzer(db, top_n=top_n)
-    result = analyzer.analyze(source_files=args.files)
+    source_names = [Path(fp).name for fp in args.files]
+    result = analyzer.analyze(source_files=source_names)
     logger.info(f"分析结果: {analyzer.summarize(result)}")
 
     # ---- 报告 ----
@@ -198,12 +200,12 @@ def confirm_clear(prompt: str) -> bool:
 
 def main() -> None:
     """程序主入口"""
-    args = parse_arguments()
-
     # 加载配置（切换工作目录到脚本所在位置，保证配置文件路径正确）
     import os
     script_dir = Path(__file__).parent
     os.chdir(script_dir)
+
+    args = parse_arguments()
 
     try:
         config = get_config(args.config)

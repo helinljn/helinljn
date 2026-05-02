@@ -75,7 +75,7 @@ python main.py replace --pattern "*.py" --find "old_name" --replace "new_name" -
 
 ### 5. 使用正则表达式重命名
 ```bash
-python main.py rename --pattern "*.txt" --regex "(\d+)" --replace "file_\1" --path ./docs
+python main.py rename --pattern "*.txt" --replace "(\d+)" "file_\1" --regex --path ./docs
 ```
 
 ## 配置文件
