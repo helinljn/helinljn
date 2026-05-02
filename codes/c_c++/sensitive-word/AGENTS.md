@@ -106,6 +106,7 @@
 
 - `res`
   - 敏感词词库等项目运行资源文件。
+  - 包含 `sensitive_word_deny.txt`（默认黑名单）、`sensitive_word_allow.txt`（默认白名单）和 `dict-2026-04-20.txt`（由 `scripts/optimize_dict.py` 生成的优化词库样例，76k+ 词条）。
   - 修改词库路径或内容时，需要关注构建后拷贝、服务默认路径和运行目录。
 
 - 构建运行目录下的 `data/config` 与 `data/dictionary`
@@ -114,7 +115,8 @@
   - 修改 OpenCC 资源路径时，需要同时检查 `text_normalizer` 的搜索路径和构建后运行目录。
 
 - `scripts`
-  - 辅助脚本目录。
+  - 辅助脚本目录，包含 `optimize_dict.py`（词库去重、排序、长度过滤）。
+  - 运行 `optimize_dict.py` 需要 `charset-normalizer` 与 `opencc-python-reimplemented` 依赖。
   - 修改脚本时要说明运行环境和副作用。
 
 - `3rd`
@@ -213,6 +215,12 @@
 - `char_ignore`、`result_condition`、`replace_strategy` 采用策略模式；工厂函数分别位于 `char_ignores`、`result_conditions`、`replace_strategies` 命名空间。
 - 公开 API 对只读字符串参数优先使用 `std::string_view`，返回值使用 `std::string`。
 - 查询类方法应优先标记 `[[nodiscard]]`；移动构造和移动赋值在可行时标记 `noexcept`。
+- `result_condition` 提供三种实现：`always_true`、`english_word_match`（默认）和 `english_word_num_match`（同时要求 ASCII 字母和数字满足单词边界）。
+- `replace_strategy` 提供 `stars()`（默认 `*` 替换）和 `chars(char)`（指定字符替换）两种工厂函数。
+- 引擎支持运行时增删词：`add_word()`、`remove_word()`、`add_allow_word()`、`remove_allow_word()`，无需重建引擎实例。
+- 引擎支持查询词条状态：`query_word_status()` 返回 `word_entry_status`（包含 `exists`、`in_deny`、`in_allow`）。
+- `replace` 提供多个重载：除接受 `match_options` 的版本外，还可以接受预计算的 `std::vector<word_result>` 做集中替换，或在调用时传入 `char` / `replace_strategy` 覆盖默认替换行为。
+- `config()` 访问器返回引擎当前 `sensitive_word_config` 的只读引用。
 
 ### Trie 字典树
 
@@ -227,6 +235,7 @@
 - 归一化输出包含 `char32_t` 序列与到原始 UTF-8 的字节偏移映射。
 - 繁转简映射使用静态数据做码点级映射；OpenCC 主要用于构建期生成或复制数据，不应在热路径中引入分词器级开销。
 - 核心扫描流程：`text_normalizer` → 遍历码点 → `char_ignore::ignore()` 跳过干扰字符 → 沿 Trie 搜索 → `result_condition::match()` 过滤误杀 → 输出带原始字节位置的 `word_result` → `replace_strategy` 基于字节偏移生成替换文本。
+- `ignore_repeat` 属于扫描层行为（`sensitive_word_config`），不在 `text_normalizer`（`text_normalizer_options`）中处理。重复字符的尾部折叠在扫描期间执行，不会改变归一化输出。
 - `match_options::longest_match` 控制最短匹配与最长匹配；确认命中后扫描游标跳过已命中跨度，不产生交叉重叠的重复输出。
 - `contains()` 内部固定使用最短匹配，修改匹配策略时不得破坏这一性能语义。
 
