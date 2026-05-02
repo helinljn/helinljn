@@ -48,13 +48,16 @@
 | `service` | 可执行文件 | `src/service/` | HTTP 服务。链接 `core` 与 `mimalloc`。构建后自动将 `res/` 拷贝到运行目录。 |
 | `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
 | `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
+| `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `core`、`testa` 与 doctest。 |
+| `testa` | 动态库 | `src/hcode/testa/` | Hook 实验辅助动态库。 |
+| `testpatch` | 动态库 | `src/hcode/testpatch/` | Hook 实验补丁动态库。 |
 
 重要约定：
 
 - `src/service/sw/` 不是独立库目标，其源码被直接编译进 `service`、`test`、`benchmark` 三个目标。
 - 修改 `src/service/sw` 中的头文件或实现文件，会影响服务、测试和基准测试三个目标。
 - 根 `CMakeLists.txt` 中的 `PROJECT_TARGET_APPLY_COMMON_OPTIONS` 统一应用平台编译选项。
-  - Windows：`/utf-8`、`/permissive-`、`/Zc:__cplusplus`、`/bigobj`、`/W4`、`/MP`。
+  - Windows：`/utf-8`、`/permissive-`、`/Zc:__cplusplus`、`/bigobj`、`/W4`、`/MP`、`/wd4251`。
   - Linux：`-Wall`、`-Wextra`、`-Wpedantic`。
 - `compile_commands.json` 由 CMake 生成。需要依赖编译数据库的工具时，优先使用构建目录中的该文件。
 
@@ -233,7 +236,7 @@
 
 - `text_normalizer` 在单次遍历中完成 UTF-8 解码、全半角折叠、大小写折叠、繁转简映射、数字样式折叠和英文变体折叠。
 - 归一化输出包含 `char32_t` 序列与到原始 UTF-8 的字节偏移映射。
-- 繁转简映射使用静态数据做码点级映射；OpenCC 主要用于构建期生成或复制数据，不应在热路径中引入分词器级开销。
+- 繁转简映射按单个代码点执行；运行时通过 OpenCC `t2s.json` 转换首次遇到的 CJK 字符，并将基础 CJK 区间结果缓存到连续数组中，扩展区字符使用映射缓存。不要把整段文本分词级转换引入热路径。
 - 核心扫描流程：`text_normalizer` → 遍历码点 → `char_ignore::ignore()` 跳过干扰字符 → 沿 Trie 搜索 → `result_condition::match()` 过滤误杀 → 输出带原始字节位置的 `word_result` → `replace_strategy` 基于字节偏移生成替换文本。
 - `ignore_repeat` 属于扫描层行为（`sensitive_word_config`），不在 `text_normalizer`（`text_normalizer_options`）中处理。重复字符的尾部折叠在扫描期间执行，不会改变归一化输出。
 - `match_options::longest_match` 控制最短匹配与最长匹配；确认命中后扫描游标跳过已命中跨度，不产生交叉重叠的重复输出。

@@ -42,10 +42,10 @@ echo ------------------
 echo -- opencc
 cd $ROOT_INIT_DIR
 if [ ! -d $OPENCC_INIT_DIR ]; then
-    git clone -b ver.1.2.0 https://github.com/BYVoid/OpenCC.gi $OPENCC_INIT_DIR
+    git clone -b ver.1.2.0 https://github.com/BYVoid/OpenCC.git $OPENCC_INIT_DIR
 else
     cd $OPENCC_INIT_DIR
-    git remote set-url origin https://github.com/BYVoid/OpenCC.gi
+    git remote set-url origin https://github.com/BYVoid/OpenCC.git
     git remote -v
     git checkout .
     git fetch -p origin

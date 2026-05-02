@@ -54,7 +54,7 @@
 
 ### 2.1 极速的单字符繁简映射缓存
 我们彻底摒弃了常规做法中将整段文本丢给 OpenCC 进行词法分词与长句繁转简的高昂开销。
-通过在内存中静态分配不到 100KB 的连续数组，我们将最常用的两万个基础 CJK 汉字映射进行了极速缓存（`O(1)` 数组级访问）。不仅将繁简预处理的耗时降至微秒级，更在核心机制上确保了即使敏感词中间被穿插了各类干扰符号（如 `敏*感*詞`），依然能被**逐字精准折叠拦截**，大幅提升了防黑产穿透的健壮性。
+当前实现会在运行时使用 OpenCC 的 `t2s.json` 对单个 CJK 字符做繁转简，并将基础 CJK 区间的转换结果缓存到连续数组中（`O(1)` 数组级访问）。首次遇到某个字符时承担一次 OpenCC 转换成本，后续命中直接走缓存；这避免了整段文本分词级转换的高昂开销，也确保即使敏感词中间被穿插了各类干扰符号（如 `敏*感*詞`），依然能被**逐字精准折叠拦截**，提升防穿透能力。
 
 ### 2.2 极致的 Trie 字典树性能
 底层放弃了传统的指针链表树或庞大的 Hash 表节点，而是采用了 **Arena Allocator（一维内存池）**：
@@ -191,7 +191,7 @@ sensitive_word_engine engine = sensitive_word_builder()
     .build();
 
 engine.contains("have");    // false，av 处于英文单词内部，安全放行
-engine.contains("java");    // true，av 独立出现
+engine.contains("看 av");    // true，av 独立出现
 engine.contains("abc123def"); // false，123 处于字母数字串内部
 engine.contains("第123号");   // true，123 被非字母数字字符包围
 ```
@@ -210,7 +210,7 @@ engine.replace("检测敏感词内容"); // "检测###内容"
 也可以在调用 `replace` 时直接传入替换字符或策略，无需在构建时预设：
 ```cpp
 engine.replace("检测敏感词内容", '#'); // 指定替换字符
-engine.replace("检测敏感词内容", chars('X')); // 使用策略对象
+engine.replace("检测敏感词内容", *chars('X')); // 使用策略对象
 ```
 
 #### 基于预计算结果的替换
@@ -245,6 +245,8 @@ std::string replaced2 = engine.replace("天安门和五星红旗", results, '#')
 - `res/sensitive_word_deny.txt`
 - `res/sensitive_word_allow.txt`
 
+默认服务使用 `sensitive_word_config{}` 构建引擎：词检测开启，数字检测关闭（`enable_num_check=false`），重复字符折叠关闭（`ignore_repeat=false`）。如果需要让 HTTP 服务启用 Number 检测或其它归一化策略，需要在服务启动配置中调整 `engine_config`。
+
 启动方式：
 
 ```powershell
@@ -263,6 +265,20 @@ std::string replaced2 = engine.replace("天安门和五星红旗", results, '#')
 ```
 
 错误响应同样使用 `code`、`message`、`data`，并在请求中提供 `request_id` 时原样返回。`/v1/check` 与 `/v1/query_word` 需要 `POST` 和 `Content-Type: application/json`；`/v1/healthz` 支持 `GET` 与 `POST`。
+
+常见错误码：
+
+| HTTP 状态码 | 业务码 | 说明 |
+|-------------|--------|------|
+| `400` | `40001` | 请求体不是合法 JSON |
+| `400` | `40002` | 缺少必填字段 |
+| `400` | `40003` | 字段类型不符合要求 |
+| `400` | `40004` | 字段值非法，例如 `max_results <= 0` |
+| `400` | `40005` | `return_mode` 非法 |
+| `404` | `40401` | 路由不存在 |
+| `405` | `40501` | HTTP 方法不支持 |
+| `415` | `41501` | `Content-Type` 不是 `application/json` |
+| `500` | `50001` | worker 上下文不可用 |
 
 #### `/v1/healthz`
 
@@ -341,6 +357,8 @@ curl.exe -X POST http://127.0.0.1:9000/v1/check `
 - `first`：返回第一个命中结果。
 - `all`：返回全部命中结果，并受 `max_results` 限制。
 
+`contains` 模式仅返回 `hit` 和空的 `matches` 数组，不返回 `match_count`。
+
 #### `/v1/query_word`
 
 查询词条在当前 worker 引擎中的状态：
@@ -394,7 +412,7 @@ curl.exe -X POST http://127.0.0.1:9000/v1/query_word `
 ## 5. 归一化深度说明
 
 ### 5.1 繁简体单字映射缓存
-我们通过静态分配连续数组，构建了基础 CJK 汉字的繁简映射缓存，实现 `O(1)` 的单字级极速访问。彻底摒弃了传统做法中将整段文本交由第三方分词库处理的高昂开销。这种设计不仅将热路径耗时降至极限，更确保了即使敏感词中间穿插了各类干扰符号（如 `敏*感*詞`），依然能被**逐字精准折叠拦截**，大幅提升了引擎防黑产穿透的健壮性。
+运行时繁简转换按单个代码点执行：基础 CJK 区间使用连续数组缓存转换结果，扩展区字符使用映射缓存。首次转换依赖 OpenCC `t2s.json`，后续相同字符直接命中缓存。这种设计避免了整段文本交由第三方分词库处理的高昂开销，同时确保即使敏感词中间穿插了各类干扰符号（如 `敏*感*詞`），依然能被**逐字精准折叠拦截**。
 
 ### 5.2 数字样式支持 (ignore_num_style)
 涵盖了极广的 Unicode 数字变体：
@@ -456,6 +474,13 @@ Windows 下按以下方式构建（CMake 配置目录为 `.build/windows/x64-Rel
 *(可使用 `debug` 构建调试版本，对应 `.build/windows/x64-Debug` 与 `.build/Debug`)*
 
 构建 OpenCC 数据目标需要可用的 Python3；项目会在构建运行目录下生成 `data/config` 与 `data/dictionary`（位于 `.build/Release/data/` 下）。
+
+Linux 下按以下方式构建（CMake 配置目录为 `.build/linux/x64-Release`，可执行文件及运行资源同样输出到 `.build/Release`）：
+
+```bash
+./init-3rd.sh
+./build.linux.sh release
+```
 
 ### 7.2 运行测试
 本项目附带了较完整的 Doctest 单元测试（涵盖基础流程、归一化、高级边界碰撞、零宽字符穿透等）。
