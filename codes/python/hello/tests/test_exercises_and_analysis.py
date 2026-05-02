@@ -11,10 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 EXERCISES = ROOT / "练习题与答案"
 PROJECT26 = ROOT / "07_项目实战" / "chapter26_项目2_日志分析系统"
 CHAPTER11 = ROOT / "03_模块与面向对象篇" / "chapter11_异常处理.py"
-CHAPTER21_NETWORK = ROOT / "05_标准库篇" / "chapter21_网络与HTTP基础.py"
-CHAPTER21_NUMERIC = ROOT / "05_标准库篇" / "chapter21_补充1_数学与数值工具.py"
-CHAPTER21_FILE_TOOLS = ROOT / "05_标准库篇" / "chapter21_补充2_文件目录工具.py"
-CHAPTER21_TYPING = ROOT / "05_标准库篇" / "chapter21_补充3_类型注解进阶.py"
+CHAPTER21_NETWORK = ROOT / "05_标准库篇" / "chapter21_补充01_网络与HTTP基础.py"
+CHAPTER21_NUMERIC = ROOT / "05_标准库篇" / "chapter21_补充02_数学与数值工具.py"
+CHAPTER21_FILE_TOOLS = ROOT / "05_标准库篇" / "chapter21_补充03_文件目录工具.py"
+CHAPTER21_TYPING = ROOT / "05_标准库篇" / "chapter21_补充04_类型注解进阶.py"
 
 
 def load_module(module_name: str, module_path: Path):
