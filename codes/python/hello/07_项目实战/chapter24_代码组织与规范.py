@@ -1,22 +1,28 @@
-"""
-第 24 章：代码组织与规范
-
-本章内容：
-1. 项目目录结构最佳实践
-2. 模块化设计原则
-3. PEP 8 代码规范详解
-4. 类型注解（Type Hints）
-5. 文档字符串规范
-6. 单元测试（unittest）
-7. 虚拟环境（本工程使用 conda，补充 venv 对比）
-
-学习目标：
-- 掌握 Python 项目的标准组织结构
-- 理解并应用 PEP 8 代码规范
-- 学会使用类型注解提高代码可维护性
-- 掌握单元测试的编写方法
-- 了解 conda 与 venv 两种虚拟环境方案的基本用法
-"""
+# =============================================================================
+# 第 24 章：代码组织与规范
+# =============================================================================
+#
+# 【学习目标】
+#   1. 掌握 Python 项目的标准组织结构
+#   2. 理解并应用 PEP 8 代码规范
+#   3. 学会使用类型注解提高代码可维护性
+#   4. 掌握单元测试的编写方法
+#   5. 了解 conda 与 venv 两种虚拟环境方案的基本用法
+#
+# 【运行方式】
+#   python chapter24_代码组织与规范.py
+#
+# 【本章内容】
+#   1. 项目目录结构最佳实践
+#   2. 模块化设计原则
+#   3. PEP 8 代码规范详解
+#   4. 类型注解（Type Hints）
+#   5. 文档字符串规范
+#   6. 单元测试（unittest）
+#   7. 虚拟环境（本工程使用 conda，补充 venv 对比）
+#   8. 综合实战：规范化的计算器模块
+#
+# =============================================================================
 
 # ============================================================================
 # 1. 项目目录结构最佳实践
@@ -1265,7 +1271,8 @@ print(f"\n  计算器测试: {passed}/{total} 通过")
 
 
 # ============================================================================
-# 本章总结
+# ============================================================================
+# 【本章总结】
 # ============================================================================
 
 print("\n" + "=" * 60)
@@ -1318,3 +1325,92 @@ summary = """
    - pip 依赖导出：pip freeze > requirements.txt
 """
 print(summary)
+
+
+# ============================================================================
+# 【小练习】
+# ============================================================================
+#
+# 练习 1（基础）：
+#   设计一个小型项目目录结构，至少包含 README.md、main.py、config.py、
+#   utils.py、tests/，并说明每个文件的职责。
+#
+# 练习 2（基础）：
+#   为 Calculator 类新增 mod(a, b) 取模方法：
+#   - b 为 0 时抛出 DivisionByZeroError
+#   - 成功计算时记录历史
+#   - 为该方法补充 unittest 测试
+#
+# 练习 3（进阶）：
+#   将 Calculator 类拆分成一个真实模块结构：
+#   - calculator/core.py：Calculator 类和异常
+#   - calculator/__init__.py：导出公共接口
+#   - tests/test_calculator.py：测试用例
+#   - main.py：演示入口
+#
+# 练习答案提示：
+#   练习1：按“单一职责”划分文件，README 写运行方式，tests 放自动化测试
+#   练习2：参考 divide() 的异常处理、_round() 和 _record() 的用法
+#   练习3：移动代码时保持导入方向清晰，业务模块不要依赖 main.py
+
+
+# ============================================================================
+# 【练习答案】
+# ============================================================================
+
+def exercise1_answer() -> None:
+    """练习 1：项目目录结构示例。"""
+    structure = """
+mini_project/
+├── README.md              # 项目说明、环境准备、运行方式
+├── main.py                # 程序入口，只负责解析输入和调用业务逻辑
+├── config.py              # 配置项、默认值、配置加载函数
+├── utils.py               # 与业务无关的通用工具函数
+└── tests/
+    └── test_utils.py      # 自动化测试
+"""
+    print(structure)
+
+
+def exercise2_answer() -> None:
+    """练习 2：Calculator.mod 方法参考实现。"""
+    print("在 Calculator 类中新增方法：")
+    print("""
+def mod(self, a: float, b: float) -> float:
+    if b == 0:
+        raise DivisionByZeroError(f"取模除数不能为零: {a} % {b}")
+    result = self._round(a % b)
+    self._record(f"{a} % {b}", result)
+    return result
+""")
+    print("对应测试：")
+    print("""
+def test_mod(self):
+    self.assertEqual(self.calc.mod(10, 3), 1)
+
+def test_mod_by_zero(self):
+    with self.assertRaises(DivisionByZeroError):
+        self.calc.mod(10, 0)
+""")
+
+
+def exercise3_answer() -> None:
+    """练习 3：模块拆分参考方案。"""
+    print("推荐拆分：")
+    print("  calculator/core.py       # Calculator, CalculatorError")
+    print("  calculator/__init__.py   # from .core import Calculator")
+    print("  tests/test_calculator.py # TestCalculator")
+    print("  main.py                  # from calculator import Calculator")
+    print("原则：核心模块保持可导入、可测试；入口文件只做流程编排。")
+
+
+# 取消注释以运行练习答案：
+# if __name__ == "__main__":
+#     print("=" * 40)
+#     exercise1_answer()
+#
+#     print("=" * 40)
+#     exercise2_answer()
+#
+#     print("=" * 40)
+#     exercise3_answer()
