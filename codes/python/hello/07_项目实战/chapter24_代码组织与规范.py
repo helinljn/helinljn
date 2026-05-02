@@ -8,14 +8,14 @@
 4. 类型注解（Type Hints）
 5. 文档字符串规范
 6. 单元测试（unittest）
-7. 虚拟环境（venv）
+7. 虚拟环境（本工程使用 conda，补充 venv 对比）
 
 学习目标：
 - 掌握 Python 项目的标准组织结构
 - 理解并应用 PEP 8 代码规范
 - 学会使用类型注解提高代码可维护性
 - 掌握单元测试的编写方法
-- 了解虚拟环境的使用
+- 了解 conda 与 venv 两种虚拟环境方案的基本用法
 """
 
 # ============================================================================
@@ -859,10 +859,10 @@ print(f"  测试{'全部通过 ✓' if test_success else '存在失败 ✗'}")
 
 
 # ============================================================================
-# 7. 虚拟环境（venv）
+# 7. 虚拟环境（conda 与 venv）
 # ============================================================================
 
-print("\n--- 7. 虚拟环境（venv）---")
+print("\n--- 7. 虚拟环境（conda 与 venv）---")
 
 import sys
 import os
@@ -872,9 +872,28 @@ import os
 # 2. 固定项目的依赖版本
 # 3. 便于在不同机器上重现开发环境
 #
-# Python 3.3+ 内置 venv 模块，无需额外安装。
+# 本学习工程实际使用 conda，并通过根目录 environment.yml 精确导出 py311 环境。
+# venv 是 Python 3.3+ 内置的虚拟环境模块，这里作为对比知识点学习。
 
-# ----- 7.1 虚拟环境常用命令 -----
+# ----- 7.1 本工程使用的 conda 命令（Windows CMD）-----
+#
+# 创建环境：
+#   conda env create -f environment.yml
+#
+# 激活环境：
+#   conda activate py311
+#
+# 更新已有环境：
+#   conda env update -f environment.yml --prune
+#
+# 查看当前 conda 环境：
+#   conda env list
+#   conda info --envs
+#
+# 导出当前环境：
+#   conda env export > environment.yml
+
+# ----- 7.2 venv 常用命令（Python 内置方案）-----
 #
 # 创建虚拟环境：
 #   python -m venv venv              # 在当前目录创建 venv/ 目录
@@ -899,7 +918,7 @@ import os
 #   pip freeze > requirements.txt    # 导出所有已安装包
 #   pip freeze | grep -i requests    # 查找特定包版本
 
-# ----- 7.2 requirements.txt 格式 -----
+# ----- 7.3 requirements.txt 格式 -----
 #
 # 简单格式（指定精确版本，推荐生产环境）：
 #   requests==2.31.0
@@ -916,10 +935,11 @@ import os
 #   flake8==7.0.0
 #   black==24.1.1
 
-# ----- 7.3 检测当前 Python 环境信息 -----
+# ----- 7.4 检测当前 Python 环境信息 -----
 print("当前 Python 环境信息:")
 print(f"  Python 版本: {sys.version.split()[0]}")
 print(f"  Python 解释器路径: {sys.executable}")
+print(f"  conda 环境名: {os.environ.get('CONDA_DEFAULT_ENV', '未检测到')}")
 
 # 检测是否处于虚拟环境中
 in_venv = hasattr(sys, 'real_prefix') or (
@@ -928,7 +948,7 @@ in_venv = hasattr(sys, 'real_prefix') or (
 print(f"  是否在虚拟环境中: {'是' if in_venv else '否'}")
 print(f"  sys.prefix: {sys.prefix}")
 
-# ----- 7.4 使用 venv 模块的 API（程序化创建虚拟环境）-----
+# ----- 7.5 使用 venv 模块的 API（程序化创建虚拟环境）-----
 import venv
 
 def create_virtual_env_info(env_path: str) -> Dict[str, str]:
@@ -958,7 +978,7 @@ print(f"    环境目录: {env_info['env_dir']}")
 print(f"    Python:   {env_info['python']}")
 print(f"    Bin 目录: {env_info['bin_path']}")
 
-# ----- 7.5 pip 常用命令 -----
+# ----- 7.6 pip 常用命令 -----
 #
 # 查看已安装包：
 #   pip list
@@ -1290,10 +1310,11 @@ summary = """
    - 丰富的 assertXxx 断言方法
    - 运行：python -m unittest discover
 
-7. 虚拟环境（venv）
-   - 创建：python -m venv venv
-   - 激活：Windows: venv\\Scripts\\activate
-   - 导出依赖：pip freeze > requirements.txt
-   - 安装依赖：pip install -r requirements.txt
+7. 虚拟环境（conda 与 venv）
+   - 本工程使用 conda：conda activate py311
+   - conda 精确复现：conda env create -f environment.yml
+   - venv 创建：python -m venv venv
+   - venv 激活：Windows: venv\\Scripts\\activate
+   - pip 依赖导出：pip freeze > requirements.txt
 """
 print(summary)

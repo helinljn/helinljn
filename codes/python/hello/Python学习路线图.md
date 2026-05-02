@@ -261,7 +261,7 @@
 - 类型注解（Type Hints）
 - 文档字符串规范
 - 单元测试（unittest）
-- 虚拟环境（venv）
+- 虚拟环境（本工程使用 conda，补充 venv 对比）
 
 #### 第 25 章：综合项目 1 - 命令行工具
 **项目：文件批量处理工具**
@@ -297,6 +297,7 @@
 python-learning/
 │
 ├── Python学习路线图.md                  # 本文件
+├── environment.yml                      # conda 环境精确导出文件
 ├── main.py                              # 入口文件
 ├── .vscode/                             # VS Code 配置
 │   ├── settings.json                    # conda 环境 + Python 路径

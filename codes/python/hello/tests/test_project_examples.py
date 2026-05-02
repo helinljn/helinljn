@@ -46,7 +46,13 @@ class FileProcessorProjectTests(unittest.TestCase):
             (root / "nested" / "c.txt").write_text("nested", encoding="utf-8")
 
             processor = self.file_processor.FileProcessor(dry_run=True, backup=False)
-            files = processor.search(root, "*.txt", recursive=True, print_results=False)
+            files = processor.search(
+                root,
+                "*.txt",
+                recursive=True,
+                ignore_hidden=False,
+                print_results=False,
+            )
 
             self.assertEqual([p.relative_to(root).as_posix() for p in files], ["a.txt", "nested/c.txt"])
 
@@ -138,4 +144,3 @@ class LogAnalyzerProjectTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
