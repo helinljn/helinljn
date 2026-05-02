@@ -16,20 +16,24 @@
         },
         "includeCoAuthoredBy": false
     }
-    // claude -> gpt-5.5
-    // OpenAI Responses API, AUTHROPIC_AUTH_TOKEN
+
+    // codex -> gpt-5.5
     // 写入通用配置
     {
-        "env": {
-            "ANTHROPIC_AUTH_TOKEN": "xxx",
-            "ANTHROPIC_BASE_URL": "https://www.right.codes/codex",
-            "ANTHROPIC_MODEL": "gpt-5.5",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gpt-5.5",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL": "gpt-5.5",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL": "gpt-5.5"
-        },
-        "includeCoAuthoredBy": false
+        "OPENAI_API_KEY": "xxx"
     }
+
+    model_provider = "custom"
+    model = "gpt-5.5"
+    model_reasoning_effort = "high"
+    disable_response_storage = true
+    model_context_window = 1000000
+    model_auto_compact_token_limit = 900000
+    [model_providers.custom]
+    name = "custom"
+    wire_api = "responses"
+    requires_openai_auth = true
+    base_url = "https://www.right.codes/codex/v1"
 
 2. 安装nodejs
     https://nodejs.cn/download
@@ -39,3 +43,4 @@
         C:\ProgramData\node-v24.15.0-win-x64
 
     npm i -g @anthropic-ai/claude-code@latest
+    npm i -g @openai/codex@latest
