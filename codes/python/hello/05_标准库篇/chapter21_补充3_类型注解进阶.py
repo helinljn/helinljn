@@ -21,10 +21,6 @@ from typing import Any, Generic, Literal, NotRequired, Protocol, TypeAlias, Type
 # 21.补充3.1 Optional、Union、Literal
 # =============================================================================
 
-print("=" * 60)
-print("第 21 章补充 3：类型注解进阶")
-print("=" * 60)
-
 UserId: TypeAlias = int
 JsonValue: TypeAlias = str | int | float | bool | None | list["JsonValue"] | dict[str, "JsonValue"]
 LogLevel: TypeAlias = Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -45,7 +41,9 @@ def should_log(message_level: LogLevel, enabled_level: LogLevel = "INFO") -> boo
 
 def demo_union_literal() -> None:
     """演示联合类型、可选类型和 Literal。"""
-    print("\n--- 21.补充3.1 Optional、Union、Literal ---")
+    print("=" * 60)
+    print("21.补充3.1 Optional、Union、Literal")
+    print("=" * 60)
 
     print("normalize_user_id('42'):", normalize_user_id("42"))
     print("normalize_user_id(None):", normalize_user_id(None))
@@ -74,7 +72,9 @@ def format_user(user: UserRecord) -> str:
 
 def demo_typed_dict() -> None:
     """演示 TypedDict 描述固定结构的字典。"""
-    print("\n--- 21.补充3.2 TypedDict ---")
+    print("\n" + "=" * 60)
+    print("21.补充3.2 TypedDict")
+    print("=" * 60)
 
     user: UserRecord = {"id": 1, "name": "Alice", "email": "alice@example.com"}
     print(format_user(user))
@@ -108,7 +108,9 @@ def save_payload(serializer: Serializer, payload: JsonValue) -> str:
 
 def demo_protocol() -> None:
     """演示 Protocol 的结构化类型思想。"""
-    print("\n--- 21.补充3.3 Protocol ---")
+    print("\n" + "=" * 60)
+    print("21.补充3.3 Protocol")
+    print("=" * 60)
 
     serializer = SimpleJsonSerializer()
     print("序列化字符串:", save_payload(serializer, "hello"))
@@ -143,7 +145,9 @@ def first_or_none(items: list[T]) -> T | None:
 
 def demo_generic() -> None:
     """演示泛型类和泛型函数。"""
-    print("\n--- 21.补充3.4 Generic 和 TypeVar ---")
+    print("\n" + "=" * 60)
+    print("21.补充3.4 Generic 和 TypeVar")
+    print("=" * 60)
 
     repo: Repository[str] = Repository()
     repo.add("python")
@@ -154,40 +158,48 @@ def demo_generic() -> None:
 
 
 # =============================================================================
-# 【语法总结】
+# 主程序
 # =============================================================================
 
-print("\n" + "=" * 60)
-print("第 21 章补充 3 语法总结")
-print("=" * 60)
+def main() -> None:
+    """运行本章补充的所有演示函数。"""
+    demo_union_literal()
+    demo_typed_dict()
+    demo_protocol()
+    demo_generic()
 
-summary = """
-1. Optional / Union
-   - Python 3.10+ 推荐写成 T | None、A | B
-   - 适合表达参数可能为空或支持多种输入类型
 
-2. Literal
-   - 限定字符串或数字只能取某几个固定值
-   - 常用于模式、状态、级别等枚举型参数
+if __name__ == "__main__":
+    main()
 
-3. TypeAlias
-   - 给复杂类型起名字，提高可读性
-   - 例如 JsonValue、UserId
 
-4. TypedDict
-   - 描述字典应该有哪些 key 和 value 类型
-   - 适合 JSON、配置、接口返回值等字典结构
-
-5. Protocol
-   - 表达“只要有某些方法即可”的结构化接口
-   - 更贴近 Python 鸭子类型
-
-6. Generic / TypeVar
-   - 编写保留类型信息的容器、仓库、工具函数
-   - list[T]、Repository[T] 都属于泛型思想
-"""
-
-print(summary)
+# =============================================================================
+# 【语法总结】
+# =============================================================================
+#
+# 1. Optional / Union
+#    - Python 3.10+ 推荐写成 T | None、A | B
+#    - 适合表达参数可能为空或支持多种输入类型
+#
+# 2. Literal
+#    - 限定字符串或数字只能取某几个固定值
+#    - 常用于模式、状态、级别等枚举型参数
+#
+# 3. TypeAlias
+#    - 给复杂类型起名字，提高可读性
+#    - 例如 JsonValue、UserId
+#
+# 4. TypedDict
+#    - 描述字典应该有哪些 key 和 value 类型
+#    - 适合 JSON、配置、接口返回值等字典结构
+#
+# 5. Protocol
+#    - 表达“只要有某些方法即可”的结构化接口
+#    - 更贴近 Python 鸭子类型
+#
+# 6. Generic / TypeVar
+#    - 编写保留类型信息的容器、仓库、工具函数
+#    - list[T]、Repository[T] 都属于泛型思想
 
 
 # =============================================================================
@@ -230,13 +242,12 @@ def last_or_none(items: list[T]) -> T | None:
     return items[-1] if items else None
 
 
-def main() -> None:
-    """运行本章补充示例。"""
-    demo_union_literal()
-    demo_typed_dict()
-    demo_protocol()
-    demo_generic()
-
-
-if __name__ == "__main__":
-    main()
+# 取消注释以运行练习：
+# if __name__ == "__main__":
+#     product: Product = {"id": 1, "name": "Python Book", "price": 68.0}
+#
+#     print("=" * 40)
+#     print(product)
+#
+#     print("\n" + "=" * 40)
+#     print(last_or_none([1, 2, 3]))

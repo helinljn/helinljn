@@ -24,10 +24,6 @@ import tempfile
 # 21.补充2.1 glob 文件查找
 # =============================================================================
 
-print("=" * 60)
-print("第 21 章补充 2：文件目录工具")
-print("=" * 60)
-
 
 def find_files(root: Path, pattern: str) -> list[Path]:
     """使用 glob 递归查找匹配文件。"""
@@ -37,7 +33,9 @@ def find_files(root: Path, pattern: str) -> list[Path]:
 
 def demo_glob_module(root: Path) -> None:
     """演示 glob 通配符查找。"""
-    print("\n--- 21.补充2.1 glob 文件查找 ---")
+    print("=" * 60)
+    print("21.补充2.1 glob 文件查找")
+    print("=" * 60)
 
     txt_files = find_files(root, "*.txt")
     py_files = find_files(root, "*.py")
@@ -66,7 +64,9 @@ def copy_by_extension(source: Path, target: Path, extension: str) -> list[Path]:
 
 def demo_shutil_module(root: Path) -> None:
     """演示 shutil 复制目录和文件。"""
-    print("\n--- 21.补充2.2 shutil 文件和目录操作 ---")
+    print("\n" + "=" * 60)
+    print("21.补充2.2 shutil 文件和目录操作")
+    print("=" * 60)
 
     backup = root / "backup"
     copied = copy_by_extension(root / "src", backup, ".txt")
@@ -96,7 +96,9 @@ def create_demo_workspace(root: Path) -> None:
 
 def demo_tempfile_module() -> None:
     """演示 tempfile 自动清理临时目录。"""
-    print("\n--- 21.补充2.3 tempfile 临时文件和临时目录 ---")
+    print("=" * 60)
+    print("21.补充2.3 tempfile 临时文件和临时目录")
+    print("=" * 60)
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -115,31 +117,36 @@ def demo_tempfile_module() -> None:
 
 
 # =============================================================================
-# 【语法总结】
+# 主程序
 # =============================================================================
 
-print("\n" + "=" * 60)
-print("第 21 章补充 2 语法总结")
-print("=" * 60)
+def main() -> None:
+    """运行本章补充的所有演示函数。"""
+    demo_tempfile_module()
 
-summary = """
-1. glob
-   - glob.glob("**/*.txt", recursive=True)：递归匹配文件
-   - 通配符：* 匹配任意字符，? 匹配单个字符
 
-2. shutil
-   - copy2(src, dst)：复制文件并尽量保留元数据
-   - copytree(src, dst)：复制整个目录
-   - move(src, dst)：移动文件或目录
-   - rmtree(path)：递归删除目录，使用前必须确认路径
+if __name__ == "__main__":
+    main()
 
-3. tempfile
-   - TemporaryDirectory()：创建临时目录，with 结束自动删除
-   - NamedTemporaryFile()：创建临时文件
-   - 适合测试、演示、处理中间文件
-"""
 
-print(summary)
+# =============================================================================
+# 【语法总结】
+# =============================================================================
+#
+# 1. glob
+#    - glob.glob("**/*.txt", recursive=True)：递归匹配文件
+#    - 通配符：* 匹配任意字符，? 匹配单个字符
+#
+# 2. shutil
+#    - copy2(src, dst)：复制文件并尽量保留元数据
+#    - copytree(src, dst)：复制整个目录
+#    - move(src, dst)：移动文件或目录
+#    - rmtree(path)：递归删除目录，使用前必须确认路径
+#
+# 3. tempfile
+#    - TemporaryDirectory()：创建临时目录，with 结束自动删除
+#    - NamedTemporaryFile()：创建临时文件
+#    - 适合测试、演示、处理中间文件
 
 
 # =============================================================================
@@ -184,10 +191,14 @@ def make_backup(source: Path) -> Path:
     return Path(shutil.copytree(source, target))
 
 
-def main() -> None:
-    """运行本章补充示例。"""
-    demo_tempfile_module()
-
-
-if __name__ == "__main__":
-    main()
+# 取消注释以运行练习：
+# if __name__ == "__main__":
+#     with tempfile.TemporaryDirectory() as tmp:
+#         root = Path(tmp)
+#         create_demo_workspace(root)
+#
+#         print("=" * 40)
+#         print(count_by_extension(root))
+#
+#         print("\n" + "=" * 40)
+#         print(make_backup(root / "src"))

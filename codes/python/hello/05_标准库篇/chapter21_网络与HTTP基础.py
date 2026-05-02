@@ -27,14 +27,12 @@ from urllib import error, parse, request
 # 21.1 URL 解析与构造
 # =============================================================================
 
-print("=" * 60)
-print("第 21 章：网络与 HTTP 基础")
-print("=" * 60)
-
 
 def demo_url_parsing() -> None:
     """演示 URL 解析、查询参数读取和 URL 构造。"""
-    print("\n--- 21.1 URL 解析与构造 ---")
+    print("=" * 60)
+    print("21.1 URL 解析与构造")
+    print("=" * 60)
 
     url = "https://api.example.com/users?page=2&size=20&keyword=python"
     parts = parse.urlparse(url)
@@ -78,7 +76,9 @@ def build_json_request(url: str, payload: dict[str, Any]) -> request.Request:
 
 def demo_http_request_object() -> None:
     """演示 urllib.request.Request 的常用字段。"""
-    print("\n--- 21.2 HTTP 请求对象 ---")
+    print("\n" + "=" * 60)
+    print("21.2 HTTP 请求对象")
+    print("=" * 60)
 
     req = build_json_request(
         "https://api.example.com/login",
@@ -137,7 +137,9 @@ def fetch_json(url: str, timeout: float = 3.0) -> dict[str, Any]:
 
 def demo_local_http_server() -> None:
     """启动本地 HTTP 服务，并用 urllib.request 访问它。"""
-    print("\n--- 21.3 本地 HTTP 服务与客户端请求 ---")
+    print("\n" + "=" * 60)
+    print("21.3 本地 HTTP 服务与客户端请求")
+    print("=" * 60)
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), JsonHandler)
     host, port = server.server_address
@@ -181,7 +183,9 @@ def start_echo_server() -> tuple[socket.socket, threading.Thread]:
 
 def demo_socket_tcp() -> None:
     """演示 TCP 服务端和客户端的最小通信流程。"""
-    print("\n--- 21.4 socket TCP 基础 ---")
+    print("\n" + "=" * 60)
+    print("21.4 socket TCP 基础")
+    print("=" * 60)
 
     server, thread = start_echo_server()
     host, port = server.getsockname()
@@ -216,7 +220,9 @@ def classify_http_status(status: int) -> str:
 
 def demo_error_handling() -> None:
     """演示网络编程中常见异常和状态码分类。"""
-    print("\n--- 21.5 网络异常处理 ---")
+    print("\n" + "=" * 60)
+    print("21.5 网络异常处理")
+    print("=" * 60)
 
     for status in [200, 301, 404, 500]:
         print(f"HTTP {status}: {classify_http_status(status)}")
@@ -233,44 +239,53 @@ def demo_error_handling() -> None:
 
 
 # =============================================================================
-# 【语法总结】
+# 主程序
 # =============================================================================
 
-print("\n" + "=" * 60)
-print("第 21 章语法总结")
-print("=" * 60)
+def main() -> None:
+    """运行本章所有演示函数。"""
+    demo_url_parsing()
+    demo_http_request_object()
+    demo_local_http_server()
+    demo_socket_tcp()
+    demo_error_handling()
 
-network_summary = """
-1. urllib.parse
-   - urlparse(url)：拆分 URL
-   - parse_qs(query)：把查询字符串转为 dict[str, list[str]]
-   - urlencode(mapping)：把参数 dict 编码为查询字符串
-   - urlunparse(parts)：把 URL 各部分重新组合
 
-2. urllib.request
-   - Request(url, data=None, headers=None, method=None)：构造请求
-   - urlopen(req_or_url, timeout=3)：发送请求
-   - 响应对象可读取 status、headers、read()
+if __name__ == "__main__":
+    main()
 
-3. http.server
-   - BaseHTTPRequestHandler：自定义请求处理器
-   - ThreadingHTTPServer((host, port), Handler)：启动本地 HTTP 服务
-   - 本地服务适合做教学、调试、小工具，不适合生产部署
 
-4. socket
-   - socket.socket(AF_INET, SOCK_STREAM)：创建 TCP socket
-   - bind/listen/accept：服务端流程
-   - create_connection/sendall/recv：客户端流程
-
-5. 网络编程注意事项
-   - 永远设置 timeout
-   - 检查 HTTP 状态码
-   - 明确编码，常见为 UTF-8
-   - 捕获 URLError、HTTPError、TimeoutError 等异常
-   - 外部接口不稳定，测试时优先使用本地服务或 mock
-"""
-
-print(network_summary)
+# =============================================================================
+# 【语法总结】
+# =============================================================================
+#
+# 1. urllib.parse
+#    - urlparse(url)：拆分 URL
+#    - parse_qs(query)：把查询字符串转为 dict[str, list[str]]
+#    - urlencode(mapping)：把参数 dict 编码为查询字符串
+#    - urlunparse(parts)：把 URL 各部分重新组合
+#
+# 2. urllib.request
+#    - Request(url, data=None, headers=None, method=None)：构造请求
+#    - urlopen(req_or_url, timeout=3)：发送请求
+#    - 响应对象可读取 status、headers、read()
+#
+# 3. http.server
+#    - BaseHTTPRequestHandler：自定义请求处理器
+#    - ThreadingHTTPServer((host, port), Handler)：启动本地 HTTP 服务
+#    - 本地服务适合做教学、调试、小工具，不适合生产部署
+#
+# 4. socket
+#    - socket.socket(AF_INET, SOCK_STREAM)：创建 TCP socket
+#    - bind/listen/accept：服务端流程
+#    - create_connection/sendall/recv：客户端流程
+#
+# 5. 网络编程注意事项
+#    - 永远设置 timeout
+#    - 检查 HTTP 状态码
+#    - 明确编码，常见为 UTF-8
+#    - 捕获 URLError、HTTPError、TimeoutError 等异常
+#    - 外部接口不稳定，测试时优先使用本地服务或 mock
 
 
 # =============================================================================
@@ -321,14 +336,10 @@ def download_text(url: str, timeout: float = 3.0) -> str:
         return "网络错误: 请求超时"
 
 
-def main() -> None:
-    """运行本章所有示例。"""
-    demo_url_parsing()
-    demo_http_request_object()
-    demo_local_http_server()
-    demo_socket_tcp()
-    demo_error_handling()
-
-
-if __name__ == "__main__":
-    main()
+# 取消注释以运行练习：
+# if __name__ == "__main__":
+#     print("=" * 40)
+#     print(build_search_url("https://example.com/search", "python 网络", 1))
+#
+#     print("\n" + "=" * 40)
+#     print(download_text("http://127.0.0.1:8000/health"))

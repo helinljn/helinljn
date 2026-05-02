@@ -25,10 +25,6 @@ import statistics
 # 21.补充1.1 math 模块
 # =============================================================================
 
-print("=" * 60)
-print("第 21 章补充 1：数学与数值工具")
-print("=" * 60)
-
 
 def circle_area(radius: float) -> float:
     """计算圆面积。"""
@@ -39,7 +35,9 @@ def circle_area(radius: float) -> float:
 
 def demo_math_module() -> None:
     """演示 math 模块常用函数。"""
-    print("\n--- 21.补充1.1 math 模块 ---")
+    print("=" * 60)
+    print("21.补充1.1 math 模块")
+    print("=" * 60)
 
     print("pi:", round(math.pi, 6))
     print("sqrt(16):", math.sqrt(16))
@@ -62,7 +60,9 @@ def roll_dice(times: int, seed: int | None = None) -> list[int]:
 
 def demo_random_module() -> None:
     """演示 random 模块常用方法。"""
-    print("\n--- 21.补充1.2 random 模块 ---")
+    print("\n" + "=" * 60)
+    print("21.补充1.2 random 模块")
+    print("=" * 60)
 
     numbers = list(range(1, 11))
     rng = random.Random(42)
@@ -95,7 +95,9 @@ def summarize_scores(scores: list[float]) -> dict[str, float]:
 
 def demo_statistics_module() -> None:
     """演示 statistics 模块。"""
-    print("\n--- 21.补充1.3 statistics 模块 ---")
+    print("\n" + "=" * 60)
+    print("21.补充1.3 statistics 模块")
+    print("=" * 60)
 
     scores = [88, 92, 75, 91, 84, 92]
     summary = summarize_scores(scores)
@@ -121,7 +123,9 @@ def calculate_total_price(prices: list[str], tax_rate: str = "0.06") -> Decimal:
 
 def demo_decimal_module() -> None:
     """演示 Decimal 避免二进制浮点误差。"""
-    print("\n--- 21.补充1.4 Decimal 精确小数 ---")
+    print("\n" + "=" * 60)
+    print("21.补充1.4 Decimal 精确小数")
+    print("=" * 60)
 
     print("float: 0.1 + 0.2 =", 0.1 + 0.2)
     print("Decimal: 0.1 + 0.2 =", Decimal("0.1") + Decimal("0.2"))
@@ -142,7 +146,9 @@ def add_fractions(a: str, b: str) -> Fraction:
 
 def demo_fraction_module() -> None:
     """演示 Fraction 精确表示有理数。"""
-    print("\n--- 21.补充1.5 Fraction 有理数 ---")
+    print("\n" + "=" * 60)
+    print("21.补充1.5 Fraction 有理数")
+    print("=" * 60)
 
     value = Fraction(1, 3) + Fraction(1, 6)
     print("1/3 + 1/6 =", value)
@@ -151,37 +157,46 @@ def demo_fraction_module() -> None:
 
 
 # =============================================================================
-# 【语法总结】
+# 主程序
 # =============================================================================
 
-print("\n" + "=" * 60)
-print("第 21 章补充 1 语法总结")
-print("=" * 60)
+def main() -> None:
+    """运行本章补充的所有演示函数。"""
+    demo_math_module()
+    demo_random_module()
+    demo_statistics_module()
+    demo_decimal_module()
+    demo_fraction_module()
 
-summary = """
-1. math
-   - math.pi、math.sqrt、math.ceil、math.floor
-   - 三角函数、对数、幂运算等数学工具
 
-2. random
-   - random.Random(seed)：创建独立随机数生成器
-   - randint、choice、sample、shuffle
-   - 教学和测试中使用 seed 可得到稳定结果
+if __name__ == "__main__":
+    main()
 
-3. statistics
-   - mean、median、mode、pstdev、stdev
-   - 适合基础统计，不替代专业数据分析库
 
-4. decimal.Decimal
-   - 用字符串创建 Decimal，避免 float 误差
-   - 金额计算常配合 quantize 做四舍五入
-
-5. fractions.Fraction
-   - 精确表达有理数，例如 1/3、2/5
-   - 适合比例、分数和精确有理数运算
-"""
-
-print(summary)
+# =============================================================================
+# 【语法总结】
+# =============================================================================
+#
+# 1. math
+#    - math.pi、math.sqrt、math.ceil、math.floor
+#    - 三角函数、对数、幂运算等数学工具
+#
+# 2. random
+#    - random.Random(seed)：创建独立随机数生成器
+#    - randint、choice、sample、shuffle
+#    - 教学和测试中使用 seed 可得到稳定结果
+#
+# 3. statistics
+#    - mean、median、mode、pstdev、stdev
+#    - 适合基础统计，不替代专业数据分析库
+#
+# 4. decimal.Decimal
+#    - 用字符串创建 Decimal，避免 float 误差
+#    - 金额计算常配合 quantize 做四舍五入
+#
+# 5. fractions.Fraction
+#    - 精确表达有理数，例如 1/3、2/5
+#    - 适合比例、分数和精确有理数运算
 
 
 # =============================================================================
@@ -221,14 +236,10 @@ def split_bill(total: str, people: int) -> Decimal:
     return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 
-def main() -> None:
-    """运行本章补充示例。"""
-    demo_math_module()
-    demo_random_module()
-    demo_statistics_module()
-    demo_decimal_module()
-    demo_fraction_module()
-
-
-if __name__ == "__main__":
-    main()
+# 取消注释以运行练习：
+# if __name__ == "__main__":
+#     print("=" * 40)
+#     print(distance(0, 0, 3, 4))
+#
+#     print("\n" + "=" * 40)
+#     print(split_bill("128.00", 3))
