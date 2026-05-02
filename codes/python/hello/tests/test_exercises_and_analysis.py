@@ -12,6 +12,9 @@ EXERCISES = ROOT / "练习题与答案"
 PROJECT26 = ROOT / "07_项目实战" / "chapter26_项目2_日志分析系统"
 CHAPTER11 = ROOT / "03_模块与面向对象篇" / "chapter11_异常处理.py"
 CHAPTER21_NETWORK = ROOT / "05_标准库篇" / "chapter21_网络与HTTP基础.py"
+CHAPTER21_NUMERIC = ROOT / "05_标准库篇" / "chapter21_补充1_数学与数值工具.py"
+CHAPTER21_FILE_TOOLS = ROOT / "05_标准库篇" / "chapter21_补充2_文件目录工具.py"
+CHAPTER21_TYPING = ROOT / "05_标准库篇" / "chapter21_补充3_类型注解进阶.py"
 
 
 def load_module(module_name: str, module_path: Path):
@@ -279,6 +282,9 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
     def setUpClass(cls):
         cls.chapter11 = load_module("chapter11_exceptions", CHAPTER11)
         cls.chapter21_network = load_module("chapter21_network", CHAPTER21_NETWORK)
+        cls.chapter21_numeric = load_module("chapter21_numeric", CHAPTER21_NUMERIC)
+        cls.chapter21_file_tools = load_module("chapter21_file_tools", CHAPTER21_FILE_TOOLS)
+        cls.chapter21_typing = load_module("chapter21_typing", CHAPTER21_TYPING)
 
     def test_chapter11_new_exception_sections_run(self):
         buffer = io.StringIO()
@@ -301,6 +307,38 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
         self.assertIn("21.1 URL 解析与构造", text)
         self.assertIn("/health 响应", text)
         self.assertIn("客户端收到: echo: hello socket", text)
+
+    def test_chapter21_numeric_supplement_runs(self):
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            self.chapter21_numeric.main()
+
+        text = output.getvalue()
+        self.assertIn("21.补充1.1 math 模块", text)
+        self.assertEqual(round(self.chapter21_numeric.distance(0, 0, 3, 4), 2), 5.0)
+        self.assertEqual(str(self.chapter21_numeric.split_bill("10.00", 4)), "2.50")
+
+    def test_chapter21_file_tools_supplement_runs(self):
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            self.chapter21_file_tools.main()
+
+        text = output.getvalue()
+        self.assertIn("21.补充2.1 glob 文件查找", text)
+        self.assertIn("离开 with 后临时目录会自动清理", text)
+
+    def test_chapter21_typing_supplement_runs(self):
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            self.chapter21_typing.main()
+
+        text = output.getvalue()
+        self.assertIn("21.补充3.1 Optional、Union、Literal", text)
+        self.assertEqual(self.chapter21_typing.last_or_none([1, 2, 3]), 3)
+        self.assertIsNone(self.chapter21_typing.last_or_none([]))
 
     def test_chapter11_main_runs(self):
         buffer = io.StringIO()
