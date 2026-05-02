@@ -72,8 +72,12 @@ python -m unittest discover -s tests
 
 当前测试主要覆盖：
 
+- 基础练习：Kaprekar 常数、数字提取、杨辉三角
+- 函数练习：pipe/compose、TTL 缓存、参数验证
+- 面向对象练习：银行账户、数据类、事件系统
+- 综合练习：日志解析、CSV 管道、SQLite 任务队列
 - 项目1：文件搜索、演练重命名、内容替换
-- 项目2：Apache/Nginx 日志行解析、文件解析统计
+- 项目2：Apache/Nginx 日志行解析、文件解析统计、SQLite 数据分析
 
 这些测试用于验证学习工程的关键示例能正常运行，不替代每章的手动练习。
 
