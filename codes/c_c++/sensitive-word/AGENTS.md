@@ -38,12 +38,33 @@
 - 对 Unicode 变体、全半角、繁简体、零宽字符、重复字符等绕过方式具备防护能力
 - API 设计强调直观、稳定和低拷贝
 
+## 构建系统架构
+
+本项目使用 CMake 3.15+ 与 C++17。主要构建目标如下：
+
+| 目标 | 类型 | 源码 | 关键说明 |
+|------|------|------|----------|
+| `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、light_hook、common 工具函数。链接 jsoncpp 与 opencc，对外暴露 brynet、spdlog、utfcpp 头文件。 |
+| `service` | 可执行文件 | `src/service/` | HTTP 服务。链接 `core` 与 `mimalloc`。构建后自动将 `res/` 拷贝到运行目录。 |
+| `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
+| `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
+
+重要约定：
+
+- `src/service/sw/` 不是独立库目标，其源码被直接编译进 `service`、`test`、`benchmark` 三个目标。
+- 修改 `src/service/sw` 中的头文件或实现文件，会影响服务、测试和基准测试三个目标。
+- 根 `CMakeLists.txt` 中的 `PROJECT_TARGET_APPLY_COMMON_OPTIONS` 统一应用平台编译选项。
+  - Windows：`/utf-8`、`/permissive-`、`/Zc:__cplusplus`、`/bigobj`、`/W4`、`/MP`。
+  - Linux：`-Wall`、`-Wextra`、`-Wpedantic`。
+- `compile_commands.json` 由 CMake 生成。需要依赖编译数据库的工具时，优先使用构建目录中的该文件。
+
 ## 目录职责
 
 在理解或修改代码时，优先按目录职责建立边界意识：
 
 - `src/core`
   - 底层公共能力与基础设施。
+  - 典型内容包括 `common.h/cpp`、base64、md5、datetime、light_hook 等。
   - 应尽量保持通用，不混入上层服务协议或业务语义。
   - 不应反向依赖 `src/service` 中的业务或网络模块。
 
@@ -51,18 +72,32 @@
   - 敏感词服务侧领域逻辑。
   - 包括词典装载、归一化、匹配、结果条件、替换策略等。
   - 这里承载核心业务语义，不应被 HTTP/JSON 细节污染。
+  - 典型文件：
+    - `sensitive_word.*`：公开 API、builder、engine、word_result。
+    - `trie_dictionary.*`：Trie 字典树实现。
+    - `text_normalizer.*`：UTF-8 解码与文本折叠归一化。
+    - `char_ignore.*`：扫描时的字符跳过策略。
+    - `result_condition.*`：命中后的条件过滤。
+    - `replace_strategy.*`：替换文本生成策略。
+    - `word_dictionary_loader.*`：黑白名单加载。
 
 - `src/service/net`
   - 网络与服务编排层。
   - 包括 HTTP 服务、JSON 请求解析等。
   - 负责把外部请求转换为内部操作，并保持响应语义的一致性。
+  - 典型文件：
+    - `sw_http_server.*`：路由分发、keep-alive、服务生命周期管理。
+    - `sw_http_protocol.*`：JSON 解析、字段校验、错误映射、响应构建。
+    - `sw_worker_registry.*`：每线程引擎实例管理。
 
 - `src/test`
   - 单元测试与行为验证。
+  - 使用 doctest，主测试套件入口在 `test.cpp`。
   - 修改核心行为后，优先补齐或更新这里的验证。
 
 - `src/benchmark`
   - 性能验证与基准测试。
+  - 使用 nanobench。
   - 涉及热路径变更时，优先关注这里的性能回退风险。
 
 - `src/hcode`
@@ -164,6 +199,30 @@
 - 任何文本处理语义变更都应谨慎评估对绕过对抗、匹配结果和替换结果的影响。
 - 热路径优先低拷贝、低分配，不要为了抽象美观牺牲明显性能。
 
+### 引擎架构速览
+
+- `sensitive_word_engine` 是公开值类型包装，内部使用 Pimpl 隐藏实现细节。
+- `sensitive_word_builder` 收集配置、词库和策略对象，并通过 `build()` 构建引擎。
+- `char_ignore`、`result_condition`、`replace_strategy` 采用策略模式；工厂函数分别位于 `char_ignores`、`result_conditions`、`replace_strategies` 命名空间。
+- 公开 API 对只读字符串参数优先使用 `std::string_view`，返回值使用 `std::string`。
+- 查询类方法应优先标记 `[[nodiscard]]`；移动构造和移动赋值在可行时标记 `noexcept`。
+
+### Trie 字典树
+
+- `trie_dictionary` 使用 Arena 内存池，目标是减少逐节点堆分配。
+- 子节点使用有序 `std::vector` 与 `std::lower_bound` 查找。
+- 根节点配备 `root_ascii_cache_` 数组，为纯 ASCII 文本提供快速放行路径。
+- 当前实现不是 AC 自动机；扫描流程依赖游标推进，并支持运行时轻量增删词，无需重建 failure 链接。
+
+### 文本归一化与扫描流程
+
+- `text_normalizer` 在单次遍历中完成 UTF-8 解码、全半角折叠、大小写折叠、繁转简映射、数字样式折叠和英文变体折叠。
+- 归一化输出包含 `char32_t` 序列与到原始 UTF-8 的字节偏移映射。
+- 繁转简映射使用静态数据做码点级映射；OpenCC 主要用于构建期生成或复制数据，不应在热路径中引入分词器级开销。
+- 核心扫描流程：`text_normalizer` → 遍历码点 → `char_ignore::ignore()` 跳过干扰字符 → 沿 Trie 搜索 → `result_condition::match()` 过滤误杀 → 输出带原始字节位置的 `word_result` → `replace_strategy` 基于字节偏移生成替换文本。
+- `match_options::longest_match` 控制最短匹配与最长匹配；确认命中后扫描游标跳过已命中跨度，不产生交叉重叠的重复输出。
+- `contains()` 内部固定使用最短匹配，修改匹配策略时不得破坏这一性能语义。
+
 ## 代码审查要求
 
 审查 C++ 代码时，重点关注以下内容，并给出具体建议：
@@ -197,6 +256,27 @@
 - 若修改跨越 `src/service/sw` 与 `src/service/net`，优先说明分层边界是否仍然清晰。
 - 若修改 HTTP、服务生命周期、worker 绑定或并发语义，默认需要额外关注失败路径与兼容性。
 
+## 第三方依赖
+
+`3rd/` 下依赖由 `init-3rd.bat` 或 `init-3rd.sh` 按固定版本克隆。默认视为外部代码，不直接修改。
+
+| 依赖 | 版本 | 用途 |
+|------|------|------|
+| `brynet` | HEAD | 异步网络库，HTTP 服务底层 |
+| `utfcpp` | v4.0.9 | UTF-8/16/32 迭代 |
+| `opencc` | v1.2.0 | 繁简转换数据生成与相关资源 |
+| `spdlog` | v1.15.3 | 日志 |
+| `jsoncpp` | 1.9.7 | JSON 解析 |
+| `doctest` | v2.4.12 | 测试框架 |
+| `mimalloc` | v2.3.1 | 内存分配器，供 service/test/benchmark 链接 |
+| `nanobench` | v4.3.11 | 微基准测试 |
+
+补充约定：
+
+- 构建时 OpenCC 数据目标需要 Python3。
+- OpenCC 数据会在构建输出目录下生成或复制到 `data/config` 与 `data/dictionary`。
+- 运行时资源路径变更必须同时检查 `res/` 拷贝逻辑、`sw_worker_registry` 默认词库路径和 `text_normalizer` 的资源搜索路径。
+
 ## 构建与测试
 
 Windows 环境默认操作如下：
@@ -204,11 +284,37 @@ Windows 环境默认操作如下：
 1. 首次构建或第三方依赖缺失时，运行 `.\init-3rd.bat`。
 2. 构建命令：`.\build.windows.bat release`
 3. 运行测试：`cd .build\Release; .\test.exe`
-4. 若需运行 hcode 测试：`cd .build\Release; .\hcode.exe`
+4. 若需运行基准测试：`cd .build\Release; .\benchmark.exe`
+5. 若需运行 hcode 测试：`cd .build\Release; .\hcode.exe`
+
+Windows 构建命令：
+
+```powershell
+.\init-3rd.bat
+.\build.windows.bat release
+.\build.windows.bat debug
+.\build.windows.bat all
+```
+
+Linux 构建命令：
+
+```bash
+./init-3rd.sh
+./build.linux.sh release
+./build.linux.sh debug
+./build.linux.sh all
+```
+
+运行目录与构建目录约定：
+
+- Windows 脚本的 CMake 配置目录为 `.build/windows/x64-Release` 与 `.build/windows/x64-Debug`。
+- Linux 脚本的 CMake 配置目录为 `.build/linux/x64-Release` 与 `.build/linux/x64-Debug`。
+- Windows 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
+- Linux 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
+- HTTP 服务默认可通过 `.\.build\Release\service.exe` 启动，监听 `0.0.0.0:9000`。
 
 补充约定：
 
-- 构建 OpenCC 数据目标需要可用的 Python3。
 - 若运行 `scripts/optimize_dict.py`，需要安装脚本依赖 `charset-normalizer` 与 `opencc-python-reimplemented`；本机可按需要先激活约定的 Python/conda 环境。
 - 若只验证普通单元测试，优先运行 `test.exe`。
 - 若修改影响核心匹配行为、归一化逻辑或词库装载逻辑，应至少执行相关测试。
