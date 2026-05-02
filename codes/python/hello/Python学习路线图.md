@@ -172,11 +172,11 @@
 - **subprocess 模块**：子进程管理
 - **argparse 模块**：命令行参数解析
 
-#### 第 16 章：数据序列化
+#### 第 16 章：文本处理与序列化
 - **json 模块**：JSON 数据处理
 - **csv 模块**：CSV 文件读写
-- **pickle 模块**：Python 对象序列化
 - **configparser 模块**：配置文件解析
+- **pickle 模块**：Python 对象序列化（在 ch23 中实践）
 
 #### 第 17 章：日期与时间
 - **datetime 模块**：日期时间处理
@@ -296,7 +296,11 @@
 ```
 python-learning/
 │
-├── 00_学习路线图.md                    # 本文件
+├── Python学习路线图.md                  # 本文件
+├── main.py                              # 入口文件
+├── .vscode/                             # VS Code 配置
+│   ├── settings.json                    # conda 环境 + Python 路径
+│   └── launch.json                      # 调试配置
 │
 ├── 01_基础篇/
 │   ├── chapter01_入门与环境.py
@@ -305,32 +309,31 @@ python-learning/
 │   ├── chapter04_字符串处理.py
 │   └── chapter05_容器数据类型.py
 │
-├── 02_函数与模块/
+├── 02_函数篇/
 │   ├── chapter06_函数基础.py
-│   ├── chapter07_函数进阶.py
-│   └── chapter08_模块与包/
-│       ├── main.py
-│       ├── mymodule.py
-│       └── mypackage/
-│           ├── __init__.py
-│           ├── module1.py
-│           └── module2.py
+│   └── chapter07_函数进阶.py
 │
-├── 03_面向对象/
-│   ├── chapter09_类与对象.py
-│   └── chapter10_继承与多态.py
-│
-├── 04_高级特性/
+├── 03_模块与面向对象篇/
+│   ├── chapter08_模块与包.py
+│   ├── chapter09_面向对象基础.py
+│   ├── chapter10_面向对象进阶.py
 │   ├── chapter11_异常处理.py
+│   ├── mymodule.py                      # ch08 可运行的示例模块
+│   └── mypackage/                       # ch08 可运行的示例包
+│       ├── __init__.py
+│       ├── module1.py
+│       └── module2.py
+│
+├── 04_高级特性篇/
 │   ├── chapter12_文件操作.py
 │   ├── chapter13_迭代器与生成器.py
 │   └── chapter14_装饰器详解.py
 │
-├── 05_标准库/
+├── 05_标准库篇/
 │   ├── chapter15_系统与环境.py
-│   ├── chapter16_数据序列化.py
+│   ├── chapter16_文本处理.py              # json, csv, re（数据序列化）
 │   ├── chapter17_日期与时间.py
-│   ├── chapter18_数据结构增强.py
+│   ├── chapter18_数据结构工具.py
 │   ├── chapter19_函数式编程工具.py
 │   ├── chapter20_正则表达式.py
 │   └── chapter21_日志与调试.py
@@ -345,19 +348,26 @@ python-learning/
 │   │   ├── main.py
 │   │   ├── file_processor.py
 │   │   ├── config.py
+│   │   ├── utils.py
+│   │   ├── config.ini
 │   │   └── README.md
 │   └── chapter26_项目2_日志分析系统/
 │       ├── main.py
 │       ├── log_parser.py
 │       ├── analyzer.py
 │       ├── reporter.py
+│       ├── database.py
+│       ├── config.py
+│       ├── config.ini
+│       ├── sample_logs/
+│       │   └── access.log
 │       └── README.md
 │
 └── 练习题与答案/
-    ├── exercises_01_基础.py
-    ├── exercises_02_函数.py
-    ├── exercises_03_面向对象.py
-    └── exercises_04_综合.py
+    ├── exercises_01_基础.py              # 覆盖 ch01-05
+    ├── exercises_02_函数.py              # 覆盖 ch06-07
+    ├── exercises_03_面向对象.py          # 覆盖 ch08-11
+    └── exercises_04_综合.py              # 覆盖 ch12-23
 ```
 
 ---

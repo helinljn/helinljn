@@ -145,6 +145,12 @@ if __name__ == "__main__":
     print("  result = mymath.add(10, 20)")
     print("  calc = mymath.Calculator('我的计算器')")
 
+    print("\n💡 本目录下已有可实际运行的示例文件：")
+    print("  - mymodule.py           → 试运行: python mymodule.py")
+    print("  - mypackage/            → 试运行: python -c \"from mypackage.module1 import greet; print(greet('Python'))\"")
+    print("  - mypackage/module1.py  → 试运行: python mypackage/module1.py")
+    print("  - mypackage/module2.py  → 试运行: python mypackage/module2.py")
+
 
 # =============================================================================
 # 8.3 __name__ 和 __main__

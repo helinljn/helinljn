@@ -1,5 +1,5 @@
 # =============================================================================
-# 第 16 章：文本处理（json、csv、re）
+# 第 16 章：文本处理（json、csv、re、tomllib）
 # =============================================================================
 #
 # 【学习目标】
@@ -13,6 +13,7 @@
 #   json:  处理 JSON 格式数据，与 Web API 交互、配置文件
 #   csv:   处理表格数据，Excel 导入导出、数据分析
 #   re:    文本模式匹配、数据提取、字符串验证
+#   tomllib: 解析 TOML 配置文件（Python 3.11+ 新增）
 #
 # 【与 C/C++ 的对比】
 #   C/C++:  需要手动解析 JSON/CSV，正则表达式需要第三方库
@@ -594,6 +595,131 @@ def demo_config_converter() -> None:
 
 
 # =============================================================================
+# 16.? tomllib 模块（Python 3.11+ 新增）
+# =============================================================================
+#
+# TOML (Tom's Obvious, Minimal Language) 是一种配置文件的格式，
+# 比 JSON 更适合人工编辑，比 INI 更结构化。
+# Python 3.11 将 tomllib 加入标准库（之前需要第三方库 tomli）。
+
+def demo_toml_module() -> None:
+    """演示 tomllib 模块（Python 3.11+ 标准库）。"""
+    print("\n" + "=" * 60)
+    print("16.? tomllib 模块（Python 3.11+）")
+    print("=" * 60)
+
+    # Python 3.11+ 才支持，我们做一个兼容处理
+    try:
+        import tomllib
+    except ImportError:
+        # Python < 3.11 的兼容提示
+        try:
+            import tomli as tomllib  # type: ignore
+            print("  (使用第三方库 tomli，升级到 Python 3.11+ 可直接用标准库 tomllib)")
+        except ImportError:
+            print("  ⚠️  tomllib 需要 Python 3.11+，或安装 tomli: pip install tomli")
+            print("  以下是 TOML 格式的说明（演示跳过）")
+            _print_toml_guide()
+            return
+
+    # ── TOML 格式示例 ─────────────────────────────────────
+    toml_content = """\
+# 这是 TOML 注释
+title = "TOML 示例"
+
+[owner]
+name = "Alice"
+dob = 1995-05-28
+
+[database]
+host = "localhost"
+port = 5432
+max_connections = 100
+use_ssl = true
+
+[servers.alpha]
+ip = "10.0.0.1"
+role = "frontend"
+
+[servers.beta]
+ip = "10.0.0.2"
+role = "backend"
+
+[[products]]
+name = "锤子"
+sku = 738594937
+price = 29.99
+
+[[products]]
+name = "钉子"
+sku = 284759393
+price = 0.59
+"""
+
+    print("TOML 格式示例：")
+    print(toml_content)
+
+    # ── 解析 TOML 字符串 ──────────────────────────────────
+    config = tomllib.loads(toml_content)
+    print(f"解析结果:")
+    print(f"  title: {config['title']}")
+    print(f"  owner.name: {config['owner']['name']}")
+    print(f"  owner.dob: {config['owner']['dob']} (类型: {type(config['owner']['dob']).__name__})")
+    print(f"  database.port: {config['database']['port']} (类型: {type(config['database']['port']).__name__})")
+    print(f"  database.use_ssl: {config['database']['use_ssl']}")
+    print(f"  servers.alpha.role: {config['servers']['alpha']['role']}")
+    print(f"  products: {config['products']}")
+
+    # ── 从文件读取 TOML ───────────────────────────────────
+    print("\n从文件读取 TOML（演示写入临时文件再读取）:")
+    import tempfile
+    tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".toml",
+                                       delete=False, encoding="utf-8")
+    tmp.write(toml_content)
+    tmp.close()
+
+    with open(tmp.name, "rb") as f:
+        file_config = tomllib.load(f)
+
+    print(f"  从文件读取: title = {file_config['title']!r}")
+    import os
+    os.unlink(tmp.name)
+
+    # ── TOML vs JSON vs INI 对比 ───────────────────────────
+    print("\n配置文件格式对比:")
+    print(f"  {'格式':<8} {'可读性':<10} {'标准库':<10} {'注释':<8} {'类型支持':<15}")
+    print(f"  {'-'*51}")
+    comparisons = [
+        ("TOML",  "⭐⭐⭐", "Python 3.11+", "✅ #", "int/float/bool/date/array/table"),
+        ("JSON",  "⭐⭐",  "标准库", "❌", "int/float/bool/null/array/object"),
+        ("INI",   "⭐⭐⭐", "configparser", "✅ ;/#", "全部为字符串"),
+        ("YAML",  "⭐⭐⭐", "需第三方", "✅ #", "所有类型（安全警告）"),
+    ]
+    for fmt, read, lib, comment, types in comparisons:
+        print(f"  {fmt:<8} {read:<10} {lib:<10} {comment:<8} {types:<15}")
+
+
+def _print_toml_guide() -> None:
+    """打印 TOML 格式指南（当无法导入模块时）。"""
+    print("\nTOML 格式快速参考：")
+    print("  ● 键值对：key = value")
+    print("  ● 表：[table_name]")
+    print("  ● 嵌套表：[parent.child]")
+    print("  ● 数组表：[[array_table]]")
+    print("  ● 类型：字符串、整数、浮点数、布尔值、日期、数组")
+    print("  ● 注释：# 注释内容")
+    print("\n示例 pyproject.toml 片段：")
+    print("  [project]")
+    print('  name = "myapp"')
+    print('  version = "1.0.0"')
+    print('  requires-python = ">=3.11"')
+    print()
+    print("  [tool.ruff]")
+    print('  line-length = 100')
+    print('  select = ["E", "F", "I", "N"]')
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -605,6 +731,7 @@ def main() -> None:
     demo_validation()
     demo_log_parsing()
     demo_config_converter()
+    demo_toml_module()  # Python 3.11+
 
 
 if __name__ == "__main__":

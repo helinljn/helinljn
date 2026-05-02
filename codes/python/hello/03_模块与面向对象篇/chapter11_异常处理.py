@@ -549,6 +549,7 @@ def main() -> None:
     demo_custom_exceptions()
     demo_raise_assert()
     demo_config_loader()
+    demo_exception_group()  # Python 3.11+ 新特性
 
 
 if __name__ == "__main__":
@@ -631,6 +632,96 @@ if __name__ == "__main__":
 # except ValueError as e:
 #     raise RuntimeError("失败")       # ⚠️ 丢失原始异常
 #     raise RuntimeError("失败") from e # ✅ 保留异常链
+
+
+# =============================================================================
+# 11.8 ExceptionGroup 与 except*（Python 3.11+ 新特性）
+# =============================================================================
+#
+# Python 3.11 引入了 ExceptionGroup 和 except* 语法，
+# 用于同时处理多个不相关的异常（常见于并发、异步场景）。
+
+def demo_exception_group() -> None:
+    """演示 ExceptionGroup 和 except* 语法（需要 Python 3.11+）。"""
+    print("\n" + "=" * 60)
+    print("11.8 ExceptionGroup 与 except*（Python 3.11+）")
+    print("=" * 60)
+
+    # ── 创建 ExceptionGroup ─────────────────────────────────
+    print("ExceptionGroup 示例:")
+
+    # 将多个异常组合在一起
+    eg = ExceptionGroup(
+        "多个任务失败",
+        [
+            ValueError("无效的值"),
+            TypeError("类型不匹配"),
+            KeyError("缺少必要的键"),
+        ],
+    )
+    print(f"  {eg!r}")
+
+    # ── 使用 except* 分别处理 ─────────────────────────────
+    print("\nexcept* 语法 — 分别处理不同类型的异常:")
+    try:
+        raise eg
+    except* ValueError as e:
+        print(f"  [ValueError] 捕获: {e.exceptions}")
+    except* TypeError as e:
+        print(f"  [TypeError] 捕获: {e.exceptions}")
+    except* KeyError as e:
+        print(f"  [KeyError] 捕获: {e.exceptions}")
+    # 注意：每个 except* 只会捕获匹配的异常，其他异常继续传播到下一个 except*
+
+    # ── 嵌套 ExceptionGroup ───────────────────────────────
+    print("\n嵌套 ExceptionGroup:")
+    inner_eg = ExceptionGroup(
+        "子任务错误",
+        [TypeError("A"), ValueError("B")],
+    )
+    outer_eg = ExceptionGroup(
+        "外层错误",
+        [inner_eg, OSError("文件不存在")],
+    )
+    print(f"  外层: {outer_eg!r}")
+
+    # ── 实际场景：并发任务中的异常收集 ────────────────────
+    print("\n实际场景：模拟并发任务的异常收集")
+    import random
+
+    def simulate_task(task_id: int) -> str:
+        """模拟可能失败的任务。"""
+        r = random.random()
+        if r < 0.3:
+            raise ConnectionError(f"任务{task_id}: 网络超时")
+        elif r < 0.6:
+            raise ValueError(f"任务{task_id}: 无效输入")
+        return f"任务{task_id}: 完成"
+
+    # 收集所有异常
+    errors = []
+    results = []
+    for i in range(5):
+        try:
+            result = simulate_task(i)
+            results.append(result)
+        except Exception as e:
+            errors.append(e)
+
+    if errors:
+        task_eg = ExceptionGroup("批量任务执行结果", errors)
+        print(f"  成功: {results}")
+        print(f"  {task_eg}")
+
+        # 使用 except* 分类处理
+        try:
+            raise task_eg
+        except* ConnectionError as e:
+            print(f"  🔌 网络类错误 ({len(e.exceptions)}个): 稍后重试")
+        except* ValueError as e:
+            print(f"  📝 数据类错误 ({len(e.exceptions)}个): 记录日志")
+        except* Exception as e:
+            print(f"  ❓ 其他错误 ({len(e.exceptions)}个)")
 
 
 # =============================================================================
