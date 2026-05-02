@@ -1,13 +1,16 @@
 import importlib.util
+import io
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 EXERCISES = ROOT / "练习题与答案"
 PROJECT26 = ROOT / "07_项目实战" / "chapter26_项目2_日志分析系统"
+CHAPTER11 = ROOT / "03_模块与面向对象篇" / "chapter11_异常处理.py"
 
 
 def load_module(module_name: str, module_path: Path):
@@ -268,6 +271,34 @@ class LogAnalysisProjectTests(unittest.TestCase):
         finally:
             db.close()
             Path(db_path).unlink(missing_ok=True)
+
+
+class ChapterRuntimeSmokeTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.chapter11 = load_module("chapter11_exceptions", CHAPTER11)
+
+    def test_chapter11_new_exception_sections_run(self):
+        buffer = io.StringIO()
+
+        with redirect_stdout(buffer):
+            self.chapter11.demo_exception_best_practices()
+            self.chapter11.demo_exception_group()
+
+        output = buffer.getvalue()
+        self.assertIn("11.7 异常处理最佳实践", output)
+        self.assertIn("11.8 ExceptionGroup", output)
+
+    def test_chapter11_main_runs(self):
+        buffer = io.StringIO()
+
+        with redirect_stdout(buffer):
+            self.chapter11.main()
+
+        output = buffer.getvalue()
+        self.assertIn("11.1 异常基础", output)
+        self.assertIn("11.7 异常处理最佳实践", output)
+        self.assertIn("11.8 ExceptionGroup", output)
 
 
 if __name__ == "__main__":
