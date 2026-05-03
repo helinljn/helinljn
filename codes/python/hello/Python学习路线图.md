@@ -33,6 +33,7 @@
 - 运算符（算术、比较、逻辑、位运算）
 - 输入输出（input, print）
 - 注释与文档字符串
+- **常用内置函数**（enumerate, zip, any, all, sorted/key, \_\_repr\_\_/\_\_str\_\_）
 
 #### 第 3 章：控制流程
 - 条件语句（if-elif-else）
@@ -150,6 +151,7 @@
 - 文件写入（write, writelines）
 - 文件指针操作（seek, tell）
 - 二进制文件操作
+- with 语句与上下文管理器（类实现 + @contextmanager）
 - pathlib 模块（现代路径操作）
 - os.path 模块
 - 目录操作
@@ -272,6 +274,20 @@
 - TypedDict：描述字典结构
 - Protocol：结构化接口和鸭子类型
 - Generic / TypeVar：泛型容器和泛型函数
+
+#### 补充 05：struct 二进制数据处理
+- 格式字符与 C 类型的对应关系
+- pack / unpack 基本用法
+- 字节序（大端/小端）的指定
+- BMP 文件头解析实战
+- 自定义二进制协议（含校验和）
+
+#### 补充 06：hashlib 哈希与摘要
+- MD5、SHA1、SHA256、SHA3 等常用算法
+- 分块读取大文件计算哈希
+- 文件完整性校验
+- HMAC 带密钥哈希与 API 签名
+- 密码存储安全提示（scrypt）
 
 ---
 
@@ -502,6 +518,8 @@ python-learning/
 │   ├── chapter21_补充02_数学与数值工具.py
 │   ├── chapter21_补充03_文件目录工具.py
 │   ├── chapter21_补充04_类型注解进阶.py
+│   ├── chapter21_补充05_struct二进制数据处理.py
+│   ├── chapter21_补充06_hashlib哈希与摘要.py
 │   └── chapter21_日志与调试.py
 │
 ├── 06_并发与数据库/

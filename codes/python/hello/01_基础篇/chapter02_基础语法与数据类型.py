@@ -464,7 +464,196 @@ def demo_input_output() -> None:
 
 
 # =============================================================================
-# 2.7 综合示例：简单计算器
+# 2.7 常用内置函数速览
+# =============================================================================
+#
+# Python 提供了一些极常用的内置函数，C/C++ 中没有直接对应物。
+# 提前熟悉它们能让你写出更 Pythonic 的代码，避免用 C 思维"翻译"。
+#
+# 本节速览：enumerate、zip、any、all、sorted（含 key）、__repr__ / __str__
+
+
+def demo_builtin_functions() -> None:
+    """演示 Python 最常用的内置函数。"""
+    print("\n" + "=" * 60)
+    print("2.7 常用内置函数速览")
+    print("=" * 60)
+
+    # ── enumerate：同时获取索引和值 ──────────────────────
+    #
+    # C/C++ 中遍历数组通常这样写：
+    #   for (int i = 0; i < n; i++) { printf("%d: %s\n", i, arr[i]); }
+    #
+    # Python 中推荐用 enumerate，一行搞定索引和值：
+    print("\n── enumerate ──")
+    fruits = ["apple", "banana", "cherry"]
+    print(f"  fruits = {fruits}")
+
+    # enumerate(iterable) 返回 (索引, 值) 元组的迭代器
+    print("  enumerate(fruits):")
+    for i, fruit in enumerate(fruits):
+        print(f"    [{i}] → {fruit}")
+
+    # start 参数：索引从指定值开始（默认 0）
+    print("  enumerate(fruits, start=1):")
+    for i, fruit in enumerate(fruits, start=1):
+        print(f"    第{i}项 → {fruit}")
+
+    # 看一下 enumerate 实际返回什么
+    print(f"  list(enumerate(fruits)) = {list(enumerate(fruits))}")
+    # [(0, 'apple'), (1, 'banana'), (2, 'cherry')]
+
+    # ── zip：并行遍历多个序列 ────────────────────────────
+    #
+    # C/C++ 中同时遍历两个数组需要手动下标：
+    #   for (int i = 0; i < n; i++) { printf("%s: %d\n", a[i], b[i]); }
+    #
+    # Python 用 zip 直接"拉"在一起：
+    print("\n── zip ──")
+    names = ["Alice", "Bob", "Charlie"]
+    scores = [95, 82, 78]
+
+    print(f"  names  = {names}")
+    print(f"  scores = {scores}")
+
+    # zip(*iterables) 返回多个序列对应位置元素的元组
+    print("  zip(names, scores):")
+    for name, score in zip(names, scores):
+        print(f"    {name}: {score}")
+
+    # 长度不一致时：按最短的截断（strict=False，默认）
+    short = ["a", "b"]
+    long = [1, 2, 3, 4]
+    print(f"\n  list(zip(['a','b'], [1,2,3,4])) = {list(zip(short, long))}")
+    # [('a', 1), ('b', 2)]
+
+    # Python 3.10+ 可设置 strict=True 要求等长
+    # list(zip(short, long, strict=True))  # 会抛出 ValueError
+
+    # 常见用法：把两个列表拼成字典
+    keys = ["name", "age", "city"]
+    values = ["Alice", 25, "Beijing"]
+    d = dict(zip(keys, values))
+    print(f"  dict(zip(keys, values)) = {d}")
+    # {'name': 'Alice', 'age': 25, 'city': 'Beijing'}
+
+    # ── any / all：批量条件判断 ─────────────────────────
+    #
+    # C/C++ 中检查数组元素是否全部满足某条件，通常写循环 + 标志位。
+    # Python 中的 any() 和 all() 一行搞定：
+    print("\n── any / all ──")
+    nums = [3, 5, 7, 8, 11]
+
+    # all(iterable)：所有元素都为真 → True（"全称量词"）
+    print(f"  nums = {nums}")
+    print(f"  all(n > 0 for n in nums)      = {all(n > 0 for n in nums)}")   # True
+    print(f"  all(n % 2 == 1 for n in nums) = {all(n % 2 == 1 for n in nums)}")  # False（8是偶数）
+
+    # any(iterable)：至少一个元素为真 → True（"存在量词"）
+    print(f"  any(n > 10 for n in nums)     = {any(n > 10 for n in nums)}")  # True（11）
+    print(f"  any(n < 0 for n in nums)      = {any(n < 0 for n in nums)}")   # False
+
+    # 可直接传入列表（非空 = True，空 = False）
+    print(f"  any([0, 0, 1, 0])  = {any([0, 0, 1, 0])}")   # True
+    print(f"  all([1, 2, 3])     = {all([1, 2, 3])}")      # True
+    print(f"  any([])            = {any([])}")               # False（空列表没有真元素）
+    print(f"  all([])            = {all([])}")               # True（空列表没有假元素）⚠️ 注意！
+
+    # ── sorted 与 key 参数 ──────────────────────────────
+    #
+    # C/C++ 中排序通常用 qsort + 比较函数指针。
+    # Python 的 sorted 通过 key 参数指定"按什么排序"，更简洁：
+    print("\n── sorted 与 key ──")
+    words = ["banana", "Apple", "cherry", "date"]
+
+    # sorted(iterable) 返回新列表，默认升序
+    print(f"  words = {words}")
+    print(f"  sorted(words)        = {sorted(words)}")
+    # 注意：大写字母排在小写之前（按 ASCII/Unicode 码点）
+
+    # key 参数：指定一个函数，排序前每个元素先经过该函数
+    print(f"  sorted(words, key=str.lower) = {sorted(words, key=str.lower)}")
+    # 按小写后的值排序，大小写不敏感
+
+    # 按长度排序
+    print(f"  sorted(words, key=len)      = {sorted(words, key=len)}")
+
+    # reverse=True：降序
+    print(f"  sorted(words, reverse=True) = {sorted(words, reverse=True)}")
+
+    # 常见场景：按字典的某个字段排序
+    students = [
+        {"name": "Alice", "score": 92},
+        {"name": "Bob",   "score": 78},
+        {"name": "Carol", "score": 95},
+    ]
+    ranked = sorted(students, key=lambda s: s["score"], reverse=True)
+    print(f"  按成绩排名: {[s['name'] for s in ranked]}")
+    # ['Carol', 'Alice', 'Bob']
+
+    # 注意：list.sort() 是原地排序（修改原列表），sorted() 返回新列表
+    original = [3, 1, 2]
+    new_list = sorted(original)
+    print(f"\n  sorted() 与 .sort() 的区别:")
+    print(f"    sorted(original) → {new_list},  原列表不变 → {original}")
+    original.sort()
+    print(f"    original.sort()  → {original},  原列表已变")
+
+    # ── __repr__ vs __str__ ─────────────────────────────
+    #
+    # C/C++ 中打印对象通常靠自定义 print 函数。
+    # Python 通过两个特殊方法来控制对象的字符串表示：
+    print("\n── __repr__ vs __str__ ──")
+
+    # __repr__：给开发者看的，"能还原对象的字符串表示"
+    # __str__：给用户看的，"可读的字符串表示"
+    # print() 优先用 __str__，没有则回退到 __repr__
+    # 交互式环境直接输入变量名时，显示 __repr__
+
+    class Point:
+        """演示 __repr__ 和 __str__ 的区别。"""
+
+        def __init__(self, x: float, y: float) -> None:
+            self.x = x
+            self.y = y
+
+        def __repr__(self) -> str:
+            """开发者表示：像代码，能用来重建对象。"""
+            return f"Point({self.x}, {self.y})"
+
+        def __str__(self) -> str:
+            """用户表示：可读的描述。"""
+            return f"({self.x}, {self.y})"
+
+    p = Point(3, 4)
+
+    # print() 用 __str__
+    print(f"  print(p)     → {p}")
+    # 交互式环境用 __repr__（这里模拟一下）
+    print(f"  repr(p)      → {repr(p)}")
+    # f-string 中 !r 强制使用 __repr__
+    print(f"  {p!r}        → {p!r}")
+
+    # 如果没有定义 __str__，Python 会回退到 __repr__
+    # 如果都没有定义，默认显示 <module.Point object at 0x...>
+    print(f"  type(p).__name__ → 获取类型名: '{type(p).__name__}'")
+
+    # 内置类型的例子
+    print(f"\n  内置类型的 repr vs str:")
+    print(f"    str('hello')  = {str('hello')!r}")    # 'hello'
+    print(f"    repr('hello') = {repr('hello')}")     # "'hello'"  (带引号)
+    print(f"    str(datetime) = {str(__import__('datetime').datetime(2024, 1, 15, 12, 30))}")
+    dt = __import__('datetime').datetime(2024, 1, 15, 12, 30)
+    print(f"    repr(datetime)= {repr(dt)}")
+
+    # 经验法则：
+    #   - __repr__ 目标：eval(repr(obj)) == obj（尽量）
+    #   - __str__  目标：人类可读
+    #   - 至少实现 __repr__（对调试非常有帮助）
+
+
+# =============================================================================
+# 2.8 综合示例：简单计算器
 # =============================================================================
 
 def simple_calculator(a: float, b: float, op: str) -> float | None:
@@ -510,7 +699,7 @@ def simple_calculator(a: float, b: float, op: str) -> float | None:
 def demo_calculator() -> None:
     """演示计算器函数。"""
     print("\n" + "=" * 60)
-    print("2.7 综合示例：简单计算器")
+    print("2.8 综合示例：简单计算器")
     print("=" * 60)
 
     test_cases = [
@@ -545,6 +734,7 @@ def main() -> None:
     demo_type_checking()
     demo_operators()
     demo_input_output()
+    demo_builtin_functions()
     demo_calculator()
 
 
@@ -570,6 +760,16 @@ if __name__ == "__main__":
 # Python is  身份比较（内存地址）
 # Python in  成员检查
 # Python 链式比较：1 < x < 10  ↔  C/C++ (1<x)&&(x<10)
+#
+# ── 常用内置函数 ──
+# enumerate(seq, start=0)   同时获取索引和值，返回 (i, val) 迭代器
+# zip(*iterables)           并行遍历多个序列，返回 (a,b,...) 元组迭代器
+# all(iterable)             所有元素为真 → True（空列表返回 True）
+# any(iterable)             至少一个元素为真 → True（空列表返回 False）
+# sorted(iterable, key=, reverse=)  排序并返回新列表（key 很常用）
+# list.sort()               原地排序（修改原列表），无返回值
+# __repr__                  开发者字符串表示（repr(obj)、交互式环境）
+# __str__                   用户可读字符串表示（print(obj)、str(obj)）
 #
 # ── 类型转换 ──
 # int(), float(), str(), bool()

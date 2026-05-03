@@ -6,10 +6,11 @@
 #   1. 掌握文件的打开、读取、写入、关闭
 #   2. 理解文本模式 vs 二进制模式
 #   3. 掌握 with 语句（上下文管理器）
-#   4. 学会处理不同编码的文件
-#   5. 掌握文件指针操作（seek/tell）
-#   6. 了解 pathlib 模块（现代路径操作）
-#   7. 掌握常见文件格式（JSON、CSV）
+#   4. 学会实现自定义上下文管理器（__enter__/__exit__、contextmanager）
+#   5. 学会处理不同编码的文件
+#   6. 掌握文件指针操作（seek/tell）
+#   7. 了解 pathlib 模块（现代路径操作）
+#   8. 掌握常见文件格式（JSON、CSV）
 #
 # 【与 C++ 的对比】
 #   C++:  fstream file("data.txt"); file >> data;
@@ -602,6 +603,145 @@ def demo_log_analyzer() -> None:
 
 
 # =============================================================================
+# 12.10 自定义上下文管理器
+# =============================================================================
+#
+# 前面大量使用 with open(...) as f: 来自动关闭文件。
+# 这是因为 open() 返回的对象实现了上下文管理器协议。
+# 你也可以给自己的类实现这个协议，让 with 管理任意资源。
+#
+# 两种实现方式：
+#   1. 类方式：实现 __enter__ 和 __exit__ 方法
+#   2. 函数方式：用 contextlib.contextmanager 装饰一个生成器
+#
+# C/C++ 对比：
+#   C++ RAII:  构造函数获取资源，析构函数释放资源
+#   Python with: __enter__ 获取资源，__exit__ 释放资源（类似 RAII）
+#
+# 注意：with 只保证 __exit__ 被调用（即使发生异常），不阻止异常传播。
+
+
+def demo_custom_context_managers() -> None:
+    """演示如何编写自定义上下文管理器。"""
+    print("\n" + "=" * 60)
+    print("12.10 自定义上下文管理器")
+    print("=" * 60)
+
+    # ── 方式 1：类实现 __enter__ / __exit__ ────────────────
+    #
+    # __enter__(self) → 返回要赋给 as 后面变量的对象
+    # __exit__(self, exc_type, exc_val, exc_tb) → 返回 True 可抑制异常
+
+    import time
+
+    class Timer:
+        """计时器上下文管理器——测量代码块执行时间。
+
+        使用示例：
+            with Timer("数据加载") as t:
+                load_data()
+            print(f"耗时: {t.elapsed:.3f}s")
+        """
+
+        def __init__(self, label: str = "") -> None:
+            self.label = label
+            self.elapsed = 0.0
+
+        def __enter__(self) -> "Timer":
+            self._start = time.perf_counter()
+            return self  # 返回自身，赋给 as 后的变量
+
+        def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+            self.elapsed = time.perf_counter() - self._start
+            if self.label:
+                print(f"  [Timer] {self.label}: {self.elapsed:.4f}s")
+            return False  # 不抑制异常
+
+    print("1. 类方式（Timer）:")
+    with Timer("sleep 0.05") as t:
+        time.sleep(0.05)
+    print(f"    t.elapsed = {t.elapsed:.4f}s")
+
+    # ── 演示异常不阻止 __exit__ ────────────────────────────
+    print("\n2. __exit__ 在异常时也会执行:")
+    import traceback
+
+    class Guard:
+        """演示 __exit__ 的异常参数。"""
+
+        def __enter__(self):
+            print("    进入 with 块")
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if exc_type is None:
+                print("    离开 with 块（无异常）")
+            else:
+                print(f"    离开 with 块（捕获到异常: {exc_type.__name__}: {exc_val}）")
+            return False  # 不抑制，异常继续传播
+
+    with Guard():
+        print("    执行正常代码")
+
+    print()
+    try:
+        with Guard():
+            print("    即将抛出异常...")
+            raise ValueError("演示错误")
+    except ValueError:
+        print("    异常被外层捕获（__exit__ 返回了 False）")
+
+    # ── 方式 2：contextlib.contextmanager 装饰生成器 ──────
+    #
+    # 用 yield 分隔 __enter__ 和 __exit__ 的逻辑：
+    #   yield 之前的代码 → __enter__
+    #   yield 之后的代码 → __exit__
+
+    from contextlib import contextmanager
+
+    @contextmanager
+    def managed_resource(name: str):
+        """用生成器模拟资源管理。
+
+        yield 之前的代码相当于 __enter__
+        yield 之后的代码相当于 __exit__（finally 保证必执行）
+        """
+        print(f"    [{name}] 资源获取")
+        try:
+            yield f"资源-{name}"  # 这个值赋给 as 后面的变量
+        finally:
+            print(f"    [{name}] 资源释放")
+
+    print("\n3. contextmanager 装饰器方式:")
+    with managed_resource("DB连接") as res:
+        print(f"    使用 {res}")
+    # 离开 with 时自动执行 finally 中的释放代码
+
+    # ── 对比：不用 contextmanager 的等价类写法 ────────────
+
+    class ManagedResource:
+        def __init__(self, name: str):
+            self.name = name
+
+        def __enter__(self):
+            print(f"    [{self.name}] 资源获取（类方式）")
+            return f"资源-{self.name}"
+
+        def __exit__(self, *args):
+            print(f"    [{self.name}] 资源释放（类方式）")
+
+    print("\n4. 等价的类方式:")
+    with ManagedResource("文件锁") as res:
+        print(f"    使用 {res}")
+
+    # ── 小结 ──────────────────────────────────────────────
+    print("\n选择建议:")
+    print("  • 简单场景（如计时、临时切换状态）→ contextmanager 更简洁")
+    print("  • 复杂场景（需要多个方法、保存状态）→ 类方式更灵活")
+    print("  • 无论哪种方式，__exit__ / finally 都会在异常时执行")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -616,6 +756,7 @@ def main() -> None:
     demo_json_files()
     demo_csv_files()
     demo_log_analyzer()
+    demo_custom_context_managers()
 
 
 if __name__ == "__main__":
@@ -644,6 +785,12 @@ if __name__ == "__main__":
 # ── 指针操作 ──
 # f.tell()          返回当前位置
 # f.seek(offset, whence=0)  移动指针
+#
+# ── 上下文管理器 ──
+# with obj as x:    进入 __enter__，离开时执行 __exit__
+# __enter__(self)   返回赋给 as 后面变量的对象
+# __exit__(self, exc_type, exc_val, exc_tb)  清理资源，返回 True 可抑制异常
+# @contextmanager    把生成器函数转为上下文管理器（yield 前=enter，后=exit）
 #
 # ── pathlib 常用操作 ──
 # Path(str)         创建路径对象

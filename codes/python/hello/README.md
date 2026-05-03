@@ -45,6 +45,8 @@ python "05_标准库篇\chapter21_补充01_网络与HTTP基础.py"
 python "05_标准库篇\chapter21_补充02_数学与数值工具.py"
 python "05_标准库篇\chapter21_补充03_文件目录工具.py"
 python "05_标准库篇\chapter21_补充04_类型注解进阶.py"
+python "05_标准库篇\chapter21_补充05_struct二进制数据处理.py"
+python "05_标准库篇\chapter21_补充06_hashlib哈希与摘要.py"
 python "06_并发与数据库\chapter23_数据库操作.py"
 ```
 
