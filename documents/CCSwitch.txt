@@ -2,17 +2,21 @@
     https://github.com/farion1231/cc-switch/releases
     CC-Switch-v3.14.1-Windows.msi
 
-    // claude -> deepseek-v4-pro
+    // claude -> deepseek-v4-pro[1m]
     // Anthropic Messages, AUTHROPIC_AUTH_TOKEN
     // 写入通用配置
     {
         "env": {
             "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
             "ANTHROPIC_AUTH_TOKEN": "xxx",
-            "ANTHROPIC_MODEL": "deepseek-v4-pro",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-pro",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-pro",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro"
+            "ANTHROPIC_MODEL": "deepseek-v4-pro[1m]",
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-v4-pro[1m]",
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-v4-pro[1m]",
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-v4-pro[1m]",
+            "CLAUDE_MAX_CONTEXT_WINDOW": "1000000",
+            "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60",
+            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+            "API_TIMEOUT_MS": "600000"
         },
         "includeCoAuthoredBy": false
     }
