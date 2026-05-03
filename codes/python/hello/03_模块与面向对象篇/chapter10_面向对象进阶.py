@@ -1,5 +1,5 @@
 # =============================================================================
-# 第 10 章：面向对象进阶（继承、多态、魔术方法）
+# 第 10 章：面向对象进阶（继承、多态、魔术方法、dataclass）
 # =============================================================================
 #
 # 【学习目标】
@@ -9,6 +9,7 @@
 #   4. 掌握常用魔术方法
 #   5. 了解抽象基类（ABC）
 #   6. 掌握上下文管理器
+#   7. 掌握 dataclasses 数据类
 #
 # 【运行方式】
 #   python chapter10_面向对象进阶.py
@@ -452,7 +453,222 @@ def demo_context_manager() -> None:
 
 
 # =============================================================================
-# 10.7 综合示例：图形类层次结构
+# 10.7 dataclasses：数据类
+# =============================================================================
+#
+# 【背景】
+#   在 C/C++ 中，struct 用于聚合数据；在 Python 3.6 之前，创建一个纯数据类需要写大量的
+#   样板代码（__init__、__repr__、__eq__ 等）。Python 3.7 引入的 @dataclass 装饰器
+#   自动生成这些方法，让数据类的定义和使用像 C struct 一样简洁。
+#
+
+from dataclasses import dataclass, field
+
+
+# ── 1. @dataclass 基础 ──────────────────────────────────────────────────────
+
+@dataclass
+class Weapon:
+    """武器数据类 —— 演示 @dataclass 基础功能。
+
+    C/C++ 对比:
+      struct Weapon {
+          const char* name;
+          int damage;
+          float weight = 5.0;
+          const char* element = nullptr;
+      };
+    """
+    name: str
+    damage: int
+    weight: float = 5.0
+    element: str | None = None
+
+
+@dataclass
+class Player:
+    """玩家数据类 —— 演示 field()、default_factory、frozen 等进阶特性。"""
+    name: str
+    level: int
+    # default_factory: 每次创建实例都调用，生成独立的可变默认值
+    #   C/C++ 对比: C struct 不能直接写动态默认值，通常需要 malloc + init 函数
+    inventory: list[str] = field(default_factory=list)
+    # compare=False: 参与 __repr__ 但忽略 __eq__ 比较
+    last_login: str = field(default="未知", compare=False)
+    # repr=False: 不显示在 __repr__ 输出中（类似日志打印时过滤敏感字段）
+    password_hash: str = field(default="", repr=False)
+
+    # ── __post_init__ 用于初始化后验证 ──────────────────────
+    def __post_init__(self) -> None:
+        """初始化后自动调用 —— 类似 C 中通过 init_struct() 进行数据校验。"""
+        if self.level < 1:
+            raise ValueError(f"等级必须 >= 1，当前值: {self.level}")
+
+
+# ── 3. frozen=True（不可变数据类）───────────────────────────────────────────
+
+@dataclass(frozen=True)
+class ColorRGB:
+    """不可变数据类 —— 类似 C/C++ 的 const struct。
+
+    C/C++ 对比:
+      const struct Color { int r, g, b; };
+      实例化后所有字段只读，修改会抛出 FrozenInstanceError。
+    """
+    r: int = 0
+    g: int = 0
+    b: int = 0
+
+    def as_hex(self) -> str:
+        """将 RGB 值转为十六进制颜色码。"""
+        return f"#{self.r:02X}{self.g:02X}{self.b:02X}"
+
+
+# ── 4. 与普通类的对比（样板代码演示）───────────────────────────────────────
+
+class PlayerRegular:
+    """与 Player 等价的普通类 —— 展示 @dataclass 消除了多少样板代码。
+
+    以下是手动编写的 __init__ + __repr__ + __eq__，代码量约为 dataclass 版的 3 倍。
+    """
+
+    def __init__(
+        self,
+        name: str,
+        level: int,
+        inventory: list[str] | None = None,
+        last_login: str = "未知",
+        password_hash: str = "",
+    ) -> None:
+        self.name = name
+        self.level = level
+        self.inventory = inventory if inventory is not None else []
+        self.last_login = last_login
+        self.password_hash = password_hash
+        if self.level < 1:
+            raise ValueError(f"等级必须 >= 1，当前值: {self.level}")
+
+    def __repr__(self) -> str:
+        return (
+            f"PlayerRegular(name={self.name!r}, level={self.level}, "
+            f"inventory={self.inventory!r}, last_login={self.last_login!r})"
+        )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, PlayerRegular):
+            return NotImplemented
+        return (self.name, self.level, self.inventory) == (
+            other.name, other.level, other.inventory)
+
+
+# ── 5. 结构模式匹配（match/case）───────────────────────────────────────────
+
+@dataclass
+class Point2D:
+    """二维点。"""
+    x: float = 0.0
+    y: float = 0.0
+
+
+@dataclass
+class CircleShape:
+    """圆形。"""
+    radius: float
+    center: Point2D
+
+
+@dataclass
+class RectShape:
+    """矩形。"""
+    width: float
+    height: float
+    origin: Point2D
+
+
+def describe_shape(shape: CircleShape | RectShape) -> str:
+    """使用 match/case 对 dataclass 进行结构模式匹配。
+
+    match/case 通过 dataclass 的 __match_args__ 自动支持字段解构，
+    无需手写 __match_args__ 元组。
+    """
+    match shape:
+        case CircleShape(radius=r, center=Point2D(x=x, y=y)):
+            return f"圆形：半径={r}，圆心=({x}, {y})"
+        case RectShape(width=w, height=h, origin=Point2D(x=x, y=y)):
+            return f"矩形：{w}×{h}，原点=({x}, {y})"
+        case _:
+            raise ValueError(f"未知形状: {shape}")
+
+
+def demo_dataclasses() -> None:
+    """演示 dataclasses：数据类（自动生成 __init__、__repr__、__eq__ 等）。"""
+    print("\n" + "=" * 60)
+    print("10.7 dataclasses：数据类")
+    print("=" * 60)
+
+    # ── 基础使用 ────────────────────────────────────────────
+    print("1. @dataclass 基础:")
+    sword = Weapon(name="倚天剑", damage=25)
+    bow = Weapon(name="落日弓", damage=18, element="火")
+
+    print(f"  {sword}")
+    print(f"  {bow}")
+    # 自动生成的 __eq__：按字段值逐一比较
+    print(f"  sword == Weapon('倚天剑', 25) = {sword == Weapon('倚天剑', 25)}")
+    print(f"  sword == bow = {sword == bow}")
+
+    # ── field() 与 default_factory ─────────────────────────
+    print("\n2. field() 函数 (default_factory / compare / repr):")
+    p1 = Player(name="亚瑟", level=30, inventory=["长剑", "盾牌"])
+    p2 = Player(name="亚瑟", level=30)  # inventory 自动初始化为 []
+    p2.last_login = p1.last_login  # 对齐 compare=False 的字段
+
+    print(f"  p1 = {p1}")
+    print(f"  p2 = {p2}")
+    print(f"  ⚠ password_hash 因 repr=False 不显示")
+    # compare=False 的 last_login 被忽略，所以 p1 == p2
+    print(f"  p1 == p2（忽略 last_login）= {p1 == p2}")
+
+    # ── frozen=True ─────────────────────────────────────────
+    print("\n3. frozen=True（不可变数据类）:")
+    red = ColorRGB(255, 0, 0)
+    white = ColorRGB(255, 255, 255)
+    print(f"  red   = {red}  ->  {red.as_hex()}")
+    print(f"  white = {white}  ->  {white.as_hex()}")
+
+    try:
+        red.r = 128  # type: ignore
+    except Exception as e:
+        print(f"  ✓ 修改 frozen 实例 -> {type(e).__name__}: {e}")
+
+    # ── __post_init__ 验证 ──────────────────────────────────
+    print("\n4. __post_init__ 数据验证:")
+    try:
+        bad_player = Player(name="菜鸟", level=-5)
+    except ValueError as e:
+        print(f"  ✓ 验证失败: {e}")
+
+    # ── 样板代码对比 ────────────────────────────────────────
+    print("\n5. 样板代码对比（dataclass vs 普通类）:")
+    print(f"  Player (@dataclass) 字段数 = {len(Player.__dataclass_fields__)}")
+    # 用正则类实例化一次证明功能等价
+    pr = PlayerRegular(name="测试", level=1)
+    print(f"  PlayerRegular (普通类) 输出: {pr}")
+    print(f"  💡 @dataclass 消除了 ~70% 的重复样板代码")
+
+    # ── match/case 模式匹配 ─────────────────────────────────
+    print("\n6. match/case 结构模式匹配:")
+    shapes: list[CircleShape | RectShape] = [
+        CircleShape(radius=5.0, center=Point2D(0, 0)),
+        RectShape(width=4.0, height=3.0, origin=Point2D(1, 2)),
+        CircleShape(radius=2.5, center=Point2D(-3, 4)),
+    ]
+    for shape in shapes:
+        print(f"  {describe_shape(shape)}")
+
+
+# =============================================================================
+# 10.8 综合示例：图形类层次结构
 # =============================================================================
 
 class Point:
@@ -520,7 +736,7 @@ class Triangle(GeometricShape):
 def demo_comprehensive() -> None:
     """综合示例。"""
     print("\n" + "=" * 60)
-    print("10.7 综合示例：图形类层次结构")
+    print("10.8 综合示例：图形类层次结构")
     print("=" * 60)
 
     triangle = Triangle(
@@ -546,6 +762,7 @@ def main() -> None:
     demo_magic_methods()
     demo_abc()
     demo_context_manager()
+    demo_dataclasses()
     demo_comprehensive()
 
 
@@ -596,6 +813,26 @@ if __name__ == "__main__":
 #
 # with MyContext() as ctx:
 #     ...
+#
+# ── dataclasses ──
+# from dataclasses import dataclass, field
+# @dataclass
+# class Data:
+#     name: str
+#     value: int = 0                # 带默认值的字段
+#     items: list[str] = field(default_factory=list)  # 可变默认值
+#     _secret: str = field(repr=False)                # 不参与 __repr__
+#     _tag: str = field(compare=False)                # 不参与 __eq__
+#
+# @dataclass(frozen=True)
+# class Immutable:
+#     x: int
+#     y: int
+#
+# # 初始化后验证
+# def __post_init__(self):
+#     if self.value < 0:
+#         raise ValueError(...)
 
 
 # =============================================================================

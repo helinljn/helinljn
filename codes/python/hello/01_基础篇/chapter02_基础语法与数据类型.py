@@ -6,7 +6,7 @@
 #   1. 掌握 Python 变量的声明与使用方式
 #   2. 理解 Python 的 4 种基本数据类型：int、float、bool、None
 #   3. 掌握类型转换和类型检查
-#   4. 熟练使用各种运算符
+#   4. 熟练使用各种运算符（含海象运算符 :=）
 #   5. 掌握 input() 和 print() 的常见用法
 #
 # 【运行方式】
@@ -394,6 +394,148 @@ def demo_operators() -> None:
 
 
 # =============================================================================
+# 2.5a 海象运算符（赋值表达式 :=）
+# =============================================================================
+#
+# 海象运算符 `:=`（Python 3.8+）是"赋值表达式"——
+# 在一个表达式内部完成赋值，并返回被赋的值。
+#
+# C/C++ 中赋值本身就是表达式，可以嵌套：
+#   while ((chunk = read(fd, buf, size)) > 0) { ... }
+#   if ((p = get_value()) != NULL) { ... }
+#
+# Python 的 `=` 是语句（不能放在表达式中），
+# 而 `:=` 是表达式（可以在任何需要表达式的地方赋值并返回值）。
+# 因形状像海象的眼睛和长牙而得名 :-)o
+#
+# 核心要点：
+#   1. `:=` 必须用括号包裹（优先级很低）
+#   2. 变量属于所在函数的局部作用域（推导式中会泄漏到外层）
+#   3. 用在对的地方（while / if / 推导式），不要到处滥用
+
+
+def demo_walrus() -> None:
+    """演示海象运算符（赋值表达式 :=）的经典用法。"""
+    print("\n" + "=" * 60)
+    print("2.5a 海象运算符（:=）")
+    print("=" * 60)
+
+    # ── 1. while 循环中的海象运算符 ──────────────────────────
+    #
+    # C/C++ 风格：
+    #   char buf[8192];
+    #   while ((n = read(fd, buf, 8192)) > 0) { ... }
+    #
+    # Python 用 := 实现同样的"读-判断"一体写法：
+    print("── 1. while 循环 ──")
+    import io
+    data = io.StringIO("line1\nline2\nline3\n")
+    lineno = 0
+    while chunk := data.readline():
+        lineno += 1
+        print(f"   第{lineno}行: {chunk.strip()!r}")
+    # 不用 := 的传统写法：需要先赋值再判断，循环体内还要再次读取
+    #   line = f.readline()
+    #   while line:
+    #       ...处理...
+    #       line = f.readline()  ← 容易忘记这行
+
+    # 另一个经典场景：交互输入直到空行
+    # while (line := input("请输入（空行结束）: ")):
+    #     print(f"你输入了: {line}")
+
+    # ── 2. if 语句中的海象运算符 ─────────────────────────────
+    #
+    # C/C++ 风格：
+    #   if ((p = get_value()) != NULL) { use(p); }
+    #
+    # Python 等价写法：
+    print("\n── 2. if 语句 ──")
+    import re
+    text = "联系电话: 010-12345678"
+    # 不用 := 需要先赋值再判断，多一行：
+    #   match = re.search(r"\d{3,4}-\d{7,8}", text)
+    #   if match:
+    #       print(match.group())
+    #
+    # 用 := 直接合并：
+    if match := re.search(r"\d{3,4}-\d{7,8}", text):
+        print(f"  匹配到号码: {match.group()}")
+    # match 变量在 if 外部仍然存在！
+    print(f"  起始位置: {match.start()}")
+
+    # 另一个例子：计算长度并同时判断
+    numbers = [15, 8, 23, 4, 42, 16]
+    if (n := len(numbers)) > 5:
+        print(f"  列表有 {n} 个元素（超过 5 个）")
+
+    # ── 3. 列表推导式中的海象运算符 ──────────────────────────
+    print("\n── 3. 列表推导式 ──")
+    # 场景：对每个元素做计算，只保留结果 > 0 的
+    # 不用 := 需要写两次同样的计算：
+    #   [f(x) for x in data if f(x) > 0]  ← f(x) 算了两次！
+    #
+    # 用 := 只算一次：
+    nums = [9, 4, 16, 1, 25]
+    results = [y for x in nums if (y := x ** 0.5) > 3]
+    print(f"  nums    = {nums}")
+    print(f"  results = {results}  (只保留 sqrt > 3)")
+    # y 在推导式外部也可访问（推导式中 := 赋值的变量会泄漏到外层）
+    print(f"  最后一个 y = {y}")
+
+    # 另一个推导式例子：转换并过滤
+    words = ["hello", "world", "Python", "AI", "ok"]
+    long_upper = [w for word in words if len(w := word.upper()) > 5]
+    print(f"  原列表: {words}")
+    print(f"  大写化、长度>5: {long_upper}")
+
+    # ── 4. 括号是必须的 ─────────────────────────────────────
+    #
+    # := 的优先级在所有运算符中最低，必须用括号明确范围：
+    #   x := 1 + 2        ← 语法错误！
+    #   (x := 1 + 2)      ← 正确，x = 3
+    #
+    # 在 if / while 条件中同样需要外层括号：
+    #   if x := f():      ← SyntaxError
+    #   if (x := f()):     ← 正确
+    print("\n── 4. 括号要求 ──")
+    try:
+        compile("x := 1 + 2", "<test>", "eval")
+    except SyntaxError:
+        print("  ❌ x := 1 + 2     → SyntaxError（缺少括号）")
+    print("  ✅ (x := 1 + 2)    → 正确")
+
+    # ── 5. 作用域规则 ──────────────────────────────────────
+    #
+    # 在 def 内部用 :=，变量属于该函数的局部作用域。
+    # 但在推导式中用 :=，变量会"泄漏"到外层函数作用域——
+    # 这与推导式中 for 循环变量的行为不同（后者在 Python 3+ 中不泄漏）。
+    print("\n── 5. 作用域规则 ──")
+    # 推导式中的 := 泄漏到外层：
+    squares = [v for n in range(3) if (v := n ** 2) >= 0]
+    print(f"  推导式中的 v 泄漏到外层: v = {v}")  # 4（最后一次迭代）
+
+    # def 内的 := 是局部变量：
+    def scope_test() -> int:
+        (local_val := 42)
+        return local_val
+
+    print(f"  def 内 := 赋值的变量是局部变量: {scope_test()}")
+
+    # ── 6. 何时不该用（避免滥用）─────────────────────────────
+    print("\n── 6. 避免滥用 ──")
+    print("  ❌ 简单赋值直接用 =：")
+    print("     a := 10               # 多此一举，用 a = 10")
+    print("  ❌ 嵌套过深降低可读性：")
+    print("     (a := (b := (c := f()) + 1) + 2)  # 没人想读这种代码")
+    print("  ✅ 合适的使用场景：")
+    print("     while 循环中避免重复读取")
+    print('     if 语句中"匹配-使用"模式')
+    print("     推导式中避免重复计算子表达式")
+    print("  核心原则：让代码更清晰，而不是更'聪明'。")
+
+
+# =============================================================================
 # 2.6 输入与输出
 # =============================================================================
 
@@ -733,6 +875,7 @@ def main() -> None:
     demo_type_conversion()
     demo_type_checking()
     demo_operators()
+    demo_walrus()
     demo_input_output()
     demo_builtin_functions()
     demo_calculator()
@@ -760,6 +903,7 @@ if __name__ == "__main__":
 # Python is  身份比较（内存地址）
 # Python in  成员检查
 # Python 链式比较：1 < x < 10  ↔  C/C++ (1<x)&&(x<10)
+# Python :=   赋值表达式（海象运算符），C/C++ 赋值本身就能当表达式用
 #
 # ── 常用内置函数 ──
 # enumerate(seq, start=0)   同时获取索引和值，返回 (i, val) 迭代器

@@ -135,7 +135,7 @@ def main() -> None:
             print()
         elif cmd == "6":
             print()
-            show_numlist(CHAPTERS[30:32], 31)
+            show_numlist(CHAPTERS[30:33], 31)
             print()
         elif cmd == "L":
             print()
@@ -143,7 +143,7 @@ def main() -> None:
             print()
 
         elif cmd == "A":
-            for name, path, _ in CHAPTERS[:32]:  # 教学章节
+            for name, path, _ in CHAPTERS[:33]:  # 教学章节 (ch01~ch23 + 补充01~10)
                 run_chapter(path)
 
         elif cmd.isdigit():

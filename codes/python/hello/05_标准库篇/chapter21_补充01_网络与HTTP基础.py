@@ -239,6 +239,108 @@ def demo_error_handling() -> None:
 
 
 # =============================================================================
+# 21.补充1.6 HTTP 客户端请求（urllib.request）
+# =============================================================================
+#
+# 本节要点：
+#   - urllib.request.urlopen() 发送 GET / POST 请求
+#   - 读取响应的状态码、响应头、响应体
+#   - 使用 urllib.error.HTTPError / URLError 做异常处理
+#   - 了解第三方库 requests（比 urllib 更简洁，建议实际项目使用）
+#   - 实战：用 urllib 访问 httpbin.org 公开测试接口
+
+
+def demo_http_client() -> None:
+    """演示 urllib.request 的 GET/POST 请求、响应解析和异常处理。
+
+    与前面章节不同，本节面向真实的外部 HTTP 服务（httpbin.org），
+    把请求构造、响应读取、错误处理串联成一个完整的客户端示例。
+    """
+    print("\n" + "=" * 60)
+    print("21.补充1.6 HTTP 客户端请求（urllib.request）")
+    print("=" * 60)
+
+    base = "https://httpbin.org"
+
+    # ── 1. GET 请求 ──────────────────────────────────────────────────────
+    print("─" * 60)
+    print("1. GET 请求 —— 读取状态码、响应头和响应体")
+    print("─" * 60)
+
+    get_url = f"{base}/get?name=Python&limit=5"
+    try:
+        with request.urlopen(get_url, timeout=10) as resp:
+            print(f"  状态码: {resp.status} {resp.reason}")
+            print(f"  Content-Type: {resp.headers.get('Content-Type')}")
+            print(f"  响应头数量: {len(resp.headers)}")
+            body = resp.read().decode("utf-8")
+            data = json.loads(body)
+            # 只展示 args 字段，避免输出太长
+            print(f"  返回的查询参数: {data.get('args', {})}")
+    except error.URLError as exc:
+        print(f"  [跳过] GET 请求失败: {exc.reason}")
+
+    # ── 2. POST 请求 —— 发送 JSON 数据 ──────────────────────────────────
+    print("\n" + "─" * 60)
+    print("2. POST 请求 —— 发送 JSON 数据")
+    print("─" * 60)
+
+    post_url = f"{base}/post"
+    payload = json.dumps({"username": "alice", "role": "engineer"}, ensure_ascii=False)
+    post_req = request.Request(
+        post_url,
+        data=payload.encode("utf-8"),
+        method="POST",
+        headers={
+            "Content-Type": "application/json; charset=utf-8",
+            "User-Agent": "python-urllib-demo/3.11",
+        },
+    )
+    try:
+        with request.urlopen(post_req, timeout=10) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            print(f"  状态码: {resp.status}")
+            print(f"  服务端回显的 JSON: {result.get('json', {})}")
+    except error.URLError as exc:
+        print(f"  [跳过] POST 请求失败: {exc.reason}")
+
+    # ── 3. 异常处理 —— HTTP 4xx/5xx 与网络错误 ──────────────────────────
+    print("\n" + "─" * 60)
+    print("3. 异常处理 —— HTTPError 与 URLError")
+    print("─" * 60)
+
+    test_cases: list[tuple[str, str]] = [
+        ("不存在的路径", f"{base}/status/404"),
+        ("错误的域名", "http://this-domain-does-not-exist-42.invalid"),
+    ]
+    for label, test_url in test_cases:
+        try:
+            with request.urlopen(test_url, timeout=5) as _resp:
+                print(f"  [{label}] 状态码: {_resp.status}")
+        except error.HTTPError as exc:
+            # HTTPError 是 URLError 的子类，所以先捕获它
+            print(f"  [{label}] HTTPError → 状态码={exc.code}, 原因={exc.reason}")
+        except error.URLError as exc:
+            print(f"  [{label}] URLError → {exc.reason}")
+        except TimeoutError:
+            print(f"  [{label}] 请求超时")
+
+    # ── 4. 关于 requests 库的说明 ────────────────────────────────────────
+    print("\n" + "─" * 60)
+    print("4. 第三方库 requests —— 更简洁的 HTTP 客户端")
+    print("─" * 60)
+    print(
+        "  标准库 urllib 功能完备但 API 略显繁琐。\n"
+        "  第三方库 requests 是事实上的 HTTP 客户端标准：\n"
+        "    pip install requests\n"
+        "  同样的 GET 请求用 requests 只需一行:\n"
+        "    r = requests.get('https://httpbin.org/get', params={'name': 'Python'})\n"
+        "    print(r.json()['args'])\n"
+        "  建议：学习阶段掌握 urllib 理解 HTTP 细节，项目开发优先使用 requests。"
+    )
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -249,6 +351,7 @@ def main() -> None:
     demo_local_http_server()
     demo_socket_tcp()
     demo_error_handling()
+    demo_http_client()
 
 
 if __name__ == "__main__":

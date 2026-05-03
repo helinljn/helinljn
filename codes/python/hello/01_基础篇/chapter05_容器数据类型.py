@@ -577,6 +577,127 @@ def demo_frozenset_and_summary() -> None:
 
 
 # =============================================================================
+# 5.6 推导式（Comprehensions）
+# =============================================================================
+#
+# Python 推导式将循环和条件浓缩为单行表达式，兼具可读性和性能。
+# 对应 C/C++ 中没有直接等价物——最接近的是范围 for 循环 + if 的组合。
+# 四种形式：列表/字典/集合推导式、生成器表达式（惰性求值）。
+
+def demo_comprehensions() -> None:
+    """演示四种推导式及与传统循环的对比。"""
+    print("\n" + "=" * 60)
+    print("5.6 推导式（Comprehensions）")
+    print("=" * 60)
+
+    # ── 1. 列表推导式 [expr for item in iterable if condition] ──
+    print("\n1. 列表推导式")
+    print("─" * 60)
+
+    # C/C++ 风格：vector<int> r; for(int x:data) if(x>0) r.push_back(x*2);
+    # Python 推导式（一行等价）：
+    data = [-5, 3, 0, 8, -2, 7]
+    result = [x * 2 for x in data if x > 0]
+    print(f"  [x*2 for x in data if x>0]: {result}")
+
+    # if-else 三元表达式（条件在表达式位置，而非过滤位置）
+    labels = ["正" if x > 0 else "非正" for x in data]
+    print(f"  if-else 三元: {labels}")
+
+    # 嵌套推导式：展平二维列表 / 笛卡尔积
+    matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    flat = [x for row in matrix for x in row]
+    colors, ranks = ["红", "黑"], ["A", "K"]
+    deck = [f"{c}{r}" for c in colors for r in ranks]
+    print(f"  展平二维: {flat}")
+    print(f"  笛卡尔积: {deck}")
+
+    # 嵌套推导式构建二维数组
+    identity = [[1 if i == j else 0 for j in range(3)] for i in range(3)]
+    print(f"  单位矩阵: {identity}")
+
+    # ── 2. 字典推导式 {k:v for item in iterable} ──
+    print("\n2. 字典推导式")
+    print("─" * 60)
+
+    square_map = {x: x ** 2 for x in range(1, 6)}
+    print(f"  平方映射: {square_map}")
+
+    scores = {"Alice": 95, "Bob": 87, "Charlie": 92}
+    high = {k: v for k, v in scores.items() if v >= 90}
+    reversed_map = {v: k for k, v in scores.items()}
+    print(f"  高分学生: {high}")
+    print(f"  反转映射: {reversed_map}")
+
+    # ── 3. 集合推导式 {expr for item in iterable} ──
+    print("\n3. 集合推导式")
+    print("─" * 60)
+
+    # 自动去重
+    nums = [1, -1, 2, -2, 3, -3, 1, 2, 3]
+    squares_set = {x ** 2 for x in nums}
+    vowels = {c for c in "hello world, hello Python" if c.lower() in "aeiou"}
+    print(f"  平方值集合（去重）: {squares_set}")
+    print(f"  元音集合（去重）:   {vowels}")
+
+    # ── 4. 生成器表达式 (expr for item in iterable) 惰性求值 ──
+    print("\n4. 生成器表达式 —— 惰性求值")
+    print("─" * 60)
+
+    # 圆括号创建生成器——只在需要时才计算下一个值
+    gen = (x ** 2 for x in range(1, 6))
+    print(f"  对象: {gen}, 类型: {type(gen).__name__}")
+    print(f"  next(gen): {next(gen)}, {next(gen)} → 剩余: {list(gen)}")
+
+    # 内存优势：生成器占用固定内存，不随数据规模增长
+    import sys
+    big_list = [x ** 2 for x in range(1_000_000)]
+    big_gen = (x ** 2 for x in range(1_000_000))
+    print(f"\n  百万元素 列表内存: {sys.getsizeof(big_list):,} 字节")
+    print(f"  百万元素 生成器内存: {sys.getsizeof(big_gen)} 字节（恒定）")
+
+    # 传给 sum/max/min 时可省略外层括号
+    total = sum(x ** 2 for x in range(1, 1001))
+    print(f"  sum(x**2 for x in range(1,1001)) = {total}")
+
+    # ── 5. 推导式 vs 传统循环：何时不用推导式 ──
+    print("\n5. 何时不应使用推导式")
+    print("─" * 60)
+
+    print("  推导式适合简洁的「映射 + 过滤」模式。以下情况请用传统循环：")
+
+    # 反面案例：嵌套太深难以理解
+    print("\n  ❌ 嵌套层数过多（应改用循环）:")
+    print("     # 三层以上嵌套推导式 = 团队 code review 杀手")
+
+    # 具体对比：复杂嵌套
+    messy = "".join(
+        [str(x) for x in range(10) for y in range(x) if y % 2 == 0 for z in range(y) if z > 1]
+    )
+    good: list[str] = []
+    for x in range(10):
+        for y in range(x):
+            if y % 2 == 0:
+                for z in range(y):
+                    if z > 1:
+                        good.append(str(x))
+    print(f"     推导式: [str(x) for x in range(10) for y... for z...]  ← 难以理解")
+    print(f"     循环版: 多层 for + if（如上）→ {''.join(good)}")
+
+    print("\n  ❌ 推导式中有副作用（print/写文件/修改外部变量）—— 应改用循环")
+    print("  ❌ 需要 try/except、break、continue —— 推导式不支持")
+    print("  💡 原则：一个推导式应能在 3 秒内看懂，否则拆成循环")
+
+    # ── 速查 ──
+    print("\n" + "─" * 60)
+    print("  速查:")
+    print("    [x*2 for x in L if x>0]         列表推导式（返回 list）")
+    print("    {k:v for k,v in D.items()}      字典推导式（返回 dict）")
+    print("    {x%3 for x in range(10)}        集合推导式（返回 set，自动去重）")
+    print("    (x*2 for x in L)                生成器表达式（惰性，返回 generator）")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -587,6 +708,7 @@ def main() -> None:
     demo_dict()
     demo_set()
     demo_frozenset_and_summary()
+    demo_comprehensions()
 
 
 if __name__ == "__main__":
