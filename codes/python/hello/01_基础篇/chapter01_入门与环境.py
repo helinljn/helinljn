@@ -144,9 +144,9 @@ def greet(name: str) -> str:
 
 import sys  # 导入标准库的 sys 模块（模块就是一个功能库，类似 C 的头文件）
 
-print("\n" + "=" * 50)
+print("\n" + "=" * 60)
 print("Python 环境信息")
-print("=" * 50)
+print("=" * 60)
 
 # sys.version 包含完整的版本信息字符串
 print(f"Python 版本: {sys.version}")
@@ -256,9 +256,9 @@ class UserProfile:              # 类名：PascalCase
 def main() -> None:
     """主函数：演示本章所有知识点。"""
 
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print("第 1 章综合演示")
-    print("=" * 50)
+    print("=" * 60)
 
     # 1. 调用自定义函数
     message = greet("Python 学习者")

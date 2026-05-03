@@ -33,7 +33,7 @@ import platform
 import subprocess
 import argparse
 from pathlib import Path
-from typing import List, Optional, Any
+from typing import List, Any
 
 
 # =============================================================================
@@ -846,7 +846,7 @@ def head_command(args: argparse.Namespace) -> None:
 
 # ── 练习 3：带超时的命令执行 ─────────────────────────────────────────────────
 
-def run_with_timeout(cmd: List[str], timeout_sec: float) -> Optional[str]:
+def run_with_timeout(cmd: List[str], timeout_sec: float) -> str | None:
     """
     练习 3：运行外部命令，超时或出错时返回 None。
 
@@ -979,11 +979,11 @@ def exercise3_answer() -> None:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise2_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise3_answer()

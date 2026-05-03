@@ -283,6 +283,98 @@ print(a)  # [1, 2, 3]
 print(b)  # [1, 2, 3, 4]
 ```
 
+### 8. 字符串拼接：join() 比 + 快得多
+
+循环中用 `+` 拼接字符串会产生大量临时对象，时间复杂度 O(n²)。
+
+```python
+# ❌ O(n²)，循环 10000 次就明显变慢
+result = ""
+for word in word_list:
+    result += word
+
+# ✅ O(n)，一次性 join
+result = "".join(word_list)
+```
+
+`join()` 会先计算总长度，一次性分配内存，效率高得多。
+
+### 9. finally 的执行顺序
+
+`finally` 块在 `return` 之后、函数真正返回之前执行，但 return 的值已经确定了。
+
+```python
+def demo():
+    try:
+        return "try"
+    finally:
+        print("finally 执行了")
+
+
+print(demo())
+# 输出:
+#   finally 执行了
+#   try
+# （finally 先打印，return 后生效——但返回值已经是 "try"）
+```
+
+如果 finally 里也有 return，会覆盖 try 的 return（不推荐这样做）。
+
+### 10. try-except 不要滥用
+
+只捕获你能处理的异常，不要写成空 except 或 except Exception 兜底。
+
+```python
+# ❌ 吞掉所有异常（包括 KeyboardInterrupt）
+try:
+    do_something()
+except:
+    pass
+
+# ❌ 太宽泛
+try:
+    do_something()
+except Exception:
+    pass
+
+# ✅ 只捕获你能处理的
+try:
+    num = int(user_input)
+except ValueError:
+    print("请输入有效数字")
+```
+
+### 11. 生成器用完就没了
+
+生成器只能消费一次，第二次迭代什么也不会产生。
+
+```python
+gen = (x * 2 for x in range(3))
+print(list(gen))  # [0, 2, 4]
+print(list(gen))  # []（已经耗尽了）
+```
+
+需要多次使用时，先转成 list 或用 `itertools.tee`。
+
+### 12. 可变对象作为函数参数
+
+调用时传入可变对象作为参数，函数内部修改会影响外部。
+
+```python
+def add_user(name, users=None):
+    if users is None:
+        users = []
+    users.append(name)
+    return users
+
+
+my_list = ["alice"]
+add_user("bob", my_list)
+print(my_list)  # ['alice', 'bob']（外部也被修改了）
+```
+
+这不是 bug，但很多人会意外。如果需要隔离，函数内先 copy。
+
 ---
 
 ## 三、学习建议
@@ -291,3 +383,5 @@ print(b)  # [1, 2, 3, 4]
 - 遇到依赖问题，先确认当前 Python 解释器和虚拟环境。
 - 遇到结果异常，优先检查：可变对象、浅拷贝、浮点数、`is`/`==`、路径字符串。
 - 写项目时优先使用 `pathlib`、`with`、参数化 SQL、清晰的函数边界。
+- 循环拼接字符串永远用 `join()`，不要用 `+`。
+- 异常捕获要具体，不要写空的 except 块。

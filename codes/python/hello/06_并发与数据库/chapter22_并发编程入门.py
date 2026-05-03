@@ -65,11 +65,11 @@ import threading
 import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 # =============================================================================
-# 22.1 并发基础概念：并发 vs 并行，以及 GIL
+# 22.1 【必修】并发基础概念：并发 vs 并行，以及 GIL
 # =============================================================================
 
 def demo_concurrency_concepts() -> None:
@@ -137,7 +137,7 @@ def demo_concurrency_concepts() -> None:
 
 
 # =============================================================================
-# 22.2 threading 基础：线程创建与生命周期
+# 22.2 【必修】threading 基础：线程创建与生命周期
 # =============================================================================
 
 def demo_thread_basics() -> None:
@@ -222,7 +222,7 @@ def demo_thread_basics() -> None:
             super().__init__(name=f"Worker-{task_id}")
             self.task_id = task_id
             self.data = data
-            self.result: Optional[int] = None  # 用于存储计算结果
+            self.result: int | None = None  # 用于存储计算结果
 
         def run(self) -> None:
             """
@@ -301,7 +301,7 @@ def demo_thread_basics() -> None:
 
 
 # =============================================================================
-# 22.3 线程同步：避免竞态条件
+# 22.3 【进阶】线程同步：避免竞态条件
 # =============================================================================
 
 def demo_thread_synchronization() -> None:
@@ -561,7 +561,7 @@ def demo_thread_synchronization() -> None:
 
 
 # =============================================================================
-# 22.4 线程通信：Queue
+# 22.4 【必修】线程通信：Queue
 # =============================================================================
 
 def demo_thread_queue() -> None:
@@ -617,7 +617,7 @@ def demo_thread_queue() -> None:
     print()
 
     # 任务队列：存放待处理的 URL（模拟）
-    task_queue: queue.Queue[Optional[str]] = queue.Queue()
+    task_queue: queue.Queue[str | None] = queue.Queue()
     result_queue: queue.Queue[tuple[str, str]] = queue.Queue()
 
     def url_worker(worker_id: int) -> None:
@@ -703,7 +703,7 @@ def demo_thread_queue() -> None:
 
 
 # =============================================================================
-# 22.5 ThreadPoolExecutor：线程池
+# 22.5 【必修】ThreadPoolExecutor：线程池
 # =============================================================================
 
 def demo_thread_pool_executor() -> None:
@@ -844,7 +844,7 @@ def demo_thread_pool_executor() -> None:
 
 
 # =============================================================================
-# 22.6 multiprocessing 基础：进程创建与进程池
+# 22.6 【进阶】multiprocessing 基础：进程创建与进程池
 # =============================================================================
 
 def demo_multiprocessing_basics() -> None:
@@ -1004,7 +1004,7 @@ def demo_multiprocessing_basics() -> None:
 
 
 # =============================================================================
-# 22.7 asyncio 入门：异步编程基础
+# 22.7 【进阶】asyncio 入门：异步编程基础
 # =============================================================================
 
 def demo_asyncio_basics() -> None:
@@ -1206,7 +1206,7 @@ def demo_asyncio_basics() -> None:
 
 
 # =============================================================================
-# 22.8 并发模型选择指南
+# 22.8 【必修】并发模型选择指南
 # =============================================================================
 
 def demo_concurrency_comparison() -> None:
@@ -1762,7 +1762,7 @@ def producer_consumer_demo() -> int:
     CONSUMER_COUNT = 3
     ITEMS_PER_PRODUCER = 10
 
-    task_queue: queue.Queue[Optional[int]] = queue.Queue()
+    task_queue: queue.Queue[int | None] = queue.Queue()
     result_queue: queue.Queue[int] = queue.Queue()
 
     def producer(producer_id: int) -> None:
@@ -1929,7 +1929,7 @@ async def compare_concurrent_vs_sequential() -> tuple[float, float]:
 
 # ── 练习 7：fetch_with_timeout ────────────────────────────────────────────────
 
-async def fetch_with_timeout(url: str, timeout: float) -> Optional[dict]:
+async def fetch_with_timeout(url: str, timeout: float) -> dict | None:
     """
     练习 7：带超时的异步 HTTP 请求（模拟）。
 
@@ -1997,7 +1997,7 @@ class ConcurrentBatchProcessor:
     def run(
         self,
         max_workers: int = 4,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> list[dict]:
         """
         并发执行所有已添加的任务。
@@ -2011,7 +2011,7 @@ class ConcurrentBatchProcessor:
             {'status': 'ok', 'result': 返回值} 或
             {'status': 'error', 'result': 异常信息字符串}
         """
-        results: list[Optional[dict]] = [None] * len(self._tasks)
+        results: list[dict | None] = [None] * len(self._tasks)
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_index = {
@@ -2170,28 +2170,28 @@ def exercise8_answer() -> None:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise2_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise3_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise4_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise5_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise6_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise7_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise8_answer()
 
 

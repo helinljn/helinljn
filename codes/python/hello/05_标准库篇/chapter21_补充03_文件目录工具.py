@@ -1,5 +1,5 @@
 # =============================================================================
-# 第 21 章：补充 2 - 文件目录工具
+# 第 21 章：补充 3 - 文件目录工具
 # =============================================================================
 #
 # 【学习目标】
@@ -21,7 +21,7 @@ import tempfile
 
 
 # =============================================================================
-# 21.补充2.1 glob 文件查找
+# 21.补充3.1 glob 文件查找
 # =============================================================================
 
 
@@ -34,7 +34,7 @@ def find_files(root: Path, pattern: str) -> list[Path]:
 def demo_glob_module(root: Path) -> None:
     """演示 glob 通配符查找。"""
     print("=" * 60)
-    print("21.补充2.1 glob 文件查找")
+    print("21.补充3.1 glob 文件查找")
     print("=" * 60)
 
     txt_files = find_files(root, "*.txt")
@@ -45,7 +45,7 @@ def demo_glob_module(root: Path) -> None:
 
 
 # =============================================================================
-# 21.补充2.2 shutil 文件和目录操作
+# 21.补充3.2 shutil 文件和目录操作
 # =============================================================================
 
 
@@ -65,7 +65,7 @@ def copy_by_extension(source: Path, target: Path, extension: str) -> list[Path]:
 def demo_shutil_module(root: Path) -> None:
     """演示 shutil 复制目录和文件。"""
     print("\n" + "=" * 60)
-    print("21.补充2.2 shutil 文件和目录操作")
+    print("21.补充3.2 shutil 文件和目录操作")
     print("=" * 60)
 
     backup = root / "backup"
@@ -82,7 +82,7 @@ def demo_shutil_module(root: Path) -> None:
 
 
 # =============================================================================
-# 21.补充2.3 tempfile 临时文件和临时目录
+# 21.补充3.3 tempfile 临时文件和临时目录
 # =============================================================================
 
 
@@ -97,7 +97,7 @@ def create_demo_workspace(root: Path) -> None:
 def demo_tempfile_module() -> None:
     """演示 tempfile 自动清理临时目录。"""
     print("=" * 60)
-    print("21.补充2.3 tempfile 临时文件和临时目录")
+    print("21.补充3.3 tempfile 临时文件和临时目录")
     print("=" * 60)
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -197,8 +197,8 @@ def make_backup(source: Path) -> Path:
 #         root = Path(tmp)
 #         create_demo_workspace(root)
 #
-#         print("=" * 40)
+#         print("=" * 60)
 #         print(count_by_extension(root))
 #
-#         print("\n" + "=" * 40)
+#         print("\n" + "=" * 60)
 #         print(make_backup(root / "src"))

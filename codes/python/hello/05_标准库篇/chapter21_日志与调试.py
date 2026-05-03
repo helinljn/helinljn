@@ -49,7 +49,7 @@ import time
 import traceback
 import tempfile
 from pathlib import Path
-from typing import Optional
+
 
 
 # =============================================================================
@@ -1075,7 +1075,7 @@ def demo_practical_logging_system() -> None:
     def setup_logging(
         name: str,
         level: int = logging.DEBUG,
-        log_dir: Optional[str] = None,
+        log_dir: str | None = None,
         console_level: int = logging.INFO,
         max_bytes: int = 10 * 1024 * 1024,
         backup_count: int = 5,
@@ -1749,16 +1749,16 @@ def exercise4_answer() -> None:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise2_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise3_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise4_answer()
 
 

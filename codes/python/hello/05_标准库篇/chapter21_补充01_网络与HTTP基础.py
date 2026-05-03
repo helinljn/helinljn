@@ -1,5 +1,5 @@
 # =============================================================================
-# 第 21 章：网络与 HTTP 基础
+# 第 21 章：补充 1 - 网络与 HTTP 基础
 # =============================================================================
 #
 # 【学习目标】
@@ -24,14 +24,14 @@ from urllib import error, parse, request
 
 
 # =============================================================================
-# 21.1 URL 解析与构造
+# 21.补充1.1 URL 解析与构造
 # =============================================================================
 
 
 def demo_url_parsing() -> None:
     """演示 URL 解析、查询参数读取和 URL 构造。"""
     print("=" * 60)
-    print("21.1 URL 解析与构造")
+    print("21.补充1.1 URL 解析与构造")
     print("=" * 60)
 
     url = "https://api.example.com/users?page=2&size=20&keyword=python"
@@ -52,7 +52,7 @@ def demo_url_parsing() -> None:
 
 
 # =============================================================================
-# 21.2 HTTP 请求对象
+# 21.补充1.2 HTTP 请求对象
 # =============================================================================
 
 
@@ -77,7 +77,7 @@ def build_json_request(url: str, payload: dict[str, Any]) -> request.Request:
 def demo_http_request_object() -> None:
     """演示 urllib.request.Request 的常用字段。"""
     print("\n" + "=" * 60)
-    print("21.2 HTTP 请求对象")
+    print("21.补充1.2 HTTP 请求对象")
     print("=" * 60)
 
     req = build_json_request(
@@ -92,7 +92,7 @@ def demo_http_request_object() -> None:
 
 
 # =============================================================================
-# 21.3 本地 HTTP 服务与客户端请求
+# 21.补充1.3 本地 HTTP 服务与客户端请求
 # =============================================================================
 
 
@@ -138,7 +138,7 @@ def fetch_json(url: str, timeout: float = 3.0) -> dict[str, Any]:
 def demo_local_http_server() -> None:
     """启动本地 HTTP 服务，并用 urllib.request 访问它。"""
     print("\n" + "=" * 60)
-    print("21.3 本地 HTTP 服务与客户端请求")
+    print("21.补充1.3 本地 HTTP 服务与客户端请求")
     print("=" * 60)
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), JsonHandler)
@@ -159,7 +159,7 @@ def demo_local_http_server() -> None:
 
 
 # =============================================================================
-# 21.4 socket TCP 基础
+# 21.补充1.4 socket TCP 基础
 # =============================================================================
 
 
@@ -184,7 +184,7 @@ def start_echo_server() -> tuple[socket.socket, threading.Thread]:
 def demo_socket_tcp() -> None:
     """演示 TCP 服务端和客户端的最小通信流程。"""
     print("\n" + "=" * 60)
-    print("21.4 socket TCP 基础")
+    print("21.补充1.4 socket TCP 基础")
     print("=" * 60)
 
     server, thread = start_echo_server()
@@ -201,7 +201,7 @@ def demo_socket_tcp() -> None:
 
 
 # =============================================================================
-# 21.5 网络异常处理
+# 21.补充1.5 网络异常处理
 # =============================================================================
 
 
@@ -221,7 +221,7 @@ def classify_http_status(status: int) -> str:
 def demo_error_handling() -> None:
     """演示网络编程中常见异常和状态码分类。"""
     print("\n" + "=" * 60)
-    print("21.5 网络异常处理")
+    print("21.补充1.5 网络异常处理")
     print("=" * 60)
 
     for status in [200, 301, 404, 500]:
@@ -338,8 +338,8 @@ def download_text(url: str, timeout: float = 3.0) -> str:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     print(build_search_url("https://example.com/search", "python 网络", 1))
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     print(download_text("http://127.0.0.1:8000/health"))

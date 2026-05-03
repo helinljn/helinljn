@@ -407,10 +407,61 @@ def demo_itertools() -> None:
     print(f"  combinations([1,2,3,4], 2): {list(comb)}")
 
     # ── 分组 ─────────────────────────────────────────────
-    print("\n5. 分组:")
+    print("\n5. 分组与聚合:")
     data = [('A', 1), ('A', 2), ('B', 3), ('B', 4), ('C', 5)]
     for key, group in itertools.groupby(data, key=lambda x: x[0]):
-        print(f"  {key}: {list(group)}")
+        print(f"  groupby {key}: {list(group)}")
+    # 注意：groupby 要求输入已按键排序，否则相同键不会合并
+
+    # ── 切片与窗口 ────────────────────────────────────────
+    print("\n6. 切片与窗口:")
+
+    # islice: 惰性切片（不复制）
+    sliced = itertools.islice(range(100), 10, 20)
+    print(f"  islice(range(100), 10, 20): {list(sliced)}")
+
+    # pairwise (Python 3.10+): 相邻配对
+    pw = itertools.pairwise([1, 2, 3, 4, 5])
+    print(f"  pairwise([1,2,3,4,5]): {list(pw)}")
+
+    # ── 累积与归约 ────────────────────────────────────────
+    print("\n7. 累积:")
+
+    import operator
+    # accumulate: 累积聚合
+    acc = itertools.accumulate([1, 2, 3, 4, 5])
+    print(f"  accumulate([1,2,3,4,5]) → {list(acc)}  (累计和)")
+    acc_mul = itertools.accumulate([1, 2, 3, 4, 5], operator.mul)
+    print(f"  accumulate(..., mul)      → {list(acc_mul)}  (阶乘)")
+
+    # ── 排列组合补充 ──────────────────────────────────────
+    print("\n8. 排列组合补充:")
+
+    # combinations_with_replacement: 可重复组合
+    cwr = itertools.combinations_with_replacement([1, 2, 3], 2)
+    print(f"  combinations_with_replacement([1,2,3], 2): {list(cwr)}")
+
+    # ── 实用组合 ──────────────────────────────────────────
+    print("\n9. 实用示例:")
+
+    # tee: 复制迭代器（多次消费）
+    it = iter([1, 2, 3])
+    a, b = itertools.tee(it, 2)
+    print(f"  tee([1,2,3], 2): a={list(a)}, b={list(b)}")
+
+    # starmap: 与 map 类似，但将参数解包
+    sm = itertools.starmap(pow, [(2, 3), (3, 2), (4, 2)])
+    print(f"  starmap(pow, [(2,3),(3,2),(4,2)]): {list(sm)}  (2^3, 3^2, 4^2)")
+
+    # filterfalse: 保留不满足条件的元素
+    ff = itertools.filterfalse(lambda x: x % 2 == 0, range(10))
+    print(f"  filterfalse(even, range(10)): {list(ff)}  (奇数)")
+
+    # ── 效率提示 ──────────────────────────────────────────
+    print(f"\n效率提示:")
+    print(f"  itertools 函数都是惰性求值的迭代器，不会一次性生成所有数据")
+    print(f"  处理百万级数据时，itertools 比等价的 list 操作内存效率高得多")
+    print(f"  例如: islice + accumulate 可以处理不能完整放入内存的数据流")
 
 
 # =============================================================================
@@ -503,14 +554,22 @@ if __name__ == "__main__":
 # count(start, step)           无限计数
 # cycle(iterable)              循环迭代
 # repeat(obj, times)           重复元素
-# chain(*iterables)            连接
-# compress(data, selectors)    筛选
-# dropwhile(pred, iterable)    丢弃
-# takewhile(pred, iterable)    保留
-# product(*iterables)          笛卡尔积
-# permutations(iterable, r)    排列
-# combinations(iterable, r)    组合
-# groupby(iterable, key)       分组
+# chain(*iterables)            连接多个可迭代对象
+# chain.from_iterable(iter)    展平嵌套可迭代对象
+# compress(data, selectors)    按布尔序列筛选
+# dropwhile(pred, iterable)    丢弃满足条件的元素
+# takewhile(pred, iterable)    保留满足条件的元素
+# islice(iterable, start, stop[, step])  惰性切片
+# pairwise(iterable)           相邻元素配对 (3.10+)
+# tee(iterable, n)             复制为 n 个独立迭代器
+# accumulate(iterable[, func]) 累积聚合
+# starmap(func, iterable)      解包参数的 map
+# filterfalse(pred, iterable)  保留不满足条件的元素
+# product(*iterables[, repeat])    笛卡尔积
+# permutations(iterable, r)        排列
+# combinations(iterable, r)        组合
+# combinations_with_replacement(iterable, r)  可重复组合
+# groupby(iterable, key)           分组
 
 
 # =============================================================================
@@ -766,11 +825,11 @@ def exercise3_answer() -> None:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise2_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise3_answer()

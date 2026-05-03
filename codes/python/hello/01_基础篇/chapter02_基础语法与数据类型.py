@@ -73,9 +73,9 @@ def demo_variables() -> None:
 
 def demo_int() -> None:
     """演示整数类型（int）。"""
-    print("\n" + "─" * 40)
+    print("\n" + "─" * 60)
     print("2.2.1 整数类型（int）")
-    print("─" * 40)
+    print("─" * 60)
 
     # Python 的 int 可以表示任意大的整数，没有溢出问题
     # C/C++ 需要区分 int / long / long long，Python 只有一种 int
@@ -109,9 +109,9 @@ def demo_int() -> None:
 
 def demo_float() -> None:
     """演示浮点数类型（float）。"""
-    print("\n" + "─" * 40)
+    print("\n" + "─" * 60)
     print("2.2.2 浮点数类型（float）")
-    print("─" * 40)
+    print("─" * 60)
 
     # Python 的 float 等同于 C/C++ 的 double（64位双精度）
     pi = 3.14159
@@ -144,9 +144,9 @@ def demo_float() -> None:
 
 def demo_bool() -> None:
     """演示布尔类型（bool）。"""
-    print("\n" + "─" * 40)
+    print("\n" + "─" * 60)
     print("2.2.3 布尔类型（bool）")
-    print("─" * 40)
+    print("─" * 60)
 
     # Python: True / False（首字母大写）
     # C/C++: true / false（全小写）
@@ -170,9 +170,9 @@ def demo_bool() -> None:
 
 def demo_none() -> None:
     """演示空值类型（None）。"""
-    print("\n" + "─" * 40)
+    print("\n" + "─" * 60)
     print("2.2.4 空值类型（None）")
-    print("─" * 40)
+    print("─" * 60)
 
     # None 类似于 C/C++ 的 NULL/nullptr，但它是一个完整的对象
     nothing = None

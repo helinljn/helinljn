@@ -47,6 +47,10 @@ python "05_标准库篇\chapter21_补充03_文件目录工具.py"
 python "05_标准库篇\chapter21_补充04_类型注解进阶.py"
 python "05_标准库篇\chapter21_补充05_struct二进制数据处理.py"
 python "05_标准库篇\chapter21_补充06_hashlib哈希与摘要.py"
+python "05_标准库篇\chapter21_补充07_bytes与bytearray深入.py"
+python "05_标准库篇\chapter21_补充08_enum枚举.py"
+python "05_标准库篇\chapter21_补充09_uuid唯一标识符.py"
+python "05_标准库篇\chapter21_补充10_ctypes调用C动态库.py"
 python "06_并发与数据库\chapter23_数据库操作.py"
 ```
 

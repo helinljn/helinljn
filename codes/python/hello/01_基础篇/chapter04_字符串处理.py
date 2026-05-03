@@ -8,6 +8,7 @@
 #   3. 掌握字符串格式化的各种方式
 #   4. 理解字符串的不可变性
 #   5. 掌握字符串切片操作
+#   6. 熟悉 string 模块的常用常量
 #
 # 【运行方式】
 #   python chapter04_字符串处理.py
@@ -392,6 +393,61 @@ It was created by Guido van Rossum and released in 1991."""
 
 
 # =============================================================================
+# 4.6 string 模块常量
+# =============================================================================
+
+def demo_string_module() -> None:
+    """演示 string 模块的常用常量。"""
+    print("\n" + "=" * 60)
+    print("4.6 string 模块常量")
+    print("=" * 60)
+
+    import string
+
+    # ── 字符分类常量 ──────────────────────────────────────
+    print("字符分类常量:")
+    print(f"  ascii_letters   = {string.ascii_letters!r}")
+    print(f"  ascii_lowercase = {string.ascii_lowercase!r}")
+    print(f"  ascii_uppercase = {string.ascii_uppercase!r}")
+    print(f"  digits          = {string.digits!r}")
+    print(f"  hexdigits       = {string.hexdigits!r}")
+    print(f"  octdigits       = {string.octdigits!r}")
+    print(f"  punctuation     = {string.punctuation!r}")
+
+    # ── 空白字符 ──────────────────────────────────────────
+    print(f"\n空白字符:")
+    print(f"  whitespace = {string.whitespace!r}")
+    print(f"  (包含空格、制表符、换行等)")
+
+    # ── 常见应用 ──────────────────────────────────────────
+    print(f"\n常见应用:")
+
+    # 1. 生成随机密码
+    import random
+    import secrets
+    chars = string.ascii_letters + string.digits + "!@#$%"
+    password = "".join(secrets.choice(chars) for _ in range(16))
+    print(f"  随机密码: {password!r}  (secrets.choice, 安全)")
+
+    # 2. 验证字符串是否全为十六进制
+    def is_hex(s: str) -> bool:
+        return all(c in string.hexdigits for c in s)
+
+    print(f"   is_hex('deadbeef') = {is_hex('deadbeef')}")
+    print(f"   is_hex('xyz123')   = {is_hex('xyz123')}")
+
+    # 3. 生成字母表
+    print(f"   大写字母表: {string.ascii_uppercase!r}")
+
+    # ── Formatter 类（了解即可） ──────────────────────────
+    print(f"\nstring.Formatter 自定义格式化:")
+    fmt = string.Formatter()
+    result = fmt.format("Hello, {name}! You have {count} messages.",
+                        name="Alice", count=5)
+    print(f"  {result!r}")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -402,6 +458,7 @@ def main() -> None:
     demo_string_methods()
     demo_string_formatting()
     demo_string_tips()
+    demo_string_module()
 
 
 if __name__ == "__main__":
@@ -440,6 +497,16 @@ if __name__ == "__main__":
 # f"{value:08d}"      补零
 # f"{value:.1%}"      百分比
 # f"{value:,}"        千分位
+#
+# ── string 模块常量 ──
+# string.ascii_letters    (a-zA-Z)
+# string.ascii_lowercase  (a-z)
+# string.ascii_uppercase  (A-Z)
+# string.digits           (0-9)
+# string.hexdigits        (0-9a-fA-F)
+# string.punctuation      (!"#$%&'...)
+# string.whitespace       (空格\\t\\n\\r\\x0b\\x0c)
+# string.Formatter        自定义格式化器
 
 
 # =============================================================================

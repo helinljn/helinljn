@@ -457,11 +457,11 @@ def is_png(data: bytes) -> bool:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     pt = pack_point(3.5, -2.8)
 #     print(f"打包 Point(3.5, -2.8): {pt.hex(' ')}")
 #     print(f"解包: {unpack_point(pt)}")
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     print(f"is_png(b'\\x89PNG...'): {is_png(b'\\x89PNG\\r\\n\\x1a\\n' + b'x' * 100)}")
 #     print(f"is_png(b'GIF89a...'):   {is_png(b'GIF89a')}")

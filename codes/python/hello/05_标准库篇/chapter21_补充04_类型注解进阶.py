@@ -1,5 +1,5 @@
 # =============================================================================
-# 第 21 章：补充 3 - 类型注解进阶
+# 第 21 章：补充 4 - 类型注解进阶
 # =============================================================================
 #
 # 【学习目标】
@@ -18,7 +18,7 @@ from typing import Any, Generic, Literal, NotRequired, Protocol, TypeAlias, Type
 
 
 # =============================================================================
-# 21.补充3.1 Optional、Union、Literal
+# 21.补充4.1 Optional、Union、Literal
 # =============================================================================
 
 UserId: TypeAlias = int
@@ -42,7 +42,7 @@ def should_log(message_level: LogLevel, enabled_level: LogLevel = "INFO") -> boo
 def demo_union_literal() -> None:
     """演示联合类型、可选类型和 Literal。"""
     print("=" * 60)
-    print("21.补充3.1 Optional、Union、Literal")
+    print("21.补充4.1 Optional、Union、Literal")
     print("=" * 60)
 
     print("normalize_user_id('42'):", normalize_user_id("42"))
@@ -51,7 +51,7 @@ def demo_union_literal() -> None:
 
 
 # =============================================================================
-# 21.补充3.2 TypedDict
+# 21.补充4.2 TypedDict
 # =============================================================================
 
 
@@ -73,7 +73,7 @@ def format_user(user: UserRecord) -> str:
 def demo_typed_dict() -> None:
     """演示 TypedDict 描述固定结构的字典。"""
     print("\n" + "=" * 60)
-    print("21.补充3.2 TypedDict")
+    print("21.补充4.2 TypedDict")
     print("=" * 60)
 
     user: UserRecord = {"id": 1, "name": "Alice", "email": "alice@example.com"}
@@ -81,7 +81,7 @@ def demo_typed_dict() -> None:
 
 
 # =============================================================================
-# 21.补充3.3 Protocol
+# 21.补充4.3 Protocol
 # =============================================================================
 
 
@@ -109,7 +109,7 @@ def save_payload(serializer: Serializer, payload: JsonValue) -> str:
 def demo_protocol() -> None:
     """演示 Protocol 的结构化类型思想。"""
     print("\n" + "=" * 60)
-    print("21.补充3.3 Protocol")
+    print("21.补充4.3 Protocol")
     print("=" * 60)
 
     serializer = SimpleJsonSerializer()
@@ -118,7 +118,7 @@ def demo_protocol() -> None:
 
 
 # =============================================================================
-# 21.补充3.4 Generic 和 TypeVar
+# 21.补充4.4 Generic 和 TypeVar
 # =============================================================================
 
 
@@ -146,7 +146,7 @@ def first_or_none(items: list[T]) -> T | None:
 def demo_generic() -> None:
     """演示泛型类和泛型函数。"""
     print("\n" + "=" * 60)
-    print("21.补充3.4 Generic 和 TypeVar")
+    print("21.补充4.4 Generic 和 TypeVar")
     print("=" * 60)
 
     repo: Repository[str] = Repository()
@@ -246,8 +246,8 @@ def last_or_none(items: list[T]) -> T | None:
 # if __name__ == "__main__":
 #     product: Product = {"id": 1, "name": "Python Book", "price": 68.0}
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     print(product)
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     print(last_or_none([1, 2, 3]))

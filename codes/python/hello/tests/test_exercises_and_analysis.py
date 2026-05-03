@@ -304,7 +304,7 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
             self.chapter21_network.main()
 
         text = output.getvalue()
-        self.assertIn("21.1 URL 解析与构造", text)
+        self.assertIn("21.补充1.1 URL 解析与构造", text)
         self.assertIn("/health 响应", text)
         self.assertIn("客户端收到: echo: hello socket", text)
 
@@ -315,7 +315,7 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
             self.chapter21_numeric.main()
 
         text = output.getvalue()
-        self.assertIn("21.补充1.1 math 模块", text)
+        self.assertIn("21.补充2.1 math 模块", text)
         self.assertEqual(round(self.chapter21_numeric.distance(0, 0, 3, 4), 2), 5.0)
         self.assertEqual(str(self.chapter21_numeric.split_bill("10.00", 4)), "2.50")
 
@@ -326,7 +326,7 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
             self.chapter21_file_tools.main()
 
         text = output.getvalue()
-        self.assertIn("21.补充2.1 glob 文件查找", text)
+        self.assertIn("21.补充3.1 glob 文件查找", text)
         self.assertIn("离开 with 后临时目录会自动清理", text)
 
     def test_chapter21_typing_supplement_runs(self):
@@ -336,7 +336,7 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
             self.chapter21_typing.main()
 
         text = output.getvalue()
-        self.assertIn("21.补充3.1 Optional、Union、Literal", text)
+        self.assertIn("21.补充4.1 Optional、Union、Literal", text)
         self.assertEqual(self.chapter21_typing.last_or_none([1, 2, 3]), 3)
         self.assertIsNone(self.chapter21_typing.last_or_none([]))
 

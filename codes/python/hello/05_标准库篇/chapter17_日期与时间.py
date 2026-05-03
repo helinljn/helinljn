@@ -26,7 +26,6 @@ import datetime
 import re
 import time
 import calendar
-from typing import Optional
 
 
 # =============================================================================
@@ -932,14 +931,14 @@ def exercise4_answer() -> None:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise2_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise3_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise4_answer()

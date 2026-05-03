@@ -382,7 +382,7 @@ def find_duplicate_files(directory: Path) -> dict[str, list[Path]]:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     print(f"MD5 of 'hello': {md5_hex('hello')}")
 #     print()
 #     tmp = Path("test_verify.txt")

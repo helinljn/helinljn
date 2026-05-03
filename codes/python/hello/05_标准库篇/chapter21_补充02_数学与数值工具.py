@@ -1,5 +1,5 @@
 # =============================================================================
-# 第 21 章：补充 1 - 数学与数值工具
+# 第 21 章：补充 2 - 数学与数值工具
 # =============================================================================
 #
 # 【学习目标】
@@ -22,7 +22,7 @@ import statistics
 
 
 # =============================================================================
-# 21.补充1.1 math 模块
+# 21.补充2.1 math 模块
 # =============================================================================
 
 
@@ -36,7 +36,7 @@ def circle_area(radius: float) -> float:
 def demo_math_module() -> None:
     """演示 math 模块常用函数。"""
     print("=" * 60)
-    print("21.补充1.1 math 模块")
+    print("21.补充2.1 math 模块")
     print("=" * 60)
 
     print("pi:", round(math.pi, 6))
@@ -48,7 +48,7 @@ def demo_math_module() -> None:
 
 
 # =============================================================================
-# 21.补充1.2 random 模块
+# 21.补充2.2 random 模块
 # =============================================================================
 
 
@@ -61,7 +61,7 @@ def roll_dice(times: int, seed: int | None = None) -> list[int]:
 def demo_random_module() -> None:
     """演示 random 模块常用方法。"""
     print("\n" + "=" * 60)
-    print("21.补充1.2 random 模块")
+    print("21.补充2.2 random 模块")
     print("=" * 60)
 
     numbers = list(range(1, 11))
@@ -77,7 +77,7 @@ def demo_random_module() -> None:
 
 
 # =============================================================================
-# 21.补充1.3 statistics 模块
+# 21.补充2.3 statistics 模块
 # =============================================================================
 
 
@@ -96,7 +96,7 @@ def summarize_scores(scores: list[float]) -> dict[str, float]:
 def demo_statistics_module() -> None:
     """演示 statistics 模块。"""
     print("\n" + "=" * 60)
-    print("21.补充1.3 statistics 模块")
+    print("21.补充2.3 statistics 模块")
     print("=" * 60)
 
     scores = [88, 92, 75, 91, 84, 92]
@@ -110,7 +110,7 @@ def demo_statistics_module() -> None:
 
 
 # =============================================================================
-# 21.补充1.4 Decimal 精确小数
+# 21.补充2.4 Decimal 精确小数
 # =============================================================================
 
 
@@ -124,7 +124,7 @@ def calculate_total_price(prices: list[str], tax_rate: str = "0.06") -> Decimal:
 def demo_decimal_module() -> None:
     """演示 Decimal 避免二进制浮点误差。"""
     print("\n" + "=" * 60)
-    print("21.补充1.4 Decimal 精确小数")
+    print("21.补充2.4 Decimal 精确小数")
     print("=" * 60)
 
     print("float: 0.1 + 0.2 =", 0.1 + 0.2)
@@ -135,7 +135,7 @@ def demo_decimal_module() -> None:
 
 
 # =============================================================================
-# 21.补充1.5 Fraction 有理数
+# 21.补充2.5 Fraction 有理数
 # =============================================================================
 
 
@@ -147,7 +147,7 @@ def add_fractions(a: str, b: str) -> Fraction:
 def demo_fraction_module() -> None:
     """演示 Fraction 精确表示有理数。"""
     print("\n" + "=" * 60)
-    print("21.补充1.5 Fraction 有理数")
+    print("21.补充2.5 Fraction 有理数")
     print("=" * 60)
 
     value = Fraction(1, 3) + Fraction(1, 6)
@@ -238,8 +238,8 @@ def split_bill(total: str, people: int) -> Decimal:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     print(distance(0, 0, 3, 4))
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     print(split_bill("128.00", 3))

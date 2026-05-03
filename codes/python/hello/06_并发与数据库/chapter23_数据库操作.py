@@ -51,7 +51,7 @@ import sys
 from contextlib import closing, contextmanager
 from datetime import datetime, date
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Any, Generator
 
 
 # 全局数据库路径（整章共用同一个演示文件）
@@ -1090,7 +1090,7 @@ def demo_task_manager() -> None:
             title: str,
             description: str = "",
             priority: int = 2,
-            due_date: Optional[str] = None,
+            due_date: str | None = None,
         ) -> int:
             """
             添加新任务。
@@ -1159,8 +1159,8 @@ def demo_task_manager() -> None:
 
         def list_tasks(
             self,
-            status: Optional[str] = None,
-            priority: Optional[int] = None,
+            status: str | None = None,
+            priority: int | None = None,
             order_by: str = "priority DESC, created_at",
         ) -> list[dict[str, Any]]:
             """

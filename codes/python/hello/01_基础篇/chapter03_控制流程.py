@@ -8,6 +8,7 @@
 #   3. 理解 break、continue、pass 的用法
 #   4. 理解循环的 else 子句（Python 特有）
 #   5. 掌握条件表达式（三元运算符）
+#   6. 掌握 match/case 结构化模式匹配（Python 3.10+）
 #
 # 【运行方式】
 #   python chapter03_控制流程.py
@@ -504,6 +505,135 @@ def demo_algorithms() -> None:
 
 
 # =============================================================================
+# 3.6 match/case 结构化模式匹配（Python 3.10+）
+# =============================================================================
+#
+# C/C++ 中 switch-case 只能匹配整数或枚举常量。
+# Python 的 match/case 可以匹配任意数据结构：序列、映射、类实例，
+# 并且支持解构和条件守卫，功能远超 switch。
+
+def demo_match_case() -> None:
+    """演示 match/case 的各种模式匹配方式。"""
+    print("\n" + "=" * 60)
+    print("3.6 match/case 结构化模式匹配（Python 3.10+）")
+    print("=" * 60)
+
+    # ── 模式 1：字面量模式（最接近 switch-case）────────────
+    print("1. 字面量模式（类似 switch-case）:")
+
+    def http_status_text(code: int) -> str:
+        match code:
+            case 200:
+                return "OK"
+            case 301 | 302 | 307:            # | 表示"或"
+                return "重定向"
+            case 404:
+                return "Not Found"
+            case 500:
+                return "服务器错误"
+            case _:                           # _ 是通配符（default）
+                return "未知"
+        # 注意：不需要 break！每个 case 只执行自己的分支
+
+    for c in [200, 302, 404, 999]:
+        print(f"  HTTP {c} → {http_status_text(c)!r}")
+
+    # ── 模式 2：序列解构 ──────────────────────────────────
+    print("\n2. 序列解构模式:")
+
+    def describe_point(pt: tuple | list) -> str:
+        match pt:
+            case [0, 0]:
+                return "原点"
+            case [0, y]:
+                return f"Y 轴上的点 (y={y})"
+            case [x, 0]:
+                return f"X 轴上的点 (x={x})"
+            case [x, y]:
+                return f"坐标 ({x}, {y})"
+            case _:
+                return "不是有效的二维坐标"
+
+    test_pts = [(0, 0), (0, 5), (3, 0), (4, 7), (1, 2, 3)]
+    for pt in test_pts:
+        print(f"  {pt} → {describe_point(pt)!r}")
+
+    # ── 模式 3：映射（字典）模式 ──────────────────────────
+    print("\n3. 映射模式:")
+
+    def handle_event(event: dict) -> str:
+        match event:
+            case {"type": "click", "x": x, "y": y}:
+                return f"点击事件: ({x}, {y})"
+            case {"type": "keypress", "key": key}:
+                return f"按键事件: {key!r}"
+            case {"type": "login", "user": user, "role": "admin"}:
+                return f"管理员 {user} 登录"
+            case {"type": "login", "user": user}:
+                return f"用户 {user} 登录"
+            case _:
+                return "未知事件"
+
+    events = [
+        {"type": "click", "x": 100, "y": 200},
+        {"type": "keypress", "key": "Enter"},
+        {"type": "login", "user": "root", "role": "admin"},
+        {"type": "login", "user": "alice"},
+        {"type": "unknown"},
+    ]
+    for evt in events:
+        print(f"  {evt} → {handle_event(evt)!r}")
+
+    # ── 模式 4：守卫（if 条件）─────────────────────────────
+    print("\n4. 带守卫的模式匹配:")
+
+    def categorize_number(n: int) -> str:
+        match n:
+            case 0:
+                return "零"
+            case n if n < 0:
+                return f"负数: {n}"
+            case n if n % 2 == 0:
+                return f"正偶数: {n}"
+            case n:
+                return f"正奇数: {n}"
+
+    for n in [-5, 0, 4, 7]:
+        print(f"  {n:3d} → {categorize_number(n)!r}")
+
+    # ── 模式 5：类模式 ────────────────────────────────────
+    print("\n5. 类模式:")
+
+    class Point:
+        def __init__(self, x: int, y: int):
+            self.x = x
+            self.y = y
+
+    def where_is(pt: Point) -> str:
+        match pt:
+            case Point(x=0, y=0):
+                return "原点"
+            case Point(x=0, y=y):
+                return f"Y 轴 (y={y})"
+            case Point(x=x, y=0):
+                return f"X 轴 (x={x})"
+            case Point(x=x, y=y) if x == y:
+                return f"对角线 (x={x}, y={y})"
+            case Point():
+                return f"普通点 ({pt.x}, {pt.y})"
+
+    objs = [Point(0, 0), Point(0, 10), Point(5, 5), Point(3, 7)]
+    for obj in objs:
+        print(f"  ({obj.x}, {obj.y}) → {where_is(obj)!r}")
+
+    # ── C/C++ 对比 ────────────────────────────────────────
+    print(f"\nC/C++ 对比:")
+    print(f"  C switch: 只能匹配整数/枚举，需要 break，无解构")
+    print(f"  Python match: 可匹配任意结构，自带解构，无需 break")
+    print(f"  match 不是 switch 的简单替代，而是结构化模式匹配")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -514,6 +644,7 @@ def main() -> None:
     demo_for_loop()
     demo_break_continue_pass()
     demo_algorithms()
+    demo_match_case()
 
 
 if __name__ == "__main__":
@@ -533,7 +664,16 @@ if __name__ == "__main__":
 #     ...
 #
 # 条件表达式（三元）：值1 if 条件 else 值2
-# match-case（3.10+）：用于结构模式匹配
+#
+# ── match/case（3.10+）──
+# match value:
+#     case pattern1: ...             字面量匹配
+#     case pattern2 | pattern3: ...  "或"模式
+#     case [x, y]: ...               序列解构
+#     case {"key": v}: ...           映射解构
+#     case Class(field=val): ...     类模式
+#     case val if condition: ...     守卫
+#     case _: ...                    通配符（default）
 #
 # ── while 循环 ──
 # while 条件:

@@ -28,7 +28,7 @@ import json
 import csv
 import re
 from pathlib import Path
-from typing import Any, List, Dict, Optional
+from typing import Any, List, Dict
 from io import StringIO
 import tempfile
 
@@ -525,7 +525,7 @@ def demo_config_converter() -> None:
     def parse_ini(content: str) -> Dict[str, Dict[str, Any]]:
         """解析简单的 INI 格式配置文件。"""
         result: Dict[str, Dict[str, Any]] = {}
-        current_section: Optional[str] = None
+        current_section: str | None = None
 
         # 段落标题：[section_name]
         section_pattern = re.compile(r'^\[(\w+)\]$')
@@ -1072,14 +1072,14 @@ def exercise4_answer() -> None:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise2_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise3_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise4_answer()

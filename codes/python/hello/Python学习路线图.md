@@ -289,6 +289,29 @@
 - HMAC 带密钥哈希与 API 签名
 - 密码存储安全提示（scrypt）
 
+#### 补充 07：bytes 与 bytearray 深入
+- bytes（不可变）vs bytearray（可变）
+- 二进制数据的索引、切片、常用方法
+- 字符串与二进制的编解码（UTF-8/GBK）
+- memoryview 零拷贝操作
+
+#### 补充 08：enum 枚举
+- Enum / IntEnum / StrEnum 的定义和访问
+- auto() 自动赋值
+- Flag / IntFlag 位掩码枚举
+- match/case 联动与实用模式
+
+#### 补充 09：uuid 唯一标识符
+- uuid1 / uuid3 / uuid4 / uuid5 的区别
+- UUID 属性（hex / bytes / int）
+- 数据库主键、文件名去重、请求追踪等场景
+
+#### 补充 10：ctypes 调用 C 动态库
+- 加载 DLL/SO 并调用 C 函数
+- ctypes 类型与 C 类型映射
+- 结构体、指针与回调函数
+- Windows API 调用实操
+
 ---
 
 ### 第六阶段：并发与数据库（第 22-23 章）
@@ -520,6 +543,10 @@ python-learning/
 │   ├── chapter21_补充04_类型注解进阶.py
 │   ├── chapter21_补充05_struct二进制数据处理.py
 │   ├── chapter21_补充06_hashlib哈希与摘要.py
+│   ├── chapter21_补充07_bytes与bytearray深入.py
+│   ├── chapter21_补充08_enum枚举.py
+│   ├── chapter21_补充09_uuid唯一标识符.py
+│   ├── chapter21_补充10_ctypes调用C动态库.py
 │   └── chapter21_日志与调试.py
 │
 ├── 06_并发与数据库/

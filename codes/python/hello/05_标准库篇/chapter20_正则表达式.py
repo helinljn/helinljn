@@ -28,7 +28,7 @@
 
 import re
 import time
-from typing import Optional
+
 
 
 # =============================================================================
@@ -882,7 +882,7 @@ def extract_md_links(text: str) -> list[tuple[str, str]]:
     return re.findall(r'\[([^\]]+)\]\(([^)]+)\)', text)
 
 
-def format_phone(phone: str) -> Optional[str]:
+def format_phone(phone: str) -> str | None:
     """
     练习 3：统一格式化手机号为 +86-138-1234-5678。
 
@@ -1034,14 +1034,14 @@ def exercise4_answer() -> None:
 
 # 取消注释以运行练习：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise2_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise3_answer()
 #
-#     print("\n" + "=" * 40)
+#     print("\n" + "=" * 60)
 #     exercise4_answer()
