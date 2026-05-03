@@ -9,7 +9,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXERCISES = ROOT / "练习题与答案"
-PROJECT26 = ROOT / "07_项目实战" / "chapter26_项目2_日志分析系统"
 CHAPTER11 = ROOT / "03_模块与面向对象篇" / "chapter11_异常处理.py"
 CHAPTER21_NETWORK = ROOT / "05_标准库篇" / "chapter21_补充01_网络与HTTP基础.py"
 CHAPTER21_NUMERIC = ROOT / "05_标准库篇" / "chapter21_补充02_数学与数值工具.py"
@@ -217,64 +216,6 @@ class ComprehensiveExerciseTests(unittest.TestCase):
             self.assertEqual(queue.stats(), {"completed": 1})
         finally:
             queue.close()
-
-
-class LogAnalysisProjectTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.database = load_module("database", PROJECT26 / "database.py")
-        cls.analyzer = load_module("project26_analyzer", PROJECT26 / "analyzer.py")
-
-    def test_database_and_analyzer_integration(self):
-        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
-            db_path = f.name
-
-        db = self.database.Database(db_path)
-        try:
-            inserted = db.insert_log_batch(
-                [
-                    {
-                        "source_file": "access.log",
-                        "ip": "192.168.1.1",
-                        "timestamp": "2024-01-01 10:00:00",
-                        "method": "GET",
-                        "url": "/index.html",
-                        "protocol": "HTTP/1.1",
-                        "status_code": 200,
-                        "bytes_sent": 1000,
-                        "response_time": 0.1,
-                        "user_agent": "test",
-                        "referer": None,
-                    },
-                    {
-                        "source_file": "access.log",
-                        "ip": "192.168.1.2",
-                        "timestamp": "2024-01-01 10:05:00",
-                        "method": "POST",
-                        "url": "/api/login",
-                        "protocol": "HTTP/1.1",
-                        "status_code": 500,
-                        "bytes_sent": 500,
-                        "response_time": 1.5,
-                        "user_agent": "test",
-                        "referer": None,
-                    },
-                ]
-            )
-
-            analyzer = self.analyzer.LogAnalyzer(db, top_n=3)
-            result = analyzer.analyze(source_files=["access.log"])
-
-            self.assertEqual(inserted, 2)
-            self.assertEqual(result["basic_stats"]["total_requests"], 2)
-            self.assertEqual(result["basic_stats"]["unique_ips"], 2)
-            self.assertEqual(result["success_rate"], 50.0)
-            self.assertEqual(result["error_rate"], 50.0)
-            self.assertEqual(analyzer.get_peak_hour("access.log"), {"hour": "2024-01-01 10", "count": 2})
-            self.assertEqual(analyzer.get_slow_requests_summary(1.0, "access.log")["slow_count"], 1)
-        finally:
-            db.close()
-            Path(db_path).unlink(missing_ok=True)
 
 
 class ChapterRuntimeSmokeTests(unittest.TestCase):

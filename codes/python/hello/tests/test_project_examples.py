@@ -101,6 +101,73 @@ class FileProcessorProjectTests(unittest.TestCase):
         self.assertEqual(exit_code, 1)
 
 
+class LogAnalysisDatabaseAnalyzerTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.database = load_module(
+            "database", PROJECT26 / "database.py", PROJECT26
+        )
+        cls.analyzer = load_module(
+            "project26_analyzer", PROJECT26 / "analyzer.py", PROJECT26
+        )
+
+    def test_database_and_analyzer_integration(self):
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+            db_path = f.name
+
+        db = self.database.Database(db_path)
+        try:
+            inserted = db.insert_log_batch(
+                [
+                    {
+                        "source_file": "access.log",
+                        "ip": "192.168.1.1",
+                        "timestamp": "2024-01-01 10:00:00",
+                        "method": "GET",
+                        "url": "/index.html",
+                        "protocol": "HTTP/1.1",
+                        "status_code": 200,
+                        "bytes_sent": 1000,
+                        "response_time": 0.1,
+                        "user_agent": "test",
+                        "referer": None,
+                    },
+                    {
+                        "source_file": "access.log",
+                        "ip": "192.168.1.2",
+                        "timestamp": "2024-01-01 10:05:00",
+                        "method": "POST",
+                        "url": "/api/login",
+                        "protocol": "HTTP/1.1",
+                        "status_code": 500,
+                        "bytes_sent": 500,
+                        "response_time": 1.5,
+                        "user_agent": "test",
+                        "referer": None,
+                    },
+                ]
+            )
+
+            analyzer = self.analyzer.LogAnalyzer(db, top_n=3)
+            result = analyzer.analyze(source_files=["access.log"])
+
+            self.assertEqual(inserted, 2)
+            self.assertEqual(result["basic_stats"]["total_requests"], 2)
+            self.assertEqual(result["basic_stats"]["unique_ips"], 2)
+            self.assertEqual(result["success_rate"], 50.0)
+            self.assertEqual(result["error_rate"], 50.0)
+            self.assertEqual(
+                analyzer.get_peak_hour("access.log"),
+                {"hour": "2024-01-01 10", "count": 2},
+            )
+            self.assertEqual(
+                analyzer.get_slow_requests_summary(1.0, "access.log")["slow_count"], 1
+            )
+        finally:
+            db.close()
+            Path(db_path).unlink(missing_ok=True)
+
+
 class LogAnalyzerProjectTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

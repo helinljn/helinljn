@@ -14,9 +14,9 @@
 #
 # =============================================================================
 
-# ============================================================================
+# =============================================================================
 # 24.1 项目目录结构最佳实践
-# ============================================================================
+# =============================================================================
 
 # 标准 Python 项目结构如下（以注释形式展示）：
 #
@@ -65,9 +65,9 @@ print("=" * 60)
 print("\n--- 24.1 项目目录结构最佳实践 ---")
 
 
-# ============================================================================
+# =============================================================================
 # 24.2 模块化设计原则
-# ============================================================================
+# =============================================================================
 
 print("\n--- 24.2 模块化设计原则 ---")
 
@@ -149,9 +149,9 @@ print(f"  邮箱验证: {validate_email('invalid-email')}")
 db.close()
 
 
-# ============================================================================
+# =============================================================================
 # 24.3 PEP 8 代码规范详解
-# ============================================================================
+# =============================================================================
 
 print("\n--- 24.3 PEP 8 代码规范详解 ---")
 print("官方文档: https://peps.python.org/pep-0008/")
@@ -265,9 +265,9 @@ print(f"  字符串: {sentence1}")
 print(f"  字符串: {sentence2}")
 
 
-# ============================================================================
+# =============================================================================
 # 24.4 类型注解（Type Hints）
-# ============================================================================
+# =============================================================================
 
 print("\n--- 24.4 类型注解（Type Hints）---")
 
@@ -277,7 +277,7 @@ print("\n--- 24.4 类型注解（Type Hints）---")
 # - 配合 mypy 等工具进行静态类型检查
 # - 不影响运行时性能（纯注解，Python 不强制检查）
 
-from typing import List, Dict, Tuple, Optional, Union, Any, Callable, Set
+from typing import List, Dict, Tuple, Union, Any, Callable, Set
 from typing import TypeVar, Generic, Iterator, Generator
 
 # 24.4.1 基本类型注解
@@ -311,8 +311,8 @@ def get_unique_tags() -> Set[str]:
     return {"python", "coding", "tutorial"}
 
 # 24.4.3 Optional（可能为 None 的返回值）
-def find_user_by_id(user_id: int) -> Optional[Dict[str, str]]:
-    """Optional[X] 等价于 Union[X, None]"""
+def find_user_by_id(user_id: int) -> dict[str, str] | None:
+    """X | None 等价于 Union[X, None] (Python 3.10+)"""
     users = {1: {"name": "Alice"}, 2: {"name": "Bob"}}
     return users.get(user_id)  # 找不到时返回 None
 
@@ -332,7 +332,7 @@ def apply(func: Callable[[int, int], int], a: int, b: int) -> int:
 # 24.4.6 TypeVar（泛型）
 T = TypeVar('T')
 
-def first_element(items: List[T]) -> Optional[T]:
+def first_element(items: List[T]) -> T | None:
     """返回列表第一个元素，适用于任意类型"""
     return items[0] if items else None
 
@@ -384,9 +384,9 @@ p2 = Point(3.0, 4.0)
 print(f"  {p1} 到 {p2} 的距离: {p1.distance_to(p2)}")
 
 
-# ============================================================================
+# =============================================================================
 # 24.5 文档字符串（Docstring）规范
-# ============================================================================
+# =============================================================================
 
 print("\n--- 24.5 文档字符串规范 ---")
 
@@ -402,7 +402,7 @@ def google_style_example(
     age: int,
     scores: List[int],
     active: bool = True
-) -> Optional[str]:
+) -> str | None:
     """
     Google 风格文档字符串示例。
 
@@ -539,9 +539,9 @@ doc_lines = StudentRecord.get_average.__doc__.strip().split('\n')
 print(f"    {doc_lines[0]}")  # 打印第一行
 
 
-# ============================================================================
+# =============================================================================
 # 24.6 单元测试（unittest）
-# ============================================================================
+# =============================================================================
 
 print("\n--- 24.6 单元测试（unittest）---")
 
@@ -849,17 +849,11 @@ def run_tests():
     return result.wasSuccessful()
 
 
-print("运行单元测试:")
-print("-" * 40)
-test_success = run_tests()
-print(f"  测试{'全部通过 ✓' if test_success else '存在失败 ✗'}")
 
 
-# ============================================================================
+# =============================================================================
 # 24.7 虚拟环境（conda 与 venv）
-# ============================================================================
-
-print("\n--- 24.7 虚拟环境（conda 与 venv）---")
+# =============================================================================
 
 import sys
 import os
@@ -933,17 +927,21 @@ import os
 #   black==24.1.1
 
 # ----- 7.4 检测当前 Python 环境信息 -----
-print("当前 Python 环境信息:")
-print(f"  Python 版本: {sys.version.split()[0]}")
-print(f"  Python 解释器路径: {sys.executable}")
-print(f"  conda 环境名: {os.environ.get('CONDA_DEFAULT_ENV', '未检测到')}")
+def show_env_info() -> None:
+    """打印当前 Python 环境信息。"""
+    import sys
+    import os
+    print("当前 Python 环境信息:")
+    print(f"  Python 版本: {sys.version.split()[0]}")
+    print(f"  Python 解释器路径: {sys.executable}")
+    print(f"  conda 环境名: {os.environ.get('CONDA_DEFAULT_ENV', '未检测到')}")
 
-# 检测是否处于虚拟环境中
-in_venv = hasattr(sys, 'real_prefix') or (
-    hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
-)
-print(f"  是否在虚拟环境中: {'是' if in_venv else '否'}")
-print(f"  sys.prefix: {sys.prefix}")
+    # 检测是否处于虚拟环境中
+    in_venv = hasattr(sys, 'real_prefix') or (
+        hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
+    )
+    print(f"  是否在虚拟环境中: {'是' if in_venv else '否'}")
+    print(f"  sys.prefix: {sys.prefix}")
 
 # ----- 7.5 使用 venv 模块的 API（程序化创建虚拟环境）-----
 import venv
@@ -968,12 +966,15 @@ def create_virtual_env_info(env_path: str) -> Dict[str, str]:
     }
 
 # 展示虚拟环境路径（在临时路径上演示）
-demo_env_path = os.path.join(os.getcwd(), "demo_venv")
-env_info = create_virtual_env_info(demo_env_path)
-print("\n  虚拟环境路径示例（未实际创建）:")
-print(f"    环境目录: {env_info['env_dir']}")
-print(f"    Python:   {env_info['python']}")
-print(f"    Bin 目录: {env_info['bin_path']}")
+def show_venv_paths() -> None:
+    """演示虚拟环境路径（不实际创建）。"""
+    import os
+    demo_env_path = os.path.join(os.getcwd(), "demo_venv")
+    env_info = create_virtual_env_info(demo_env_path)
+    print("  虚拟环境路径示例（未实际创建）:")
+    print(f"    环境目录: {env_info['env_dir']}")
+    print(f"    Python:   {env_info['python']}")
+    print(f"    Bin 目录: {env_info['bin_path']}")
 
 # ----- 7.6 pip 常用命令 -----
 #
@@ -998,13 +999,10 @@ print(f"    Bin 目录: {env_info['bin_path']}")
 #   pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 
-# ============================================================================
+# =============================================================================
 # 24.8 综合实战：应用所有规范编写一个小型计算器模块
-# ============================================================================
+# =============================================================================
 
-print("\n--- 24.8 综合实战：规范化的计算器模块 ---")
-
-from typing import Optional
 import math
 
 
@@ -1231,46 +1229,57 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(len(self.calc.history), 0)
 
 
-# 演示计算器
-print("计算器模块演示:")
-calc = Calculator(precision=4)
 
-try:
-    print(f"  3 + 4 = {calc.add(3, 4)}")
-    print(f"  10.5 - 3.2 = {calc.subtract(10.5, 3.2)}")
-    print(f"  6 × 7 = {calc.multiply(6, 7)}")
-    print(f"  22 ÷ 7 = {calc.divide(22, 7)}")
-    print(f"  √2 = {calc.sqrt(2)}")
-    print(f"  2^10 = {calc.power(2, 10)}")
-    print(f"  1 ÷ 0 = ", end="")
-    calc.divide(1, 0)
-except DivisionByZeroError as e:
-    print(f"错误: {e}")
-
-print("\n计算历史:")
-calc.print_history()
-
-# 运行计算器测试
-print("\n运行计算器单元测试:")
-print("-" * 40)
-calc_suite = unittest.TestLoader().loadTestsFromTestCase(TestCalculator)
-calc_runner = unittest.TextTestRunner(verbosity=1)
-calc_result = calc_runner.run(calc_suite)
-total = calc_result.testsRun
-passed = total - len(calc_result.failures) - len(calc_result.errors)
-print(f"\n  计算器测试: {passed}/{total} 通过")
-
-
-# ============================================================================
-# ============================================================================
+# =============================================================================
 # 【语法总结】
-# ============================================================================
+# =============================================================================
 
-print("\n" + "=" * 60)
-print("第 24 章总结")
-print("=" * 60)
+def main() -> None:
+    """运行本章所有演示内容。"""
+    print("运行单元测试:")
+    print("-" * 60)
+    test_success = run_tests()
+    print(f"  测试{'全部通过 ✓' if test_success else '存在失败 ✗'}")
 
-summary = """
+    print("\n--- 24.7 虚拟环境（conda 与 venv）---")
+    show_env_info()
+    show_venv_paths()
+
+    print("\n--- 24.8 综合实战：规范化的计算器模块 ---")
+    # 演示计算器
+    print("计算器模块演示:")
+    calc = Calculator(precision=4)
+
+    try:
+        print(f"  3 + 4 = {calc.add(3, 4)}")
+        print(f"  10.5 - 3.2 = {calc.subtract(10.5, 3.2)}")
+        print(f"  6 × 7 = {calc.multiply(6, 7)}")
+        print(f"  22 ÷ 7 = {calc.divide(22, 7)}")
+        print(f"  √2 = {calc.sqrt(2)}")
+        print(f"  2^10 = {calc.power(2, 10)}")
+        print(f"  1 ÷ 0 = ", end="")
+        calc.divide(1, 0)
+    except DivisionByZeroError as e:
+        print(f"错误: {e}")
+
+    print("\n计算历史:")
+    calc.print_history()
+
+    # 运行计算器测试
+    print("\n运行计算器单元测试:")
+    print("-" * 60)
+    calc_suite = unittest.TestLoader().loadTestsFromTestCase(TestCalculator)
+    calc_runner = unittest.TextTestRunner(verbosity=1)
+    calc_result = calc_runner.run(calc_suite)
+    total = calc_result.testsRun
+    passed = total - len(calc_result.failures) - len(calc_result.errors)
+    print(f"\n  计算器测试: {passed}/{total} 通过")
+
+    print("\n" + "=" * 60)
+    print("第 24 章总结")
+    print("=" * 60)
+
+    summary = """
 1. 项目目录结构
    - 标准结构：src 包目录 + tests/ + docs/ + README.md
    - 小型项目：main.py + utils.py 即可
@@ -1292,7 +1301,7 @@ summary = """
 4. 类型注解（Type Hints）
    - 基本类型：int, str, float, bool
    - 容器：List[T], Dict[K, V], Tuple, Set
-   - 特殊：Optional[T], Union[A, B], Callable, Any
+   - 特殊：T | None, Union[A, B], Callable, Any
    - Python 3.9+：直接用 list[int], dict[str, int]
    - 配合 mypy 进行静态检查
 
@@ -1315,12 +1324,12 @@ summary = """
    - venv 激活：Windows: venv\\Scripts\\activate
    - pip 依赖导出：pip freeze > requirements.txt
 """
-print(summary)
+    print(summary)
 
 
-# ============================================================================
+# =============================================================================
 # 【小练习】
-# ============================================================================
+# =============================================================================
 #
 # 练习 1（基础）：
 #   设计一个小型项目目录结构，至少包含 README.md、main.py、config.py、
@@ -1345,9 +1354,9 @@ print(summary)
 #   练习3：移动代码时保持导入方向清晰，业务模块不要依赖 main.py
 
 
-# ============================================================================
+# =============================================================================
 # 【练习答案】
-# ============================================================================
+# =============================================================================
 
 def exercise1_answer() -> None:
     """练习 1：项目目录结构示例。"""
@@ -1395,13 +1404,16 @@ def exercise3_answer() -> None:
     print("原则：核心模块保持可导入、可测试；入口文件只做流程编排。")
 
 
+if __name__ == "__main__":
+    main()
+
 # 取消注释以运行练习答案：
 # if __name__ == "__main__":
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise1_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise2_answer()
 #
-#     print("=" * 40)
+#     print("=" * 60)
 #     exercise3_answer()
