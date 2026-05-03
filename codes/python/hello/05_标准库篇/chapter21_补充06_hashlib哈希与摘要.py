@@ -20,6 +20,7 @@
 
 import hashlib
 import hmac
+import os
 from pathlib import Path
 from typing import Any
 

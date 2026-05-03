@@ -9,11 +9,50 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXERCISES = ROOT / "练习题与答案"
-CHAPTER11 = ROOT / "03_模块与面向对象篇" / "chapter11_异常处理.py"
-CHAPTER21_NETWORK = ROOT / "05_标准库篇" / "chapter21_补充01_网络与HTTP基础.py"
-CHAPTER21_NUMERIC = ROOT / "05_标准库篇" / "chapter21_补充02_数学与数值工具.py"
-CHAPTER21_FILE_TOOLS = ROOT / "05_标准库篇" / "chapter21_补充03_文件目录工具.py"
-CHAPTER21_TYPING = ROOT / "05_标准库篇" / "chapter21_补充04_类型注解进阶.py"
+
+# (module_key, relative_path, expected_first_section_header)
+CHAPTER_SMOKE_DATA = [
+    # 01_基础篇
+    ("ch01", "01_基础篇/chapter01_入门与环境.py", "第 1 章综合演示"),
+    ("ch02", "01_基础篇/chapter02_基础语法与数据类型.py", "2.1 变量与动态类型"),
+    ("ch03", "01_基础篇/chapter03_控制流程.py", "3.1 条件语句（if-elif-else）"),
+    ("ch04", "01_基础篇/chapter04_字符串处理.py", "4.1 字符串基础"),
+    ("ch05", "01_基础篇/chapter05_容器数据类型.py", "5.1 列表（list）"),
+    # 02_函数篇
+    ("ch06", "02_函数篇/chapter06_函数基础.py", "6.1 函数定义与调用"),
+    ("ch07", "02_函数篇/chapter07_函数进阶.py", "7.1 Lambda 匿名函数"),
+    # 03_模块与面向对象篇
+    ("ch08", "03_模块与面向对象篇/chapter08_模块与包.py", "8.1 模块基础"),
+    ("ch09", "03_模块与面向对象篇/chapter09_面向对象基础.py", "9.1 类和对象基础"),
+    ("ch10", "03_模块与面向对象篇/chapter10_面向对象进阶.py", "10.1 继承基础"),
+    ("ch11", "03_模块与面向对象篇/chapter11_异常处理.py", "11.1 异常基础"),
+    # 04_高级特性篇
+    ("ch12", "04_高级特性篇/chapter12_文件操作.py", "12.1 文件基础操作"),
+    ("ch13", "04_高级特性篇/chapter13_迭代器与生成器.py", "13.1 可迭代对象 vs 迭代器"),
+    ("ch14", "04_高级特性篇/chapter14_装饰器详解.py", "14.1 装饰器基础回顾"),
+    # 05_标准库篇
+    ("ch15", "05_标准库篇/chapter15_系统与环境.py", "15.1 sys 模块：系统参数与标准流"),
+    ("ch16", "05_标准库篇/chapter16_文本处理.py", "16.1 json 模块：JSON 数据处理"),
+    ("ch17", "05_标准库篇/chapter17_日期与时间.py", "17.1 datetime.date：纯日期"),
+    ("ch18", "05_标准库篇/chapter18_数据结构工具.py", "18.1 collections.Counter：计数器"),
+    ("ch19", "05_标准库篇/chapter19_函数式编程工具.py", "19.1 operator 模块：将运算符变成函数"),
+    ("ch20", "05_标准库篇/chapter20_正则表达式.py", "20.1 正则表达式基础：元字符与字符类"),
+    ("ch21", "05_标准库篇/chapter21_日志与调试.py", "21.1 logging 模块基础：日志级别与快速入门"),
+    # 06_并发与数据库
+    ("ch22", "06_并发与数据库/chapter22_并发编程入门.py", "22.1 并发基础概念"),
+    ("ch23", "06_并发与数据库/chapter23_数据库操作.py", "23.1 数据库基础概念"),
+    # ch21 补充
+    ("ch21_supp01", "05_标准库篇/chapter21_补充01_网络与HTTP基础.py", "21.补充1.1 URL 解析与构造"),
+    ("ch21_supp02", "05_标准库篇/chapter21_补充02_数学与数值工具.py", "21.补充2.1 math 模块"),
+    ("ch21_supp03", "05_标准库篇/chapter21_补充03_文件目录工具.py", "21.补充3.1 glob 文件查找"),
+    ("ch21_supp04", "05_标准库篇/chapter21_补充04_类型注解进阶.py", "21.补充4.1 Optional、Union、Literal"),
+    ("ch21_supp05", "05_标准库篇/chapter21_补充05_struct二进制数据处理.py", "21.补充5.1 struct 基础：pack 与 unpack"),
+    ("ch21_supp06", "05_标准库篇/chapter21_补充06_hashlib哈希与摘要.py", "21.补充6.1 hashlib 基础：MD5、SHA1、SHA256"),
+    ("ch21_supp07", "05_标准库篇/chapter21_补充07_bytes与bytearray深入.py", "21.补充7.1 bytes 基础"),
+    ("ch21_supp08", "05_标准库篇/chapter21_补充08_enum枚举.py", "21.补充8.1 Enum 基础"),
+    ("ch21_supp09", "05_标准库篇/chapter21_补充09_uuid唯一标识符.py", "21.补充9.1 UUID 类型与生成"),
+    ("ch21_supp10", "05_标准库篇/chapter21_补充10_ctypes调用C动态库.py", "21.补充10.1 ctypes 基础：加载库与简单调用"),
+]
 
 
 def load_module(module_name: str, module_path: Path):
@@ -219,31 +258,45 @@ class ComprehensiveExerciseTests(unittest.TestCase):
 
 
 class ChapterRuntimeSmokeTests(unittest.TestCase):
+    """烟雾测试：验证所有章节的 main() 能完整跑通，不校验具体业务逻辑。"""
+
     @classmethod
     def setUpClass(cls):
-        cls.chapter11 = load_module("chapter11_exceptions", CHAPTER11)
-        cls.chapter21_network = load_module("chapter21_network", CHAPTER21_NETWORK)
-        cls.chapter21_numeric = load_module("chapter21_numeric", CHAPTER21_NUMERIC)
-        cls.chapter21_file_tools = load_module("chapter21_file_tools", CHAPTER21_FILE_TOOLS)
-        cls.chapter21_typing = load_module("chapter21_typing", CHAPTER21_TYPING)
+        cls.chapters = {}
+        for key, rel_path, _header in CHAPTER_SMOKE_DATA:
+            module_name = key.replace("ch21_supp", "chapter21_supplement")
+            with redirect_stdout(io.StringIO()):
+                cls.chapters[key] = load_module(module_name, ROOT / rel_path)
+
+    def test_all_chapters_main_runs(self):
+        """验证 ch01~ch23 及 ch21 全部补充章节的 main() 不崩溃且输出首节标题。"""
+        for key, _rel_path, expected_header in CHAPTER_SMOKE_DATA:
+            with self.subTest(chapter=key, header=expected_header):
+                output = io.StringIO()
+                try:
+                    with redirect_stdout(output):
+                        self.chapters[key].main()
+                except SystemExit:
+                    pass
+                text = output.getvalue()
+                self.assertIn(expected_header, text,
+                    f"{key} 的 main() 输出中未找到节标题 '{expected_header}'")
+
+    # ── 以下是对特定章节的深度烟雾测试（校验多个输出点） ──
 
     def test_chapter11_new_exception_sections_run(self):
         buffer = io.StringIO()
-
         with redirect_stdout(buffer):
-            self.chapter11.demo_exception_best_practices()
-            self.chapter11.demo_exception_group()
-
+            self.chapters["ch11"].demo_exception_best_practices()
+            self.chapters["ch11"].demo_exception_group()
         output = buffer.getvalue()
         self.assertIn("11.7 异常处理最佳实践", output)
         self.assertIn("11.8 ExceptionGroup", output)
 
     def test_chapter21_network_demos_run_locally(self):
         output = io.StringIO()
-
         with redirect_stdout(output):
-            self.chapter21_network.main()
-
+            self.chapters["ch21_supp01"].main()
         text = output.getvalue()
         self.assertIn("21.补充1.1 URL 解析与构造", text)
         self.assertIn("/health 响应", text)
@@ -251,46 +304,29 @@ class ChapterRuntimeSmokeTests(unittest.TestCase):
 
     def test_chapter21_numeric_supplement_runs(self):
         output = io.StringIO()
-
         with redirect_stdout(output):
-            self.chapter21_numeric.main()
-
+            self.chapters["ch21_supp02"].main()
         text = output.getvalue()
         self.assertIn("21.补充2.1 math 模块", text)
-        self.assertEqual(round(self.chapter21_numeric.distance(0, 0, 3, 4), 2), 5.0)
-        self.assertEqual(str(self.chapter21_numeric.split_bill("10.00", 4)), "2.50")
+        self.assertEqual(round(self.chapters["ch21_supp02"].distance(0, 0, 3, 4), 2), 5.0)
+        self.assertEqual(str(self.chapters["ch21_supp02"].split_bill("10.00", 4)), "2.50")
 
     def test_chapter21_file_tools_supplement_runs(self):
         output = io.StringIO()
-
         with redirect_stdout(output):
-            self.chapter21_file_tools.main()
-
+            self.chapters["ch21_supp03"].main()
         text = output.getvalue()
         self.assertIn("21.补充3.1 glob 文件查找", text)
         self.assertIn("离开 with 后临时目录会自动清理", text)
 
     def test_chapter21_typing_supplement_runs(self):
         output = io.StringIO()
-
         with redirect_stdout(output):
-            self.chapter21_typing.main()
-
+            self.chapters["ch21_supp04"].main()
         text = output.getvalue()
         self.assertIn("21.补充4.1 Optional、Union、Literal", text)
-        self.assertEqual(self.chapter21_typing.last_or_none([1, 2, 3]), 3)
-        self.assertIsNone(self.chapter21_typing.last_or_none([]))
-
-    def test_chapter11_main_runs(self):
-        buffer = io.StringIO()
-
-        with redirect_stdout(buffer):
-            self.chapter11.main()
-
-        output = buffer.getvalue()
-        self.assertIn("11.1 异常基础", output)
-        self.assertIn("11.7 异常处理最佳实践", output)
-        self.assertIn("11.8 ExceptionGroup", output)
+        self.assertEqual(self.chapters["ch21_supp04"].last_or_none([1, 2, 3]), 3)
+        self.assertIsNone(self.chapters["ch21_supp04"].last_or_none([]))
 
 
 if __name__ == "__main__":
