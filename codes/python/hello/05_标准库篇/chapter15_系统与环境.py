@@ -33,7 +33,7 @@ import platform
 import subprocess
 import argparse
 from pathlib import Path
-from typing import List, Any
+from typing import Any
 
 
 # =============================================================================
@@ -438,7 +438,7 @@ def demo_argparse_module() -> None:
     # ── 手动解析模拟参数 ─────────────────────────────────
     print("2. 模拟解析各种参数:")
 
-    test_cases: List[List[str]] = [
+    test_cases: list[list[str]] = [
         ["input.txt"],
         ["data.csv", "-o", "result.txt", "-v", "--format", "json"],
         ["log.txt", "-n", "100", "-q", "-q", "--exclude", "DEBUG", "INFO"],
@@ -751,7 +751,7 @@ if __name__ == "__main__":
 import tempfile
 
 
-def find_txt_files(directory: str) -> List[str]:
+def find_txt_files(directory: str) -> list[str]:
     """
     练习 1：返回目录中所有 .txt 文件的完整路径列表（已排序，不区分大小写）。
 
@@ -846,7 +846,7 @@ def head_command(args: argparse.Namespace) -> None:
 
 # ── 练习 3：带超时的命令执行 ─────────────────────────────────────────────────
 
-def run_with_timeout(cmd: List[str], timeout_sec: float) -> str | None:
+def run_with_timeout(cmd: list[str], timeout_sec: float) -> str | None:
     """
     练习 3：运行外部命令，超时或出错时返回 None。
 

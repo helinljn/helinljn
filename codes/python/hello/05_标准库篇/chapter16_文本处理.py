@@ -1,5 +1,5 @@
 # =============================================================================
-# 第 16 章：文本处理（json、csv、re、tomllib）
+# 第 16 章：文本处理（json、csv、re、configparser、tomllib）
 # =============================================================================
 #
 # 【学习目标】
@@ -13,6 +13,7 @@
 #   json:  处理 JSON 格式数据，与 Web API 交互、配置文件
 #   csv:   处理表格数据，Excel 导入导出、数据分析
 #   re:    文本模式匹配、数据提取、字符串验证
+#   configparser: 读写 INI 配置文件
 #   tomllib: 解析 TOML 配置文件（Python 3.11+ 新增）
 #
 # 【与 C/C++ 的对比】
@@ -28,7 +29,7 @@ import json
 import csv
 import re
 from pathlib import Path
-from typing import Any, List, Dict
+from typing import Any
 from io import StringIO
 import tempfile
 
@@ -522,7 +523,7 @@ def demo_config_converter() -> None:
     print("输入（INI 格式）:")
     print(ini_content)
 
-    def parse_ini(content: str) -> Dict[str, Dict[str, Any]]:
+    def parse_ini(content: str) -> dict[str, dict[str, Any]]:
         """解析简单的 INI 格式配置文件。"""
         result: Dict[str, Dict[str, Any]] = {}
         current_section: str | None = None
@@ -720,6 +721,79 @@ def _print_toml_guide() -> None:
 
 
 # =============================================================================
+# 16.8 configparser 模块：INI 配置文件
+# =============================================================================
+
+def demo_configparser() -> None:
+    """演示 configparser 模块读写 INI 配置文件。"""
+    import configparser
+
+    print("=" * 60)
+    print("16.8 configparser 模块：INI 配置文件")
+    print("=" * 60)
+
+    # ── 创建并写入 INI 配置 ─────────────────────────────────
+    config = configparser.ConfigParser()
+
+    config["DEFAULT"] = {
+        "host": "localhost",
+        "port": "8080",
+        "debug": "false",
+    }
+    config["database"] = {
+        "host": "db.example.com",
+        "port": "5432",
+        "name": "myapp",
+        "user": "admin",
+    }
+    config["logging"] = {
+        "level": "INFO",
+        "file": "/var/log/myapp.log",
+    }
+
+    # 写入文件
+    import tempfile
+    tmp = tempfile.NamedTemporaryFile(mode="w+", suffix=".ini", delete=False, encoding="utf-8")
+    config.write(tmp)
+    tmp.close()
+
+    print("写入的 INI 文件内容：")
+    with open(tmp.name, encoding="utf-8") as f:
+        print(f.read())
+
+    # ── 读取 INI 配置 ───────────────────────────────────────
+    reader = configparser.ConfigParser()
+    reader.read(tmp.name)
+    import os
+    os.unlink(tmp.name)
+
+    print(f"sections = {reader.sections()}")
+    print(f"defaults = {{k: v for k, v in reader['DEFAULT'].items()}}")
+
+    # 读取值（DEFAULT 节的键会在其他节中自动继承）
+    print(f"\n读取键值：")
+    print(f"  database.host = {reader['database']['host']!r}")
+    print(f"  database.port = {reader.getint('database', 'port')!r}")
+    print(f"  database.debug = {reader.getboolean('database', 'debug')!r}  (继承自 DEFAULT)")
+
+    # ── 类型感知方法 ────────────────────────────────────────
+    print(f"\n类型方法：")
+    print(f"  getint()       = {reader.getint('database', 'port')}")
+    print(f"  getfloat()     = {reader.getfloat('database', 'port')}")
+    print(f"  getboolean()   = {reader.getboolean('database', 'debug')}")
+
+    # fallback 默认值
+    print(f"\nfallback 默认值：")
+    print(f"  get('logging', 'format', fallback='%(message)s') "
+          f"= {reader.get('logging', 'format', fallback='%(message)s')!r}")
+
+    # ── 修改与写回 ──────────────────────────────────────────
+    print(f"\n修改值：")
+    reader["database"]["max_connections"] = "100"
+    print(f"  database.max_connections = {reader['database']['max_connections']!r}")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -732,6 +806,7 @@ def main() -> None:
     demo_log_parsing()
     demo_config_converter()
     demo_toml_module()  # Python 3.11+
+    demo_configparser()
 
 
 if __name__ == "__main__":
@@ -937,7 +1012,7 @@ def csv_column_avg(csv_text: str, column: str) -> float:
     return sum(values) / len(values) if values else 0.0
 
 
-def extract_links(html: str) -> List[str]:
+def extract_links(html: str) -> list[str]:
     """
     练习 3：从 HTML 文本中提取所有超链接地址，返回去重后的有序列表。
 
@@ -957,7 +1032,7 @@ def extract_links(html: str) -> List[str]:
     return list(sorted(set(links)))
 
 
-def extract_contacts(text: str) -> Dict[str, List[str]]:
+def extract_contacts(text: str) -> dict[str, list[str]]:
     """
     练习 4：从文本中提取所有手机号和邮箱，去重后以字典返回。
 

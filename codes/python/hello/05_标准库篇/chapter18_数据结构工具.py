@@ -777,6 +777,58 @@ def demo_grade_analysis() -> None:
 
 
 # =============================================================================
+# 18.9 collections.ChainMap：链式字典
+# =============================================================================
+
+def demo_chainmap() -> None:
+    """演示 collections.ChainMap 的用法。"""
+    print("=" * 60)
+    print("18.9 collections.ChainMap：链式字典")
+    print("=" * 60)
+
+    # ChainMap 将多个 dict 串联成一个逻辑视图，按顺序查找
+    # 典型场景：配置层级覆盖（命令行 > 配置文件 > 默认值）
+
+    defaults = {"host": "localhost", "port": 8080, "debug": False}
+    file_config = {"host": "db.example.com", "port": 5432}
+    cli_args = {"debug": True}
+
+    # 查找优先级：cli_args → file_config → defaults
+    config = collections.ChainMap(cli_args, file_config, defaults)
+
+    print(f"ChainMap({list(config.maps)}):")
+    print(f"  host  = {config['host']!r}    (来自 file_config)")
+    print(f"  port  = {config['port']}       (来自 file_config)")
+    print(f"  debug = {config['debug']}      (来自 cli_args)")
+
+    # ── 修改总是作用于第一个映射 ───────────────────────────
+    print(f"\n修改 ChainMap（写入第一个映射）：")
+    config["port"] = 3306
+    print(f"  cli_args = {cli_args}  ← 新增了 port")
+    print(f"  defaults = {defaults}  (未受影响)")
+    print(f"  config['port'] = {config['port']}")
+
+    # ── child.parents：跳过第一个映射查看后续 ────────────────
+    print(f"\nparents 属性（跳过 cli_args）：")
+    print(f"  config.parents['host'] = {config.parents['host']!r}")
+
+    # ── new_child()：在链前端追加新层 ─────────────────────
+    print(f"\nnew_child() 追加临时覆盖层：")
+    overrides = {"port": 9999}
+    config2 = config.new_child(overrides)
+    print(f"  port = {config2['port']}  (来自 overrides)")
+
+    # ── 实用场景：合并同名配置键 ────────────────────────────
+    print(f"\n实用场景 — 合并环境配置：")
+    default = {"env": "prod", "retry": "3", "timeout": "30"}
+    dev = {"env": "dev", "timeout": "60"}
+    config_chain = collections.ChainMap(dev, default)
+    print(f"  ChainMap(dev, default) =")
+    for k in ["env", "retry", "timeout"]:
+        print(f"    {k} = {config_chain[k]!r}")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -789,6 +841,7 @@ def main() -> None:
     demo_namedtuple()
     demo_itertools()
     demo_functools()
+    demo_chainmap()
     demo_grade_analysis()
 
 

@@ -14,6 +14,15 @@
 #
 # =============================================================================
 
+import math
+import os
+import re
+import sys
+import unittest
+import venv
+from typing import Any, Callable, TypeVar
+
+
 # =============================================================================
 # 24.1 项目目录结构最佳实践
 # =============================================================================
@@ -59,17 +68,18 @@
 # ├── main.py                # 主程序
 # └── utils.py               # 工具函数
 
-print("=" * 60)
-print("第 24 章：代码组织与规范")
-print("=" * 60)
-print("\n--- 24.1 项目目录结构最佳实践 ---")
+
+def demo_section_1() -> None:
+    """演示 24.1 项目目录结构最佳实践。"""
+    print("=" * 60)
+    print("第 24 章：代码组织与规范")
+    print("=" * 60)
+    print("\n--- 24.1 项目目录结构最佳实践 ---")
 
 
 # =============================================================================
 # 24.2 模块化设计原则
 # =============================================================================
-
-print("\n--- 24.2 模块化设计原则 ---")
 
 # 模块化设计的四大核心原则：
 #
@@ -128,7 +138,6 @@ def format_date(year: int, month: int, day: int) -> str:
 
 def validate_email(email: str) -> bool:
     """验证邮箱格式"""
-    import re
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return bool(re.match(pattern, email))
 
@@ -138,23 +147,24 @@ def validate_email(email: str) -> bool:
 # __all__ = ['AppConfig', 'SimpleDatabase', 'format_date', 'validate_email']
 # __version__ = '1.0.0'
 
-# 演示模块化设计
-print("模块化设计演示:")
-config = AppConfig.from_file("app.ini")
-db = SimpleDatabase(AppConfig.DATABASE_URL)
-db.connect()
-print(f"  日期格式化: {format_date(2024, 1, 15)}")
-print(f"  邮箱验证: {validate_email('user@example.com')}")
-print(f"  邮箱验证: {validate_email('invalid-email')}")
-db.close()
+
+def demo_section_2() -> None:
+    """演示 24.2 模块化设计原则。"""
+    print("\n--- 24.2 模块化设计原则 ---")
+
+    print("模块化设计演示:")
+    config = AppConfig.from_file("app.ini")
+    db = SimpleDatabase(AppConfig.DATABASE_URL)
+    db.connect()
+    print(f"  日期格式化: {format_date(2024, 1, 15)}")
+    print(f"  邮箱验证: {validate_email('user@example.com')}")
+    print(f"  邮箱验证: {validate_email('invalid-email')}")
+    db.close()
 
 
 # =============================================================================
 # 24.3 PEP 8 代码规范详解
 # =============================================================================
-
-print("\n--- 24.3 PEP 8 代码规范详解 ---")
-print("官方文档: https://peps.python.org/pep-0008/")
 
 # 24.3.1 缩进：使用 4 个空格（禁止使用 Tab）
 
@@ -208,8 +218,6 @@ class GoodClassName:
 def good_function_name():
     pass
 
-good_variable_name = 42
-
 # 常量：全大写 + 下划线
 MAX_SIZE = 1000
 DEFAULT_ENCODING = "utf-8"
@@ -231,12 +239,8 @@ class NamingConventions:
 # 24.3.6 空格使用规范
 
 # ✓ 赋值、算术、比较运算符两边各一个空格
-correct_spacing = 1 + 2
-is_valid = correct_spacing > 0
 
 # ✓ 逗号后一个空格，冒号后一个空格
-coord_list = [1, 2, 3]
-info_dict = {"key": "value"}
 
 # ✓ 函数默认参数的 = 两边不加空格
 def connect(host, port=8080, timeout=30):
@@ -251,25 +255,39 @@ def connect(host, port=8080, timeout=30):
 # Python 中单引号和双引号等价，选择一种并保持一致
 # 推荐：优先使用双引号（与其他语言一致）
 
-name = "Alice"
-greeting = f"Hello, {name}!"
-
 # 包含单引号时用双引号，包含双引号时用单引号（避免转义）
-sentence1 = "It's a beautiful day"
-sentence2 = 'She said "hello"'
 
-print("\nPEP 8 规范演示:")
-pep8_indentation_demo()
-print(f"  命名规范示例: MAX_SIZE={MAX_SIZE}, DEFAULT_ENCODING={DEFAULT_ENCODING}")
-print(f"  字符串: {sentence1}")
-print(f"  字符串: {sentence2}")
+
+def demo_section_3() -> None:
+    """演示 24.3 PEP 8 代码规范。"""
+    print("\n--- 24.3 PEP 8 代码规范详解 ---")
+    print("官方文档: https://peps.python.org/pep-0008/")
+
+    # 命名规范教学示例变量
+    good_variable_name = 42  # 函数名、变量名：小写 + 下划线（snake_case）
+
+    # 空格使用规范示例
+    correct_spacing = 1 + 2
+    is_valid = correct_spacing > 0
+    coord_list = [1, 2, 3]
+    info_dict = {"key": "value"}
+
+    # 字符串引号示例
+    name = "Alice"
+    greeting = f"Hello, {name}!"
+    sentence1 = "It's a beautiful day"
+    sentence2 = 'She said "hello"'
+
+    print("\nPEP 8 规范演示:")
+    pep8_indentation_demo()
+    print(f"  命名规范示例: MAX_SIZE={MAX_SIZE}, DEFAULT_ENCODING={DEFAULT_ENCODING}")
+    print(f"  字符串: {sentence1}")
+    print(f"  字符串: {sentence2}")
 
 
 # =============================================================================
 # 24.4 类型注解（Type Hints）
 # =============================================================================
-
-print("\n--- 24.4 类型注解（Type Hints）---")
 
 # 类型注解（PEP 484，Python 3.5+）的作用：
 # - 提升 IDE 代码补全和错误检测能力
@@ -277,38 +295,44 @@ print("\n--- 24.4 类型注解（Type Hints）---")
 # - 配合 mypy 等工具进行静态类型检查
 # - 不影响运行时性能（纯注解，Python 不强制检查）
 
-from typing import List, Dict, Tuple, Union, Any, Callable, Set
-from typing import TypeVar, Generic, Iterator, Generator
-
 # 24.4.1 基本类型注解
 def greet(name: str) -> str:
     return f"Hello, {name}!"
 
+
 def add(a: int, b: int) -> int:
     return a + b
+
 
 def divide(a: float, b: float) -> float:
     return a / b
 
+
 def is_positive(n: int) -> bool:
     return n > 0
+
 
 # 返回 None 的函数
 def print_message(msg: str) -> None:
     print(f"  [消息] {msg}")
 
+
 # 24.4.2 容器类型注解
-def sum_numbers(numbers: List[int]) -> int:
+def sum_numbers(numbers: list[int]) -> int:
     return sum(numbers)
 
-def get_user() -> Dict[str, str]:
+
+def get_user() -> dict[str, str]:
     return {"name": "Alice", "role": "admin"}
 
-def get_point() -> Tuple[float, float]:
+
+def get_point() -> tuple[float, float]:
     return (3.14, 2.71)
 
-def get_unique_tags() -> Set[str]:
+
+def get_unique_tags() -> set[str]:
     return {"python", "coding", "tutorial"}
+
 
 # 24.4.3 Optional（可能为 None 的返回值）
 def find_user_by_id(user_id: int) -> dict[str, str] | None:
@@ -316,10 +340,12 @@ def find_user_by_id(user_id: int) -> dict[str, str] | None:
     users = {1: {"name": "Alice"}, 2: {"name": "Bob"}}
     return users.get(user_id)  # 找不到时返回 None
 
+
 # 24.4.4 Union（多种可能的类型）
-def stringify(value: Union[int, float, bool]) -> str:
+def stringify(value: int | float | bool) -> str:
     """将数值类型转换为字符串"""
     return str(value)
+
 
 # Python 3.10+ 可以用 | 语法代替 Union
 # def stringify(value: int | float | bool) -> str:
@@ -329,12 +355,15 @@ def apply(func: Callable[[int, int], int], a: int, b: int) -> int:
     """接受一个二元整数函数并应用它"""
     return func(a, b)
 
+
 # 24.4.6 TypeVar（泛型）
 T = TypeVar('T')
 
-def first_element(items: List[T]) -> T | None:
+
+def first_element(items: list[T]) -> T | None:
     """返回列表第一个元素，适用于任意类型"""
     return items[0] if items else None
+
 
 # 24.4.7 Python 3.9+ 新语法（直接使用内置类型）
 # Python 3.9+ 无需从 typing 导入 List/Dict/Tuple/Set
@@ -344,9 +373,11 @@ def modern_sum(numbers: list[int]) -> int:
     """Python 3.9+ 风格的类型注解"""
     return sum(numbers)
 
+
 def modern_lookup(data: dict[str, list[int]], key: str) -> list[int]:
     """嵌套的容器类型注解"""
     return data.get(key, [])
+
 
 # 24.4.8 类型注解在类中的使用
 class Point:
@@ -360,35 +391,37 @@ class Point:
 
     def distance_to(self, other: 'Point') -> float:
         """计算到另一个点的距离"""
-        import math
         return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
     def __repr__(self) -> str:
         return f"Point({self.x}, {self.y})"
 
+
 # 24.4.9 使用 reveal_type（仅供 mypy 静态检查，运行时需注释掉）
 # reveal_type(greet("Alice"))  # mypy 会输出推断的类型
 
-# 演示
-print("类型注解演示:")
-print(f"  greet: {greet('World')}")
-print(f"  add: {add(3, 4)}")
-print(f"  find_user_by_id(1): {find_user_by_id(1)}")
-print(f"  find_user_by_id(99): {find_user_by_id(99)}")
-print(f"  apply(add, 10, 20): {apply(add, 10, 20)}")
-print(f"  first_element([1,2,3]): {first_element([1, 2, 3])}")
-print(f"  first_element([]): {first_element([])}")
 
-p1 = Point(0.0, 0.0)
-p2 = Point(3.0, 4.0)
-print(f"  {p1} 到 {p2} 的距离: {p1.distance_to(p2)}")
+def demo_section_4() -> None:
+    """演示 24.4 类型注解（Type Hints）。"""
+    print("\n--- 24.4 类型注解（Type Hints）---")
+
+    print("类型注解演示:")
+    print(f"  greet: {greet('World')}")
+    print(f"  add: {add(3, 4)}")
+    print(f"  find_user_by_id(1): {find_user_by_id(1)}")
+    print(f"  find_user_by_id(99): {find_user_by_id(99)}")
+    print(f"  apply(add, 10, 20): {apply(add, 10, 20)}")
+    print(f"  first_element([1,2,3]): {first_element([1, 2, 3])}")
+    print(f"  first_element([]): {first_element([])}")
+
+    p1 = Point(0.0, 0.0)
+    p2 = Point(3.0, 4.0)
+    print(f"  {p1} 到 {p2} 的距离: {p1.distance_to(p2)}")
 
 
 # =============================================================================
 # 24.5 文档字符串（Docstring）规范
 # =============================================================================
-
-print("\n--- 24.5 文档字符串规范 ---")
 
 # Python 常见文档字符串风格：
 # 1. Google 风格（推荐，简洁易读）
@@ -400,7 +433,7 @@ print("\n--- 24.5 文档字符串规范 ---")
 def google_style_example(
     name: str,
     age: int,
-    scores: List[int],
+    scores: list[int],
     active: bool = True
 ) -> str | None:
     """
@@ -472,7 +505,7 @@ class StudentRecord:
         """
         self.name = name
         self.student_id = student_id
-        self.scores: Dict[str, float] = {}
+        self.scores: dict[str, float] = {}
 
     def add_score(self, subject: str, score: float) -> None:
         """
@@ -522,31 +555,29 @@ class StudentRecord:
         return f"StudentRecord(name={self.name!r}, id={self.student_id!r})"
 
 
-# 演示文档字符串
-print("文档字符串演示:")
-result = google_style_example("Alice", 25, [90, 85, 92])
-print(f"  google_style_example: {result}")
+def demo_section_5() -> None:
+    """演示 24.5 文档字符串规范。"""
+    print("\n--- 24.5 文档字符串规范 ---")
 
-student = StudentRecord("Bob", "S001")
-student.add_score("数学", 88)
-student.add_score("英语", 92)
-student.add_score("Python", 95)
-print(student.get_report())
+    print("文档字符串演示:")
+    result = google_style_example("Alice", 25, [90, 85, 92])
+    print(f"  google_style_example: {result}")
 
-# 访问文档字符串
-print(f"\n  函数 __doc__ 预览:")
-doc_lines = StudentRecord.get_average.__doc__.strip().split('\n')
-print(f"    {doc_lines[0]}")  # 打印第一行
+    student = StudentRecord("Bob", "S001")
+    student.add_score("数学", 88)
+    student.add_score("英语", 92)
+    student.add_score("Python", 95)
+    print(student.get_report())
+
+    # 访问文档字符串
+    print(f"\n  函数 __doc__ 预览:")
+    doc_lines = StudentRecord.get_average.__doc__.strip().split('\n')
+    print(f"    {doc_lines[0]}")  # 打印第一行
 
 
 # =============================================================================
 # 24.6 单元测试（unittest）
 # =============================================================================
-
-print("\n--- 24.6 单元测试（unittest）---")
-
-import unittest
-import math
 
 # ----- 6.1 被测试的功能模块（通常在独立文件中）-----
 
@@ -849,14 +880,18 @@ def run_tests():
     return result.wasSuccessful()
 
 
+def demo_section_6() -> None:
+    """演示 24.6 单元测试（unittest）。"""
+    print("\n--- 24.6 单元测试（unittest）---")
+    print("运行单元测试:")
+    print("-" * 60)
+    test_success = run_tests()
+    print(f"  测试{'全部通过 ✓' if test_success else '存在失败 ✗'}")
 
 
 # =============================================================================
 # 24.7 虚拟环境（conda 与 venv）
 # =============================================================================
-
-import sys
-import os
 
 # 虚拟环境是独立的 Python 运行环境，用于：
 # 1. 隔离项目依赖，避免全局包冲突
@@ -929,8 +964,6 @@ import os
 # ----- 7.4 检测当前 Python 环境信息 -----
 def show_env_info() -> None:
     """打印当前 Python 环境信息。"""
-    import sys
-    import os
     print("当前 Python 环境信息:")
     print(f"  Python 版本: {sys.version.split()[0]}")
     print(f"  Python 解释器路径: {sys.executable}")
@@ -943,10 +976,10 @@ def show_env_info() -> None:
     print(f"  是否在虚拟环境中: {'是' if in_venv else '否'}")
     print(f"  sys.prefix: {sys.prefix}")
 
-# ----- 7.5 使用 venv 模块的 API（程序化创建虚拟环境）-----
-import venv
 
-def create_virtual_env_info(env_path: str) -> Dict[str, str]:
+# ----- 7.5 使用 venv 模块的 API（程序化创建虚拟环境）-----
+
+def create_virtual_env_info(env_path: str) -> dict[str, str]:
     """
     获取虚拟环境相关路径信息（不实际创建）。
 
@@ -965,16 +998,17 @@ def create_virtual_env_info(env_path: str) -> Dict[str, str]:
         "bin_path": context.bin_path,
     }
 
+
 # 展示虚拟环境路径（在临时路径上演示）
 def show_venv_paths() -> None:
     """演示虚拟环境路径（不实际创建）。"""
-    import os
     demo_env_path = os.path.join(os.getcwd(), "demo_venv")
     env_info = create_virtual_env_info(demo_env_path)
     print("  虚拟环境路径示例（未实际创建）:")
     print(f"    环境目录: {env_info['env_dir']}")
     print(f"    Python:   {env_info['python']}")
     print(f"    Bin 目录: {env_info['bin_path']}")
+
 
 # ----- 7.6 pip 常用命令 -----
 #
@@ -999,11 +1033,16 @@ def show_venv_paths() -> None:
 #   pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 
+def demo_section_7() -> None:
+    """演示 24.7 虚拟环境（conda 与 venv）。"""
+    print("\n--- 24.7 虚拟环境（conda 与 venv）---")
+    show_env_info()
+    show_venv_paths()
+
+
 # =============================================================================
 # 24.8 综合实战：应用所有规范编写一个小型计算器模块
 # =============================================================================
-
-import math
 
 
 class CalculatorError(Exception):
@@ -1050,10 +1089,10 @@ class Calculator:
             precision: 浮点结果保留的小数位数，默认 4 位。
         """
         self.precision = precision
-        self._history: List[str] = []
+        self._history: list[str] = []
 
     @property
-    def history(self) -> List[str]:
+    def history(self) -> list[str]:
         """只读的历史记录属性"""
         return self._history.copy()
 
@@ -1229,24 +1268,9 @@ class TestCalculator(unittest.TestCase):
         self.assertEqual(len(self.calc.history), 0)
 
 
-
-# =============================================================================
-# 【语法总结】
-# =============================================================================
-
-def main() -> None:
-    """运行本章所有演示内容。"""
-    print("运行单元测试:")
-    print("-" * 60)
-    test_success = run_tests()
-    print(f"  测试{'全部通过 ✓' if test_success else '存在失败 ✗'}")
-
-    print("\n--- 24.7 虚拟环境（conda 与 venv）---")
-    show_env_info()
-    show_venv_paths()
-
+def demo_section_8() -> None:
+    """演示 24.8 综合实战：规范化的计算器模块。"""
     print("\n--- 24.8 综合实战：规范化的计算器模块 ---")
-    # 演示计算器
     print("计算器模块演示:")
     calc = Calculator(precision=4)
 
@@ -1349,7 +1373,7 @@ def main() -> None:
 #   - main.py：演示入口
 #
 # 练习答案提示：
-#   练习1：按“单一职责”划分文件，README 写运行方式，tests 放自动化测试
+#   练习1：按"单一职责"划分文件，README 写运行方式，tests 放自动化测试
 #   练习2：参考 divide() 的异常处理、_round() 和 _record() 的用法
 #   练习3：移动代码时保持导入方向清晰，业务模块不要依赖 main.py
 
@@ -1402,6 +1426,22 @@ def exercise3_answer() -> None:
     print("  tests/test_calculator.py # TestCalculator")
     print("  main.py                  # from calculator import Calculator")
     print("原则：核心模块保持可导入、可测试；入口文件只做流程编排。")
+
+
+# =============================================================================
+# 【语法总结 / 主函数】
+# =============================================================================
+
+def main() -> None:
+    """运行本章所有演示内容。"""
+    demo_section_1()
+    demo_section_2()
+    demo_section_3()
+    demo_section_4()
+    demo_section_5()
+    demo_section_6()
+    demo_section_7()
+    demo_section_8()
 
 
 if __name__ == "__main__":

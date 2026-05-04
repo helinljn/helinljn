@@ -52,6 +52,7 @@ CHAPTER_SMOKE_DATA = [
     ("ch21_supp08", "05_标准库篇/chapter21_补充08_enum枚举.py", "21.补充8.1 Enum 基础"),
     ("ch21_supp09", "05_标准库篇/chapter21_补充09_uuid唯一标识符.py", "21.补充9.1 UUID 类型与生成"),
     ("ch21_supp10", "05_标准库篇/chapter21_补充10_ctypes调用C动态库.py", "21.补充10.1 ctypes 基础：加载库与简单调用"),
+    ("ch21_supp11", "05_标准库篇/chapter21_补充11_性能分析与优化.py", "21.补充11.1 timeit 模块：测量代码执行时间"),
 ]
 
 
