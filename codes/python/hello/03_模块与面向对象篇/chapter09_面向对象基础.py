@@ -9,6 +9,8 @@
 #   4. 区分实例方法、类方法、静态方法
 #   5. 理解封装和访问控制
 #   6. 掌握 @property 属性装饰器
+#   7. 理解 __slots__ 内存优化
+#   8. 理解 __new__ 与 __init__ 的区别
 #
 # 【与 C++ 的对比】
 #   C++:  class MyClass { public: int x; void method() {} };
@@ -539,6 +541,153 @@ def demo_student_system() -> None:
 
 
 # =============================================================================
+# 9.5 __slots__：限制实例属性，节省内存
+# =============================================================================
+
+def demo_slots() -> None:
+    """演示 __slots__ 的内存优化效果。"""
+    print("=" * 60)
+    print("9.5 __slots__：限制实例属性，节省内存")
+    print("=" * 60)
+
+    # ── 问题背景 ────────────────────────────────────────────
+    print("背景：每个 Python 对象都有一个 __dict__ 字典存储属性。")
+    print("  这很灵活，但每个实例多占约 100+ 字节（字典开销）。")
+    print("  对于创建数百万个小对象的场景，__slots__ 可以大幅节省内存。")
+    print()
+
+    # ── 无 __slots__ 的类 ───────────────────────────────────
+    class PointNoSlot:
+        def __init__(self, x: float, y: float) -> None:
+            self.x = x
+            self.y = y
+
+    p1 = PointNoSlot(1.0, 2.0)
+    print(f"无 __slots__：")
+    print(f"  有 __dict__: {hasattr(p1, '__dict__')}")
+    print(f"  可动态加属性: p1.z = 3.0 → ", end="")
+    p1.z = 3.0  # 可以随意添加
+    print(f"p1.z = {p1.z}")
+
+    # ── 有 __slots__ 的类 ───────────────────────────────────
+    class PointSlot:
+        __slots__ = ('x', 'y')  # 只允许这两个属性
+
+        def __init__(self, x: float, y: float) -> None:
+            self.x = x
+            self.y = y
+
+    p2 = PointSlot(3.0, 4.0)
+    print(f"\n有 __slots__：")
+    print(f"  有 __dict__: {hasattr(p2, '__dict__')}")
+    print(f"  只能访问 x, y: p2.x={p2.x}, p2.y={p2.y}")
+
+    # 尝试添加未定义属性 → AttributeError
+    print(f"  动态加属性 → ", end="")
+    try:
+        p2.z = 5.0
+    except AttributeError as e:
+        print(f"AttributeError: {e}")
+
+    # ── 内存对比 ────────────────────────────────────────────
+    print(f"\n内存对比（估算）：")
+    # 用 pympler 或用 sys.getsizeof 粗略估计
+    import sys
+    noslot_size = sys.getsizeof(p1) + sys.getsizeof(p1.__dict__)
+    slot_size = sys.getsizeof(p2)
+    print(f"  PointNoSlot: {noslot_size} bytes (含 __dict__)")
+    print(f"  PointSlot:   {slot_size} bytes  (无 __dict__)")
+    print(f"  节省约 {noslot_size - slot_size} bytes/实例")
+
+    # ── 注意事项 ────────────────────────────────────────────
+    print(f"\n__slots__ 注意事项：")
+    print("  1. __slots__ 只限制实例属性，不影响类属性")
+    print("  2. 子类不会自动继承 __slots__（需重新声明）")
+    print("  3. 不能和 __dict__ 同时存在（除非在 __slots__ 中加入 '__dict__'）")
+    print("  4. 每个实例不再有 __dict__，因此也不能用 @cached_property")
+    print(f"  5. 适用于：大量小对象（Point、坐标、数据记录等）")
+
+
+# =============================================================================
+# 9.6 __new__ 与 __init__：对象创建全流程
+# =============================================================================
+
+def demo_new_vs_init() -> None:
+    """演示 __new__ 和 __init__ 的区别与配合。"""
+    print("\n" + "=" * 60)
+    print("9.6 __new__ 与 __init__：对象创建全流程")
+    print("=" * 60)
+
+    # ── 概念解释 ────────────────────────────────────────────
+    print("__new__   — 创建对象（分配内存，返回实例）—— 对应 C++ operator new")
+    print("__init__  — 初始化对象（设置初始值）      —— 对应 C++ 构造函数")
+    print("执行顺序:  __new__ 先被调用 → 返回实例 → __init__ 再被调用")
+    print()
+
+    # ── 基本演示 ────────────────────────────────────────────
+    class Demo:
+        def __new__(cls, *args, **kwargs):
+            print(f"  1. __new__ 被调用 (cls={cls.__name__})")
+            instance = super().__new__(cls)  # 实际分配内存
+            print(f"  2. 实例已创建: {instance}")
+            return instance
+
+        def __init__(self, name: str):
+            print(f"  3. __init__ 被调用 (name={name!r})")
+            self.name = name
+
+    print("基本流程演示：")
+    d = Demo("hello")
+    print(f"  结果: d.name = {d.name!r}")
+
+    # ── 实用场景 1：单例模式 ─────────────────────────────────
+    print(f"\n── 实用场景 1：单例模式 ──")
+    print("  用 __new__ 确保一个类只有一个实例：")
+
+    class Singleton:
+        _instance = None
+
+        def __new__(cls, *args, **kwargs):
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+            return cls._instance
+
+        def __init__(self, value: int = 0):
+            # ⚠ __init__ 每次"构造"都会调用，即使返回的是旧实例
+            if not hasattr(self, '_initialized'):
+                self.value = value
+                self._initialized = True
+
+    s1 = Singleton(42)
+    s2 = Singleton(99)
+    print(f"  s1 = Singleton(42), s2 = Singleton(99)")
+    print(f"  s1 is s2: {s1 is s2}")
+    print(f"  s1.value = {s1.value}  (不会被 s2 覆盖)")
+
+    # ── 实用场景 2：不可变类型的子类 ─────────────────────────
+    print(f"\n── 实用场景 2：继承不可变类型 ──")
+    print("  继承 str/int/tuple 等不可变类型，必须用 __new__：")
+
+    class UpperStr(str):
+        """自动转为大写的字符串。"""
+        def __new__(cls, value: str):
+            # 不可变类型的值在 __new__ 中设置，__init__ 改不了
+            return super().__new__(cls, value.upper())
+
+    us = UpperStr("hello world")
+    print(f"  UpperStr('hello world') = {us!r}")
+    print(f"  type: {type(us).__name__}, 是 str 子类: {isinstance(us, str)}")
+
+    # ── 何时用 __new__ vs __init__ ───────────────────────────
+    print(f"\n── 何时重写 __new__ ──")
+    print("  ✅ 单例模式")
+    print("  ✅ 继承不可变类型（str, int, tuple, frozenset）")
+    print("  ✅ 元类编程（控制类的创建）")
+    print("  ✅ 对象池 / 缓存（返回已有实例）")
+    print("  ❌ 普通初始化 —— 始终用 __init__")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -548,6 +697,8 @@ def main() -> None:
     demo_encapsulation()
     demo_property()
     demo_student_system()
+    demo_slots()
+    demo_new_vs_init()
 
 
 if __name__ == "__main__":
@@ -591,6 +742,11 @@ if __name__ == "__main__":
 #
 #     def __repr__(self):           # repr() 调用
 #         return f"MyClass({self.x!r})"
+#
+#     __slots__ = ('x', 'y')         # 限制属性，节省内存（可选）
+#
+#     def __new__(cls, *a, **kw):    # 创建实例（高级，通常不需要重写）
+#         return super().__new__(cls)
 #
 # ── 创建对象 ──
 # obj = MyClass(42)

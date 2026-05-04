@@ -53,6 +53,7 @@ CHAPTERS: list[tuple[str, str, str]] = [
     ("补充09 uuid唯一标识符",       "05_标准库篇/chapter21_补充09_uuid唯一标识符.py",   "标准库补充"),
     ("补充10 ctypes调用C动态库",    "05_标准库篇/chapter21_补充10_ctypes调用C动态库.py","标准库补充"),
     ("补充11 性能分析与优化",       "05_标准库篇/chapter21_补充11_性能分析与优化.py",     "标准库补充"),
+    ("补充12 内存管理工具",         "05_标准库篇/chapter21_补充12_内存管理工具.py",       "标准库补充"),
     # ── 第六阶段：并发与数据库 ──
     ("ch22 并发编程入门",           "06_并发与数据库/chapter22_并发编程入门.py",        "并发"),
     ("ch23 数据库操作",             "06_并发与数据库/chapter23_数据库操作.py",          "并发"),
@@ -132,11 +133,11 @@ def main() -> None:
             print()
         elif cmd == "5":
             print()
-            show_numlist(CHAPTERS[14:32], 15)
+            show_numlist(CHAPTERS[14:33], 15)
             print()
         elif cmd == "6":
             print()
-            show_numlist(CHAPTERS[32:34], 33)
+            show_numlist(CHAPTERS[33:35], 34)
             print()
         elif cmd == "L":
             print()
@@ -144,7 +145,7 @@ def main() -> None:
             print()
 
         elif cmd == "A":
-            for name, path, _ in CHAPTERS[:34]:  # 教学章节 (ch01~ch23 + 补充01~11)
+            for name, path, _ in CHAPTERS[:35]:  # 教学章节 (ch01~ch23 + 补充01~12)
                 run_chapter(path)
 
         elif cmd.isdigit():
