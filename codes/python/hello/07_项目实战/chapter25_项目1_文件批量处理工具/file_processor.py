@@ -397,13 +397,13 @@ class BatchRenamer:
         use_regex: bool = False,
         flags: int = 0,
     ) -> BatchResult:
-        """
+        r"""
         替换文件名中的指定文本
 
         Args:
             files:     文件列表
             old:       要替换的文本或正则表达式
-            new:       替换为的文本（正则模式下支持 \\1 等反向引用）
+            new:       替换为的文本（正则模式下支持 \1 等反向引用）
             use_regex: 是否将 old 视为正则表达式
             flags:     正则标志（如 re.IGNORECASE）
 
@@ -652,13 +652,13 @@ class ContentReplacer:
         use_regex: bool = False,
         flags: int = 0,
     ) -> BatchResult:
-        """
+        r"""
         在多个文件中批量替换文本
 
         Args:
             files:     文件列表
             old:       要替换的文本或正则表达式
-            new:       替换目标文本（正则模式支持 \\1 等反向引用）
+            new:       替换目标文本（正则模式支持 \1 等反向引用）
             use_regex: 是否将 old 视为正则表达式
             flags:     正则标志（如 re.IGNORECASE | re.MULTILINE）
 

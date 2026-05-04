@@ -131,11 +131,11 @@ def main() -> None:
             print()
         elif cmd == "5":
             print()
-            show_numlist(CHAPTERS[14:30], 15)
+            show_numlist(CHAPTERS[14:31], 15)
             print()
         elif cmd == "6":
             print()
-            show_numlist(CHAPTERS[30:33], 31)
+            show_numlist(CHAPTERS[31:33], 32)
             print()
         elif cmd == "L":
             print()
