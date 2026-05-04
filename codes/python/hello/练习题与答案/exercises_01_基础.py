@@ -230,8 +230,8 @@ class ShoppingCart:
         self.items[product_name] = self.items.get(product_name, 0) + quantity
         self.product_types.add(product_name)
 
-    def checkout(self) -> tuple[float, list[str]]:
-        """结账：返回总价和购物清单。"""
+    def checkout(self, inventory: dict) -> tuple[float, list[str]]:
+        """结账：根据库存中的价格返回总价和购物清单。"""
         if not self.items:
             return (0.0, [])
 
@@ -242,7 +242,7 @@ class ShoppingCart:
         receipt.append("-" * 40)
 
         for name, qty in self.items.items():
-            price = self._get_price(name)
+            price = inventory[name]["price"]
             subtotal = price * qty
             total += subtotal
             receipt.append(f"{name:<12} {price:>8.2f} {qty:>6} {subtotal:>10.2f}")
@@ -251,11 +251,6 @@ class ShoppingCart:
         receipt.append(f"{'合计':<12} {'':>8} {'':>6} {total:>10.2f}")
         receipt.append("=" * 40)
         return (total, receipt)
-
-    def _get_price(self, name: str) -> float:
-        """获取商品单价（内部方法）。"""
-        # 简化处理——实际项目中会从 inventory 获取
-        return 0.0
 
 
 def add_to_cart(cart: ShoppingCart, product_name: str,
@@ -270,7 +265,7 @@ def add_to_cart(cart: ShoppingCart, product_name: str,
 
 def checkout(cart: ShoppingCart, inventory: dict) -> tuple[float, list[str]]:
     """结账并返回总价和清单。"""
-    return cart.checkout()
+    return cart.checkout(inventory)
 
 
 def show_inventory(inventory: dict) -> str:

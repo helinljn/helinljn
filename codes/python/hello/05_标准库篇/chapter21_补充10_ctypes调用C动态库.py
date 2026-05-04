@@ -73,8 +73,9 @@ def demo_ctypes_basics() -> None:
         printf.argtypes = [c_char_p]
         printf.restype = c_int
         print(f"\nC printf:")
-        msg = "  Hello from C printf! (返回值=%d chars)\n".encode()
-        printf(msg)
+        msg = "  Hello from C printf!\n".encode("utf-8")
+        chars_written = printf(msg)
+        print(f"  C printf 返回值: {chars_written} chars")
 
     # ── ctypes 类型速查 ───────────────────────────────────
     print(f"\nctypes ↔ C 类型速查:")

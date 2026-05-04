@@ -151,19 +151,25 @@ def demo_logging_basics() -> None:
     handler2.setFormatter(logging.Formatter('  [%(levelname)s] %(message)s'))
     error_logger.addHandler(handler2)
 
-    print("  使用 exc_info=True 或 exception() 自动附加异常堆栈：")
+    print("  使用 exc_info=True 或 exception() 可以自动附加异常堆栈：")
     try:
         result = 10 / 0
     except ZeroDivisionError:
-        # error() + exc_info=True 会自动追加当前异常的 traceback
-        error_logger.error("计算失败：除零错误", exc_info=True)
+        # 真实项目中常写：error_logger.error("计算失败：除零错误", exc_info=True)
+        error_logger.error("计算失败：除零错误（堆栈信息见下方演示）")
+        tb_text = traceback.format_exc()
+        print("  traceback 前 3 行：")
+        for line in tb_text.strip().split('\n')[:3]:
+            print(f"    {line}")
+        print("    ...")
     print()
 
     # exception() 是 error() + exc_info=True 的快捷方式
     try:
         int("not a number")
     except ValueError:
-        error_logger.exception("数值转换失败")  # 等同于 error(..., exc_info=True)
+        # 真实项目中常写：error_logger.exception("数值转换失败")
+        error_logger.error("数值转换失败（exception() 等同于 error(..., exc_info=True)）")
     print()
 
 
@@ -791,13 +797,18 @@ def demo_traceback() -> None:
         """外层函数。"""
         level2_function()
 
+    def print_traceback_demo(tb_text: str) -> None:
+        """把 traceback 文本作为演示内容打印到标准输出。"""
+        for line in tb_text.rstrip().splitlines():
+            print(f"    {line}")
+
     print("  调用链：level1 → level2 → level3 → raise ValueError")
     print()
-    print("  traceback.print_exc() 输出：")
+    print("  traceback.print_exc() 等价输出（这里改为受控打印）：")
     try:
         level1_function()
     except ValueError:
-        traceback.print_exc()
+        print_traceback_demo(traceback.format_exc())
     print()
 
     # ── traceback.format_exc ──────────────────────────────
@@ -886,7 +897,7 @@ def demo_traceback() -> None:
     try:
         connect_database("db.example.com")
     except RuntimeError:
-        traceback.print_exc()
+        print_traceback_demo(traceback.format_exc())
     print()
 
 

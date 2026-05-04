@@ -93,6 +93,21 @@ class BasicExerciseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.ex01.pascal_triangle(-1)
 
+    def test_shopping_cart_checkout_uses_inventory_prices(self):
+        inventory = {
+            "苹果": {"price": 5.0, "stock": 100},
+            "笔记本": {"price": 25.0, "stock": 10},
+        }
+        cart = self.ex01.ShoppingCart()
+
+        self.assertIn("已添加", self.ex01.add_to_cart(cart, "苹果", 3, inventory))
+        self.assertIn("已添加", self.ex01.add_to_cart(cart, "笔记本", 2, inventory))
+        total, receipt = self.ex01.checkout(cart, inventory)
+
+        self.assertEqual(total, 65.0)
+        self.assertEqual(inventory["苹果"]["stock"], 97)
+        self.assertIn("65.00", "\n".join(receipt))
+
 
 class FunctionExerciseTests(unittest.TestCase):
     @classmethod
