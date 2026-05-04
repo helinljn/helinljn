@@ -1429,7 +1429,45 @@ def exercise3_answer() -> None:
 
 
 # =============================================================================
-# 【语法总结 / 主函数】
+# 【语法总结】
+# =============================================================================
+#
+# 1. 项目目录结构
+#    - 按功能拆分为独立模块（core / utils / config / tests）
+#    - main.py 只做入口编排，不包含业务逻辑
+#    - tests/ 目录镜像源码结构，test_<模块名>.py 命名
+#
+# 2. 模块化设计
+#    - 单一职责：一个模块只做一件事
+#    - 依赖方向：业务 → 工具，入口 → 业务（单向，不反向）
+#    - __init__.py 控制导出接口（__all__ 或显式 import）
+#
+# 3. PEP 8 代码规范
+#    - 缩进：4 空格，不用 Tab
+#    - 行宽：≤ 79 字符（文档字符串 ≤ 72）
+#    - 导入顺序：标准库 → 第三方 → 本地模块，每组空一行
+#    - 命名：模块用小写下划线，类用大驼峰，函数/变量用小写下划线
+#
+# 4. 类型注解
+#    - Python 3.9+ 优先用内置泛型：list[int], dict[str, int], tuple[float, ...]
+#    - 可选类型：X | None（Python 3.10+），避免 Optional[X]
+#    - 复杂类型用 TypeAlias 或 Protocol 表达
+#
+# 5. 文档字符串
+#    - 每个模块、类、公共函数都需要 docstring
+#    - 推荐 Google 风格：描述、Args、Returns、Raises
+#
+# 6. 单元测试
+#    - 使用标准库 unittest，无需第三方依赖
+#    - 测试类继承 unittest.TestCase，方法以 test_ 开头
+#    - 覆盖正常路径、边界条件、异常情况
+#    - 用 python -m unittest discover -s tests 运行全部测试
+#
+# 7. 虚拟环境
+#    - 每个项目独立环境（conda create / venv）
+#    - 导出依赖：conda env export > environment.yml 或 pip freeze > requirements.txt
+#    - 提交 environment.yml / requirements.txt，不提交虚拟环境目录
+#
 # =============================================================================
 
 def main() -> None:

@@ -525,7 +525,7 @@ def demo_config_converter() -> None:
 
     def parse_ini(content: str) -> dict[str, dict[str, Any]]:
         """解析简单的 INI 格式配置文件。"""
-        result: Dict[str, Dict[str, Any]] = {}
+        result: dict[str, dict[str, Any]] = {}
         current_section: str | None = None
 
         # 段落标题：[section_name]
@@ -1002,7 +1002,7 @@ def csv_column_avg(csv_text: str, column: str) -> float:
     if reader.fieldnames is None or column not in reader.fieldnames:
         raise KeyError(column)
 
-    values: List[float] = []
+    values: list[float] = []
     for row in reader:
         try:
             values.append(float(row[column]))
