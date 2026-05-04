@@ -514,6 +514,145 @@ def demo_pipeline() -> None:
 
 
 # =============================================================================
+# 13.8 生成器的双向通信：send()、throw()、close()
+# =============================================================================
+
+def demo_generator_methods() -> None:
+    """演示生成器的 send()、throw()、close() 方法——与生成器双向通信。"""
+    print("\n" + "=" * 60)
+    print("13.8 生成器进阶：send()、throw()、close()")
+    print("=" * 60)
+
+    # ── send()：向生成器发送值 ───────────────────────────────
+    print("1. send() — 向生成器内部发送数据：")
+
+    def echo_generator():
+        """接收外部发送的值并回显。"""
+        print("    生成器启动...")
+        while True:
+            received = yield  # yield 表达式接收 send() 传入的值
+            print(f"    收到: {received!r}")
+
+    gen = echo_generator()
+    print("    调用 next(gen) 启动生成器...")
+    next(gen)  # 必须先推进到第一个 yield（启动生成器）
+
+    gen.send("Hello")
+    gen.send(42)
+    gen.send([1, 2, 3])
+    gen.close()
+
+    # ── send() 返回值：累加器示例 ─────────────────────────────
+    print(f"\n2. send() 累加器模式：")
+
+    def accumulator():
+        """累加器：通过 send() 注入数值，yield 返回当前总和。"""
+        total = 0
+        while True:
+            value = yield total  # 返回 total，同时接收新值
+            if value is not None:
+                total += value
+
+    acc = accumulator()
+    print(f"    初始值: {next(acc)}")       # 推进到 yield，返回 total=0
+    print(f"    send(10): {acc.send(10)}")   # 发送 10，total=10
+    print(f"    send(20): {acc.send(20)}")   # 发送 20，total=30
+    print(f"    send(-5): {acc.send(-5)}")   # 发送 -5，total=25
+
+    # ── throw()：向生成器注入异常 ─────────────────────────────
+    print(f"\n3. throw() — 向生成器注入异常：")
+
+    def resilient_generator():
+        """可处理异常的弹性生成器。"""
+        print("    生成器启动")
+        try:
+            while True:
+                try:
+                    value = yield
+                    print(f"    处理: {value}")
+                except ValueError:
+                    print("    → 捕获 ValueError，继续运行")
+                except TypeError:
+                    print("    → 捕获 TypeError，继续运行")
+        except GeneratorExit:
+            print("    → 收到 GeneratorExit，正在清理...")
+            raise  # 重新抛出，让生成器正常退出
+
+    rg = resilient_generator()
+    next(rg)  # 启动
+    rg.send("正常数据")
+    rg.throw(ValueError)      # 注入 ValueError → 被内部捕获，继续运行
+    rg.send("仍可继续")
+    rg.throw(TypeError)       # 注入 TypeError → 也被内部捕获
+    rg.send("还能运行")
+    rg.close()
+    print()
+
+    # ── throw() 未捕获的异常会传播到调用方 ────────────────────
+    print("  未捕获的异常传播到调用方：")
+    def simple_gen():
+        try:
+            yield 1
+            yield 2
+        except ValueError:
+            pass  # 只处理 ValueError
+
+    sg = simple_gen()
+    next(sg)
+    try:
+        sg.throw(RuntimeError, "外部注入的错误")
+    except RuntimeError as e:
+        print(f"  → 调用方捕获到 RuntimeError: {e}")
+
+    # ── close()：优雅关闭生成器 ───────────────────────────────
+    print(f"\n4. close() — 优雅关闭生成器：")
+
+    def file_like_reader():
+        """模拟文件读取的生成器，需要在退出时清理。"""
+        print("    资源打开")
+        try:
+            for i in range(5):
+                yield f"数据块 #{i}"
+        except GeneratorExit:
+            print("    → close() 触发 GeneratorExit，执行清理...")
+            raise  # 重新抛出让生成器终止
+        finally:
+            print("    资源关闭（finally 保证执行）")
+
+    reader = file_like_reader()
+    print(f"    读取: {next(reader)}")
+    print(f"    读取: {next(reader)}")
+    print("    调用 close()...")
+    reader.close()  # 在 yield 处注入 GeneratorExit
+    print("    close() 完成")
+
+    # ── 实战：协程风格的管道 ─────────────────────────────────
+    print(f"\n5. 实战：用 send() 构建协程管道：")
+
+    def coroutine_pipeline():
+        """接收数据的协程——被动的消费者。"""
+        while True:
+            data = yield
+            if data is not None:
+                print(f"    管道处理: {data.upper()!r}")
+
+    pipeline = coroutine_pipeline()
+    next(pipeline)  # 启动协程
+    pipeline.send("hello")
+    pipeline.send("world")
+    pipeline.close()
+
+    # ── 小结 ─────────────────────────────────────────────────
+    print(f"\n── send / throw / close 总结 ──")
+    print("  next(gen)     - 推进生成器，获取下一个 yield 值")
+    print("  gen.send(x)   - 向生成器发送值，获取下一个 yield 值")
+    print("  gen.throw(E)  - 向生成器注入异常（在 yield 断点处抛出）")
+    print("  gen.close()   - 优雅关闭生成器（在 yield 处注入 GeneratorExit）")
+    print()
+    print("  这些方法奠定了协程的基础（PEP 342），是理解 asyncio 的前置知识。")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -526,6 +665,7 @@ def main() -> None:
     demo_yield_from()
     demo_itertools()
     demo_pipeline()
+    demo_generator_methods()
 
 
 if __name__ == "__main__":
@@ -570,6 +710,12 @@ if __name__ == "__main__":
 # combinations(iterable, r)        组合
 # combinations_with_replacement(iterable, r)  可重复组合
 # groupby(iterable, key)           分组
+#
+# ── 生成器双向通信（PEP 342）──
+# next(gen)       推进生成器，获取下一个 yield 值
+# gen.send(x)     向生成器发送值，在当前 yield 处接收，返回下一个 yield 值
+# gen.throw(E)    在生成器当前 yield 处注入异常，需先启动生成器
+# gen.close()     在生成器当前 yield 处注入 GeneratorExit，触发清理
 
 
 # =============================================================================

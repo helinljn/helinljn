@@ -123,6 +123,7 @@
 - 特殊方法（魔术方法）
 - __slots__ 内存优化
 - __new__ vs __init__（对象创建全流程）
+- 描述符协议（__get__/__set__/__delete__）——@property 底层机制
 
 #### 第 10 章：继承与多态
 - 继承的概念与语法
@@ -133,6 +134,7 @@
 - 抽象基类（ABC）
 - 组合优于继承
 - 数据类（dataclass）
+- 元类（metaclass）基础——类的"类"
 
 ---
 
@@ -167,6 +169,7 @@
 - 生成器（Generator）
 - 生成器表达式
 - yield from
+- 生成器进阶：send() / throw() / close()
 - itertools 模块
 
 #### 第 14 章：装饰器详解
@@ -195,13 +198,13 @@
 - **csv 模块**：CSV 文件读写
 - **configparser 模块**：配置文件解析
 - **tomllib 模块**：TOML 配置解析（Python 3.11+）
-- **pickle 模块**：Python 对象序列化（在 ch23 中实践）
+- **pickle 模块**：Python 对象序列化与安全注意事项
 
 #### 第 17 章：日期与时间
 - **datetime 模块**：日期时间处理
 - **time 模块**：时间相关函数
 - **calendar 模块**：日历操作
-- 时区处理（zoneinfo）
+- **zoneinfo 模块**：IANA 时区数据库（正确处理夏令时）
 - 时间格式化与解析
 
 #### 第 18 章：数据结构增强
@@ -212,8 +215,8 @@
   - defaultdict：默认字典
   - OrderedDict：有序字典
   - ChainMap：链式字典
-- **heapq 模块**：堆队列
-- **bisect 模块**：二分查找
+- **heapq 模块**：堆队列（优先队列，详见第 19 章）
+- **bisect 模块**：二分查找与有序插入（详见第 19 章）
 
 #### 第 19 章：函数式编程工具
 - **functools 模块**：
@@ -344,6 +347,7 @@
   - 异步编程概念
   - async/await 语法
   - 协程基础
+  - asyncio 进阶（Lock、Queue、Semaphore、async with/for）
   - 简单异步示例
 
 #### 第 23 章：数据库操作

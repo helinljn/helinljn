@@ -10,6 +10,7 @@
 #   5. 了解抽象基类（ABC）
 #   6. 掌握上下文管理器
 #   7. 掌握 dataclasses 数据类
+#   8. 理解元类（metaclass）基础——类的"类"
 #
 # 【运行方式】
 #   python chapter10_面向对象进阶.py
@@ -668,7 +669,7 @@ def demo_dataclasses() -> None:
 
 
 # =============================================================================
-# 10.8 综合示例：图形类层次结构
+# 10.9 综合示例：图形类层次结构
 # =============================================================================
 
 class Point:
@@ -733,10 +734,165 @@ class Triangle(GeometricShape):
         return f"Triangle[{self.p1}, {self.p2}, {self.p3}]"
 
 
+# =============================================================================
+# 10.8 元类（metaclass）—— 类的"类"
+# =============================================================================
+
+def demo_metaclasses() -> None:
+    """演示元类基础：理解 type 创建类的机制及 metaclass 的应用。"""
+    print("\n" + "=" * 60)
+    print("10.8 元类（metaclass）—— 类的工厂")
+    print("=" * 60)
+
+    # ── 概念：元类是什么 ─────────────────────────────────────
+    print("概念：")
+    print("  类（class）是创建对象的模板")
+    print("  元类（metaclass）是创建类的模板——即'类的类'")
+    print("  Python 中默认的元类是 type")
+    print("  类比 C++ 的模板元编程（TMP），但元类在运行时而非编译期工作")
+    print()
+
+    # ── type 的两种用法 ──────────────────────────────────────
+    print("1. type 的两种用法：")
+
+    # 用法一：获取对象的类型
+    print(f"  type(42) = {type(42)}     (获取对象的类型)")
+    print(f"  type(int) = {type(int)}   (类的类型是 type！)")
+
+    # 用法二：动态创建类
+    print(f"\n2. type(name, bases, namespace) —— 动态创建类：")
+
+    # 等价于: class Dog(Animal): species = "Canine"; def bark(self): ...
+    Dog = type("Dog", (), {
+        "species": "Canine",
+        "bark": lambda self: f"{self.name} says Woof!",
+        "__init__": lambda self, name: setattr(self, "name", name),
+    })
+
+    d = Dog("Buddy")
+    print(f"  Dog 类由 type 动态创建: {Dog}")
+    print(f"  d = Dog('Buddy')")
+    print(f"  d.bark()  = {d.bark()!r}")
+    print(f"  d.species = {d.species!r}")
+
+    # ── 自定义元类 ───────────────────────────────────────────
+    print(f"\n3. 自定义元类 —— 拦截类的创建过程：")
+
+    class LoggingMeta(type):
+        """元类：在类创建时自动记录日志，并可注入属性。"""
+
+        def __new__(mcs, name, bases, namespace):
+            print(f"    [LoggingMeta] 正在创建类: {name}")
+            print(f"      基类: {[b.__name__ for b in bases]}")
+            # 可以在类创建前修改 namespace
+            namespace["created_by"] = "LoggingMeta"
+            # 自动为所有方法添加调用计数
+            for attr_name, attr_value in namespace.items():
+                if callable(attr_value) and not attr_name.startswith("__"):
+                    namespace[attr_name] = mcs._wrap_with_log(attr_name, attr_value)
+            return super().__new__(mcs, name, bases, namespace)
+
+        @staticmethod
+        def _wrap_with_log(name, func):
+            def wrapper(self, *args, **kwargs):
+                print(f"    → 调用 {name}({args}, {kwargs})")
+                result = func(self, *args, **kwargs)
+                print(f"    ← {name} 返回 {result!r}")
+                return result
+            return wrapper
+
+    class Service(metaclass=LoggingMeta):
+        """业务类——其创建过程被 LoggingMeta 拦截。"""
+
+        def process(self, data: str) -> str:
+            return data.upper()
+
+        def status(self) -> str:
+            return "ok"
+
+    print(f"  Service.created_by = {Service.created_by!r}  (元类注入的属性)")
+    print()
+    svc = Service()
+    print(f"  svc.process('hello') = {svc.process('hello')!r}")
+    print(f"  svc.status() = {svc.status()!r}")
+
+    # ── 常见应用：注册表模式 ─────────────────────────────────
+    print(f"\n4. 实战：用元类实现自动注册表：")
+
+    class PluginRegistry(type):
+        """自动将所有子类注册到 _plugins 字典中。"""
+        _plugins: dict[str, type] = {}
+
+        def __new__(mcs, name, bases, namespace):
+            cls = super().__new__(mcs, name, bases, namespace)
+            if bases:  # 不注册基类本身
+                mcs._plugins[name.lower()] = cls
+            return cls
+
+        @classmethod
+        def list_plugins(mcs):
+            return list(mcs._plugins.keys())
+
+    class Plugin(metaclass=PluginRegistry):
+        """插件基类——所有具体插件自动注册。"""
+        def run(self):
+            raise NotImplementedError
+
+    class EmailPlugin(Plugin):
+        def run(self):
+            return "发送邮件通知"
+
+    class SMSPlugin(Plugin):
+        def run(self):
+            return "发送短信通知"
+
+    class WebhookPlugin(Plugin):
+        def run(self):
+            return "触发 Webhook"
+
+    print(f"  已注册的插件: {PluginRegistry.list_plugins()}")
+    for name, cls in PluginRegistry._plugins.items():
+        instance = cls()
+        print(f"    {name}: {instance.run()}")
+
+    # ── __init_subclass__：更简单的替代方案 ──────────────────
+    print(f"\n5. __init_subclass__ —— 元类的轻量替代（Python 3.6+）：")
+
+    class Base:
+        _subclasses: list[type] = []
+
+        def __init_subclass__(cls, **kwargs):
+            """当子类被定义时自动调用——不需要元类！"""
+            super().__init_subclass__(**kwargs)
+            Base._subclasses.append(cls)
+            print(f"    自动注册子类: {cls.__name__}")
+
+    class HandlerA(Base):
+        pass
+
+    class HandlerB(Base):
+        pass
+
+    print(f"  所有子类: {[c.__name__ for c in Base._subclasses]}")
+
+    # ── 何时使用元类 ─────────────────────────────────────────
+    print(f"\n── 使用指南 ──")
+    print("  元类 vs __init_subclass__：")
+    print("    大多数'拦截子类创建'的需求用 __init_subclass__ 就够了")
+    print("    元类用于需要修改类本身的行为（方法注入、属性校验等）")
+    print()
+    print("  使用场景：")
+    print("    ✅ 自动注册子类（ORM 的 Model、插件系统）")
+    print("    ✅ 自动为方法添加日志/计时/权限检查")
+    print("    ✅ 校验类定义是否完整（如必须实现某些方法）")
+    print("    ✅ 自动生成 API 文档（扫描类的结构）")
+    print("    ❌ 90% 场景不需要元类——先考虑装饰器和 __init_subclass__")
+
+
 def demo_comprehensive() -> None:
     """综合示例。"""
     print("\n" + "=" * 60)
-    print("10.8 综合示例：图形类层次结构")
+    print("10.9 综合示例：图形类层次结构")
     print("=" * 60)
 
     triangle = Triangle(
@@ -763,6 +919,7 @@ def main() -> None:
     demo_abc()
     demo_context_manager()
     demo_dataclasses()
+    demo_metaclasses()
     demo_comprehensive()
 
 
@@ -833,6 +990,24 @@ if __name__ == "__main__":
 # def __post_init__(self):
 #     if self.value < 0:
 #         raise ValueError(...)
+#
+# ── 元类（metaclass）──
+# # 方式一：type(name, bases, namespace)  —— 动态创建类
+# # 方式二：class MyMeta(type): ...  —— 自定义元类
+# # 方式三：__init_subclass__  —— 元类的轻量替代（Python 3.6+）
+#
+# class MyMeta(type):
+#     def __new__(mcs, name, bases, ns):
+#         # 在类创建时修改 namespace
+#         return super().__new__(mcs, name, bases, ns)
+#
+# class MyClass(metaclass=MyMeta):
+#     pass
+#
+# class Base:
+#     def __init_subclass__(cls, **kwargs):
+#         # 子类定义时自动调用，不需要元类
+#         super().__init_subclass__(**kwargs)
 
 
 # =============================================================================

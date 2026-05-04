@@ -11,6 +11,7 @@
 #   6. 掌握 @property 属性装饰器
 #   7. 理解 __slots__ 内存优化
 #   8. 理解 __new__ 与 __init__ 的区别
+#   9. 理解描述符协议（__get__/__set__/__delete__）——@property 的底层机制
 #
 # 【与 C++ 的对比】
 #   C++:  class MyClass { public: int x; void method() {} };
@@ -688,6 +689,151 @@ def demo_new_vs_init() -> None:
 
 
 # =============================================================================
+# 9.7 描述符协议（__get__ / __set__ / __delete__）
+# =============================================================================
+
+def demo_descriptors() -> None:
+    """演示描述符协议：理解 @property 的底层实现机制。"""
+    print("\n" + "=" * 60)
+    print("9.7 描述符协议（Descriptor Protocol）")
+    print("=" * 60)
+
+    # ── 描述符简介 ───────────────────────────────────────────
+    print("概念：")
+    print("  描述符是实现了 __get__ / __set__ / __delete__ 中至少一个的对象")
+    print("  @property、@classmethod、@staticmethod 都由描述符实现")
+    print("  它们拦截属性访问（. 运算符），类似 C++ 的 operator-> 重载")
+    print()
+
+    # ── 最简单的描述符：仅 __get__ ───────────────────────────
+    print("1. 非数据描述符（仅 __get__）：")
+
+    class UpperName:
+        """每次访问时自动转换为大写。—— 非数据描述符。"""
+        def __get__(self, obj, objtype=None):
+            if obj is None:
+                return self
+            return obj._name.upper()
+
+    class Person:
+        upper = UpperName()  # 描述符作为类属性
+
+        def __init__(self, name: str):
+            self._name = name
+
+    p = Person("alice")
+    print(f"  p.upper = {p.upper!r}       (类级别描述符，访问实例属性)")
+    print(f"  Person.upper = {Person.upper!r}  (类级别访问，返回描述符自身)")
+
+    # ── 数据描述符：__get__ + __set__ ────────────────────────
+    print(f"\n2. 数据描述符（__get__ + __set__）：")
+
+    class Bounded:
+        """带类型和范围检查的描述符 —— 数据描述符。"""
+        def __init__(self, type_: type, min_val=None, max_val=None):
+            self.type = type_
+            self.min = min_val
+            self.max = max_val
+            self._data: dict = {}  # 存储每个实例的值
+
+        def __get__(self, obj, objtype=None):
+            if obj is None:
+                return self
+            return self._data.get(id(obj), None)
+
+        def __set__(self, obj, value):
+            if not isinstance(value, self.type):
+                raise TypeError(f"期望 {self.type.__name__}，得到 {type(value).__name__}")
+            if self.min is not None and value < self.min:
+                raise ValueError(f"值 {value} 小于最小值 {self.min}")
+            if self.max is not None and value > self.max:
+                raise ValueError(f"值 {value} 大于最大值 {self.max}")
+            self._data[id(obj)] = value
+
+        def __delete__(self, obj):
+            self._data.pop(id(obj), None)
+
+    class Product:
+        name = Bounded(str)
+        price = Bounded(float, min_val=0.0)
+        stock = Bounded(int, min_val=0, max_val=9999)
+
+        def __init__(self, name: str, price: float, stock: int):
+            self.name = name      # 触发 Bounded.__set__
+            self.price = price    # 触发 Bounded.__set__
+            self.stock = stock    # 触发 Bounded.__set__
+
+    prod = Product("Widget", 19.99, 100)
+    print(f"  prod.name = {prod.name!r}")
+    print(f"  prod.price = {prod.price}")
+    print(f"  prod.stock = {prod.stock}")
+
+    try:
+        prod.price = -5.0  # 触发范围检查
+    except ValueError as e:
+        print(f"  prod.price = -5.0 → ValueError: {e}")
+
+    try:
+        prod.name = 123    # 触发类型检查
+    except TypeError as e:
+        print(f"  prod.name = 123 → TypeError: {e}")
+
+    # ── @property 就是描述符 ──────────────────────────────────
+    print(f"\n3. @property 的本质——内置描述符：")
+
+    class Demo:
+        def __init__(self, x):
+            self._x = x
+
+        @property
+        def x(self):
+            """这就是一个描述符！property 实现了 __get__。"""
+            return self._x
+
+    d = Demo(42)
+    print(f"  d.x = {d.x}")
+    # 证明 property 是描述符：
+    prop = Demo.__dict__['x']  # property 对象
+    print(f"  Demo.__dict__['x'] = {prop!r}")
+    print(f"  type(prop) = {type(prop).__name__}")
+    print(f"  有 __get__: {hasattr(prop, '__get__')}")
+    print(f"  有 __set__: {hasattr(prop, '__set__')}")
+
+    # ── 数据描述符 vs 非数据描述符 ─────────────────────────────
+    print(f"\n4. 查找优先级（重要！）：")
+    print("  数据描述符（有 __set__） > 实例 __dict__ > 非数据描述符（仅 __get__）")
+    print("  这就是 @property 定义后无法被实例属性覆盖的原因")
+
+    class DataDesc:
+        def __get__(self, obj, t=None): return "data_desc"
+        def __set__(self, obj, val): pass
+
+    class NonDataDesc:
+        def __get__(self, obj, t=None): return "nondata_desc"
+
+    class Test:
+        dd = DataDesc()
+        nd = NonDataDesc()
+
+    t = Test()
+    print(f"  t.dd = {t.dd!r}    (数据描述符，拦截访问)")
+    t.__dict__['dd'] = "override"
+    print(f"  设置 t.__dict__['dd'] = 'override' 后，t.dd = {t.dd!r}  (数据描述符仍优先)")
+
+    print(f"  t.nd = {t.nd!r}    (非数据描述符)")
+    t.__dict__['nd'] = "override"
+    print(f"  设置 t.__dict__['nd'] = 'override' 后，t.nd = {t.nd!r}  (实例属性优先)")
+
+    # ── 使用场景 ─────────────────────────────────────────────
+    print(f"\n── 描述符使用场景 ──")
+    print("  ✅ 类型/范围校验（如 ORM 中的字段定义）")
+    print("  ✅ 惰性计算（延迟求值，如按需加载）")
+    print("  ✅ 缓存属性（第一次访问时计算，后续直接返回）")
+    print("  ✅ 日志/审计（记录每次属性读写）")
+    print("  提示：大多数场景用 @property 就够，需要复用校验逻辑时再写描述符")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -699,6 +845,7 @@ def main() -> None:
     demo_student_system()
     demo_slots()
     demo_new_vs_init()
+    demo_descriptors()
 
 
 if __name__ == "__main__":
@@ -747,6 +894,17 @@ if __name__ == "__main__":
 #
 #     def __new__(cls, *a, **kw):    # 创建实例（高级，通常不需要重写）
 #         return super().__new__(cls)
+#
+# ── 描述符协议 ──
+# class Descriptor:
+#     def __get__(self, obj, objtype=None):   # 读取属性时调用
+#         return obj._value
+#     def __set__(self, obj, value):          # 设置属性时调用
+#         obj._value = value
+#     def __delete__(self, obj):              # del 属性时调用
+#         del obj._value
+# # 数据描述符（__set__）优先级 > 实例 __dict__ > 非数据描述符（仅 __get__）
+# # @property 本质上就是一个数据描述符
 #
 # ── 创建对象 ──
 # obj = MyClass(42)

@@ -1,17 +1,18 @@
 # =============================================================================
-# 第 17 章：日期与时间（datetime、time）
+# 第 17 章：日期与时间（datetime、time、zoneinfo）
 # =============================================================================
 #
 # 【学习目标】
 #   1. 掌握 datetime 模块：日期、时间、日期时间的创建与运算
 #   2. 掌握 timedelta：时间差计算
-#   3. 掌握时区处理（timezone）
+#   3. 掌握时区处理（timezone 固定偏移 + zoneinfo IANA 时区）
 #   4. 掌握 time 模块：时间戳、性能计时
 #   5. 学会日期格式化与解析
 #
 # 【这些模块解决什么问题？】
 #   datetime: 日期时间的表示、计算、格式化，是处理时间数据的核心
 #   time:     获取系统时间戳、暂停程序执行、性能计时
+#   zoneinfo: 访问 IANA 时区数据库，正确处理夏令时（DST）
 #
 # 【与 C/C++ 的对比】
 #   C/C++:  time.h 提供基础时间函数，操作笨重，时区处理麻烦
@@ -26,6 +27,7 @@ import datetime
 import re
 import time
 import calendar
+import zoneinfo
 
 
 # =============================================================================
@@ -597,6 +599,93 @@ def demo_timer_decorator() -> None:
 
 
 # =============================================================================
+# 17.10 zoneinfo 模块：IANA 时区数据库
+# =============================================================================
+
+def demo_zoneinfo() -> None:
+    """演示 zoneinfo 模块：使用 IANA 时区数据库正确处理时区和夏令时。"""
+    print("\n" + "=" * 60)
+    print("17.10 zoneinfo 模块：IANA 时区数据库")
+    print("=" * 60)
+
+    # ── 为什么需要 zoneinfo ──────────────────────────────────
+    print("datetime.timezone 的局限：")
+    print("  timezone(timedelta(hours=8)) 只表示固定偏移 +08:00")
+    print("  无法表示夏令时（DST）—— 同一地区不同季节偏移不同")
+    print("  zoneinfo.ZoneInfo 使用 IANA 数据库，自动处理历史/当前规则")
+    print()
+
+    # ── 创建带时区的 datetime ────────────────────────────────
+    print("1. ZoneInfo 基本用法：")
+
+    tz_shanghai = zoneinfo.ZoneInfo("Asia/Shanghai")
+    tz_ny = zoneinfo.ZoneInfo("America/New_York")
+    tz_utc = zoneinfo.ZoneInfo("UTC")
+
+    now_utc = datetime.datetime.now(tz_utc)
+    now_sh = now_utc.astimezone(tz_shanghai)
+    now_ny = now_utc.astimezone(tz_ny)
+
+    print(f"  UTC               = {now_utc.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+    print(f"  Asia/Shanghai     = {now_sh.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+    print(f"  America/New_York  = {now_ny.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+
+    # ── 可用时区列表 ─────────────────────────────────────────
+    available = zoneinfo.available_timezones()
+    print(f"\n  可用时区总数: {len(available)}")
+    # 列出部分常用时区
+    common_zones = [
+        z for z in sorted(available)
+        if z.startswith(("Asia/", "America/", "Europe/"))
+    ]
+    print(f"  常用时区示例 ({len(common_zones)} 个):")
+    for z in common_zones[:8]:
+        print(f"    {z}")
+
+    # ── 夏令时（DST）处理 ────────────────────────────────────
+    print(f"\n2. 夏令时（DST）自动处理：")
+
+    # 纽约在 2024 年 3 月 10 日和 11 月 3 日之间处于夏令时
+    winter = datetime.datetime(2024, 1, 15, 12, 0, 0, tzinfo=tz_ny)   # 冬令时 EST
+    summer = datetime.datetime(2024, 7, 15, 12, 0, 0, tzinfo=tz_ny)   # 夏令时 EDT
+
+    print(f"  纽约 1月15日 (冬令时): {winter.strftime('%Y-%m-%d %H:%M %Z')}  (utcoffset={winter.utcoffset()})")
+    print(f"  纽约 7月15日 (夏令时): {summer.strftime('%Y-%m-%d %H:%M %Z')}  (utcoffset={summer.utcoffset()})")
+    print(f"  → zoneinfo 自动应用正确的 UTC 偏移，无需手动调整")
+
+    # ── 时区感知 vs 时区无关 ─────────────────────────────────
+    print(f"\n3. aware（时区感知） vs naive（时区无关）：")
+
+    naive = datetime.datetime(2024, 6, 1, 10, 0, 0)
+    aware = naive.replace(tzinfo=tz_shanghai)
+
+    print(f"  naive  = {naive!r}")
+    print(f"    tzinfo = {naive.tzinfo}  (无时区信息)")
+    print(f"  aware  = {aware!r}")
+    print(f"    tzinfo = {aware.tzinfo}")
+
+    # ── 跨时区会议时间安排 ───────────────────────────────────
+    print(f"\n4. 实战：跨时区会议时间转换")
+
+    # 北京 2024-06-01 15:00 开会，求纽约、伦敦当地时间
+    meeting_beijing = datetime.datetime(2024, 6, 1, 15, 0, 0, tzinfo=tz_shanghai)
+    meeting_ny = meeting_beijing.astimezone(tz_ny)
+    meeting_london = meeting_beijing.astimezone(zoneinfo.ZoneInfo("Europe/London"))
+
+    print(f"  北京开会时间: {meeting_beijing.strftime('%Y-%m-%d %H:%M %Z')}")
+    print(f"  纽约当地时间: {meeting_ny.strftime('%Y-%m-%d %H:%M %Z')}")
+    print(f"  伦敦当地时间: {meeting_london.strftime('%Y-%m-%d %H:%M %Z')}")
+
+    # ── 使用建议 ─────────────────────────────────────────────
+    print(f"\n── 使用建议 ──")
+    print("  ✅ 存储和传输：始终用 UTC")
+    print("  ✅ 显示给用户：用 astimezone() 转为本地时区")
+    print("  ✅ 固定偏移时区（如 UTC+8 无 DST）：可用 timezone(timedelta(hours=8))")
+    print("  ✅ 有夏令时的地区：必须用 zoneinfo.ZoneInfo")
+    print("  ✅ 常用时区标识: 'Asia/Shanghai', 'America/New_York', 'Europe/London', 'UTC'")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -611,6 +700,7 @@ def main() -> None:
     demo_calendar()
     demo_workday_calculator()
     demo_timer_decorator()
+    demo_zoneinfo()
 
 
 if __name__ == "__main__":
@@ -643,8 +733,15 @@ if __name__ == "__main__":
 # datetime.time         只有时间（时分秒微秒）
 # datetime.datetime     日期 + 时间（继承自 date）
 # datetime.timedelta    时间差（天、秒、微秒）
-# datetime.timezone     时区信息（UTC 偏移）
+# datetime.timezone     时区信息（固定 UTC 偏移）
 # datetime.tzinfo       时区抽象基类
+# zoneinfo.ZoneInfo      IANA 时区（自动处理夏令时）
+
+# ── zoneinfo 常用操作 ──
+# zoneinfo.ZoneInfo("Asia/Shanghai")   获取 IANA 时区对象
+# zoneinfo.available_timezones()       获取所有可用时区标识符
+# dt.replace(tzinfo=tz)                给 naive datetime 附加时区
+# dt.astimezone(tz)                    转换时区（自动计算偏移）
 
 
 # =============================================================================

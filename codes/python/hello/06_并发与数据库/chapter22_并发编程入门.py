@@ -1305,6 +1305,182 @@ def demo_concurrency_comparison() -> None:
 
 
 # =============================================================================
+# 22.9 asyncio 进阶：异步锁、队列、async with / async for
+# =============================================================================
+
+def demo_asyncio_advanced() -> None:
+    """演示 asyncio 进阶功能：异步锁、异步队列、async with / async for。"""
+    print("\n" + "=" * 60)
+    print("22.9 asyncio 进阶：Lock、Queue、async with / async for")
+    print("=" * 60)
+
+    # ── asyncio.Lock：协程间互斥 ──────────────────────────────
+    print("1. asyncio.Lock —— 协程安全的互斥锁：")
+
+    async def demo_async_lock():
+        lock = asyncio.Lock()
+        shared = {"count": 0}
+
+        async def safe_increment(task_id: int):
+            async with lock:  # 协程安全的上下文管理器
+                current = shared["count"]
+                await asyncio.sleep(0.01)  # 模拟 I/O 延迟
+                shared["count"] = current + 1
+                print(f"    任务{task_id}: count = {shared['count']}")
+
+        await asyncio.gather(*[safe_increment(i) for i in range(5)])
+        print(f"  最终 count = {shared['count']}  (正确结果应为 5)")
+
+    asyncio.run(demo_async_lock())
+
+    # ── asyncio.Queue：生产者-消费者 ──────────────────────────
+    print(f"\n2. asyncio.Queue —— 异步生产者-消费者：")
+
+    async def demo_async_queue():
+        queue: asyncio.Queue[int | None] = asyncio.Queue(maxsize=3)
+        NUM_CONSUMERS = 2
+
+        async def producer():
+            for i in range(5):
+                await asyncio.sleep(0.05)  # 模拟生产耗时
+                await queue.put(i)
+                print(f"    生产: {i}  (队列大小: {queue.qsize()})")
+            # 为每个消费者发送一个毒丸（sentinel）
+            for _ in range(NUM_CONSUMERS):
+                await queue.put(None)
+
+        async def consumer(name: str):
+            while True:
+                item = await queue.get()
+                if item is None:  # 收到毒丸，退出
+                    queue.task_done()
+                    break
+                print(f"    {name} 消费: {item}")
+                await asyncio.sleep(0.1)  # 模拟消费耗时
+                queue.task_done()
+
+        await asyncio.gather(
+            producer(),
+            consumer("消费者A"),
+            consumer("消费者B"),
+        )
+        await queue.join()  # 等待所有任务完成（所有 task_done 都已调用）
+        print("    所有任务处理完毕")
+
+    asyncio.run(demo_async_queue())
+
+    # ── async for：异步迭代 ───────────────────────────────────
+    print(f"\n3. async for —— 异步迭代器：")
+
+    class AsyncRange:
+        """异步迭代器：每次迭代都有 I/O 延迟。"""
+        def __init__(self, start: int, stop: int, delay: float = 0.05):
+            self.start = start
+            self.stop = stop
+            self.delay = delay
+
+        def __aiter__(self):
+            self.current = self.start
+            return self
+
+        async def __anext__(self):
+            if self.current >= self.stop:
+                raise StopAsyncIteration
+            await asyncio.sleep(self.delay)  # 模拟异步获取
+            val = self.current
+            self.current += 1
+            return val
+
+    async def demo_async_for():
+        print("    异步迭代 AsyncRange(0, 5):")
+        async for val in AsyncRange(0, 5):
+            print(f"      → {val}")
+
+    asyncio.run(demo_async_for())
+
+    # ── async with：异步上下文管理器 ──────────────────────────
+    print(f"\n4. async with —— 异步上下文管理器：")
+
+    class AsyncConnection:
+        """模拟异步数据库连接。"""
+
+        async def __aenter__(self):
+            print("    正在连接数据库...")
+            await asyncio.sleep(0.1)
+            print("    连接已建立")
+            return self
+
+        async def __aexit__(self, *args):
+            print("    正在关闭连接...")
+            await asyncio.sleep(0.05)
+            print("    连接已关闭")
+
+        async def query(self, sql: str):
+            print(f"    执行: {sql}")
+            await asyncio.sleep(0.05)
+            return [("row1",), ("row2",)]
+
+    async def demo_async_context():
+        async with AsyncConnection() as conn:
+            result = await conn.query("SELECT * FROM users")
+            print(f"    结果: {result}")
+
+    asyncio.run(demo_async_context())
+
+    # ── 实战：异步条件变量 ───────────────────────────────────
+    print(f"\n5. asyncio.Condition —— 异步条件变量：")
+
+    async def demo_async_condition():
+        cond = asyncio.Condition()
+        ready = False
+
+        async def waiter(name: str):
+            async with cond:
+                print(f"    {name} 等待条件...")
+                await cond.wait_for(lambda: ready)
+                print(f"    {name} 收到通知，继续执行")
+
+        async def notifier():
+            await asyncio.sleep(0.2)
+            async with cond:
+                nonlocal ready
+                ready = True
+                print("    通知者: 条件已满足，通知所有等待者")
+                cond.notify_all()
+
+        await asyncio.gather(waiter("A"), waiter("B"), notifier())
+
+    asyncio.run(demo_async_condition())
+
+    # ── asyncio.Semaphore：限制并发数 ─────────────────────────
+    print(f"\n6. asyncio.Semaphore —— 限制并发数：")
+
+    async def demo_semaphore():
+        sem = asyncio.Semaphore(2)  # 最多 2 个协程同时执行
+
+        async def rate_limited(task_id: int):
+            async with sem:
+                print(f"    任务{task_id} 开始（获得信号量）")
+                await asyncio.sleep(0.2)
+                print(f"    任务{task_id} 完成（释放信号量）")
+
+        await asyncio.gather(*[rate_limited(i) for i in range(5)])
+
+    asyncio.run(demo_semaphore())
+
+    # ── 使用总结 ─────────────────────────────────────────────
+    print(f"\n── asyncio 进阶 API 速查 ──")
+    print("  asyncio.Lock()        协程互斥锁")
+    print("  asyncio.Queue(maxsize) 异步生产者-消费者队列")
+    print("  asyncio.Semaphore(n)   限制并发协程数量")
+    print("  asyncio.Condition()    异步条件变量（wait_for）")
+    print("  async with lock:       异步上下文管理器（acquire/release）")
+    print("  async for item in ai:  异步迭代（__aiter__ + __anext__）")
+    print("  __aenter__/__aexit__   异步上下文管理器协议")
+    print("  __aiter__/__anext__    异步迭代器协议")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -1317,6 +1493,7 @@ def main() -> None:
     demo_thread_pool_executor()
     demo_multiprocessing_basics()
     demo_asyncio_basics()
+    demo_asyncio_advanced()
     demo_concurrency_comparison()
 
 
@@ -1462,6 +1639,16 @@ if __name__ == "__main__":
 #   asyncio + 线程/进程（混合使用）：
 #     loop.run_in_executor(executor, func, *args)
 #       → 在线程池/进程池中运行同步函数，返回 awaitable
+#
+#   进阶同步原语：
+#     asyncio.Lock()             # 协程互斥锁（async with lock:）
+#     asyncio.Queue(maxsize)     # 异步队列（await queue.put/get）
+#     asyncio.Semaphore(n)       # 限制并发协程数
+#     asyncio.Condition()        # 异步条件变量（await cond.wait_for()）
+#
+#   异步上下文管理器 / 迭代器：
+#     async with obj:            # __aenter__ + __aexit__
+#     async for item in obj:     # __aiter__ + __anext__
 #
 # =============================================================================
 # 【常见错误】

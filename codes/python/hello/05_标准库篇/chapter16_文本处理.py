@@ -1,13 +1,14 @@
 # =============================================================================
-# 第 16 章：文本处理（json、csv、re、configparser、tomllib）
+# 第 16 章：文本处理（json、csv、re、configparser、tomllib、pickle）
 # =============================================================================
 #
 # 【学习目标】
 #   1. 掌握 json 模块：JSON 数据的序列化和反序列化
 #   2. 掌握 csv 模块：CSV 文件的读写操作
 #   3. 掌握 re 模块：正则表达式的使用
-#   4. 理解文本数据处理的常见模式
-#   5. 学会处理实际项目中的数据格式转换
+#   4. 掌握 pickle 模块：Python 对象序列化及安全注意事项
+#   5. 理解文本数据处理的常见模式
+#   6. 学会处理实际项目中的数据格式转换
 #
 # 【这些模块解决什么问题？】
 #   json:  处理 JSON 格式数据，与 Web API 交互、配置文件
@@ -15,6 +16,7 @@
 #   re:    文本模式匹配、数据提取、字符串验证
 #   configparser: 读写 INI 配置文件
 #   tomllib: 解析 TOML 配置文件（Python 3.11+ 新增）
+#   pickle: 序列化任意 Python 对象（注意安全风险）
 #
 # 【与 C/C++ 的对比】
 #   C/C++:  需要手动解析 JSON/CSV，正则表达式需要第三方库
@@ -28,6 +30,7 @@
 import json
 import csv
 import re
+import pickle
 from pathlib import Path
 from typing import Any
 from io import StringIO
@@ -794,6 +797,132 @@ def demo_configparser() -> None:
 
 
 # =============================================================================
+# 16.9 pickle 模块：Python 对象序列化
+# =============================================================================
+
+class GameState:
+    """用于 pickle 演示的游戏状态类（模块级别：pickle 要求类可被导入）。"""
+    def __init__(self, level: int, player_name: str, inventory: list[str]):
+        self.level = level
+        self.player_name = player_name
+        self.inventory = inventory
+
+    def __repr__(self):
+        return f"GameState(level={self.level}, name={self.player_name!r}, inv={self.inventory})"
+
+    def __getstate__(self):
+        """自定义序列化：排除敏感或不可序列化的字段。"""
+        state = self.__dict__.copy()
+        return state
+
+    def __setstate__(self, state):
+        """自定义反序列化：恢复对象状态。"""
+        self.__dict__.update(state)
+
+
+def demo_pickle() -> None:
+    """演示 pickle 模块：序列化任意 Python 对象及安全注意事项。"""
+    print("=" * 60)
+    print("16.9 pickle 模块：Python 对象序列化")
+    print("=" * 60)
+
+    # ── 基本用法：dumps / loads ──────────────────────────────
+    print("1. 基本序列化（dumps / loads）：")
+
+    data = {
+        "name": "Alice",
+        "scores": [95, 87, 92],
+        "active": True,
+        "metadata": {"version": 2, "tags": ("python", "beginner")},
+    }
+
+    serialized = pickle.dumps(data)
+    restored = pickle.loads(serialized)
+
+    print(f"  原始数据:     {data}")
+    print(f"  序列化(bytes): {serialized!r}")
+    print(f"  恢复数据:     {restored}")
+    print(f"  data == restored: {data == restored}")
+    print(f"  大小: JSON={len(json.dumps(data))} 字节, pickle={len(serialized)} 字节")
+
+    # ── 文件读写 ──────────────────────────────────────────────
+    print(f"\n2. 文件读写（dump / load）：")
+
+    with tempfile.NamedTemporaryFile(suffix=".pkl", delete=False) as f:
+        tmp_path = f.name
+        pickle.dump(data, f)
+
+    with open(tmp_path, "rb") as f:
+        loaded = pickle.load(f)
+    import os
+    os.unlink(tmp_path)
+    print(f"  从文件加载: {loaded}")
+
+    # ── 自定义对象的序列化 ────────────────────────────────────
+    print(f"\n3. 自定义对象的序列化：")
+
+    state = GameState(5, "Hero", ["sword", "shield", "potion"])
+    pickled_state = pickle.dumps(state)
+    restored_state = pickle.loads(pickled_state)
+
+    print(f"  原始: {state}")
+    print(f"  恢复: {restored_state}")
+
+    # ── 协议版本 ─────────────────────────────────────────────
+    print(f"\n4. 协议版本：")
+    print(f"  pickle.HIGHEST_PROTOCOL = {pickle.HIGHEST_PROTOCOL}")
+    print(f"  协议 0: 人类可读的 ASCII（最慢，兼容 Python 2）")
+    print(f"  协议 3: Python 3 默认（二进制）")
+    print(f"  协议 5: Python 3.8+（支持 out-of-band 数据，最快）")
+
+    proto0 = pickle.dumps(data, protocol=0)
+    proto5 = pickle.dumps(data, protocol=5)
+    print(f"  协议0 (ASCII): {len(proto0)} 字节")
+    print(f"  协议5 (二进制): {len(proto5)} 字节")
+
+    # ── ⚠️ 安全警告 ──────────────────────────────────────────
+    print(f"\n5. ⚠️ 安全警告：")
+    print("  pickle 在反序列化时可以执行任意代码！")
+    print("  绝不 unpickle 来自不可信来源的数据（网络、用户上传等）。")
+    print()
+    print("  安全规则：")
+    print("    ✅ 仅用于可信的本地数据（缓存、临时存储）")
+    print("    ✅ 跨语言交换数据用 JSON")
+    print("    ✅ 需要安全序列化时考虑 json / struct / protobuf")
+    print("    ❌ 不要 unpickle 用户上传的文件")
+    print("    ❌ 不要 unpickle 网络接收的 pickle 数据")
+
+    # ── pickle vs JSON 对比 ──────────────────────────────────
+    print(f"\n6. pickle vs JSON 对比：")
+    import datetime
+    complex_obj = {
+        "timestamp": datetime.datetime.now(),
+        "set_data": {1, 2, 3},
+        "bytes_data": b"hello",
+    }
+
+    # JSON 不能直接序列化 datetime / set / bytes
+    print(f"  对象类型: datetime + set + bytes")
+    try:
+        json.dumps(complex_obj)
+    except TypeError as e:
+        print(f"  JSON 失败: {e}")
+
+    pickle_result = pickle.loads(pickle.dumps(complex_obj))
+    print(f"  pickle 成功: {pickle_result}")
+    print()
+    print(f"  ┌──────────┬────────────────────┬────────────────────┐")
+    print(f"  │          │ JSON               │ pickle             │")
+    print(f"  ├──────────┼────────────────────┼────────────────────┤")
+    print(f"  │ 可序列化 │ 基本类型+容器       │ 任意 Python 对象   │")
+    print(f"  │ 跨语言   │ ✅                 │ ❌ (仅 Python)     │")
+    print(f"  │ 人类可读 │ ✅                 │ ❌ (二进制)        │")
+    print(f"  │ 安全性   │ ✅ 无代码执行风险  │ ⚠️  可执行任意代码 │")
+    print(f"  │ 速度     │ 中等               │ 快                 │")
+    print(f"  └──────────┴────────────────────┴────────────────────┘")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -807,6 +936,7 @@ def main() -> None:
     demo_config_converter()
     demo_toml_module()  # Python 3.11+
     demo_configparser()
+    demo_pickle()
 
 
 if __name__ == "__main__":
@@ -854,6 +984,16 @@ if __name__ == "__main__":
 # $      字符串结尾            []     字符集合
 # |      或                    ()     分组捕获
 # (?:)   非捕获分组            (?P<name>) 命名分组
+#
+# ── pickle 常用函数 ──
+# pickle.dumps(obj, protocol=N)    对象 → bytes
+# pickle.loads(data)               bytes → 对象
+# pickle.dump(obj, file)           对象 → 文件（'wb' 模式）
+# pickle.load(file)                文件 → 对象（'rb' 模式）
+# pickle.HIGHEST_PROTOCOL          当前最高协议版本
+# obj.__getstate__()               自定义序列化
+# obj.__setstate__(state)          自定义反序列化
+# ⚠️ 绝不 unpickle 不可信来源的数据！
 
 
 # =============================================================================
