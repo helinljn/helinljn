@@ -57,12 +57,41 @@ CHAPTERS: list[tuple[str, str, str]] = [
     # ── 第六阶段：并发与数据库 ──
     ("ch22 并发编程入门",           "06_并发与数据库/chapter22_并发编程入门.py",        "并发"),
     ("ch23 数据库操作",             "06_并发与数据库/chapter23_数据库操作.py",          "并发"),
+    # ── 第七阶段：项目实战 ──
+    ("ch24 代码组织与规范",         "07_项目实战/chapter24_代码组织与规范.py",          "项目"),
+    ("ch25 项目1 文件批量处理工具", "07_项目实战/chapter25_项目1_文件批量处理工具/main.py", "项目"),
+    ("ch26 项目2 日志分析系统",     "07_项目实战/chapter26_项目2_日志分析系统/main.py", "项目"),
     # ── 练习 ──
     ("练习01 基础篇",               "练习题与答案/exercises_01_基础.py",                "练习"),
     ("练习02 函数篇",               "练习题与答案/exercises_02_函数.py",                "练习"),
     ("练习03 面向对象",             "练习题与答案/exercises_03_面向对象.py",            "练习"),
     ("练习04 综合篇",               "练习题与答案/exercises_04_综合.py",                "练习"),
 ]
+
+STAGE_MENU: list[tuple[str, str, str]] = [
+    ("1", "基础", "基础 (ch01-05)"),
+    ("2", "函数", "函数 (ch06-07)"),
+    ("3", "OOP", "OOP  (ch08-11)"),
+    ("4", "高级", "高级 (ch12-14)"),
+    ("5", "标准库", "标准库 (ch15-21 + 补充01-12)"),
+    ("6", "并发", "并发与数据库 (ch22-23)"),
+    ("7", "项目", "项目实战 (ch24-26)"),
+    ("8", "练习", "练习题与答案"),
+]
+
+TEACHING_STAGES = {"基础", "函数", "OOP", "高级", "标准库", "标准库补充", "并发", "项目"}
+
+
+def chapter_number(chapter: tuple[str, str, str]) -> int:
+    """返回章节在总列表中的显示编号。"""
+    return CHAPTERS.index(chapter) + 1
+
+
+def select_by_stage(stage: str) -> list[tuple[str, str, str]]:
+    """按阶段筛选章节。标准库菜单同时包含补充章节。"""
+    if stage == "标准库":
+        return [chapter for chapter in CHAPTERS if chapter[2] in {"标准库", "标准库补充"}]
+    return [chapter for chapter in CHAPTERS if chapter[2] == stage]
 
 
 def run_chapter(path: str) -> None:
@@ -74,35 +103,86 @@ def run_chapter(path: str) -> None:
     print(f"\n{'=' * 60}")
     print(f"  运行: {Path(path).name}")
     print(f"{'=' * 60}\n")
-    subprocess.run([sys.executable, "-X", "utf8", str(full)])
+    sys.stdout.flush()
+    result = subprocess.run([sys.executable, "-X", "utf8", str(full)], check=False)
+    if result.returncode != 0:
+        print(f"\n  ! 运行结束，退出码: {result.returncode}")
 
 
-def show_numlist(chapters: list[tuple[str, str, str]], start_idx: int) -> None:
+def show_numlist(chapters: list[tuple[str, str, str]]) -> None:
     """显示编号列表。"""
-    for i, (name, path, stage) in enumerate(chapters, start=start_idx):
+    for chapter in chapters:
+        name, path, _stage = chapter
         marker = ""
         full = ROOT / path
         if not full.exists():
             marker = "  [缺]"
-        print(f"  {i:2d}. {name}{marker}")
+        print(f"  {chapter_number(chapter):2d}. {name}{marker}")
 
 
-def main() -> None:
+def show_menu() -> None:
+    """显示主菜单。"""
     print("=" * 60)
     print("  Python 学习工程 — 交互式章节导航")
     print("=" * 60)
     print()
     print("  阶段:")
-    print("    [1] 基础 (ch01-05)")
-    print("    [2] 函数 (ch06-07)")
-    print("    [3] OOP  (ch08-11)")
-    print("    [4] 高级 (ch12-14)")
-    print("    [5] 标准库 (ch15-21 + 补充01-10)")
-    print("    [6] 并发与数据库 (ch22-23)")
+    for key, _stage, label in STAGE_MENU:
+        print(f"    [{key}] {label}")
     print("    [L] 列出全部章节")
+    print("    [R编号] 运行指定章节，例如 R1、R14、R36")
     print("    [A] 运行全部教学章节")
+    print("    [T] 运行自动化测试")
+    print("    [H] 显示帮助")
     print("    [Q] 退出")
     print()
+
+
+def show_help() -> None:
+    """显示操作帮助。"""
+    print("\n  使用方式:")
+    print("    输入 1-8 查看对应阶段的章节编号")
+    print("    输入 R编号 运行单个章节，例如 R1、R14、R36")
+    print("    输入 9 以上的章节编号也可以直接运行，例如 14、36")
+    print("    输入 L 查看全部章节")
+    print("    输入 A 运行全部教学章节，不包含练习")
+    print("    输入 T 运行 unittest 自动化测试")
+    print("    输入 Q 退出")
+    print()
+
+
+def run_tests() -> None:
+    """运行项目自动化测试。"""
+    print(f"\n{'=' * 60}")
+    print("  运行自动化测试")
+    print(f"{'=' * 60}\n")
+    sys.stdout.flush()
+    result = subprocess.run(
+        [sys.executable, "-X", "utf8", "-m", "unittest", "discover", "-s", "tests", "-v"],
+        cwd=ROOT,
+        check=False,
+    )
+    if result.returncode == 0:
+        print("\n  测试通过。")
+    else:
+        print(f"\n  测试失败，退出码: {result.returncode}")
+
+
+def run_by_number(number_text: str) -> None:
+    """按显示编号运行章节。"""
+    if not number_text.isdigit():
+        print("  运行命令格式: R编号，例如 R1、R14、R36")
+        return
+
+    idx = int(number_text) - 1
+    if 0 <= idx < len(CHAPTERS):
+        run_chapter(CHAPTERS[idx][1])
+    else:
+        print(f"  无效编号 (1-{len(CHAPTERS)}), 输入 L 查看全部")
+
+
+def main() -> None:
+    show_menu()
 
     while True:
         try:
@@ -115,48 +195,40 @@ def main() -> None:
             print("  再见!")
             break
 
-        elif cmd == "1":
+        elif cmd == "":
+            continue
+
+        elif cmd in {key for key, _stage, _label in STAGE_MENU}:
+            stage = next(stage for key, stage, _label in STAGE_MENU if key == cmd)
             print()
-            show_numlist(CHAPTERS[:5], 1)
+            show_numlist(select_by_stage(stage))
             print()
-        elif cmd == "2":
-            print()
-            show_numlist(CHAPTERS[5:7], 6)
-            print()
-        elif cmd == "3":
-            print()
-            show_numlist(CHAPTERS[7:11], 8)
-            print()
-        elif cmd == "4":
-            print()
-            show_numlist(CHAPTERS[11:14], 12)
-            print()
-        elif cmd == "5":
-            print()
-            show_numlist(CHAPTERS[14:33], 15)
-            print()
-        elif cmd == "6":
-            print()
-            show_numlist(CHAPTERS[33:35], 34)
-            print()
+
         elif cmd == "L":
             print()
-            show_numlist(CHAPTERS, 1)
+            show_numlist(CHAPTERS)
             print()
 
         elif cmd == "A":
-            for name, path, _ in CHAPTERS[:35]:  # 教学章节 (ch01~ch23 + 补充01~12)
+            for _name, path, stage in CHAPTERS:
+                if stage not in TEACHING_STAGES:
+                    continue
                 run_chapter(path)
 
+        elif cmd == "T":
+            run_tests()
+
+        elif cmd == "H":
+            show_help()
+
+        elif cmd.startswith("R"):
+            run_by_number(cmd[1:].strip())
+
         elif cmd.isdigit():
-            idx = int(cmd) - 1
-            if 0 <= idx < len(CHAPTERS):
-                run_chapter(CHAPTERS[idx][1])
-            else:
-                print(f"  无效编号 (1-{len(CHAPTERS)}), 输入 L 查看全部")
+            run_by_number(cmd)
 
         else:
-            print("  输入: 1-6 (阶段) / L (全部) / A (运行) / 编号 (单个) / Q (退出)")
+            print("  输入: 1-8 (阶段) / R编号 (运行) / L (全部) / A (运行全部) / T (测试) / H (帮助) / Q (退出)")
 
 
 if __name__ == "__main__":
