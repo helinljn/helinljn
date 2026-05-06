@@ -29,7 +29,7 @@
 - 文本归一化与绕过对抗
 - 黑白名单管理
 - 匹配结果提取、过滤与替换
-- 基于 HTTP 的服务接口
+- 敏感词检测服务
 
 实现侧重点：
 
@@ -45,7 +45,7 @@
 | 目标 | 类型 | 源码 | 关键说明 |
 |------|------|------|----------|
 | `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、light_hook、common 工具函数。链接 jsoncpp 与 opencc，对外暴露 brynet、spdlog、utfcpp 头文件。 |
-| `service` | 可执行文件 | `src/service/` | HTTP 服务。链接 `core` 与 `mimalloc`。构建后自动将 `res/` 拷贝到运行目录。 |
+| `service` | 可执行文件 | `src/service/` | 敏感词检测服务。链接 `core` 与 `mimalloc`。构建后自动将 `res/` 拷贝到运行目录。 |
 | `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
 | `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
 | `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `core`、`testa` 与 doctest。 |
@@ -83,15 +83,6 @@
     - `result_condition.*`：命中后的条件过滤。
     - `replace_strategy.*`：替换文本生成策略。
     - `word_dictionary_loader.*`：黑白名单加载。
-
-- `src/service/net`
-  - 网络与服务编排层。
-  - 包括 HTTP 服务、JSON 请求解析等。
-  - 负责把外部请求转换为内部操作，并保持响应语义的一致性。
-  - 典型文件：
-    - `sw_http_server.*`：路由分发、keep-alive、服务生命周期管理。
-    - `sw_http_protocol.*`：JSON 解析、字段校验、错误映射、响应构建。
-    - `sw_worker_registry.*`：每线程引擎实例管理。
 
 - `src/test`
   - 单元测试与行为验证。
@@ -172,38 +163,10 @@
 
 ## 分层边界约束
 
-- `src/service/net` 负责协议接入、请求校验、响应组织与服务生命周期管理。
 - `src/service/sw` 负责词典、归一化、匹配、过滤、替换等领域逻辑。
-- `src/core` 负责通用基础设施，不承载具体 HTTP 协议或敏感词业务规则。
-- 不要把 HTTP/JSON 类型、状态码等协议细节渗透进 `src/service/sw` 或 `src/core`。
-- 不要把词库规则、匹配策略或文本处理细节硬编码在网络层。
+- `src/core` 负责通用基础设施，不承载具体业务规则。
+- 不要把业务规则、匹配策略或文本处理细节硬编码在基础设施层。
 - 新增模块时，优先沿用现有分层，不随意绕过既有边界。
-
-## `src/service/net` 专项要求
-
-修改网络模块时，默认认为兼容性要求高。
-
-### HTTP 与 JSON 边界
-
-- `sw_http_server.*` 负责请求分发、响应组装与服务生命周期，不应演变成塞满业务逻辑的大型处理函数。
-  - 使用 brynet 的 `HttpListenerBuilder` 构建 HTTP 服务。
-  - 支持 HTTP keep-alive：根据 `parser.isKeepAlive()` 决定连接行为，keep-alive 时保持连接，否则在发送完成后调用 `postShutdown()`。
-- `sw_http_protocol.*` 负责 HTTP/JSON 共享结构、内容类型判断、解析、字段校验、错误映射和通用响应构建。
-
-### 接口兼容性
-
-- 修改 HTTP 接口时，默认保持以下内容兼容，除非任务明确要求变更：
-  - 路由语义
-  - HTTP 状态码
-  - JSON 字段名与基本结构
-  - 错误码与错误响应形态
-  - `request_id` 等请求级追踪语义
-- 若确需调整接口契约，必须明确说明影响面，并同步检查相关调用方或测试。
-
-### Worker 管理
-
-- `sw_worker_registry.*` 负责 worker 上下文管理和线程局部绑定。
-- 词库文件装载和引擎构建应保持在服务编排边界内，不向 HTTP handler 深处扩散。
 
 ## `src/service/sw` 与核心匹配能力要求
 
@@ -273,8 +236,8 @@
 - `3rd/` 下的第三方依赖默认视为外部代码，不要为了适配项目逻辑直接修改；除非任务明确要求修改或升级第三方库，否则应在项目代码中封装兼容。
 - 若已有测试覆盖相关行为，修改后应补齐或更新测试。
 - 若用户明确要求不新增测试覆盖，不强行补测试，但仍应运行现有构建/测试并说明未新增覆盖。
-- 若修改跨越 `src/service/sw` 与 `src/service/net`，优先说明分层边界是否仍然清晰。
-- 若修改 HTTP、服务生命周期、worker 绑定或并发语义，默认需要额外关注失败路径与兼容性。
+- 新增模块时应保持分层边界清晰。
+- 若修改服务生命周期或并发语义，默认需要额外关注失败路径与兼容性。
 
 ## 第三方依赖
 
@@ -295,7 +258,7 @@
 
 - 构建时 OpenCC 数据目标需要 Python3。
 - OpenCC 数据会在构建输出目录下生成或复制到 `data/config` 与 `data/dictionary`。
-- 运行时资源路径变更必须同时检查 `res/` 拷贝逻辑、`sw_worker_registry` 默认词库路径和 `text_normalizer` 的资源搜索路径。
+- 运行时资源路径变更必须同时检查 `res/` 拷贝逻辑和 `text_normalizer` 的资源搜索路径。
 
 ## 构建与测试
 
@@ -331,15 +294,13 @@ Linux 构建命令：
 - Linux 脚本的 CMake 配置目录为 `.build/linux/x64-Release` 与 `.build/linux/x64-Debug`。
 - Windows 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
 - Linux 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
-- HTTP 服务默认可通过 `.\.build\Release\service.exe` 启动，监听 `0.0.0.0:9000`。
+- `service` 可执行文件默认可通过 `.\build\Release\service.exe` 运行。
 
 补充约定：
 
 - 若运行 `scripts/optimize_dict.py`，需要安装脚本依赖 `charset-normalizer` 与 `opencc-python-reimplemented`；本机可按需要先激活约定的 Python/conda 环境。
 - 若只验证普通单元测试，优先运行 `test.exe`。
 - 若修改影响核心匹配行为、归一化逻辑或词库装载逻辑，应至少执行相关测试。
-- 若修改 `src/service/net` 的接口、路由、服务生命周期、worker 绑定或并发逻辑，应至少执行相关验证；若缺少自动化覆盖，需要明确说明验证缺口，不要假设其安全。
-- 若 HTTP 行为发生变化且仓库内没有直接覆盖，至少在结果说明中写清楚需要怎样的手工验证。
 - 若无法运行测试，需要明确说明原因，不要假设测试通过。
 
 ## 输出要求
@@ -358,5 +319,4 @@ Linux 构建命令：
 - 不要为了“现代化”而牺牲热路径性能或可读性。
 - 不要保留未使用代码、未使用头文件和无意义注释。
 - 不要在未验证影响的情况下修改敏感词匹配、归一化或替换语义。
-- 不要在未验证影响的情况下修改 HTTP 状态码、JSON 契约等接口语义。
-- 不要把网络协议细节、平台细节或临时调试逻辑扩散到核心业务层。
+- 不要把平台细节或临时调试逻辑扩散到核心业务层。
