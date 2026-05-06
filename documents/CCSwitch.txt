@@ -42,7 +42,6 @@
             "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek-v4-flash",
             "API_TIMEOUT_MS": "600000",
             "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-            "CLAUDE_MAX_CONTEXT_WINDOW": "1000000",
             "CLAUDE_CODE_EFFORT_LEVEL": "max",
             "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90"
         },
