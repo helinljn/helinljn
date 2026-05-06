@@ -5,7 +5,9 @@
 
 #include "core.h"
 #include "timestamp.h"
+#include <ctime>
 #include <string>
+#include <string_view>
 
 namespace core {
 

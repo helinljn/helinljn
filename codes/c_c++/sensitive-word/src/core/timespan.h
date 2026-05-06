@@ -3,7 +3,9 @@
 #ifndef TIMESPAN_H
 #define TIMESPAN_H
 
+#include <ctime>
 #include <chrono>
+#include <type_traits>
 
 namespace core    {
 namespace details {

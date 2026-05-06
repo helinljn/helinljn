@@ -3,7 +3,11 @@
 #ifndef SW_TEXT_NORMALIZER_H
 #define SW_TEXT_NORMALIZER_H
 
-#include "sw/sensitive_word.h"
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace sensitive_word {
 
