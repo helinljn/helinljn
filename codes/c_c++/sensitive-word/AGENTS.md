@@ -44,18 +44,18 @@
 
 | 目标 | 类型 | 源码 | 关键说明 |
 |------|------|------|----------|
-| `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、light_hook、common 工具函数。链接 jsoncpp 与 opencc，对外暴露 brynet、spdlog、utfcpp 头文件。 |
+| `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、light_hook、common 工具函数，以及 `src/core/sw/` 敏感词核心能力。链接 jsoncpp 与 opencc，对外暴露 brynet、spdlog、utfcpp 和 `sw` 头文件。 |
 | `service` | 可执行文件 | `src/service/` | 敏感词检测服务。链接 `core` 与 `mimalloc`。构建后自动将 `res/` 拷贝到运行目录。 |
-| `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
-| `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，并直接编译 `src/service/sw/*.cpp`。 |
+| `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
+| `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
 | `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `core`、`testa` 与 doctest。 |
 | `testa` | 动态库 | `src/hcode/testa/` | Hook 实验辅助动态库。 |
 | `testpatch` | 动态库 | `src/hcode/testpatch/` | Hook 实验补丁动态库。 |
 
 重要约定：
 
-- `src/service/sw/` 不是独立库目标，其源码被直接编译进 `service`、`test`、`benchmark` 三个目标。
-- 修改 `src/service/sw` 中的头文件或实现文件，会影响服务、测试和基准测试三个目标。
+- `src/core/sw/` 不是独立库目标，其源码被直接编译进 `core` 动态库。
+- 修改 `src/core/sw` 中的头文件或实现文件，会影响所有链接 `core` 的目标。
 - 根 `CMakeLists.txt` 中的 `PROJECT_TARGET_APPLY_COMMON_OPTIONS` 统一应用平台编译选项。
   - Windows：`/utf-8`、`/permissive-`、`/Zc:__cplusplus`、`/bigobj`、`/W4`、`/MP`、`/wd4251`。
   - Linux：`-Wall`、`-Wextra`、`-Wpedantic`。
@@ -71,8 +71,8 @@
   - 应尽量保持通用，不混入上层服务协议或业务语义。
   - 不应反向依赖 `src/service` 中的业务或网络模块。
 
-- `src/service/sw`
-  - 敏感词服务侧领域逻辑。
+- `src/core/sw`
+  - 敏感词核心领域逻辑。
   - 包括词典装载、归一化、匹配、结果条件、替换策略等。
   - 这里承载核心业务语义，不应被 HTTP/JSON 细节污染。
   - 典型文件：
@@ -163,12 +163,12 @@
 
 ## 分层边界约束
 
-- `src/service/sw` 负责词典、归一化、匹配、过滤、替换等领域逻辑。
+- `src/core/sw` 负责词典、归一化、匹配、过滤、替换等领域逻辑。
 - `src/core` 负责通用基础设施，不承载具体业务规则。
 - 不要把业务规则、匹配策略或文本处理细节硬编码在基础设施层。
 - 新增模块时，优先沿用现有分层，不随意绕过既有边界。
 
-## `src/service/sw` 与核心匹配能力要求
+## `src/core/sw` 与核心匹配能力要求
 
 - 涉及归一化、匹配、黑白名单、替换策略时，默认认为兼容性要求高。
 - 任何文本处理语义变更都应谨慎评估对绕过对抗、匹配结果和替换结果的影响。

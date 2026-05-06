@@ -3,6 +3,7 @@
 #ifndef SENSITIVE_WORD_H
 #define SENSITIVE_WORD_H
 
+#include "../core.h"
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -12,7 +13,7 @@
 
 namespace sensitive_word {
 
-class sensitive_word_engine;
+class CORE_API sensitive_word_engine;
 
 //////////////////////////////////////////////////////////////
 // 敏感词匹配类型
@@ -84,7 +85,7 @@ struct match_options
 // 字符忽略策略
 // 用于判断扫描过程中是否跳过当前字符
 //////////////////////////////////////////////////////////////
-class char_ignore
+class CORE_API char_ignore
 {
 public:
     virtual ~char_ignore() = default;
@@ -96,7 +97,7 @@ public:
 // 敏感词匹配条件
 // 用于对候选命中结果做进一步过滤
 //////////////////////////////////////////////////////////////
-class result_condition
+class CORE_API result_condition
 {
 public:
     virtual ~result_condition() = default;
@@ -108,7 +109,7 @@ public:
 // 字符串替换策略
 // 用于为命中结果生成替换文本
 //////////////////////////////////////////////////////////////
-class replace_strategy
+class CORE_API replace_strategy
 {
 public:
     virtual ~replace_strategy() = default;
@@ -120,7 +121,7 @@ public:
 // 敏感词匹配构建器
 // 用于组装配置、词库和策略并构建匹配引擎
 //////////////////////////////////////////////////////////////
-class sensitive_word_builder
+class CORE_API sensitive_word_builder
 {
 public:
     sensitive_word_builder& ignore_case(bool value);
@@ -164,7 +165,7 @@ private:
 // 敏感词匹配引擎
 // 用于执行命中检测、结果提取和替换操作
 //////////////////////////////////////////////////////////////
-class sensitive_word_engine
+class CORE_API sensitive_word_engine
 {
 public:
     sensitive_word_engine();
@@ -219,13 +220,13 @@ namespace char_ignores {
  * @brief 创建一个字符忽略策略，不忽略任何字符
  * @return 不会跳过任何字符的忽略策略
  */
-std::shared_ptr<char_ignore> none();
+CORE_API std::shared_ptr<char_ignore> none();
 
 /**
  * @brief 创建一个字符忽略策略，忽略归一化后不属于词字符的字符
  * @return 会跳过非词字符的忽略策略
  */
-std::shared_ptr<char_ignore> special_chars();
+CORE_API std::shared_ptr<char_ignore> special_chars();
 
 } // namespace char_ignores
 
@@ -235,19 +236,19 @@ namespace result_conditions {
  * @brief 创建一个结果条件，不过滤任何命中结果
  * @return 始终返回 true 的结果条件
  */
-std::shared_ptr<result_condition> always_true();
+CORE_API std::shared_ptr<result_condition> always_true();
 
 /**
  * @brief 创建一个结果条件，仅要求包含 ASCII 字母的命中满足英文单词边界
  * @return 英文单词边界匹配条件
  */
-std::shared_ptr<result_condition> english_word_match();
+CORE_API std::shared_ptr<result_condition> english_word_match();
 
 /**
  * @brief 创建一个结果条件，仅要求包含 ASCII 字母或数字的命中满足单词边界
  * @return 英文单词和数字边界匹配条件
  */
-std::shared_ptr<result_condition> english_word_num_match();
+CORE_API std::shared_ptr<result_condition> english_word_num_match();
 
 } // namespace result_conditions
 
@@ -257,14 +258,14 @@ namespace replace_strategies {
  * @brief 创建一个替换策略，用星号按命中长度生成替换文本
  * @return 星号替换策略
  */
-std::shared_ptr<replace_strategy> stars();
+CORE_API std::shared_ptr<replace_strategy> stars();
 
 /**
  * @brief 创建一个替换策略，用指定字符按命中长度生成替换文本
  * @param replacement 用于替换命中片段的字符
  * @return 指定字符替换策略
  */
-std::shared_ptr<replace_strategy> chars(char replacement);
+CORE_API std::shared_ptr<replace_strategy> chars(char replacement);
 
 } // namespace replace_strategies
 } // namespace sensitive_word

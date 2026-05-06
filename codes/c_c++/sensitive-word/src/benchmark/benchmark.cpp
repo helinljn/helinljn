@@ -1,7 +1,7 @@
 #define ANKERL_NANOBENCH_IMPLEMENT
 #include "nanobench.h"
 #include "mimalloc.h"
-#include "sw/sensitive_word.h"
+#include "core/sw.h"
 #include <cstdlib>
 #include <string>
 #include <vector>
