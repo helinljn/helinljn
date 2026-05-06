@@ -218,6 +218,8 @@ build.windows.bat release
 ```
 *(可使用 `debug` 构建调试版本)*
 
+当前敏感词能力随 `core` 动态库构建并导出。业务侧使用时包含 `sw/sensitive_word.h`，并链接 `core`；测试与基准目标也通过链接 `core` 使用同一套实现。Release 构建后的主要产物位于 `.build\Release`，包括 `core.dll`、`test.exe`、`benchmark.exe` 和 hcode 相关实验目标。
+
 ### 7.2 运行测试
 本项目附带了极其详尽的 Doctest 单元测试（涵盖基础流程、归一化、高级边界碰撞、零宽字符穿透等）。
 运行测试时，请在构建目录下执行：
@@ -231,7 +233,7 @@ cd .build\Release
 
 ## 8. 资源说明
 
-`res/` 目录下存放敏感词相关资源文件，包括默认黑名单 `sensitive_word_deny.txt`、默认白名单 `sensitive_word_allow.txt` 和优化词库样例 `dict-2026-04-20.txt`。具体配置可由业务调用方通过 `.add_deny_words_from_file(...)` / `.add_allow_words_from_file(...)` 灵活加载。
+`res/` 目录下存放敏感词相关资源文件，当前包含优化词库样例 `dict-2026-04-20.txt`。具体配置可由业务调用方通过 `.add_deny_words_from_file(...)` 灵活加载。
 
 OpenCC 配置与二进制词典不放在 `res/` 中，构建时会生成或复制到运行目录下的 `data/config` 与 `data/dictionary`。
 

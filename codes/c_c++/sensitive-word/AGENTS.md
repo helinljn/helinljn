@@ -22,14 +22,13 @@
 
 ## 项目概览
 
-本项目 `sensitive-word` 是一个基于 C++17 的高性能敏感词检测库，并包含本地服务侧能力。当前核心能力包括：
+本项目 `sensitive-word` 是一个基于 C++17 的高性能敏感词检测库。当前核心能力包括：
 
 - Word 检测
 - Number 检测
 - 文本归一化与绕过对抗
 - 黑白名单管理
 - 匹配结果提取、过滤与替换
-- 敏感词检测服务
 
 实现侧重点：
 
@@ -45,7 +44,6 @@
 | 目标 | 类型 | 源码 | 关键说明 |
 |------|------|------|----------|
 | `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、light_hook、common 工具函数，以及 `src/core/sw/` 敏感词核心能力。链接 jsoncpp 与 opencc，对外暴露 brynet、spdlog、utfcpp 和 `sw` 头文件。 |
-| `service` | 可执行文件 | `src/service/` | 敏感词检测服务。链接 `core` 与 `mimalloc`。构建后自动将 `res/` 拷贝到运行目录。 |
 | `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
 | `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
 | `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `core`、`testa` 与 doctest。 |
@@ -66,10 +64,10 @@
 在理解或修改代码时，优先按目录职责建立边界意识：
 
 - `src/core`
-  - 底层公共能力与基础设施。
+  - 底层公共能力、基础设施，以及明确归入 `core` 动态库的敏感词核心模块。
   - 典型内容包括 `common.h/cpp`、base64、md5、datetime、light_hook 等。
-  - 应尽量保持通用，不混入上层服务协议或业务语义。
-  - 不应反向依赖 `src/service` 中的业务或网络模块。
+  - 根层通用工具应尽量保持通用，不混入上层应用协议或业务语义。
+  - 不应反向依赖上层应用、网络服务或临时实验模块。
 
 - `src/core/sw`
   - 敏感词核心领域逻辑。
@@ -100,8 +98,8 @@
 
 - `res`
   - 敏感词词库等项目运行资源文件。
-  - 包含 `sensitive_word_deny.txt`（默认黑名单）、`sensitive_word_allow.txt`（默认白名单）和 `dict-2026-04-20.txt`（由 `scripts/optimize_dict.py` 生成的优化词库样例，76k+ 词条）。
-  - 修改词库路径或内容时，需要关注构建后拷贝、服务默认路径和运行目录。
+  - 当前包含 `dict-2026-04-20.txt`（由 `scripts/optimize_dict.py` 生成的优化词库样例，76k+ 词条）。
+  - 修改词库路径或内容时，需要关注构建后拷贝、运行目录和使用方加载路径。
 
 - 构建运行目录下的 `data/config` 与 `data/dictionary`
   - OpenCC 配置与二进制词典资源。
@@ -163,9 +161,9 @@
 
 ## 分层边界约束
 
-- `src/core/sw` 负责词典、归一化、匹配、过滤、替换等领域逻辑。
-- `src/core` 负责通用基础设施，不承载具体业务规则。
-- 不要把业务规则、匹配策略或文本处理细节硬编码在基础设施层。
+- `src/core/sw` 负责词典、归一化、匹配、过滤、替换等敏感词核心领域逻辑，并随 `core` 动态库导出。
+- `src/core` 根层负责通用基础设施；除 `src/core/sw` 这个明确领域模块外，不承载具体业务规则。
+- 不要把上层业务规则、应用协议或临时服务逻辑硬编码在基础设施层。
 - 新增模块时，优先沿用现有分层，不随意绕过既有边界。
 
 ## `src/core/sw` 与核心匹配能力要求
@@ -245,13 +243,13 @@
 
 | 依赖 | 版本 | 用途 |
 |------|------|------|
-| `brynet` | HEAD | 异步网络库，HTTP 服务底层 |
+| `brynet` | HEAD | 异步网络库，供 `core` 暴露头文件和网络相关测试使用 |
 | `utfcpp` | v4.0.9 | UTF-8/16/32 迭代 |
 | `opencc` | v1.2.0 | 繁简转换数据生成与相关资源 |
 | `spdlog` | v1.15.3 | 日志 |
 | `jsoncpp` | 1.9.7 | JSON 解析 |
 | `doctest` | v2.4.12 | 测试框架 |
-| `mimalloc` | v2.3.1 | 内存分配器，供 service/test/benchmark 链接 |
+| `mimalloc` | v2.3.1 | 内存分配器，供 test/benchmark/hcode 链接 |
 | `nanobench` | v4.3.11 | 微基准测试 |
 
 补充约定：
@@ -294,7 +292,6 @@ Linux 构建命令：
 - Linux 脚本的 CMake 配置目录为 `.build/linux/x64-Release` 与 `.build/linux/x64-Debug`。
 - Windows 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
 - Linux 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
-- `service` 可执行文件默认可通过 `.\.build\Release\service.exe` 运行。
 
 补充约定：
 
