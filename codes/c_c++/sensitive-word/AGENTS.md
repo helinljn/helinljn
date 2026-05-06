@@ -183,7 +183,7 @@
 - 查询类方法应优先标记 `[[nodiscard]]`；移动构造和移动赋值在可行时标记 `noexcept`。
 - `result_condition` 提供三种实现：`always_true`、`english_word_match`（默认）和 `english_word_num_match`（同时要求 ASCII 字母和数字满足单词边界）。
 - `replace_strategy` 提供 `stars()`（默认 `*` 替换）和 `chars(char)`（指定字符替换）两种工厂函数。
-- 引擎支持运行时增删词：`add_word()`、`remove_word()`、`add_allow_word()`、`remove_allow_word()`，无需重建引擎实例。
+- 引擎支持运行时增删词：`add_word()`、`remove_word()`、`add_allow_word()`、`remove_allow_word()`，无需重建引擎实例；同一引擎实例的并发读写不应默认视为线程安全，调用方需要外部同步或使用新实例替换策略。
 - 引擎支持查询词条状态：`query_word_status()` 返回 `word_entry_status`（包含 `exists`、`in_deny`、`in_allow`）。
 - `replace` 提供多个重载：除接受 `match_options` 的版本外，还可以接受预计算的 `std::vector<word_result>` 做集中替换，或在调用时传入 `char` / `replace_strategy` 覆盖默认替换行为。
 - `config()` 访问器返回引擎当前 `sensitive_word_config` 的只读引用。
@@ -294,7 +294,7 @@ Linux 构建命令：
 - Linux 脚本的 CMake 配置目录为 `.build/linux/x64-Release` 与 `.build/linux/x64-Debug`。
 - Windows 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
 - Linux 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
-- `service` 可执行文件默认可通过 `.\build\Release\service.exe` 运行。
+- `service` 可执行文件默认可通过 `.\.build\Release\service.exe` 运行。
 
 补充约定：
 
