@@ -18,6 +18,8 @@
     wire_api = "responses"
     requires_openai_auth = true
     base_url = "https://www.right.codes/codex/v1"
+    [windows]
+    sandbox = "unelevated"
 
 2. 安装nodejs
     https://nodejs.cn/download
