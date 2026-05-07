@@ -6,16 +6,26 @@
 #include "testb.h"
 #include <atomic>
 #include <chrono>
+#include <cstdint>
+#include <cstring>
 #include <thread>
 #include <vector>
+#include <initializer_list>
 
 #if defined(CORE_PLATFORM_WINDOWS)
+    #ifndef NOMINMAX
+        #define NOMINMAX
+    #endif
+    #define WIN32_LEAN_AND_MEAN
+    #include <Windows.h>
     #define LIGHT_HOOK_NOINLINE __declspec(noinline)
 #elif defined(CORE_PLATFORM_LINUX)
+    #include <sys/mman.h>
+    #include <unistd.h>
     #define LIGHT_HOOK_NOINLINE __attribute__((noinline))
 #else
     #define LIGHT_HOOK_NOINLINE
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 namespace {
 
@@ -49,6 +59,110 @@ extern "C" LIGHT_HOOK_NOINLINE int light_hook_concurrent_patch_func(int value)
         g_light_hook_probe_seed + 3
     };
     return values[0] + values[1] + 2;
+}
+
+extern "C" LIGHT_HOOK_NOINLINE int light_hook_machine_patch_func(int value)
+{
+    return value + 1000;
+}
+
+class executable_code
+{
+public:
+    explicit executable_code(size_t size)
+        : size_(size)
+    {
+#if defined(CORE_PLATFORM_WINDOWS)
+        data_ = static_cast<unsigned char*>(VirtualAlloc(nullptr, size_, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE));
+#elif defined(CORE_PLATFORM_LINUX)
+        void* memory = mmap(nullptr, size_, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        data_        = memory == MAP_FAILED ? nullptr : static_cast<unsigned char*>(memory);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+        if (data_)
+            std::memset(data_, 0xCC, size_);
+    }
+
+    executable_code(const executable_code&) = delete;
+    executable_code& operator=(const executable_code&) = delete;
+
+    ~executable_code()
+    {
+        if (!data_)
+            return;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+        VirtualFree(data_, 0, MEM_RELEASE);
+#elif defined(CORE_PLATFORM_LINUX)
+        munmap(data_, size_);
+#endif
+    }
+
+    [[nodiscard]] bool valid() const
+    {
+        return data_ != nullptr;
+    }
+
+    [[nodiscard]] void* data() const
+    {
+        return data_;
+    }
+
+    void write(size_t offset, std::initializer_list<unsigned char> bytes)
+    {
+        std::memcpy(data_ + offset, bytes.begin(), bytes.size());
+    }
+
+    void write_i32(size_t offset, int32_t value)
+    {
+        std::memcpy(data_ + offset, &value, sizeof(value));
+    }
+
+    void flush()
+    {
+#if defined(CORE_PLATFORM_WINDOWS)
+        FlushInstructionCache(GetCurrentProcess(), data_, size_);
+#elif defined(CORE_PLATFORM_LINUX)
+        __builtin___clear_cache(reinterpret_cast<char*>(data_), reinterpret_cast<char*>(data_) + size_);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+    }
+
+private:
+    unsigned char* data_{nullptr};
+    size_t         size_{0};
+};
+
+void write_arg_to_eax_add(executable_code& code, size_t offset)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    code.write(offset, {0x01, 0xC8});  // add eax, ecx
+#elif defined(CORE_PLATFORM_LINUX)
+    code.write(offset, {0x01, 0xF8});  // add eax, edi
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+void write_arg_to_eax_mov(executable_code& code, size_t offset)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    code.write(offset, {0x8B, 0xC1});  // mov eax, ecx
+#elif defined(CORE_PLATFORM_LINUX)
+    code.write(offset, {0x89, 0xF8});  // mov eax, edi
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+void write_arg_test(executable_code& code, size_t offset)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    code.write(offset, {0x85, 0xC9});  // test ecx, ecx
+#elif defined(CORE_PLATFORM_LINUX)
+    code.write(offset, {0x85, 0xFF});  // test edi, edi
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+void write_nops(executable_code& code, size_t offset, size_t count)
+{
+    for (size_t i = 0; i < count; ++i)
+        code.write(offset + i, {0x90});
 }
 
 } // namespace
@@ -85,6 +199,176 @@ TEST_SUITE("Hook")
             CHECK(func != nullptr);
             CHECK(func("hello") == "HELLO");
         }
+    }
+
+    TEST_CASE("LightHookRelocatesGeneratedX64Instructions")
+    {
+        using func_t = int (*)(int);
+
+        SUBCASE("RIP relative load")
+        {
+            executable_code code(4096);
+            REQUIRE(code.valid());
+
+            code.write(0, {0x8B, 0x05, 0x00, 0x00, 0x00, 0x00});  // mov eax, [rip+disp32]
+            code.write_i32(2, 32 - 6);
+            write_arg_to_eax_add(code, 6);
+            write_nops(code, 8, 6);
+            code.write(14, {0xC3});
+            code.write_i32(32, 17);
+            code.flush();
+
+            auto call_func = reinterpret_cast<func_t>(code.data());
+            CHECK(call_func(5) == 22);
+
+            auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+            CHECK(hook_func.bytes_to_copy >= 14);
+            REQUIRE(enable_hook(&hook_func) != 0);
+
+            auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
+            CHECK(call_func(5) == 1005);
+            CHECK(trampoline(5) == 22);
+
+            CHECK(disable_hook(&hook_func) != 0);
+            CHECK(call_func(5) == 22);
+        }
+
+        SUBCASE("relative call")
+        {
+            executable_code code(4096);
+            REQUIRE(code.valid());
+
+            code.write(0, {0xE8, 0x00, 0x00, 0x00, 0x00});
+            code.write_i32(1, 32 - 5);
+            write_arg_to_eax_add(code, 5);
+            write_nops(code, 7, 7);
+            code.write(14, {0xC3});
+            code.write(32, {0xB8, 0x0B, 0x00, 0x00, 0x00, 0xC3});  // mov eax, 11; ret
+            code.flush();
+
+            auto call_func = reinterpret_cast<func_t>(code.data());
+            CHECK(call_func(5) == 16);
+
+            auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+            CHECK(hook_func.bytes_to_copy >= 14);
+            REQUIRE(enable_hook(&hook_func) != 0);
+
+            auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
+            CHECK(call_func(5) == 1005);
+            CHECK(trampoline(5) == 16);
+
+            CHECK(disable_hook(&hook_func) != 0);
+            CHECK(call_func(5) == 16);
+        }
+
+        SUBCASE("relative jmp")
+        {
+            executable_code code(4096);
+            REQUIRE(code.valid());
+
+            code.write(0, {0xEB, 0x0C});
+            write_nops(code, 2, 12);
+            write_arg_to_eax_mov(code, 14);
+            code.write(16, {0x83, 0xC0, 0x1E, 0xC3});  // add eax, 30; ret
+            code.flush();
+
+            auto call_func = reinterpret_cast<func_t>(code.data());
+            CHECK(call_func(5) == 35);
+
+            auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+            CHECK(hook_func.bytes_to_copy >= 14);
+            REQUIRE(enable_hook(&hook_func) != 0);
+
+            auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
+            CHECK(call_func(5) == 1005);
+            CHECK(trampoline(5) == 35);
+
+            CHECK(disable_hook(&hook_func) != 0);
+            CHECK(call_func(5) == 35);
+        }
+
+        SUBCASE("relative jcc")
+        {
+            executable_code code(4096);
+            REQUIRE(code.valid());
+
+            write_arg_test(code, 0);
+            code.write(2, {0x7F, 0x0A});                                  // jg +10
+            code.write(4, {0xB8, 0xFB, 0xFF, 0xFF, 0xFF, 0xC3});          // mov eax, -5; ret
+            write_nops(code, 10, 4);
+            write_arg_to_eax_mov(code, 14);
+            code.write(16, {0x83, 0xC0, 0x40, 0xC3});                    // add eax, 64; ret
+            code.flush();
+
+            auto call_func = reinterpret_cast<func_t>(code.data());
+            CHECK(call_func(5) == 69);
+            CHECK(call_func(-1) == -5);
+
+            auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+            CHECK(hook_func.bytes_to_copy >= 14);
+            REQUIRE(enable_hook(&hook_func) != 0);
+
+            auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
+            CHECK(call_func(5) == 1005);
+            CHECK(call_func(-1) == 999);
+            CHECK(trampoline(5) == 69);
+            CHECK(trampoline(-1) == -5);
+
+            CHECK(disable_hook(&hook_func) != 0);
+            CHECK(call_func(5) == 69);
+            CHECK(call_func(-1) == -5);
+        }
+    }
+
+    TEST_CASE("LightHookIdempotentEnableDisable")
+    {
+        using func_t = int (*)(int);
+
+        executable_code code(4096);
+        REQUIRE(code.valid());
+
+        write_arg_to_eax_mov(code, 0);
+        code.write(2, {0x83, 0xC0, 0x07});
+        write_nops(code, 5, 9);
+        code.write(14, {0xC3});
+        code.flush();
+
+        auto call_func = reinterpret_cast<func_t>(code.data());
+        CHECK(call_func(5) == 12);
+
+        auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+        REQUIRE(enable_hook(&hook_func) != 0);
+        void* trampoline = hook_func.trampoline;
+
+        CHECK(call_func(5) == 1005);
+        CHECK(enable_hook(&hook_func) != 0);
+        CHECK(hook_func.trampoline == trampoline);
+        CHECK(call_func(5) == 1005);
+
+        CHECK(disable_hook(&hook_func) != 0);
+        CHECK(call_func(5) == 12);
+        CHECK(disable_hook(&hook_func) != 0);
+        CHECK(call_func(5) == 12);
+    }
+
+    TEST_CASE("LightHookUnsupportedInstructionLeavesEntryUnchanged")
+    {
+        executable_code code(4096);
+        REQUIRE(code.valid());
+
+        code.write(0, {0xC5, 0xF8, 0x77, 0xC3});  // VEX prefix; unsupported by the lightweight decoder.
+        write_nops(code, 4, 12);
+        code.flush();
+
+        unsigned char original[16];
+        std::memcpy(original, code.data(), sizeof(original));
+
+        auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+        CHECK(hook_func.bytes_to_copy == 0);
+        CHECK(enable_hook(&hook_func) == 0);
+        CHECK(std::memcmp(original, code.data(), sizeof(original)) == 0);
+        CHECK(hook_func.trampoline == nullptr);
+        CHECK(hook_func.enabled == 0);
     }
 
     TEST_CASE("PatchSharedTestLightHook")
