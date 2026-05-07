@@ -4,6 +4,54 @@
 #include "core/light_hook.h"
 #include "testa/testa.h"
 #include "testb.h"
+#include <atomic>
+#include <chrono>
+#include <thread>
+#include <vector>
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    #define LIGHT_HOOK_NOINLINE __declspec(noinline)
+#elif defined(CORE_PLATFORM_LINUX)
+    #define LIGHT_HOOK_NOINLINE __attribute__((noinline))
+#else
+    #define LIGHT_HOOK_NOINLINE
+#endif
+
+namespace {
+
+volatile int g_light_hook_probe_seed = 7;
+
+extern "C" LIGHT_HOOK_NOINLINE int light_hook_concurrent_func(int value)
+{
+    volatile int values[8] = {
+        value,
+        g_light_hook_probe_seed,
+        value + 1,
+        g_light_hook_probe_seed + 1,
+        value + 2,
+        g_light_hook_probe_seed + 2,
+        value + 3,
+        g_light_hook_probe_seed + 3
+    };
+    return values[0] + values[1] + 1;
+}
+
+extern "C" LIGHT_HOOK_NOINLINE int light_hook_concurrent_patch_func(int value)
+{
+    volatile int values[8] = {
+        value,
+        g_light_hook_probe_seed,
+        value + 1,
+        g_light_hook_probe_seed + 1,
+        value + 2,
+        g_light_hook_probe_seed + 2,
+        value + 3,
+        g_light_hook_probe_seed + 3
+    };
+    return values[0] + values[1] + 2;
+}
+
+} // namespace
 
 TEST_SUITE("Hook")
 {
@@ -362,5 +410,51 @@ TEST_SUITE("Hook")
             testb_base& base_ref = b;
             CHECK(core::starts_with(base_ref.func1("hello"), "testb::func1"));
         }
+    }
+
+    TEST_CASE("ConcurrentPatchLightHook")
+    {
+        using func_t = int (*)(int);
+
+        auto* original_func = reinterpret_cast<void*>(&light_hook_concurrent_func);
+        auto* patch_func    = reinterpret_cast<void*>(&light_hook_concurrent_patch_func);
+        auto  call_func     = reinterpret_cast<func_t>(original_func);
+
+        auto hook_func = create_hook(original_func, patch_func);
+        CHECK(hook_func.bytes_to_copy >= 14);
+
+        std::atomic<bool>        stop{false};
+        std::atomic<int>         bad_result_count{0};
+        std::vector<std::thread> callers;
+
+        const int input          = 100;
+        const int original_value = input + g_light_hook_probe_seed + 1;
+        const int patch_value    = input + g_light_hook_probe_seed + 2;
+
+        for (int i = 0; i < 8; ++i)
+        {
+            callers.emplace_back([&]() {
+                while (!stop.load(std::memory_order_acquire))
+                {
+                    const int result = call_func(input);
+                    if (result != original_value && result != patch_value)
+                        bad_result_count.fetch_add(1, std::memory_order_relaxed);
+                }
+            });
+        }
+
+        for (int i = 0; i < 20; ++i)
+        {
+            CHECK(enable_hook(&hook_func) != 0);
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            CHECK(disable_hook(&hook_func) != 0);
+        }
+
+        stop.store(true, std::memory_order_release);
+        for (auto& caller : callers)
+            caller.join();
+
+        CHECK(bad_result_count.load(std::memory_order_acquire) == 0);
+        CHECK(call_func(input) == original_value);
     }
 }

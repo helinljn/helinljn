@@ -1,394 +1,1088 @@
 #include "light_hook.h"
+#include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    #ifdef _KERNEL_MODE
-        #ifndef _EFI
-            #include <ntifs.h>
-            #include <intrin.h>
-        #endif
-    #else
-        #define WIN32_NO_STATUS
-        #define WIN32_LEAN_AND_MEAN
-        #include <Windows.h>
-        #undef LHCopyMemory
+    #ifndef NOMINMAX
+        #define NOMINMAX
     #endif
+    #define WIN32_LEAN_AND_MEAN
+    #include <Windows.h>
+    #include <TlHelp32.h>
 #elif defined(CORE_PLATFORM_LINUX)
-    #include <assert.h>
+    #include <dirent.h>
     #include <errno.h>
-    #include <stdio.h>
-    #include <sys/mman.h>
+    #include <fcntl.h>
+    #include <signal.h>
+    #include <stdlib.h>
     #include <unistd.h>
+    #include <sys/mman.h>
+    #include <sys/syscall.h>
+    #include <sys/ucontext.h>
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
-#ifdef _EFI
-    #include <efi.h>
-    #include <efilib.h>
-#endif
+namespace {
 
-#define HOOK_R (*b >> 4)
-#define HOOK_C (*b & 0xF)
+constexpr std::size_t k_jump_size         = 14;
+constexpr std::size_t k_max_relocated     = 128;
+constexpr std::size_t k_trampoline_size   = 512;
+constexpr int         k_patch_retry_count = 1000;
+constexpr int         k_trap_grace_ms     = 2;
 
-/**
- * @brief 可读可写可执行保护标识
- * 在不同平台下会被转换为对应的内存保护常量。
- */
-#define PROTECTION_READ_WRITE_EXECUTE 0xfffffffffffe
+const unsigned char k_jump_code[k_jump_size] = {
+    0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
 
-/**
- * @brief 指令前缀字节表
- */
-static const unsigned char prefixes[] = { 0xF0, 0xF2, 0xF3, 0x2E, 0x36, 0x3E, 0x26, 0x64, 0x65, 0x66, 0x67 };
+std::mutex                       g_hook_mutex;
+std::atomic<hook_information_t*> g_active_transaction{nullptr};
 
-/**
- * @brief 需要解析 ModR/M 的单字节操作码表
- */
-static const unsigned char op1_modrm[] = { 0x62, 0x63, 0x69, 0x6B, 0xC0, 0xC1, 0xC4, 0xC5, 0xC6, 0xC7, 0xD0, 0xD1, 0xD2, 0xD3, 0xF6, 0xF7, 0xFE, 0xFF };
-
-/**
- * @brief 带 8 位立即数的单字节操作码表
- */
-static const unsigned char op1_imm8[] = { 0x6A, 0x6B, 0x80, 0x82, 0x83, 0xA8, 0xC0, 0xC1, 0xC6, 0xCD, 0xD4, 0xD5, 0xEB };
-
-/**
- * @brief 带 16/32/64 位立即数的单字节操作码表
- */
-static const unsigned char op1_imm32[] = { 0x68, 0x69, 0x81, 0xA9, 0xC7, 0xE8, 0xE9 };
-
-/**
- * @brief 需要解析 ModR/M 的双字节操作码表
- */
-static const unsigned char op2_modrm[] = { 0x0D, 0xA3, 0xA4, 0xA5, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF };
-
-/**
- * @brief 绝对间接跳转模板
- */
-static const unsigned char jump_code[] = { 0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-
-/**
- * @brief 检查给定字节是否存在于缓冲区中
- * @param buffer     输入缓冲区
- * @param max_length 缓冲区长度
- * @param value      待查找字节
- * @return 找到返回非 0，未找到返回 0
- */
-static int find_byte(const unsigned char* buffer, const unsigned long long max_length, const unsigned char value)
+struct instruction_info
 {
-    for (unsigned long long i = 0; i < max_length; i++)
-    {
-        if (buffer[i] == value)
-            return 1;
-    }
+    int           length              = 0;
+    bool          supported           = true;
+    bool          rip_relative        = false;
+    int           displacement_offset = 0;
+    int           displacement_size   = 0;
+    int           relative_offset     = 0;
+    int           relative_size       = 0;
+    int           relative_kind       = 0;  // 1 call, 2 jmp, 3 jcc
+    unsigned char condition           = 0;
+};
 
-    return 0;
+bool fits_int32(std::intptr_t value)
+{
+    return value >= std::numeric_limits<std::int32_t>::min() && value <= std::numeric_limits<std::int32_t>::max();
 }
 
-/**
- * @brief 解析 ModR/M 字节并调整指令指针
- * @param buffer         当前指令指针
- * @param address_prefix 是否存在地址长度前缀
- */
-static void parse_modrm(unsigned char** buffer, const int address_prefix)
+bool is_legacy_prefix(unsigned char value)
 {
-    const unsigned char modrm = *++*buffer;
-
-    if (!address_prefix || (address_prefix && **buffer >= 0x40))
+    switch (value)
     {
-        int has_sib = 0;
-        if (**buffer < 0xC0 && (**buffer & 0b111) == 0b100 && !address_prefix)
-            has_sib = 1, (*buffer)++;
-
-        if (modrm >= 0x40 && modrm <= 0x7F)
-            (*buffer)++;
-        else if ((modrm <= 0x3F && (modrm & 0b111) == 0b101) || (modrm >= 0x80 && modrm <= 0xBF))
-            *buffer += address_prefix ? 2 : 4;
-        else if (has_sib && (**buffer & 0b111) == 0b101)
-            *buffer += (modrm & 0b01000000) ? 1 : 4;
-    }
-    else if (address_prefix && modrm == 0x26)
-    {
-        *buffer += 2;
+    case 0xF0:
+    case 0xF2:
+    case 0xF3:
+    case 0x2E:
+    case 0x36:
+    case 0x3E:
+    case 0x26:
+    case 0x64:
+    case 0x65:
+    case 0x66:
+    case 0x67:
+        return true;
+    default:
+        return false;
     }
 }
 
-/**
- * @brief 获取 x86_64 指令长度
- * @param address 指令地址
- * @return 指令长度（字节数）
- */
-static int get_instruction_size(const void* address)
+bool has_opcode(unsigned char opcode, const unsigned char* values, std::size_t size)
 {
-    /*
-     * Based on length-disassembler by @Nomade040
-     * https://github.com/Nomade040/length-disassembler
-     */
-    unsigned long long offset = 0;
-    int operand_prefix = 0;
-    int address_prefix = 0;
-    int rex_w = 0;
-    unsigned char* b = (unsigned char*)address;
-
-    for (int i = 0; (i < 14 && find_byte(prefixes, sizeof(prefixes), *b)) || HOOK_R == 4; i++, b++)
+    for (std::size_t i = 0; i < size; ++i)
     {
-        if (*b == 0x66)
-            operand_prefix = 1;
-        else if (*b == 0x67)
-            address_prefix = 1;
-        else if (HOOK_R == 4 && HOOK_C >= 8)
-            rex_w = 1;
+        if (values[i] == opcode)
+            return true;
     }
 
-    if (*b == 0x0F)
+    return false;
+}
+
+void parse_modrm(const unsigned char* start, const unsigned char*& cursor, bool address_prefix, instruction_info& info)
+{
+    const unsigned char* modrm_ptr = cursor;
+    const unsigned char  modrm     = *cursor++;
+    const unsigned char  mod       = static_cast<unsigned char>(modrm >> 6);
+    const unsigned char  rm        = static_cast<unsigned char>(modrm & 0x07);
+
+    if (address_prefix)
     {
-        b++;
-        if (*b == 0x38 || *b == 0x3A)
+        if (mod == 0 && rm == 6)
+            cursor += 2;
+        else if (mod == 1)
+            cursor += 1;
+        else if (mod == 2)
+            cursor += 2;
+        return;
+    }
+
+    if (mod != 3 && rm == 4)
+    {
+        const unsigned char sib  = *cursor++;
+        const unsigned char base = static_cast<unsigned char>(sib & 0x07);
+        if (mod == 0 && base == 5)
+            cursor += 4;
+    }
+    else if (mod == 0 && rm == 5)
+    {
+        info.rip_relative        = true;
+        info.displacement_offset = static_cast<int>(cursor - start);
+        info.displacement_size   = 4;
+        cursor += 4;
+    }
+
+    if (mod == 1)
+        cursor += 1;
+    else if (mod == 2)
+        cursor += 4;
+
+    (void)modrm_ptr;
+}
+
+instruction_info decode_instruction(const void* address)
+{
+    static const unsigned char op1_modrm[] = {0x62, 0x63, 0x69, 0x6B, 0xC0, 0xC1, 0xC4, 0xC5, 0xC6, 0xC7, 0xD0, 0xD1, 0xD2, 0xD3, 0xF6, 0xF7, 0xFE, 0xFF};
+    static const unsigned char op1_imm8[]  = {0x6A, 0x6B, 0x80, 0x82, 0x83, 0xA8, 0xC0, 0xC1, 0xC6, 0xCD, 0xD4, 0xD5, 0xEB};
+    static const unsigned char op1_imm32[] = {0x68, 0x69, 0x81, 0xA9, 0xC7, 0xE8, 0xE9};
+    static const unsigned char op2_modrm[] = {0x0D, 0xA3, 0xA4, 0xA5, 0xAB, 0xAC, 0xAD, 0xAE, 0xAF};
+
+    instruction_info     info;
+    const unsigned char* start          = static_cast<const unsigned char*>(address);
+    const unsigned char* cursor         = start;
+    bool                 operand_prefix = false;
+    bool                 address_prefix = false;
+    bool                 rex_w          = false;
+    for (int i = 0; i < 15; ++i)
+    {
+        if (is_legacy_prefix(*cursor))
         {
-            if (*b++ == 0x3A)
-                offset++;
+            operand_prefix = (*cursor == 0x66) || operand_prefix;
+            address_prefix = (*cursor == 0x67) || address_prefix;
+            ++cursor;
 
-            parse_modrm(&b, address_prefix);
+            continue;
+        }
+
+        if (*cursor >= 0x40 && *cursor <= 0x4F)
+        {
+            rex_w = ((*cursor & 0x08) != 0) || rex_w;
+            ++cursor;
+
+            continue;
+        }
+
+        break;
+    }
+
+    const unsigned char opcode         = *cursor++;
+    bool                has_modrm_byte = false;
+    int                 immediate_size = 0;
+    if (opcode == 0xE8)
+    {
+        info.relative_kind   = 1;
+        info.relative_offset = static_cast<int>(cursor - start);
+        info.relative_size   = 4;
+        cursor              += 4;
+        info.length          = static_cast<int>(cursor - start);
+
+        return info;
+    }
+
+    if (opcode == 0xE9)
+    {
+        info.relative_kind   = 2;
+        info.relative_offset = static_cast<int>(cursor - start);
+        info.relative_size   = 4;
+        cursor              += 4;
+        info.length          = static_cast<int>(cursor - start);
+
+        return info;
+    }
+
+    if (opcode == 0xEB)
+    {
+        info.relative_kind   = 2;
+        info.relative_offset = static_cast<int>(cursor - start);
+        info.relative_size   = 1;
+        cursor              += 1;
+        info.length          = static_cast<int>(cursor - start);
+
+        return info;
+    }
+
+    if (opcode >= 0x70 && opcode <= 0x7F)
+    {
+        info.relative_kind   = 3;
+        info.condition       = static_cast<unsigned char>(opcode & 0x0F);
+        info.relative_offset = static_cast<int>(cursor - start);
+        info.relative_size   = 1;
+        cursor              += 1;
+        info.length          = static_cast<int>(cursor - start);
+
+        return info;
+    }
+
+    if (opcode == 0x0F)
+    {
+        const unsigned char opcode2 = *cursor++;
+        if (opcode2 >= 0x80 && opcode2 <= 0x8F)
+        {
+            info.relative_kind   = 3;
+            info.condition       = static_cast<unsigned char>(opcode2 & 0x0F);
+            info.relative_offset = static_cast<int>(cursor - start);
+            info.relative_size   = 4;
+            cursor              += 4;
+            info.length          = static_cast<int>(cursor - start);
+
+            return info;
+        }
+
+        if (opcode2 == 0x38 || opcode2 == 0x3A)
+        {
+            std::ignore = *cursor++;
+            has_modrm_byte = true;
+
+            if (opcode2 == 0x3A)
+                immediate_size = 1;
         }
         else
         {
-            if (HOOK_R == 8)
-                offset += 4;
-            else if ((HOOK_R == 7 && HOOK_C < 4) || *b == 0xA4 || *b == 0xC2 || (*b > 0xC3 && *b <= 0xC6) || *b == 0xBA || *b == 0xAC)
-                offset++;
+            const unsigned char high = static_cast<unsigned char>(opcode2 >> 4);
+            const unsigned char low  = static_cast<unsigned char>(opcode2 & 0x0F);
+            if (high == 8)
+                immediate_size = 4;
+            else if ((high == 7 && low < 4) || opcode2 == 0xA4 || opcode2 == 0xC2 || (opcode2 > 0xC3 && opcode2 <= 0xC6) || opcode2 == 0xBA || opcode2 == 0xAC)
+                immediate_size = 1;
 
-            if (find_byte(op2_modrm, sizeof(op2_modrm), *b) || (HOOK_R != 3 && HOOK_R > 0 && HOOK_R < 7) || *b >= 0xD0 || (HOOK_R == 7 && HOOK_C != 7) || HOOK_R == 9 || HOOK_R == 0xB || (HOOK_R == 0xC && HOOK_C < 8) || (HOOK_R == 0 && HOOK_C < 4))
-                parse_modrm(&b, address_prefix);
+            has_modrm_byte = has_opcode(opcode2, op2_modrm, sizeof(op2_modrm))
+                                || (high != 3 && high > 0 && high < 7)
+                                || opcode2 >= 0xD0
+                                || (high == 7 && low != 7)
+                                || high == 9
+                                || high == 0xB
+                                || (high == 0xC && low < 8)
+                                || (high == 0 && low < 4);
         }
     }
     else
     {
-        if ((HOOK_R == 0xE && HOOK_C < 8) || (HOOK_R == 0xB && HOOK_C < 8) || HOOK_R == 7 || (HOOK_R < 4 && (HOOK_C == 4 || HOOK_C == 0xC)) || (*b == 0xF6 && !(*(b + 1) & 48)) || find_byte(op1_imm8, sizeof(op1_imm8), *b))
-            offset++;
-        else if (*b == 0xC2 || *b == 0xCA)
-            offset += 2;
-        else if (*b == 0xC8)
-            offset += 3;
-        else if ((HOOK_R < 4 && (HOOK_C == 5 || HOOK_C == 0xD)) || (HOOK_R == 0xB && HOOK_C >= 8) || (*b == 0xF7 && !(*(b + 1) & 48)) || find_byte(op1_imm32, sizeof(op1_imm32), *b))
+        const unsigned char high = static_cast<unsigned char>(opcode >> 4);
+        const unsigned char low  = static_cast<unsigned char>(opcode & 0x0F);
+        if (   (high == 0xE && low < 8)
+            || (high == 0xB && low < 8)
+            || high == 7
+            || (high < 4 && (low == 4 || low == 0xC))
+            || (opcode == 0xF6 && !(*(cursor) & 48))
+            || has_opcode(opcode, op1_imm8, sizeof(op1_imm8)))
         {
-            if (*b == 0xB8 || (*b >= 0xB8 && *b <= 0xBF))
-                offset += rex_w ? 8 : 4;
-            else if (*b == 0xC7)
-                offset += 4;
-            else if (*b == 0x69)
-                offset += 4;
+            immediate_size = 1;
+        }
+        else if (opcode == 0xC2 || opcode == 0xCA)
+        {
+            immediate_size = 2;
+        }
+        else if (opcode == 0xC8)
+        {
+            immediate_size = 3;
+        }
+        else if (  (high < 4 && (low == 5 || low == 0xD))
+                || (high == 0xB && low >= 8)
+                || (opcode == 0xF7 && !(*(cursor) & 48))
+                || has_opcode(opcode, op1_imm32, sizeof(op1_imm32)))
+        {
+            if (opcode >= 0xB8 && opcode <= 0xBF)
+                immediate_size = rex_w ? 8 : 4;
+            else if (opcode == 0xC7 || opcode == 0x69)
+                immediate_size = 4;
             else
-                offset += operand_prefix ? 2 : 4;
+                immediate_size = operand_prefix ? 2 : 4;
         }
-        else if (HOOK_R == 0xA && HOOK_C < 4)
+        else if (high == 0xA && low < 4)
         {
-            offset += rex_w ? 8 : (address_prefix ? 2 : 4);
+            immediate_size = rex_w ? 8 : (address_prefix ? 2 : 4);
         }
-        else if (*b == 0xEA || *b == 0x9A)
+        else if (opcode == 0xEA || opcode == 0x9A)
         {
-            offset += operand_prefix ? 4 : 6;
+            immediate_size = operand_prefix ? 4 : 6;
         }
 
-        if (find_byte(op1_modrm, sizeof(op1_modrm), *b) || (HOOK_R < 4 && (HOOK_C < 4 || (HOOK_C >= 8 && HOOK_C < 0xC))) || HOOK_R == 8 || (HOOK_R == 0xD && HOOK_C >= 8))
-            parse_modrm(&b, address_prefix);
+        has_modrm_byte = has_opcode(opcode, op1_modrm, sizeof(op1_modrm))
+                            || (high < 4 && (low < 4 || (low >= 8 && low < 0xC)))
+                            || high == 8
+                            || (high == 0xD && low >= 8);
     }
 
-    return (int)(++b + offset - (unsigned char*)address);
+    if (has_modrm_byte)
+        parse_modrm(start, cursor, address_prefix, info);
+
+    cursor     += immediate_size;
+    info.length = static_cast<int>(cursor - start);
+    if (info.length <= 0 || info.length > 15)
+        info.supported = false;
+
+    return info;
 }
 
-/**
- * @brief 简单内存拷贝实现
- * @param destination 目标地址
- * @param source 源地址
- * @param size   拷贝字节数
- */
-static void memory_copy(void* destination, void* source, unsigned long long size)
+void write_absolute_jump(unsigned char* output, const void* target)
 {
-    unsigned char* dst = (unsigned char*)destination;
-    unsigned char* src = (unsigned char*)source;
-    for (unsigned long long i = 0; i < size; i++)
-        dst[i] = src[i];
+    std::memcpy(output, k_jump_code, sizeof(k_jump_code));
+    *reinterpret_cast<std::uintptr_t*>(output + 6) = reinterpret_cast<std::uintptr_t>(target);
 }
 
-/**
- * @brief 分配可执行内存
- * @param size 字节数
- * @return 分配得到的内存地址，失败返回 0
- */
-static void* platform_allocate(const unsigned long long size)
+bool append_bytes(std::vector<unsigned char>& output, const void* data, std::size_t size)
 {
-#ifdef _EFI
-    const unsigned long long number_of_pages = 1 + size / 1024;
-    EFI_PHYSICAL_ADDRESS physical_address;
-    gBS->AllocatePages(AllocateAnyPages, EfiRuntimeServicesCode, number_of_pages, &physical_address);
-    return (void*)physical_address;
-#endif
+    if (output.size() + size > k_trampoline_size)
+        return false;
 
+    const unsigned char* bytes = static_cast<const unsigned char*>(data);
+    output.insert(output.end(), bytes, bytes + size);
+
+    return true;
+}
+
+bool append_absolute_jump(std::vector<unsigned char>& output, const void* target)
+{
+    unsigned char buffer[k_jump_size];
+    write_absolute_jump(buffer, target);
+    return append_bytes(output, buffer, sizeof(buffer));
+}
+
+bool append_absolute_call(std::vector<unsigned char>& output, const void* target)
+{
+    const unsigned char prefix[] = {0xFF, 0x15, 0x02, 0x00, 0x00, 0x00, 0xEB, 0x08};
+    if (!append_bytes(output, prefix, sizeof(prefix)))
+        return false;
+
+    const std::uintptr_t target_value = reinterpret_cast<std::uintptr_t>(target);
+    return append_bytes(output, &target_value, sizeof(target_value));
+}
+
+bool append_absolute_jcc(std::vector<unsigned char>& output, unsigned char condition, const void* target)
+{
+    const unsigned char inverted_condition = static_cast<unsigned char>(condition ^ 0x01);
+    const unsigned char skip_jump[]        = {
+        0x0F,
+        static_cast<unsigned char>(0x80 | inverted_condition),
+        0x0E,
+        0x00,
+        0x00,
+        0x00
+    };
+
+    return append_bytes(output, skip_jump, sizeof(skip_jump)) && append_absolute_jump(output, target);
+}
+
+std::intptr_t read_relative_value(const unsigned char* instruction, const instruction_info& info)
+{
+    if (info.relative_size == 1)
+        return *reinterpret_cast<const std::int8_t*>(instruction + info.relative_offset);
+
+    return *reinterpret_cast<const std::int32_t*>(instruction + info.relative_offset);
+}
+
+bool append_relocated_instruction(std::vector<unsigned char>& output,
+                                  const unsigned char*        source_instruction,
+                                  unsigned char*              trampoline_base,
+                                  const instruction_info&     info)
+{
+    const auto source_address = reinterpret_cast<std::uintptr_t>(source_instruction);
+    const auto source_next    = source_address + static_cast<std::uintptr_t>(info.length);
+    if (info.relative_kind != 0)
+    {
+        const std::uintptr_t target = source_next + read_relative_value(source_instruction, info);
+        if (info.relative_kind == 1)
+            return append_absolute_call(output, reinterpret_cast<const void*>(target));
+
+        if (info.relative_kind == 2)
+            return append_absolute_jump(output, reinterpret_cast<const void*>(target));
+
+        return append_absolute_jcc(output, info.condition, reinterpret_cast<const void*>(target));
+    }
+
+    const std::size_t output_offset = output.size();
+    if (!append_bytes(output, source_instruction, static_cast<std::size_t>(info.length)))
+        return false;
+
+    if (info.rip_relative)
+    {
+        const std::uintptr_t source_target = source_next + *reinterpret_cast<const std::int32_t*>(source_instruction + info.displacement_offset);
+        const std::uintptr_t dest_next     = reinterpret_cast<std::uintptr_t>(trampoline_base) + output_offset + static_cast<std::uintptr_t>(info.length);
+        const auto           new_disp      = static_cast<std::intptr_t>(source_target - dest_next);
+        if (!fits_int32(new_disp))
+            return false;
+
+        *reinterpret_cast<std::int32_t*>(output.data() + output_offset + static_cast<std::size_t>(info.displacement_offset)) = static_cast<std::int32_t>(new_disp);
+    }
+
+    return true;
+}
+
+bool build_trampoline(hook_information_t* information)
+{
+    std::vector<unsigned char> relocated;
+    relocated.reserve(k_trampoline_size);
+
+    const auto*    source     = static_cast<const unsigned char*>(information->original_function);
+    unsigned char* trampoline = static_cast<unsigned char*>(information->trampoline);
+
+    int copied = 0;
+    while (copied < information->bytes_to_copy)
+    {
+        const instruction_info info = decode_instruction(source + copied);
+        if (!info.supported || info.length <= 0 || copied + info.length > information->bytes_to_copy)
+            return false;
+
+        if (!append_relocated_instruction(relocated, source + copied, trampoline, info))
+            return false;
+
+        copied += info.length;
+    }
+
+    const auto* return_address = static_cast<const unsigned char*>(information->original_function) + information->bytes_to_copy;
+    if (!append_absolute_jump(relocated, return_address))
+        return false;
+
+    std::memcpy(trampoline, relocated.data(), relocated.size());
+    information->trampoline_size = static_cast<int>(k_trampoline_size);
+
+    return true;
+}
+
+std::size_t page_size()
+{
 #if defined(CORE_PLATFORM_WINDOWS)
-    #ifdef _KERNEL_MODE
-        #ifndef _EFI
-            return ExAllocatePool(NonPagedPoolExecute, size);
-        #endif
-    #else
-        return VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-    #endif
+    SYSTEM_INFO info;
+    GetSystemInfo(&info);
+    return info.dwPageSize;
 #elif defined(CORE_PLATFORM_LINUX)
-    return mmap(0, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
-#else
-    (void)size;
-    return 0;
+    return static_cast<std::size_t>(getpagesize());
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-/**
- * @brief 释放由 platform_allocate 分配的内存
- * @param address 内存地址
- * @param size    字节数
- */
-static void platform_free(void* address, const unsigned long long size)
+std::uintptr_t align_down(std::uintptr_t value, std::size_t alignment)
 {
-#ifdef _EFI
-    const unsigned long long number_of_pages = 1 + size / 1024;
-    gBS->FreePages((EFI_PHYSICAL_ADDRESS)address, number_of_pages);
-    return;
-#endif
+    return value & ~(static_cast<std::uintptr_t>(alignment) - 1U);
+}
+
+void* platform_allocate_near(const void* target, std::size_t size)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    SYSTEM_INFO info;
+    GetSystemInfo(&info);
+    const std::uintptr_t granularity = info.dwAllocationGranularity;
+    const std::uintptr_t base        = align_down(reinterpret_cast<std::uintptr_t>(target), granularity);
+    const std::uintptr_t range       = 0x7FFF0000ULL;
+
+    for (std::uintptr_t offset = 0; offset < range; offset += granularity)
+    {
+        const std::uintptr_t high = base + offset;
+        void* memory = VirtualAlloc(reinterpret_cast<void*>(high), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+        if (memory)
+            return memory;
+
+        if (base > offset)
+        {
+            const std::uintptr_t low = base - offset;
+            memory = VirtualAlloc(reinterpret_cast<void*>(low), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+            if (memory)
+                return memory;
+        }
+    }
+
+    return VirtualAlloc(nullptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+#elif defined(CORE_PLATFORM_LINUX)
+    const std::size_t    page      = page_size();
+    const std::uintptr_t base      = align_down(reinterpret_cast<std::uintptr_t>(target), page);
+    const std::uintptr_t max_range = 0x7FFF0000ULL;
+
+    for (std::uintptr_t offset = 0; offset < max_range; offset += page * 16)
+    {
+        const std::uintptr_t candidates[] = { base + offset, base > offset ? base - offset : 0 };
+        for (std::uintptr_t candidate : candidates)
+        {
+            if (candidate == 0)
+                continue;
+
+            void* memory = mmap(reinterpret_cast<void*>(candidate),
+                                size,
+                                PROT_READ | PROT_WRITE | PROT_EXEC,
+                                MAP_PRIVATE | MAP_ANONYMOUS
+#ifdef MAP_FIXED_NOREPLACE
+                                    | MAP_FIXED_NOREPLACE
+#endif // MAP_FIXED_NOREPLACE
+                                ,
+                                -1,
+                                0);
+            if (memory == MAP_FAILED)
+                continue;
+            if (fits_int32(reinterpret_cast<std::intptr_t>(memory) - reinterpret_cast<std::intptr_t>(target)))
+                return memory;
+
+            munmap(memory, size);
+        }
+    }
+
+    void* memory = mmap(nullptr, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    return memory == MAP_FAILED ? nullptr : memory;
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+void platform_free(void* address, std::size_t size)
+{
+    if (!address)
+        return;
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    #ifdef _KERNEL_MODE
-        #ifndef _EFI
-            (void)size;
-            ExFreePool(address);
-        #endif
-    #else
-        (void)size;
-        VirtualFree(address, 0, MEM_RELEASE);
-    #endif
+    (void)size;
+    VirtualFree(address, 0, MEM_RELEASE);
 #elif defined(CORE_PLATFORM_LINUX)
     munmap(address, size);
-#else
-    (void)address;
-    (void)size;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-/**
- * @brief 修改内存保护属性
- * @param address    内存地址
- * @param size       内存大小
- * @param protection 目标保护属性
- * @return 原始保护值或恢复所需值
- */
-static unsigned long long platform_protect(void* address, unsigned long long size, unsigned long long protection)
+bool platform_make_writable(void* address, std::size_t size, unsigned long* old_protection)
 {
 #if defined(CORE_PLATFORM_WINDOWS)
-    #ifdef _KERNEL_MODE
-        (void)size;
-        (void)address;
-        if (protection == PROTECTION_READ_WRITE_EXECUTE)
-        {
-            _disable();
-
-            unsigned long long cr0 = __readcr0();
-            unsigned long long original_cr0 = cr0;
-            cr0 &= ~(1ULL << 16);
-            __writecr0(cr0);
-
-            return original_cr0;
-        }
-        else
-        {
-            __writecr0(protection);
-            _enable();
-            return 0;
-        }
-    #else
-        if (protection == PROTECTION_READ_WRITE_EXECUTE)
-            protection = PAGE_EXECUTE_READWRITE;
-
-        unsigned long original = 0;
-        VirtualProtect(address, size, (unsigned long)protection, &original);
-        return original;
-    #endif
+    DWORD old = 0;
+    if (!VirtualProtect(address, size, PAGE_EXECUTE_READWRITE, &old))
+        return false;
+    *old_protection = old;
+    return true;
 #elif defined(CORE_PLATFORM_LINUX)
-    (void)size;
-    if (protection == PROTECTION_READ_WRITE_EXECUTE)
-        protection = PROT_READ | PROT_WRITE | PROT_EXEC;
-    else
-        protection = PROT_READ | PROT_EXEC;
-
-    int page_size = getpagesize();
-    unsigned long long page_offset = (unsigned long long)address % page_size;
-    address = (void*)((unsigned long long)address - page_offset);
-
-    int status = mprotect(address, page_size, (int)protection);
-    assert(status == 0);
-    (void)status;
-
-    return protection;
-#else
-    (void)address;
-    (void)size;
-    (void)protection;
-    return 0;
+    const std::size_t page     = page_size();
+    const auto        start    = align_down(reinterpret_cast<std::uintptr_t>(address), page);
+    const auto        end      = reinterpret_cast<std::uintptr_t>(address) + size;
+    const auto        end_page = align_down(end + page - 1, page);
+    (void)old_protection;
+    return mprotect(reinterpret_cast<void*>(start), end_page - start, PROT_READ | PROT_WRITE | PROT_EXEC) == 0;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-#define create_jump(name, target_address)                            \
-    unsigned char name[sizeof(jump_code)];                           \
-    memory_copy(name, (void*)jump_code, sizeof(jump_code));          \
-    *(unsigned long long*)((unsigned long long)name + 6) = (unsigned long long)(target_address)
+void platform_restore_protection(void* address, std::size_t size, unsigned long old_protection)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    DWORD ignored = 0;
+    VirtualProtect(address, size, old_protection, &ignored);
+#elif defined(CORE_PLATFORM_LINUX)
+    const std::size_t page     = page_size();
+    const auto        start    = align_down(reinterpret_cast<std::uintptr_t>(address), page);
+    const auto        end      = reinterpret_cast<std::uintptr_t>(address) + size;
+    const auto        end_page = align_down(end + page - 1, page);
+    (void)old_protection;
+    mprotect(reinterpret_cast<void*>(start), end_page - start, PROT_READ | PROT_EXEC);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+void platform_flush_instruction_cache(void* address, std::size_t size)
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    FlushInstructionCache(GetCurrentProcess(), address, size);
+#elif defined(CORE_PLATFORM_LINUX)
+    __builtin___clear_cache(static_cast<char*>(address), static_cast<char*>(address) + size);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+void make_patch_bytes(unsigned char* buffer, const void* target, int patch_size)
+{
+    std::memset(buffer, 0x90, static_cast<std::size_t>(patch_size));
+    write_absolute_jump(buffer, target);
+}
+
+bool is_in_patch_range(std::uintptr_t ip, const hook_information_t* information)
+{
+    const auto start = reinterpret_cast<std::uintptr_t>(information->original_function);
+    const auto end   = start + static_cast<std::uintptr_t>(information->bytes_to_copy);
+    return ip >= start && ip < end;
+}
+
+#if defined(CORE_PLATFORM_WINDOWS)
+LONG CALLBACK trap_handler(EXCEPTION_POINTERS* exception_info)
+{
+    if (exception_info == nullptr || exception_info->ExceptionRecord == nullptr || exception_info->ContextRecord == nullptr)
+        return EXCEPTION_CONTINUE_SEARCH;
+
+    if (exception_info->ExceptionRecord->ExceptionCode != EXCEPTION_BREAKPOINT)
+        return EXCEPTION_CONTINUE_SEARCH;
+
+    hook_information_t* information = g_active_transaction.load(std::memory_order_acquire);
+    if (!information)
+        return EXCEPTION_CONTINUE_SEARCH;
+
+    const auto entry_rip    = reinterpret_cast<std::uintptr_t>(information->original_function);
+    const auto expected_rip = entry_rip + 1U;
+    const auto current_rip  = static_cast<std::uintptr_t>(exception_info->ContextRecord->Rip);
+    if (current_rip != entry_rip && current_rip != expected_rip)
+        return EXCEPTION_CONTINUE_SEARCH;
+
+    exception_info->ContextRecord->Rip = reinterpret_cast<DWORD64>(information->target_function);
+
+    return EXCEPTION_CONTINUE_EXECUTION;
+}
+
+void ensure_trap_handler_installed()
+{
+    static std::once_flag once;
+    std::call_once(once, []() {
+        AddVectoredExceptionHandler(1, trap_handler);
+    });
+}
+
+class thread_parker
+{
+public:
+    ~thread_parker()
+    {
+        resume();
+    }
+
+    bool park()
+    {
+        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        if (snapshot == INVALID_HANDLE_VALUE)
+            return false;
+
+        THREADENTRY32 entry;
+        entry.dwSize = sizeof(entry);
+
+        if (!Thread32First(snapshot, &entry))
+        {
+            CloseHandle(snapshot);
+            return false;
+        }
+
+        const DWORD current_process_id = GetCurrentProcessId();
+        const DWORD current_thread_id  = GetCurrentThreadId();
+        do
+        {
+            if (entry.th32OwnerProcessID != current_process_id || entry.th32ThreadID == current_thread_id)
+                continue;
+
+            HANDLE thread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, FALSE, entry.th32ThreadID);
+            if (!thread)
+                continue;
+
+            if (SuspendThread(thread) == static_cast<DWORD>(-1))
+            {
+                CloseHandle(thread);
+                continue;
+            }
+
+            threads_.push_back(thread);
+        } while (Thread32Next(snapshot, &entry));
+
+        CloseHandle(snapshot);
+
+        return true;
+    }
+
+    bool has_ip_in_range(const hook_information_t* information) const
+    {
+        for (HANDLE thread : threads_)
+        {
+            CONTEXT context;
+            std::memset(&context, 0, sizeof(context));
+            context.ContextFlags = CONTEXT_CONTROL;
+
+            if (!GetThreadContext(thread, &context))
+                continue;
+
+            if (is_in_patch_range(static_cast<std::uintptr_t>(context.Rip), information))
+                return true;
+        }
+
+        return false;
+    }
+
+    void resume()
+    {
+        for (HANDLE thread : threads_)
+        {
+            ResumeThread(thread);
+            CloseHandle(thread);
+        }
+
+        threads_.clear();
+    }
+
+private:
+    std::vector<HANDLE> threads_;
+};
+#elif defined(CORE_PLATFORM_LINUX)
+struct linux_thread_record
+{
+    pid_t                       tid{0};
+    std::atomic<int>            parked{0};
+    std::atomic<std::uintptr_t> rip{0};
+};
+
+constexpr int                     k_suspend_signal{SIGUSR2};
+std::atomic<int>                  g_suspend_requested{0};
+std::atomic<linux_thread_record*> g_suspend_records{nullptr};
+std::atomic<int>                  g_suspend_record_count{0};
+struct sigaction                  g_previous_trap_action{};
+struct sigaction                  g_previous_suspend_action{};
+
+pid_t current_tid()
+{
+    return static_cast<pid_t>(syscall(SYS_gettid));
+}
+
+std::uintptr_t context_rip(void* context)
+{
+    auto* uc = static_cast<ucontext_t*>(context);
+    return static_cast<std::uintptr_t>(uc->uc_mcontext.gregs[REG_RIP]);
+}
+
+void set_context_rip(void* context, std::uintptr_t rip)
+{
+    auto* uc = static_cast<ucontext_t*>(context);
+    uc->uc_mcontext.gregs[REG_RIP] = static_cast<greg_t>(rip);
+}
+
+void suspend_signal_handler(int, siginfo_t*, void* context)
+{
+    linux_thread_record* records = g_suspend_records.load(std::memory_order_acquire);
+    const int            count   = g_suspend_record_count.load(std::memory_order_acquire);
+    const pid_t          tid     = current_tid();
+    for (int i = 0; i < count; ++i)
+    {
+        if (records[i].tid != tid)
+            continue;
+
+        records[i].rip.store(context_rip(context), std::memory_order_release);
+        records[i].parked.store(1, std::memory_order_release);
+
+        while (g_suspend_requested.load(std::memory_order_acquire))
+        {
+#if defined(__x86_64__)
+            __asm__ __volatile__("pause");
+#endif // defined(__x86_64__)
+        }
+
+        records[i].parked.store(0, std::memory_order_release);
+
+        return;
+    }
+}
+
+void trap_signal_handler(int signal_number, siginfo_t*, void* context)
+{
+    hook_information_t* information = g_active_transaction.load(std::memory_order_acquire);
+    if (information)
+    {
+        const auto entry_rip    = reinterpret_cast<std::uintptr_t>(information->original_function);
+        const auto expected_rip = entry_rip + 1U;
+        const auto current_rip  = context_rip(context);
+        if (current_rip == entry_rip || current_rip == expected_rip)
+        {
+            set_context_rip(context, reinterpret_cast<std::uintptr_t>(information->target_function));
+            return;
+        }
+    }
+
+    if (g_previous_trap_action.sa_flags & SA_SIGINFO)
+    {
+        if (g_previous_trap_action.sa_sigaction)
+            g_previous_trap_action.sa_sigaction(signal_number, nullptr, context);
+    }
+    else if (g_previous_trap_action.sa_handler == SIG_DFL)
+    {
+        signal(signal_number, SIG_DFL);
+        raise(signal_number);
+    }
+    else if (g_previous_trap_action.sa_handler && g_previous_trap_action.sa_handler != SIG_IGN)
+    {
+        g_previous_trap_action.sa_handler(signal_number);
+    }
+}
+
+void ensure_trap_handler_installed()
+{
+    static std::once_flag once;
+    std::call_once(once, []() {
+        struct sigaction trap_action;
+        std::memset(&trap_action, 0, sizeof(trap_action));
+        trap_action.sa_sigaction = trap_signal_handler;
+        trap_action.sa_flags     = SA_SIGINFO | SA_NODEFER;
+        sigemptyset(&trap_action.sa_mask);
+        sigaction(SIGTRAP, &trap_action, &g_previous_trap_action);
+
+        struct sigaction suspend_action;
+        std::memset(&suspend_action, 0, sizeof(suspend_action));
+        suspend_action.sa_sigaction = suspend_signal_handler;
+        suspend_action.sa_flags     = SA_SIGINFO | SA_RESTART;
+        sigemptyset(&suspend_action.sa_mask);
+        sigaction(k_suspend_signal, &suspend_action, &g_previous_suspend_action);
+    });
+}
+
+class thread_parker
+{
+public:
+    ~thread_parker()
+    {
+        resume();
+    }
+
+    bool park()
+    {
+        DIR* dir = opendir("/proc/self/task");
+        if (!dir)
+            return false;
+
+        const pid_t        self = current_tid();
+        std::vector<pid_t> tids;
+        while (dirent* entry = readdir(dir))
+        {
+            if (entry->d_name[0] == '.')
+                continue;
+
+            const pid_t tid = static_cast<pid_t>(strtol(entry->d_name, nullptr, 10));
+            if (tid <= 0 || tid == self)
+                continue;
+
+            tids.push_back(tid);
+        }
+
+        closedir(dir);
+
+        if (tids.empty())
+            return true;
+
+        record_count_ = tids.size();
+        records_.reset(new linux_thread_record[record_count_]);
+        for (std::size_t i = 0; i < record_count_; ++i)
+            records_[i].tid = tids[i];
+
+        g_suspend_requested.store(1, std::memory_order_release);
+        g_suspend_records.store(records_.get(), std::memory_order_release);
+        g_suspend_record_count.store(static_cast<int>(record_count_), std::memory_order_release);
+
+        const pid_t process_id = getpid();
+        for (std::size_t i = 0; i < record_count_; ++i)
+            syscall(SYS_tgkill, process_id, records_[i].tid, k_suspend_signal);
+
+        for (int retry = 0; retry < k_patch_retry_count; ++retry)
+        {
+            bool all_parked = true;
+            for (std::size_t i = 0; i < record_count_; ++i)
+            {
+                if (!records_[i].parked.load(std::memory_order_acquire))
+                {
+                    all_parked = false;
+                    break;
+                }
+            }
+
+            if (all_parked)
+                return true;
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+
+        resume();
+
+        return false;
+    }
+
+    bool has_ip_in_range(const hook_information_t* information) const
+    {
+        for (std::size_t i = 0; i < record_count_; ++i)
+        {
+            if (is_in_patch_range(records_[i].rip.load(std::memory_order_acquire), information))
+                return true;
+        }
+
+        return false;
+    }
+
+    void resume()
+    {
+        if (records_)
+        {
+            g_suspend_requested.store(0, std::memory_order_release);
+            for (int retry = 0; retry < k_patch_retry_count; ++retry)
+            {
+                bool all_resumed = true;
+                for (std::size_t i = 0; i < record_count_; ++i)
+                {
+                    if (records_[i].parked.load(std::memory_order_acquire))
+                    {
+                        all_resumed = false;
+                        break;
+                    }
+                }
+
+                if (all_resumed)
+                    break;
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
+
+        g_suspend_records.store(nullptr, std::memory_order_release);
+        g_suspend_record_count.store(0, std::memory_order_release);
+        records_.reset();
+        record_count_ = 0;
+    }
+
+private:
+    std::unique_ptr<linux_thread_record[]> records_{};
+    std::size_t                            record_count_{0};
+};
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+bool wait_for_safe_patch_window(hook_information_t* information)
+{
+    for (int retry = 0; retry < k_patch_retry_count; ++retry)
+    {
+        thread_parker parker;
+        if (!parker.park())
+            return false;
+
+        if (!parker.has_ip_in_range(information))
+            return true;
+
+        parker.resume();
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
+    return false;
+}
+
+bool write_entry_transaction(hook_information_t* information, const unsigned char* final_bytes, bool enabling)
+{
+    ensure_trap_handler_installed();
+
+    unsigned long old_protection = 0;
+    if (!platform_make_writable(information->original_function, static_cast<std::size_t>(information->bytes_to_copy), &old_protection))
+        return false;
+
+    auto* entry = static_cast<unsigned char*>(information->original_function);
+
+    g_active_transaction.store(information, std::memory_order_release);
+
+    entry[0] = 0xCC;
+    platform_flush_instruction_cache(entry, 1);
+
+    if (!wait_for_safe_patch_window(information))
+    {
+        std::memcpy(entry, enabling ? information->original_buffer : final_bytes, static_cast<std::size_t>(information->bytes_to_copy));
+        platform_flush_instruction_cache(entry, static_cast<std::size_t>(information->bytes_to_copy));
+        g_active_transaction.store(nullptr, std::memory_order_release);
+        platform_restore_protection(information->original_function, static_cast<std::size_t>(information->bytes_to_copy), old_protection);
+
+        return false;
+    }
+
+    if (information->bytes_to_copy > 1)
+    {
+        std::memcpy(entry + 1, final_bytes + 1, static_cast<std::size_t>(information->bytes_to_copy - 1));
+        platform_flush_instruction_cache(entry + 1, static_cast<std::size_t>(information->bytes_to_copy - 1));
+    }
+
+    entry[0] = final_bytes[0];
+    platform_flush_instruction_cache(entry, static_cast<std::size_t>(information->bytes_to_copy));
+
+    wait_for_safe_patch_window(information);
+    std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms));
+    g_active_transaction.store(nullptr, std::memory_order_release);
+    platform_restore_protection(information->original_function, static_cast<std::size_t>(information->bytes_to_copy), old_protection);
+
+    return true;
+}
+
+bool prepare_patch_size(hook_information_t* information)
+{
+    if (!information || !information->original_function || !information->target_function)
+        return false;
+
+    int copied = 0;
+    while (copied < static_cast<int>(k_jump_size))
+    {
+        if (copied >= static_cast<int>(sizeof(information->original_buffer)))
+            return false;
+
+        const instruction_info info = decode_instruction(static_cast<unsigned char*>(information->original_function) + copied);
+        if (!info.supported || info.length <= 0 || copied + info.length > static_cast<int>(sizeof(information->original_buffer)))
+            return false;
+
+        copied += info.length;
+    }
+
+    information->bytes_to_copy = copied;
+    std::memcpy(information->original_buffer, information->original_function, static_cast<std::size_t>(copied));
+
+    return true;
+}
+
+} // namespace
 
 hook_information_t create_hook(void* original_function, void* target_function)
 {
     hook_information_t information;
-    information.enabled = 0;
-    information.trampoline = 0;
+    std::memset(&information, 0, sizeof(information));
     information.original_function = original_function;
-    information.target_function = target_function;
+    information.target_function   = target_function;
 
-    int size = 0;
-    while (size < (int)sizeof(jump_code))
-        size += get_instruction_size((unsigned char*)original_function + size);
-
-    information.bytes_to_copy = size;
-    memory_copy(information.original_buffer, original_function, size);
+    prepare_patch_size(&information);
 
     return information;
 }
 
 int enable_hook(hook_information_t* information)
 {
-    if (information->enabled)
-        return 1;
+    std::lock_guard<std::mutex> lock(g_hook_mutex);
 
-    const int buffer_size = (int)sizeof(jump_code) + information->bytes_to_copy;
-    unsigned char* buffer = (unsigned char*)platform_allocate(buffer_size);
-    if (!buffer)
+    if (!information || information->enabled)
+        return information ? 1 : 0;
+
+    if (information->bytes_to_copy <= 0 && !prepare_patch_size(information))
         return 0;
 
-    information->trampoline = buffer;
-    memory_copy(buffer, information->original_buffer, information->bytes_to_copy);
+    information->trampoline = platform_allocate_near(information->original_function, k_trampoline_size);
+    if (!information->trampoline)
+        return 0;
 
-    create_jump(original_jump, (unsigned char*)information->original_function + information->bytes_to_copy);
-    memory_copy(buffer + information->bytes_to_copy, original_jump, sizeof(jump_code));
+    if (!build_trampoline(information))
+    {
+        platform_free(information->trampoline, k_trampoline_size);
+        information->trampoline      = nullptr;
+        information->trampoline_size = 0;
 
-    create_jump(target_jump, information->target_function);
-    unsigned long long original_protection = platform_protect(information->original_function, information->bytes_to_copy, PROTECTION_READ_WRITE_EXECUTE);
-    memory_copy(information->original_function, target_jump, sizeof(jump_code));
-    platform_protect(information->original_function, information->bytes_to_copy, original_protection);
+        return 0;
+    }
+
+    unsigned char patch_bytes[sizeof(information->original_buffer)];
+    make_patch_bytes(patch_bytes, information->target_function, information->bytes_to_copy);
+
+    if (!write_entry_transaction(information, patch_bytes, true))
+    {
+        platform_free(information->trampoline, k_trampoline_size);
+        information->trampoline      = nullptr;
+        information->trampoline_size = 0;
+
+        return 0;
+    }
 
     information->enabled = 1;
+
     return 1;
 }
 
 int disable_hook(hook_information_t* information)
 {
+    std::lock_guard<std::mutex> lock(g_hook_mutex);
+
+    if (!information)
+        return 0;
+
     if (!information->enabled)
         return 1;
 
-    unsigned long long original_protection = platform_protect(information->original_function, information->bytes_to_copy, PROTECTION_READ_WRITE_EXECUTE);
-    memory_copy(information->original_function, information->original_buffer, information->bytes_to_copy);
-    platform_protect(information->original_function, information->bytes_to_copy, original_protection);
+    if (!write_entry_transaction(information, information->original_buffer, false))
+        return 0;
 
-    platform_free(information->trampoline, sizeof(jump_code) + information->bytes_to_copy);
+    platform_free(information->trampoline, information->trampoline_size > 0 ? static_cast<std::size_t>(information->trampoline_size) : k_trampoline_size);
+    information->trampoline      = nullptr;
+    information->trampoline_size = 0;
+    information->enabled         = 0;
 
-    information->enabled = 0;
     return 1;
 }
