@@ -8,6 +8,7 @@
 #include <limits>
 #include <memory>
 #include <mutex>
+#include <tuple>
 #include <thread>
 #include <vector>
 
@@ -1077,6 +1078,7 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
     std::memcpy(rollback_bytes, entry, static_cast<size_t>(information->bytes_to_copy));
 
     g_active_transaction.store(information, std::memory_order_release);
+    std::atomic_signal_fence(std::memory_order_seq_cst);
 
     entry[0] = 0xCC;
     platform_flush_instruction_cache(entry, 1);
@@ -1085,6 +1087,7 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
     {
         std::memcpy(entry, rollback_bytes, static_cast<size_t>(information->bytes_to_copy));
         platform_flush_instruction_cache(entry, static_cast<size_t>(information->bytes_to_copy));
+        std::atomic_signal_fence(std::memory_order_seq_cst);
         g_active_transaction.store(nullptr, std::memory_order_release);
         platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
 
@@ -1102,6 +1105,7 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
 
     wait_for_safe_patch_window(information);
     std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms));
+    std::atomic_signal_fence(std::memory_order_seq_cst);
     g_active_transaction.store(nullptr, std::memory_order_release);
     platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
 
