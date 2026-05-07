@@ -95,7 +95,7 @@ public:
         VirtualFree(data_, 0, MEM_RELEASE);
 #elif defined(CORE_PLATFORM_LINUX)
         munmap(data_, size_);
-#endif
+#endif // defined(CORE_PLATFORM_WINDOWS)
     }
 
     [[nodiscard]] bool valid() const
