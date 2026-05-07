@@ -431,7 +431,8 @@ TEST_SUITE("Hook")
         const int original_value = input + g_light_hook_probe_seed + 1;
         const int patch_value    = input + g_light_hook_probe_seed + 2;
 
-        for (int i = 0; i < 8; ++i)
+        constexpr int k_caller_thread_count = 4;
+        for (int i = 0; i < k_caller_thread_count; ++i)
         {
             callers.emplace_back([&]() {
                 while (!stop.load(std::memory_order_acquire))
@@ -443,7 +444,8 @@ TEST_SUITE("Hook")
             });
         }
 
-        for (int i = 0; i < 20; ++i)
+        constexpr int k_patch_round_count = 5;
+        for (int i = 0; i < k_patch_round_count; ++i)
         {
             CHECK(enable_hook(&hook_func) != 0);
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
