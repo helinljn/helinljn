@@ -6,19 +6,12 @@
 #include "core/timespan.h"
 #include "core/timestamp.h"
 #include "core/datetime.h"
-#include "core/stack_trace.h"
 #include "spdlog/fmt/fmt.h"
 #include <thread>
 #include <fstream>
 
 TEST_SUITE("Misc")
 {
-    TEST_CASE("stack_trace")
-    {
-        const auto str = core::stack_trace().to_string();
-        fmt::print("{}", str);
-    }
-
     TEST_CASE("Timespan")
     {
         constexpr core::timespan span1;

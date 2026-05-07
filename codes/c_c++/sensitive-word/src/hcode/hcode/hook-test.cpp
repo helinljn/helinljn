@@ -1,7 +1,9 @@
 #include "doctest.h"
 #include "core/common.h"
+#include "core/stack_trace.h"
 #include "core/symbol_loader.h"
 #include "core/light_hook.h"
+#include "spdlog/fmt/fmt.h"
 #include "testa/testa.h"
 #include "testb.h"
 #include <atomic>
@@ -169,6 +171,12 @@ void write_nops(executable_code& code, size_t offset, size_t count)
 
 TEST_SUITE("Hook")
 {
+    TEST_CASE("stack_trace")
+    {
+        const auto str = core::stack_trace().to_string();
+        fmt::print("{}", str);
+    }
+
     TEST_CASE("SymbolLoader")
     {
         // 测试加载可执行文件中的main函数
