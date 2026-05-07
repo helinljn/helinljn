@@ -39,7 +39,7 @@ struct hook_information_t
 {
     int           enabled;               // 当前 Hook 是否已启用
     int           bytes_to_copy;         // 为构建跳板而复制的原始指令字节数
-    int           trampoline_size;       // trampoline 实际分配字节数
+    int           trampoline_size;       // trampoline 分配字节数
     unsigned char original_buffer[128];  // 原函数前若干字节的备份
     void*         original_function;     // 被 Hook 的原函数
     void*         target_function;       // Hook 后跳转到的目标函数

@@ -382,6 +382,7 @@ bool append_absolute_jump(std::vector<unsigned char>& output, const void* target
 
 bool append_absolute_call(std::vector<unsigned char>& output, const void* target)
 {
+    // call [rip+2]; jmp +8; <abs64 target>
     const unsigned char prefix[] = {0xFF, 0x15, 0x02, 0x00, 0x00, 0x00, 0xEB, 0x08};
     if (!append_bytes(output, prefix, sizeof(prefix)))
         return false;
@@ -1055,6 +1056,8 @@ bool wait_for_safe_patch_window(hook_information_t* information)
         if (!parker.park())
             return false;
 
+        // The parked threads are intentionally resumed when returning true.
+        // entry[0] remains INT3 and g_active_transaction stays active while the remaining bytes are patched.
         if (!parker.has_ip_in_range(information))
             return true;
 
