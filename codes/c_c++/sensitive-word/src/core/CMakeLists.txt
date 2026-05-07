@@ -33,6 +33,7 @@ IF(WIN32)
     SET(CURRENT_LINK_LIBS
         jsoncpp
         opencc
+        Dbghelp
     )
 ELSE()
     # 宏定义
@@ -53,6 +54,7 @@ ELSE()
     SET(CURRENT_LINK_LIBS
         jsoncpp
         opencc
+        dl
     )
 ENDIF()
 
