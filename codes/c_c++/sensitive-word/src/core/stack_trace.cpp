@@ -1,5 +1,6 @@
 #include "stack_trace.h"
 #include <array>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
@@ -205,8 +206,8 @@ std::string stack_trace::to_string() const
         const frame& current = frames_[idx];
 
         stream << '#' << std::setw(4) << std::left << idx << std::right
-               << "0x" << std::hex << std::setw(static_cast<int>(sizeof(std::uintptr_t) * 2))
-               << std::setfill('0') << reinterpret_cast<std::uintptr_t>(current.address)
+               << "0x" << std::hex << std::setw(static_cast<int>(sizeof(uintptr_t) * 2))
+               << std::setfill('0') << reinterpret_cast<uintptr_t>(current.address)
                << std::dec << std::setfill(' ') << ": "
                << (current.module.empty() ? "<unknown>" : current.module) << '!'
                << (current.function.empty() ? "???" : current.function);
