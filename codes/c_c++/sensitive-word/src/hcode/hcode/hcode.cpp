@@ -1,8 +1,12 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 #include "mimalloc.h"
+#include "core/stack_trace.h"
 #include <cstdlib>
 #include <new>
+
+#define TRY_BEGIN try {
+#define TRY_END   } catch(...) {}
 
 namespace {
 
@@ -39,6 +43,27 @@ bool verify_mimalloc()
     return true;
 }
 
+////////////////////////////////////////////////////////////////
+// 初始化器
+////////////////////////////////////////////////////////////////
+class initializer final
+{
+public:
+    initializer()
+    {
+        TRY_BEGIN
+            core::stack_trace::initialize();
+        TRY_END
+    }
+
+    ~initializer()
+    {
+        TRY_BEGIN
+            core::stack_trace::uninitialize();
+        TRY_END
+    }
+};
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -47,6 +72,8 @@ int main(int argc, char** argv)
 
     if (!verify_mimalloc())
         return EXIT_FAILURE;
+
+    initializer init;
 
     doctest::Context context;
     context.applyCommandLine(argc, argv);
