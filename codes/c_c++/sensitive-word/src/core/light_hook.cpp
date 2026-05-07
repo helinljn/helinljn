@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cstdio>
 #include <cstdint>
 #include <cstring>
 #include <limits>
@@ -29,13 +30,17 @@
     #include <sys/ucontext.h>
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
+#if !defined(_M_X64) && !defined(__x86_64__) && !defined(__amd64__)
+    #error "light_hook only supports x86_64."
+#endif // !defined(_M_X64) && !defined(__x86_64__) && !defined(__amd64__)
+
 namespace {
 
-constexpr std::size_t k_jump_size         = 14;
-constexpr std::size_t k_max_relocated     = 128;
-constexpr std::size_t k_trampoline_size   = 512;
-constexpr int         k_patch_retry_count = 1000;
-constexpr int         k_trap_grace_ms     = 2;
+constexpr size_t k_jump_size         = 14;
+constexpr size_t k_max_relocated     = 128;
+constexpr size_t k_trampoline_size   = 512;
+constexpr int    k_patch_retry_count = 1000;
+constexpr int    k_trap_grace_ms     = 2;
 
 const unsigned char k_jump_code[k_jump_size] = {
     0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
@@ -57,9 +62,27 @@ struct instruction_info
     unsigned char condition           = 0;
 };
 
-bool fits_int32(std::intptr_t value)
+#if defined(CORE_PLATFORM_LINUX)
+struct protection_range
 {
-    return value >= std::numeric_limits<std::int32_t>::min() && value <= std::numeric_limits<std::int32_t>::max();
+    uintptr_t start      = 0;
+    uintptr_t end        = 0;
+    int       protection = 0;
+};
+#endif // defined(CORE_PLATFORM_LINUX)
+
+struct platform_protection_state
+{
+#if defined(CORE_PLATFORM_WINDOWS)
+    unsigned long old_protection = 0;
+#elif defined(CORE_PLATFORM_LINUX)
+    std::vector<protection_range> ranges;
+#endif // defined(CORE_PLATFORM_WINDOWS)
+};
+
+bool fits_int32(intptr_t value)
+{
+    return value >= std::numeric_limits<int32_t>::min() && value <= std::numeric_limits<int32_t>::max();
 }
 
 bool is_legacy_prefix(unsigned char value)
@@ -83,15 +106,20 @@ bool is_legacy_prefix(unsigned char value)
     }
 }
 
-bool has_opcode(unsigned char opcode, const unsigned char* values, std::size_t size)
+bool has_opcode(unsigned char opcode, const unsigned char* values, size_t size)
 {
-    for (std::size_t i = 0; i < size; ++i)
+    for (size_t i = 0; i < size; ++i)
     {
         if (values[i] == opcode)
             return true;
     }
 
     return false;
+}
+
+bool is_vex_or_evex_prefix(unsigned char opcode)
+{
+    return opcode == 0xC4 || opcode == 0xC5 || opcode == 0x62;
 }
 
 void parse_modrm(const unsigned char* start, const unsigned char*& cursor, bool address_prefix, instruction_info& info)
@@ -170,9 +198,17 @@ instruction_info decode_instruction(const void* address)
         break;
     }
 
-    const unsigned char opcode         = *cursor++;
-    bool                has_modrm_byte = false;
-    int                 immediate_size = 0;
+    const unsigned char opcode = *cursor++;
+    if (is_vex_or_evex_prefix(opcode))
+    {
+        info.supported = false;
+        info.length    = 0;
+
+        return info;
+    }
+
+    bool has_modrm_byte = false;
+    int  immediate_size = 0;
     if (opcode == 0xE8)
     {
         info.relative_kind   = 1;
@@ -322,10 +358,10 @@ instruction_info decode_instruction(const void* address)
 void write_absolute_jump(unsigned char* output, const void* target)
 {
     std::memcpy(output, k_jump_code, sizeof(k_jump_code));
-    *reinterpret_cast<std::uintptr_t*>(output + 6) = reinterpret_cast<std::uintptr_t>(target);
+    *reinterpret_cast<uintptr_t*>(output + 6) = reinterpret_cast<uintptr_t>(target);
 }
 
-bool append_bytes(std::vector<unsigned char>& output, const void* data, std::size_t size)
+bool append_bytes(std::vector<unsigned char>& output, const void* data, size_t size)
 {
     if (output.size() + size > k_trampoline_size)
         return false;
@@ -349,7 +385,7 @@ bool append_absolute_call(std::vector<unsigned char>& output, const void* target
     if (!append_bytes(output, prefix, sizeof(prefix)))
         return false;
 
-    const std::uintptr_t target_value = reinterpret_cast<std::uintptr_t>(target);
+    const uintptr_t target_value = reinterpret_cast<uintptr_t>(target);
     return append_bytes(output, &target_value, sizeof(target_value));
 }
 
@@ -368,12 +404,12 @@ bool append_absolute_jcc(std::vector<unsigned char>& output, unsigned char condi
     return append_bytes(output, skip_jump, sizeof(skip_jump)) && append_absolute_jump(output, target);
 }
 
-std::intptr_t read_relative_value(const unsigned char* instruction, const instruction_info& info)
+intptr_t read_relative_value(const unsigned char* instruction, const instruction_info& info)
 {
     if (info.relative_size == 1)
-        return *reinterpret_cast<const std::int8_t*>(instruction + info.relative_offset);
+        return *reinterpret_cast<const int8_t*>(instruction + info.relative_offset);
 
-    return *reinterpret_cast<const std::int32_t*>(instruction + info.relative_offset);
+    return *reinterpret_cast<const int32_t*>(instruction + info.relative_offset);
 }
 
 bool append_relocated_instruction(std::vector<unsigned char>& output,
@@ -381,11 +417,11 @@ bool append_relocated_instruction(std::vector<unsigned char>& output,
                                   unsigned char*              trampoline_base,
                                   const instruction_info&     info)
 {
-    const auto source_address = reinterpret_cast<std::uintptr_t>(source_instruction);
-    const auto source_next    = source_address + static_cast<std::uintptr_t>(info.length);
+    const auto source_address = reinterpret_cast<uintptr_t>(source_instruction);
+    const auto source_next    = source_address + static_cast<uintptr_t>(info.length);
     if (info.relative_kind != 0)
     {
-        const std::uintptr_t target = source_next + read_relative_value(source_instruction, info);
+        const uintptr_t target = source_next + read_relative_value(source_instruction, info);
         if (info.relative_kind == 1)
             return append_absolute_call(output, reinterpret_cast<const void*>(target));
 
@@ -395,19 +431,19 @@ bool append_relocated_instruction(std::vector<unsigned char>& output,
         return append_absolute_jcc(output, info.condition, reinterpret_cast<const void*>(target));
     }
 
-    const std::size_t output_offset = output.size();
-    if (!append_bytes(output, source_instruction, static_cast<std::size_t>(info.length)))
+    const size_t output_offset = output.size();
+    if (!append_bytes(output, source_instruction, static_cast<size_t>(info.length)))
         return false;
 
     if (info.rip_relative)
     {
-        const std::uintptr_t source_target = source_next + *reinterpret_cast<const std::int32_t*>(source_instruction + info.displacement_offset);
-        const std::uintptr_t dest_next     = reinterpret_cast<std::uintptr_t>(trampoline_base) + output_offset + static_cast<std::uintptr_t>(info.length);
-        const auto           new_disp      = static_cast<std::intptr_t>(source_target - dest_next);
+        const uintptr_t source_target = source_next + *reinterpret_cast<const int32_t*>(source_instruction + info.displacement_offset);
+        const uintptr_t dest_next     = reinterpret_cast<uintptr_t>(trampoline_base) + output_offset + static_cast<uintptr_t>(info.length);
+        const auto      new_disp      = static_cast<intptr_t>(source_target - dest_next);
         if (!fits_int32(new_disp))
             return false;
 
-        *reinterpret_cast<std::int32_t*>(output.data() + output_offset + static_cast<std::size_t>(info.displacement_offset)) = static_cast<std::int32_t>(new_disp);
+        *reinterpret_cast<int32_t*>(output.data() + output_offset + static_cast<size_t>(info.displacement_offset)) = static_cast<int32_t>(new_disp);
     }
 
     return true;
@@ -444,42 +480,110 @@ bool build_trampoline(hook_information_t* information)
     return true;
 }
 
-std::size_t page_size()
+size_t page_size()
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     SYSTEM_INFO info;
     GetSystemInfo(&info);
     return info.dwPageSize;
 #elif defined(CORE_PLATFORM_LINUX)
-    return static_cast<std::size_t>(getpagesize());
+    return static_cast<size_t>(getpagesize());
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-std::uintptr_t align_down(std::uintptr_t value, std::size_t alignment)
+uintptr_t align_down(uintptr_t value, size_t alignment)
 {
-    return value & ~(static_cast<std::uintptr_t>(alignment) - 1U);
+    return value & ~(static_cast<uintptr_t>(alignment) - 1U);
 }
 
-void* platform_allocate_near(const void* target, std::size_t size)
+#if defined(CORE_PLATFORM_LINUX)
+int permissions_to_protection(const char* permissions)
+{
+    int protection = 0;
+    if (permissions[0] == 'r')
+        protection |= PROT_READ;
+
+    if (permissions[1] == 'w')
+        protection |= PROT_WRITE;
+
+    if (permissions[2] == 'x')
+        protection |= PROT_EXEC;
+
+    return protection;
+}
+
+bool record_original_protection(uintptr_t start, uintptr_t end, platform_protection_state* state)
+{
+    state->ranges.clear();
+
+    FILE* maps = std::fopen("/proc/self/maps", "r");
+    if (!maps)
+        return false;
+
+    char line[512];
+    while (std::fgets(line, sizeof(line), maps))
+    {
+        unsigned long long map_start = 0;
+        unsigned long long map_end   = 0;
+        char               perms[5]  = {};
+        if (std::sscanf(line, "%llx-%llx %4s", &map_start, &map_end, perms) != 3)
+            continue;
+
+        const uintptr_t range_start = static_cast<uintptr_t>(map_start);
+        const uintptr_t range_end   = static_cast<uintptr_t>(map_end);
+        if (range_end <= start || range_start >= end)
+            continue;
+
+        protection_range range;
+        range.start      = std::max(range_start, start);
+        range.end        = std::min(range_end, end);
+        range.protection = permissions_to_protection(perms);
+        state->ranges.push_back(range);
+    }
+
+    std::fclose(maps);
+
+    if (state->ranges.empty())
+        return false;
+
+    std::sort(state->ranges.begin(), state->ranges.end(), [](const protection_range& left, const protection_range& right) {
+        return left.start < right.start;
+    });
+
+    uintptr_t covered = start;
+    for (const auto& range : state->ranges)
+    {
+        if (range.start > covered)
+            return false;
+
+        if (range.end > covered)
+            covered = range.end;
+    }
+
+    return covered >= end;
+}
+#endif // defined(CORE_PLATFORM_LINUX)
+
+void* platform_allocate_near(const void* target, size_t size)
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     SYSTEM_INFO info;
     GetSystemInfo(&info);
-    const std::uintptr_t granularity = info.dwAllocationGranularity;
-    const std::uintptr_t base        = align_down(reinterpret_cast<std::uintptr_t>(target), granularity);
-    const std::uintptr_t range       = 0x7FFF0000ULL;
 
-    for (std::uintptr_t offset = 0; offset < range; offset += granularity)
+    const uintptr_t granularity = info.dwAllocationGranularity;
+    const uintptr_t base        = align_down(reinterpret_cast<uintptr_t>(target), granularity);
+    const uintptr_t range       = 0x7FFF0000ULL;
+    for (uintptr_t offset = 0; offset < range; offset += granularity)
     {
-        const std::uintptr_t high = base + offset;
-        void* memory = VirtualAlloc(reinterpret_cast<void*>(high), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+        const auto high   = base + offset;
+        void*      memory = VirtualAlloc(reinterpret_cast<void*>(high), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
         if (memory)
             return memory;
 
         if (base > offset)
         {
-            const std::uintptr_t low = base - offset;
-            memory = VirtualAlloc(reinterpret_cast<void*>(low), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+            const auto low = base - offset;
+            memory         = VirtualAlloc(reinterpret_cast<void*>(low), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
             if (memory)
                 return memory;
         }
@@ -487,20 +591,18 @@ void* platform_allocate_near(const void* target, std::size_t size)
 
     return VirtualAlloc(nullptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
 #elif defined(CORE_PLATFORM_LINUX)
-    const std::size_t    page      = page_size();
-    const std::uintptr_t base      = align_down(reinterpret_cast<std::uintptr_t>(target), page);
-    const std::uintptr_t max_range = 0x7FFF0000ULL;
-
-    for (std::uintptr_t offset = 0; offset < max_range; offset += page * 16)
+    const size_t    page      = page_size();
+    const uintptr_t base      = align_down(reinterpret_cast<uintptr_t>(target), page);
+    const uintptr_t max_range = 0x7FFF0000ULL;
+    for (uintptr_t offset = 0; offset < max_range; offset += page * 16)
     {
-        const std::uintptr_t candidates[] = { base + offset, base > offset ? base - offset : 0 };
-        for (std::uintptr_t candidate : candidates)
+        const uintptr_t candidates[] = { base + offset, base > offset ? base - offset : 0 };
+        for (uintptr_t candidate : candidates)
         {
             if (candidate == 0)
                 continue;
 
-            void* memory = mmap(reinterpret_cast<void*>(candidate),
-                                size,
+            void* memory = mmap(reinterpret_cast<void*>(candidate), size,
                                 PROT_READ | PROT_WRITE | PROT_EXEC,
                                 MAP_PRIVATE | MAP_ANONYMOUS
 #ifdef MAP_FIXED_NOREPLACE
@@ -511,7 +613,8 @@ void* platform_allocate_near(const void* target, std::size_t size)
                                 0);
             if (memory == MAP_FAILED)
                 continue;
-            if (fits_int32(reinterpret_cast<std::intptr_t>(memory) - reinterpret_cast<std::intptr_t>(target)))
+
+            if (fits_int32(reinterpret_cast<intptr_t>(memory) - reinterpret_cast<intptr_t>(target)))
                 return memory;
 
             munmap(memory, size);
@@ -523,7 +626,7 @@ void* platform_allocate_near(const void* target, std::size_t size)
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-void platform_free(void* address, std::size_t size)
+void platform_free(void* address, size_t size)
 {
     if (!address)
         return;
@@ -536,40 +639,40 @@ void platform_free(void* address, std::size_t size)
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-bool platform_make_writable(void* address, std::size_t size, unsigned long* old_protection)
+bool platform_make_writable(void* address, size_t size, platform_protection_state* protection_state)
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     DWORD old = 0;
     if (!VirtualProtect(address, size, PAGE_EXECUTE_READWRITE, &old))
         return false;
-    *old_protection = old;
+    protection_state->old_protection = old;
     return true;
 #elif defined(CORE_PLATFORM_LINUX)
-    const std::size_t page     = page_size();
-    const auto        start    = align_down(reinterpret_cast<std::uintptr_t>(address), page);
-    const auto        end      = reinterpret_cast<std::uintptr_t>(address) + size;
-    const auto        end_page = align_down(end + page - 1, page);
-    (void)old_protection;
+    const size_t page     = page_size();
+    const auto   start    = align_down(reinterpret_cast<uintptr_t>(address), page);
+    const auto   end      = reinterpret_cast<uintptr_t>(address) + size;
+    const auto   end_page = align_down(end + page - 1, page);
+    if (!record_original_protection(start, end_page, protection_state))
+        return false;
+
     return mprotect(reinterpret_cast<void*>(start), end_page - start, PROT_READ | PROT_WRITE | PROT_EXEC) == 0;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-void platform_restore_protection(void* address, std::size_t size, unsigned long old_protection)
+void platform_restore_protection(void* address, size_t size, const platform_protection_state& protection_state)
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     DWORD ignored = 0;
-    VirtualProtect(address, size, old_protection, &ignored);
+    VirtualProtect(address, size, protection_state.old_protection, &ignored);
 #elif defined(CORE_PLATFORM_LINUX)
-    const std::size_t page     = page_size();
-    const auto        start    = align_down(reinterpret_cast<std::uintptr_t>(address), page);
-    const auto        end      = reinterpret_cast<std::uintptr_t>(address) + size;
-    const auto        end_page = align_down(end + page - 1, page);
-    (void)old_protection;
-    mprotect(reinterpret_cast<void*>(start), end_page - start, PROT_READ | PROT_EXEC);
+    (void)address;
+    (void)size;
+    for (const auto& range : protection_state.ranges)
+        mprotect(reinterpret_cast<void*>(range.start), range.end - range.start, range.protection);
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
-void platform_flush_instruction_cache(void* address, std::size_t size)
+void platform_flush_instruction_cache(void* address, size_t size)
 {
 #if defined(CORE_PLATFORM_WINDOWS)
     FlushInstructionCache(GetCurrentProcess(), address, size);
@@ -580,14 +683,14 @@ void platform_flush_instruction_cache(void* address, std::size_t size)
 
 void make_patch_bytes(unsigned char* buffer, const void* target, int patch_size)
 {
-    std::memset(buffer, 0x90, static_cast<std::size_t>(patch_size));
+    std::memset(buffer, 0x90, static_cast<size_t>(patch_size));
     write_absolute_jump(buffer, target);
 }
 
-bool is_in_patch_range(std::uintptr_t ip, const hook_information_t* information)
+bool is_in_patch_range(uintptr_t ip, const hook_information_t* information)
 {
-    const auto start = reinterpret_cast<std::uintptr_t>(information->original_function);
-    const auto end   = start + static_cast<std::uintptr_t>(information->bytes_to_copy);
+    const auto start = reinterpret_cast<uintptr_t>(information->original_function);
+    const auto end   = start + static_cast<uintptr_t>(information->bytes_to_copy);
     return ip >= start && ip < end;
 }
 
@@ -604,9 +707,9 @@ LONG CALLBACK trap_handler(EXCEPTION_POINTERS* exception_info)
     if (!information)
         return EXCEPTION_CONTINUE_SEARCH;
 
-    const auto entry_rip    = reinterpret_cast<std::uintptr_t>(information->original_function);
+    const auto entry_rip    = reinterpret_cast<uintptr_t>(information->original_function);
     const auto expected_rip = entry_rip + 1U;
-    const auto current_rip  = static_cast<std::uintptr_t>(exception_info->ContextRecord->Rip);
+    const auto current_rip  = static_cast<uintptr_t>(exception_info->ContextRecord->Rip);
     if (current_rip != entry_rip && current_rip != expected_rip)
         return EXCEPTION_CONTINUE_SEARCH;
 
@@ -682,7 +785,7 @@ public:
             if (!GetThreadContext(thread, &context))
                 continue;
 
-            if (is_in_patch_range(static_cast<std::uintptr_t>(context.Rip), information))
+            if (is_in_patch_range(static_cast<uintptr_t>(context.Rip), information))
                 return true;
         }
 
@@ -706,9 +809,9 @@ private:
 #elif defined(CORE_PLATFORM_LINUX)
 struct linux_thread_record
 {
-    pid_t                       tid{0};
-    std::atomic<int>            parked{0};
-    std::atomic<std::uintptr_t> rip{0};
+    pid_t                  tid{0};
+    std::atomic<int>       parked{0};
+    std::atomic<uintptr_t> rip{0};
 };
 
 constexpr int                     k_suspend_signal{SIGUSR2};
@@ -723,22 +826,48 @@ pid_t current_tid()
     return static_cast<pid_t>(syscall(SYS_gettid));
 }
 
-std::uintptr_t context_rip(void* context)
+uintptr_t context_rip(void* context)
 {
     auto* uc = static_cast<ucontext_t*>(context);
-    return static_cast<std::uintptr_t>(uc->uc_mcontext.gregs[REG_RIP]);
+    return static_cast<uintptr_t>(uc->uc_mcontext.gregs[REG_RIP]);
 }
 
-void set_context_rip(void* context, std::uintptr_t rip)
+void set_context_rip(void* context, uintptr_t rip)
 {
     auto* uc = static_cast<ucontext_t*>(context);
     uc->uc_mcontext.gregs[REG_RIP] = static_cast<greg_t>(rip);
 }
 
-void suspend_signal_handler(int, siginfo_t*, void* context)
+void call_previous_signal_action(const struct sigaction& action, int signal_number, siginfo_t* signal_info, void* context)
+{
+    if (action.sa_flags & SA_SIGINFO)
+    {
+        if (action.sa_sigaction)
+            action.sa_sigaction(signal_number, signal_info, context);
+        return;
+    }
+
+    if (action.sa_handler == SIG_DFL)
+    {
+        signal(signal_number, SIG_DFL);
+        raise(signal_number);
+        return;
+    }
+
+    if (action.sa_handler && action.sa_handler != SIG_IGN)
+        action.sa_handler(signal_number);
+}
+
+void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* context)
 {
     linux_thread_record* records = g_suspend_records.load(std::memory_order_acquire);
     const int            count   = g_suspend_record_count.load(std::memory_order_acquire);
+    if (!records || count <= 0)
+    {
+        call_previous_signal_action(g_previous_suspend_action, signal_number, signal_info, context);
+        return;
+    }
+
     const pid_t          tid     = current_tid();
     for (int i = 0; i < count; ++i)
     {
@@ -759,37 +888,26 @@ void suspend_signal_handler(int, siginfo_t*, void* context)
 
         return;
     }
+
+    call_previous_signal_action(g_previous_suspend_action, signal_number, signal_info, context);
 }
 
-void trap_signal_handler(int signal_number, siginfo_t*, void* context)
+void trap_signal_handler(int signal_number, siginfo_t* signal_info, void* context)
 {
     hook_information_t* information = g_active_transaction.load(std::memory_order_acquire);
     if (information)
     {
-        const auto entry_rip    = reinterpret_cast<std::uintptr_t>(information->original_function);
+        const auto entry_rip    = reinterpret_cast<uintptr_t>(information->original_function);
         const auto expected_rip = entry_rip + 1U;
         const auto current_rip  = context_rip(context);
         if (current_rip == entry_rip || current_rip == expected_rip)
         {
-            set_context_rip(context, reinterpret_cast<std::uintptr_t>(information->target_function));
+            set_context_rip(context, reinterpret_cast<uintptr_t>(information->target_function));
             return;
         }
     }
 
-    if (g_previous_trap_action.sa_flags & SA_SIGINFO)
-    {
-        if (g_previous_trap_action.sa_sigaction)
-            g_previous_trap_action.sa_sigaction(signal_number, nullptr, context);
-    }
-    else if (g_previous_trap_action.sa_handler == SIG_DFL)
-    {
-        signal(signal_number, SIG_DFL);
-        raise(signal_number);
-    }
-    else if (g_previous_trap_action.sa_handler && g_previous_trap_action.sa_handler != SIG_IGN)
-    {
-        g_previous_trap_action.sa_handler(signal_number);
-    }
+    call_previous_signal_action(g_previous_trap_action, signal_number, signal_info, context);
 }
 
 void ensure_trap_handler_installed()
@@ -847,21 +965,21 @@ public:
 
         record_count_ = tids.size();
         records_.reset(new linux_thread_record[record_count_]);
-        for (std::size_t i = 0; i < record_count_; ++i)
+        for (size_t i = 0; i < record_count_; ++i)
             records_[i].tid = tids[i];
 
-        g_suspend_requested.store(1, std::memory_order_release);
         g_suspend_records.store(records_.get(), std::memory_order_release);
         g_suspend_record_count.store(static_cast<int>(record_count_), std::memory_order_release);
+        g_suspend_requested.store(1, std::memory_order_release);
 
         const pid_t process_id = getpid();
-        for (std::size_t i = 0; i < record_count_; ++i)
+        for (size_t i = 0; i < record_count_; ++i)
             syscall(SYS_tgkill, process_id, records_[i].tid, k_suspend_signal);
 
         for (int retry = 0; retry < k_patch_retry_count; ++retry)
         {
             bool all_parked = true;
-            for (std::size_t i = 0; i < record_count_; ++i)
+            for (size_t i = 0; i < record_count_; ++i)
             {
                 if (!records_[i].parked.load(std::memory_order_acquire))
                 {
@@ -883,7 +1001,7 @@ public:
 
     bool has_ip_in_range(const hook_information_t* information) const
     {
-        for (std::size_t i = 0; i < record_count_; ++i)
+        for (size_t i = 0; i < record_count_; ++i)
         {
             if (is_in_patch_range(records_[i].rip.load(std::memory_order_acquire), information))
                 return true;
@@ -900,7 +1018,7 @@ public:
             for (int retry = 0; retry < k_patch_retry_count; ++retry)
             {
                 bool all_resumed = true;
-                for (std::size_t i = 0; i < record_count_; ++i)
+                for (size_t i = 0; i < record_count_; ++i)
                 {
                     if (records_[i].parked.load(std::memory_order_acquire))
                     {
@@ -916,15 +1034,15 @@ public:
             }
         }
 
-        g_suspend_records.store(nullptr, std::memory_order_release);
         g_suspend_record_count.store(0, std::memory_order_release);
+        g_suspend_records.store(nullptr, std::memory_order_release);
         records_.reset();
         record_count_ = 0;
     }
 
 private:
     std::unique_ptr<linux_thread_record[]> records_{};
-    std::size_t                            record_count_{0};
+    size_t                                 record_count_{0};
 };
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
@@ -946,15 +1064,17 @@ bool wait_for_safe_patch_window(hook_information_t* information)
     return false;
 }
 
-bool write_entry_transaction(hook_information_t* information, const unsigned char* final_bytes, bool enabling)
+bool write_entry_transaction(hook_information_t* information, const unsigned char* final_bytes)
 {
     ensure_trap_handler_installed();
 
-    unsigned long old_protection = 0;
-    if (!platform_make_writable(information->original_function, static_cast<std::size_t>(information->bytes_to_copy), &old_protection))
+    platform_protection_state protection_state;
+    if (!platform_make_writable(information->original_function, static_cast<size_t>(information->bytes_to_copy), &protection_state))
         return false;
 
     auto* entry = static_cast<unsigned char*>(information->original_function);
+    unsigned char rollback_bytes[sizeof(information->original_buffer)];
+    std::memcpy(rollback_bytes, entry, static_cast<size_t>(information->bytes_to_copy));
 
     g_active_transaction.store(information, std::memory_order_release);
 
@@ -963,27 +1083,27 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
 
     if (!wait_for_safe_patch_window(information))
     {
-        std::memcpy(entry, enabling ? information->original_buffer : final_bytes, static_cast<std::size_t>(information->bytes_to_copy));
-        platform_flush_instruction_cache(entry, static_cast<std::size_t>(information->bytes_to_copy));
+        std::memcpy(entry, rollback_bytes, static_cast<size_t>(information->bytes_to_copy));
+        platform_flush_instruction_cache(entry, static_cast<size_t>(information->bytes_to_copy));
         g_active_transaction.store(nullptr, std::memory_order_release);
-        platform_restore_protection(information->original_function, static_cast<std::size_t>(information->bytes_to_copy), old_protection);
+        platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
 
         return false;
     }
 
     if (information->bytes_to_copy > 1)
     {
-        std::memcpy(entry + 1, final_bytes + 1, static_cast<std::size_t>(information->bytes_to_copy - 1));
-        platform_flush_instruction_cache(entry + 1, static_cast<std::size_t>(information->bytes_to_copy - 1));
+        std::memcpy(entry + 1, final_bytes + 1, static_cast<size_t>(information->bytes_to_copy - 1));
+        platform_flush_instruction_cache(entry + 1, static_cast<size_t>(information->bytes_to_copy - 1));
     }
 
     entry[0] = final_bytes[0];
-    platform_flush_instruction_cache(entry, static_cast<std::size_t>(information->bytes_to_copy));
+    platform_flush_instruction_cache(entry, static_cast<size_t>(information->bytes_to_copy));
 
     wait_for_safe_patch_window(information);
     std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms));
     g_active_transaction.store(nullptr, std::memory_order_release);
-    platform_restore_protection(information->original_function, static_cast<std::size_t>(information->bytes_to_copy), old_protection);
+    platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
 
     return true;
 }
@@ -1007,7 +1127,7 @@ bool prepare_patch_size(hook_information_t* information)
     }
 
     information->bytes_to_copy = copied;
-    std::memcpy(information->original_buffer, information->original_function, static_cast<std::size_t>(copied));
+    std::memcpy(information->original_buffer, information->original_function, static_cast<size_t>(copied));
 
     return true;
 }
@@ -1052,7 +1172,7 @@ int enable_hook(hook_information_t* information)
     unsigned char patch_bytes[sizeof(information->original_buffer)];
     make_patch_bytes(patch_bytes, information->target_function, information->bytes_to_copy);
 
-    if (!write_entry_transaction(information, patch_bytes, true))
+    if (!write_entry_transaction(information, patch_bytes))
     {
         platform_free(information->trampoline, k_trampoline_size);
         information->trampoline      = nullptr;
@@ -1076,10 +1196,10 @@ int disable_hook(hook_information_t* information)
     if (!information->enabled)
         return 1;
 
-    if (!write_entry_transaction(information, information->original_buffer, false))
+    if (!write_entry_transaction(information, information->original_buffer))
         return 0;
 
-    platform_free(information->trampoline, information->trampoline_size > 0 ? static_cast<std::size_t>(information->trampoline_size) : k_trampoline_size);
+    platform_free(information->trampoline, information->trampoline_size > 0 ? static_cast<size_t>(information->trampoline_size) : k_trampoline_size);
     information->trampoline      = nullptr;
     information->trampoline_size = 0;
     information->enabled         = 0;
