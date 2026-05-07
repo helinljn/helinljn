@@ -29,6 +29,11 @@
     #define LIGHT_HOOK_NOINLINE
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
+LIGHT_HOOK_NOINLINE std::string stack_trace_test_probe()
+{
+    return core::stack_trace().to_string();
+}
+
 namespace {
 
 volatile int g_light_hook_probe_seed = 7;
@@ -173,9 +178,9 @@ TEST_SUITE("Hook")
 {
     TEST_CASE("stack_trace")
     {
-        const auto str = core::stack_trace().to_string();
+        const auto str = stack_trace_test_probe();
         CHECK(!str.empty());
-        CHECK(core::contains(str, "stack_trace"));
+        CHECK(core::contains(str, "stack_trace_test_probe"));
         fmt::print("{}", str);
     }
 

@@ -48,6 +48,7 @@ constexpr int stack_trace_capacity = 64;
 #if defined(CORE_PLATFORM_WINDOWS)
 DWORD saved_dbghelp_options       = 0;
 bool  saved_dbghelp_options_valid = false;
+bool  owns_dbghelp_symbol_handler = false;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
 const char* basename_of(const char* path, const char windows_separator, const char unix_separator)
@@ -244,9 +245,21 @@ void stack_trace::initialize_locked()
     SymSetOptions(saved_dbghelp_options | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_LOAD_LINES);
     if (!SymInitialize(process, nullptr, TRUE))
     {
-        SymSetOptions(saved_dbghelp_options);
-        saved_dbghelp_options_valid = false;
-        throw std::runtime_error("Cannot initialize symbol handler for stack trace.");
+        const DWORD error = GetLastError();
+        if (error != ERROR_INVALID_PARAMETER)
+        {
+            SymSetOptions(saved_dbghelp_options);
+            saved_dbghelp_options_valid = false;
+            throw std::runtime_error("Cannot initialize symbol handler for stack trace.");
+        }
+
+        // DbgHelp 的符号处理器是进程级资源；ERROR_INVALID_PARAMETER
+        // 通常表示当前进程已经由其它模块初始化过，后续只能借用，不能清理。
+        owns_dbghelp_symbol_handler = false;
+    }
+    else
+    {
+        owns_dbghelp_symbol_handler = true;
     }
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
@@ -259,18 +272,28 @@ void stack_trace::uninitialize_locked()
         return;
 
 #if defined(CORE_PLATFORM_WINDOWS)
-    HANDLE process = GetCurrentProcess();
-    if (process == nullptr || !SymCleanup(process))
-        throw std::runtime_error("Cannot cleanup symbol handler for stack trace.");
+    bool cleanup_failed = false;
+    if (owns_dbghelp_symbol_handler)
+    {
+        HANDLE process = GetCurrentProcess();
+        cleanup_failed = process == nullptr || !SymCleanup(process);
+    }
 
     if (saved_dbghelp_options_valid)
     {
         SymSetOptions(saved_dbghelp_options);
         saved_dbghelp_options_valid = false;
     }
+
+    owns_dbghelp_symbol_handler = false;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 
     initialized_.store(false, std::memory_order_release);
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    if (cleanup_failed)
+        throw std::runtime_error("Cannot cleanup symbol handler for stack trace.");
+#endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
 } // namespace core
