@@ -2,7 +2,6 @@
 #include <array>
 #include <cstdlib>
 #include <cstring>
-#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <stdexcept>
@@ -44,6 +43,11 @@ std::atomic_bool stack_trace::initialized_{false};
 namespace {
 
 constexpr int stack_trace_capacity = 64;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+DWORD saved_dbghelp_options       = 0;
+bool  saved_dbghelp_options_valid = false;
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 const char* basename_of(const char* path, const char windows_separator, const char unix_separator)
 {
@@ -98,49 +102,22 @@ std::string demangle_symbol_name(const char* symbol_name)
 void stack_trace::initialize()
 {
     std::lock_guard<std::mutex> lock(capture_mutex_);
-    if (initialized_.load(std::memory_order_acquire))
-        return;
-
-#if defined(CORE_PLATFORM_WINDOWS)
-    HANDLE process = GetCurrentProcess();
-    if (process == nullptr)
-        throw std::runtime_error("Cannot get current process handle for stack trace.");
-
-    // 加载行号信息并延迟装载模块符号，避免初始化阶段产生不必要开销。
-    SymSetOptions(SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_LOAD_LINES);
-    if (!SymInitialize(process, nullptr, TRUE))
-        throw std::runtime_error("Cannot initialize symbol handler for stack trace.");
-#endif // defined(CORE_PLATFORM_WINDOWS)
-
-    initialized_.store(true, std::memory_order_release);
+    initialize_locked();
 }
 
 void stack_trace::uninitialize()
 {
     std::lock_guard<std::mutex> lock(capture_mutex_);
-    if (!initialized_.load(std::memory_order_acquire))
-        return;
-
-#if defined(CORE_PLATFORM_WINDOWS)
-    HANDLE process = GetCurrentProcess();
-    if (process == nullptr || !SymCleanup(process))
-        throw std::runtime_error("Cannot cleanup symbol handler for stack trace.");
-#endif // defined(CORE_PLATFORM_WINDOWS)
-
-    initialized_.store(false, std::memory_order_release);
+    uninitialize_locked();
 }
 
 stack_trace::stack_trace()
     : frames_()
 {
-    // Windows 的符号解析依赖进程级初始化；这里按需初始化以降低调用方使用门槛。
-    if (!initialized_.load(std::memory_order_acquire))
-        initialize();
+    std::lock_guard<std::mutex> lock(capture_mutex_);
+    initialize_locked();
 
     std::array<void*, stack_trace_capacity> captured_frames{};
-
-    // DbgHelp 的符号接口不是线程安全的；Linux 分支一起串行化，保证输出一致。
-    std::lock_guard<std::mutex> lock(capture_mutex_);
 
 #if defined(CORE_PLATFORM_WINDOWS)
     const USHORT captured = CaptureStackBackTrace(0, static_cast<DWORD>(captured_frames.size()), captured_frames.data(), nullptr);
@@ -160,7 +137,7 @@ stack_trace::stack_trace()
                 current.module = module_name;
         }
 
-        std::array<char, sizeof(SYMBOL_INFO) + MAX_SYM_NAME> symbol_buffer{};
+        alignas(SYMBOL_INFO) std::array<unsigned char, sizeof(SYMBOL_INFO) + MAX_SYM_NAME> symbol_buffer{};
         auto* symbol         = reinterpret_cast<PSYMBOL_INFO>(symbol_buffer.data());
         symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
         symbol->MaxNameLen   = MAX_SYM_NAME;
@@ -244,6 +221,55 @@ std::string stack_trace::to_string() const
     }
 
     return stream.str();
+}
+
+void stack_trace::initialize_locked()
+{
+    if (initialized_.load(std::memory_order_acquire))
+        return;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    HANDLE process = GetCurrentProcess();
+    if (process == nullptr)
+        throw std::runtime_error("Cannot get current process handle for stack trace.");
+
+    if (!saved_dbghelp_options_valid)
+    {
+        saved_dbghelp_options = SymGetOptions();
+        saved_dbghelp_options_valid = true;
+    }
+
+    // 保留进程既有选项，仅补充 stack_trace 所需的行号与解码能力。
+    SymSetOptions(saved_dbghelp_options | SYMOPT_UNDNAME | SYMOPT_DEFERRED_LOADS | SYMOPT_LOAD_LINES);
+    if (!SymInitialize(process, nullptr, TRUE))
+    {
+        SymSetOptions(saved_dbghelp_options);
+        saved_dbghelp_options_valid = false;
+        throw std::runtime_error("Cannot initialize symbol handler for stack trace.");
+    }
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+    initialized_.store(true, std::memory_order_release);
+}
+
+void stack_trace::uninitialize_locked()
+{
+    if (!initialized_.load(std::memory_order_acquire))
+        return;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    HANDLE process = GetCurrentProcess();
+    if (process == nullptr || !SymCleanup(process))
+        throw std::runtime_error("Cannot cleanup symbol handler for stack trace.");
+
+    if (saved_dbghelp_options_valid)
+    {
+        SymSetOptions(saved_dbghelp_options);
+        saved_dbghelp_options_valid = false;
+    }
+#endif // defined(CORE_PLATFORM_WINDOWS)
+
+    initialized_.store(false, std::memory_order_release);
 }
 
 } // namespace core

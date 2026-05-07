@@ -69,6 +69,10 @@ public:
     std::string to_string() const;
 
 private:
+    static void initialize_locked();
+    static void uninitialize_locked();
+
+private:
     std::vector<frame>      frames_;
     static std::mutex       capture_mutex_;
     static std::atomic_bool initialized_;
