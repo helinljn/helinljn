@@ -25,7 +25,7 @@ def send_idip_command(command, params):
     请求格式:
         POST {IDIP_API_URL}
         Content-Type: application/x-www-form-urlencoded
-        id={command_id}&GSA=&content={url_encoded_json}
+        id={request_id}&GSA=&content={url_encoded_json}
 
     兼容两种响应格式：
     1) 新格式包装：
@@ -69,7 +69,7 @@ def send_idip_command(command, params):
 
     # 构造form-urlencoded数据
     form_data = {
-        'id': command.command_id,
+        'id': command.request_id,
         'GSA': '',
         'content': content_encoded,
     }
