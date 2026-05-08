@@ -10,8 +10,66 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from .command_parser import sync_commands_to_db, validate_json_command_ids
+from .idip_client import send_idip_command
 from .models import CommandLog, GMCommand, UserCommandPermission, UserProfile
 from .security_utils import get_client_ip
+
+
+class IdipClientEncodingTests(TestCase):
+    def test_content_is_not_pre_url_encoded_before_requests_form_encoding(self):
+        command = GMCommand(
+            command_id='10001',
+            command_name='测试命令',
+            tab='测试',
+            request_name='TestReq',
+            request_id=4100,
+            response_name='TestRsp',
+            response_id=4101,
+        )
+        captured = {}
+
+        class FakeResponse:
+            def raise_for_status(self):
+                return None
+
+            def json(self):
+                return {'status': True, 'id': 4100, 'json': {'Result': 0, 'RetMsg': 'OK'}}
+
+        class FakeRequests:
+            class Timeout(Exception):
+                pass
+
+            class ConnectionError(Exception):
+                pass
+
+            JSONDecodeError = json.JSONDecodeError
+
+            def post(self, url, data, timeout):
+                captured['url'] = url
+                captured['data'] = data
+                captured['timeout'] = timeout
+                return FakeResponse()
+
+        with patch('gmtool.idip_client._get_requests', return_value=FakeRequests()):
+            response_data, error_message, request_content, error_type = send_idip_command(
+                command,
+                {
+                    'AreaId': 10,
+                    'Partition': 1,
+                    'PlatId': 1,
+                    'RoleName': '测试角色',
+                },
+            )
+
+        self.assertIsNone(error_message)
+        self.assertEqual(error_type, '')
+        self.assertTrue(response_data['status'])
+
+        content = captured['data']['content']
+        self.assertTrue(content.startswith('{'))
+        self.assertNotIn('%7B', content)
+        self.assertEqual(json.loads(content)['body']['RoleName'], '测试角色')
+        self.assertEqual(json.loads(request_content)['form_data']['content'], content)
 
 
 class CommandExecutePersistenceFallbackTests(TestCase):

@@ -1,7 +1,6 @@
 """IDIP API 转发客户端"""
 import json
 import logging
-import urllib.parse
 
 from django.conf import settings
 from django.utils.translation import gettext as _
@@ -25,7 +24,7 @@ def send_idip_command(command, params):
     请求格式:
         POST {IDIP_API_URL}
         Content-Type: application/x-www-form-urlencoded
-        id={request_id}&GSA=&content={url_encoded_json}
+        id={request_id}&GSA=&content={json}
 
     兼容两种响应格式：
     1) 新格式包装：
@@ -63,15 +62,14 @@ def send_idip_command(command, params):
         }
     }
 
-    # JSON序列化并URL编码
+    # JSON 序列化；form-urlencoded 编码交给 requests 统一处理，避免 content 被双重编码。
     content_str = json.dumps(content_json, ensure_ascii=False)
-    content_encoded = urllib.parse.quote(content_str)
 
     # 构造form-urlencoded数据
     form_data = {
         'id': command.request_id,
         'GSA': '',
-        'content': content_encoded,
+        'content': content_str,
     }
 
     # 构造完整的请求JSON（包含form_data原始格式，用于存储和展示）
