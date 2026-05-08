@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-08 11:37+0800\n"
+"POT-Creation-Date: 2026-05-08 14:30+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -474,25 +474,25 @@ msgstr "Invalid JSON: %(error)s"
 msgid "响应参数必须是 JSON 数组"
 msgstr "Response params must be a JSON array"
 
-#: .\gmtool\idip_client.py:18
+#: .\gmtool\idip_client.py:17
 msgid "requests 库未安装，请执行: pip install requests"
 msgstr "requests library not installed, please run: pip install requests"
 
-#: .\gmtool\idip_client.py:118 .\gmtool\idip_client.py:124
-#: .\gmtool\idip_client.py:127 .\gmtool\idip_client.py:173
+#: .\gmtool\idip_client.py:109 .\gmtool\idip_client.py:115
+#: .\gmtool\idip_client.py:118 .\gmtool\idip_client.py:164
 #, python-format
 msgid "请求失败: %(error)s"
 msgstr "Request failed: %(error)s"
 
-#: .\gmtool\idip_client.py:151
+#: .\gmtool\idip_client.py:142
 msgid "请求超时，请稍后重试"
 msgstr "Request timed out, please try again later"
 
-#: .\gmtool\idip_client.py:154
+#: .\gmtool\idip_client.py:145
 msgid "无法连接到游戏服务器，请检查配置"
 msgstr "Unable to connect to game server, please check configuration"
 
-#: .\gmtool\idip_client.py:168
+#: .\gmtool\idip_client.py:159
 msgid "请求失败: 响应不是有效 JSON"
 msgstr "Request failed: response is not valid JSON"
 
