@@ -673,9 +673,86 @@ http://127.0.0.1:18080/cy_idip
 
 ---
 
-## 16. MySQL 部署
+## 16. Ubuntu 24.04 部署账号建议
 
-### 16.1 安装依赖
+生产环境建议使用独立 Linux 用户运行项目。该用户只负责安装 Miniconda、维护 conda 环境、执行 Django 初始化命令和运行最终 Web 服务，不需要授予 sudo 提权。
+
+### 16.1 创建 django 用户
+以下命令由已有运维账号或 root 执行：
+
+```bash
+sudo adduser --disabled-password --gecos "" django
+```
+
+不要把 `django` 用户加入 `sudo` 组：
+
+```bash
+# 不要执行
+sudo usermod -aG sudo django
+```
+
+### 16.2 准备项目目录
+项目目录可按实际部署路径调整，示例使用 `/opt/gmtool`：
+
+```bash
+sudo mkdir -p /opt/gmtool
+sudo chown -R django:django /opt/gmtool
+```
+
+项目代码、`.env`、`idip_commands.json`、`logs/`、`staticfiles/` 等运行期需要读写的内容，应确保归属或写入权限对 `django` 用户可用。
+
+### 16.3 切换到 django 用户
+后续 Miniconda 安装、conda 环境创建、数据库初始化和 Web 服务启动均在 `django` 用户下执行：
+
+```bash
+sudo -iu django
+```
+
+### 16.4 安装 Miniconda
+建议把 Miniconda 安装到 `django` 用户家目录，例如：
+
+```text
+/home/django/miniconda3
+```
+
+在 x86_64 Ubuntu 24.04 上，可由 `django` 用户执行：
+
+```bash
+cd /home/django
+wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-py38_23.11.0-2-Linux-x86_64.sh -O miniconda.sh
+bash miniconda.sh -b -p /home/django/miniconda3
+/home/django/miniconda3/bin/conda init bash
+source /home/django/.bashrc
+```
+
+其他 CPU 架构请替换为对应的 Miniconda Linux 安装脚本。
+
+安装完成后，用 `django` 用户进入项目目录并创建或更新环境：
+
+```bash
+cd /opt/gmtool
+conda env create -f environment.yml
+conda activate django-admin
+```
+
+如果环境已存在，使用：
+
+```bash
+conda env update -f environment.yml
+conda activate django-admin
+```
+
+### 16.5 权限边界
+- 运维账号或 root 只负责创建系统用户、准备目录、调整目录归属和配置系统级服务。
+- `django` 用户负责安装 Miniconda、运行 Django 管理命令和启动最终 Web 服务。
+- 最终 Web 服务不要以 root 用户运行。
+- `django` 用户不需要 sudo 权限，也不应依赖 sudo 完成日常部署和运行。
+
+---
+
+## 17. MySQL 部署
+
+### 17.1 安装依赖
 更新 conda 环境，安装 Django MySQL 驱动：
 
 ```bash
@@ -683,7 +760,7 @@ conda env update -f environment.yml
 conda activate django-admin
 ```
 
-### 16.2 创建 MySQL 库和账号
+### 17.2 创建 MySQL 库和账号
 建议使用 MySQL 8.0 或更高版本，并启用 `utf8mb4`：
 
 ```sql
@@ -695,7 +772,7 @@ FLUSH PRIVILEGES;
 
 如果 Django 与 MySQL 部署在同一台机器，也可以把账号主机限制为 `localhost` 或 `127.0.0.1`。
 
-### 16.3 配置生产环境变量
+### 17.3 配置生产环境变量
 `.env` 示例：
 
 ```env
@@ -718,7 +795,7 @@ CSRF_COOKIE_SECURE=True
 
 MySQL 连接会使用 `utf8mb4`，并在连接初始化时启用 `STRICT_TRANS_TABLES`。
 
-### 16.4 初始化空库
+### 17.4 初始化空库
 当前流程按空 MySQL 库部署，不迁移现有 SQLite 数据：
 
 ```bash
@@ -731,7 +808,7 @@ python manage.py check --deploy
 
 初始化后访问 `/gmtool/`，用新建超级管理员账号登录，并验证命令列表、命令执行、登录日志和命令日志写入正常。
 
-### 16.5 常见问题
+### 17.5 常见问题
 - `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment.yml`，并在 `django-admin` 环境中运行项目。
 - `Access denied for user`：检查 `DB_USER`、`DB_PASSWORD`、账号授权主机和 MySQL 服务端监听地址。
 - 中文或 JSON 内容乱码：确认数据库字符集为 `utf8mb4`。
@@ -739,15 +816,19 @@ python manage.py check --deploy
 
 ---
 
-## 17. 生产部署检查清单
+## 18. 生产部署检查清单
 
-### 17.1 基础配置
+### 18.1 基础配置
 - 设置 `DJANGO_DEBUG=False`
 - 设置安全的 `DJANGO_SECRET_KEY`
 - 设置正确的 `DJANGO_ALLOWED_HOSTS`
 - MySQL 部署时设置 `DB_ENGINE=mysql` 及完整数据库连接参数
+- 使用独立 `django` Linux 用户运行 Web 服务
+- 确认 `django` 用户不具备 sudo 权限
+- 确认项目目录、日志目录和静态文件目录对 `django` 用户可写
+- 确认生产 Web 服务未以 root 用户运行
 
-### 17.2 HTTPS / 代理
+### 18.2 HTTPS / 代理
 - 确认 HTTPS 已启用
 - 确认代理透传 `X-Forwarded-Proto: https`
 - 确认 `SESSION_COOKIE_SECURE=True`
@@ -755,12 +836,12 @@ python manage.py check --deploy
 - 确认 Django 无法被绕过代理直接访问
 - 确认 `request.is_secure()` 在线上表现正确
 
-### 17.3 Django 自检
+### 18.3 Django 自检
 ```bash
 python manage.py check --deploy
 ```
 
-### 17.4 命令链路验证
+### 18.4 命令链路验证
 - 验证至少一条成功命令
 - 验证至少一条失败命令
 - 验证命令日志正常落库
@@ -768,7 +849,7 @@ python manage.py check --deploy
 
 ---
 
-## 18. 国际化
+## 19. 国际化
 
 当前支持语言：
 
@@ -785,7 +866,7 @@ python manage.py compilemessages
 
 ---
 
-## 19. 维护建议
+## 20. 维护建议
 
 - 新增配置项后，同步更新：
   - `mysite/settings.py`
@@ -801,7 +882,7 @@ python manage.py compilemessages
 
 ---
 
-## 20. 备注
+## 21. 备注
 
 - 当前默认数据库为 SQLite，更适合开发与轻量部署
 - 生产环境可通过 `DB_ENGINE=mysql` 切换到 MySQL
