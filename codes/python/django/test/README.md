@@ -63,12 +63,12 @@ http://127.0.0.1:18080/cy_idip
 - 路径：`/cy_idip`
 - Content-Type：`application/x-www-form-urlencoded`
 - 字段：
-  - `id`: GM 命令 ID（如 `10226000`）
+  - `id`: 请求协议 ID（如 `4105`）；mock 服务也兼容 GM 命令编号（如 `10226001`）
   - `GSA`: 透传字段
-  - `content`: URL 编码后的 JSON（包含 `head` / `body`）
+  - `content`: 扁平参数 JSON，由 form-urlencoded 统一编码
   - `__mock_fail`（可选）: 传 `1` 时强制模拟失败
 
-也支持在 `content.body` 中传 `_mock_fail: true` 触发失败。
+也支持在 `content` 中传 `_mock_fail: true` 触发失败。
 
 ---
 
@@ -120,9 +120,9 @@ http://127.0.0.1:18080/cy_idip
 ```bash
 curl -X POST "http://127.0.0.1:18080/cy_idip" ^
   -H "Content-Type: application/x-www-form-urlencoded" ^
-  --data-urlencode "id=10226001" ^
+  --data-urlencode "id=4105" ^
   --data-urlencode "GSA=" ^
-  --data-urlencode "content={\"head\":{\"Requestid\":4105},\"body\":{\"RollingContent\":\"hello\"}}"
+  --data-urlencode "content={\"AreaId\":10,\"Partition\":1,\"PlatId\":1,\"RollingContent\":\"hello\"}"
 ```
 
 ### 6.2 强制失败
@@ -130,10 +130,10 @@ curl -X POST "http://127.0.0.1:18080/cy_idip" ^
 ```bash
 curl -X POST "http://127.0.0.1:18080/cy_idip" ^
   -H "Content-Type: application/x-www-form-urlencoded" ^
-  --data-urlencode "id=10226001" ^
+  --data-urlencode "id=4105" ^
   --data-urlencode "__mock_fail=1" ^
   --data-urlencode "GSA=" ^
-  --data-urlencode "content={\"head\":{\"Requestid\":4105},\"body\":{\"RollingContent\":\"hello\"}}"
+  --data-urlencode "content={\"AreaId\":10,\"Partition\":1,\"PlatId\":1,\"RollingContent\":\"hello\"}"
 ```
 
 ---

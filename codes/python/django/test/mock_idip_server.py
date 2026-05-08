@@ -206,6 +206,23 @@ def get_request_id(command_def: Optional[Dict[str, Any]]) -> int:
         return 0
 
 
+def find_command_definition(form_id: str) -> tuple[str, Optional[Dict[str, Any]]]:
+    """Resolve form id as either command id or request protocol id."""
+    command_def = COMMAND_DEFINITIONS.get(form_id)
+    if command_def:
+        return form_id, command_def
+
+    try:
+        request_id = int(form_id)
+    except (TypeError, ValueError):
+        return form_id, None
+
+    for command_id, candidate in COMMAND_DEFINITIONS.items():
+        if get_request_id(candidate) == request_id:
+            return command_id, candidate
+    return form_id, None
+
+
 class MockIdipHandler(BaseHTTPRequestHandler):
     server_version = "MockIDIP/2.0"
 
@@ -261,7 +278,10 @@ class MockIdipHandler(BaseHTTPRequestHandler):
                     parsed_content = {}
 
         head = parsed_content.get("head", {}) if isinstance(parsed_content, dict) else {}
-        body = parsed_content.get("body", {}) if isinstance(parsed_content, dict) else {}
+        if isinstance(parsed_content, dict) and "body" in parsed_content:
+            body = parsed_content.get("body", {})
+        else:
+            body = parsed_content if isinstance(parsed_content, dict) else {}
         body_force_fail = False
         if isinstance(body, dict):
             body_force_fail = bool(body.get("_mock_fail"))
@@ -269,9 +289,9 @@ class MockIdipHandler(BaseHTTPRequestHandler):
         print("=" * 80)
         print(f"[MockIDIP] path={self.path}, command_id={command_id}")
         print(f"[MockIDIP] head={json.dumps(head, ensure_ascii=False)}")
-        print(f"[MockIDIP] body={json.dumps(body, ensure_ascii=False)}")
+        print(f"[MockIDIP] content={json.dumps(body, ensure_ascii=False)}")
 
-        command_def = COMMAND_DEFINITIONS.get(command_id)
+        resolved_command_id, command_def = find_command_definition(command_id)
         request_id = get_request_id(command_def)
 
         if not command_id:
@@ -287,7 +307,7 @@ class MockIdipHandler(BaseHTTPRequestHandler):
             self._write_failed(request_id, 5001, "mock forced failure")
             return
 
-        response_payload = generate_command_response(command_id, command_def)
+        response_payload = generate_command_response(resolved_command_id, command_def)
 
         self._write_json(
             200,

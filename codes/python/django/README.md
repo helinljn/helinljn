@@ -357,7 +357,7 @@ python manage.py format_idip_commands --check
 - `GSA`
 - `content`
 
-`content` 是原始 JSON 字符串，由 `requests.post(..., data=...)` 按 `application/x-www-form-urlencoded` 统一编码。抓包看到的 HTTP body 中 `content` 应只经过一次 URL 编码，例如 `%7B%22head%22...`；服务端表单解析后应直接得到 JSON 字符串。
+`content` 是扁平的原始参数 JSON 字符串，由 `requests.post(..., data=...)` 按 `application/x-www-form-urlencoded` 统一编码。抓包看到的 HTTP body 中 `content` 应只经过一次 URL 编码；服务端表单解析后应直接得到类似 `{"AreaId": 1001, "Partition": 1001, "PlatId": 1001, "OpenId": "1001"}` 的 JSON 字符串。
 
 ### 9.2 Python 调用返回值
 `send_idip_command(command, params)` 当前返回：

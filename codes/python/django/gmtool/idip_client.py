@@ -44,23 +44,16 @@ def send_idip_command(command, params):
     """
     req = _get_requests()
 
-    # 构造content的JSON结构
+    # 构造 content 的扁平 JSON 结构。协议 ID 由 form 字段 id 承载，不再放入 content。
     content_json = {
-        "head": {
-            "Uin": 0,
-            "AreaId": params.get('AreaId', 10),
-            "Partition": params.get('Partition', 0),
-            "PlatId": params.get('PlatId', 1),
-            "Requestid": command.request_id,
-            "Request": command.request_name,
-            "Responseid": command.response_id,
-            "Response": command.response_name,
-        },
-        "body": {
-            k: v for k, v in params.items()
-            if k not in ('AreaId', 'Partition', 'PlatId')
-        }
+        'AreaId': params.get('AreaId', 10),
+        'Partition': params.get('Partition', 0),
+        'PlatId': params.get('PlatId', 1),
     }
+    content_json.update({
+        k: v for k, v in params.items()
+        if k not in ('AreaId', 'Partition', 'PlatId')
+    })
 
     # JSON 序列化；form-urlencoded 编码交给 requests 统一处理，避免 content 被双重编码。
     content_str = json.dumps(content_json, ensure_ascii=False)

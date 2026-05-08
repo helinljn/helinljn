@@ -68,7 +68,18 @@ class IdipClientEncodingTests(TestCase):
         content = captured['data']['content']
         self.assertTrue(content.startswith('{'))
         self.assertNotIn('%7B', content)
-        self.assertEqual(json.loads(content)['body']['RoleName'], '测试角色')
+        content_payload = json.loads(content)
+        self.assertEqual(
+            content_payload,
+            {
+                'AreaId': 10,
+                'Partition': 1,
+                'PlatId': 1,
+                'RoleName': '测试角色',
+            },
+        )
+        self.assertNotIn('head', content_payload)
+        self.assertNotIn('body', content_payload)
         self.assertEqual(json.loads(request_content)['form_data']['content'], content)
 
 
