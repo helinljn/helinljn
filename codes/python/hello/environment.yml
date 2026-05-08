@@ -3,6 +3,7 @@ channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+  - defaults
 dependencies:
   - bzip2=1.0.8
   - ca-certificates=2026.2.25

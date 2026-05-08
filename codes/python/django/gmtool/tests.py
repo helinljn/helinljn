@@ -9,7 +9,7 @@ from django.db import DatabaseError, IntegrityError
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from .command_parser import validate_json_command_ids
+from .command_parser import sync_commands_to_db, validate_json_command_ids
 from .models import CommandLog, GMCommand, UserCommandPermission, UserProfile
 from .security_utils import get_client_ip
 
@@ -139,6 +139,53 @@ class ValidateJsonCommandIdsTests(TestCase):
 
         self.assertTrue(is_valid)
         self.assertEqual(error_msg, '')
+
+
+class SyncCommandsToDbValidationTests(TestCase):
+    def setUp(self):
+        GMCommand.objects.create(
+            command_id='cmd_a',
+            command_name='命令A',
+            tab='测试',
+            request_name='ReqA',
+            request_id=100,
+            response_name='RspA',
+            response_id=101,
+            request_params=[],
+            response_params=[],
+            field_labels={},
+            is_active=True,
+        )
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.json_path = Path(self.temp_dir.name) / 'idip_commands.json'
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_sync_rejects_cross_protocol_id_conflict_before_writing(self):
+        self.json_path.write_text(
+            json.dumps(
+                {
+                    'cmd_b': {
+                        'name': '命令B',
+                        'tab': '测试',
+                        'request': 'ReqB',
+                        'request_id': 101,
+                        'respone': 'RspB',
+                        'response_id': 102,
+                        'ReqB': [],
+                        'RspB': [],
+                    }
+                },
+                ensure_ascii=False,
+            ),
+            encoding='utf-8',
+        )
+
+        with self.assertRaisesMessage(ValueError, '检测到 ID 冲突'):
+            sync_commands_to_db(str(self.json_path))
+
+        self.assertFalse(GMCommand.objects.filter(command_id='cmd_b').exists())
 
 
 class GetClientIpTests(TestCase):

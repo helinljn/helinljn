@@ -50,7 +50,7 @@
 
 ### 2.4 配置与运行
 - `.env` 驱动核心配置
-- 默认使用 SQLite
+- 默认使用 SQLite，可通过环境变量切换到 MySQL
 - 支持国际化（简体中文 / 英文）
 - 支持反向代理 HTTPS 感知
 - 支持命令定义文件变更监控（开发便利功能）
@@ -64,7 +64,7 @@
 |---|---|
 | 后端框架 | Django 5.2.12 |
 | Python | 3.11 |
-| 数据库 | SQLite（当前默认） |
+| 数据库 | SQLite（默认）/ MySQL（可配置） |
 | HTTP 客户端 | requests |
 | 配置管理 | python-decouple |
 | 国际化 | Django i18n |
@@ -443,36 +443,48 @@ python manage.py format_idip_commands --check
 - `DJANGO_SECRET_KEY`
 - `DJANGO_ALLOWED_HOSTS`
 
-### 11.2 IDIP 与命令定义
+### 11.2 数据库
+- `DB_ENGINE`
+- `DB_NAME`
+- `DB_SQLITE_TIMEOUT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_HOST`
+- `DB_PORT`
+- `DB_CONN_MAX_AGE`
+
+默认 `DB_ENGINE=sqlite`。生产环境如需使用 MySQL，设置 `DB_ENGINE=mysql` 并提供 MySQL 连接参数。
+
+### 11.3 IDIP 与命令定义
 - `IDIP_API_URL`
 - `IDIP_TIMEOUT`
 - `IDIP_JSON_PATH`
 - `UPLOAD_MAX_SIZE`
 
-### 11.3 命令执行与展示
+### 11.4 命令执行与展示
 - `BATCH_EXECUTE_MAX_TARGETS`
 - `BATCH_EXECUTE_INTERVAL_MS`
 - `PAGE_SIZE`
 
-### 11.4 文件监控
+### 11.5 文件监控
 - `ENABLE_IDIP_FILE_MONITOR`
 - `IDIP_FILE_CHECK_INTERVAL`
 - `IDIP_USE_HASH_CHECK`
 
-### 11.5 登录安全
+### 11.6 登录安全
 - `LOGIN_MAX_ATTEMPTS`
 - `LOGIN_LOCKOUT_SECONDS`
 
-### 11.6 日志脱敏
+### 11.7 日志脱敏
 - `SENSITIVE_FIELDS`
 
-### 11.7 代理 / Cookie / HTTPS
+### 11.8 代理 / Cookie / HTTPS
 - `DJANGO_TRUSTED_PROXY`
 - `DJANGO_TRUSTED_PROXY_COUNT`
 - `SESSION_COOKIE_SECURE`
 - `CSRF_COOKIE_SECURE`
 
-### 11.8 默认行为说明
+### 11.9 默认行为说明
 - 开发环境默认 `DEBUG=True`
 - 非开发环境必须显式配置：
   - `DJANGO_SECRET_KEY`
@@ -659,14 +671,81 @@ http://127.0.0.1:18080/cy_idip
 
 ---
 
-## 16. 生产部署检查清单
+## 16. MySQL 部署
 
-### 16.1 基础配置
+### 16.1 安装依赖
+更新 conda 环境，安装 Django MySQL 驱动：
+
+```bash
+conda env update -f environment.yml
+conda activate django-admin
+```
+
+### 16.2 创建 MySQL 库和账号
+建议使用 MySQL 8.0 或更高版本，并启用 `utf8mb4`：
+
+```sql
+CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'gmtool_user'@'%' IDENTIFIED BY 'strong_password_here';
+GRANT ALL PRIVILEGES ON gmtool.* TO 'gmtool_user'@'%';
+FLUSH PRIVILEGES;
+```
+
+如果 Django 与 MySQL 部署在同一台机器，也可以把账号主机限制为 `localhost` 或 `127.0.0.1`。
+
+### 16.3 配置生产环境变量
+`.env` 示例：
+
+```env
+DJANGO_DEBUG=False
+DJANGO_SECRET_KEY=替换为生产密钥
+DJANGO_ALLOWED_HOSTS=gm.example.com,admin.example.com
+
+DB_ENGINE=mysql
+DB_NAME=gmtool
+DB_USER=gmtool_user
+DB_PASSWORD=strong_password_here
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_CONN_MAX_AGE=600
+
+ENABLE_IDIP_FILE_MONITOR=False
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+```
+
+MySQL 连接会使用 `utf8mb4`，并在连接初始化时启用 `STRICT_TRANS_TABLES`。
+
+### 16.4 初始化空库
+当前流程按空 MySQL 库部署，不迁移现有 SQLite 数据：
+
+```bash
+python manage.py migrate
+python manage.py sync_commands
+python manage.py createsuperuser
+python manage.py collectstatic --noinput
+python manage.py check --deploy
+```
+
+初始化后访问 `/gmtool/`，用新建超级管理员账号登录，并验证命令列表、命令执行、登录日志和命令日志写入正常。
+
+### 16.5 常见问题
+- `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment.yml`，并在 `django-admin` 环境中运行项目。
+- `Access denied for user`：检查 `DB_USER`、`DB_PASSWORD`、账号授权主机和 MySQL 服务端监听地址。
+- 中文或 JSON 内容乱码：确认数据库字符集为 `utf8mb4`。
+- `check --deploy` 提示 Cookie 或 Host 配置风险：按生产域名和 HTTPS 代理实际情况修正 `.env`。
+
+---
+
+## 17. 生产部署检查清单
+
+### 17.1 基础配置
 - 设置 `DJANGO_DEBUG=False`
 - 设置安全的 `DJANGO_SECRET_KEY`
 - 设置正确的 `DJANGO_ALLOWED_HOSTS`
+- MySQL 部署时设置 `DB_ENGINE=mysql` 及完整数据库连接参数
 
-### 16.2 HTTPS / 代理
+### 17.2 HTTPS / 代理
 - 确认 HTTPS 已启用
 - 确认代理透传 `X-Forwarded-Proto: https`
 - 确认 `SESSION_COOKIE_SECURE=True`
@@ -674,12 +753,12 @@ http://127.0.0.1:18080/cy_idip
 - 确认 Django 无法被绕过代理直接访问
 - 确认 `request.is_secure()` 在线上表现正确
 
-### 16.3 Django 自检
+### 17.3 Django 自检
 ```bash
 python manage.py check --deploy
 ```
 
-### 16.4 命令链路验证
+### 17.4 命令链路验证
 - 验证至少一条成功命令
 - 验证至少一条失败命令
 - 验证命令日志正常落库
@@ -687,7 +766,7 @@ python manage.py check --deploy
 
 ---
 
-## 17. 国际化
+## 18. 国际化
 
 当前支持语言：
 
@@ -704,7 +783,7 @@ python manage.py compilemessages
 
 ---
 
-## 18. 维护建议
+## 19. 维护建议
 
 - 新增配置项后，同步更新：
   - `mysite/settings.py`
@@ -720,8 +799,9 @@ python manage.py compilemessages
 
 ---
 
-## 19. 备注
+## 20. 备注
 
 - 当前默认数据库为 SQLite，更适合开发与轻量部署
-- 若要进入更高并发或更复杂生产环境，可评估 MySQL / PostgreSQL、Redis、任务队列等组件
+- 生产环境可通过 `DB_ENGINE=mysql` 切换到 MySQL
+- 若要进入更高并发或更复杂生产环境，可继续评估 Redis、任务队列等组件
 - 当前命令定义字段已统一使用 `response_id`

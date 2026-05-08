@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-16 14:23+0800\n"
+"POT-Creation-Date: 2026-05-08 11:37+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,8 @@ msgstr ""
 msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
 msgstr ""
 
-#: .\gmtool\api_views.py:111 .\gmtool\command_views.py:346
+#: .\gmtool\api_views.py:111 .\gmtool\command_parser.py:403
+#: .\gmtool\command_views.py:346
 #, python-format
 msgid "检测到 ID 冲突: %(errors)s"
 msgstr ""

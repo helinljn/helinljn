@@ -291,7 +291,7 @@ def add_command_to_json(command_data):
     previous_snapshot = read_commands_json_snapshot(json_path)
 
     try:
-        _, data = load_commands_json_file(json_path)
+        _raw_content, data = load_commands_json_file(json_path)
     except (json.JSONDecodeError, FileNotFoundError, ValueError) as e:
         return False, str(e), None
 
@@ -352,7 +352,7 @@ def parse_commands(json_path=None):
     """
     json_path = _get_commands_json_path(json_path)
 
-    _, data = load_commands_json_file(json_path)
+    _raw_content, data = load_commands_json_file(json_path)
 
     commands = []
     for cmd_id, cmd_data in data.items():
@@ -397,6 +397,11 @@ def sync_commands_to_db(json_path=None):
     - JSON中不存在的命令：标记为不活跃(is_active=False)
     返回 (created_count, updated_count, deactivated_count)
     """
+    _raw_content, data = load_commands_json_file(json_path)
+    is_valid_ids, id_error_msg = validate_json_command_ids(data)
+    if not is_valid_ids:
+        raise ValueError(_('检测到 ID 冲突: %(errors)s') % {'errors': id_error_msg})
+
     commands = parse_commands(json_path)
 
     with transaction.atomic():
@@ -408,7 +413,7 @@ def sync_commands_to_db(json_path=None):
 
         for cmd in commands:
             json_ids.add(cmd['command_id'])
-            _, created = GMCommand.objects.update_or_create(
+            _command, created = GMCommand.objects.update_or_create(
                 command_id=cmd['command_id'],
                 defaults={
                     'command_name': cmd['command_name'],
