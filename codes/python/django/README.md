@@ -796,20 +796,35 @@ conda activate django-admin
 ```
 
 ### 17.4 创建 MySQL 库和账号
-建议使用 MySQL 8.0 或更高版本，并启用 `utf8mb4`：
+建议数据库名、业务账号和 Django `.env` 保持一致。示例使用：
 
-```sql
-# sudo su 执行：mysql
-CREATE USER 'gmtool'@'localhost' IDENTIFIED BY '111111';
-GRANT ALL PRIVILEGES ON *.* TO 'gmtool'@'localhost';
-FLUSH PRIVILEGES;
+- 数据库：`gmtool`
+- 业务账号：`gmtool_user`
+- 连接主机：`127.0.0.1`
 
-# 使用 gmtool 登录(如果wsl依然不行则先：wsl --shutdown 关闭重启一次)
-# mysql -ugmtool -p111111
-CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+先用本机 root 身份进入 MySQL：
+
+```bash
+sudo mysql
 ```
 
-如果 Django 与 MySQL 部署在同一台机器，也可以把账号主机限制为 `localhost` 或 `127.0.0.1`。
+创建数据库和业务账号：
+
+```sql
+CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'gmtool'@'localhost' IDENTIFIED BY '111111';
+GRANT ALL PRIVILEGES ON gmtool.* TO 'gmtool'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+验证业务账号可以连接并访问目标库：
+
+```bash
+mysql -h127.0.0.1 -ugmtool_user -p gmtool
+```
+
+如果 WSL 环境使用 gmtool 登录失败(wsl --shutdown 关闭重启一次)
+如果 Django 和 MySQL 不在同一台机器，把账号主机从 `127.0.0.1` 改成 Django 服务器的内网 IP 或受控网段，并同步调整 `.env` 中的 `DB_HOST`。
 
 ### 17.5 配置生产环境变量
 `.env` 示例：
