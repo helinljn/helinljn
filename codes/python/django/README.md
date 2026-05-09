@@ -820,7 +820,7 @@ FLUSH PRIVILEGES;
 验证业务账号可以连接并访问目标库：
 
 ```bash
-mysql ugmtool -p111111
+mysql -ugmtool -p111111
 ```
 
 如果 WSL 环境使用 gmtool 登录失败(wsl --shutdown 关闭重启一次)
