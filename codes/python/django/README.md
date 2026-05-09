@@ -766,7 +766,7 @@ conda activate django-admin
 ```bash
 sudo apt update
 sudo apt install mysql-server
-sudo systemctl enable --now mysql
+sudo service mysql start
 ```
 
 ### 17.2 安装 MySQL 配置文件
@@ -782,7 +782,7 @@ config/my.cnf
 sudo cp config/my.cnf /etc/mysql/conf.d/gmtool.cnf
 sudo chown root:root /etc/mysql/conf.d/gmtool.cnf
 sudo chmod 644 /etc/mysql/conf.d/gmtool.cnf
-sudo systemctl restart mysql
+sudo service mysql restart
 ```
 
 注意：MySQL 的 `!includedir` 通常只加载 `.cnf` 后缀文件，不要把配置文件安装成 `.conf` 后缀。
@@ -799,10 +799,14 @@ conda activate django-admin
 建议使用 MySQL 8.0 或更高版本，并启用 `utf8mb4`：
 
 ```sql
-CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'gmtool_user'@'%' IDENTIFIED BY 'strong_password_here';
-GRANT ALL PRIVILEGES ON gmtool.* TO 'gmtool_user'@'%';
+# sudo su 执行：mysql
+CREATE USER 'gmtool'@'localhost' IDENTIFIED BY '111111';
+GRANT ALL PRIVILEGES ON *.* TO 'gmtool'@'localhost';
 FLUSH PRIVILEGES;
+
+# 使用 gmtool 登录(如果wsl依然不行则先：wsl --shutdown 关闭重启一次)
+# mysql -ugmtool -p111111
+CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 如果 Django 与 MySQL 部署在同一台机器，也可以把账号主机限制为 `localhost` 或 `127.0.0.1`。
@@ -849,11 +853,11 @@ python manage.py check --deploy
 该操作会删除当前 MySQL 实例中的所有数据库、账号和权限，但会保留已安装的软件包以及 `/etc/mysql/` 下的配置文件。执行前必须确认没有需要保留的数据。
 
 ```bash
-sudo systemctl stop mysql
+sudo service mysql stop
 sudo rm -rf /var/lib/mysql
 sudo install -d -o mysql -g mysql -m 750 /var/lib/mysql
 sudo mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
-sudo systemctl start mysql
+sudo service mysql start
 ```
 
 说明：

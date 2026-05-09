@@ -9,7 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${MYSQL_CONFIG_FILE:-$SCRIPT_DIR/my.cnf}"
 INSTALLED_CONFIG_FILE="${MYSQL_INSTALLED_CONFIG_FILE:-/etc/mysql/conf.d/gmtool.cnf}"
-SYSTEMCTL_BIN="${MYSQL_SYSTEMCTL_BIN:-systemctl}"
+SERVICE_BIN="${MYSQL_SERVICE_BIN:-service}"
 SERVICE_NAME="${MYSQL_SERVICE_NAME:-mysql}"
 
 sudo_cmd() {
@@ -21,9 +21,9 @@ sudo_cmd() {
 }
 
 service_exists() {
-    "$SYSTEMCTL_BIN" list-unit-files --type=service --no-legend --no-pager 2>/dev/null \
-        | awk '{print $1}' \
-        | grep -qx "${1}.service"
+    "$SERVICE_BIN" --status-all 2>/dev/null \
+        | awk '{print $4}' \
+        | grep -qx "$1"
 }
 
 detect_service_name() {
@@ -32,13 +32,16 @@ detect_service_name() {
         return 0
     fi
 
-    echo "MySQL service not found: ${SERVICE_NAME}.service" >&2
+    echo "MySQL service not found: $SERVICE_NAME" >&2
     echo "Set MYSQL_SERVICE_NAME explicitly if your service has a different name." >&2
     exit 1
 }
 
-run_systemctl() {
-    sudo_cmd "$SYSTEMCTL_BIN" "$@"
+run_service() {
+    local action="$1"
+    shift
+
+    sudo_cmd "$SERVICE_BIN" "$MYSQL_SERVICE_NAME" "$action" "$@"
 }
 
 show_config_paths() {
@@ -47,7 +50,7 @@ show_config_paths() {
 }
 
 is_mysql_running() {
-    "$SYSTEMCTL_BIN" is-active --quiet "$MYSQL_SERVICE_UNIT"
+    "$SERVICE_BIN" "$MYSQL_SERVICE_NAME" status >/dev/null 2>&1
 }
 
 wait_for_state() {
@@ -55,7 +58,7 @@ wait_for_state() {
     local attempts="${2:-20}"
 
     for _ in $(seq 1 "$attempts"); do
-        if "$SYSTEMCTL_BIN" is-active --quiet "$MYSQL_SERVICE_UNIT"; then
+        if is_mysql_running; then
             if [ "$expected_state" = "active" ]; then
                 return 0
             fi
@@ -71,7 +74,7 @@ wait_for_state() {
 }
 
 start_mysql() {
-    echo "Starting MySQL service: $MYSQL_SERVICE_UNIT"
+    echo "Starting MySQL service: $MYSQL_SERVICE_NAME"
     show_config_paths
 
     if is_mysql_running; then
@@ -79,7 +82,7 @@ start_mysql() {
         return 0
     fi
 
-    run_systemctl start "$MYSQL_SERVICE_UNIT"
+    run_service start
 
     if wait_for_state active; then
         echo "MySQL started successfully"
@@ -91,14 +94,14 @@ start_mysql() {
 }
 
 stop_mysql() {
-    echo "Stopping MySQL service: $MYSQL_SERVICE_UNIT"
+    echo "Stopping MySQL service: $MYSQL_SERVICE_NAME"
 
     if ! is_mysql_running; then
         echo "MySQL is not running"
         return 0
     fi
 
-    run_systemctl stop "$MYSQL_SERVICE_UNIT"
+    run_service stop
 
     if wait_for_state inactive; then
         echo "MySQL stopped successfully"
@@ -110,8 +113,8 @@ stop_mysql() {
 }
 
 restart_mysql() {
-    echo "Restarting MySQL service: $MYSQL_SERVICE_UNIT"
-    run_systemctl restart "$MYSQL_SERVICE_UNIT"
+    echo "Restarting MySQL service: $MYSQL_SERVICE_NAME"
+    run_service restart
 
     if wait_for_state active; then
         echo "MySQL restarted successfully"
@@ -125,14 +128,14 @@ restart_mysql() {
 status_mysql() {
     if is_mysql_running; then
         echo "MySQL is running"
-        echo "Service: $MYSQL_SERVICE_UNIT"
+        echo "Service: $MYSQL_SERVICE_NAME"
         show_config_paths
-        run_systemctl status --no-pager --full "$MYSQL_SERVICE_UNIT" | sed -n '1,12p'
+        run_service status | sed -n '1,12p'
         return 0
     fi
 
     echo "MySQL is not running"
-    echo "Service: $MYSQL_SERVICE_UNIT"
+    echo "Service: $MYSQL_SERVICE_NAME"
     show_config_paths
     return 1
 }
@@ -171,11 +174,11 @@ Environment overrides:
   MYSQL_CONFIG_FILE    default: $CONFIG_FILE
   MYSQL_INSTALLED_CONFIG_FILE default: $INSTALLED_CONFIG_FILE
   MYSQL_SERVICE_NAME   default: mysql
-  MYSQL_SYSTEMCTL_BIN  default: $SYSTEMCTL_BIN
+  MYSQL_SERVICE_BIN    default: $SERVICE_BIN
 EOF
 }
 
-MYSQL_SERVICE_UNIT="$(detect_service_name)"
+MYSQL_SERVICE_NAME="$(detect_service_name)"
 
 case "${1:-help}" in
     start)
