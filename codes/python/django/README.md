@@ -752,7 +752,25 @@ conda activate django-admin
 
 ## 17. MySQL 部署
 
-### 17.1 安装依赖
+### 17.1 安装 MySQL 配置文件
+项目提供 MySQL 8.0.45 示例配置：
+
+```text
+config/my.cnf
+```
+
+在 Ubuntu 24.04 上部署时，应把它安装为 MySQL 会读取的 `.cnf` 文件，例如：
+
+```bash
+sudo cp config/my.cnf /etc/mysql/conf.d/gmtool.cnf
+sudo chown root:root /etc/mysql/conf.d/gmtool.cnf
+sudo chmod 644 /etc/mysql/conf.d/gmtool.cnf
+sudo systemctl restart mysql
+```
+
+注意：MySQL 的 `!includedir` 通常只加载 `.cnf` 后缀文件，不要把配置文件安装成 `.conf` 后缀。
+
+### 17.2 安装依赖
 更新 conda 环境，安装 Django MySQL 驱动：
 
 ```bash
@@ -760,7 +778,7 @@ conda env update -f environment.yml
 conda activate django-admin
 ```
 
-### 17.2 创建 MySQL 库和账号
+### 17.3 创建 MySQL 库和账号
 建议使用 MySQL 8.0 或更高版本，并启用 `utf8mb4`：
 
 ```sql
@@ -772,7 +790,7 @@ FLUSH PRIVILEGES;
 
 如果 Django 与 MySQL 部署在同一台机器，也可以把账号主机限制为 `localhost` 或 `127.0.0.1`。
 
-### 17.3 配置生产环境变量
+### 17.4 配置生产环境变量
 `.env` 示例：
 
 ```env
@@ -795,7 +813,7 @@ CSRF_COOKIE_SECURE=True
 
 MySQL 连接会使用 `utf8mb4`，并在连接初始化时启用 `STRICT_TRANS_TABLES`。
 
-### 17.4 初始化空库
+### 17.5 初始化空库
 当前流程按空 MySQL 库部署，不迁移现有 SQLite 数据：
 
 ```bash
@@ -808,7 +826,7 @@ python manage.py check --deploy
 
 初始化后访问 `/gmtool/`，用新建超级管理员账号登录，并验证命令列表、命令执行、登录日志和命令日志写入正常。
 
-### 17.5 常见问题
+### 17.6 常见问题
 - `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment.yml`，并在 `django-admin` 环境中运行项目。
 - `Access denied for user`：检查 `DB_USER`、`DB_PASSWORD`、账号授权主机和 MySQL 服务端监听地址。
 - 中文或 JSON 内容乱码：确认数据库字符集为 `utf8mb4`。

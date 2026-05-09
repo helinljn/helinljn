@@ -7,7 +7,7 @@ set -euo pipefail
 # installed separately under the system MySQL configuration directory.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="${MYSQL_CONFIG_FILE:-$SCRIPT_DIR/my.conf}"
+CONFIG_FILE="${MYSQL_CONFIG_FILE:-$SCRIPT_DIR/my.cnf}"
 SYSTEMCTL_BIN="${MYSQL_SYSTEMCTL_BIN:-systemctl}"
 SERVICE_NAME="${MYSQL_SERVICE_NAME:-mysql}"
 
