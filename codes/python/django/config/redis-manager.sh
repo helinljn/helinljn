@@ -1,158 +1,166 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Redis Manager Script for WSL Ubuntu 24.04
-# This script provides start, stop, and flush operations for Redis server
+set -euo pipefail
 
-# Function to check if Redis is running
-is_redis_running() {
-    if pgrep -f "redis-server" > /dev/null; then
-        return 0
+# Redis 7.0.15 manager for Ubuntu 24.04.
+# It starts Redis with this project's config/redis.conf and avoids matching
+# unrelated redis-server processes on the same host.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${REDIS_CONFIG_FILE:-$SCRIPT_DIR/redis.conf}"
+CLI_BIN="${REDIS_CLI_BIN:-redis-cli}"
+SERVER_BIN="${REDIS_SERVER_BIN:-redis-server}"
+REDIS_USER="${REDIS_USER:-redis}"
+HOST="${REDIS_HOST:-127.0.0.1}"
+PORT="${REDIS_PORT:-6379}"
+PID_FILE="${REDIS_PID_FILE:-/run/redis/redis-server.pid}"
+LOG_DIR="${REDIS_LOG_DIR:-/var/log/redis}"
+DATA_DIR="${REDIS_DATA_DIR:-/var/lib/redis}"
+RUN_DIR="$(dirname "$PID_FILE")"
+
+sudo_cmd() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
     else
-        return 1
+        sudo "$@"
     fi
 }
 
-# Function to get Redis PID
-get_redis_pid() {
-    pgrep -f "redis-server" 2>/dev/null
+run_as_redis_user() {
+    if [ "$(id -un)" = "$REDIS_USER" ]; then
+        "$@"
+    else
+        sudo -u "$REDIS_USER" "$@"
+    fi
 }
 
-# Function to start Redis
+redis_cli() {
+    "$CLI_BIN" -h "$HOST" -p "$PORT" "$@"
+}
+
+prepare_dirs() {
+    sudo_cmd install -d -m 0755 -o "$REDIS_USER" -g "$REDIS_USER" "$RUN_DIR" "$LOG_DIR" "$DATA_DIR"
+}
+
+is_redis_running() {
+    redis_cli PING >/dev/null 2>&1
+}
+
+get_redis_pid() {
+    if [ -f "$PID_FILE" ]; then
+        cat "$PID_FILE"
+        return 0
+    fi
+
+    pgrep -f "$SERVER_BIN .*$(basename "$CONFIG_FILE")" 2>/dev/null || true
+}
+
 start_redis() {
-    echo "Starting Redis server..."
+    echo "Starting Redis with $CONFIG_FILE..."
 
     if is_redis_running; then
         echo "Redis is already running (PID: $(get_redis_pid))"
         return 0
     fi
 
-    # Start Redis
-    sudo redis-server --daemonize yes
+    prepare_dirs
+    run_as_redis_user "$SERVER_BIN" "$CONFIG_FILE"
 
-    sleep 2
+    for _ in {1..20}; do
+        if is_redis_running; then
+            echo "Redis started successfully (PID: $(get_redis_pid))"
+            echo "Redis is listening on $HOST:$PORT"
+            return 0
+        fi
+        sleep 0.5
+    done
 
-    if is_redis_running; then
-        echo "✓ Redis started successfully (PID: $(get_redis_pid))"
-        echo "Redis is listening on port 6379"
-    else
-        echo "✗ Failed to start Redis"
-        return 1
-    fi
+    echo "Failed to start Redis"
+    return 1
 }
 
-# Function to stop Redis
 stop_redis() {
-    echo "Stopping Redis server..."
+    echo "Stopping Redis..."
 
     if ! is_redis_running; then
         echo "Redis is not running"
         return 0
     fi
 
-    local pid=$(get_redis_pid)
+    redis_cli SHUTDOWN NOSAVE >/dev/null 2>&1 || true
 
-    # Try graceful shutdown first
-    sudo kill -TERM "$pid" 2>/dev/null
-
-    # Wait for process to stop
-    local count=0
-    while is_redis_running && [ $count -lt 10 ]; do
-        sleep 1
-        count=$((count + 1))
+    for _ in {1..20}; do
+        if ! is_redis_running; then
+            echo "Redis stopped successfully"
+            return 0
+        fi
+        sleep 0.5
     done
 
-    # Force kill if still running
-    if is_redis_running; then
-        echo "Force stopping Redis..."
-        sudo kill -KILL "$pid" 2>/dev/null
-        sleep 1
+    local pid
+    pid="$(get_redis_pid)"
+    if [ -n "$pid" ]; then
+        echo "Graceful shutdown timed out; sending TERM to PID $pid"
+        sudo_cmd kill -TERM "$pid" 2>/dev/null || true
     fi
 
-    if ! is_redis_running; then
-        echo "✓ Redis stopped successfully"
-    else
-        echo "✗ Failed to stop Redis"
-        return 1
-    fi
+    for _ in {1..10}; do
+        if ! is_redis_running; then
+            echo "Redis stopped successfully"
+            return 0
+        fi
+        sleep 0.5
+    done
+
+    echo "Failed to stop Redis"
+    return 1
 }
 
-# Function to flush Redis data
+restart_redis() {
+    stop_redis
+    start_redis
+}
+
 flush_redis() {
     echo "Flushing Redis data..."
 
     if ! is_redis_running; then
-        echo "Redis is not running. Starting Redis first..."
-        if ! start_redis; then
-            echo "✗ Failed to start Redis for flushing"
-            return 1
-        fi
-    fi
-
-    # Flush all databases
-    redis-cli FLUSHALL
-
-    if [ $? -eq 0 ]; then
-        echo "✓ Redis data flushed successfully"
-    else
-        echo "✗ Failed to flush Redis data"
+        echo "Redis is not running"
         return 1
     fi
+
+    redis_cli FLUSHALL ASYNC
+    echo "Redis data flush submitted"
 }
 
-# Function to show Redis status
 status_redis() {
-    if is_redis_running; then
-        local pid=$(get_redis_pid)
-        echo "✓ Redis is running (PID: $pid)"
-
-        # Try to get connection info
-        if redis-cli PING > /dev/null 2>&1; then
-            echo "  - Connection: OK"
-            echo "  - Port: 6379"
-
-            # Get memory info
-            local memory=$(redis-cli info memory | grep "used_memory_human" | cut -d: -f2)
-            echo "  - Memory used: $memory"
-
-            # Get keys count
-            local keys=$(redis-cli dbsize)
-            echo "  - Keys in DB: $keys"
-        else
-            echo "  - Connection: Failed"
-        fi
-    else
-        echo "✗ Redis is not running"
-    fi
-}
-
-# Function to restart Redis
-restart_redis() {
-    echo "Restarting Redis server..."
-
-    if is_redis_running; then
-        stop_redis
+    if ! is_redis_running; then
+        echo "Redis is not running"
+        return 1
     fi
 
-    start_redis
+    echo "Redis is running (PID: $(get_redis_pid))"
+    echo "Connection: OK"
+    echo "Address: $HOST:$PORT"
+    echo "Memory used: $(redis_cli INFO memory | awk -F: '/^used_memory_human:/ {gsub(/\r/, \"\", $2); print $2}')"
+    echo "Keys in DB 0: $(redis_cli DBSIZE)"
+    echo "Maxmemory policy: $(redis_cli CONFIG GET maxmemory-policy | awk 'NR==2')"
 }
 
-# Function to show usage
 show_usage() {
-    echo "Redis Manager Script"
-    echo "Usage: $0 {start|stop|restart|status|flush|help}"
-    echo ""
-    echo "Commands:"
-    echo "  start   - Start Redis server"
-    echo "  stop    - Stop Redis server"
-    echo "  restart - Restart Redis server"
-    echo "  status  - Show Redis status"
-    echo "  flush   - Flush all Redis data"
-    echo "  help    - Show this help message"
-    echo ""
+    cat <<EOF
+Redis Manager Script
+Usage: $0 {start|stop|restart|status|flush|help}
+
+Environment overrides:
+  REDIS_CONFIG_FILE  default: $CONFIG_FILE
+  REDIS_USER         default: $REDIS_USER
+  REDIS_HOST         default: $HOST
+  REDIS_PORT         default: $PORT
+EOF
 }
 
-# Main script logic
-case "$1" in
+case "${1:-help}" in
     start)
         start_redis
         ;;
@@ -172,11 +180,8 @@ case "$1" in
         show_usage
         ;;
     *)
-        echo "Error: Unknown command '$1'"
-        echo ""
+        echo "Unknown command: $1"
         show_usage
         exit 1
         ;;
 esac
-
-exit 0
