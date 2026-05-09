@@ -799,7 +799,7 @@ conda activate django-admin
 建议数据库名、业务账号和 Django `.env` 保持一致。示例使用：
 
 - 数据库：`gmtool`
-- 业务账号：`gmtool_user`
+- 业务账号：`gmtool`
 - 连接主机：`127.0.0.1`
 
 先用本机 root 身份进入 MySQL：
@@ -813,14 +813,14 @@ sudo mysql
 ```sql
 CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'gmtool'@'localhost' IDENTIFIED BY '111111';
-GRANT ALL PRIVILEGES ON gmtool.* TO 'gmtool'@'localhost';
+GRANT ALL PRIVILEGES ON *.* TO 'gmtool'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
 验证业务账号可以连接并访问目标库：
 
 ```bash
-mysql -h127.0.0.1 -ugmtool_user -p gmtool
+mysql ugmtool -p111111
 ```
 
 如果 WSL 环境使用 gmtool 登录失败(wsl --shutdown 关闭重启一次)
@@ -836,7 +836,7 @@ DJANGO_ALLOWED_HOSTS=gm.example.com,admin.example.com
 
 DB_ENGINE=mysql
 DB_NAME=gmtool
-DB_USER=gmtool_user
+DB_USER=gmtool
 DB_PASSWORD=strong_password_here
 DB_HOST=127.0.0.1
 DB_PORT=3306
