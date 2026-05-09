@@ -812,15 +812,15 @@ sudo mysql
 
 ```sql
 CREATE DATABASE gmtool CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'gmtool'@'localhost' IDENTIFIED BY '111111';
-GRANT ALL PRIVILEGES ON *.* TO 'gmtool'@'localhost';
+CREATE USER 'gmtool'@'127.0.0.1' IDENTIFIED BY '111111';
+GRANT ALL PRIVILEGES ON *.* TO 'gmtool'@'127.0.0.1';
 FLUSH PRIVILEGES;
 ```
 
 验证业务账号可以连接并访问目标库：
 
 ```bash
-mysql -ugmtool -p111111
+mysql -h127.0.0.1 -ugmtool -p111111
 ```
 
 如果 WSL 环境使用 gmtool 登录失败(wsl --shutdown 关闭重启一次)
@@ -863,16 +863,16 @@ python manage.py check --deploy
 初始化后访问 `/gmtool/`，用新建超级管理员账号登录，并验证命令列表、命令执行、登录日志和命令日志写入正常。
 
 ### 17.7 重置 MySQL 数据目录
-如果只是想把当前 MySQL 实例重置成接近刚安装后的空数据目录状态，可以停止服务、删除数据目录并重新初始化。
+如果只是想把当前 MySQL 实例重置成接近刚安装后的空数据目录状态，可以停止服务、卸载 MySQL 并重新安装。
 
 该操作会删除当前 MySQL 实例中的所有数据库、账号和权限，但会保留已安装的软件包以及 `/etc/mysql/` 下的配置文件。执行前必须确认没有需要保留的数据。
 
 ```bash
 sudo service mysql stop
-sudo rm -rf /var/lib/mysql
-sudo install -d -o mysql -g mysql -m 750 /var/lib/mysql
-sudo mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
-sudo service mysql start
+sudo apt purge mysql-server mysql-client mysql-common mysql-server-core-* mysql-client-core-*
+sudo apt autoremove
+sudo rm -rf /etc/mysql /var/lib/mysql /var/log/mysql
+sudo rm -rf /etc/apparmor.d/abstractions/mysql /etc/apparmor.d/cache/usr.sbin.mysqld
 ```
 
 说明：
