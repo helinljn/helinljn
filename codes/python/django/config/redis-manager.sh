@@ -87,7 +87,7 @@ stop_redis() {
         return 0
     fi
 
-    redis_cli SHUTDOWN NOSAVE >/dev/null 2>&1 || true
+    redis_cli SHUTDOWN SAVE >/dev/null 2>&1 || true
 
     for _ in {1..20}; do
         if ! is_redis_running; then

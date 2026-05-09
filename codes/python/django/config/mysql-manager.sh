@@ -9,7 +9,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${MYSQL_CONFIG_FILE:-$SCRIPT_DIR/my.conf}"
 SYSTEMCTL_BIN="${MYSQL_SYSTEMCTL_BIN:-systemctl}"
-SERVICE_NAME="${MYSQL_SERVICE_NAME:-}"
+SERVICE_NAME="${MYSQL_SERVICE_NAME:-mysql}"
 
 sudo_cmd() {
     if [ "$(id -u)" -eq 0 ]; then
@@ -19,10 +19,6 @@ sudo_cmd() {
     fi
 }
 
-service_candidates() {
-    printf '%s\n' mysql mysqld mariadb
-}
-
 service_exists() {
     "$SYSTEMCTL_BIN" list-unit-files --type=service --no-legend --no-pager 2>/dev/null \
         | awk '{print $1}' \
@@ -30,21 +26,14 @@ service_exists() {
 }
 
 detect_service_name() {
-    if [ -n "$SERVICE_NAME" ]; then
+    if service_exists "$SERVICE_NAME"; then
         echo "$SERVICE_NAME"
         return 0
     fi
 
-    while IFS= read -r candidate; do
-        if service_exists "$candidate"; then
-            echo "$candidate"
-            return 0
-        fi
-    done <<EOF
-$(service_candidates)
-EOF
-
-    echo "mysql"
+    echo "MySQL service not found: ${SERVICE_NAME}.service" >&2
+    echo "Set MYSQL_SERVICE_NAME explicitly if your service has a different name." >&2
+    exit 1
 }
 
 run_systemctl() {
@@ -154,7 +143,7 @@ Usage: $0 {start|stop|restart|status|reload|help}
 
 Environment overrides:
   MYSQL_CONFIG_FILE    default: $CONFIG_FILE
-  MYSQL_SERVICE_NAME   default: auto-detect mysql/mysqld/mariadb
+  MYSQL_SERVICE_NAME   default: mysql
   MYSQL_SYSTEMCTL_BIN  default: $SYSTEMCTL_BIN
 EOF
 }
