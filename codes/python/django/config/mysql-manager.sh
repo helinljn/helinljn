@@ -8,6 +8,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${MYSQL_CONFIG_FILE:-$SCRIPT_DIR/my.cnf}"
+INSTALLED_CONFIG_FILE="${MYSQL_INSTALLED_CONFIG_FILE:-/etc/mysql/conf.d/gmtool.cnf}"
 SYSTEMCTL_BIN="${MYSQL_SYSTEMCTL_BIN:-systemctl}"
 SERVICE_NAME="${MYSQL_SERVICE_NAME:-mysql}"
 
@@ -130,19 +131,40 @@ status_mysql() {
     return 1
 }
 
-reload_mysql() {
-    echo "Reloading MySQL service: $MYSQL_SERVICE_UNIT"
-    run_systemctl reload "$MYSQL_SERVICE_UNIT"
-    echo "MySQL reload requested"
+check_config() {
+    local source_file="$CONFIG_FILE"
+    local installed_file="$INSTALLED_CONFIG_FILE"
+
+    echo "Source config: $source_file"
+    echo "Installed config: $installed_file"
+
+    if [ ! -f "$source_file" ]; then
+        echo "Source config file not found"
+        return 1
+    fi
+
+    if [ ! -f "$installed_file" ]; then
+        echo "Installed config file not found"
+        return 1
+    fi
+
+    if cmp -s "$source_file" "$installed_file"; then
+        echo "Config file matches"
+        return 0
+    fi
+
+    echo "Config file differs from source"
+    return 1
 }
 
 show_usage() {
     cat <<EOF
 MySQL Manager Script
-Usage: $0 {start|stop|restart|status|reload|help}
+Usage: $0 {start|stop|restart|status|check-config|help}
 
 Environment overrides:
   MYSQL_CONFIG_FILE    default: $CONFIG_FILE
+  MYSQL_INSTALLED_CONFIG_FILE default: $INSTALLED_CONFIG_FILE
   MYSQL_SERVICE_NAME   default: mysql
   MYSQL_SYSTEMCTL_BIN  default: $SYSTEMCTL_BIN
 EOF
@@ -163,8 +185,8 @@ case "${1:-help}" in
     status)
         status_mysql
         ;;
-    reload)
-        reload_mysql
+    check-config)
+        check_config
         ;;
     help|--help|-h)
         show_usage

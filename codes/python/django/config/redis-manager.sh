@@ -121,16 +121,34 @@ restart_redis() {
     start_redis
 }
 
-flush_redis() {
-    echo "Flushing Redis data..."
+redis_config_file() {
+    local config_file
+    config_file="$(redis_cli INFO server 2>/dev/null | awk -F: '/^config_file:/ {gsub(/\r/, "", $2); print $2}')"
+    echo "$config_file"
+}
 
+check_redis_config() {
     if ! is_redis_running; then
         echo "Redis is not running"
         return 1
     fi
 
-    redis_cli FLUSHALL ASYNC
-    echo "Redis data flush submitted"
+    local current_config
+    current_config="$(redis_config_file)"
+
+    if [ -z "$current_config" ]; then
+        echo "Unable to determine active Redis config file"
+        return 1
+    fi
+
+    echo "Active config file: $current_config"
+    if [ "$current_config" = "$CONFIG_FILE" ]; then
+        echo "Config file matches expected file"
+        return 0
+    fi
+
+    echo "Config file does not match expected file"
+    return 1
 }
 
 status_redis() {
@@ -142,6 +160,7 @@ status_redis() {
     echo "Redis is running (PID: $(get_redis_pid))"
     echo "Connection: OK"
     echo "Address: $HOST:$PORT"
+    echo "Config file: $(redis_config_file)"
     echo "Memory used: $(redis_cli INFO memory | awk -F: '/^used_memory_human:/ {gsub(/\r/, \"\", $2); print $2}')"
     echo "Keys in DB 0: $(redis_cli DBSIZE)"
     echo "Maxmemory policy: $(redis_cli CONFIG GET maxmemory-policy | awk 'NR==2')"
@@ -150,7 +169,7 @@ status_redis() {
 show_usage() {
     cat <<EOF
 Redis Manager Script
-Usage: $0 {start|stop|restart|status|flush|help}
+Usage: $0 {start|stop|restart|status|check-config|help}
 
 Environment overrides:
   REDIS_CONFIG_FILE  default: $CONFIG_FILE
@@ -173,8 +192,8 @@ case "${1:-help}" in
     status)
         status_redis
         ;;
-    flush)
-        flush_redis
+    check-config)
+        check_redis_config
         ;;
     help|--help|-h)
         show_usage
