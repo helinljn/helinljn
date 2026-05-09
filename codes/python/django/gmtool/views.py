@@ -8,6 +8,7 @@ GM命令后台管理系统 - 视图函数（拆分后的统一导出模块）
 from .auth_views import (
     login_view,
     logout_view,
+    custom_400,
     custom_404,
     custom_500,
     custom_403,
@@ -42,6 +43,7 @@ __all__ = [
     # 认证相关
     'login_view',
     'logout_view',
+    'custom_400',
     'custom_404',
     'custom_500',
     'custom_403',

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-08 14:30+0800\n"
+"POT-Creation-Date: 2026-05-09 21:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,7 +105,7 @@ msgstr ""
 msgid "用户名或密码错误，还可尝试 %(remaining)d 次"
 msgstr ""
 
-#: .\gmtool\auth_views.py:209
+#: .\gmtool\auth_views.py:214
 msgid "页面已过期，请重新登录。"
 msgstr ""
 
@@ -619,13 +619,13 @@ msgstr ""
 msgid "登录日志"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\403.html:7 .\gmtool\templates\gmtool\403.html:44
-msgid "访问被拒绝"
+#: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\400.html:101
+msgid "访问地址未授权"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\403.html:7 .\gmtool\templates\gmtool\404.html:7
-#: .\gmtool\templates\gmtool\500.html:7 .\gmtool\templates\gmtool\base.html:6
-#: .\gmtool\templates\gmtool\base.html:18
+#: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\403.html:7
+#: .\gmtool\templates\gmtool\404.html:7 .\gmtool\templates\gmtool\500.html:7
+#: .\gmtool\templates\gmtool\base.html:6 .\gmtool\templates\gmtool\base.html:18
 #: .\gmtool\templates\gmtool\command_add.html:4
 #: .\gmtool\templates\gmtool\command_execute.html:4
 #: .\gmtool\templates\gmtool\command_list.html:4
@@ -641,13 +641,34 @@ msgstr ""
 msgid "GM命令管理系统"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\403.html:45
-msgid "抱歉，您没有权限访问此页面。"
+#: .\gmtool\templates\gmtool\400.html:106
+msgid ""
+"当前访问使用的域名或 IP 暂未加入系统允许访问列表，因此请求已被安全策略拦截。"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\403.html:47 .\gmtool\templates\gmtool\404.html:47
-#: .\gmtool\templates\gmtool\500.html:47
+#: .\gmtool\templates\gmtool\400.html:109
+msgid "处理方式"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\400.html:111
+msgid "请联系管理员将当前域名或 IP 加入"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\400.html:113
+msgid "后再访问。"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\400.html:118 .\gmtool\templates\gmtool\403.html:47
+#: .\gmtool\templates\gmtool\404.html:47 .\gmtool\templates\gmtool\500.html:47
 msgid "返回首页"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\403.html:7 .\gmtool\templates\gmtool\403.html:44
+msgid "访问被拒绝"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\403.html:45
+msgid "抱歉，您没有权限访问此页面。"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\404.html:7 .\gmtool\templates\gmtool\404.html:44

@@ -187,6 +187,11 @@ def logout_view(request):
 
 
 # 自定义错误页面
+def custom_400(request, exception=None):
+    """400 请求无效"""
+    return render(request, 'gmtool/400.html', status=400)
+
+
 def custom_404(request, exception=None):
     """404 页面未找到"""
     return render(request, 'gmtool/404.html', status=404)

@@ -17,8 +17,9 @@ Including another URLconf
 from django.urls import include, path, re_path
 from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
-from gmtool.views import custom_403, custom_404, custom_500
+from gmtool.views import custom_400, custom_403, custom_404, custom_500
 
+handler400 = custom_400
 handler404 = custom_404
 handler500 = custom_500
 handler403 = custom_403

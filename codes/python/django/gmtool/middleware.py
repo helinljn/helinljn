@@ -7,6 +7,8 @@ import time
 
 from django.conf import settings
 from django.core.cache import cache
+from django.core.exceptions import DisallowedHost
+from django.shortcuts import render
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +22,20 @@ CHECK_INTERVAL = getattr(settings, 'IDIP_FILE_CHECK_INTERVAL', 30)
 ENABLE_FILE_MONITOR = getattr(settings, 'ENABLE_IDIP_FILE_MONITOR', True)
 # 是否使用文件哈希进行变更检测（更准确但稍慢）
 USE_HASH_CHECK = getattr(settings, 'IDIP_USE_HASH_CHECK', False)
+
+
+class AllowedHostErrorMiddleware:
+    """将未授权 Host 的安全拦截渲染为站点错误页。"""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        try:
+            request.get_host()
+        except DisallowedHost:
+            return render(request, 'gmtool/400.html', status=400)
+        return self.get_response(request)
 
 
 class IDIPFileMonitorMiddleware:
