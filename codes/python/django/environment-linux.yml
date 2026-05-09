@@ -1,18 +1,65 @@
 name: django-admin
 channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
   - defaults
 dependencies:
-  - python=3.11
+  - _openmp_mutex=4.5
+  - asgiref=3.11.1
+  - backports.zstd=1.4.0
+  - brotli-python=1.2.0
+  - bzip2=1.0.8
+  - ca-certificates=2026.4.22
+  - certifi=2026.4.22
+  - charset-normalizer=3.4.7
   - django=5.2.12
+  - gettext=0.25.1
+  - gettext-tools=0.25.1
+  - h2=4.3.0
+  - hpack=4.1.0
+  - hyperframe=6.1.0
+  - idna=3.13
+  - ld_impl_linux-64=2.45.1
+  - libasprintf=0.25.1
+  - libasprintf-devel=0.25.1
+  - libexpat=2.8.0
+  - libffi=3.5.2
+  - libgcc=15.2.0
+  - libgcc-ng=15.2.0
+  - libgettextpo=0.25.1
+  - libgettextpo-devel=0.25.1
+  - libgomp=15.2.0
+  - libiconv=1.18
+  - liblzma=5.8.3
+  - libnsl=2.0.1
+  - libsqlite=3.53.1
+  - libstdcxx=15.2.0
+  - libuuid=2.42
+  - libxcrypt=4.4.36
+  - libzlib=1.3.2
+  - mysql-common=9.6.0
+  - mysql-libs=9.6.0
   - mysqlclient=2.2.8
-  - python-decouple=3.8
-  - requests=2.33.1
+  - ncurses=6.6
+  - openssl=3.6.2
+  - packaging=26.2
+  - pip=26.1.1
   - polib=1.2.0
-  - gettext
-  - ca-certificates
-  - certifi
-  - openssl
-  - pip
+  - pysocks=1.7.1
+  - python=3.11.15
+  - python-decouple=3.8
+  - python_abi=3.11
+  - readline=8.3
+  - requests=2.33.1
+  - setuptools=82.0.1
+  - sqlparse=0.5.5
+  - tk=8.6.13
+  - typing_extensions=4.15.0
+  - tzdata=2025c
+  - urllib3=2.7.0
+  - wheel=0.47.0
+  - zstd=1.5.7
   - pip:
       - opencc-python-reimplemented==0.1.7
+prefix: /home/django/miniconda3/envs/django-admin
