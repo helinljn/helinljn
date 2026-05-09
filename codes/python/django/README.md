@@ -826,7 +826,28 @@ python manage.py check --deploy
 
 初始化后访问 `/gmtool/`，用新建超级管理员账号登录，并验证命令列表、命令执行、登录日志和命令日志写入正常。
 
-### 17.6 常见问题
+### 17.6 重置 MySQL 数据目录
+如果只是想把当前 MySQL 实例重置成接近刚安装后的空数据目录状态，可以停止服务、删除数据目录并重新初始化。
+
+该操作会删除当前 MySQL 实例中的所有数据库、账号和权限，但会保留已安装的软件包以及 `/etc/mysql/` 下的配置文件。执行前必须确认没有需要保留的数据。
+
+```bash
+sudo systemctl stop mysql
+sudo rm -rf /var/lib/mysql
+sudo install -d -o mysql -g mysql -m 750 /var/lib/mysql
+sudo mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
+sudo systemctl start mysql
+```
+
+说明：
+
+- `--initialize-insecure` 会创建无密码的 MySQL `root` 账号，仅建议用于测试、重置或受控初始化流程。
+- 服务启动后应立即设置 MySQL `root` 密码，重新创建 `gmtool` 数据库和业务账号。
+- 如果需要连配置文件一起恢复到刚安装状态，应使用 `apt purge` 后重新安装，而不是只删除 `/var/lib/mysql`。
+
+重置后重新执行本节的建库、授权和 Django 初始化步骤。
+
+### 17.7 常见问题
 - `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment.yml`，并在 `django-admin` 环境中运行项目。
 - `Access denied for user`：检查 `DB_USER`、`DB_PASSWORD`、账号授权主机和 MySQL 服务端监听地址。
 - 中文或 JSON 内容乱码：确认数据库字符集为 `utf8mb4`。
