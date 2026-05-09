@@ -1,0 +1,18 @@
+name: django-admin
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - django=5.2.12
+  - mysqlclient=2.2.8
+  - python-decouple=3.8
+  - requests=2.33.1
+  - polib=1.2.0
+  - gettext
+  - ca-certificates
+  - certifi
+  - openssl
+  - pip
+  - pip:
+      - opencc-python-reimplemented==0.1.7

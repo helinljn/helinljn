@@ -81,8 +81,14 @@ d:\helinljn\codes\python\django\
 ├── manage.py
 ├── db.sqlite3
 ├── environment.yml
+├── environment-linux.yml
 ├── idip_commands.json
 ├── README.md
+├── config/
+│   ├── my.cnf
+│   ├── mysql-manager.sh
+│   ├── redis.conf
+│   └── redis-manager.sh
 ├── mysite/
 │   ├── __init__.py
 │   ├── asgi.py
@@ -631,12 +637,14 @@ python manage.py createsuperuser
 ## 15. 本地开发与联调
 
 ### 15.1 创建环境
-项目提供 `environment.yml`：
+Windows 或当前开发环境可使用 `environment.yml`：
 
 ```bash
 conda env create -f environment.yml
 conda activate django-admin
 ```
+
+Ubuntu 24.04 部署使用 `environment-linux.yml`，见第 16 节。
 
 ### 15.2 初始化数据库
 ```bash
@@ -731,14 +739,14 @@ source /home/django/.bashrc
 
 ```bash
 cd /opt/gmtool
-conda env create -f environment.yml
+conda env create -f environment-linux.yml
 conda activate django-admin
 ```
 
 如果环境已存在，使用：
 
 ```bash
-conda env update -f environment.yml
+conda env update -f environment-linux.yml
 conda activate django-admin
 ```
 
@@ -752,7 +760,16 @@ conda activate django-admin
 
 ## 17. MySQL 部署
 
-### 17.1 安装 MySQL 配置文件
+### 17.1 安装 MySQL 服务端
+在全新的 Ubuntu 24.04 上，先安装 MySQL 服务端：
+
+```bash
+sudo apt update
+sudo apt install mysql-server
+sudo systemctl enable --now mysql
+```
+
+### 17.2 安装 MySQL 配置文件
 项目提供 MySQL 8.0.45 示例配置：
 
 ```text
@@ -770,15 +787,15 @@ sudo systemctl restart mysql
 
 注意：MySQL 的 `!includedir` 通常只加载 `.cnf` 后缀文件，不要把配置文件安装成 `.conf` 后缀。
 
-### 17.2 安装依赖
+### 17.3 安装依赖
 更新 conda 环境，安装 Django MySQL 驱动：
 
 ```bash
-conda env update -f environment.yml
+conda env update -f environment-linux.yml
 conda activate django-admin
 ```
 
-### 17.3 创建 MySQL 库和账号
+### 17.4 创建 MySQL 库和账号
 建议使用 MySQL 8.0 或更高版本，并启用 `utf8mb4`：
 
 ```sql
@@ -790,7 +807,7 @@ FLUSH PRIVILEGES;
 
 如果 Django 与 MySQL 部署在同一台机器，也可以把账号主机限制为 `localhost` 或 `127.0.0.1`。
 
-### 17.4 配置生产环境变量
+### 17.5 配置生产环境变量
 `.env` 示例：
 
 ```env
@@ -813,7 +830,7 @@ CSRF_COOKIE_SECURE=True
 
 MySQL 连接会使用 `utf8mb4`，并在连接初始化时启用 `STRICT_TRANS_TABLES`。
 
-### 17.5 初始化空库
+### 17.6 初始化空库
 当前流程按空 MySQL 库部署，不迁移现有 SQLite 数据：
 
 ```bash
@@ -826,7 +843,7 @@ python manage.py check --deploy
 
 初始化后访问 `/gmtool/`，用新建超级管理员账号登录，并验证命令列表、命令执行、登录日志和命令日志写入正常。
 
-### 17.6 重置 MySQL 数据目录
+### 17.7 重置 MySQL 数据目录
 如果只是想把当前 MySQL 实例重置成接近刚安装后的空数据目录状态，可以停止服务、删除数据目录并重新初始化。
 
 该操作会删除当前 MySQL 实例中的所有数据库、账号和权限，但会保留已安装的软件包以及 `/etc/mysql/` 下的配置文件。执行前必须确认没有需要保留的数据。
@@ -847,8 +864,8 @@ sudo systemctl start mysql
 
 重置后重新执行本节的建库、授权和 Django 初始化步骤。
 
-### 17.7 常见问题
-- `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment.yml`，并在 `django-admin` 环境中运行项目。
+### 17.8 常见问题
+- `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment-linux.yml`，并在 `django-admin` 环境中运行项目。
 - `Access denied for user`：检查 `DB_USER`、`DB_PASSWORD`、账号授权主机和 MySQL 服务端监听地址。
 - 中文或 JSON 内容乱码：确认数据库字符集为 `utf8mb4`。
 - `check --deploy` 提示 Cookie 或 Host 配置风险：按生产域名和 HTTPS 代理实际情况修正 `.env`。
