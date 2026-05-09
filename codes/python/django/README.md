@@ -823,7 +823,8 @@ FLUSH PRIVILEGES;
 mysql -h127.0.0.1 -ugmtool -p111111
 ```
 
-如果 WSL 环境使用 gmtool 登录失败(wsl --shutdown 关闭重启一次)
+如果 WSL 环境使用 `gmtool` 登录失败，可以先在 Windows 侧执行 `wsl --shutdown`，再重新启动 WSL 后重试。
+
 如果 Django 和 MySQL 不在同一台机器，把账号主机从 `127.0.0.1` 改成 Django 服务器的内网 IP 或受控网段，并同步调整 `.env` 中的 `DB_HOST`。
 
 ### 17.5 配置生产环境变量
@@ -862,26 +863,36 @@ python manage.py check --deploy
 
 初始化后访问 `/gmtool/`，用新建超级管理员账号登录，并验证命令列表、命令执行、登录日志和命令日志写入正常。
 
-### 17.7 重置 MySQL 数据目录
-如果只是想把当前 MySQL 实例重置成接近刚安装后的空数据目录状态，可以停止服务、卸载 MySQL 并重新安装。
+### 17.7 重置或卸载 MySQL
+如果只是想清空当前 MySQL 实例，优先使用“重置数据目录”。它会删除所有数据库、账号和权限，但保留已安装的软件包以及 `/etc/mysql/` 下的配置文件。
 
-该操作会删除当前 MySQL 实例中的所有数据库、账号和权限，但会保留已安装的软件包以及 `/etc/mysql/` 下的配置文件。执行前必须确认没有需要保留的数据。
+```bash
+sudo service mysql stop
+sudo rm -rf /var/lib/mysql
+sudo install -d -o mysql -g mysql -m 750 /var/lib/mysql
+sudo mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
+sudo service mysql start
+```
+
+如果需要连 MySQL 软件包、系统配置和数据一起清理，再使用“完整卸载重装”：
 
 ```bash
 sudo service mysql stop
 sudo apt purge mysql-server mysql-client mysql-common mysql-server-core-* mysql-client-core-*
-sudo apt autoremove
-sudo rm -rf /etc/mysql /var/lib/mysql /var/log/mysql
-sudo rm -rf /etc/apparmor.d/abstractions/mysql /etc/apparmor.d/cache/usr.sbin.mysqld
+sudo apt autoremove --purge
+sudo rm -rf /etc/mysql /var/lib/mysql /var/lib/mysql-files /var/log/mysql
+sudo apt install mysql-server
+sudo service mysql start
 ```
 
 说明：
 
-- `--initialize-insecure` 会创建无密码的 MySQL `root` 账号，仅建议用于测试、重置或受控初始化流程。
-- 服务启动后应立即设置 MySQL `root` 密码，重新创建 `gmtool` 数据库和业务账号。
-- 如果需要连配置文件一起恢复到刚安装状态，应使用 `apt purge` 后重新安装，而不是只删除 `/var/lib/mysql`。
+- 两种操作都会删除当前 MySQL 实例中的数据库、账号和权限，执行前必须确认没有需要保留的数据。
+- `--initialize-insecure` 会创建可通过本机系统 root 维护的空实例，仅建议用于测试、重置或受控初始化流程。
+- 完整卸载重装会删除 `/etc/mysql/`，因此需要重新安装 `config/my.cnf` 并重启 MySQL。
+- 不建议手动删除 `/etc/apparmor.d/` 下的 MySQL 规则文件；如果软件包仍然需要它们，应由 `apt` 安装、卸载或修复。
 
-重置后重新执行本节的建库、授权和 Django 初始化步骤。
+重置或重装后，重新执行本节的配置文件安装、建库授权和 Django 初始化步骤。
 
 ### 17.8 常见问题
 - `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment-linux.yml`，并在 `django-admin` 环境中运行项目。
