@@ -648,7 +648,7 @@ msgstr "Login Log"
 
 #: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\400.html:101
 msgid "访问地址未授权"
-msgstr ""
+msgstr "Access Address Not Authorized"
 
 #: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\403.html:7
 #: .\gmtool\templates\gmtool\404.html:7 .\gmtool\templates\gmtool\500.html:7
@@ -672,18 +672,20 @@ msgstr "GM Command System"
 msgid ""
 "当前访问使用的域名或 IP 暂未加入系统允许访问列表，因此请求已被安全策略拦截。"
 msgstr ""
+"The domain name or IP address used for this visit is not in the system's "
+"allowed hosts list, so the request has been blocked by the security policy."
 
 #: .\gmtool\templates\gmtool\400.html:109
 msgid "处理方式"
-msgstr ""
+msgstr "How to Resolve"
 
 #: .\gmtool\templates\gmtool\400.html:111
 msgid "请联系管理员将当前域名或 IP 加入"
-msgstr ""
+msgstr "Please contact the administrator to add the current domain name or IP address to"
 
 #: .\gmtool\templates\gmtool\400.html:113
 msgid "后再访问。"
-msgstr ""
+msgstr "before accessing again."
 
 #: .\gmtool\templates\gmtool\400.html:118 .\gmtool\templates\gmtool\403.html:47
 #: .\gmtool\templates\gmtool\404.html:47 .\gmtool\templates\gmtool\500.html:47
