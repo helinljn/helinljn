@@ -41,6 +41,11 @@ run_systemctl() {
     sudo_cmd "$SYSTEMCTL_BIN" "$@"
 }
 
+show_config_paths() {
+    echo "Source config: $CONFIG_FILE"
+    echo "Installed config: $INSTALLED_CONFIG_FILE"
+}
+
 is_mysql_running() {
     "$SYSTEMCTL_BIN" is-active --quiet "$MYSQL_SERVICE_UNIT"
 }
@@ -67,7 +72,7 @@ wait_for_state() {
 
 start_mysql() {
     echo "Starting MySQL service: $MYSQL_SERVICE_UNIT"
-    echo "Config file: $CONFIG_FILE"
+    show_config_paths
 
     if is_mysql_running; then
         echo "MySQL is already running"
@@ -121,13 +126,14 @@ status_mysql() {
     if is_mysql_running; then
         echo "MySQL is running"
         echo "Service: $MYSQL_SERVICE_UNIT"
-        echo "Config file: $CONFIG_FILE"
+        show_config_paths
         run_systemctl status --no-pager --full "$MYSQL_SERVICE_UNIT" | sed -n '1,12p'
         return 0
     fi
 
     echo "MySQL is not running"
     echo "Service: $MYSQL_SERVICE_UNIT"
+    show_config_paths
     return 1
 }
 
@@ -135,8 +141,7 @@ check_config() {
     local source_file="$CONFIG_FILE"
     local installed_file="$INSTALLED_CONFIG_FILE"
 
-    echo "Source config: $source_file"
-    echo "Installed config: $installed_file"
+    show_config_paths
 
     if [ ! -f "$source_file" ]; then
         echo "Source config file not found"
