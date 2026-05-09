@@ -85,6 +85,7 @@ d:\helinljn\codes\python\django\
 ├── idip_commands.json
 ├── README.md
 ├── config/
+│   ├── django-manager.sh
 │   ├── my.cnf
 │   ├── mysql-manager.sh
 │   ├── redis.conf
@@ -659,10 +660,22 @@ python manage.py createsuperuser
 
 ### 15.4 启动项目
 ```bash
-python manage.py runserver
+bash config/django-manager.sh start
 ```
 
-访问地址：
+停止项目：
+
+```bash
+bash config/django-manager.sh stop
+```
+
+默认监听地址：
+
+```text
+0.0.0.0:8000
+```
+
+访问地址按实际主机 IP 选择，例如：
 
 ```text
 http://127.0.0.1:8000/gmtool/
