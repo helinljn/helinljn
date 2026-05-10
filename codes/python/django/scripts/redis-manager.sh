@@ -14,7 +14,8 @@ REDIS_USER="${REDIS_USER:-redis}"
 HOST="${REDIS_HOST:-127.0.0.1}"
 PORT="${REDIS_PORT:-6379}"
 PID_FILE="${REDIS_PID_FILE:-/run/redis/redis-server.pid}"
-LOG_DIR="${REDIS_LOG_DIR:-/var/log/redis}"
+LOG_FILE="${REDIS_LOG_FILE:-/var/log/redis/redis-server.log}"
+LOG_DIR="${REDIS_LOG_DIR:-$(dirname "$LOG_FILE")}"
 DATA_DIR="${REDIS_DATA_DIR:-/var/lib/redis}"
 RUN_DIR="$(dirname "$PID_FILE")"
 
@@ -42,6 +43,17 @@ prepare_dirs() {
     sudo_cmd install -d -m 0755 -o "$REDIS_USER" -g "$REDIS_USER" "$RUN_DIR" "$LOG_DIR" "$DATA_DIR"
 }
 
+prepare_log_file() {
+    sudo_cmd touch "$LOG_FILE"
+    sudo_cmd chown "$REDIS_USER:$REDIS_USER" "$LOG_FILE"
+    sudo_cmd chmod u+rw "$LOG_FILE"
+}
+
+prepare_data_files() {
+    sudo_cmd chown -R "$REDIS_USER:$REDIS_USER" "$DATA_DIR"
+    sudo_cmd chmod -R u+rwX "$DATA_DIR"
+}
+
 is_redis_running() {
     redis_cli PING >/dev/null 2>&1
 }
@@ -64,6 +76,8 @@ start_redis() {
     fi
 
     prepare_dirs
+    prepare_log_file
+    prepare_data_files
     run_as_redis_user "$SERVER_BIN" "$CONFIG_FILE"
 
     for _ in {1..20}; do
@@ -161,7 +175,7 @@ status_redis() {
     echo "Connection: OK"
     echo "Address: $HOST:$PORT"
     echo "Config file: $(redis_config_file)"
-    echo "Memory used: $(redis_cli INFO memory | awk -F: '/^used_memory_human:/ {gsub(/\r/, \"\", $2); print $2}')"
+    echo "Memory used: $(redis_cli INFO memory | awk -F: '/^used_memory_human:/ {gsub(/\r/, "", $2); print $2}')"
     echo "Keys in DB 0: $(redis_cli DBSIZE)"
     echo "Maxmemory policy: $(redis_cli CONFIG GET maxmemory-policy | awk 'NR==2')"
 }
@@ -173,6 +187,7 @@ Usage: $0 {start|stop|restart|status|check-config|help}
 
 Environment overrides:
   REDIS_CONFIG_FILE  default: $CONFIG_FILE
+  REDIS_LOG_FILE     default: $LOG_FILE
   REDIS_USER         default: $REDIS_USER
   REDIS_HOST         default: $HOST
   REDIS_PORT         default: $PORT
