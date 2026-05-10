@@ -155,13 +155,14 @@ check_redis_config() {
         return 1
     fi
 
-    echo "Active config file: $current_config"
+    echo "Source config: $CONFIG_FILE"
+    echo "Active config: $current_config"
     if [ "$current_config" = "$CONFIG_FILE" ]; then
-        echo "Config file matches expected file"
+        echo "Config file matches"
         return 0
     fi
 
-    echo "Config file does not match expected file"
+    echo "Config file differs from source"
     return 1
 }
 

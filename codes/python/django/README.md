@@ -84,7 +84,7 @@ d:\helinljn\codes\python\django\
 ├── environment-linux.yml
 ├── idip_commands.json
 ├── README.md
-├── config/
+├── scripts/
 │   ├── django-manager.sh
 │   ├── my.cnf
 │   ├── mysql-manager.sh
@@ -660,13 +660,13 @@ python manage.py createsuperuser
 
 ### 15.4 启动项目
 ```bash
-bash config/django-manager.sh start
+bash scripts/django-manager.sh start
 ```
 
 停止项目：
 
 ```bash
-bash config/django-manager.sh stop
+bash scripts/django-manager.sh stop
 ```
 
 默认监听地址：
@@ -786,13 +786,13 @@ sudo service mysql start
 项目提供 MySQL 8.0.45 示例配置：
 
 ```text
-config/my.cnf
+scripts/my.cnf
 ```
 
 在 Ubuntu 24.04 上部署时，应把它安装为 MySQL 会读取的 `.cnf` 文件，例如：
 
 ```bash
-sudo cp config/my.cnf /etc/mysql/conf.d/gmtool.cnf
+sudo cp scripts/my.cnf /etc/mysql/conf.d/gmtool.cnf
 sudo chown root:root /etc/mysql/conf.d/gmtool.cnf
 sudo chmod 644 /etc/mysql/conf.d/gmtool.cnf
 sudo service mysql restart
@@ -902,7 +902,7 @@ sudo service mysql start
 
 - 两种操作都会删除当前 MySQL 实例中的数据库、账号和权限，执行前必须确认没有需要保留的数据。
 - `--initialize-insecure` 会创建可通过本机系统 root 维护的空实例，仅建议用于测试、重置或受控初始化流程。
-- 完整卸载重装会删除 `/etc/mysql/`，因此需要重新安装 `config/my.cnf` 并重启 MySQL。
+- 完整卸载重装会删除 `/etc/mysql/`，因此需要重新安装 `scripts/my.cnf` 并重启 MySQL。
 - 不建议手动删除 `/etc/apparmor.d/` 下的 MySQL 规则文件；如果软件包仍然需要它们，应由 `apt` 安装、卸载或修复。
 
 重置或重装后，重新执行本节的配置文件安装、建库授权和 Django 初始化步骤。
