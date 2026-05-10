@@ -13,9 +13,9 @@ PREFERRED_FIELD_ORDER = [
     'request_desc',
     'request_id',
     'request',
-    'respone_desc',
+    'response_desc',
     'response_id',
-    'respone',
+    'response',
 ]
 
 
@@ -26,7 +26,7 @@ def reorder_command_fields(command_data):
 
     ordered = OrderedDict()
     request_name = command_data.get('request')
-    response_name = command_data.get('respone')
+    response_name = command_data.get('response')
 
     # 先放固定的头部字段
     for key in PREFERRED_FIELD_ORDER:

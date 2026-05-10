@@ -240,7 +240,7 @@ class SyncCommandsToDbValidationTests(TestCase):
                         'tab': '测试',
                         'request': 'ReqB',
                         'request_id': 101,
-                        'respone': 'RspB',
+                        'response': 'RspB',
                         'response_id': 102,
                         'ReqB': [],
                         'RspB': [],
@@ -306,7 +306,7 @@ class UploadCommandsRollbackTests(TestCase):
                     'request': 'OldReq',
                     'request_id': 5000,
                     'response_id': 5001,
-                    'respone': 'OldRsp',
+                    'response': 'OldRsp',
                     'OldReq': [],
                     'OldRsp': [],
                 }
@@ -329,7 +329,7 @@ class UploadCommandsRollbackTests(TestCase):
                     'request': 'NewReq',
                     'request_id': 6000,
                     'response_id': 6001,
-                    'respone': 'NewRsp',
+                    'response': 'NewRsp',
                     'NewReq': [],
                     'NewRsp': [],
                 }

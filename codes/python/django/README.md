@@ -279,9 +279,9 @@ idip_commands.json
     "request_desc": "查询个人信息请求(Personal information query request)",
     "request_id": 4097,
     "request": "QueryUsrInfoReq",
-    "respone_desc": "查询个人信息应答(Personal information query response)",
+    "response_desc": "查询个人信息应答(Personal information query response)",
     "response_id": 4098,
-    "respone": "QueryUsrInfoRsp",
+    "response": "QueryUsrInfoRsp",
     "QueryUsrInfoReq": [],
     "QueryUsrInfoRsp": []
   }
@@ -342,9 +342,9 @@ python manage.py format_idip_commands --check
 2. `request_desc`
 3. `request_id`
 4. `request`
-5. `respone_desc`
+5. `response_desc`
 6. `response_id`
-7. `respone`
+7. `response`
 8. 请求参数定义
 9. 响应参数定义
 10. 其他扩展字段

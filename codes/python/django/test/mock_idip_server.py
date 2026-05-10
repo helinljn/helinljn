@@ -169,10 +169,9 @@ def _apply_success_defaults(payload: Dict[str, Any], schema_fields: List[Dict[st
 
 def generate_command_response(command_id: str, command_def: Dict[str, Any]) -> Dict[str, Any]:
     """按当前命令定义自动读取响应协议并组装 json。"""
-    # 兼容不同字段命名（当前文件主要是 respone）
+    # 兼容不同字段命名（当前文件主要是 response）
     response_name = (
-        command_def.get("respone")
-        or command_def.get("response")
+        command_def.get("response")
         or command_def.get("response_name")
     )
     if not response_name:

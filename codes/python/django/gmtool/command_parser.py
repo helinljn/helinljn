@@ -357,7 +357,7 @@ def parse_commands(json_path=None):
     commands = []
     for cmd_id, cmd_data in data.items():
         request_name = cmd_data.get('request', '')
-        response_name = cmd_data.get('respone', '')
+        response_name = cmd_data.get('response', '')
 
         # 提取请求参数定义
         request_params = cmd_data.get(request_name, [])
