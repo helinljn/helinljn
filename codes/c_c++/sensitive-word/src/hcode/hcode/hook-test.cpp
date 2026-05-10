@@ -276,7 +276,7 @@ TEST_SUITE("Hook")
             CHECK(call_func(5) == 16);
         }
 
-        SUBCASE("relative jmp")
+        SUBCASE("relative jmp before patch span is rejected")
         {
             executable_code code(4096);
             REQUIRE(code.valid());
@@ -290,15 +290,15 @@ TEST_SUITE("Hook")
             auto call_func = reinterpret_cast<func_t>(code.data());
             CHECK(call_func(5) == 35);
 
+            unsigned char original[16];
+            std::memcpy(original, code.data(), sizeof(original));
+
             auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
-            CHECK(hook_func.bytes_to_copy >= 14);
-            REQUIRE(enable_hook(&hook_func) != 0);
-
-            auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
-            CHECK(call_func(5) == 1005);
-            CHECK(trampoline(5) == 35);
-
-            CHECK(disable_hook(&hook_func) != 0);
+            CHECK(hook_func.bytes_to_copy == 0);
+            CHECK(enable_hook(&hook_func) == 0);
+            CHECK(std::memcmp(original, code.data(), sizeof(original)) == 0);
+            CHECK(hook_func.trampoline == nullptr);
+            CHECK(hook_func.enabled == 0);
             CHECK(call_func(5) == 35);
         }
 
@@ -307,17 +307,18 @@ TEST_SUITE("Hook")
             executable_code code(4096);
             REQUIRE(code.valid());
 
-            write_arg_test(code, 0);
-            code.write(2, {0x7F, 0x0A});                                  // jg +10
-            code.write(4, {0xB8, 0xFB, 0xFF, 0xFF, 0xFF, 0xC3});          // mov eax, -5; ret
-            write_nops(code, 10, 4);
-            write_arg_to_eax_mov(code, 14);
-            code.write(16, {0x83, 0xC0, 0x40, 0xC3});                    // add eax, 64; ret
+            code.write(0, {0xB8, 0x01, 0x00, 0x00, 0x00});                // mov eax, 1
+            write_arg_test(code, 5);
+            code.write(7, {0x7F, 0x05});                                  // jg +5, target offset 14
+            code.write(9, {0x83, 0xE8, 0x02});                            // sub eax, 2
+            write_nops(code, 12, 2);
+            write_arg_to_eax_add(code, 14);
+            code.write(16, {0xC3});
             code.flush();
 
             auto call_func = reinterpret_cast<func_t>(code.data());
-            CHECK(call_func(5) == 69);
-            CHECK(call_func(-1) == -5);
+            CHECK(call_func(5) == 6);
+            CHECK(call_func(-1) == -2);
 
             auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
             CHECK(hook_func.bytes_to_copy >= 14);
@@ -326,12 +327,44 @@ TEST_SUITE("Hook")
             auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
             CHECK(call_func(5) == 1005);
             CHECK(call_func(-1) == 999);
-            CHECK(trampoline(5) == 69);
-            CHECK(trampoline(-1) == -5);
+            CHECK(trampoline(5) == 6);
+            CHECK(trampoline(-1) == -2);
 
             CHECK(disable_hook(&hook_func) != 0);
-            CHECK(call_func(5) == 69);
-            CHECK(call_func(-1) == -5);
+            CHECK(call_func(5) == 6);
+            CHECK(call_func(-1) == -2);
+        }
+
+        SUBCASE("relative jcc to copied prologue")
+        {
+            executable_code code(4096);
+            REQUIRE(code.valid());
+
+            code.write(0, {0xB8, 0x01, 0x00, 0x00, 0x00});  // mov eax, 1
+            write_arg_test(code, 5);
+            code.write(7, {0x7E, 0x03});                    // jle +3, target offset 12
+            code.write(9, {0x83, 0xC0, 0x0A});              // add eax, 10
+            write_arg_to_eax_add(code, 12);
+            code.write(14, {0xC3});
+            code.flush();
+
+            auto call_func = reinterpret_cast<func_t>(code.data());
+            CHECK(call_func(5) == 16);
+            CHECK(call_func(-1) == 0);
+
+            auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+            CHECK(hook_func.bytes_to_copy == 14);
+            REQUIRE(enable_hook(&hook_func) != 0);
+
+            auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
+            CHECK(call_func(5) == 1005);
+            CHECK(call_func(-1) == 999);
+            CHECK(trampoline(5) == 16);
+            CHECK(trampoline(-1) == 0);
+
+            CHECK(disable_hook(&hook_func) != 0);
+            CHECK(call_func(5) == 16);
+            CHECK(call_func(-1) == 0);
         }
     }
 
@@ -404,6 +437,26 @@ TEST_SUITE("Hook")
         write_nops(code, 2, 12);
         write_arg_to_eax_mov(code, 14);
         code.write(16, {0xC3});
+        code.flush();
+
+        unsigned char original[16];
+        std::memcpy(original, code.data(), sizeof(original));
+
+        auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+        CHECK(hook_func.bytes_to_copy == 0);
+        CHECK(enable_hook(&hook_func) == 0);
+        CHECK(std::memcmp(original, code.data(), sizeof(original)) == 0);
+        CHECK(hook_func.trampoline == nullptr);
+        CHECK(hook_func.enabled == 0);
+    }
+
+    TEST_CASE("LightHookShortFunctionLeavesEntryUnchanged")
+    {
+        executable_code code(4096);
+        REQUIRE(code.valid());
+
+        code.write(0, {0xC3});  // ret before a full absolute jump can be installed.
+        write_nops(code, 1, 15);
         code.flush();
 
         unsigned char original[16];

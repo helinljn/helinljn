@@ -65,7 +65,17 @@ struct instruction_info
     int           relative_offset     = 0;
     int           relative_size       = 0;
     int           relative_kind       = 0;  // 1 call, 2 jmp, 3 jcc
+    int           modrm_reg           = -1;
+    bool          terminal            = false;
     unsigned char condition           = 0;
+};
+
+struct relocated_instruction
+{
+    int              original_offset = 0;
+    size_t           output_offset   = 0;
+    size_t           output_size     = 0;
+    instruction_info info;
 };
 
 #if defined(CORE_PLATFORM_LINUX)
@@ -142,7 +152,9 @@ void parse_modrm(const unsigned char* start, const unsigned char*& cursor, bool 
     const unsigned char* modrm_ptr = cursor;
     const unsigned char  modrm     = *cursor++;
     const unsigned char  mod       = static_cast<unsigned char>(modrm >> 6);
+    const unsigned char  reg       = static_cast<unsigned char>((modrm >> 3) & 0x07);
     const unsigned char  rm        = static_cast<unsigned char>(modrm & 0x07);
+    info.modrm_reg                 = reg;
 
     if (address_prefix)
     {
@@ -232,6 +244,31 @@ instruction_info decode_instruction(const void* address)
         return info;
     }
 
+    if (opcode == 0xC3 || opcode == 0xCB)
+    {
+        info.terminal = true;
+        info.length   = static_cast<int>(cursor - start);
+
+        return info;
+    }
+
+    if (opcode == 0xC2 || opcode == 0xCA)
+    {
+        info.terminal = true;
+        cursor       += 2;
+        info.length   = static_cast<int>(cursor - start);
+
+        return info;
+    }
+
+    if (opcode == 0xEA || opcode == 0x9A || opcode == 0xCC || opcode == 0xCF)
+    {
+        info.supported = false;
+        info.length    = 0;
+
+        return info;
+    }
+
     bool has_modrm_byte = false;
     int  immediate_size = 0;
     if (opcode == 0xE8)
@@ -248,6 +285,7 @@ instruction_info decode_instruction(const void* address)
     if (opcode == 0xE9)
     {
         info.relative_kind   = 2;
+        info.terminal        = true;
         info.relative_offset = static_cast<int>(cursor - start);
         info.relative_size   = 4;
         cursor              += 4;
@@ -259,6 +297,7 @@ instruction_info decode_instruction(const void* address)
     if (opcode == 0xEB)
     {
         info.relative_kind   = 2;
+        info.terminal        = true;
         info.relative_offset = static_cast<int>(cursor - start);
         info.relative_size   = 1;
         cursor              += 1;
@@ -292,6 +331,14 @@ instruction_info decode_instruction(const void* address)
     if (opcode == 0x0F)
     {
         const unsigned char opcode2 = *cursor++;
+        if (opcode2 == 0x0B)
+        {
+            info.supported = false;
+            info.length    = 0;
+
+            return info;
+        }
+
         if (opcode2 >= 0x80 && opcode2 <= 0x8F)
         {
             info.relative_kind   = 3;
@@ -360,13 +407,13 @@ instruction_info decode_instruction(const void* address)
             if (opcode >= 0xB8 && opcode <= 0xBF)
                 immediate_size = rex_w ? 8 : 4;
             else if (opcode == 0xC7 || opcode == 0x69)
-                immediate_size = 4;
+                immediate_size = operand_prefix ? 2 : 4;
             else
                 immediate_size = operand_prefix ? 2 : 4;
         }
         else if (high == 0xA && low < 4)
         {
-            immediate_size = rex_w ? 8 : (address_prefix ? 2 : 4);
+            immediate_size = 8;
         }
         else if (opcode == 0xEA || opcode == 0x9A)
         {
@@ -381,6 +428,9 @@ instruction_info decode_instruction(const void* address)
 
     if (has_modrm_byte)
         parse_modrm(start, cursor, address_prefix, info);
+
+    if (opcode == 0xFF && (info.modrm_reg == 4 || info.modrm_reg == 5))
+        info.terminal = true;
 
     cursor     += immediate_size;
     info.length = static_cast<int>(cursor - start);
@@ -455,23 +505,105 @@ intptr_t read_relative_value(const unsigned char* instruction, const instruction
     return value;
 }
 
+bool compute_relative_disp32(uintptr_t target, uintptr_t next_instruction, int32_t* displacement)
+{
+    if (!displacement)
+        return false;
+
+    if (target >= next_instruction)
+    {
+        const uintptr_t delta = target - next_instruction;
+        if (delta > static_cast<uintptr_t>(std::numeric_limits<int32_t>::max()))
+            return false;
+
+        *displacement = static_cast<int32_t>(delta);
+        return true;
+    }
+
+    const uintptr_t delta = next_instruction - target;
+    if (delta > static_cast<uintptr_t>(std::numeric_limits<int32_t>::max()) + 1U)
+        return false;
+
+    *displacement = static_cast<int32_t>(-static_cast<int64_t>(delta));
+    return true;
+}
+
+uintptr_t add_signed_offset(uintptr_t base, intptr_t offset)
+{
+    if (offset >= 0)
+        return base + static_cast<uintptr_t>(offset);
+
+    return base - static_cast<uintptr_t>(-offset);
+}
+
+size_t relocated_instruction_size(const instruction_info& info)
+{
+    if (info.relative_kind == 1)
+        return 16;
+
+    if (info.relative_kind == 2)
+        return k_jump_size;
+
+    if (info.relative_kind == 3)
+        return 6 + k_jump_size;
+
+    return static_cast<size_t>(info.length);
+}
+
+bool resolve_internal_relocation_target(uintptr_t                                  target,
+                                        uintptr_t                                  source_base,
+                                        int                                        bytes_to_copy,
+                                        const std::vector<relocated_instruction>&  instructions,
+                                        unsigned char*                             trampoline_base,
+                                        const void**                               relocated_target)
+{
+    if (!relocated_target)
+        return false;
+
+    const uintptr_t source_end = source_base + static_cast<uintptr_t>(bytes_to_copy);
+    if (target < source_base || target >= source_end)
+    {
+        *relocated_target = reinterpret_cast<const void*>(target);
+        return true;
+    }
+
+    const auto target_offset = static_cast<int>(target - source_base);
+    for (const auto& instruction : instructions)
+    {
+        if (instruction.original_offset != target_offset)
+            continue;
+
+        *relocated_target = trampoline_base + instruction.output_offset;
+        return true;
+    }
+
+    return false;
+}
+
 bool append_relocated_instruction(std::vector<unsigned char>& output,
                                   const unsigned char*        source_instruction,
                                   unsigned char*              trampoline_base,
-                                  const instruction_info&     info)
+                                  const instruction_info&     info,
+                                  uintptr_t                   source_base,
+                                  int                         bytes_to_copy,
+                                  const std::vector<relocated_instruction>& instructions)
 {
     const auto source_address = reinterpret_cast<uintptr_t>(source_instruction);
     const auto source_next    = source_address + static_cast<uintptr_t>(info.length);
     if (info.relative_kind != 0)
     {
-        const uintptr_t target = source_next + read_relative_value(source_instruction, info);
+        const uintptr_t target = add_signed_offset(source_next, read_relative_value(source_instruction, info));
+        const void* relocated_target = nullptr;
+        if (!resolve_internal_relocation_target(target, source_base, bytes_to_copy, instructions, trampoline_base, &relocated_target))
+            return false;
+
         if (info.relative_kind == 1)
-            return append_absolute_call(output, reinterpret_cast<const void*>(target));
+            return append_absolute_call(output, relocated_target);
 
         if (info.relative_kind == 2)
-            return append_absolute_jump(output, reinterpret_cast<const void*>(target));
+            return append_absolute_jump(output, relocated_target);
 
-        return append_absolute_jcc(output, info.condition, reinterpret_cast<const void*>(target));
+        return append_absolute_jcc(output, info.condition, relocated_target);
     }
 
     const size_t output_offset = output.size();
@@ -482,13 +614,12 @@ bool append_relocated_instruction(std::vector<unsigned char>& output,
     {
         int32_t source_disp = 0;
         std::memcpy(&source_disp, source_instruction + info.displacement_offset, sizeof(source_disp));
-        const uintptr_t source_target = source_next + source_disp;
+        const uintptr_t source_target = add_signed_offset(source_next, source_disp);
         const uintptr_t dest_next     = reinterpret_cast<uintptr_t>(trampoline_base) + output_offset + static_cast<uintptr_t>(info.length);
-        const auto      new_disp      = static_cast<intptr_t>(source_target - dest_next);
-        if (!fits_int32(new_disp))
+        int32_t         relocated_disp = 0;
+        if (!compute_relative_disp32(source_target, dest_next, &relocated_disp))
             return false;
 
-        const auto relocated_disp = static_cast<int32_t>(new_disp);
         std::memcpy(output.data() + output_offset + static_cast<size_t>(info.displacement_offset), &relocated_disp, sizeof(relocated_disp));
     }
 
@@ -502,6 +633,10 @@ bool build_trampoline(hook_information_t* information)
 
     const auto*    source     = static_cast<const unsigned char*>(information->original_function);
     unsigned char* trampoline = static_cast<unsigned char*>(information->trampoline);
+    const auto     source_base = reinterpret_cast<uintptr_t>(source);
+
+    std::vector<relocated_instruction> instructions;
+    instructions.reserve(16);
 
     int copied = 0;
     while (copied < information->bytes_to_copy)
@@ -510,10 +645,37 @@ bool build_trampoline(hook_information_t* information)
         if (!info.supported || info.length <= 0 || copied + info.length > information->bytes_to_copy)
             return false;
 
-        if (!append_relocated_instruction(relocated, source + copied, trampoline, info))
+        relocated_instruction instruction;
+        instruction.original_offset = copied;
+        instruction.output_offset   = relocated.size();
+        instruction.output_size     = relocated_instruction_size(info);
+        instruction.info            = info;
+        if (instruction.output_offset + instruction.output_size > k_trampoline_size)
             return false;
 
+        instructions.push_back(instruction);
+        relocated.resize(instruction.output_offset + instruction.output_size);
+
         copied += info.length;
+    }
+
+    relocated.clear();
+    for (const auto& instruction : instructions)
+    {
+        if (relocated.size() != instruction.output_offset)
+            return false;
+
+        if (!append_relocated_instruction(relocated,
+                                          source + instruction.original_offset,
+                                          trampoline,
+                                          instruction.info,
+                                          source_base,
+                                          information->bytes_to_copy,
+                                          instructions))
+            return false;
+
+        if (relocated.size() != instruction.output_offset + instruction.output_size)
+            return false;
     }
 
     const auto* return_address = static_cast<const unsigned char*>(information->original_function) + information->bytes_to_copy;
@@ -758,6 +920,17 @@ bool entry_matches_original(const hook_information_t* information)
     return std::memcmp(information->original_function, information->original_buffer, static_cast<size_t>(information->bytes_to_copy)) == 0;
 }
 
+bool entry_matches_patch(const hook_information_t* information)
+{
+    if (!has_valid_copy_size(information))
+        return false;
+
+    unsigned char patch_bytes[sizeof(information->original_buffer)];
+    make_patch_bytes(patch_bytes, information->target_function, information->bytes_to_copy);
+
+    return std::memcmp(information->original_function, patch_bytes, static_cast<size_t>(information->bytes_to_copy)) == 0;
+}
+
 bool is_in_patch_range(uintptr_t ip, const hook_information_t* information)
 {
     const auto start = reinterpret_cast<uintptr_t>(information->original_function);
@@ -830,12 +1003,18 @@ public:
 
             HANDLE thread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_QUERY_INFORMATION, FALSE, entry.th32ThreadID);
             if (!thread)
-                continue;
+            {
+                CloseHandle(snapshot);
+                resume();
+                return false;
+            }
 
             if (SuspendThread(thread) == static_cast<DWORD>(-1))
             {
                 CloseHandle(thread);
-                continue;
+                CloseHandle(snapshot);
+                resume();
+                return false;
             }
 
             threads_.push_back(thread);
@@ -855,7 +1034,7 @@ public:
             context.ContextFlags = CONTEXT_CONTROL;
 
             if (!GetThreadContext(thread, &context))
-                continue;
+                return true;
 
             if (is_in_patch_range(static_cast<uintptr_t>(context.Rip), information))
                 return true;
@@ -883,6 +1062,7 @@ struct linux_thread_record
 {
     pid_t                  tid{0};
     std::atomic<int>       parked{0};
+    std::atomic<int>       ignored{0};
     std::atomic<uintptr_t> rip{0};
 };
 
@@ -890,8 +1070,22 @@ constexpr int                     k_suspend_signal{SIGUSR2};
 std::atomic<int>                  g_suspend_requested{0};
 std::atomic<linux_thread_record*> g_suspend_records{nullptr};
 std::atomic<int>                  g_suspend_record_count{0};
+std::atomic<int>                  g_suspend_handler_active{0};
 struct sigaction                  g_previous_trap_action{};
 struct sigaction                  g_previous_suspend_action{};
+
+struct suspend_handler_scope
+{
+    suspend_handler_scope()
+    {
+        g_suspend_handler_active.fetch_add(1, std::memory_order_acq_rel);
+    }
+
+    ~suspend_handler_scope()
+    {
+        g_suspend_handler_active.fetch_sub(1, std::memory_order_acq_rel);
+    }
+};
 
 pid_t current_tid()
 {
@@ -930,12 +1124,24 @@ void call_previous_signal_action(const struct sigaction& action, int signal_numb
         action.sa_handler(signal_number);
 }
 
+bool is_internal_suspend_signal(int signal_number, siginfo_t* signal_info)
+{
+    return signal_number == k_suspend_signal
+        && signal_info != nullptr
+        && signal_info->si_code == SI_TKILL
+        && signal_info->si_pid == getpid();
+}
+
 void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* context)
 {
+    suspend_handler_scope scope;
     linux_thread_record* records = g_suspend_records.load(std::memory_order_acquire);
     const int            count   = g_suspend_record_count.load(std::memory_order_acquire);
     if (!records || count <= 0)
     {
+        if (is_internal_suspend_signal(signal_number, signal_info))
+            return;
+
         call_previous_signal_action(g_previous_suspend_action, signal_number, signal_info, context);
         return;
     }
@@ -960,6 +1166,9 @@ void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* con
 
         return;
     }
+
+    if (is_internal_suspend_signal(signal_number, signal_info))
+        return;
 
     call_previous_signal_action(g_previous_suspend_action, signal_number, signal_info, context);
 }
@@ -1054,14 +1263,27 @@ public:
 
         const pid_t process_id = getpid();
         for (size_t i = 0; i < record_count_; ++i)
-            syscall(SYS_tgkill, process_id, records_[i].tid, k_suspend_signal);
+        {
+            if (syscall(SYS_tgkill, process_id, records_[i].tid, k_suspend_signal) == 0)
+                continue;
+
+            if (errno == ESRCH)
+            {
+                records_[i].ignored.store(1, std::memory_order_release);
+                continue;
+            }
+
+            resume();
+            return false;
+        }
 
         for (int retry = 0; retry < k_patch_retry_count; ++retry)
         {
             bool all_parked = true;
             for (size_t i = 0; i < record_count_; ++i)
             {
-                if (!records_[i].parked.load(std::memory_order_acquire))
+                if (!records_[i].ignored.load(std::memory_order_acquire)
+                    && !records_[i].parked.load(std::memory_order_acquire))
                 {
                     all_parked = false;
                     break;
@@ -1083,6 +1305,9 @@ public:
     {
         for (size_t i = 0; i < record_count_; ++i)
         {
+            if (records_[i].ignored.load(std::memory_order_acquire))
+                continue;
+
             if (is_in_patch_range(records_[i].rip.load(std::memory_order_acquire), information))
                 return true;
         }
@@ -1100,7 +1325,8 @@ public:
                 bool all_resumed = true;
                 for (size_t i = 0; i < record_count_; ++i)
                 {
-                    if (records_[i].parked.load(std::memory_order_acquire))
+                    if (!records_[i].ignored.load(std::memory_order_acquire)
+                        && records_[i].parked.load(std::memory_order_acquire))
                     {
                         all_resumed = false;
                         break;
@@ -1116,6 +1342,14 @@ public:
 
         g_suspend_record_count.store(0, std::memory_order_release);
         g_suspend_records.store(nullptr, std::memory_order_release);
+        for (int retry = 0; retry < k_patch_retry_count; ++retry)
+        {
+            if (g_suspend_handler_active.load(std::memory_order_acquire) == 0)
+                break;
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+
         records_.reset();
         record_count_ = 0;
     }
@@ -1224,6 +1458,8 @@ bool prepare_patch_size(hook_information_t* information)
             return false;
 
         copied += info.length;
+        if (copied < static_cast<int>(k_jump_size) && info.terminal)
+            return false;
     }
 
     information->bytes_to_copy = copied;
@@ -1250,8 +1486,11 @@ int enable_hook(hook_information_t* information)
 {
     std::lock_guard<std::mutex> lock(g_hook_mutex);
 
-    if (!information || information->enabled)
-        return information ? 1 : 0;
+    if (!information)
+        return 0;
+
+    if (information->enabled)
+        return entry_matches_patch(information) ? 1 : 0;
 
     if (information->bytes_to_copy <= 0 && !prepare_patch_size(information))
         return 0;
@@ -1311,6 +1550,9 @@ int disable_hook(hook_information_t* information)
         return 1;
 
     if (!has_valid_copy_size(information))
+        return 0;
+
+    if (!entry_matches_patch(information))
         return 0;
 
     if (!write_entry_transaction(information, information->original_buffer))
