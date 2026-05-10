@@ -38,7 +38,6 @@
 namespace {
 
 constexpr size_t k_jump_size         = 14;
-constexpr size_t k_max_relocated     = 128;
 constexpr size_t k_trampoline_size   = 512;
 constexpr int    k_patch_retry_count = 1000;
 constexpr int    k_trap_grace_ms     = 2;
@@ -49,6 +48,12 @@ const unsigned char k_jump_code[k_jump_size] = {
 
 std::mutex                       g_hook_mutex;
 std::atomic<hook_information_t*> g_active_transaction{nullptr};
+
+#if defined(CORE_PLATFORM_WINDOWS)
+void* g_trap_handler_handle = nullptr;
+#elif defined(CORE_PLATFORM_LINUX)
+bool g_trap_handler_installed = false;
+#endif // defined(CORE_PLATFORM_WINDOWS)
 
 struct instruction_info
 {
@@ -84,6 +89,15 @@ struct platform_protection_state
 bool fits_int32(intptr_t value)
 {
     return value >= std::numeric_limits<int32_t>::min() && value <= std::numeric_limits<int32_t>::max();
+}
+
+bool has_valid_copy_size(const hook_information_t* information)
+{
+    return information != nullptr
+        && information->original_function != nullptr
+        && information->target_function != nullptr
+        && information->bytes_to_copy >= static_cast<int>(k_jump_size)
+        && information->bytes_to_copy <= static_cast<int>(sizeof(information->original_buffer));
 }
 
 bool is_legacy_prefix(unsigned char value)
@@ -199,6 +213,16 @@ instruction_info decode_instruction(const void* address)
         break;
     }
 
+    // 0x67 switches x86_64 instructions to 32-bit addressing. The lightweight
+    // relocator only handles the normal 64-bit ModR/M RIP-relative form.
+    if (address_prefix)
+    {
+        info.supported = false;
+        info.length    = 0;
+
+        return info;
+    }
+
     const unsigned char opcode = *cursor++;
     if (is_vex_or_evex_prefix(opcode))
     {
@@ -239,6 +263,16 @@ instruction_info decode_instruction(const void* address)
         info.relative_size   = 1;
         cursor              += 1;
         info.length          = static_cast<int>(cursor - start);
+
+        return info;
+    }
+
+    if (opcode >= 0xE0 && opcode <= 0xE3)
+    {
+        // LOOP/LOOPE/LOOPNE/JRCXZ are relative control-flow instructions with
+        // special semantics. Refuse them instead of copying a stale offset.
+        info.supported = false;
+        info.length    = 0;
 
         return info;
     }
@@ -359,7 +393,8 @@ instruction_info decode_instruction(const void* address)
 void write_absolute_jump(unsigned char* output, const void* target)
 {
     std::memcpy(output, k_jump_code, sizeof(k_jump_code));
-    *reinterpret_cast<uintptr_t*>(output + 6) = reinterpret_cast<uintptr_t>(target);
+    const uintptr_t target_value = reinterpret_cast<uintptr_t>(target);
+    std::memcpy(output + 6, &target_value, sizeof(target_value));
 }
 
 bool append_bytes(std::vector<unsigned char>& output, const void* data, size_t size)
@@ -409,9 +444,15 @@ bool append_absolute_jcc(std::vector<unsigned char>& output, unsigned char condi
 intptr_t read_relative_value(const unsigned char* instruction, const instruction_info& info)
 {
     if (info.relative_size == 1)
-        return *reinterpret_cast<const int8_t*>(instruction + info.relative_offset);
+    {
+        int8_t value = 0;
+        std::memcpy(&value, instruction + info.relative_offset, sizeof(value));
+        return value;
+    }
 
-    return *reinterpret_cast<const int32_t*>(instruction + info.relative_offset);
+    int32_t value = 0;
+    std::memcpy(&value, instruction + info.relative_offset, sizeof(value));
+    return value;
 }
 
 bool append_relocated_instruction(std::vector<unsigned char>& output,
@@ -439,13 +480,16 @@ bool append_relocated_instruction(std::vector<unsigned char>& output,
 
     if (info.rip_relative)
     {
-        const uintptr_t source_target = source_next + *reinterpret_cast<const int32_t*>(source_instruction + info.displacement_offset);
+        int32_t source_disp = 0;
+        std::memcpy(&source_disp, source_instruction + info.displacement_offset, sizeof(source_disp));
+        const uintptr_t source_target = source_next + source_disp;
         const uintptr_t dest_next     = reinterpret_cast<uintptr_t>(trampoline_base) + output_offset + static_cast<uintptr_t>(info.length);
         const auto      new_disp      = static_cast<intptr_t>(source_target - dest_next);
         if (!fits_int32(new_disp))
             return false;
 
-        *reinterpret_cast<int32_t*>(output.data() + output_offset + static_cast<size_t>(info.displacement_offset)) = static_cast<int32_t>(new_disp);
+        const auto relocated_disp = static_cast<int32_t>(new_disp);
+        std::memcpy(output.data() + output_offset + static_cast<size_t>(info.displacement_offset), &relocated_disp, sizeof(relocated_disp));
     }
 
     return true;
@@ -578,20 +622,20 @@ void* platform_allocate_near(const void* target, size_t size)
     for (uintptr_t offset = 0; offset < range; offset += granularity)
     {
         const auto high   = base + offset;
-        void*      memory = VirtualAlloc(reinterpret_cast<void*>(high), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+        void*      memory = VirtualAlloc(reinterpret_cast<void*>(high), size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
         if (memory)
             return memory;
 
         if (base > offset)
         {
             const auto low = base - offset;
-            memory         = VirtualAlloc(reinterpret_cast<void*>(low), size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+            memory         = VirtualAlloc(reinterpret_cast<void*>(low), size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
             if (memory)
                 return memory;
         }
     }
 
-    return VirtualAlloc(nullptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+    return VirtualAlloc(nullptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 #elif defined(CORE_PLATFORM_LINUX)
     const size_t    page      = page_size();
     const uintptr_t base      = align_down(reinterpret_cast<uintptr_t>(target), page);
@@ -605,7 +649,7 @@ void* platform_allocate_near(const void* target, size_t size)
                 continue;
 
             void* memory = mmap(reinterpret_cast<void*>(candidate), size,
-                                PROT_READ | PROT_WRITE | PROT_EXEC,
+                                PROT_READ | PROT_WRITE,
                                 MAP_PRIVATE | MAP_ANONYMOUS
 #ifdef MAP_FIXED_NOREPLACE
                                     | MAP_FIXED_NOREPLACE
@@ -623,7 +667,7 @@ void* platform_allocate_near(const void* target, size_t size)
         }
     }
 
-    void* memory = mmap(nullptr, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    void* memory = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     return memory == MAP_FAILED ? nullptr : memory;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
@@ -638,6 +682,23 @@ void platform_free(void* address, size_t size)
     VirtualFree(address, 0, MEM_RELEASE);
 #elif defined(CORE_PLATFORM_LINUX)
     munmap(address, size);
+#endif // defined(CORE_PLATFORM_WINDOWS)
+}
+
+bool platform_make_executable(void* address, size_t size)
+{
+    if (!address || size == 0)
+        return false;
+
+#if defined(CORE_PLATFORM_WINDOWS)
+    DWORD ignored = 0;
+    return VirtualProtect(address, size, PAGE_EXECUTE_READ, &ignored) != 0;
+#elif defined(CORE_PLATFORM_LINUX)
+    const size_t page     = page_size();
+    const auto   start    = align_down(reinterpret_cast<uintptr_t>(address), page);
+    const auto   end      = reinterpret_cast<uintptr_t>(address) + size;
+    const auto   end_page = align_down(end + page - 1, page);
+    return mprotect(reinterpret_cast<void*>(start), end_page - start, PROT_READ | PROT_EXEC) == 0;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
 
@@ -689,6 +750,14 @@ void make_patch_bytes(unsigned char* buffer, const void* target, int patch_size)
     write_absolute_jump(buffer, target);
 }
 
+bool entry_matches_original(const hook_information_t* information)
+{
+    if (!has_valid_copy_size(information))
+        return false;
+
+    return std::memcmp(information->original_function, information->original_buffer, static_cast<size_t>(information->bytes_to_copy)) == 0;
+}
+
 bool is_in_patch_range(uintptr_t ip, const hook_information_t* information)
 {
     const auto start = reinterpret_cast<uintptr_t>(information->original_function);
@@ -720,12 +789,13 @@ LONG CALLBACK trap_handler(EXCEPTION_POINTERS* exception_info)
     return EXCEPTION_CONTINUE_EXECUTION;
 }
 
-void ensure_trap_handler_installed()
+bool ensure_trap_handler_installed()
 {
     static std::once_flag once;
     std::call_once(once, []() {
-        AddVectoredExceptionHandler(1, trap_handler);
+        g_trap_handler_handle = AddVectoredExceptionHandler(1, trap_handler);
     });
+    return g_trap_handler_handle != nullptr;
 }
 
 class thread_parker
@@ -912,7 +982,7 @@ void trap_signal_handler(int signal_number, siginfo_t* signal_info, void* contex
     call_previous_signal_action(g_previous_trap_action, signal_number, signal_info, context);
 }
 
-void ensure_trap_handler_installed()
+bool ensure_trap_handler_installed()
 {
     static std::once_flag once;
     std::call_once(once, []() {
@@ -921,15 +991,23 @@ void ensure_trap_handler_installed()
         trap_action.sa_sigaction = trap_signal_handler;
         trap_action.sa_flags     = SA_SIGINFO | SA_NODEFER;
         sigemptyset(&trap_action.sa_mask);
-        sigaction(SIGTRAP, &trap_action, &g_previous_trap_action);
+        if (sigaction(SIGTRAP, &trap_action, &g_previous_trap_action) != 0)
+            return;
 
         struct sigaction suspend_action;
         std::memset(&suspend_action, 0, sizeof(suspend_action));
         suspend_action.sa_sigaction = suspend_signal_handler;
         suspend_action.sa_flags     = SA_SIGINFO | SA_RESTART;
         sigemptyset(&suspend_action.sa_mask);
-        sigaction(k_suspend_signal, &suspend_action, &g_previous_suspend_action);
+        if (sigaction(k_suspend_signal, &suspend_action, &g_previous_suspend_action) != 0)
+        {
+            sigaction(SIGTRAP, &g_previous_trap_action, nullptr);
+            return;
+        }
+
+        g_trap_handler_installed = true;
     });
+    return g_trap_handler_installed;
 }
 
 class thread_parker
@@ -1070,7 +1148,11 @@ bool wait_for_safe_patch_window(hook_information_t* information)
 
 bool write_entry_transaction(hook_information_t* information, const unsigned char* final_bytes)
 {
-    ensure_trap_handler_installed();
+    if (!has_valid_copy_size(information) || final_bytes == nullptr)
+        return false;
+
+    if (!ensure_trap_handler_installed())
+        return false;
 
     platform_protection_state protection_state;
     if (!platform_make_writable(information->original_function, static_cast<size_t>(information->bytes_to_copy), &protection_state))
@@ -1106,8 +1188,19 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
     entry[0] = final_bytes[0];
     platform_flush_instruction_cache(entry, static_cast<size_t>(information->bytes_to_copy));
 
-    wait_for_safe_patch_window(information);
-    std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms));
+    bool patch_window_settled = wait_for_safe_patch_window(information);
+    if (!patch_window_settled)
+    {
+        for (int retry = 0; retry < 3; ++retry)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            patch_window_settled = wait_for_safe_patch_window(information);
+            if (patch_window_settled)
+                break;
+        }
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(patch_window_settled ? k_trap_grace_ms : k_trap_grace_ms * 4));
     std::atomic_signal_fence(std::memory_order_seq_cst);
     g_active_transaction.store(nullptr, std::memory_order_release);
     platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
@@ -1163,16 +1256,27 @@ int enable_hook(hook_information_t* information)
     if (information->bytes_to_copy <= 0 && !prepare_patch_size(information))
         return 0;
 
-    information->trampoline = platform_allocate_near(information->original_function, k_trampoline_size);
-    if (!information->trampoline)
+    if (!has_valid_copy_size(information) || !entry_matches_original(information))
         return 0;
 
-    if (!build_trampoline(information))
+    const bool needs_trampoline_build = information->trampoline == nullptr;
+    if (needs_trampoline_build)
     {
-        platform_free(information->trampoline, k_trampoline_size);
-        information->trampoline      = nullptr;
-        information->trampoline_size = 0;
+        information->trampoline = platform_allocate_near(information->original_function, k_trampoline_size);
+        if (!information->trampoline)
+            return 0;
 
+        if (!build_trampoline(information) || !platform_make_executable(information->trampoline, k_trampoline_size))
+        {
+            platform_free(information->trampoline, k_trampoline_size);
+            information->trampoline      = nullptr;
+            information->trampoline_size = 0;
+
+            return 0;
+        }
+    }
+    else if (information->trampoline_size <= 0)
+    {
         return 0;
     }
 
@@ -1181,9 +1285,12 @@ int enable_hook(hook_information_t* information)
 
     if (!write_entry_transaction(information, patch_bytes))
     {
-        platform_free(information->trampoline, k_trampoline_size);
-        information->trampoline      = nullptr;
-        information->trampoline_size = 0;
+        if (needs_trampoline_build)
+        {
+            platform_free(information->trampoline, k_trampoline_size);
+            information->trampoline      = nullptr;
+            information->trampoline_size = 0;
+        }
 
         return 0;
     }
@@ -1203,13 +1310,15 @@ int disable_hook(hook_information_t* information)
     if (!information->enabled)
         return 1;
 
+    if (!has_valid_copy_size(information))
+        return 0;
+
     if (!write_entry_transaction(information, information->original_buffer))
         return 0;
 
-    platform_free(information->trampoline, information->trampoline_size > 0 ? static_cast<size_t>(information->trampoline_size) : k_trampoline_size);
-    information->trampoline      = nullptr;
-    information->trampoline_size = 0;
-    information->enabled         = 0;
+    // Keep the trampoline mapped after disable. Other threads, or target code
+    // already holding the trampoline pointer, may still execute through it.
+    information->enabled = 0;
 
     return 1;
 }

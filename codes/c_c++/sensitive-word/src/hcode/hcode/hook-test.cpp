@@ -362,6 +362,15 @@ TEST_SUITE("Hook")
 
         CHECK(disable_hook(&hook_func) != 0);
         CHECK(call_func(5) == 12);
+        CHECK(hook_func.trampoline == trampoline);
+
+        CHECK(enable_hook(&hook_func) != 0);
+        CHECK(hook_func.trampoline == trampoline);
+        CHECK(call_func(5) == 1005);
+
+        CHECK(disable_hook(&hook_func) != 0);
+        CHECK(call_func(5) == 12);
+        CHECK(hook_func.trampoline == trampoline);
         CHECK(disable_hook(&hook_func) != 0);
         CHECK(call_func(5) == 12);
     }
@@ -373,6 +382,28 @@ TEST_SUITE("Hook")
 
         code.write(0, {0xC5, 0xF8, 0x77, 0xC3});  // VEX prefix; unsupported by the lightweight decoder.
         write_nops(code, 4, 12);
+        code.flush();
+
+        unsigned char original[16];
+        std::memcpy(original, code.data(), sizeof(original));
+
+        auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+        CHECK(hook_func.bytes_to_copy == 0);
+        CHECK(enable_hook(&hook_func) == 0);
+        CHECK(std::memcmp(original, code.data(), sizeof(original)) == 0);
+        CHECK(hook_func.trampoline == nullptr);
+        CHECK(hook_func.enabled == 0);
+    }
+
+    TEST_CASE("LightHookUnsupportedRelativeLoopLeavesEntryUnchanged")
+    {
+        executable_code code(4096);
+        REQUIRE(code.valid());
+
+        code.write(0, {0xE3, 0x0C});  // jrcxz +12; unsupported relative control flow
+        write_nops(code, 2, 12);
+        write_arg_to_eax_mov(code, 14);
+        code.write(16, {0xC3});
         code.flush();
 
         unsigned char original[16];
