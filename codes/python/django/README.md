@@ -36,7 +36,7 @@
 - 动态参数表单执行 GM 命令
 - 支持批量执行参数配置
 - 在线新增命令并写入 `idip_commands.json`
-- 上传命令定义 JSON 并自动同步数据库
+- 超级管理员可上传命令定义 JSON 并自动同步数据库
 - JSON 中不存在的命令自动标记为停用
 - 停用命令不可继续执行
 
@@ -120,9 +120,12 @@ d:\helinljn\codes\python\django\
 │   ├── migrations/
 │   ├── templates/gmtool/
 │   └── templatetags/
+│       ├── __init__.py
+│       └── gmtool_tags.py
 ├── locale/
 ├── logs/
 └── test/
+    ├── __init__.py
     ├── README.md
     └── mock_idip_server.py
 ```
@@ -147,6 +150,7 @@ d:\helinljn\codes\python\django\
 - `api_views.py`：命令定义上传接口、日志详情接口
 - `command_parser.py`：命令定义文件解析、ID 校验、JSON 快照读写、数据库同步
 - `command_services.py`：命令执行前的参数校验与命令查询辅助逻辑
+- `query_utils.py`：分页与时间范围筛选辅助函数，供列表页复用
 - `idip_client.py`：与远端 IDIP 服务通信
 - `middleware.py`：命令定义文件变更监控
 - `security_utils.py`：脱敏与安全辅助函数
@@ -292,6 +296,8 @@ idip_commands.json
 - 顶层请求协议 ID 使用 `request_id`
 - 顶层响应协议 ID 使用 `response_id`
 - 请求/响应参数列表中的 `id` 表示字段名，不要与协议 ID 字段混淆
+- `command_name` 的解析优先级为 `name` -> `command_name` -> `tab`
+- `request_desc` / `response_desc` 为可选描述字段，上传时不强制要求，Web 端新增命令时会写入；这两个字段仅作为 JSON 描述信息保留，不同步到 `GMCommand` 数据库字段
 
 ### 8.3 同步逻辑
 `gmtool.command_parser` 会将 JSON 定义同步到数据库：
@@ -365,6 +371,7 @@ python manage.py format_idip_commands --check
 - `content`
 
 `content` 是扁平的原始参数 JSON 字符串，由 `requests.post(..., data=...)` 按 `application/x-www-form-urlencoded` 统一编码。抓包看到的 HTTP body 中 `content` 应只经过一次 URL 编码；服务端表单解析后应直接得到类似 `{"AreaId": 1001, "Partition": 1001, "PlatId": 1001, "OpenId": "1001"}` 的 JSON 字符串。
+- `GSA` 当前固定为空串，后续如启用签名或透传值再单独调整
 
 ### 9.2 Python 调用返回值
 `send_idip_command(command, params)` 当前返回：
@@ -412,7 +419,7 @@ python manage.py format_idip_commands --check
 ### 10.2 应用路由
 `gmtool/urls.py` 当前主要包括：
 
-#### 认证
+#### 首页 / 认证
 - `/gmtool/`
 - `/gmtool/login/`
 - `/gmtool/logout/`
@@ -437,6 +444,9 @@ python manage.py format_idip_commands --check
 - `/gmtool/api/v1/commands/sync/`
 - `/gmtool/api/v1/commands/upload/`
 - `/gmtool/api/v1/logs/<log_id>/`
+
+说明：
+- `/gmtool/api/v1/commands/sync/` 与 `/gmtool/api/v1/commands/upload/` 均仅超级管理员可用
 
 ---
 
@@ -490,6 +500,8 @@ python manage.py format_idip_commands --check
 ### 11.8 代理 / Cookie / HTTPS
 - `DJANGO_TRUSTED_PROXY`
 - `DJANGO_TRUSTED_PROXY_COUNT`
+- `SESSION_COOKIE_AGE`
+- `SESSION_EXPIRE_AT_BROWSER_CLOSE`
 - `SESSION_COOKIE_SECURE`
 - `CSRF_COOKIE_SECURE`
 
@@ -986,4 +998,4 @@ python manage.py compilemessages
 - 当前默认数据库为 SQLite，更适合开发与轻量部署
 - 生产环境可通过 `DB_ENGINE=mysql` 切换到 MySQL
 - 若要进入更高并发或更复杂生产环境，可继续评估 Redis、任务队列等组件
-- 当前命令定义字段已统一使用 `response_id`
+- 当前命令定义中的协议响应 ID 字段统一使用 `response_id`
