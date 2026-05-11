@@ -12,7 +12,7 @@ TEST_SUITE("Hook")
     TEST_CASE("stack_trace")
     {
         const auto str = core::stack_trace().to_string();
-        // CHECK(!str.empty());
+        CHECK(!str.empty());
         fmt::print("{}", str);
     }
 

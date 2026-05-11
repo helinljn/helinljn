@@ -29,8 +29,8 @@
         #undef NOMINMAX
     #endif
 #elif defined(CORE_PLATFORM_LINUX)
-    #include <cxxabi.h>
     #include <dlfcn.h>
+    #include <cxxabi.h>
     #include <execinfo.h>
 #else
     #error "Error! I don't know what to do..."
@@ -78,6 +78,65 @@ std::string undecorate_symbol_name(const char* symbol_name)
 
     return buffer.data();
 }
+
+std::vector<void*> capture_stack_frames_windows()
+{
+    std::vector<void*> frames;
+
+    std::array<void*, stack_trace_capacity> captured_frames{};
+    const USHORT captured = CaptureStackBackTrace(0, static_cast<DWORD>(captured_frames.size()), captured_frames.data(), nullptr);
+    if (captured > 0)
+    {
+        frames.assign(captured_frames.begin(), captured_frames.begin() + captured);
+        return frames;
+    }
+
+    CONTEXT context{};
+    context.ContextFlags = CONTEXT_FULL;
+    RtlCaptureContext(&context);
+
+    STACKFRAME64 stack_frame{};
+    DWORD        machine_type = 0;
+
+    HANDLE process = GetCurrentProcess();
+    HANDLE thread  = GetCurrentThread();
+
+#if defined(_M_X64) || defined(_M_AMD64)
+    machine_type = IMAGE_FILE_MACHINE_AMD64;
+    stack_frame.AddrPC.Offset    = context.Rip;
+    stack_frame.AddrPC.Mode      = AddrModeFlat;
+    stack_frame.AddrFrame.Offset = context.Rbp;
+    stack_frame.AddrFrame.Mode   = AddrModeFlat;
+    stack_frame.AddrStack.Offset = context.Rsp;
+    stack_frame.AddrStack.Mode   = AddrModeFlat;
+#elif defined(_M_IX86)
+    machine_type = IMAGE_FILE_MACHINE_I386;
+    stack_frame.AddrPC.Offset    = context.Eip;
+    stack_frame.AddrPC.Mode      = AddrModeFlat;
+    stack_frame.AddrFrame.Offset = context.Ebp;
+    stack_frame.AddrFrame.Mode   = AddrModeFlat;
+    stack_frame.AddrStack.Offset = context.Esp;
+    stack_frame.AddrStack.Mode   = AddrModeFlat;
+#else
+    return frames;
+#endif
+
+    DWORD64 previous_pc = 0;
+    for (size_t idx = 0; idx != stack_trace_capacity; ++idx)
+    {
+        if (!StackWalk64(machine_type, process, thread, &stack_frame, &context, nullptr, SymFunctionTableAccess64, SymGetModuleBase64, nullptr))
+            break;
+
+        const DWORD64 current_pc = stack_frame.AddrPC.Offset;
+        if (current_pc == 0 || current_pc == previous_pc)
+            break;
+
+        previous_pc = current_pc;
+        frames.push_back(reinterpret_cast<void*>(current_pc));
+    }
+
+    return frames;
+}
 #elif defined(CORE_PLATFORM_LINUX)
 std::string demangle_symbol_name(const char* symbol_name)
 {
@@ -119,14 +178,12 @@ stack_trace::stack_trace()
     std::lock_guard<std::mutex> lock(capture_mutex_);
     initialize_locked();
 
-    std::array<void*, stack_trace_capacity> captured_frames{};
-
 #if defined(CORE_PLATFORM_WINDOWS)
-    const USHORT captured = CaptureStackBackTrace(0, static_cast<DWORD>(captured_frames.size()), captured_frames.data(), nullptr);
-    frames_.resize(captured);
+    const auto captured_frames = capture_stack_frames_windows();
+    frames_.resize(captured_frames.size());
 
     HANDLE process = GetCurrentProcess();
-    for (USHORT idx = 0; idx != captured; ++idx)
+    for (size_t idx = 0; idx != captured_frames.size(); ++idx)
     {
         frame& current  = frames_[idx];
         current.address = captured_frames[idx];
@@ -158,6 +215,7 @@ stack_trace::stack_trace()
         }
     }
 #elif defined(CORE_PLATFORM_LINUX)
+    std::array<void*, stack_trace_capacity> captured_frames{};
     const int captured = backtrace(captured_frames.data(), static_cast<int>(captured_frames.size()));
     if (captured <= 0)
         return;
