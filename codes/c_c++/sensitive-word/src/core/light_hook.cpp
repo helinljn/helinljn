@@ -43,6 +43,7 @@ constexpr int    k_patch_retry_count = 1000;
 constexpr int    k_trap_grace_ms     = 2;
 
 const unsigned char k_jump_code[k_jump_size] = {
+    // FF 25 使用 RIP 相对间接跳转，后面 8 字节填入绝对目标地址。
     0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
@@ -64,7 +65,7 @@ struct instruction_info
     int           displacement_size   = 0;
     int           relative_offset     = 0;
     int           relative_size       = 0;
-    int           relative_kind       = 0;  // 1 call, 2 jmp, 3 jcc
+    int           relative_kind       = 0;  // 1 表示 call，2 表示 jmp，3 表示 jcc。
     int           modrm_reg           = -1;
     bool          terminal            = false;
     unsigned char condition           = 0;
@@ -179,7 +180,7 @@ void parse_modrm(const unsigned char* start, const unsigned char*& cursor, bool 
         info.rip_relative        = true;
         info.displacement_offset = static_cast<int>(cursor - start);
         info.displacement_size   = 4;
-        cursor += 4;
+        cursor                  += 4;
     }
 
     if (mod == 1)
@@ -225,8 +226,7 @@ instruction_info decode_instruction(const void* address)
         break;
     }
 
-    // 0x67 switches x86_64 instructions to 32-bit addressing. The lightweight
-    // relocator only handles the normal 64-bit ModR/M RIP-relative form.
+    // 0x67 会把 x86_64 指令切到 32 位寻址；轻量重定位器只处理常规 64 位 ModR/M RIP 相对形式。
     if (address_prefix)
     {
         info.supported = false;
@@ -308,8 +308,7 @@ instruction_info decode_instruction(const void* address)
 
     if (opcode >= 0xE0 && opcode <= 0xE3)
     {
-        // LOOP/LOOPE/LOOPNE/JRCXZ are relative control-flow instructions with
-        // special semantics. Refuse them instead of copying a stale offset.
+        // LOOP/LOOPE/LOOPNE/JRCXZ 是带特殊语义的相对控制流指令；这里拒绝处理，避免复制出失效偏移。
         info.supported = false;
         info.length    = 0;
 
@@ -353,7 +352,7 @@ instruction_info decode_instruction(const void* address)
 
         if (opcode2 == 0x38 || opcode2 == 0x3A)
         {
-            std::ignore = *cursor++;
+            std::ignore    = *cursor++;
             has_modrm_byte = true;
 
             if (opcode2 == 0x3A)
@@ -467,7 +466,7 @@ bool append_absolute_jump(std::vector<unsigned char>& output, const void* target
 
 bool append_absolute_call(std::vector<unsigned char>& output, const void* target)
 {
-    // call [rip+2]; jmp +8; <abs64 target>
+    // call [rip+2]; jmp +8; <abs64 target>：用内存里的 64 位地址模拟绝对 call。
     const unsigned char prefix[] = {0xFF, 0x15, 0x02, 0x00, 0x00, 0x00, 0xEB, 0x08};
     if (!append_bytes(output, prefix, sizeof(prefix)))
         return false;
@@ -478,6 +477,7 @@ bool append_absolute_call(std::vector<unsigned char>& output, const void* target
 
 bool append_absolute_jcc(std::vector<unsigned char>& output, unsigned char condition, const void* target)
 {
+    // 短条件跳转无法直接编码绝对地址，先反转条件跳过后面的绝对跳转。
     const unsigned char inverted_condition = static_cast<unsigned char>(condition ^ 0x01);
     const unsigned char skip_jump[]        = {
         0x0F,
@@ -580,18 +580,19 @@ bool resolve_internal_relocation_target(uintptr_t                               
     return false;
 }
 
-bool append_relocated_instruction(std::vector<unsigned char>& output,
-                                  const unsigned char*        source_instruction,
-                                  unsigned char*              trampoline_base,
-                                  const instruction_info&     info,
-                                  uintptr_t                   source_base,
-                                  int                         bytes_to_copy,
+bool append_relocated_instruction(std::vector<unsigned char>&               output,
+                                  const unsigned char*                      source_instruction,
+                                  unsigned char*                            trampoline_base,
+                                  const instruction_info&                   info,
+                                  uintptr_t                                 source_base,
+                                  int                                       bytes_to_copy,
                                   const std::vector<relocated_instruction>& instructions)
 {
     const auto source_address = reinterpret_cast<uintptr_t>(source_instruction);
     const auto source_next    = source_address + static_cast<uintptr_t>(info.length);
     if (info.relative_kind != 0)
     {
+        // 相对 call/jmp/jcc 的目标地址必须重新计算，目标落在被搬走的入口片段内时要指向跳板内的新位置。
         const uintptr_t target = add_signed_offset(source_next, read_relative_value(source_instruction, info));
         const void* relocated_target = nullptr;
         if (!resolve_internal_relocation_target(target, source_base, bytes_to_copy, instructions, trampoline_base, &relocated_target))
@@ -612,10 +613,12 @@ bool append_relocated_instruction(std::vector<unsigned char>& output,
 
     if (info.rip_relative)
     {
+        // 普通指令复制到跳板后，RIP 基准变了，位移需要按新地址重新编码。
         int32_t source_disp = 0;
         std::memcpy(&source_disp, source_instruction + info.displacement_offset, sizeof(source_disp));
-        const uintptr_t source_target = add_signed_offset(source_next, source_disp);
-        const uintptr_t dest_next     = reinterpret_cast<uintptr_t>(trampoline_base) + output_offset + static_cast<uintptr_t>(info.length);
+
+        const uintptr_t source_target  = add_signed_offset(source_next, source_disp);
+        const uintptr_t dest_next      = reinterpret_cast<uintptr_t>(trampoline_base) + output_offset + static_cast<uintptr_t>(info.length);
         int32_t         relocated_disp = 0;
         if (!compute_relative_disp32(source_target, dest_next, &relocated_disp))
             return false;
@@ -638,6 +641,7 @@ bool build_trampoline(hook_information_t* information)
     std::vector<relocated_instruction> instructions;
     instructions.reserve(16);
 
+    // 第一遍只解码并预估输出大小，这样内部跳转目标可以在第二遍重定位时稳定映射。
     int copied = 0;
     while (copied < information->bytes_to_copy)
     {
@@ -650,6 +654,7 @@ bool build_trampoline(hook_information_t* information)
         instruction.output_offset   = relocated.size();
         instruction.output_size     = relocated_instruction_size(info);
         instruction.info            = info;
+
         if (instruction.output_offset + instruction.output_size > k_trampoline_size)
             return false;
 
@@ -660,6 +665,7 @@ bool build_trampoline(hook_information_t* information)
     }
 
     relocated.clear();
+    // 第二遍按预估布局真正写入跳板指令。
     for (const auto& instruction : instructions)
     {
         if (relocated.size() != instruction.output_offset)
@@ -679,6 +685,7 @@ bool build_trampoline(hook_information_t* information)
     }
 
     const auto* return_address = static_cast<const unsigned char*>(information->original_function) + information->bytes_to_copy;
+    // 跳板末尾跳回原函数未被覆盖的位置，保证原始函数还能继续执行。
     if (!append_absolute_jump(relocated, return_address))
         return false;
 
@@ -870,6 +877,7 @@ bool platform_make_writable(void* address, size_t size, platform_protection_stat
     DWORD old = 0;
     if (!VirtualProtect(address, size, PAGE_EXECUTE_READWRITE, &old))
         return false;
+
     protection_state->old_protection = old;
     return true;
 #elif defined(CORE_PLATFORM_LINUX)
@@ -947,6 +955,7 @@ LONG CALLBACK trap_handler(EXCEPTION_POINTERS* exception_info)
     if (exception_info->ExceptionRecord->ExceptionCode != EXCEPTION_BREAKPOINT)
         return EXCEPTION_CONTINUE_SEARCH;
 
+    // 补丁入口首字节会临时写成 INT3；命中的线程直接改 RIP 到目标函数，避开半写入状态。
     hook_information_t* information = g_active_transaction.load(std::memory_order_acquire);
     if (!information)
         return EXCEPTION_CONTINUE_SEARCH;
@@ -996,6 +1005,7 @@ public:
 
         const DWORD current_process_id = GetCurrentProcessId();
         const DWORD current_thread_id  = GetCurrentThreadId();
+        // 暂停本进程内除当前线程外的线程，缩小入口机器码被覆盖时的竞态窗口。
         do
         {
             if (entry.th32OwnerProcessID != current_process_id || entry.th32ThreadID == current_thread_id)
@@ -1036,6 +1046,7 @@ public:
             if (!GetThreadContext(thread, &context))
                 return true;
 
+            // 取不到上下文时按不安全处理；只要有线程 RIP 在待覆盖入口范围内，就延后写入。
             if (is_in_patch_range(static_cast<uintptr_t>(context.Rip), information))
                 return true;
         }
@@ -1139,6 +1150,7 @@ void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* con
     const int            count   = g_suspend_record_count.load(std::memory_order_acquire);
     if (!records || count <= 0)
     {
+        // 非本轮暂停流程的信号继续交给旧处理器，避免吞掉用户自己的 SIGUSR2 逻辑。
         if (is_internal_suspend_signal(signal_number, signal_info))
             return;
 
@@ -1155,6 +1167,7 @@ void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* con
         records[i].rip.store(context_rip(context), std::memory_order_release);
         records[i].parked.store(1, std::memory_order_release);
 
+        // 信号处理函数里只做自旋等待，直到发起补丁写入的线程清除暂停标记。
         while (g_suspend_requested.load(std::memory_order_acquire))
         {
 #if defined(__x86_64__)
@@ -1178,6 +1191,7 @@ void trap_signal_handler(int signal_number, siginfo_t* signal_info, void* contex
     hook_information_t* information = g_active_transaction.load(std::memory_order_acquire);
     if (information)
     {
+        // Linux 下 INT3 触发 SIGTRAP，同样通过改写上下文 RIP 避开正在改写的入口。
         const auto entry_rip    = reinterpret_cast<uintptr_t>(information->original_function);
         const auto expected_rip = entry_rip + 1U;
         const auto current_rip  = context_rip(context);
@@ -1261,6 +1275,7 @@ public:
         g_suspend_record_count.store(static_cast<int>(record_count_), std::memory_order_release);
         g_suspend_requested.store(1, std::memory_order_release);
 
+        // 逐线程发送内部暂停信号；线程已退出时标记为忽略，不把它当失败。
         const pid_t process_id = getpid();
         for (size_t i = 0; i < record_count_; ++i)
         {
@@ -1368,8 +1383,8 @@ bool wait_for_safe_patch_window(hook_information_t* information)
         if (!parker.park())
             return false;
 
-        // The parked threads are intentionally resumed when returning true.
-        // entry[0] remains INT3 and g_active_transaction stays active while the remaining bytes are patched.
+        // 返回 true 时会故意让暂停器析构恢复线程；此时 entry[0] 仍是 INT3，
+        // g_active_transaction 也仍有效，后续补丁字节写入期间仍能拦截误入线程。
         if (!parker.has_ip_in_range(information))
             return true;
 
@@ -1399,6 +1414,7 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
     g_active_transaction.store(information, std::memory_order_release);
     std::atomic_signal_fence(std::memory_order_seq_cst);
 
+    // 先写 INT3 作为事务哨兵，任何误入入口的线程都会被陷阱处理器导到目标函数。
     entry[0] = 0xCC;
     platform_flush_instruction_cache(entry, 1);
 
@@ -1415,6 +1431,7 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
 
     if (information->bytes_to_copy > 1)
     {
+        // 首字节保持 INT3，只替换后续字节；最后再提交首字节完成事务。
         std::memcpy(entry + 1, final_bytes + 1, static_cast<size_t>(information->bytes_to_copy - 1));
         platform_flush_instruction_cache(entry + 1, static_cast<size_t>(information->bytes_to_copy - 1));
     }
@@ -1425,6 +1442,7 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
     bool patch_window_settled = wait_for_safe_patch_window(information);
     if (!patch_window_settled)
     {
+        // 提交首字节后再确认一次入口范围，尽量等正在陷阱处理或恢复的线程离开危险窗口。
         for (int retry = 0; retry < 3; ++retry)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -1450,6 +1468,7 @@ bool prepare_patch_size(hook_information_t* information)
     int copied = 0;
     while (copied < static_cast<int>(k_jump_size))
     {
+        // 覆盖入口必须按完整指令累加，不能把一条 x86 指令截断到跳转补丁里。
         if (copied >= static_cast<int>(sizeof(information->original_buffer)))
             return false;
 
@@ -1501,6 +1520,7 @@ int enable_hook(hook_information_t* information)
     const bool needs_trampoline_build = information->trampoline == nullptr;
     if (needs_trampoline_build)
     {
+        // 跳板尽量分配在原函数附近，降低后续相对位移无法编码成 disp32 的概率。
         information->trampoline = platform_allocate_near(information->original_function, k_trampoline_size);
         if (!information->trampoline)
             return 0;
@@ -1558,8 +1578,7 @@ int disable_hook(hook_information_t* information)
     if (!write_entry_transaction(information, information->original_buffer))
         return 0;
 
-    // Keep the trampoline mapped after disable. Other threads, or target code
-    // already holding the trampoline pointer, may still execute through it.
+    // 禁用后保留跳板映射；其他线程或已缓存跳板指针的目标代码仍可能继续执行它。
     information->enabled = 0;
 
     return 1;
