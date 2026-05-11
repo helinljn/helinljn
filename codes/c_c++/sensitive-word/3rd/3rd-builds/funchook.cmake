@@ -1,0 +1,125 @@
+# 项目名字
+SET(CURRENT_TARGET_NAME funchook)
+
+# 头文件目录
+SET(CURRENT_PRIVATE_INCLUDE_DIRS
+    # ...
+)
+
+SET(CURRENT_PUBLIC_INCLUDE_DIRS
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include
+)
+
+# 创建配置文件
+IF(NOT EXISTS ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/config.h)
+    FILE(WRITE ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/config.h
+        "#define _GNU_SOURCE\n"
+        "#define GNU_SPECIFIC_STRERROR_R 1\n"
+        "#define DISASM_DISTORM 1\n"
+        "#define SIZEOF_VOID_P 8\n"
+    )
+ENDIF()
+
+# 宏定义、编译选项、链接库
+IF(WIN32)
+    # 宏定义
+    SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
+        -DFUNCHOOK_EXPORTS
+    )
+
+    SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
+        # ...
+    )
+
+    # 编译选项
+    SET(CURRENT_COMPILE_OPTIONS
+        /wd4100
+        /wd4210
+        /wd4244
+        /wd4389
+        /wd4456
+        /wd4701
+    )
+
+    # 链接库
+    SET(CURRENT_LINK_LIBS
+        distorm
+        psapi
+    )
+ELSE()
+    # 宏定义
+    SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
+        -DFUNCHOOK_EXPORTS
+    )
+
+    SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
+        # ...
+    )
+
+    # 编译选项
+    SET(CURRENT_COMPILE_OPTIONS
+        -Wno-format
+        -Wno-pedantic
+        -Wno-overflow
+        -Wno-sign-compare
+        -Wno-unused-parameter
+    )
+
+    # 链接库
+    SET(CURRENT_LINK_LIBS
+        distorm
+        dl
+    )
+ENDIF()
+
+# funchook头文件
+FILE(GLOB_RECURSE FUNCHOOK_INCLUDE_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include/*.inl
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/include/*.hpp
+)
+
+# funchook源文件
+IF(WIN32)
+    ENABLE_LANGUAGE(ASM_MASM)
+    SET(FUNCHOOK_SRC_LIST
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/funchook.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/arch_x86.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/os_windows.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/disasm_distorm.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/prehook-x86_64-ms.asm
+    )
+ELSE()
+    ENABLE_LANGUAGE(ASM)
+    SET(FUNCHOOK_SRC_LIST
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/funchook.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/arch_x86.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/os_unix.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/disasm_distorm.c
+        ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook/src/prehook-x86_64-sysv.S
+    )
+ENDIF()
+
+# 生成动态库
+ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED ${FUNCHOOK_INCLUDE_LIST} ${FUNCHOOK_SRC_LIST})
+PROJECT_TARGET_APPLY_COMMON_OPTIONS(${CURRENT_TARGET_NAME})
+TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_PRIVATE_INCLUDE_DIRS})
+TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PUBLIC  ${CURRENT_PUBLIC_INCLUDE_DIRS})
+TARGET_COMPILE_DEFINITIONS(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(${CURRENT_TARGET_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
+TARGET_COMPILE_OPTIONS(${CURRENT_TARGET_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
+TARGET_LINK_DIRECTORIES(${CURRENT_TARGET_NAME}    PRIVATE ${PROJECT_DEBUGGER_WORKING_DIRECTORY})
+TARGET_LINK_LIBRARIES(${CURRENT_TARGET_NAME}      PUBLIC  ${CURRENT_LINK_LIBS})
+
+# 其它设置
+IF(WIN32)
+    # MSVC运行库设置
+    SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+
+    # VS工程设置
+    SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY FOLDER "projects")
+    SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DEBUGGER_WORKING_DIRECTORY}")
+
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/funchook PREFIX "funchook"
+        FILES ${FUNCHOOK_INCLUDE_LIST} ${FUNCHOOK_SRC_LIST})
+ENDIF()

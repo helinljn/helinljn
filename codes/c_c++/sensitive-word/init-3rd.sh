@@ -2,6 +2,8 @@
 
 ROOT_INIT_DIR=`pwd`
 BRYNET_INIT_DIR=$ROOT_INIT_DIR/3rd/brynet
+DISTORM_INIT_DIR=$ROOT_INIT_DIR/3rd/distorm
+FUNCHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/funchook
 UTFCPP_INIT_DIR=$ROOT_INIT_DIR/3rd/utfcpp
 OPENCC_INIT_DIR=$ROOT_INIT_DIR/3rd/opencc
 SPDLOG_INIT_DIR=$ROOT_INIT_DIR/3rd/spdlog
@@ -18,6 +20,34 @@ if [ ! -d $BRYNET_INIT_DIR ]; then
 else
     cd $BRYNET_INIT_DIR
     git remote set-url origin https://github.com/IronsDu/brynet.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- distorm
+cd $ROOT_INIT_DIR
+if [ ! -d $DISTORM_INIT_DIR ]; then
+    git clone https://github.com/gdabah/distorm.git $DISTORM_INIT_DIR
+else
+    cd $DISTORM_INIT_DIR
+    git remote set-url origin https://github.com/gdabah/distorm.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- funchook
+cd $ROOT_INIT_DIR
+if [ ! -d $FUNCHOOK_INIT_DIR ]; then
+    git clone https://github.com/kubo/funchook.git $FUNCHOOK_INIT_DIR
+else
+    cd $FUNCHOOK_INIT_DIR
+    git remote set-url origin https://github.com/kubo/funchook.git
     git remote -v
     git checkout .
     git fetch -p origin

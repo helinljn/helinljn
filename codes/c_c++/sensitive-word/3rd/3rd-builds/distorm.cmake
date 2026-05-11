@@ -1,23 +1,21 @@
 # 项目名字
-SET(CURRENT_TARGET_NAME core)
-SET(CURRENT_SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR})
+SET(CURRENT_TARGET_NAME distorm)
 
 # 头文件目录
 SET(CURRENT_PRIVATE_INCLUDE_DIRS
-    ${CURRENT_SOURCE_DIR}
+    # ...
 )
 
 SET(CURRENT_PUBLIC_INCLUDE_DIRS
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/include
 )
 
 # 宏定义、编译选项、链接库
 IF(WIN32)
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
-        -DCORE_LIB_EXPORT
+        -DDISTORM_DYNAMIC
+        -DSUPPORT_64BIT_OFFSET
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
@@ -26,20 +24,18 @@ IF(WIN32)
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        /wd4828
     )
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        funchook
-        jsoncpp
-        opencc
-        Dbghelp
+        # ...
     )
 ELSE()
     # 宏定义
     SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
-        -DCORE_LIB_EXPORT
+        -DDISTORM_DYNAMIC
+        -DSUPPORT_64BIT_OFFSET
     )
 
     SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
@@ -48,46 +44,33 @@ ELSE()
 
     # 编译选项
     SET(CURRENT_COMPILE_OPTIONS
-        # ...
+        -Wno-unused-function
+        -Wno-overlength-strings
+        -Wno-implicit-fallthrough
     )
 
     # 链接库
     SET(CURRENT_LINK_LIBS
-        funchook
-        jsoncpp
-        opencc
-        dl
+        # ...
     )
 ENDIF()
 
-# core源文件
-FILE(GLOB_RECURSE CORE_SRC_LIST
-    ${CURRENT_SOURCE_DIR}/*.h
-    ${CURRENT_SOURCE_DIR}/*.inl
-    ${CURRENT_SOURCE_DIR}/*.hpp
-    ${CURRENT_SOURCE_DIR}/*.c
-    ${CURRENT_SOURCE_DIR}/*.cc
-    ${CURRENT_SOURCE_DIR}/*.cpp
+# distorm头文件
+FILE(GLOB_RECURSE DISTORM_INCLUDE_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/include/*.h
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/include/*.inl
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/include/*.hpp
 )
 
-# brynet源文件
-FILE(GLOB_RECURSE BRYNET_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet/*.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet/*.hpp
-)
-
-# spdlog源文件
-FILE(GLOB_RECURSE SPDLOG_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include/spdlog/*.h
-)
-
-# utfcpp源文件
-FILE(GLOB_RECURSE UTFCPP_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source/*.h
+# distorm源文件
+FILE(GLOB_RECURSE DISTORM_SRC_LIST
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/src/*.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/src/*.cc
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm/src/*.cpp
 )
 
 # 生成动态库
-ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED ${CORE_SRC_LIST} ${BRYNET_SRC_LIST} ${SPDLOG_SRC_LIST} ${UTFCPP_SRC_LIST})
+ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED ${DISTORM_INCLUDE_LIST} ${DISTORM_SRC_LIST})
 PROJECT_TARGET_APPLY_COMMON_OPTIONS(${CURRENT_TARGET_NAME})
 TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_PRIVATE_INCLUDE_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PUBLIC  ${CURRENT_PUBLIC_INCLUDE_DIRS})
@@ -106,12 +89,6 @@ IF(WIN32)
     SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY FOLDER "projects")
     SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DEBUGGER_WORKING_DIRECTORY}")
 
-    SOURCE_GROUP(TREE ${CURRENT_SOURCE_DIR} PREFIX "core"
-        FILES ${CORE_SRC_LIST})
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/brynet/include/brynet PREFIX "brynet"
-        FILES ${BRYNET_SRC_LIST})
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/spdlog/include/spdlog PREFIX "spdlog"
-        FILES ${SPDLOG_SRC_LIST})
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/utfcpp/source PREFIX "utfcpp"
-        FILES ${UTFCPP_SRC_LIST})
+    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/distorm PREFIX "distorm"
+        FILES ${DISTORM_INCLUDE_LIST} ${DISTORM_SRC_LIST})
 ENDIF()

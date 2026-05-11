@@ -1,3 +1,5 @@
+INCLUDE(distorm.cmake)
+INCLUDE(funchook.cmake)
 INCLUDE(jsoncpp.cmake)
 INCLUDE(mimalloc.cmake)
 INCLUDE(opencc.cmake)
