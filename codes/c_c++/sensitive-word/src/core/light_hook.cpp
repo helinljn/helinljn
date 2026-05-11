@@ -47,6 +47,20 @@ const unsigned char k_jump_code[k_jump_size] = {
 
 std::mutex                       g_hook_mutex;
 std::atomic<hook_information_t*> g_active_transaction{nullptr};
+std::atomic<int>                 g_trap_handler_active{0};
+
+struct trap_handler_scope
+{
+    trap_handler_scope()
+    {
+        g_trap_handler_active.fetch_add(1, std::memory_order_acq_rel);
+    }
+
+    ~trap_handler_scope()
+    {
+        g_trap_handler_active.fetch_sub(1, std::memory_order_acq_rel);
+    }
+};
 
 #if defined(CORE_PLATFORM_WINDOWS)
 void* g_trap_handler_handle = nullptr;
@@ -154,7 +168,7 @@ bool is_known_no_operand_opcode(unsigned char opcode)
     return opcode >= 0xA4 && opcode <= 0xA7;
 }
 
-void parse_modrm(const unsigned char* start, const unsigned char*& cursor, instruction_info& info)
+void parse_modrm(const unsigned char* start, const unsigned char*& cursor, instruction_info& info, bool rex_b)
 {
     const unsigned char  modrm     = *cursor++;
     const unsigned char  mod       = static_cast<unsigned char>(modrm >> 6);
@@ -171,7 +185,7 @@ void parse_modrm(const unsigned char* start, const unsigned char*& cursor, instr
     }
     else if (mod == 0 && rm == 5)
     {
-        info.rip_relative        = true;
+        info.rip_relative        = !rex_b;
         info.displacement_offset = static_cast<int>(cursor - start);
         cursor                  += 4;
     }
@@ -195,6 +209,7 @@ instruction_info decode_instruction(const void* address)
     bool                 operand_prefix = false;
     bool                 address_prefix = false;
     bool                 rex_w          = false;
+    bool                 rex_b          = false;
     for (int i = 0; i < 15; ++i)
     {
         if (is_legacy_prefix(*cursor))
@@ -209,6 +224,7 @@ instruction_info decode_instruction(const void* address)
         if (*cursor >= 0x40 && *cursor <= 0x4F)
         {
             rex_w = ((*cursor & 0x08) != 0) || rex_w;
+            rex_b = ((*cursor & 0x01) != 0) || rex_b;
             ++cursor;
 
             continue;
@@ -409,7 +425,7 @@ instruction_info decode_instruction(const void* address)
     }
 
     if (has_modrm_byte)
-        parse_modrm(start, cursor, info);
+        parse_modrm(start, cursor, info, rex_b);
     else if (immediate_size == 0 && !is_known_no_operand_opcode(opcode))
         info.supported = false;
 
@@ -975,6 +991,8 @@ LONG CALLBACK trap_handler(EXCEPTION_POINTERS* exception_info)
     if (exception_info->ExceptionRecord->ExceptionCode != EXCEPTION_BREAKPOINT)
         return EXCEPTION_CONTINUE_SEARCH;
 
+    trap_handler_scope scope;
+
     // 补丁入口首字节会临时写成 INT3；命中的线程直接改 RIP 到目标函数，避开半写入状态。
     hook_information_t* information = g_active_transaction.load(std::memory_order_acquire);
     if (!information)
@@ -1039,31 +1057,38 @@ public:
                 return false;
             }
 
-            if (SuspendThread(thread) == static_cast<DWORD>(-1))
-            {
-                CloseHandle(thread);
-                CloseHandle(snapshot);
-                resume();
-                return false;
-            }
-
             threads_.push_back(thread);
         } while (Thread32Next(snapshot, &entry));
 
         CloseHandle(snapshot);
+
+        suspended_.assign(threads_.size(), 0);
+        for (size_t i = 0; i < threads_.size(); ++i)
+        {
+            if (SuspendThread(threads_[i]) == static_cast<DWORD>(-1))
+            {
+                resume();
+                return false;
+            }
+
+            suspended_[i] = 1;
+        }
 
         return true;
     }
 
     bool has_ip_in_range(const hook_information_t* information) const
     {
-        for (HANDLE thread : threads_)
+        for (size_t i = 0; i < threads_.size(); ++i)
         {
+            if (i >= suspended_.size() || !suspended_[i])
+                continue;
+
             CONTEXT context;
             std::memset(&context, 0, sizeof(context));
             context.ContextFlags = CONTEXT_CONTROL;
 
-            if (!GetThreadContext(thread, &context))
+            if (!GetThreadContext(threads_[i], &context))
                 return true;
 
             // 取不到上下文时按不安全处理；只要有线程 RIP 在待覆盖入口范围内，就延后写入。
@@ -1076,17 +1101,21 @@ public:
 
     void resume()
     {
-        for (HANDLE thread : threads_)
+        for (size_t i = 0; i < threads_.size(); ++i)
         {
-            ResumeThread(thread);
-            CloseHandle(thread);
+            if (i < suspended_.size() && suspended_[i])
+                ResumeThread(threads_[i]);
+
+            CloseHandle(threads_[i]);
         }
 
         threads_.clear();
+        suspended_.clear();
     }
 
 private:
-    std::vector<HANDLE> threads_;
+    std::vector<HANDLE>        threads_;
+    std::vector<unsigned char> suspended_;
 };
 #elif defined(CORE_PLATFORM_LINUX)
 struct linux_thread_record
@@ -1224,6 +1253,8 @@ void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* con
 
 void trap_signal_handler(int signal_number, siginfo_t* signal_info, void* context)
 {
+    trap_handler_scope scope;
+
     hook_information_t* information = g_active_transaction.load(std::memory_order_acquire);
     if (information)
     {
@@ -1431,6 +1462,20 @@ bool wait_for_safe_patch_window(hook_information_t* information)
     return false;
 }
 
+void clear_active_transaction_and_wait()
+{
+    std::atomic_signal_fence(std::memory_order_seq_cst);
+    g_active_transaction.store(nullptr, std::memory_order_release);
+
+    for (int retry = 0; retry < k_patch_retry_count; ++retry)
+    {
+        if (g_trap_handler_active.load(std::memory_order_acquire) == 0)
+            return;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+}
+
 bool write_entry_transaction(hook_information_t* information, const unsigned char* final_bytes)
 {
     if (!has_valid_copy_size(information) || final_bytes == nullptr)
@@ -1458,8 +1503,7 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
     {
         std::memcpy(entry, rollback_bytes, static_cast<size_t>(information->bytes_to_copy));
         platform_flush_instruction_cache(entry, static_cast<size_t>(information->bytes_to_copy));
-        std::atomic_signal_fence(std::memory_order_seq_cst);
-        g_active_transaction.store(nullptr, std::memory_order_release);
+        clear_active_transaction_and_wait();
         platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
 
         return false;
@@ -1475,32 +1519,20 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
     entry[0] = final_bytes[0];
     platform_flush_instruction_cache(entry, static_cast<size_t>(information->bytes_to_copy));
 
-    bool patch_window_settled = wait_for_safe_patch_window(information);
-    if (!patch_window_settled)
+    // 首字节提交后入口已经处于目标状态；后续只做 best-effort 等待，不能再把事务判为失败。
+    if (!wait_for_safe_patch_window(information))
     {
         // 提交首字节后再确认一次入口范围，尽量等正在陷阱处理或恢复的线程离开危险窗口。
         for (int retry = 0; retry < 3; ++retry)
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            patch_window_settled = wait_for_safe_patch_window(information);
-            if (patch_window_settled)
+            if (wait_for_safe_patch_window(information))
                 break;
         }
     }
 
-    if (!patch_window_settled)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms * 4));
-        std::atomic_signal_fence(std::memory_order_seq_cst);
-        g_active_transaction.store(nullptr, std::memory_order_release);
-        platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
-
-        return false;
-    }
-
     std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms));
-    std::atomic_signal_fence(std::memory_order_seq_cst);
-    g_active_transaction.store(nullptr, std::memory_order_release);
+    clear_active_transaction_and_wait();
     platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
 
     return true;

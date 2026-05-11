@@ -125,6 +125,11 @@ public:
         std::memcpy(data_ + offset, &value, sizeof(value));
     }
 
+    void write_u64(size_t offset, uint64_t value)
+    {
+        std::memcpy(data_ + offset, &value, sizeof(value));
+    }
+
     void flush()
     {
 #if defined(CORE_PLATFORM_WINDOWS)
@@ -365,6 +370,36 @@ TEST_SUITE("Hook")
             CHECK(disable_hook(&hook_func) != 0);
             CHECK(call_func(5) == 16);
             CHECK(call_func(-1) == 0);
+        }
+
+        SUBCASE("REX.B r13 disp32 is not RIP relative")
+        {
+            executable_code code(4096);
+            REQUIRE(code.valid());
+
+            constexpr size_t data_offset = 128;
+            const auto       data_address = reinterpret_cast<uint64_t>(static_cast<unsigned char*>(code.data()) + data_offset);
+            code.write(0, {0x49, 0xBD});                                      // mov r13, imm64
+            code.write_u64(2, data_address);
+            code.write(10, {0x41, 0x8B, 0x85, 0x00, 0x00, 0x00, 0x00});        // mov eax, [r13+disp32]
+            write_arg_to_eax_add(code, 17);
+            code.write(19, {0xC3});
+            code.write_i32(data_offset, 23);
+            code.flush();
+
+            auto call_func = reinterpret_cast<func_t>(code.data());
+            CHECK(call_func(4) == 27);
+
+            auto hook_func = create_hook(code.data(), reinterpret_cast<void*>(&light_hook_machine_patch_func));
+            CHECK(hook_func.bytes_to_copy == 17);
+            REQUIRE(enable_hook(&hook_func) != 0);
+
+            auto trampoline = reinterpret_cast<func_t>(hook_func.trampoline);
+            CHECK(call_func(4) == 1004);
+            CHECK(trampoline(4) == 27);
+
+            CHECK(disable_hook(&hook_func) != 0);
+            CHECK(call_func(4) == 27);
         }
     }
 
