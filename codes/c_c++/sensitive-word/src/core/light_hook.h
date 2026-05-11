@@ -4,6 +4,7 @@
 #define LIGHT_HOOK_H
 
 #include "core.h"
+#include <cstddef>
 
 /**
  * @file light_hook.h
@@ -24,14 +25,14 @@
  * - 不是完全无停顿热切换；启用和禁用期间会短暂停顿其他线程。
  * - 若目标函数前导包含当前轻量重定位器不支持的指令，enable_hook() 会失败并保持原函数不变。
  * - original_buffer 固定为 128 字节，理论上可能不足以覆盖极端复杂的函数前导。
- * - Linux 实现会安装进程级 SIGTRAP 和 SIGUSR2 处理器；宿主进程若也使用这些信号，
+ * - Linux 实现会安装进程级 SIGTRAP 和一个实时信号处理器；宿主进程若也使用这些信号，
  *   需要确认处理器链式调用语义可以接受。
  * - disable_hook() 不会释放 trampoline。调用方在拿到 trampoline 指针后应视为进程期
  *   可用代码地址，避免在线卸载时释放仍被其它线程执行的代码页。
  *
  * 使用建议：
  * - 优先在初始化阶段启用 hook；确需在线切换时，应接受短暂停顿成本。
- * - 避免多个线程同时操作同一个 hook_information_t。
+ * - 避免多个线程同时操作同一个 hook_information_t；hook_information_t 不可复制。
  * - 若需要覆盖更复杂的机器码模式，建议引入成熟反汇编/重定位库。
  * - 不要手动修改 hook_information_t 的字段；enable_hook()/disable_hook() 会校验入口
  *   备份和补丁长度，字段不一致会导致操作失败。
@@ -43,13 +44,42 @@
  */
 struct hook_information_t
 {
-    int           enabled;               // 当前 Hook 是否已启用
-    int           bytes_to_copy;         // 为构建跳板而复制的原始指令字节数
-    int           trampoline_size;       // trampoline 分配字节数
-    unsigned char original_buffer[128];  // 原函数前若干字节的备份
-    void*         original_function;     // 被 Hook 的原函数
-    void*         target_function;       // Hook 后跳转到的目标函数
-    void*         trampoline;            // 生成的跳板函数地址
+public:
+    hook_information_t() = default;
+    hook_information_t(const hook_information_t&) = delete;
+    hook_information_t& operator=(const hook_information_t&) = delete;
+    hook_information_t& operator=(hook_information_t&&) = delete;
+
+    hook_information_t(hook_information_t&& other) noexcept
+    {
+        enabled           = other.enabled;
+        bytes_to_copy     = other.bytes_to_copy;
+        trampoline_size   = other.trampoline_size;
+        original_function = other.original_function;
+        target_function   = other.target_function;
+        trampoline        = other.trampoline;
+        for (size_t i = 0; i < sizeof(original_buffer); ++i)
+        {
+            original_buffer[i]       = other.original_buffer[i];
+            other.original_buffer[i] = 0;
+        }
+
+        other.enabled           = 0;
+        other.bytes_to_copy     = 0;
+        other.trampoline_size   = 0;
+        other.original_function = nullptr;
+        other.target_function   = nullptr;
+        other.trampoline        = nullptr;
+    }
+
+public:
+    int           enabled           = 0;        // 当前 Hook 是否已启用
+    int           bytes_to_copy     = 0;        // 为构建跳板而复制的原始指令字节数
+    int           trampoline_size   = 0;        // trampoline 分配字节数
+    unsigned char original_buffer[128]{};       // 原函数前若干字节的备份
+    void*         original_function = nullptr;  // 被 Hook 的原函数
+    void*         target_function   = nullptr;  // Hook 后跳转到的目标函数
+    void*         trampoline        = nullptr;  // 生成的跳板函数地址
 };
 
 /**

@@ -8,7 +8,6 @@
 #include <limits>
 #include <memory>
 #include <mutex>
-#include <tuple>
 #include <thread>
 #include <vector>
 
@@ -22,7 +21,6 @@
 #elif defined(CORE_PLATFORM_LINUX)
     #include <dirent.h>
     #include <errno.h>
-    #include <fcntl.h>
     #include <signal.h>
     #include <stdlib.h>
     #include <unistd.h>
@@ -62,7 +60,6 @@ struct instruction_info
     bool          supported           = true;
     bool          rip_relative        = false;
     int           displacement_offset = 0;
-    int           displacement_size   = 0;
     int           relative_offset     = 0;
     int           relative_size       = 0;
     int           relative_kind       = 0;  // 1 表示 call，2 表示 jmp，3 表示 jcc。
@@ -79,22 +76,20 @@ struct relocated_instruction
     instruction_info info;
 };
 
-#if defined(CORE_PLATFORM_LINUX)
 struct protection_range
 {
     uintptr_t start      = 0;
     uintptr_t end        = 0;
+#if defined(CORE_PLATFORM_WINDOWS)
+    unsigned long protection = 0;
+#elif defined(CORE_PLATFORM_LINUX)
     int       protection = 0;
+#endif // defined(CORE_PLATFORM_WINDOWS)
 };
-#endif // defined(CORE_PLATFORM_LINUX)
 
 struct platform_protection_state
 {
-#if defined(CORE_PLATFORM_WINDOWS)
-    unsigned long old_protection = 0;
-#elif defined(CORE_PLATFORM_LINUX)
     std::vector<protection_range> ranges;
-#endif // defined(CORE_PLATFORM_WINDOWS)
 };
 
 bool fits_int32(intptr_t value)
@@ -148,25 +143,24 @@ bool is_vex_or_evex_prefix(unsigned char opcode)
     return opcode == 0xC4 || opcode == 0xC5 || opcode == 0x62;
 }
 
-void parse_modrm(const unsigned char* start, const unsigned char*& cursor, bool address_prefix, instruction_info& info)
+bool is_known_no_operand_opcode(unsigned char opcode)
 {
-    const unsigned char* modrm_ptr = cursor;
+    if (opcode == 0x90 || opcode == 0x9C || opcode == 0x9D || opcode == 0x9E || opcode == 0x9F)
+        return true;
+
+    if (opcode >= 0x50 && opcode <= 0x5F)
+        return true;
+
+    return opcode >= 0xA4 && opcode <= 0xA7;
+}
+
+void parse_modrm(const unsigned char* start, const unsigned char*& cursor, instruction_info& info)
+{
     const unsigned char  modrm     = *cursor++;
     const unsigned char  mod       = static_cast<unsigned char>(modrm >> 6);
     const unsigned char  reg       = static_cast<unsigned char>((modrm >> 3) & 0x07);
     const unsigned char  rm        = static_cast<unsigned char>(modrm & 0x07);
     info.modrm_reg                 = reg;
-
-    if (address_prefix)
-    {
-        if (mod == 0 && rm == 6)
-            cursor += 2;
-        else if (mod == 1)
-            cursor += 1;
-        else if (mod == 2)
-            cursor += 2;
-        return;
-    }
 
     if (mod != 3 && rm == 4)
     {
@@ -179,7 +173,6 @@ void parse_modrm(const unsigned char* start, const unsigned char*& cursor, bool 
     {
         info.rip_relative        = true;
         info.displacement_offset = static_cast<int>(cursor - start);
-        info.displacement_size   = 4;
         cursor                  += 4;
     }
 
@@ -187,8 +180,6 @@ void parse_modrm(const unsigned char* start, const unsigned char*& cursor, bool 
         cursor += 1;
     else if (mod == 2)
         cursor += 4;
-
-    (void)modrm_ptr;
 }
 
 instruction_info decode_instruction(const void* address)
@@ -352,7 +343,7 @@ instruction_info decode_instruction(const void* address)
 
         if (opcode2 == 0x38 || opcode2 == 0x3A)
         {
-            std::ignore    = *cursor++;
+            ++cursor;
             has_modrm_byte = true;
 
             if (opcode2 == 0x3A)
@@ -390,10 +381,6 @@ instruction_info decode_instruction(const void* address)
         {
             immediate_size = 1;
         }
-        else if (opcode == 0xC2 || opcode == 0xCA)
-        {
-            immediate_size = 2;
-        }
         else if (opcode == 0xC8)
         {
             immediate_size = 3;
@@ -414,10 +401,6 @@ instruction_info decode_instruction(const void* address)
         {
             immediate_size = 8;
         }
-        else if (opcode == 0xEA || opcode == 0x9A)
-        {
-            immediate_size = operand_prefix ? 4 : 6;
-        }
 
         has_modrm_byte = has_opcode(opcode, op1_modrm, sizeof(op1_modrm))
                             || (high < 4 && (low < 4 || (low >= 8 && low < 0xC)))
@@ -426,7 +409,9 @@ instruction_info decode_instruction(const void* address)
     }
 
     if (has_modrm_byte)
-        parse_modrm(start, cursor, address_prefix, info);
+        parse_modrm(start, cursor, info);
+    else if (immediate_size == 0 && !is_known_no_operand_opcode(opcode))
+        info.supported = false;
 
     if (opcode == 0xFF && (info.modrm_reg == 4 || info.modrm_reg == 5))
         info.terminal = true;
@@ -714,7 +699,10 @@ uintptr_t align_down(uintptr_t value, size_t alignment)
 #if defined(CORE_PLATFORM_LINUX)
 int permissions_to_protection(const char* permissions)
 {
-    int protection = 0;
+    if (!permissions)
+        return PROT_NONE;
+
+    int protection = PROT_NONE;
     if (permissions[0] == 'r')
         protection |= PROT_READ;
 
@@ -726,11 +714,39 @@ int permissions_to_protection(const char* permissions)
 
     return protection;
 }
+#endif // defined(CORE_PLATFORM_LINUX)
 
 bool record_original_protection(uintptr_t start, uintptr_t end, platform_protection_state* state)
 {
     state->ranges.clear();
 
+#if defined(CORE_PLATFORM_WINDOWS)
+    uintptr_t cursor = start;
+    while (cursor < end)
+    {
+        MEMORY_BASIC_INFORMATION info;
+        if (VirtualQuery(reinterpret_cast<const void*>(cursor), &info, sizeof(info)) == 0)
+            return false;
+
+        if (info.State != MEM_COMMIT || (info.Protect & PAGE_NOACCESS) != 0)
+            return false;
+
+        const uintptr_t range_start = std::max(cursor, reinterpret_cast<uintptr_t>(info.BaseAddress));
+        const uintptr_t range_end   = std::min(end, reinterpret_cast<uintptr_t>(info.BaseAddress) + info.RegionSize);
+        if (range_start >= range_end)
+            return false;
+
+        protection_range range;
+        range.start      = range_start;
+        range.end        = range_end;
+        range.protection = info.Protect;
+        state->ranges.push_back(range);
+
+        cursor = range_end;
+    }
+
+    return !state->ranges.empty() && cursor >= end;
+#elif defined(CORE_PLATFORM_LINUX)
     FILE* maps = std::fopen("/proc/self/maps", "r");
     if (!maps)
         return false;
@@ -776,8 +792,8 @@ bool record_original_protection(uintptr_t start, uintptr_t end, platform_protect
     }
 
     return covered >= end;
+#endif // defined(CORE_PLATFORM_WINDOWS)
 }
-#endif // defined(CORE_PLATFORM_LINUX)
 
 void* platform_allocate_near(const void* target, size_t size)
 {
@@ -873,14 +889,9 @@ bool platform_make_executable(void* address, size_t size)
 
 bool platform_make_writable(void* address, size_t size, platform_protection_state* protection_state)
 {
-#if defined(CORE_PLATFORM_WINDOWS)
-    DWORD old = 0;
-    if (!VirtualProtect(address, size, PAGE_EXECUTE_READWRITE, &old))
+    if (!address || size == 0 || protection_state == nullptr)
         return false;
 
-    protection_state->old_protection = old;
-    return true;
-#elif defined(CORE_PLATFORM_LINUX)
     const size_t page     = page_size();
     const auto   start    = align_down(reinterpret_cast<uintptr_t>(address), page);
     const auto   end      = reinterpret_cast<uintptr_t>(address) + size;
@@ -888,6 +899,10 @@ bool platform_make_writable(void* address, size_t size, platform_protection_stat
     if (!record_original_protection(start, end_page, protection_state))
         return false;
 
+#if defined(CORE_PLATFORM_WINDOWS)
+    DWORD ignored = 0;
+    return VirtualProtect(reinterpret_cast<void*>(start), end_page - start, PAGE_EXECUTE_READWRITE, &ignored) != 0;
+#elif defined(CORE_PLATFORM_LINUX)
     return mprotect(reinterpret_cast<void*>(start), end_page - start, PROT_READ | PROT_WRITE | PROT_EXEC) == 0;
 #endif // defined(CORE_PLATFORM_WINDOWS)
 }
@@ -895,8 +910,13 @@ bool platform_make_writable(void* address, size_t size, platform_protection_stat
 void platform_restore_protection(void* address, size_t size, const platform_protection_state& protection_state)
 {
 #if defined(CORE_PLATFORM_WINDOWS)
-    DWORD ignored = 0;
-    VirtualProtect(address, size, protection_state.old_protection, &ignored);
+    (void)address;
+    (void)size;
+    for (const auto& range : protection_state.ranges)
+    {
+        DWORD ignored = 0;
+        VirtualProtect(reinterpret_cast<void*>(range.start), range.end - range.start, range.protection, &ignored);
+    }
 #elif defined(CORE_PLATFORM_LINUX)
     (void)address;
     (void)size;
@@ -1077,7 +1097,7 @@ struct linux_thread_record
     std::atomic<uintptr_t> rip{0};
 };
 
-constexpr int                     k_suspend_signal{SIGUSR2};
+const int                         k_suspend_signal{SIGRTMIN};
 std::atomic<int>                  g_suspend_requested{0};
 std::atomic<linux_thread_record*> g_suspend_records{nullptr};
 std::atomic<int>                  g_suspend_record_count{0};
@@ -1135,6 +1155,21 @@ void call_previous_signal_action(const struct sigaction& action, int signal_numb
         action.sa_handler(signal_number);
 }
 
+bool is_internal_suspend_signal(int signal_number, siginfo_t* signal_info, const linux_thread_record* records, int count)
+{
+    if (signal_number != k_suspend_signal || signal_info == nullptr || signal_info->si_code != SI_TKILL || signal_info->si_pid != getpid())
+        return false;
+
+    const pid_t current = current_tid();
+    for (int i = 0; i < count; ++i)
+    {
+        if (records[i].tid == current)
+            return true;
+    }
+
+    return false;
+}
+
 bool is_internal_suspend_signal(int signal_number, siginfo_t* signal_info)
 {
     return signal_number == k_suspend_signal
@@ -1150,10 +1185,11 @@ void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* con
     const int            count   = g_suspend_record_count.load(std::memory_order_acquire);
     if (!records || count <= 0)
     {
-        // 非本轮暂停流程的信号继续交给旧处理器，避免吞掉用户自己的 SIGUSR2 逻辑。
+        // 本模块发出的暂停信号可能在一轮暂停结束后才投递，不能交给宿主默认处理器。
         if (is_internal_suspend_signal(signal_number, signal_info))
             return;
 
+        // 非本轮暂停流程的信号继续交给旧处理器，避免吞掉用户自己的实时信号逻辑。
         call_previous_signal_action(g_previous_suspend_action, signal_number, signal_info, context);
         return;
     }
@@ -1180,7 +1216,7 @@ void suspend_signal_handler(int signal_number, siginfo_t* signal_info, void* con
         return;
     }
 
-    if (is_internal_suspend_signal(signal_number, signal_info))
+    if (is_internal_suspend_signal(signal_number, signal_info, records, count))
         return;
 
     call_previous_signal_action(g_previous_suspend_action, signal_number, signal_info, context);
@@ -1452,7 +1488,17 @@ bool write_entry_transaction(hook_information_t* information, const unsigned cha
         }
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(patch_window_settled ? k_trap_grace_ms : k_trap_grace_ms * 4));
+    if (!patch_window_settled)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms * 4));
+        std::atomic_signal_fence(std::memory_order_seq_cst);
+        g_active_transaction.store(nullptr, std::memory_order_release);
+        platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
+
+        return false;
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(k_trap_grace_ms));
     std::atomic_signal_fence(std::memory_order_seq_cst);
     g_active_transaction.store(nullptr, std::memory_order_release);
     platform_restore_protection(information->original_function, static_cast<size_t>(information->bytes_to_copy), protection_state);
@@ -1492,7 +1538,6 @@ bool prepare_patch_size(hook_information_t* information)
 hook_information_t create_hook(void* original_function, void* target_function)
 {
     hook_information_t information;
-    std::memset(&information, 0, sizeof(information));
     information.original_function = original_function;
     information.target_function   = target_function;
 
