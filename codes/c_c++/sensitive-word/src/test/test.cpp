@@ -5,9 +5,6 @@
 #include <cstdlib>
 #include <new>
 
-#define TRY_BEGIN try {
-#define TRY_END   } catch(...) {}
-
 namespace {
 
 /**
@@ -51,16 +48,12 @@ class initializer final
 public:
     initializer()
     {
-        TRY_BEGIN
-            core::stack_trace::initialize();
-        TRY_END
+        core::stack_trace::initialize();
     }
 
     ~initializer()
     {
-        TRY_BEGIN
-            core::stack_trace::uninitialize();
-        TRY_END
+        core::stack_trace::uninitialize();
     }
 };
 
