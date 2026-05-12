@@ -222,13 +222,6 @@
     </div>
     <div class="card-body result-box">
         <div id="structuredResultWrap" class="structured-result-section d-none">
-            <div class="mb-2 fw-bold">{% trans "响应概览" %}</div>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered structured-table mb-3">
-                    <tbody id="structuredMetaBody"></tbody>
-                </table>
-            </div>
-
             <div class="mb-2 fw-bold">{% trans "响应数据" %}（<code>{{ response_name }}</code>）</div>
             <div id="structuredDataBody"></div>
         </div>
@@ -299,12 +292,10 @@ let batchResults = [];
 function clearResultViews() {
     const structuredWrap = document.getElementById('structuredResultWrap');
     const rawWrap = document.getElementById('rawResultWrap');
-    const metaBody = document.getElementById('structuredMetaBody');
     const dataBody = document.getElementById('structuredDataBody');
     const rawContent = document.getElementById('resultContent');
     structuredWrap.classList.add('d-none');
     rawWrap.classList.add('d-none');
-    metaBody.innerHTML = '';
     dataBody.innerHTML = '';
     rawContent.textContent = '';
 }
@@ -449,24 +440,11 @@ function renderValueElement(value) {
 
 function renderStructuredResult(payload) {
     const structuredWrap = document.getElementById('structuredResultWrap');
-    const metaBody = document.getElementById('structuredMetaBody');
     const dataBody = document.getElementById('structuredDataBody');
 
     if (!payload || typeof payload !== 'object') {
         showRawJsonFallback(payload);
         return;
-    }
-
-    const topLevel = {};
-    Object.keys(payload).forEach(k => {
-        if (k !== 'Data') topLevel[k] = payload[k];
-    });
-
-    const topEntries = Object.entries(topLevel);
-    if (!topEntries.length) {
-        appendKvRow(metaBody, '{% trans "状态" %}', '{% trans "无" %}');
-    } else {
-        topEntries.forEach(([k, v]) => appendKvRow(metaBody, k, v));
     }
 
     const sourceData = (payload.Data && typeof payload.Data === 'object') ? payload.Data : payload;

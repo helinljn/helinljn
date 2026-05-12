@@ -1,14 +1,15 @@
-{% load i18n %}<!DOCTYPE html>
+{% load i18n static %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% trans "GM命令管理系统" %}{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="{% static 'gmtool/vendor/tabler-icons/tabler-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'gmtool/css/app.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
-<body class="layout-fluid">
+<body class="layout-fluid gm-app">
     <div class="page">
         <!-- 侧边栏 -->
         <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">

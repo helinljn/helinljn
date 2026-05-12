@@ -1,21 +1,22 @@
-{% load i18n %}<!DOCTYPE html>
+{% load i18n static %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% trans "登录" %} - {% trans "GM命令管理系统" %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="{% static 'gmtool/vendor/tabler-icons/tabler-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'gmtool/css/app.css' %}">
 </head>
-<body class="d-flex flex-column">
+<body class="d-flex flex-column gm-auth-page">
     <div class="page page-center">
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
-                <a href="{% url 'gmtool:login' %}" class="navbar-brand navbar-brand-autodark">
+                <a href="{% url 'gmtool:login' %}" class="navbar-brand navbar-brand-autodark gm-auth-brand">
                     <i class="ti ti-command me-2" style="font-size:2rem;"></i>{% trans "GM命令管理系统" %}
                 </a>
             </div>
-            <div class="card card-md">
+            <div class="card card-md gm-auth-card">
                 <div class="card-body">
                     {% if already_logged_in %}
                     <h2 class="h2 text-center mb-4">{% trans "已登录" %}</h2>

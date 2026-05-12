@@ -1,48 +1,25 @@
 {# 注意：错误页面不继承 base.html，因为错误发生时 URL resolver 和上下文处理器可能不可用 #}
-{% load i18n %}<!DOCTYPE html>
+{% load i18n static %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% trans "页面未找到" %} - {% trans "GM命令管理系统" %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css">
-    <style>
-        .error-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .error-card {
-            max-width: 480px;
-            width: 100%;
-            border: none;
-            border-radius: 1rem;
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
-        }
-        .error-code {
-            font-size: 8rem;
-            font-weight: 700;
-            line-height: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'gmtool/vendor/tabler-icons/tabler-icons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'gmtool/css/app.css' %}">
 </head>
 <body>
-    <div class="error-page p-3">
-        <div class="error-card card">
+    <div class="gm-error-page">
+        <div class="gm-error-card card">
+            <div class="gm-error-topline"></div>
             <div class="card-body text-center p-5">
-                <div class="mb-3">
-                    <i class="ti ti-file-search" style="font-size: 4rem; color: #667eea;"></i>
+                <div class="gm-error-icon mb-3">
+                    <i class="ti ti-file-search"></i>
                 </div>
-                <div class="error-code">404</div>
+                <div class="gm-error-code">404</div>
                 <h2 class="mt-3 mb-2">{% trans "页面未找到" %}</h2>
-                <p class="text-muted mb-4">{% trans "抱歉，您访问的页面不存在或已被移除。" %}</p>
+                <p class="gm-error-copy mb-4">{% trans "抱歉，您访问的页面不存在或已被移除。" %}</p>
                 <a href="/gmtool/" class="btn btn-primary btn-lg">
                     <i class="ti ti-home me-2"></i>{% trans "返回首页" %}
                 </a>
