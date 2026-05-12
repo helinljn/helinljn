@@ -542,7 +542,7 @@
             {
                 "isnull": "false",
                 "id": "BanTime",
-                "type": "int32",
+                "type": "uint32",
                 "name": "封停时长（秒）(Character Suspension Duration, in Seconds)"
             },
             {
@@ -609,7 +609,7 @@
             {
                 "isnull": "false",
                 "id": "BanTime",
-                "type": "int32",
+                "type": "uint32",
                 "name": "禁言时长（秒）(Mute Duration, in Seconds)"
             },
             {
@@ -779,13 +779,13 @@
             {
                 "isnull": "false",
                 "id": "Star",
-                "type": "int32",
+                "type": "uint32",
                 "name": "装备星级(Equipment Star Level)"
             },
             {
                 "isnull": "false",
                 "id": "ExtraParam",
-                "type": "int32",
+                "type": "uint32",
                 "name": "额外参数(Additional Parameters)"
             }
         ],
@@ -905,13 +905,13 @@
             {
                 "isnull": "false",
                 "id": "Star",
-                "type": "int32",
+                "type": "uint32",
                 "name": "装备星级(Equipment Star Level)"
             },
             {
                 "isnull": "false",
                 "id": "ExtraParam",
-                "type": "int32",
+                "type": "uint32",
                 "name": "额外参数(Additional Parameters)"
             }
         ]
