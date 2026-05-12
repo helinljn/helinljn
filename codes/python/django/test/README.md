@@ -19,10 +19,10 @@
 在项目根目录执行：
 
 ```bash
-python test/mock_idip_server.py --host 127.0.0.1 --port 18080
+python test/mock_idip_server.py --host 127.0.0.1 --port 5510
 ```
 
-默认参数也是 `127.0.0.1:18080`，所以可以简写：
+默认参数也是 `127.0.0.1:5510`，所以可以简写：
 
 ```bash
 python test/mock_idip_server.py
@@ -35,7 +35,7 @@ python test/mock_idip_server.py
 将 Django 的 `IDIP_API_URL` 指向（注意路径必须带 `/cy_idip`）：
 
 ```text
-http://127.0.0.1:18080/cy_idip
+http://127.0.0.1:5510/cy_idip
 ```
 
 这样现有 `gmtool/idip_client.py` 发出的请求会直接打到 mock server。
@@ -118,7 +118,7 @@ http://127.0.0.1:18080/cy_idip
 ### 6.1 正常成功
 
 ```bash
-curl -X POST "http://127.0.0.1:18080/cy_idip" ^
+curl -X POST "http://127.0.0.1:5510/cy_idip" ^
   -H "Content-Type: application/x-www-form-urlencoded" ^
   --data-urlencode "id=4105" ^
   --data-urlencode "GSA=" ^
@@ -128,7 +128,7 @@ curl -X POST "http://127.0.0.1:18080/cy_idip" ^
 ### 6.2 强制失败
 
 ```bash
-curl -X POST "http://127.0.0.1:18080/cy_idip" ^
+curl -X POST "http://127.0.0.1:5510/cy_idip" ^
   -H "Content-Type: application/x-www-form-urlencoded" ^
   --data-urlencode "id=4105" ^
   --data-urlencode "__mock_fail=1" ^

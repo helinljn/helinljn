@@ -198,7 +198,7 @@ LOGIN_URL = '/gmtool/login/'
 CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 
 # IDIP / 命令定义
-IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:18080/cy_idip')
+IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:5510/cy_idip')
 IDIP_TIMEOUT = config('IDIP_TIMEOUT', default=30, cast=int)
 IDIP_JSON_PATH = config('IDIP_JSON_PATH', default=str(BASE_DIR / 'idip_commands.json'))
 UPLOAD_MAX_SIZE = config('UPLOAD_MAX_SIZE', default=10 * 1024 * 1024, cast=int)

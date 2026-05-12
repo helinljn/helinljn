@@ -717,7 +717,7 @@ python test/mock_idip_server.py
 默认地址：
 
 ```text
-http://127.0.0.1:18080/cy_idip
+http://127.0.0.1:5510/cy_idip
 ```
 
 ---

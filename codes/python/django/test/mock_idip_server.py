@@ -328,7 +328,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="Simple IDIP mock HTTP server")
     parser.add_argument("--host", default="127.0.0.1", help="Host to bind (default: 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=18080, help="Port to bind (default: 18080)")
+    parser.add_argument("--port", type=int, default=5510, help="Port to bind (default: 5510)")
     args = parser.parse_args()
 
     server = ThreadingHTTPServer((args.host, args.port), MockIdipHandler)
