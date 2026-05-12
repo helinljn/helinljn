@@ -105,7 +105,7 @@
             {
                 "isnull": "false",
                 "id": "Scene",
-                "type": "uint64",
+                "type": "uint32",
                 "name": "所在场景"
             },
             {
@@ -248,7 +248,7 @@
             {
                 "isnull": "false",
                 "id": "NoticeId",
-                "type": "uint64",
+                "type": "uint32",
                 "name": "公告Id：大于0"
             },
             {
@@ -355,7 +355,7 @@
             {
                 "isnull": "false",
                 "id": "NoticeId",
-                "type": "uint64",
+                "type": "uint32",
                 "name": "公告Id：大于0"
             },
             {
@@ -414,7 +414,7 @@
             {
                 "isnull": "false",
                 "id": "NoticeId",
-                "type": "uint64",
+                "type": "uint32",
                 "name": "公告Id：大于0"
             }
         ],
