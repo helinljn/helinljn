@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-09 21:01+0800\n"
+"POT-Creation-Date: 2026-05-12 16:08+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,8 +54,8 @@ msgstr "Command %(id)s is missing required fields: %(fields)s"
 msgid "命令 %(id)s 的请求参数 %(name)s 必须是数组"
 msgstr "The request parameter %(name)s of command %(id)s must be an array"
 
-#: .\gmtool\api_views.py:111 .\gmtool\command_parser.py:403
-#: .\gmtool\command_views.py:346
+#: .\gmtool\api_views.py:111 .\gmtool\command_parser.py:474
+#: .\gmtool\command_views.py:347
 #, python-format
 msgid "检测到 ID 冲突: %(errors)s"
 msgstr "ID conflict detected: %(errors)s"
@@ -201,6 +201,16 @@ msgstr ""
 msgid "command_data 中缺少 command_id"
 msgstr "Missing command_id in command_data"
 
+#: .\gmtool\command_parser.py:336
+#, python-format
+msgid "请求结构体列表字段 %(field)s 缺少 max_size"
+msgstr "Request struct list field %(field)s is missing max_size"
+
+#: .\gmtool\command_parser.py:341 .\gmtool\command_parser.py:344
+#, python-format
+msgid "请求结构体列表字段 %(field)s 的 max_size 必须为正整数"
+msgstr "max_size for request struct list field %(field)s must be a positive integer"
+
 #: .\gmtool\command_services.py:34 .\gmtool\command_services.py:45
 #: .\gmtool\command_services.py:60 .\gmtool\command_services.py:66
 #, python-format
@@ -208,29 +218,55 @@ msgid "参数 %(field)s 必须为时间戳或 ISO 时间"
 msgstr "Parameter %(field)s must be a timestamp or ISO time"
 
 #: .\gmtool\command_services.py:39 .\gmtool\command_services.py:50
-#: .\gmtool\command_services.py:104
+#: .\gmtool\command_services.py:81 .\gmtool\command_services.py:199
 #, python-format
 msgid "参数 %(field)s 不能为负数"
 msgstr "Parameter %(field)s cannot be negative"
 
-#: .\gmtool\command_services.py:78
-msgid "命令参数定义错误，请联系管理员"
-msgstr "Invalid command parameter schema, please contact the administrator"
-
-#: .\gmtool\command_services.py:93
-#, python-format
-msgid "缺少必填参数: %(field)s"
-msgstr "Missing required parameter: %(field)s"
-
-#: .\gmtool\command_services.py:102
+#: .\gmtool\command_services.py:79 .\gmtool\command_services.py:197
 #, python-format
 msgid "参数 %(field)s 必须为整数"
 msgstr "Parameter %(field)s must be an integer"
 
-#: .\gmtool\command_services.py:131
+#: .\gmtool\command_services.py:101
 #, python-format
 msgid "参数 %(field)s 必须为布尔值"
 msgstr "Parameter %(field)s must be a boolean"
+
+#: .\gmtool\command_services.py:109 .\gmtool\command_services.py:136
+#, python-format
+msgid "参数 %(field)s 必须为对象"
+msgstr "Parameter %(field)s must be an object"
+
+#: .\gmtool\command_services.py:112 .\gmtool\command_services.py:219
+msgid "命令参数定义错误，请联系管理员"
+msgstr "Invalid command parameter schema, please contact the administrator"
+
+#: .\gmtool\command_services.py:128 .\gmtool\command_services.py:168
+#: .\gmtool\command_services.py:244
+#, python-format
+msgid "缺少必填参数: %(field)s"
+msgstr "Missing required parameter: %(field)s"
+
+#: .\gmtool\command_services.py:162 .\gmtool\command_services.py:165
+#, python-format
+msgid "请求结构体列表字段 %(field)s 缺少有效的 max_size"
+msgstr "Request struct list field %(field)s is missing a valid max_size"
+
+#: .\gmtool\command_services.py:174
+#, python-format
+msgid "参数 %(field)s 必须为数组"
+msgstr "Parameter %(field)s must be an array"
+
+#: .\gmtool\command_services.py:177
+#, python-format
+msgid "参数 %(field)s 数量不能超过 %(max_size)s"
+msgstr "Parameter %(field)s count cannot exceed %(max_size)s"
+
+#: .\gmtool\command_services.py:201
+#, python-format
+msgid "参数 %(field)s 必须等于 %(target)s 的数量"
+msgstr "Parameter %(field)s must equal the count of %(target)s"
 
 #: .\gmtool\command_views.py:33
 msgid "命令请求已完成，但执行结果记录失败，请联系管理员核查应用日志"
@@ -269,45 +305,45 @@ msgstr "Partition cannot be negative"
 msgid "请求数据格式错误"
 msgstr "Invalid request data format"
 
-#: .\gmtool\command_views.py:263
+#: .\gmtool\command_views.py:264
 #, python-format
 msgid "参数 JSON 格式错误: %(error)s"
 msgstr "Invalid parameter JSON format: %(error)s"
 
-#: .\gmtool\command_views.py:266 .\gmtool\command_views.py:306
-#: .\gmtool\command_views.py:326 .\gmtool\templates\gmtool\command_add.html:20
+#: .\gmtool\command_views.py:267 .\gmtool\command_views.py:307
+#: .\gmtool\command_views.py:327 .\gmtool\templates\gmtool\command_add.html:20
 #: .\gmtool\templates\gmtool\dashboard.html:133
 msgid "添加GM命令"
 msgstr "Add GM Command"
 
-#: .\gmtool\command_views.py:290
+#: .\gmtool\command_views.py:291
 #, python-format
 msgid "写入命令到 JSON 文件失败: %(error)s"
 msgstr "Failed to write command to JSON file: %(error)s"
 
-#: .\gmtool\command_views.py:301
+#: .\gmtool\command_views.py:302
 msgid "命令同步失败，且 JSON 文件回滚失败，请立即人工核查"
 msgstr ""
 "Command sync failed, and rolling back the JSON file also failed. Please "
 "perform a manual inspection immediately"
 
-#: .\gmtool\command_views.py:303
+#: .\gmtool\command_views.py:304
 msgid "命令同步失败，JSON 文件已回滚，命令未生效"
 msgstr ""
 "Command sync failed, the JSON file has been rolled back, and the command did "
 "not take effect"
 
-#: .\gmtool\command_views.py:319
+#: .\gmtool\command_views.py:320
 #, python-format
 msgid "命令 %(id)s 添加成功"
 msgstr "Command %(id)s added successfully"
 
-#: .\gmtool\command_views.py:342
+#: .\gmtool\command_views.py:343
 #, python-format
 msgid "读取 JSON 文件失败: %(error)s"
 msgstr "Failed to read JSON file: %(error)s"
 
-#: .\gmtool\command_views.py:365
+#: .\gmtool\command_views.py:366
 msgid "服务器内部错误"
 msgstr "Internal server error"
 
@@ -370,7 +406,7 @@ msgid "超级管理员账号不可禁用"
 msgstr "Super admin account cannot be disabled"
 
 #: .\gmtool\forms.py:131 .\gmtool\models.py:8
-#: .\gmtool\templates\gmtool\command_execute.html:150
+#: .\gmtool\templates\gmtool\command_execute.html:188
 #: .\gmtool\templates\gmtool\command_list.html:37
 msgid "命令编号"
 msgstr "Command ID"
@@ -397,7 +433,7 @@ msgid "命令显示名称"
 msgstr "Command display name"
 
 #: .\gmtool\forms.py:147 .\gmtool\models.py:11
-#: .\gmtool\templates\gmtool\command_execute.html:154
+#: .\gmtool\templates\gmtool\command_execute.html:192
 #: .\gmtool\templates\gmtool\command_list.html:39
 msgid "请求名"
 msgstr "Request Name"
@@ -419,12 +455,12 @@ msgid "请求描述（可选）"
 msgstr "Request description (optional)"
 
 #: .\gmtool\forms.py:163 .\gmtool\models.py:13
-#: .\gmtool\templates\gmtool\command_execute.html:162
+#: .\gmtool\templates\gmtool\command_execute.html:200
 msgid "响应名"
 msgstr "Response Name"
 
 #: .\gmtool\forms.py:168 .\gmtool\models.py:14
-#: .\gmtool\templates\gmtool\command_execute.html:166
+#: .\gmtool\templates\gmtool\command_execute.html:204
 msgid "协议响应ID"
 msgstr "Response ID"
 
@@ -539,16 +575,16 @@ msgstr "User Command Permission"
 msgid "用户信息"
 msgstr "User Profile"
 
-#: .\gmtool\models.py:79 .\gmtool\templates\gmtool\command_execute.html:607
-#: .\gmtool\templates\gmtool\command_execute.html:674
+#: .\gmtool\models.py:79 .\gmtool\templates\gmtool\command_execute.html:828
+#: .\gmtool\templates\gmtool\command_execute.html:895
 #: .\gmtool\templates\gmtool\command_log.html:109
 #: .\gmtool\templates\gmtool\command_log.html:171
 #: .\gmtool\templates\gmtool\dashboard.html:109
 msgid "成功"
 msgstr "Success"
 
-#: .\gmtool\models.py:80 .\gmtool\templates\gmtool\command_execute.html:615
-#: .\gmtool\templates\gmtool\command_execute.html:674
+#: .\gmtool\models.py:80 .\gmtool\templates\gmtool\command_execute.html:836
+#: .\gmtool\templates\gmtool\command_execute.html:895
 #: .\gmtool\templates\gmtool\command_log.html:110
 #: .\gmtool\templates\gmtool\command_log.html:173
 #: .\gmtool\templates\gmtool\dashboard.html:111
@@ -581,13 +617,13 @@ msgstr "Full Request JSON"
 msgid "IDIP协议完整请求内容"
 msgstr "Full IDIP request content"
 
-#: .\gmtool\models.py:89 .\gmtool\templates\gmtool\command_execute.html:194
+#: .\gmtool\models.py:89 .\gmtool\templates\gmtool\command_execute.html:232
 #: .\gmtool\templates\gmtool\command_log.html:235
 msgid "响应数据"
 msgstr "Response Data"
 
-#: .\gmtool\models.py:90 .\gmtool\templates\gmtool\command_execute.html:228
-#: .\gmtool\templates\gmtool\command_execute.html:428
+#: .\gmtool\models.py:90 .\gmtool\templates\gmtool\command_execute.html:266
+#: .\gmtool\templates\gmtool\command_execute.html:467
 #: .\gmtool\templates\gmtool\command_log.html:106
 #: .\gmtool\templates\gmtool\command_log.html:142
 #: .\gmtool\templates\gmtool\dashboard.html:99
@@ -681,7 +717,9 @@ msgstr "How to Resolve"
 
 #: .\gmtool\templates\gmtool\400.html:111
 msgid "请联系管理员将当前域名或 IP 加入"
-msgstr "Please contact the administrator to add the current domain name or IP address to"
+msgstr ""
+"Please contact the administrator to add the current domain name or IP "
+"address to"
 
 #: .\gmtool\templates\gmtool\400.html:113
 msgid "后再访问。"
@@ -805,31 +843,35 @@ msgid "添加命令"
 msgstr "Add Command"
 
 #: .\gmtool\templates\gmtool\command_add.html:161
-#: .\gmtool\templates\gmtool\command_execute.html:131
+#: .\gmtool\templates\gmtool\command_execute.html:169
 #: .\gmtool\templates\gmtool\user_form.html:48
 #: .\gmtool\templates\gmtool\user_permissions.html:55
 msgid "取消"
 msgstr "Cancel"
 
-#: .\gmtool\templates\gmtool\command_execute.html:40
+#: .\gmtool\templates\gmtool\command_execute.html:42
 #: .\gmtool\templates\gmtool\user_form.html:12
 #: .\gmtool\templates\gmtool\user_permissions.html:12
 msgid "返回列表"
 msgstr "Back to List"
 
-#: .\gmtool\templates\gmtool\command_execute.html:49
+#: .\gmtool\templates\gmtool\command_execute.html:51
 msgid "命令参数"
 msgstr "Command Parameters"
 
-#: .\gmtool\templates\gmtool\command_execute.html:63
+#: .\gmtool\templates\gmtool\command_execute.html:75
 msgid "可选"
 msgstr "Optional"
 
-#: .\gmtool\templates\gmtool\command_execute.html:68
+#: .\gmtool\templates\gmtool\command_execute.html:80
 msgid "批量"
 msgstr "Batch"
 
-#: .\gmtool\templates\gmtool\command_execute.html:114
+#: .\gmtool\templates\gmtool\command_execute.html:105
+msgid "添加"
+msgstr "Add"
+
+#: .\gmtool\templates\gmtool\command_execute.html:150
 msgid "输入多个值，每行一个或用逗号分隔，如：&#10;值1&#10;值2&#10;值3"
 msgstr ""
 "Enter multiple values, one per line or comma-separated, e.g.:\n"
@@ -837,144 +879,175 @@ msgstr ""
 "Value2\n"
 "Value3"
 
-#: .\gmtool\templates\gmtool\command_execute.html:117
+#: .\gmtool\templates\gmtool\command_execute.html:153
 msgid "支持逗号分隔、换行分隔"
 msgstr "Supports comma-separated or newline-separated input"
 
-#: .\gmtool\templates\gmtool\command_execute.html:119
+#: .\gmtool\templates\gmtool\command_execute.html:155
 msgid "从文件导入"
 msgstr "Import from file"
 
-#: .\gmtool\templates\gmtool\command_execute.html:128
-#: .\gmtool\templates\gmtool\command_execute.html:499
+#: .\gmtool\templates\gmtool\command_execute.html:166
+#: .\gmtool\templates\gmtool\command_execute.html:538
 msgid "执行命令"
 msgstr "Execute Command"
 
-#: .\gmtool\templates\gmtool\command_execute.html:134
+#: .\gmtool\templates\gmtool\command_execute.html:172
 msgid "重置"
 msgstr "Reset"
 
-#: .\gmtool\templates\gmtool\command_execute.html:145
+#: .\gmtool\templates\gmtool\command_execute.html:183
 msgid "命令信息"
 msgstr "Command Info"
 
-#: .\gmtool\templates\gmtool\command_execute.html:158
+#: .\gmtool\templates\gmtool\command_execute.html:196
 #: .\gmtool\templates\gmtool\command_list.html:40
 msgid "协议ID"
 msgstr "Protocol ID"
 
-#: .\gmtool\templates\gmtool\command_execute.html:178
+#: .\gmtool\templates\gmtool\command_execute.html:216
 msgid "执行结果"
 msgstr "Execution Result"
 
-#: .\gmtool\templates\gmtool\command_execute.html:187
+#: .\gmtool\templates\gmtool\command_execute.html:225
 msgid "响应概览"
 msgstr "Response Overview"
 
-#: .\gmtool\templates\gmtool\command_execute.html:199
+#: .\gmtool\templates\gmtool\command_execute.html:237
 msgid "原始JSON（兜底）"
 msgstr "Raw JSON (Fallback)"
 
-#: .\gmtool\templates\gmtool\command_execute.html:208
+#: .\gmtool\templates\gmtool\command_execute.html:246
 msgid "批量执行结果"
 msgstr "Batch Execution Results"
 
-#: .\gmtool\templates\gmtool\command_execute.html:212
+#: .\gmtool\templates\gmtool\command_execute.html:250
 msgid "导出"
 msgstr "Export"
 
-#: .\gmtool\templates\gmtool\command_execute.html:227
+#: .\gmtool\templates\gmtool\command_execute.html:265
 msgid "目标"
 msgstr "Target"
 
-#: .\gmtool\templates\gmtool\command_execute.html:229
-#: .\gmtool\templates\gmtool\command_execute.html:460
+#: .\gmtool\templates\gmtool\command_execute.html:267
+#: .\gmtool\templates\gmtool\command_execute.html:499
 msgid "结果"
 msgstr "Result"
 
-#: .\gmtool\templates\gmtool\command_execute.html:243
+#: .\gmtool\templates\gmtool\command_execute.html:281
 msgid "请求发送中..."
 msgstr "Sending request..."
 
-#: .\gmtool\templates\gmtool\command_execute.html:309
-#: .\gmtool\templates\gmtool\command_execute.html:334
-#: .\gmtool\templates\gmtool\command_execute.html:460
+#: .\gmtool\templates\gmtool\command_execute.html:348
+#: .\gmtool\templates\gmtool\command_execute.html:373
+#: .\gmtool\templates\gmtool\command_execute.html:499
 #: .\gmtool\templates\gmtool\command_log.html:230
 msgid "无数据"
 msgstr "No data"
 
-#: .\gmtool\templates\gmtool\command_execute.html:428
+#: .\gmtool\templates\gmtool\command_execute.html:467
 msgid "无"
 msgstr "None"
 
-#: .\gmtool\templates\gmtool\command_execute.html:497
+#: .\gmtool\templates\gmtool\command_execute.html:536
 msgid "批量执行"
 msgstr "Batch Execute"
 
-#: .\gmtool\templates\gmtool\command_execute.html:519
-#: .\gmtool\templates\gmtool\command_execute.html:704
+#: .\gmtool\templates\gmtool\command_execute.html:558
+#: .\gmtool\templates\gmtool\command_execute.html:925
 msgid "时间格式无效"
 msgstr "Invalid time format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:527
-#: .\gmtool\templates\gmtool\command_execute.html:712
+#: .\gmtool\templates\gmtool\command_execute.html:566
+#: .\gmtool\templates\gmtool\command_execute.html:933
 msgid "数值格式无效"
 msgstr "Invalid number format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:530
+#: .\gmtool\templates\gmtool\command_execute.html:569
 msgid "数值不能为负数"
 msgstr "Value cannot be negative"
 
-#: .\gmtool\templates\gmtool\command_execute.html:543
+#: .\gmtool\templates\gmtool\command_execute.html:582
 msgid "布尔值格式无效"
 msgstr "Invalid boolean format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:590
-#: .\gmtool\templates\gmtool\command_execute.html:596
+#: .\gmtool\templates\gmtool\command_execute.html:607
+msgid "该列表未配置最大数量"
+msgstr "This list has no maximum count configured"
+
+#: .\gmtool\templates\gmtool\command_execute.html:615
+msgid "已达到最大数量"
+msgstr "Maximum count reached"
+
 #: .\gmtool\templates\gmtool\command_execute.html:616
-#: .\gmtool\templates\gmtool\command_execute.html:769
+msgid "最多可添加"
+msgstr "Maximum allowed"
+
+#: .\gmtool\templates\gmtool\command_execute.html:654
+#: .\gmtool\templates\gmtool\command_execute.html:705
+msgid "结构体列表缺少有效的最大数量配置"
+msgstr "Struct list is missing a valid maximum count configuration"
+
+#: .\gmtool\templates\gmtool\command_execute.html:681
+#: .\gmtool\templates\gmtool\user_list.html:91
+msgid "删除"
+msgstr "Delete"
+
+#: .\gmtool\templates\gmtool\command_execute.html:709
+msgid "结构体列表数量不能超过最大数量"
+msgstr "Struct list count cannot exceed the maximum count"
+
+#: .\gmtool\templates\gmtool\command_execute.html:713
+#: .\gmtool\templates\gmtool\command_execute.html:732
+msgid "缺少必填参数"
+msgstr "Missing required parameter"
+
+#: .\gmtool\templates\gmtool\command_execute.html:811
+#: .\gmtool\templates\gmtool\command_execute.html:817
+#: .\gmtool\templates\gmtool\command_execute.html:837
+#: .\gmtool\templates\gmtool\command_execute.html:996
 #: .\gmtool\templates\gmtool\dashboard.html:221
 #: .\gmtool\templates\gmtool\dashboard.html:243
 msgid "未知错误"
 msgstr "Unknown error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:611
+#: .\gmtool\templates\gmtool\command_execute.html:832
 #: .\gmtool\templates\gmtool\dashboard.html:217
 #: .\gmtool\templates\gmtool\dashboard.html:240
 msgid "已停用"
 msgstr "Deactivated"
 
-#: .\gmtool\templates\gmtool\command_execute.html:612
-#: .\gmtool\templates\gmtool\command_execute.html:764
+#: .\gmtool\templates\gmtool\command_execute.html:833
+#: .\gmtool\templates\gmtool\command_execute.html:991
 msgid "命令已失效"
 msgstr "Command deactivated"
 
-#: .\gmtool\templates\gmtool\command_execute.html:764
+#: .\gmtool\templates\gmtool\command_execute.html:991
 msgid "该命令已被停用或删除，即将跳转到命令列表..."
 msgstr ""
 "This command has been deactivated or deleted, redirecting to command list..."
 
-#: .\gmtool\templates\gmtool\command_execute.html:769
+#: .\gmtool\templates\gmtool\command_execute.html:996
 msgid "错误"
 msgstr "Error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:775
+#: .\gmtool\templates\gmtool\command_execute.html:1002
 msgid "请求异常"
 msgstr "Request error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:794
+#: .\gmtool\templates\gmtool\command_execute.html:1021
 msgid "请为批量字段输入至少一个值"
 msgstr "Please enter at least one value for batch fields"
 
-#: .\gmtool\templates\gmtool\command_execute.html:798
+#: .\gmtool\templates\gmtool\command_execute.html:1025
 msgid "值数量超过限制"
 msgstr "Value count exceeds limit"
 
-#: .\gmtool\templates\gmtool\command_execute.html:815
+#: .\gmtool\templates\gmtool\command_execute.html:1042
 msgid "批量字段数量不匹配"
 msgstr "Batch field count mismatch"
 
-#: .\gmtool\templates\gmtool\command_execute.html:815
+#: .\gmtool\templates\gmtool\command_execute.html:1042
 msgid "每个批量字段的值数量必须相同，或仅输入1个值以对所有目标复用"
 msgstr ""
 "Each batch field must have the same number of values, or enter only 1 value "
@@ -1291,10 +1364,6 @@ msgstr "Edit"
 #, python-format
 msgid "确认删除用户 %(username)s？"
 msgstr "Are you sure you want to delete user %(username)s?"
-
-#: .\gmtool\templates\gmtool\user_list.html:91
-msgid "删除"
-msgstr "Delete"
 
 #: .\gmtool\templates\gmtool\user_list.html:100
 msgid "暂无用户数据"
