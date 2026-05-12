@@ -1,10 +1,10 @@
 {
     "10226000": {
-        "tab": "查询个人信息(Query Personal Information)",
-        "request_desc": "查询个人信息请求(Request to Query Personal Information)",
+        "tab": "查询个人信息",
+        "request_desc": "查询个人信息请求",
         "request_id": 4097,
         "request": "QueryUsrInfoReq",
-        "response_desc": "查询个人信息应答(Response to Query Personal Information)",
+        "response_desc": "查询个人信息应答",
         "response_id": 4098,
         "response": "QueryUsrInfoRsp",
         "QueryUsrInfoReq": [
@@ -12,37 +12,37 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "OpenId",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "true",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "true",
                 "id": "RoleName",
                 "type": "string",
-                "name": "角色名称(Role Name)"
+                "name": "角色名称"
             }
         ],
         "QueryUsrInfoRsp": [
@@ -50,13 +50,13 @@
                 "isnull": "false",
                 "id": "UsrList_count",
                 "type": "uint32",
-                "name": "个人信息列表数量(Number of Entries in the Personal Information List)"
+                "name": "个人信息列表数量"
             },
             {
                 "isnull": "false",
                 "id": "UsrList",
                 "type": "SUsrInfo",
-                "name": "个人信息列表(Personal Information List)"
+                "name": "个人信息列表"
             }
         ],
         "SUsrInfo": [
@@ -64,166 +64,166 @@
                 "isnull": "false",
                 "id": "Account",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "false",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "false",
                 "id": "RoleName",
                 "type": "string",
-                "name": "角色名称(Role Name)"
+                "name": "角色名称"
             },
             {
                 "isnull": "false",
                 "id": "Gender",
                 "type": "uint8",
-                "name": "性别（1：男；2：女）(Gender: 1 = Male, 2 = Female)"
+                "name": "性别（1：男；2：女）"
             },
             {
                 "isnull": "false",
                 "id": "Job",
                 "type": "string",
-                "name": "职业(Class)"
+                "name": "职业"
             },
             {
                 "isnull": "false",
                 "id": "Exp",
                 "type": "uint32",
-                "name": "经验值(Experience)"
+                "name": "经验值"
             },
             {
                 "isnull": "false",
                 "id": "Level",
                 "type": "uint32",
-                "name": "当前等级(Current Level)"
+                "name": "当前等级"
             },
             {
                 "isnull": "false",
                 "id": "Scene",
                 "type": "uint64",
-                "name": "所在场景(Scene ID)"
+                "name": "所在场景"
             },
             {
                 "isnull": "false",
                 "id": "Location",
                 "type": "string",
-                "name": "所在位置(Location)"
+                "name": "所在位置"
             },
             {
                 "isnull": "false",
                 "id": "Fight",
                 "type": "uint32",
-                "name": "战斗力(Combat Power)"
+                "name": "战斗力"
             },
             {
                 "isnull": "false",
                 "id": "Gold",
                 "type": "uint32",
-                "name": "元宝存量(Yuanbao Balance)"
+                "name": "元宝存量"
             },
             {
                 "isnull": "false",
                 "id": "Money",
                 "type": "uint32",
-                "name": "金币存量(Gold Balance)"
+                "name": "金币存量"
             },
             {
                 "isnull": "false",
                 "id": "BindGold",
                 "type": "uint32",
-                "name": "绑定元宝存量(Bound Yuanbao Balance)"
+                "name": "绑定元宝存量"
             },
             {
                 "isnull": "false",
                 "id": "JiaoZi",
                 "type": "uint32",
-                "name": "铜钱(Jiaozi)"
+                "name": "铜钱"
             },
             {
                 "isnull": "false",
                 "id": "SpecialYuanBao",
                 "type": "uint32",
-                "name": "储备元宝(Reserved Yuanbao)"
+                "name": "储备元宝"
             },
             {
                 "isnull": "false",
                 "id": "Serverld",
                 "type": "uint32",
-                "name": "服务器Id(Server ID)"
+                "name": "服务器Id"
             },
             {
                 "isnull": "false",
                 "id": "CmbiChannelId",
                 "type": "string",
-                "name": "渠道号(CMBI Channel ID)"
+                "name": "渠道号"
             },
             {
                 "isnull": "false",
                 "id": "ChannelId",
                 "type": "uint32",
-                "name": "渠道号(Channel ID)"
+                "name": "渠道号"
             },
             {
                 "isnull": "false",
                 "id": "RegisterTime",
                 "type": "time",
-                "name": "注册时间(Registration Time)"
+                "name": "注册时间"
             },
             {
                 "isnull": "false",
                 "id": "LastLogoutTime",
                 "type": "time",
-                "name": "最后注销时间(Last Logout Time)"
+                "name": "最后注销时间"
             },
             {
                 "isnull": "false",
                 "id": "IsOnline",
                 "type": "uint8",
-                "name": "当前是否在线（1是 0 否）(Currently Online: 1 = Yes, 0 = No)"
+                "name": "当前是否在线（1是 0 否）"
             },
             {
                 "isnull": "false",
                 "id": "Time",
                 "type": "uint32",
-                "name": "入帮时间(Time Joined Guild)"
+                "name": "入帮时间"
             },
             {
                 "isnull": "false",
                 "id": "Position",
                 "type": "int32",
-                "name": "帮内职务(Guild Position)"
+                "name": "帮内职务"
             },
             {
                 "isnull": "false",
                 "id": "GuildName",
                 "type": "string",
-                "name": "帮会名称(Guild Name)"
+                "name": "帮会名称"
             },
             {
                 "isnull": "false",
                 "id": "Graduation",
                 "type": "int32",
-                "name": "拜师完成(Apprenticeship Completed)"
+                "name": "拜师完成"
             },
             {
                 "isnull": "false",
                 "id": "IsFriend",
                 "type": "int32",
-                "name": "结拜达成(Sworn Brotherhood Completed)"
+                "name": "结拜达成"
             }
         ]
     },
     "10226001": {
-        "tab": "发公告(Send Announcement)",
-        "request_desc": "发公告请求(Request to Send Announcement)",
+        "tab": "发公告",
+        "request_desc": "发公告请求",
         "request_id": 4105,
         "request": "DoSendRollingMsgReq",
-        "response_desc": "发公告应答(Response to Send Announcement)",
+        "response_desc": "发公告应答",
         "response_id": 4106,
         "response": "DoSendRollingMsgRsp",
         "DoSendRollingMsgReq": [
@@ -231,49 +231,49 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "NoticeId",
                 "type": "uint64",
-                "name": "公告Id：大于0(Announcement ID: must be greater than 0)"
+                "name": "公告Id：大于0"
             },
             {
                 "isnull": "false",
                 "id": "Frequency",
                 "type": "uint32",
-                "name": "显示频率（min）(Display Frequency, in Minutes)"
+                "name": "显示频率（min）"
             },
             {
                 "isnull": "false",
                 "id": "BeginTime",
                 "type": "time",
-                "name": "公告开始时间(Announcement Start Time, UNIX_TIMESTAMP)"
+                "name": "公告开始时间"
             },
             {
                 "isnull": "false",
                 "id": "EndTime",
                 "type": "time",
-                "name": "公告结束时间(Announcement End Time, UNIX_TIMESTAMP)"
+                "name": "公告结束时间"
             },
             {
                 "isnull": "false",
                 "id": "RollingContent",
                 "type": "string",
-                "name": "公告内容(Announcement Content)"
+                "name": "公告内容"
             }
         ],
         "DoSendRollingMsgRsp": [
@@ -281,22 +281,22 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ]
     },
     "10226002": {
-        "tab": "查询公告(Query Announcement)",
-        "request_desc": "查询公告请求(Request to Query Announcement)",
+        "tab": "查询公告",
+        "request_desc": "查询公告请求",
         "request_id": 4107,
         "request": "QueryRollingReq",
-        "response_desc": "查询公告应答(Response to Query Announcement)",
+        "response_desc": "查询公告应答",
         "response_id": 4108,
         "response": "QueryRollingRsp",
         "QueryRollingReq": [
@@ -304,31 +304,31 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "BeginTime",
                 "type": "time",
-                "name": "公告开始时间(Announcement Start Time, UNIX_TIMESTAMP)"
+                "name": "公告开始时间"
             },
             {
                 "isnull": "false",
                 "id": "EndTime",
                 "type": "time",
-                "name": "公告结束时间(Announcement End Time, UNIX_TIMESTAMP)"
+                "name": "公告结束时间"
             }
         ],
         "QueryRollingRsp": [
@@ -336,13 +336,13 @@
                 "isnull": "false",
                 "id": "RollingMsgList_count",
                 "type": "uint32",
-                "name": "公告列表数量(Number of Entries in the Announcement List)"
+                "name": "公告列表数量"
             },
             {
                 "isnull": "false",
                 "id": "RollingMsgList",
                 "type": "SRollingMsgInfo",
-                "name": "公告列表(Announcement List)"
+                "name": "公告列表"
             }
         ],
         "SRollingMsgInfo": [
@@ -350,46 +350,46 @@
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "NoticeId",
                 "type": "uint64",
-                "name": "公告Id：大于0(Announcement ID: must be greater than 0)"
+                "name": "公告Id：大于0"
             },
             {
                 "isnull": "false",
                 "id": "BeginTime",
                 "type": "time",
-                "name": "公告开始时间(Announcement Start Time, UNIX_TIMESTAMP)"
+                "name": "公告开始时间"
             },
             {
                 "isnull": "false",
                 "id": "EndTime",
                 "type": "time",
-                "name": "公告结束时间(Announcement End Time, UNIX_TIMESTAMP)"
+                "name": "公告结束时间"
             },
             {
                 "isnull": "false",
                 "id": "RollingContent",
                 "type": "string",
-                "name": "公告内容(Announcement Content)"
+                "name": "公告内容"
             },
             {
                 "isnull": "false",
                 "id": "Frequency",
                 "type": "uint32",
-                "name": "显示频率（min）(Display Frequency, in Minutes)"
+                "name": "显示频率（min）"
             }
         ]
     },
     "10226003": {
-        "tab": "删除公告(Delete Announcement)",
-        "request_desc": "删除公告请求(Request to Delete Announcement)",
+        "tab": "删除公告",
+        "request_desc": "删除公告请求",
         "request_id": 4109,
         "request": "DoDelRollingReq",
-        "response_desc": "删除公告应答(Response to Delete Announcement)",
+        "response_desc": "删除公告应答",
         "response_id": 4110,
         "response": "DoDelRollingRsp",
         "DoDelRollingReq": [
@@ -397,25 +397,25 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "NoticeId",
                 "type": "uint64",
-                "name": "公告Id：大于0(Announcement ID: must be greater than 0)"
+                "name": "公告Id：大于0"
             }
         ],
         "DoDelRollingRsp": [
@@ -423,22 +423,22 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ]
     },
     "10226004": {
-        "tab": "封号(Account Suspension)",
-        "request_desc": "封号请求(Request for Account Suspension)",
+        "tab": "封号",
+        "request_desc": "封号请求",
         "request_id": 4145,
         "request": "AqDoBanUserReq",
-        "response_desc": "封号应答(Response to Account Suspension)",
+        "response_desc": "封号应答",
         "response_id": 4146,
         "response": "AqDoBanUserRsp",
         "AqDoBanUserReq": [
@@ -446,43 +446,43 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "OpenId",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "false",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "false",
                 "id": "BanTime",
                 "type": "uint32",
-                "name": "封停时长（秒）(Account Suspension Duration, in Seconds)"
+                "name": "封停时长（秒）"
             },
             {
                 "isnull": "false",
                 "id": "BanReason",
                 "type": "string",
-                "name": "封号原因(Reason for Account Suspension)"
+                "name": "封号原因"
             }
         ],
         "AqDoBanUserRsp": [
@@ -490,22 +490,22 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ]
     },
     "10226005": {
-        "tab": "封角色(Character Suspension)",
-        "request_desc": "封角色请求(Request for Character Suspension)",
+        "tab": "封角色",
+        "request_desc": "封角色请求",
         "request_id": 4147,
         "request": "AqDoBanCharacReq",
-        "response_desc": "封角色应答(Response to Character Suspension)",
+        "response_desc": "封角色应答",
         "response_id": 4148,
         "response": "AqDoBanCharacRsp",
         "AqDoBanCharacReq": [
@@ -513,43 +513,43 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "OpenId",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "false",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "false",
                 "id": "BanTime",
                 "type": "uint32",
-                "name": "封停时长（秒）(Character Suspension Duration, in Seconds)"
+                "name": "封停时长（秒）"
             },
             {
                 "isnull": "false",
                 "id": "BanReason",
                 "type": "string",
-                "name": "封号原因(Reason for Character Suspension)"
+                "name": "封号原因"
             }
         ],
         "AqDoBanCharacRsp": [
@@ -557,22 +557,22 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ]
     },
     "10226006": {
-        "tab": "禁言(Mute)",
-        "request_desc": "禁言请求(Request to Mute)",
+        "tab": "禁言",
+        "request_desc": "禁言请求",
         "request_id": 4149,
         "request": "AqDoBanChatReq",
-        "response_desc": "禁言应答(Response to Mute)",
+        "response_desc": "禁言应答",
         "response_id": 4150,
         "response": "AqDoBanChatRsp",
         "AqDoBanChatReq": [
@@ -580,43 +580,43 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "OpenId",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "false",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "false",
                 "id": "BanTime",
                 "type": "uint32",
-                "name": "禁言时长（秒）(Mute Duration, in Seconds)"
+                "name": "禁言时长（秒）"
             },
             {
                 "isnull": "false",
                 "id": "BanReason",
                 "type": "string",
-                "name": "禁言原因(Reason for Mute)"
+                "name": "禁言原因"
             }
         ],
         "AqDoBanChatRsp": [
@@ -624,22 +624,22 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ]
     },
     "10226007": {
-        "tab": "解除处罚(Remove Punishment)",
-        "request_desc": "解除处罚请求(Request to Remove Punishment)",
+        "tab": "解除处罚",
+        "request_desc": "解除处罚请求",
         "request_id": 4155,
         "request": "AqDoUnpunishReq",
-        "response_desc": "解除处罚应答(Response to Remove Punishment)",
+        "response_desc": "解除处罚应答",
         "response_id": 4156,
         "response": "AqDoUnpunishRsp",
         "AqDoUnpunishReq": [
@@ -647,49 +647,49 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "OpenId",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "false",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "false",
                 "id": "UnBanUser",
                 "type": "uint8",
-                "name": "解除封号（0 否，1 是）(Remove Account Suspension: 0 = No, 1 = Yes)"
+                "name": "解除封号（0 否，1 是）"
             },
             {
                 "isnull": "false",
                 "id": "UnBanCharac",
                 "type": "uint8",
-                "name": "解封角色（0 否，1 是）(Remove Character Suspension: 0 = No, 1 = Yes)"
+                "name": "解封角色（0 否，1 是）"
             },
             {
                 "isnull": "false",
                 "id": "UnBanChat",
                 "type": "uint8",
-                "name": "解除禁言（0 否，1 是）(Remove Mute: 0 = No, 1 = Yes)"
+                "name": "解除禁言（0 否，1 是）"
             }
         ],
         "AqDoUnpunishRsp": [
@@ -697,22 +697,22 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ]
     },
     "10226008": {
-        "tab": "发邮件送道具(Send Items via Mail)",
-        "request_desc": "发邮件送道具请求(Request to Send Items via Mail)",
+        "tab": "发邮件送道具",
+        "request_desc": "发邮件送道具请求",
         "request_id": 4203,
         "request": "DoSendMailReq",
-        "response_desc": "发邮件送道具应答(Response to Send Items via Mail)",
+        "response_desc": "发邮件送道具应答",
         "response_id": 4204,
         "response": "DoSendMailRsp",
         "DoSendMailReq": [
@@ -720,73 +720,73 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "OpenId",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "false",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "false",
                 "id": "MailTitle",
                 "type": "string",
-                "name": "邮件标题(Mail Subject)"
+                "name": "邮件标题"
             },
             {
                 "isnull": "false",
                 "id": "MailContent",
                 "type": "string",
-                "name": "邮件内容(Mail Content)"
+                "name": "邮件内容"
             },
             {
                 "isnull": "false",
                 "id": "IsBind",
                 "type": "uint8",
-                "name": "是否绑定（0不绑定 1绑定）(Whether the Item Is Bound: 0 = No, 1 = Yes)"
+                "name": "是否绑定（0不绑定 1绑定）"
             },
             {
                 "isnull": "false",
                 "id": "ItemId",
                 "type": "uint32",
-                "name": "道具Id(Item ID)"
+                "name": "道具Id"
             },
             {
                 "isnull": "false",
                 "id": "ItemNum",
                 "type": "uint32",
-                "name": "道具数量(Item Quantity)"
+                "name": "道具数量"
             },
             {
                 "isnull": "false",
                 "id": "Star",
                 "type": "uint32",
-                "name": "装备星级(Equipment Star Level)"
+                "name": "装备星级"
             },
             {
                 "isnull": "false",
                 "id": "ExtraParam",
                 "type": "uint32",
-                "name": "额外参数(Additional Parameters)"
+                "name": "额外参数"
             }
         ],
         "DoSendMailRsp": [
@@ -794,22 +794,22 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ]
     },
     "10226009": {
-        "tab": "发邮件送多个道具(Send Multi Items via Mail)",
-        "request_desc": "发邮件送多个道具请求(Request to Send Multi Items via Mail)",
+        "tab": "发邮件送多个道具",
+        "request_desc": "发邮件送多个道具请求",
         "request_id": 4213,
         "request": "DoSendMultiMailReq",
-        "response_desc": "发邮件送多个道具应答(Response to Send Multi Items via Mail)",
+        "response_desc": "发邮件送多个道具应答",
         "response_id": 4214,
         "response": "DoSendMultiMailRsp",
         "DoSendMultiMailReq": [
@@ -817,61 +817,61 @@
                 "isnull": "false",
                 "id": "AreaId",
                 "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
+                "name": "*渠道信息"
             },
             {
                 "isnull": "false",
                 "id": "Partition",
                 "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
+                "name": "服务器组号"
             },
             {
                 "isnull": "false",
                 "id": "PlatId",
                 "type": "uint8",
-                "name": "*平台信息(Platform Information)"
+                "name": "*平台信息"
             },
             {
                 "isnull": "false",
                 "id": "OpenId",
                 "type": "string",
-                "name": "账号(Account)"
+                "name": "账号"
             },
             {
                 "isnull": "false",
                 "id": "RoleId",
                 "type": "string",
-                "name": "GUID(Role ID)"
+                "name": "GUID"
             },
             {
                 "isnull": "false",
                 "id": "MailTitle",
                 "type": "string",
-                "name": "邮件标题(Mail Subject)"
+                "name": "邮件标题"
             },
             {
                 "isnull": "false",
                 "id": "MailContent",
                 "type": "string",
-                "name": "邮件内容(Mail Content)"
+                "name": "邮件内容"
             },
             {
                 "isnull": "false",
                 "id": "IsBind",
                 "type": "uint8",
-                "name": "是否绑定（0不绑定 1绑定）(Whether the Item Is Bound: 0 = No, 1 = Yes)"
+                "name": "是否绑定（0不绑定 1绑定）"
             },
             {
                 "isnull": "false",
                 "id": "ItemList1_count",
                 "type": "uint32",
-                "name": "道具列表1的数量(Count of Item List 1)"
+                "name": "道具列表1的数量"
             },
             {
                 "isnull": "false",
                 "id": "ItemList1",
                 "type": "SItemInfo",
-                "name": "道具列表1(Item List 1)",
+                "name": "道具列表1",
                 "max_size": 5
             }
         ],
@@ -880,13 +880,13 @@
                 "isnull": "false",
                 "id": "Result",
                 "type": "int32",
-                "name": "结果(Result ID)"
+                "name": "结果"
             },
             {
                 "isnull": "false",
                 "id": "RetMsg",
                 "type": "string",
-                "name": "返回消息(Result Message)"
+                "name": "返回消息"
             }
         ],
         "SItemInfo": [
@@ -894,25 +894,25 @@
                 "isnull": "false",
                 "id": "ItemId",
                 "type": "uint32",
-                "name": "道具Id(Item ID)"
+                "name": "道具Id"
             },
             {
                 "isnull": "false",
                 "id": "ItemNum",
                 "type": "uint32",
-                "name": "道具数量(Item Quantity)"
+                "name": "道具数量"
             },
             {
                 "isnull": "false",
                 "id": "Star",
                 "type": "uint32",
-                "name": "装备星级(Equipment Star Level)"
+                "name": "装备星级"
             },
             {
                 "isnull": "false",
                 "id": "ExtraParam",
                 "type": "uint32",
-                "name": "额外参数(Additional Parameters)"
+                "name": "额外参数"
             }
         ]
     }
