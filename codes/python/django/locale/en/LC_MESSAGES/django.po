@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-12 16:08+0800\n"
+"POT-Creation-Date: 2026-05-12 20:46+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -209,7 +209,8 @@ msgstr "Request struct list field %(field)s is missing max_size"
 #: .\gmtool\command_parser.py:341 .\gmtool\command_parser.py:344
 #, python-format
 msgid "请求结构体列表字段 %(field)s 的 max_size 必须为正整数"
-msgstr "max_size for request struct list field %(field)s must be a positive integer"
+msgstr ""
+"max_size for request struct list field %(field)s must be a positive integer"
 
 #: .\gmtool\command_services.py:34 .\gmtool\command_services.py:45
 #: .\gmtool\command_services.py:60 .\gmtool\command_services.py:66
@@ -361,7 +362,7 @@ msgstr "You do not have permission to execute this command"
 
 #: .\gmtool\forms.py:20 .\gmtool\models.py:117
 #: .\gmtool\templates\gmtool\command_log.html:91
-#: .\gmtool\templates\gmtool\login.html:56
+#: .\gmtool\templates\gmtool\login.html:57
 #: .\gmtool\templates\gmtool\login_log.html:17
 #: .\gmtool\templates\gmtool\login_log.html:52
 #: .\gmtool\templates\gmtool\user_list.html:34
@@ -381,7 +382,7 @@ msgstr "Active"
 msgid "联系电话"
 msgstr "Phone"
 
-#: .\gmtool\forms.py:39 .\gmtool\templates\gmtool\login.html:66
+#: .\gmtool\forms.py:39 .\gmtool\templates\gmtool\login.html:67
 msgid "密码"
 msgstr "Password"
 
@@ -575,16 +576,16 @@ msgstr "User Command Permission"
 msgid "用户信息"
 msgstr "User Profile"
 
-#: .\gmtool\models.py:79 .\gmtool\templates\gmtool\command_execute.html:828
-#: .\gmtool\templates\gmtool\command_execute.html:895
+#: .\gmtool\models.py:79 .\gmtool\templates\gmtool\command_execute.html:806
+#: .\gmtool\templates\gmtool\command_execute.html:873
 #: .\gmtool\templates\gmtool\command_log.html:109
 #: .\gmtool\templates\gmtool\command_log.html:171
 #: .\gmtool\templates\gmtool\dashboard.html:109
 msgid "成功"
 msgstr "Success"
 
-#: .\gmtool\models.py:80 .\gmtool\templates\gmtool\command_execute.html:836
-#: .\gmtool\templates\gmtool\command_execute.html:895
+#: .\gmtool\models.py:80 .\gmtool\templates\gmtool\command_execute.html:814
+#: .\gmtool\templates\gmtool\command_execute.html:873
 #: .\gmtool\templates\gmtool\command_log.html:110
 #: .\gmtool\templates\gmtool\command_log.html:173
 #: .\gmtool\templates\gmtool\dashboard.html:111
@@ -617,13 +618,12 @@ msgstr "Full Request JSON"
 msgid "IDIP协议完整请求内容"
 msgstr "Full IDIP request content"
 
-#: .\gmtool\models.py:89 .\gmtool\templates\gmtool\command_execute.html:232
+#: .\gmtool\models.py:89 .\gmtool\templates\gmtool\command_execute.html:225
 #: .\gmtool\templates\gmtool\command_log.html:235
 msgid "响应数据"
 msgstr "Response Data"
 
-#: .\gmtool\models.py:90 .\gmtool\templates\gmtool\command_execute.html:266
-#: .\gmtool\templates\gmtool\command_execute.html:467
+#: .\gmtool\models.py:90 .\gmtool\templates\gmtool\command_execute.html:259
 #: .\gmtool\templates\gmtool\command_log.html:106
 #: .\gmtool\templates\gmtool\command_log.html:142
 #: .\gmtool\templates\gmtool\dashboard.html:99
@@ -645,13 +645,13 @@ msgid "命令日志"
 msgstr "Command Log"
 
 #: .\gmtool\models.py:112 .\gmtool\templates\gmtool\login.html:6
-#: .\gmtool\templates\gmtool\login.html:77
+#: .\gmtool\templates\gmtool\login.html:78
 #: .\gmtool\templates\gmtool\login_log.html:24
 #: .\gmtool\templates\gmtool\login_log.html:66
 msgid "登录"
 msgstr "Login"
 
-#: .\gmtool\models.py:113 .\gmtool\templates\gmtool\base.html:107
+#: .\gmtool\models.py:113 .\gmtool\templates\gmtool\base.html:108
 #: .\gmtool\templates\gmtool\login_log.html:25
 #: .\gmtool\templates\gmtool\login_log.html:68
 msgid "登出"
@@ -676,27 +676,27 @@ msgid "失败原因"
 msgstr "Failure Reason"
 
 #: .\gmtool\models.py:125 .\gmtool\models.py:126
-#: .\gmtool\templates\gmtool\base.html:53
+#: .\gmtool\templates\gmtool\base.html:54
 #: .\gmtool\templates\gmtool\login_log.html:4
 #: .\gmtool\templates\gmtool\login_log.html:7
 msgid "登录日志"
 msgstr "Login Log"
 
-#: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\400.html:101
+#: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\400.html:34
 msgid "访问地址未授权"
 msgstr "Access Address Not Authorized"
 
 #: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\403.html:7
 #: .\gmtool\templates\gmtool\404.html:7 .\gmtool\templates\gmtool\500.html:7
-#: .\gmtool\templates\gmtool\base.html:6 .\gmtool\templates\gmtool\base.html:18
+#: .\gmtool\templates\gmtool\base.html:6 .\gmtool\templates\gmtool\base.html:19
 #: .\gmtool\templates\gmtool\command_add.html:4
 #: .\gmtool\templates\gmtool\command_execute.html:4
 #: .\gmtool\templates\gmtool\command_list.html:4
 #: .\gmtool\templates\gmtool\command_log.html:4
 #: .\gmtool\templates\gmtool\dashboard.html:4
 #: .\gmtool\templates\gmtool\login.html:6
-#: .\gmtool\templates\gmtool\login.html:15
-#: .\gmtool\templates\gmtool\login.html:99
+#: .\gmtool\templates\gmtool\login.html:16
+#: .\gmtool\templates\gmtool\login.html:100
 #: .\gmtool\templates\gmtool\login_log.html:4
 #: .\gmtool\templates\gmtool\user_form.html:4
 #: .\gmtool\templates\gmtool\user_list.html:4
@@ -704,67 +704,67 @@ msgstr "Access Address Not Authorized"
 msgid "GM命令管理系统"
 msgstr "GM Command System"
 
-#: .\gmtool\templates\gmtool\400.html:106
+#: .\gmtool\templates\gmtool\400.html:39
 msgid ""
 "当前访问使用的域名或 IP 暂未加入系统允许访问列表，因此请求已被安全策略拦截。"
 msgstr ""
 "The domain name or IP address used for this visit is not in the system's "
 "allowed hosts list, so the request has been blocked by the security policy."
 
-#: .\gmtool\templates\gmtool\400.html:109
+#: .\gmtool\templates\gmtool\400.html:42
 msgid "处理方式"
 msgstr "How to Resolve"
 
-#: .\gmtool\templates\gmtool\400.html:111
+#: .\gmtool\templates\gmtool\400.html:44
 msgid "请联系管理员将当前域名或 IP 加入"
 msgstr ""
 "Please contact the administrator to add the current domain name or IP "
 "address to"
 
-#: .\gmtool\templates\gmtool\400.html:113
+#: .\gmtool\templates\gmtool\400.html:46
 msgid "后再访问。"
 msgstr "before accessing again."
 
-#: .\gmtool\templates\gmtool\400.html:118 .\gmtool\templates\gmtool\403.html:47
-#: .\gmtool\templates\gmtool\404.html:47 .\gmtool\templates\gmtool\500.html:47
+#: .\gmtool\templates\gmtool\400.html:51 .\gmtool\templates\gmtool\403.html:24
+#: .\gmtool\templates\gmtool\404.html:24 .\gmtool\templates\gmtool\500.html:24
 msgid "返回首页"
 msgstr "Back to Home"
 
-#: .\gmtool\templates\gmtool\403.html:7 .\gmtool\templates\gmtool\403.html:44
+#: .\gmtool\templates\gmtool\403.html:7 .\gmtool\templates\gmtool\403.html:21
 msgid "访问被拒绝"
 msgstr "Access Denied"
 
-#: .\gmtool\templates\gmtool\403.html:45
+#: .\gmtool\templates\gmtool\403.html:22
 msgid "抱歉，您没有权限访问此页面。"
 msgstr "Sorry, you do not have permission to access this page."
 
-#: .\gmtool\templates\gmtool\404.html:7 .\gmtool\templates\gmtool\404.html:44
+#: .\gmtool\templates\gmtool\404.html:7 .\gmtool\templates\gmtool\404.html:21
 msgid "页面未找到"
 msgstr "Page Not Found"
 
-#: .\gmtool\templates\gmtool\404.html:45
+#: .\gmtool\templates\gmtool\404.html:22
 msgid "抱歉，您访问的页面不存在或已被移除。"
 msgstr ""
 "Sorry, the page you are looking for does not exist or has been removed."
 
-#: .\gmtool\templates\gmtool\500.html:7 .\gmtool\templates\gmtool\500.html:44
+#: .\gmtool\templates\gmtool\500.html:7 .\gmtool\templates\gmtool\500.html:21
 msgid "服务器错误"
 msgstr "Server Error"
 
-#: .\gmtool\templates\gmtool\500.html:45
+#: .\gmtool\templates\gmtool\500.html:22
 msgid "抱歉，服务器处理请求时遇到了问题，请稍后再试。"
 msgstr ""
 "Sorry, the server encountered an error while processing your request. Please "
 "try again later."
 
-#: .\gmtool\templates\gmtool\base.html:26
-#: .\gmtool\templates\gmtool\base.html:73
+#: .\gmtool\templates\gmtool\base.html:27
+#: .\gmtool\templates\gmtool\base.html:74
 #: .\gmtool\templates\gmtool\dashboard.html:4
 #: .\gmtool\templates\gmtool\dashboard.html:7
 msgid "仪表盘"
 msgstr "Dashboard"
 
-#: .\gmtool\templates\gmtool\base.html:32
+#: .\gmtool\templates\gmtool\base.html:33
 #: .\gmtool\templates\gmtool\command_add.html:6
 #: .\gmtool\templates\gmtool\command_execute.html:6
 #: .\gmtool\templates\gmtool\command_list.html:4
@@ -773,39 +773,39 @@ msgstr "Dashboard"
 msgid "命令管理"
 msgstr "Commands"
 
-#: .\gmtool\templates\gmtool\base.html:39
+#: .\gmtool\templates\gmtool\base.html:40
 #: .\gmtool\templates\gmtool\user_list.html:4
 #: .\gmtool\templates\gmtool\user_list.html:7
 msgid "用户管理"
 msgstr "Users"
 
-#: .\gmtool\templates\gmtool\base.html:46
+#: .\gmtool\templates\gmtool\base.html:47
 #: .\gmtool\templates\gmtool\command_log.html:4
 #: .\gmtool\templates\gmtool\command_log.html:7
 msgid "操作日志"
 msgstr "Operation Logs"
 
-#: .\gmtool\templates\gmtool\base.html:71
+#: .\gmtool\templates\gmtool\base.html:72
 #: .\gmtool\templates\gmtool\dashboard.html:6
 msgid "首页"
 msgstr "Home"
 
-#: .\gmtool\templates\gmtool\base.html:81
+#: .\gmtool\templates\gmtool\base.html:82
 msgid "中文"
 msgstr "Chinese"
 
-#: .\gmtool\templates\gmtool\base.html:81
-#: .\gmtool\templates\gmtool\base.html:95
-#: .\gmtool\templates\gmtool\login.html:90
+#: .\gmtool\templates\gmtool\base.html:82
+#: .\gmtool\templates\gmtool\base.html:96
+#: .\gmtool\templates\gmtool\login.html:91
 msgid "英文"
 msgstr "English"
 
-#: .\gmtool\templates\gmtool\base.html:88
-#: .\gmtool\templates\gmtool\login.html:96
+#: .\gmtool\templates\gmtool\base.html:89
+#: .\gmtool\templates\gmtool\login.html:97
 msgid "简体中文"
 msgstr "Simplified Chinese"
 
-#: .\gmtool\templates\gmtool\base.html:102
+#: .\gmtool\templates\gmtool\base.html:103
 #: .\gmtool\templates\gmtool\user_list.html:52
 msgid "管理员"
 msgstr "Admin"
@@ -888,7 +888,7 @@ msgid "从文件导入"
 msgstr "Import from file"
 
 #: .\gmtool\templates\gmtool\command_execute.html:166
-#: .\gmtool\templates\gmtool\command_execute.html:538
+#: .\gmtool\templates\gmtool\command_execute.html:516
 msgid "执行命令"
 msgstr "Execute Command"
 
@@ -909,145 +909,137 @@ msgstr "Protocol ID"
 msgid "执行结果"
 msgstr "Execution Result"
 
-#: .\gmtool\templates\gmtool\command_execute.html:225
-msgid "响应概览"
-msgstr "Response Overview"
-
-#: .\gmtool\templates\gmtool\command_execute.html:237
+#: .\gmtool\templates\gmtool\command_execute.html:230
 msgid "原始JSON（兜底）"
 msgstr "Raw JSON (Fallback)"
 
-#: .\gmtool\templates\gmtool\command_execute.html:246
+#: .\gmtool\templates\gmtool\command_execute.html:239
 msgid "批量执行结果"
 msgstr "Batch Execution Results"
 
-#: .\gmtool\templates\gmtool\command_execute.html:250
+#: .\gmtool\templates\gmtool\command_execute.html:243
 msgid "导出"
 msgstr "Export"
 
-#: .\gmtool\templates\gmtool\command_execute.html:265
+#: .\gmtool\templates\gmtool\command_execute.html:258
 msgid "目标"
 msgstr "Target"
 
-#: .\gmtool\templates\gmtool\command_execute.html:267
-#: .\gmtool\templates\gmtool\command_execute.html:499
+#: .\gmtool\templates\gmtool\command_execute.html:260
+#: .\gmtool\templates\gmtool\command_execute.html:477
 msgid "结果"
 msgstr "Result"
 
-#: .\gmtool\templates\gmtool\command_execute.html:281
+#: .\gmtool\templates\gmtool\command_execute.html:274
 msgid "请求发送中..."
 msgstr "Sending request..."
 
-#: .\gmtool\templates\gmtool\command_execute.html:348
-#: .\gmtool\templates\gmtool\command_execute.html:373
-#: .\gmtool\templates\gmtool\command_execute.html:499
+#: .\gmtool\templates\gmtool\command_execute.html:339
+#: .\gmtool\templates\gmtool\command_execute.html:364
+#: .\gmtool\templates\gmtool\command_execute.html:477
 #: .\gmtool\templates\gmtool\command_log.html:230
 msgid "无数据"
 msgstr "No data"
 
-#: .\gmtool\templates\gmtool\command_execute.html:467
-msgid "无"
-msgstr "None"
-
-#: .\gmtool\templates\gmtool\command_execute.html:536
+#: .\gmtool\templates\gmtool\command_execute.html:514
 msgid "批量执行"
 msgstr "Batch Execute"
 
-#: .\gmtool\templates\gmtool\command_execute.html:558
-#: .\gmtool\templates\gmtool\command_execute.html:925
+#: .\gmtool\templates\gmtool\command_execute.html:536
+#: .\gmtool\templates\gmtool\command_execute.html:903
 msgid "时间格式无效"
 msgstr "Invalid time format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:566
-#: .\gmtool\templates\gmtool\command_execute.html:933
+#: .\gmtool\templates\gmtool\command_execute.html:544
+#: .\gmtool\templates\gmtool\command_execute.html:911
 msgid "数值格式无效"
 msgstr "Invalid number format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:569
+#: .\gmtool\templates\gmtool\command_execute.html:547
 msgid "数值不能为负数"
 msgstr "Value cannot be negative"
 
-#: .\gmtool\templates\gmtool\command_execute.html:582
+#: .\gmtool\templates\gmtool\command_execute.html:560
 msgid "布尔值格式无效"
 msgstr "Invalid boolean format"
 
-#: .\gmtool\templates\gmtool\command_execute.html:607
+#: .\gmtool\templates\gmtool\command_execute.html:585
 msgid "该列表未配置最大数量"
 msgstr "This list has no maximum count configured"
 
-#: .\gmtool\templates\gmtool\command_execute.html:615
+#: .\gmtool\templates\gmtool\command_execute.html:593
 msgid "已达到最大数量"
 msgstr "Maximum count reached"
 
-#: .\gmtool\templates\gmtool\command_execute.html:616
+#: .\gmtool\templates\gmtool\command_execute.html:594
 msgid "最多可添加"
 msgstr "Maximum allowed"
 
-#: .\gmtool\templates\gmtool\command_execute.html:654
-#: .\gmtool\templates\gmtool\command_execute.html:705
+#: .\gmtool\templates\gmtool\command_execute.html:632
+#: .\gmtool\templates\gmtool\command_execute.html:683
 msgid "结构体列表缺少有效的最大数量配置"
 msgstr "Struct list is missing a valid maximum count configuration"
 
-#: .\gmtool\templates\gmtool\command_execute.html:681
+#: .\gmtool\templates\gmtool\command_execute.html:659
 #: .\gmtool\templates\gmtool\user_list.html:91
 msgid "删除"
 msgstr "Delete"
 
-#: .\gmtool\templates\gmtool\command_execute.html:709
+#: .\gmtool\templates\gmtool\command_execute.html:687
 msgid "结构体列表数量不能超过最大数量"
 msgstr "Struct list count cannot exceed the maximum count"
 
-#: .\gmtool\templates\gmtool\command_execute.html:713
-#: .\gmtool\templates\gmtool\command_execute.html:732
+#: .\gmtool\templates\gmtool\command_execute.html:691
+#: .\gmtool\templates\gmtool\command_execute.html:710
 msgid "缺少必填参数"
 msgstr "Missing required parameter"
 
-#: .\gmtool\templates\gmtool\command_execute.html:811
-#: .\gmtool\templates\gmtool\command_execute.html:817
-#: .\gmtool\templates\gmtool\command_execute.html:837
-#: .\gmtool\templates\gmtool\command_execute.html:996
+#: .\gmtool\templates\gmtool\command_execute.html:789
+#: .\gmtool\templates\gmtool\command_execute.html:795
+#: .\gmtool\templates\gmtool\command_execute.html:815
+#: .\gmtool\templates\gmtool\command_execute.html:974
 #: .\gmtool\templates\gmtool\dashboard.html:221
 #: .\gmtool\templates\gmtool\dashboard.html:243
 msgid "未知错误"
 msgstr "Unknown error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:832
+#: .\gmtool\templates\gmtool\command_execute.html:810
 #: .\gmtool\templates\gmtool\dashboard.html:217
 #: .\gmtool\templates\gmtool\dashboard.html:240
 msgid "已停用"
 msgstr "Deactivated"
 
-#: .\gmtool\templates\gmtool\command_execute.html:833
-#: .\gmtool\templates\gmtool\command_execute.html:991
+#: .\gmtool\templates\gmtool\command_execute.html:811
+#: .\gmtool\templates\gmtool\command_execute.html:969
 msgid "命令已失效"
 msgstr "Command deactivated"
 
-#: .\gmtool\templates\gmtool\command_execute.html:991
+#: .\gmtool\templates\gmtool\command_execute.html:969
 msgid "该命令已被停用或删除，即将跳转到命令列表..."
 msgstr ""
 "This command has been deactivated or deleted, redirecting to command list..."
 
-#: .\gmtool\templates\gmtool\command_execute.html:996
+#: .\gmtool\templates\gmtool\command_execute.html:974
 msgid "错误"
 msgstr "Error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:1002
+#: .\gmtool\templates\gmtool\command_execute.html:980
 msgid "请求异常"
 msgstr "Request error"
 
-#: .\gmtool\templates\gmtool\command_execute.html:1021
+#: .\gmtool\templates\gmtool\command_execute.html:999
 msgid "请为批量字段输入至少一个值"
 msgstr "Please enter at least one value for batch fields"
 
-#: .\gmtool\templates\gmtool\command_execute.html:1025
+#: .\gmtool\templates\gmtool\command_execute.html:1003
 msgid "值数量超过限制"
 msgstr "Value count exceeds limit"
 
-#: .\gmtool\templates\gmtool\command_execute.html:1042
+#: .\gmtool\templates\gmtool\command_execute.html:1020
 msgid "批量字段数量不匹配"
 msgstr "Batch field count mismatch"
 
-#: .\gmtool\templates\gmtool\command_execute.html:1042
+#: .\gmtool\templates\gmtool\command_execute.html:1020
 msgid "每个批量字段的值数量必须相同，或仅输入1个值以对所有目标复用"
 msgstr ""
 "Each batch field must have the same number of values, or enter only 1 value "
@@ -1096,7 +1088,7 @@ msgid "筛选条件"
 msgstr "Filter"
 
 #: .\gmtool\templates\gmtool\command_log.html:92
-#: .\gmtool\templates\gmtool\login.html:61
+#: .\gmtool\templates\gmtool\login.html:62
 #: .\gmtool\templates\gmtool\login_log.html:18
 msgid "请输入用户名"
 msgstr "Enter username"
@@ -1284,28 +1276,28 @@ msgstr "Sync complete!"
 msgid "同步失败"
 msgstr "Sync failed"
 
-#: .\gmtool\templates\gmtool\login.html:21
+#: .\gmtool\templates\gmtool\login.html:22
 msgid "已登录"
 msgstr "Already Logged In"
 
-#: .\gmtool\templates\gmtool\login.html:23
+#: .\gmtool\templates\gmtool\login.html:24
 #, python-format
 msgid "当前已以 <strong>%(username)s</strong> 身份登录。"
 msgstr "You are already logged in as <strong>%(username)s</strong>."
 
-#: .\gmtool\templates\gmtool\login.html:27
+#: .\gmtool\templates\gmtool\login.html:28
 msgid "进入系统"
 msgstr "Enter System"
 
-#: .\gmtool\templates\gmtool\login.html:32
+#: .\gmtool\templates\gmtool\login.html:33
 msgid "切换账号"
 msgstr "Switch Account"
 
-#: .\gmtool\templates\gmtool\login.html:37
+#: .\gmtool\templates\gmtool\login.html:38
 msgid "登录你的账号"
 msgstr "Sign in to your account"
 
-#: .\gmtool\templates\gmtool\login.html:72
+#: .\gmtool\templates\gmtool\login.html:73
 msgid "请输入密码"
 msgstr "Enter password"
 
