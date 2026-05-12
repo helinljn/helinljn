@@ -31,6 +31,8 @@
     .structured-table th, .structured-table td { vertical-align: top; }
     .structured-value-pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
     .raw-json-box { max-height: 280px; overflow-y: auto; }
+    .structured-input-table th, .structured-input-table td { vertical-align: middle; }
+    .structured-input-table th:last-child, .structured-input-table td:last-child { width: 48px; text-align: center; }
 </style>
 {% endblock %}
 
@@ -55,14 +57,24 @@
                 <form id="commandForm">
                     {% csrf_token %}
                     {% for param in request_params %}
-                    <div class="mb-3" id="param-group-{{ param.id }}">
+                    <div class="mb-3{% if param.auto_count_for %} d-none{% endif %}" id="param-group-{{ param.id }}">
+                        {% if param.auto_count_for %}
+                        <input type="hidden"
+                               class="single-input param-field auto-count-field"
+                               id="single_{{ param.id }}"
+                               data-param-id="{{ param.id }}"
+                               data-param-type="{{ param.type }}"
+                               data-auto-count-for="{{ param.auto_count_for }}"
+                               data-required="{% if param.isnull != "true" %}true{% else %}false{% endif %}"
+                               value="0">
+                        {% else %}
                         <label class="form-label" for="param_{{ param.id }}">
                             <span class="param-label-row">
                                 {{ param.name }}
                                 {% if param.isnull == "true" %}
                                 <span class="form-label-description">{% trans "可选" %}</span>
                                 {% endif %}
-                                {% if param.id != "AreaId" and param.id != "Partition" and param.id != "PlatId" %}
+                                {% if param.id != "AreaId" and param.id != "Partition" and param.id != "PlatId" and not param.children %}
                                 <span class="batch-toggle ms-2">
                                     <input type="checkbox" class="batch-mode-toggle" data-param-id="{{ param.id }}" onchange="toggleFieldBatchMode('{{ param.id }}', this.checked)">
                                     {% trans "批量" %}
@@ -70,6 +82,30 @@
                                 {% endif %}
                             </span>
                         </label>
+                        {% if param.children %}
+                        <div class="structured-input"
+                             data-struct-id="{{ param.id }}"
+                             data-count-id="{{ param.count_id|default:'' }}"
+                             data-max-size="{{ param.max_size|default:'' }}"
+                             data-required="{% if param.isnull != "true" %}true{% else %}false{% endif %}">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered structured-input-table mb-2">
+                                    <thead>
+                                        <tr>
+                                            {% for child in param.children %}
+                                            <th>{{ child.name }}</th>
+                                            {% endfor %}
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="struct_body_{{ param.id }}"></tbody>
+                                </table>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary struct-add-btn" id="struct_add_{{ param.id }}" onclick="addStructRow('{{ param.id }}')">
+                                <i class="ti ti-plus me-1"></i>{% trans "添加" %}
+                            </button>
+                        </div>
+                        {% else %}
                         {# Single value input #}
                         {% if param.id == "Partition" %}
                             <input type="number"
@@ -120,6 +156,8 @@
                                 <input type="file" class="file-import-input" data-target="{{ param.id }}" accept=".txt,.csv" style="display:none;" onchange="importValuesFromFile(this)">
                             </label>
                         </div>
+                        {% endif %}
+                        {% endif %}
                     </div>
                     {% endfor %}
 
@@ -249,6 +287,7 @@
 <script>
 const BATCH_MAX_TARGETS = Number('{{ batch_max_targets|default:200 }}');
 const BATCH_INTERVAL_MS = Number('{{ batch_interval_ms|default:200 }}');
+const REQUEST_SCHEMA = JSON.parse('{{ request_params_json|default:"[]"|escapejs }}');
 const RESPONSE_SCHEMA = JSON.parse('{{ response_params_json|default:"[]"|escapejs }}');
 const RESPONSE_FIELD_LABELS = JSON.parse('{{ response_field_labels_json|default:"{}"|escapejs }}');
 
@@ -546,6 +585,188 @@ function convertParamValue(paramType, value, paramId) {
     return { ok: true, value: rawValue };
 }
 
+function getRequestField(paramId) {
+    return (Array.isArray(REQUEST_SCHEMA) ? REQUEST_SCHEMA : []).find(field => field && field.id === paramId);
+}
+
+function getStructuredMaxSize(field) {
+    const raw = field && field.max_size;
+    const maxSize = Number.parseInt(raw, 10);
+    return Number.isFinite(maxSize) && maxSize > 0 ? maxSize : null;
+}
+
+function updateStructAddButtonState(structId) {
+    const field = getRequestField(structId);
+    const tbody = document.getElementById('struct_body_' + structId);
+    const btn = document.getElementById('struct_add_' + structId);
+    if (!field || !tbody || !btn) return;
+
+    const maxSize = getStructuredMaxSize(field);
+    if (!maxSize) {
+        btn.disabled = true;
+        btn.title = '{% trans "该列表未配置最大数量" %}';
+        return;
+    }
+
+    const current = tbody.querySelectorAll('tr').length;
+    const isFull = current >= maxSize;
+    btn.disabled = isFull;
+    btn.title = isFull
+        ? '{% trans "已达到最大数量" %}: ' + maxSize
+        : '{% trans "最多可添加" %}: ' + maxSize;
+}
+
+function createStructuredInput(structId, child, rowIndex, initialValue) {
+    const input = document.createElement('input');
+    const normalizedType = String(child.type || 'string').toLowerCase();
+    input.className = 'form-control form-control-sm structured-child-input';
+    input.dataset.structId = structId;
+    input.dataset.childId = child.id;
+    input.dataset.childType = child.type || 'string';
+    input.dataset.required = child.isnull !== 'true' ? 'true' : 'false';
+    input.id = 'struct_' + structId + '_' + rowIndex + '_' + child.id;
+
+    if (normalizedType === 'time') {
+        input.type = 'datetime-local';
+    } else if (normalizedType === 'string') {
+        input.type = 'text';
+    } else {
+        input.type = 'number';
+    }
+
+    if (input.dataset.required === 'true') {
+        input.required = true;
+    }
+    if (initialValue !== null && initialValue !== undefined) {
+        input.value = initialValue;
+    }
+    return input;
+}
+
+function addStructRow(structId, initialData) {
+    const field = getRequestField(structId);
+    const children = field && Array.isArray(field.children) ? field.children : [];
+    const tbody = document.getElementById('struct_body_' + structId);
+    if (!tbody || !children.length) return;
+
+    const maxSize = getStructuredMaxSize(field);
+    if (!maxSize) {
+        alert('{% trans "结构体列表缺少有效的最大数量配置" %}: ' + structId);
+        return;
+    }
+    if (tbody.querySelectorAll('tr').length >= maxSize) {
+        updateStructAddButtonState(structId);
+        return;
+    }
+
+    const rowIndex = tbody.children.length + 1;
+    const tr = document.createElement('tr');
+    tr.dataset.structId = structId;
+
+    children.forEach(child => {
+        const td = document.createElement('td');
+        td.appendChild(createStructuredInput(
+            structId,
+            child,
+            rowIndex,
+            initialData && Object.prototype.hasOwnProperty.call(initialData, child.id) ? initialData[child.id] : ''
+        ));
+        tr.appendChild(td);
+    });
+
+    const actionTd = document.createElement('td');
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn btn-icon btn-sm btn-outline-danger';
+    removeBtn.title = '{% trans "删除" %}';
+    removeBtn.innerHTML = '<i class="ti ti-trash"></i>';
+    removeBtn.addEventListener('click', function() {
+        tr.remove();
+        updateStructAddButtonState(structId);
+    });
+    actionTd.appendChild(removeBtn);
+    tr.appendChild(actionTd);
+    tbody.appendChild(tr);
+    updateStructAddButtonState(structId);
+}
+
+function collectStructuredParams() {
+    const params = {};
+    const fields = (Array.isArray(REQUEST_SCHEMA) ? REQUEST_SCHEMA : []).filter(field => field && Array.isArray(field.children));
+
+    for (const field of fields) {
+        const tbody = document.getElementById('struct_body_' + field.id);
+        if (!tbody) continue;
+
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const required = field.isnull !== 'true';
+        const maxSize = getStructuredMaxSize(field);
+        if (!maxSize) {
+            alert('{% trans "结构体列表缺少有效的最大数量配置" %}: ' + field.id);
+            return null;
+        }
+        if (rows.length > maxSize) {
+            alert('{% trans "结构体列表数量不能超过最大数量" %}: ' + field.id);
+            return null;
+        }
+        if (required && rows.length === 0) {
+            alert('{% trans "缺少必填参数" %}: ' + field.id);
+            return null;
+        }
+        if (!required && rows.length === 0) {
+            continue;
+        }
+
+        const items = [];
+        for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+            const item = {};
+            const inputs = Array.from(rows[rowIndex].querySelectorAll('.structured-child-input'));
+            for (const input of inputs) {
+                const childId = input.dataset.childId;
+                const rawValue = input.value.trim();
+                const childRequired = input.dataset.required === 'true';
+                const displayId = field.id + '[' + (rowIndex + 1) + '].' + childId;
+
+                if (!rawValue) {
+                    if (childRequired) {
+                        alert('{% trans "缺少必填参数" %}: ' + displayId);
+                        return null;
+                    }
+                    continue;
+                }
+
+                const converted = convertParamValue(input.dataset.childType, rawValue, displayId);
+                if (!converted.ok) {
+                    alert(converted.error);
+                    return null;
+                }
+                item[childId] = converted.value;
+            }
+            items.push(item);
+        }
+
+        params[field.id] = items;
+        if (field.count_id) {
+            params[field.count_id] = items.length;
+        }
+    }
+
+    return params;
+}
+
+function initializeStructuredInputs() {
+    (Array.isArray(REQUEST_SCHEMA) ? REQUEST_SCHEMA : []).forEach(field => {
+        if (field && Array.isArray(field.children) && field.isnull !== 'true') {
+            addStructRow(field.id);
+        }
+    });
+    (Array.isArray(REQUEST_SCHEMA) ? REQUEST_SCHEMA : []).forEach(field => {
+        if (field && Array.isArray(field.children)) {
+            updateStructAddButtonState(field.id);
+        }
+    });
+}
+
 function parseBatchValues(input) {
     const values = [];
     const lines = input.split(/[\n,;]+/);
@@ -719,7 +940,13 @@ function collectSingleParams() {
         params[id] = value;
     });
 
-    return hasError ? null : params;
+    if (hasError) return null;
+
+    const structuredParams = collectStructuredParams();
+    if (structuredParams === null) return null;
+    Object.assign(params, structuredParams);
+
+    return params;
 }
 
 function getBatchValues(paramId) {
@@ -947,5 +1174,7 @@ document.getElementById('commandForm').addEventListener('reset', function() {
         });
     }, 0);
 });
+
+initializeStructuredInputs();
 </script>
 {% endblock %}

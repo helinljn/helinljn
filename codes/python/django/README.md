@@ -193,7 +193,7 @@ GM 命令定义模型，由 `idip_commands.json` 同步生成。
 
 补充说明：
 - `field_labels` 为已同步字段的 `id -> name` 映射
-- 当前只提取命令对象第一层列表中的字段定义，不递归更深层嵌套结构
+- `request_params` / `response_params` 会保留结构体列表的展开元数据，用于请求表单渲染和响应结果展示
 
 ### 6.2 `UserCommandPermission`
 普通用户与命令之间的直接授权关系。
@@ -298,6 +298,20 @@ idip_commands.json
 - 请求/响应参数列表中的 `id` 表示字段名，不要与协议 ID 字段混淆
 - `command_name` 的解析优先级为 `name` -> `command_name` -> `tab`
 - `request_desc` / `response_desc` 为可选描述字段，上传时不强制要求，Web 端新增命令时会写入；这两个字段仅作为 JSON 描述信息保留，不同步到 `GMCommand` 数据库字段
+- 请求参数中的结构体列表需要同时提供 `*_count` 字段和列表字段；列表字段的 `type` 指向同命令内的结构体定义，并且必须配置正整数 `max_size`
+- 响应参数中的结构体列表由游戏服务器返回数量决定，不要求配置 `max_size`
+
+请求结构体列表示例：
+
+```json
+{
+  "isnull": "false",
+  "id": "ItemList1",
+  "type": "SItemInfo",
+  "name": "道具列表1(Item List 1)",
+  "max_size": 5
+}
+```
 
 ### 8.3 同步逻辑
 `gmtool.command_parser` 会将 JSON 定义同步到数据库：
@@ -307,6 +321,8 @@ idip_commands.json
 - JSON 无、数据库有 → 标记命令为停用
 
 在线新增命令、上传命令定义文件后，也会自动触发同步。
+
+同步时会校验请求结构体列表的 `max_size`。缺失、非正整数或非法值会导致同步失败；响应结构体列表不受该规则限制。
 
 ### 8.4 一致性与回滚
 在以下场景中，系统会尽量保证文件与数据库状态一致：

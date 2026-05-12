@@ -216,6 +216,7 @@ def command_execute(request, cmd_id):
         'command': command,
         'request_params': command.request_params,
         'response_params': command.response_params,
+        'request_params_json': json.dumps(command.request_params, ensure_ascii=False),
         'response_params_json': json.dumps(command.response_params, ensure_ascii=False),
         'response_field_labels_json': json.dumps(response_field_labels, ensure_ascii=False),
         'response_name': command.response_name,

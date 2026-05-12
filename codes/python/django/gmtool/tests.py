@@ -9,7 +9,8 @@ from django.db import DatabaseError, IntegrityError
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from .command_parser import sync_commands_to_db, validate_json_command_ids
+from .command_parser import _enrich_schema_fields, sync_commands_to_db, validate_json_command_ids
+from .command_services import validate_command_params_basic
 from .idip_client import send_idip_command
 from .models import CommandLog, GMCommand, UserCommandPermission, UserProfile
 from .security_utils import get_client_ip
@@ -81,6 +82,164 @@ class IdipClientEncodingTests(TestCase):
         self.assertNotIn('head', content_payload)
         self.assertNotIn('body', content_payload)
         self.assertEqual(json.loads(request_content)['form_data']['content'], content)
+
+
+class StructuredCommandSchemaTests(TestCase):
+    def test_enrich_schema_fields_adds_struct_list_metadata(self):
+        request_params = _enrich_schema_fields(
+            [
+                {'isnull': 'false', 'id': 'ItemList1_count', 'type': 'uint32', 'name': '道具数量'},
+                {'isnull': 'false', 'id': 'ItemList1', 'type': 'SItemInfo', 'name': '道具列表', 'max_size': '5'},
+            ],
+            {
+                'SItemInfo': [
+                    {'isnull': 'false', 'id': 'ItemId', 'type': 'uint32', 'name': '道具Id'},
+                    {'isnull': 'false', 'id': 'ItemNum', 'type': 'uint32', 'name': '道具数量'},
+                    {'isnull': 'false', 'id': 'Star', 'type': 'int32', 'name': '星级'},
+                    {'isnull': 'false', 'id': 'ExtraParam', 'type': 'int32', 'name': '额外参数'},
+                ],
+            },
+            require_struct_list_max_size=True,
+        )
+
+        count_field = next(field for field in request_params if field['id'] == 'ItemList1_count')
+        list_field = next(field for field in request_params if field['id'] == 'ItemList1')
+
+        self.assertEqual(count_field['auto_count_for'], 'ItemList1')
+        self.assertEqual(list_field['count_id'], 'ItemList1_count')
+        self.assertEqual(list_field['max_size'], 5)
+        self.assertEqual([child['id'] for child in list_field['children']], ['ItemId', 'ItemNum', 'Star', 'ExtraParam'])
+
+    def test_request_struct_list_requires_max_size(self):
+        with self.assertRaisesMessage(ValueError, 'max_size'):
+            _enrich_schema_fields(
+                [
+                    {'isnull': 'false', 'id': 'ItemList1_count', 'type': 'uint32', 'name': '道具数量'},
+                    {'isnull': 'false', 'id': 'ItemList1', 'type': 'SItemInfo', 'name': '道具列表'},
+                ],
+                {'SItemInfo': [{'isnull': 'false', 'id': 'ItemId', 'type': 'uint32'}]},
+                require_struct_list_max_size=True,
+            )
+
+    def test_response_struct_list_does_not_require_max_size(self):
+        response_params = _enrich_schema_fields(
+            [
+                {'isnull': 'false', 'id': 'UsrList_count', 'type': 'uint32', 'name': '角色数量'},
+                {'isnull': 'false', 'id': 'UsrList', 'type': 'SUsrInfo', 'name': '角色列表'},
+            ],
+            {'SUsrInfo': [{'isnull': 'false', 'id': 'RoleId', 'type': 'string'}]},
+        )
+
+        list_field = next(field for field in response_params if field['id'] == 'UsrList')
+        self.assertEqual(list_field['count_id'], 'UsrList_count')
+        self.assertNotIn('max_size', list_field)
+
+
+class StructuredCommandValidationTests(TestCase):
+    def setUp(self):
+        self.command = GMCommand(
+            command_id='10226009',
+            command_name='发邮件送多个道具',
+            tab='发邮件送道具',
+            request_name='DoSendMultiMailReq',
+            request_id=4213,
+            response_name='DoSendMultiMailRsp',
+            response_id=4214,
+            request_params=[
+                {'isnull': 'false', 'id': 'AreaId', 'type': 'uint32'},
+                {'isnull': 'false', 'id': 'Partition', 'type': 'uint32'},
+                {'isnull': 'false', 'id': 'ItemList1_count', 'type': 'uint32', 'auto_count_for': 'ItemList1'},
+                {
+                    'isnull': 'false',
+                    'id': 'ItemList1',
+                    'type': 'SItemInfo',
+                    'count_id': 'ItemList1_count',
+                    'max_size': 2,
+                    'children': [
+                        {'isnull': 'false', 'id': 'ItemId', 'type': 'uint32'},
+                        {'isnull': 'false', 'id': 'ItemNum', 'type': 'uint32'},
+                        {'isnull': 'false', 'id': 'Star', 'type': 'int32'},
+                    ],
+                },
+            ],
+        )
+
+    def test_structured_list_params_are_normalized(self):
+        params = {
+            'AreaId': '10',
+            'Partition': '2',
+            'ItemList1_count': '2',
+            'ItemList1': [
+                {'ItemId': '1001', 'ItemNum': '3', 'Star': '-1'},
+                {'ItemId': 1002, 'ItemNum': 4, 'Star': 0},
+            ],
+        }
+
+        valid, error = validate_command_params_basic(self.command, params)
+
+        self.assertTrue(valid)
+        self.assertEqual(error, '')
+        self.assertEqual(params['AreaId'], 10)
+        self.assertEqual(params['ItemList1_count'], 2)
+        self.assertEqual(params['ItemList1'][0], {'ItemId': 1001, 'ItemNum': 3, 'Star': -1})
+
+    def test_structured_list_count_must_match_item_count(self):
+        params = {
+            'AreaId': 10,
+            'Partition': 2,
+            'ItemList1_count': 2,
+            'ItemList1': [{'ItemId': 1001, 'ItemNum': 3, 'Star': 0}],
+        }
+
+        valid, error = validate_command_params_basic(self.command, params)
+
+        self.assertFalse(valid)
+        self.assertIn('ItemList1_count', error)
+
+    def test_structured_list_count_may_be_less_than_max_size(self):
+        params = {
+            'AreaId': 10,
+            'Partition': 2,
+            'ItemList1_count': 1,
+            'ItemList1': [{'ItemId': 1001, 'ItemNum': 3, 'Star': 0}],
+        }
+
+        valid, error = validate_command_params_basic(self.command, params)
+
+        self.assertTrue(valid)
+        self.assertEqual(error, '')
+
+    def test_structured_list_count_cannot_exceed_max_size(self):
+        params = {
+            'AreaId': 10,
+            'Partition': 2,
+            'ItemList1_count': 3,
+            'ItemList1': [
+                {'ItemId': 1001, 'ItemNum': 3, 'Star': 0},
+                {'ItemId': 1002, 'ItemNum': 4, 'Star': 0},
+                {'ItemId': 1003, 'ItemNum': 5, 'Star': 0},
+            ],
+        }
+
+        valid, error = validate_command_params_basic(self.command, params)
+
+        self.assertFalse(valid)
+        self.assertIn('ItemList1', error)
+
+    def test_structured_list_missing_max_size_fails_validation(self):
+        field = next(field for field in self.command.request_params if field.get('id') == 'ItemList1')
+        del field['max_size']
+        params = {
+            'AreaId': 10,
+            'Partition': 2,
+            'ItemList1_count': 1,
+            'ItemList1': [{'ItemId': 1001, 'ItemNum': 3, 'Star': 0}],
+        }
+
+        valid, error = validate_command_params_basic(self.command, params)
+
+        self.assertFalse(valid)
+        self.assertIn('max_size', error)
 
 
 class CommandExecutePersistenceFallbackTests(TestCase):

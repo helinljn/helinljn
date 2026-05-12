@@ -330,6 +330,67 @@ def _extract_field_labels(cmd_data):
     return labels
 
 
+def _normalize_struct_list_max_size(field_id, field):
+    raw_value = field.get('max_size')
+    if raw_value is None or raw_value == '':
+        raise ValueError(_('请求结构体列表字段 %(field)s 缺少 max_size') % {'field': field_id})
+
+    try:
+        max_size = int(raw_value)
+    except (TypeError, ValueError):
+        raise ValueError(_('请求结构体列表字段 %(field)s 的 max_size 必须为正整数') % {'field': field_id})
+
+    if max_size <= 0:
+        raise ValueError(_('请求结构体列表字段 %(field)s 的 max_size 必须为正整数') % {'field': field_id})
+
+    return max_size
+
+
+def _enrich_schema_fields(schema_fields, struct_definitions, *, require_struct_list_max_size=False):
+    """Attach inline structure metadata used by the execution form and validation."""
+    if not isinstance(schema_fields, list):
+        return schema_fields
+
+    count_fields = {
+        field.get('id')[:-6]: field.get('id')
+        for field in schema_fields
+        if isinstance(field, dict) and str(field.get('id', '')).endswith('_count')
+    }
+    struct_field_ids = {
+        field.get('id')
+        for field in schema_fields
+        if isinstance(field, dict) and field.get('type') in struct_definitions
+    }
+
+    enriched = []
+    for field in schema_fields:
+        if not isinstance(field, dict):
+            enriched.append(field)
+            continue
+
+        field_copy = dict(field)
+        field_id = field_copy.get('id')
+        field_type = field_copy.get('type')
+
+        if field_type in struct_definitions:
+            field_copy['children'] = _enrich_schema_fields(
+                struct_definitions[field_type],
+                struct_definitions,
+                require_struct_list_max_size=require_struct_list_max_size,
+            )
+            if field_id in count_fields:
+                field_copy['count_id'] = count_fields[field_id]
+                if require_struct_list_max_size:
+                    field_copy['max_size'] = _normalize_struct_list_max_size(field_id, field_copy)
+
+        if field_id and field_id.endswith('_count') and field_id[:-6] in struct_field_ids:
+            field_copy['auto_count_for'] = field_id[:-6]
+
+        enriched.append(field_copy)
+
+    return enriched
+
+
 def parse_commands(json_path=None):
     """
     解析idip_commands.json文件，提取命令定义数据。
@@ -359,10 +420,20 @@ def parse_commands(json_path=None):
         request_name = cmd_data.get('request', '')
         response_name = cmd_data.get('response', '')
 
+        struct_definitions = {
+            key: value
+            for key, value in cmd_data.items()
+            if isinstance(value, list) and key not in (request_name, response_name)
+        }
+
         # 提取请求参数定义
-        request_params = cmd_data.get(request_name, [])
+        request_params = _enrich_schema_fields(
+            cmd_data.get(request_name, []),
+            struct_definitions,
+            require_struct_list_max_size=True,
+        )
         # 提取响应参数定义
-        response_params = cmd_data.get(response_name, [])
+        response_params = _enrich_schema_fields(cmd_data.get(response_name, []), struct_definitions)
 
         command_name = (
             cmd_data.get('name')

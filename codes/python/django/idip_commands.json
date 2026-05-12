@@ -805,69 +805,14 @@
         ]
     },
     "10226009": {
-        "tab": "删除二级密码(Remove Secondary Password)",
-        "request_desc": "删除二级密码请求(Request to Remove Secondary Password)",
-        "request_id": 4237,
-        "request": "DelSecPwdReq",
-        "response_desc": "删除二级密码应答(Response to Remove Secondary Password)",
-        "response_id": 4238,
-        "response": "DelSecPwdRsp",
-        "DelSecPwdReq": [
-            {
-                "isnull": "false",
-                "id": "AreaId",
-                "type": "uint32",
-                "name": "*渠道信息(Channel Information)"
-            },
-            {
-                "isnull": "false",
-                "id": "Partition",
-                "type": "uint32",
-                "name": "服务器组号(Server Group Number)"
-            },
-            {
-                "isnull": "false",
-                "id": "PlatId",
-                "type": "uint8",
-                "name": "*平台信息(Platform Information)"
-            },
-            {
-                "isnull": "false",
-                "id": "OpenId",
-                "type": "string",
-                "name": "账号(Account)"
-            },
-            {
-                "isnull": "false",
-                "id": "RoleId",
-                "type": "string",
-                "name": "GUID(Role ID)"
-            }
-        ],
-        "DelSecPwdRsp": [
-            {
-                "isnull": "false",
-                "id": "Result",
-                "type": "int32",
-                "name": "结果(Result ID)"
-            },
-            {
-                "isnull": "false",
-                "id": "RetMsg",
-                "type": "string",
-                "name": "返回消息(Result Message)"
-            }
-        ]
-    },
-    "10226010": {
-        "tab": "修改玩家文本信息(Modify Player Text Information)",
-        "request_desc": "修改玩家文本信息请求(Request to Modify Player Text Information)",
-        "request_id": 4143,
-        "request": "ModifyTextReq",
-        "response_desc": "修改玩家文本信息应答(Response to Modify Player Text Information)",
-        "response_id": 4144,
-        "response": "ModifyTextRsp",
-        "ModifyTextReq": [
+        "tab": "发邮件送多个道具(Send Multi Items via Mail)",
+        "request_desc": "发邮件送多个道具请求(Request to Send Multi Items via Mail)",
+        "request_id": 4213,
+        "request": "DoSendMultiMailReq",
+        "response_desc": "发邮件送多个道具应答(Response to Send Multi Items via Mail)",
+        "response_id": 4214,
+        "response": "DoSendMultiMailRsp",
+        "DoSendMultiMailReq": [
             {
                 "isnull": "false",
                 "id": "AreaId",
@@ -900,30 +845,37 @@
             },
             {
                 "isnull": "false",
-                "id": "ModifyType",
+                "id": "MailTitle",
+                "type": "string",
+                "name": "邮件标题(Mail Subject)"
+            },
+            {
+                "isnull": "false",
+                "id": "MailContent",
+                "type": "string",
+                "name": "邮件内容(Mail Content)"
+            },
+            {
+                "isnull": "false",
+                "id": "IsBind",
+                "type": "uint8",
+                "name": "是否绑定（0不绑定 1绑定）(Whether the Item Is Bound: 0 = No, 1 = Yes)"
+            },
+            {
+                "isnull": "false",
+                "id": "ItemList1_count",
                 "type": "uint32",
-                "name": "修改文本类型(Text Modification Type)"
+                "name": "道具列表1的数量(Count of Item List 1)"
             },
             {
                 "isnull": "false",
-                "id": "ModifyContent",
-                "type": "string",
-                "name": "修改文本内容(Modified Text Content)"
-            },
-            {
-                "isnull": "false",
-                "id": "GroupId",
-                "type": "int32",
-                "name": "群组ID(Chat Group ID)"
-            },
-            {
-                "isnull": "false",
-                "id": "PetGuid",
-                "type": "string",
-                "name": "珍兽GUID(Pet GUID)"
+                "id": "ItemList1",
+                "type": "SItemInfo",
+                "name": "道具列表1(Item List 1)",
+                "max_size": 5
             }
         ],
-        "ModifyTextRsp": [
+        "DoSendMultiMailRsp": [
             {
                 "isnull": "false",
                 "id": "Result",
@@ -935,6 +887,32 @@
                 "id": "RetMsg",
                 "type": "string",
                 "name": "返回消息(Result Message)"
+            }
+        ],
+        "SItemInfo": [
+            {
+                "isnull": "false",
+                "id": "ItemId",
+                "type": "uint32",
+                "name": "道具Id(Item ID)"
+            },
+            {
+                "isnull": "false",
+                "id": "ItemNum",
+                "type": "uint32",
+                "name": "道具数量(Item Quantity)"
+            },
+            {
+                "isnull": "false",
+                "id": "Star",
+                "type": "int32",
+                "name": "装备星级(Equipment Star Level)"
+            },
+            {
+                "isnull": "false",
+                "id": "ExtraParam",
+                "type": "int32",
+                "name": "额外参数(Additional Parameters)"
             }
         ]
     }

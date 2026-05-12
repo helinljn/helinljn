@@ -66,6 +66,147 @@ def _parse_time_param_value(field_id, value):
     return False, _('参数 %(field)s 必须为时间戳或 ISO 时间') % {'field': field_id}
 
 
+def _is_empty_value(value):
+    return value is None or value == ''
+
+
+def _normalize_scalar_param(field_id, raw_type, value):
+    """Validate and normalize a primitive parameter value."""
+    if raw_type.startswith('uint') or raw_type.startswith('int'):
+        try:
+            int_value = int(value)
+        except (TypeError, ValueError):
+            return False, _('参数 %(field)s 必须为整数') % {'field': field_id}
+        if raw_type.startswith('uint') and int_value < 0:
+            return False, _('参数 %(field)s 不能为负数') % {'field': field_id}
+        return True, int_value
+
+    if raw_type == 'time':
+        return _parse_time_param_value(field_id, value)
+
+    if raw_type.startswith('string'):
+        if not isinstance(value, str):
+            return True, str(value)
+        return True, value
+
+    if raw_type.startswith('bool'):
+        if isinstance(value, bool):
+            return True, value
+        if isinstance(value, str):
+            lowered = value.strip().lower()
+            if lowered in ('true', '1', 'yes', 'on'):
+                return True, True
+            if lowered in ('false', '0', 'no', 'off'):
+                return True, False
+        return False, _('参数 %(field)s 必须为布尔值') % {'field': field_id}
+
+    return True, value
+
+
+def _normalize_schema_object(schema, values, field_prefix=''):
+    """Validate and normalize one object against a schema list."""
+    if not isinstance(values, dict):
+        return False, _('参数 %(field)s 必须为对象') % {'field': field_prefix.rstrip('.') or 'object'}
+
+    if not isinstance(schema, list):
+        return False, _('命令参数定义错误，请联系管理员')
+
+    for field in schema:
+        if not isinstance(field, dict):
+            continue
+
+        field_id = field.get('id')
+        if not field_id:
+            continue
+
+        raw_type = str(field.get('type', '')).strip().lower()
+        is_required = str(field.get('isnull', 'false')).strip().lower() == 'false'
+        value = values.get(field_id)
+        display_field = f'{field_prefix}{field_id}'
+
+        if is_required and _is_empty_value(value):
+            return False, _('缺少必填参数: %(field)s') % {'field': display_field}
+
+        if _is_empty_value(value):
+            continue
+
+        children = field.get('children')
+        if isinstance(children, list):
+            if not isinstance(value, dict):
+                return False, _('参数 %(field)s 必须为对象') % {'field': display_field}
+            success, normalized = _normalize_schema_object(children, value, f'{display_field}.')
+            if not success:
+                return False, normalized
+            values[field_id] = normalized
+            continue
+
+        success, normalized = _normalize_scalar_param(display_field, raw_type, value)
+        if not success:
+            return False, normalized
+        values[field_id] = normalized
+
+    return True, values
+
+
+def _normalize_struct_list_param(field, params):
+    """Validate a structured list parameter and keep its *_count in sync."""
+    field_id = field.get('id')
+    children = field.get('children')
+    value = params.get(field_id)
+    is_required = str(field.get('isnull', 'false')).strip().lower() == 'false'
+    raw_max_size = field.get('max_size')
+
+    try:
+        max_size = int(raw_max_size)
+    except (TypeError, ValueError):
+        return False, _('请求结构体列表字段 %(field)s 缺少有效的 max_size') % {'field': field_id}
+
+    if max_size <= 0:
+        return False, _('请求结构体列表字段 %(field)s 缺少有效的 max_size') % {'field': field_id}
+
+    if is_required and (_is_empty_value(value) or value == []):
+        return False, _('缺少必填参数: %(field)s') % {'field': field_id}
+
+    if _is_empty_value(value):
+        return True, ''
+
+    if not isinstance(value, list):
+        return False, _('参数 %(field)s 必须为数组') % {'field': field_id}
+
+    if len(value) > max_size:
+        return False, _('参数 %(field)s 数量不能超过 %(max_size)s') % {
+            'field': field_id,
+            'max_size': max_size,
+        }
+
+    normalized_items = []
+    for index, item in enumerate(value, start=1):
+        success, normalized = _normalize_schema_object(children, item, f'{field_id}[{index}].')
+        if not success:
+            return False, normalized
+        normalized_items.append(normalized)
+
+    params[field_id] = normalized_items
+
+    count_id = field.get('count_id')
+    if count_id:
+        raw_count = params.get(count_id, len(normalized_items))
+        try:
+            count_value = int(raw_count)
+        except (TypeError, ValueError):
+            return False, _('参数 %(field)s 必须为整数') % {'field': count_id}
+        if count_value < 0:
+            return False, _('参数 %(field)s 不能为负数') % {'field': count_id}
+        if count_value != len(normalized_items):
+            return False, _('参数 %(field)s 必须等于 %(target)s 的数量') % {
+                'field': count_id,
+                'target': field_id,
+            }
+        params[count_id] = count_value
+
+    return True, ''
+
+
 
 def validate_command_params_basic(command, params):
     """
@@ -89,45 +230,25 @@ def validate_command_params_basic(command, params):
         is_required = str(field.get('isnull', 'false')).strip().lower() == 'false'
         value = params.get(field_id)
 
-        if is_required and (value is None or value == ''):
+        if field.get('auto_count_for') and field_id not in params:
+            continue
+
+        children = field.get('children')
+        if isinstance(children, list):
+            success, error = _normalize_struct_list_param(field, params)
+            if not success:
+                return False, error
+            continue
+
+        if is_required and _is_empty_value(value):
             return False, _('缺少必填参数: %(field)s') % {'field': field_id}
 
-        if value is None or value == '':
+        if _is_empty_value(value):
             continue
 
-        if raw_type.startswith('uint') or raw_type.startswith('int'):
-            try:
-                int_value = int(value)
-            except (TypeError, ValueError):
-                return False, _('参数 %(field)s 必须为整数') % {'field': field_id}
-            if raw_type.startswith('uint') and int_value < 0:
-                return False, _('参数 %(field)s 不能为负数') % {'field': field_id}
-            params[field_id] = int_value
-            continue
-
-        if raw_type == 'time':
-            success, parsed_value = _parse_time_param_value(field_id, value)
-            if not success:
-                return False, parsed_value
-            params[field_id] = parsed_value
-            continue
-
-        if raw_type.startswith('string'):
-            if not isinstance(value, str):
-                params[field_id] = str(value)
-            continue
-
-        if raw_type.startswith('bool'):
-            if isinstance(value, bool):
-                continue
-            if isinstance(value, str):
-                lowered = value.strip().lower()
-                if lowered in ('true', '1', 'yes', 'on'):
-                    params[field_id] = True
-                    continue
-                if lowered in ('false', '0', 'no', 'off'):
-                    params[field_id] = False
-                    continue
-            return False, _('参数 %(field)s 必须为布尔值') % {'field': field_id}
+        success, normalized = _normalize_scalar_param(field_id, raw_type, value)
+        if not success:
+            return False, normalized
+        params[field_id] = normalized
 
     return True, ''
