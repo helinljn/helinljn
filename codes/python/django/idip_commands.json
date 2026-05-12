@@ -33,7 +33,7 @@
                 "name": "账号(Account)"
             },
             {
-                "isnull": "false",
+                "isnull": "true",
                 "id": "RoleId",
                 "type": "string",
                 "name": "GUID(Role ID)"
