@@ -72,7 +72,6 @@
     "security.workspace.trust.startupPrompt": "never",
 
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    "terminal.integrated.windowsUseConptyDll": false,
     "terminal.integrated.fontFamily": "Consolas",
     "terminal.integrated.fontSize": 16,
 
