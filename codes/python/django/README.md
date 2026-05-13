@@ -63,7 +63,7 @@
 | 类别 | 说明 |
 |---|---|
 | 后端框架 | Django 5.2.12 |
-| Python | 3.11 |
+| Python | 3.12.13 |
 | 数据库 | SQLite（默认）/ MySQL（可配置） |
 | HTTP 客户端 | requests |
 | 配置管理 | python-decouple |
@@ -80,8 +80,6 @@ C:\helin\helinljn\codes\python\django\
 ├── .env
 ├── manage.py
 ├── db.sqlite3
-├── environment.yml
-├── environment-linux.yml
 ├── idip_commands.json
 ├── AGENTS.md
 ├── README.md
@@ -688,7 +686,7 @@ Windows 或当前开发环境可使用 `environment.yml`：
 
 ```bash
 conda env create -f environment.yml
-conda activate django-admin
+conda activate py312
 ```
 
 Ubuntu 24.04 部署使用 `environment-linux.yml`，见第 16 节。
@@ -816,14 +814,14 @@ source /home/django/.bashrc
 ```bash
 cd /opt/gmtool
 conda env create -f environment-linux.yml
-conda activate django-admin
+conda activate py312
 ```
 
 如果环境已存在，使用：
 
 ```bash
 conda env update -f environment-linux.yml
-conda activate django-admin
+conda activate py312
 ```
 
 ### 16.5 权限边界
@@ -868,7 +866,7 @@ sudo service mysql restart
 
 ```bash
 conda env update -f environment-linux.yml
-conda activate django-admin
+conda activate py312
 ```
 
 ### 17.4 创建 MySQL 库和账号
@@ -971,7 +969,7 @@ sudo service mysql start
 重置或重装后，重新执行本节的配置文件安装、建库授权和 Django 初始化步骤。
 
 ### 17.8 常见问题
-- `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment-linux.yml`，并在 `django-admin` 环境中运行项目。
+- `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment-linux.yml`，并在 `py312` 环境中运行项目。
 - `Access denied for user`：检查 `DB_USER`、`DB_PASSWORD`、账号授权主机和 MySQL 服务端监听地址。
 - 中文或 JSON 内容乱码：确认数据库字符集为 `utf8mb4`。
 - `check --deploy` 提示 Cookie 或 Host 配置风险：按生产域名和 HTTPS 代理实际情况修正 `.env`。

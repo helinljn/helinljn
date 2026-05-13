@@ -23,7 +23,7 @@
 
 ```bash
 conda env create -f environment.yml
-conda activate django-admin
+conda activate py312
 ```
 
 Linux 部署目标使用 `environment-linux.yml`。
@@ -89,7 +89,7 @@ bash scripts/django-manager.sh restart
 bash scripts/django-manager.sh status
 ```
 
-启动脚本默认执行 `python manage.py runserver 0.0.0.0:8000 --noreload`，日志写入 `logs/django-server.log`，PID 写入 `logs/django-server.pid`。可通过 `DJANGO_BIND_HOST`、`DJANGO_BIND_PORT`、`DJANGO_PYTHON_BIN`、`DJANGO_LOG_FILE` 等环境变量覆盖。
+启动脚本默认执行 `python manage.py runserver 0.0.0.0:8000 --noreload`，日志写入 `logs/django-server.log`，PID 写入 `logs/django-server.pid`。启动前应激活 `py312`，或通过 `DJANGO_PYTHON_BIN` 指向 `py312` 环境中的 Python；也可通过 `DJANGO_BIND_HOST`、`DJANGO_BIND_PORT`、`DJANGO_LOG_FILE` 等环境变量覆盖。
 
 默认访问地址：
 
