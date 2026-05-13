@@ -293,7 +293,7 @@ def demo_http_client() -> None:
         method="POST",
         headers={
             "Content-Type": "application/json; charset=utf-8",
-            "User-Agent": "python-urllib-demo/3.11",
+            "User-Agent": "python-urllib-demo/3.12",
         },
     )
     try:

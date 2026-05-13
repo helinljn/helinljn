@@ -600,7 +600,7 @@ def demo_generator_methods() -> None:
     sg = simple_gen()
     next(sg)
     try:
-        sg.throw(RuntimeError, "外部注入的错误")
+        sg.throw(RuntimeError("外部注入的错误"))
     except RuntimeError as e:
         print(f"  → 调用方捕获到 RuntimeError: {e}")
 

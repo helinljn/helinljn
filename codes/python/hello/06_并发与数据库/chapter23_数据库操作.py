@@ -1296,7 +1296,7 @@ def demo_task_manager() -> None:
                        "完成章节1-5的学习和练习", priority=3,
                        due_date="2025-12-31"))
     ids.append(tm.add("搭建开发环境",
-                       "安装 Python 3.11、VSCode、配置虚拟环境", priority=3))
+                       "安装 Python 3.12.13、VSCode、配置虚拟环境", priority=3))
     ids.append(tm.add("阅读 Python 官方文档",
                        "重点看标准库部分", priority=2,
                        due_date="2025-06-30"))

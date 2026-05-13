@@ -898,7 +898,7 @@ def demo_section_6() -> None:
 # 2. 固定项目的依赖版本
 # 3. 便于在不同机器上重现开发环境
 #
-# 本学习工程实际使用 conda，并通过根目录 environment.yml 精确导出 py311 环境。
+# 本学习工程实际使用 conda，并通过 environment.yml 精确导出 py312 环境。
 # venv 是 Python 3.3+ 内置的虚拟环境模块，这里作为对比知识点学习。
 
 # ----- 7.1 本工程使用的 conda 命令（Windows CMD）-----
@@ -907,7 +907,7 @@ def demo_section_6() -> None:
 #   conda env create -f environment.yml
 #
 # 激活环境：
-#   conda activate py311
+#   conda activate py312
 #
 # 更新已有环境：
 #   conda env update -f environment.yml --prune
@@ -1342,7 +1342,7 @@ def demo_section_8() -> None:
    - 运行：python -m unittest discover
 
 7. 虚拟环境（conda 与 venv）
-   - 本工程使用 conda：conda activate py311
+   - 本工程使用 conda：conda activate py312
    - conda 精确复现：conda env create -f environment.yml
    - venv 创建：python -m venv venv
    - venv 激活：Windows: venv\\Scripts\\activate

@@ -308,7 +308,7 @@ def demo_builtin_modules() -> None:
     # ── json ─────────────────────────────────────────────
     import json
     print("\n5. json - JSON 处理:")
-    data = {"name": "Python", "version": 3.11}
+    data = {"name": "Python", "version": 3.12}
     print(f"  序列化: {json.dumps(data)}")
 
     print("\n更多模块将在后续章节详细讲解...")

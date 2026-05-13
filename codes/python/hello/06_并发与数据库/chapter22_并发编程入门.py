@@ -2436,7 +2436,7 @@ def exercise8_answer() -> None:
 #    - 使用 threading.settrace() 追踪线程执行
 #    - 工具：py-spy（采样分析）、deadlock-monitor（死锁检测）
 #
-# 10. Python 3.12+ 的变化
-#     - 实验性的无 GIL 模式（--disable-gil 编译选项）
-#     - 未来可能真正实现 Python 多线程并行
+# 10. Python 3.12 与 GIL
+#     - Python 3.12 仍是常规 GIL 模型，多线程不适合加速 CPU 密集任务
+#     - 可选 GIL / free-threaded 构建是 Python 3.13+ 的后续方向
 #     - PEP 703：Making the Global Interpreter Lock Optional

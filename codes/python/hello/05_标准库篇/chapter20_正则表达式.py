@@ -165,7 +165,7 @@ def demo_re_functions() -> None:
     print("  match() 只匹配字符串开头，如果开头不匹配则返回 None")
     print()
 
-    text = "Python 3.11 is great"
+    text = "Python 3.12 is great"
     pattern = r'Python'
 
     m = re.match(pattern, text)
@@ -1025,7 +1025,7 @@ def exercise4_answer() -> None:
     print()
 
     # ── 验证忽略标点和数字 ────────────────────────────────
-    sample2 = "Hello123 world! Python3.11 is great. Hello, Python!"
+    sample2 = "Hello123 world! Python3.12 is great. Hello, Python!"
     freq2 = word_frequency(sample2)
     print(f"  文本: {sample2}")
     print(f"  提取的单词: {list(freq2.keys())}")

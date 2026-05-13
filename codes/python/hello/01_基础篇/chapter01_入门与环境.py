@@ -11,7 +11,7 @@
 #
 # 【运行方式】
 #   在终端中执行：python chapter01_入门与环境.py
-#   （确保 Python 版本 >= 3.11）
+#   （确保 Python 版本 >= 3.12）
 #
 # ========================================================================================================
 
@@ -159,12 +159,12 @@ def demo_python_version() -> None:
     # sys.version_info 是一个包含版本号各部分的对象
     version = sys.version_info
     print(f"主版本号: {version.major}")    # major = 3
-    print(f"次版本号: {version.minor}")    # minor = 11
+    print(f"次版本号: {version.minor}")    # minor = 12
     print(f"修订号:   {version.micro}")    # micro = x
 
     # 检查 Python 版本是否满足要求
-    if version < (3, 11):
-        print("⚠️  警告：本教程需要 Python 3.11 或更高版本！")
+    if version < (3, 12):
+        print("⚠️  警告：本教程需要 Python 3.12 或更高版本！")
     else:
         print("✅ Python 版本符合要求！")
 
@@ -371,10 +371,10 @@ if __name__ == "__main__":
 # =============================================================================
 # Python 环境信息
 # =============================================================================
-# Python 版本: 3.11.x (main, ...)
+# Python 版本: 3.12.13 (main, ...)
 # 主版本号: 3
-# 次版本号: 11
-# 修订号:   x
+# 次版本号: 12
+# 修订号:   13
 # ✅ Python 版本符合要求！
 # 操作系统: win32
 #
@@ -438,7 +438,7 @@ if __name__ == "__main__":
 #   创建一个函数 print_system_info()，打印以下信息：
 #   - Python 版本（主版本.次版本.修订号 格式）
 #   - 当前操作系统
-#   - 提示用户他们的Python是否 >= 3.11
+#   - 提示用户他们的Python是否 >= 3.12
 #
 # 练习 3：
 #   创建一个 Rectangle 类，包含：
@@ -468,10 +468,10 @@ def print_system_info() -> None:
     v = sys.version_info
     print(f"Python 版本: {v.major}.{v.minor}.{v.micro}")
     print(f"操作系统: {sys.platform}")
-    if v >= (3, 11):
-        print("✅ 版本 >= 3.11，满足要求！")
+    if v >= (3, 12):
+        print("✅ 版本 >= 3.12，满足要求！")
     else:
-        print("⚠️ 版本 < 3.11，建议升级！")
+        print("⚠️ 版本 < 3.12，建议升级！")
 
 
 class Rectangle:
@@ -494,7 +494,7 @@ class Rectangle:
 # 如果想运行练习答案，取消下面的注释：
 # if __name__ == "__main__":
 #     print(greet_morning("Alice"))         # Good morning, Alice！
-#     print_system_info()                   # Python 版本: 3.11.x ...
+#     print_system_info()                   # Python 版本: 3.12.13 ...
 #     rect = Rectangle(4.0, 3.0)
 #     print(f"矩形面积: {rect.area()}")     # 矩形面积: 12.0
 #     print(f"矩形周长: {rect.perimeter()}") # 矩形周长: 14.0

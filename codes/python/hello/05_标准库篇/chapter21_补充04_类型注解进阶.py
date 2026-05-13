@@ -8,6 +8,7 @@
 #   3. 掌握 TypedDict 描述字典结构
 #   4. 理解 Protocol 表达“只关心行为”的接口
 #   5. 理解泛型 Generic 和 TypeVar 的基本写法
+#   6. 了解 Python 3.12 的 type 语句和类型参数语法
 #
 # 【运行方式】
 #   python chapter21_补充04_类型注解进阶.py
@@ -158,6 +159,27 @@ def demo_generic() -> None:
 
 
 # =============================================================================
+# 21.补充4.5 Python 3.12 类型语法补充
+# =============================================================================
+
+def demo_python312_typing_syntax() -> None:
+    """展示 Python 3.12 新增的类型别名和类型参数语法。"""
+    print("\n" + "=" * 60)
+    print("21.补充4.5 Python 3.12 类型语法补充")
+    print("=" * 60)
+
+    print("Python 3.12 新增 type 语句，可用于定义类型别名：")
+    print("  type UserId = int")
+    print('  type JsonValue = str | int | float | bool | None | list["JsonValue"] | dict[str, "JsonValue"]')
+    print()
+    print("Python 3.12 也新增了更紧凑的类型参数语法：")
+    print("  def first_or_none[T](items: list[T]) -> T | None: ...")
+    print("  class Repository[T]: ...")
+    print()
+    print("本章代码仍使用 TypeAlias、TypeVar 和 Generic，便于对照传统写法。")
+
+
+# =============================================================================
 # 主程序
 # =============================================================================
 
@@ -167,6 +189,7 @@ def main() -> None:
     demo_typed_dict()
     demo_protocol()
     demo_generic()
+    demo_python312_typing_syntax()
 
 
 if __name__ == "__main__":
@@ -200,6 +223,10 @@ if __name__ == "__main__":
 # 6. Generic / TypeVar
 #    - 编写保留类型信息的容器、仓库、工具函数
 #    - list[T]、Repository[T] 都属于泛型思想
+#
+# 7. Python 3.12 类型语法
+#    - type UserId = int 可替代简单 TypeAlias 写法
+#    - def func[T](...) / class Box[T] 可替代部分 TypeVar + Generic 写法
 
 
 # =============================================================================

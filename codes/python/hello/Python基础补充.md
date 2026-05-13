@@ -30,7 +30,7 @@ import pathlib       # 标准库
 
 ```bat
 conda env create -f environment.yml
-conda activate py311
+conda activate py312
 ```
 
 Python 内置的 `venv` 也是常见方案：
@@ -98,7 +98,7 @@ pip freeze > requirements.txt
 建议：先激活目标环境，再安装包。
 
 ```bat
-conda activate py311
+conda activate py312
 pip install requests
 ```
 
@@ -109,6 +109,14 @@ python --version
 where python
 pip --version
 ```
+
+### 6. Python 3.12 的依赖兼容提醒
+
+Python 3.12 移除了一些早已废弃的旧标准库模块，迁移老项目时需要留意：
+
+- `distutils` 已不再属于标准库，打包相关需求使用 `setuptools`、`packaging` 或现代 `pyproject.toml` 工具链。
+- `asyncore`、`asynchat`、`smtpd` 已移除，网络服务示例应使用 `asyncio`、`socketserver` 或第三方框架。
+- 本学习工程没有使用这些移除模块，因此从 Python 3.11 切到 3.12 不需要对应代码迁移。
 
 ---
 

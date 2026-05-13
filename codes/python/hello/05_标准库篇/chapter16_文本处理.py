@@ -716,7 +716,7 @@ def _print_toml_guide() -> None:
     print("  [project]")
     print('  name = "myapp"')
     print('  version = "1.0.0"')
-    print('  requires-python = ">=3.11"')
+    print('  requires-python = ">=3.12"')
     print()
     print("  [tool.ruff]")
     print('  line-length = 100')

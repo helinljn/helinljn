@@ -1,6 +1,6 @@
 # Python Learning
 
-这是一个基于 Python 3.11 和 conda 环境的系统学习工程，内容从基础语法、函数、模块、面向对象、标准库、网络、类型注解、并发、数据库逐步推进到两个项目实战。
+这是一个基于 Python 3.12.13 和 conda 环境的系统学习工程，内容从基础语法、函数、模块、面向对象、标准库、网络、类型注解、并发、数据库逐步推进到两个项目实战。
 
 ## 环境准备
 
@@ -8,17 +8,24 @@
 
 ```bat
 conda env create -f environment.yml
-conda activate py311
+conda activate py312
 ```
 
-如果本机已经存在 `py311` 环境，并希望按当前配置更新：
+如果本机已经存在 `py312` 环境，并希望按当前配置更新：
 
 ```bat
 conda env update -f environment.yml --prune
-conda activate py311
+conda activate py312
 ```
 
-VS Code 已配置默认解释器路径为 `.conda\envs\py311\python.exe`，打开项目后确认右下角解释器为 `py311` 即可。若在 PowerShell 中无法执行 `conda activate`，请切换到 Windows CMD。
+Linux 环境使用 `environment-linux.yml`：
+
+```bash
+conda env create -f environment-linux.yml
+conda activate py312
+```
+
+VS Code 已配置默认解释器路径为 `C:\Users\${env:USERNAME}\.conda\envs\py312\python.exe`，打开项目后确认右下角解释器为 `py312` 即可。若在 PowerShell 中无法执行 `conda activate`，请切换到 Windows CMD。
 
 ## 学习顺序
 
@@ -98,6 +105,7 @@ python -m unittest discover -s tests
 ```text
 .
 ├── environment.yml
+├── environment-linux.yml
 ├── .gitignore
 ├── README.md
 ├── Python学习路线图.md

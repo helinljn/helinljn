@@ -310,7 +310,7 @@ if __name__ == "__main__":
 
     # 练习 4
     print("\n【练习 4】字符频率统计")
-    text = "Hello, World! Python 3.11 is awesome."
+    text = "Hello, World! Python 3.12 is awesome."
     print(char_frequency_report(text))
 
     # 练习 5

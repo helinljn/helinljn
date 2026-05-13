@@ -258,6 +258,8 @@ def demo_string_formatting() -> None:
     print(f"  年龄的平方: {age ** 2}")
     print(f"  大写姓名: {name.upper()}")
     print(f"  是否成年: {'是' if age >= 18 else '否'}")
+    # Python 3.12 起，f-string 的解析更统一，表达式里可以更自然地使用引号、换行和注释。
+    print(f"  字典取值: { {'name': name}['name'] }")
 
     # f-string 格式化数字
     print(f"\n数字格式化:")
