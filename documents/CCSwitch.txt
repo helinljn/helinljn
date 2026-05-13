@@ -40,7 +40,7 @@
 
         model_provider = "custom"
         model = "gpt-5.5"
-        model_reasoning_effort = "high"
+        model_reasoning_effort = "xhigh"
         disable_response_storage = true
         model_context_window = 1000000
         model_auto_compact_token_limit = 900000
