@@ -1,4 +1,4 @@
-name: django-admin
+name: py312
 channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
@@ -7,7 +7,7 @@ channels:
 dependencies:
   - _openmp_mutex=4.5
   - asgiref=3.11.1
-  - backports.zstd=1.4.0
+  - backports.zstd=1.5.0
   - brotli-python=1.2.0
   - bzip2=1.0.8
   - ca-certificates=2026.4.22
@@ -47,11 +47,11 @@ dependencies:
   - pip=26.1.1
   - polib=1.2.0
   - pysocks=1.7.1
-  - python=3.11.15
+  - python=3.12.13
   - python-decouple=3.8
-  - python_abi=3.11
+  - python_abi=3.12
   - readline=8.3
-  - requests=2.33.1
+  - requests=2.34.0
   - setuptools=82.0.1
   - sqlparse=0.5.5
   - tk=8.6.13
@@ -62,4 +62,4 @@ dependencies:
   - zstd=1.5.7
   - pip:
       - opencc-python-reimplemented==0.1.7
-prefix: /home/django/miniconda3/envs/django-admin
+prefix: /home/django/miniconda3/envs/py312
