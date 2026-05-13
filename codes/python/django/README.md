@@ -76,7 +76,7 @@
 ## 4. 项目结构
 
 ```text
-d:\helinljn\codes\python\django\
+C:\helin\helinljn\codes\python\django\
 ├── .env
 ├── manage.py
 ├── db.sqlite3
@@ -539,6 +539,11 @@ python manage.py format_idip_commands --check
 - 非开发环境必须显式配置：
   - `DJANGO_SECRET_KEY`
   - `DJANGO_ALLOWED_HOSTS`
+- SQLite 默认数据库文件为 `db.sqlite3`，默认连接超时为 20 秒
+- 上传命令定义文件默认大小限制为 10MB
+- 文件监控默认跟随 `DEBUG`：开发环境默认开启，生产环境默认关闭
+- `SESSION_COOKIE_SECURE` 与 `CSRF_COOKIE_SECURE` 默认在生产环境开启，开发环境关闭
+- 登录失败限速使用 Django 本地内存缓存；多进程或多实例部署时需注意限速计数不跨进程共享
 - 默认 `LANGUAGE_CODE='zh-hans'`
 - 默认时区为 `Asia/Shanghai`
 
@@ -708,6 +713,13 @@ bash scripts/django-manager.sh start
 
 ```bash
 bash scripts/django-manager.sh stop
+```
+
+重启或查看状态：
+
+```bash
+bash scripts/django-manager.sh restart
+bash scripts/django-manager.sh status
 ```
 
 默认监听地址：

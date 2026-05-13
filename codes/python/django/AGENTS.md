@@ -31,12 +31,14 @@ Linux 部署目标使用 `environment-linux.yml`。
 配置通过 `python-decouple` 从 `.env` 加载。`.env` 属于本地运行配置，不要提交密钥或机器相关配置。关键配置包括：
 
 - `DJANGO_DEBUG`、`DJANGO_SECRET_KEY`、`DJANGO_ALLOWED_HOSTS`
-- `DB_ENGINE`、`DB_NAME`、`DB_USER`、`DB_PASSWORD`、`DB_HOST`、`DB_PORT`
-- `IDIP_API_URL`、`IDIP_TIMEOUT`、`IDIP_JSON_PATH`
+- `DB_ENGINE`、`DB_NAME`、`DB_SQLITE_TIMEOUT`、`DB_USER`、`DB_PASSWORD`、`DB_HOST`、`DB_PORT`、`DB_CONN_MAX_AGE`
+- `IDIP_API_URL`、`IDIP_TIMEOUT`、`IDIP_JSON_PATH`、`UPLOAD_MAX_SIZE`
 - `BATCH_EXECUTE_MAX_TARGETS`、`BATCH_EXECUTE_INTERVAL_MS`、`PAGE_SIZE`
 - `ENABLE_IDIP_FILE_MONITOR`、`IDIP_FILE_CHECK_INTERVAL`、`IDIP_USE_HASH_CHECK`
 - `LOGIN_MAX_ATTEMPTS`、`LOGIN_LOCKOUT_SECONDS`
 - `SENSITIVE_FIELDS`
+- `DJANGO_TRUSTED_PROXY`、`DJANGO_TRUSTED_PROXY_COUNT`
+- `SESSION_COOKIE_SECURE`、`CSRF_COOKIE_SECURE`
 
 默认数据库为 SQLite。可通过环境变量切换到 MySQL。
 
@@ -83,6 +85,7 @@ bash scripts/django-manager.sh start
 
 ```bash
 bash scripts/django-manager.sh stop
+bash scripts/django-manager.sh restart
 bash scripts/django-manager.sh status
 ```
 
@@ -110,17 +113,26 @@ http://127.0.0.1:5510/cy_idip
 
 - `mysite/settings.py`：项目配置、环境变量、数据库选择、日志与安全开关。
 - `mysite/urls.py`：项目级 URL 路由。
+- `gmtool/apps.py`：应用配置，启动时注册 signals。
 - `gmtool/models.py`：GM 命令、用户命令权限、用户扩展资料、命令日志、登录日志。
+- `gmtool/auth_views.py`：登录、登出、登录失败限速与登录日志。
 - `gmtool/command_parser.py`：解析 `idip_commands.json`、校验协议 ID、补充 schema 元数据、同步命令到数据库。
 - `gmtool/command_services.py`：命令查询与执行前参数校验。
 - `gmtool/command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志。
+- `gmtool/user_views.py`：用户管理、用户编辑、删除、权限分配、登录日志列表。
 - `gmtool/api_views.py`：命令上传/同步接口、日志详情接口。
 - `gmtool/forms.py`：用户、命令新增等页面表单校验。
 - `gmtool/decorators.py`：超级管理员与命令执行权限装饰器。
+- `gmtool/permission_service.py`：超级管理员判定等权限辅助逻辑。
+- `gmtool/query_utils.py`：分页与时间范围筛选辅助函数。
+- `gmtool/audit_log.py`：审计日志封装。
 - `gmtool/idip_client.py`：远端 IDIP HTTP 调用。
 - `gmtool/security_utils.py`：敏感字段脱敏、客户端 IP 辅助函数。
 - `gmtool/middleware.py`：可选的命令定义文件变更监控。
 - `gmtool/logging_handlers.py`：兼容 Windows 文件锁场景的按时间轮转日志处理器。
+- `gmtool/signals.py`：自动补齐 `UserProfile`。
+- `gmtool/views.py`：通用错误页与 CSRF 失败处理。
+- `gmtool/utils.py`：模板上下文等轻量辅助函数。
 - `gmtool/management/commands/`：自定义维护命令。
 - `gmtool/static/gmtool/`：项目 CSS 与本地 Tabler Icons 资源。
 - `gmtool/templates/gmtool/`：业务页面模板与错误页模板。
@@ -138,6 +150,10 @@ http://127.0.0.1:5510/cy_idip
 - 修改命令协议 ID 时要格外谨慎。`request_id` 和 `response_id` 必须唯一，且不能互相重叠。
 - 命令 JSON 中 `command_name` 的解析优先级为 `name` -> `command_name` -> `tab`；`request_desc` 和 `response_desc` 只作为 JSON 描述保留，不同步到数据库字段。
 - 请求结构体列表必须有对应 `*_count` 字段和正整数 `max_size`；响应结构体列表不要求 `max_size`。
+- JSON 解析会拒绝重复键；上传命令定义和在线新增命令失败时会尝试回滚 `idip_commands.json` 快照。
+- 上传命令定义必须是 `.json` 文件，大小受 `UPLOAD_MAX_SIZE` 限制，且顶层必须是对象。
+- IDIP 请求使用 `application/x-www-form-urlencoded`，字段为 `id`、`GSA`、`content`；`content` 是扁平 JSON 字符串，避免手工双重 URL 编码。
+- `send_idip_command(command, params)` 返回 `(response_data, error_message, request_content_str, error_type)`，兼容 `status/id/json` 包装响应和旧版直接 JSON 响应。
 - 修改 `idip_commands.json` 后，运行 `python manage.py format_idip_commands --check` 或 `python manage.py format_idip_commands`。
 - 修改模型后，需要添加 migration，并运行 `python manage.py test gmtool`。
 - 修改用户可见文案时，必要时同步更新翻译并运行 `makemessages` 与 `compilemessages`。
