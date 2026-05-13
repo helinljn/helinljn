@@ -1,4 +1,4 @@
-name: py311
+name: py312
 channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
@@ -15,7 +15,7 @@ dependencies:
   - openssl=3.6.2
   - packaging=26.2
   - pip=26.1.1
-  - python=3.11.15
+  - python=3.12.13
   - setuptools=82.0.1
   - tk=8.6.13
   - tzdata=2025c
@@ -24,4 +24,4 @@ dependencies:
   - vc14_runtime=14.44.35208
   - vcomp14=14.44.35208
   - wheel=0.47.0
-prefix: C:\Users\helin\.conda\envs\py311
+prefix: C:\Users\helin\.conda\envs\py312
