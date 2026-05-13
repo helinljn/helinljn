@@ -9,9 +9,13 @@
     配置环境变量：
         C:\ProgramData\node-v24.15.0-win-x64
 
+    # 查看更新包
+    npm outdated -g
+
+    # 更新包
     npm i -g @anthropic-ai/claude-code@latest
     npm i -g @openai/codex@latest
-    npm i -g deepseek@latest
+    npm i -g deepseek-tui@latest
 
 3. 配置claude-code
     C:\Users\helin\.claude\settings.json
