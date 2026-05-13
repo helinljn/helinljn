@@ -44,34 +44,37 @@ conda config --add channels defaults
 
 # Conda常用命令(如果更改base环境的话，则需要管理员权限)
     创建指定python版本的环境
-    conda create -n py311 python=3.11.15
+    conda create -n py312 python=3.12.13
 
     删除指定python版本的环境
-    conda env remove -n py311
+    conda env remove -n py312
 
     查看当前系统下的环境
     conda info -e
 
     激活某个环境
-    conda activate py311
+    conda activate py312
 
     退出某个环境
     conda deactivate
 
     查看指定环境下的包
-    conda list -n py311
+    conda list -n py312
 
     在指定环境下安装包
-    conda install -n py311 xxx
+    conda install -n py312 xxx
 
     在指定环境下卸载包
-    conda uninstall -n py311 xxx
+    conda uninstall -n py312 xxx
+
+    查看指定环境下的更新包
+    conda update -n py312 --all --dry-run
 
     在指定环境下升级包
-    conda update -n py311 xxx
+    conda update -n py312 xxx
 
     更新指定环境下的所有包
-    conda update -n py311 --all
+    conda update -n py312 --all
 
     导出当前环境的所有依赖到文件(不导出构建号)
     conda env export --no-builds > environment.yml
