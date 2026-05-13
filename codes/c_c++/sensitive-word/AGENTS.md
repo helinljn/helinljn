@@ -43,10 +43,10 @@
 
 | 目标 | 类型 | 源码 | 关键说明 |
 |------|------|------|----------|
-| `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、light_hook、common 工具函数，以及 `src/core/sw/` 敏感词核心能力。链接 jsoncpp 与 opencc，对外暴露 brynet、spdlog、utfcpp 和 `sw` 头文件。 |
+| `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、symbol_loader、stack_trace、common 工具函数，以及 `src/core/sw/` 敏感词核心能力。链接 funchook、jsoncpp 与 opencc（Windows 还链接 Dbghelp，Linux 还链接 dl），对外暴露 brynet、spdlog、utfcpp 和 `sw` 头文件。 |
 | `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
 | `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
-| `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `core`、`testa` 与 doctest。 |
+| `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `mimalloc`、`core`、`testa`，并使用 doctest 头文件。 |
 | `testa` | 动态库 | `src/hcode/testa/` | Hook 实验辅助动态库。 |
 | `testpatch` | 动态库 | `src/hcode/testpatch/` | Hook 实验补丁动态库。 |
 
@@ -65,7 +65,7 @@
 
 - `src/core`
   - 底层公共能力、基础设施，以及明确归入 `core` 动态库的敏感词核心模块。
-  - 典型内容包括 `common.h/cpp`、base64、md5、datetime、light_hook 等。
+  - 典型内容包括 `common.h/cpp`、base64、md5、datetime、symbol_loader、stack_trace 等。
   - 根层通用工具应尽量保持通用，不混入上层应用协议或业务语义。
   - 不应反向依赖上层应用、网络服务或临时实验模块。
 
@@ -113,6 +113,7 @@
 
 - `3rd`
   - 第三方依赖目录。
+  - `3rd/3rd-builds` 包含本仓库对 distorm、funchook、jsoncpp、mimalloc、opencc、OpenCC 数据与词典生成目标的 CMake 封装。
   - 默认视为外部代码，不直接修改；依赖初始化或更新应通过 `init-3rd.*` 或明确的升级任务完成。
 
 ## 通用编码要求
@@ -244,12 +245,14 @@
 | 依赖 | 版本 | 用途 |
 |------|------|------|
 | `brynet` | HEAD | 异步网络库，供 `core` 暴露头文件和网络相关测试使用 |
+| `distorm` | HEAD | 反汇编库，供 `funchook` 使用 |
+| `funchook` | HEAD | Hook/热补丁实验相关能力，`core` 当前链接该库 |
 | `utfcpp` | v4.0.9 | UTF-8/16/32 迭代 |
-| `opencc` | v1.2.0 | 繁简转换数据生成与相关资源 |
+| `opencc` | ver.1.2.0 | 繁简转换数据生成与相关资源 |
 | `spdlog` | v1.15.3 | 日志 |
 | `jsoncpp` | 1.9.7 | JSON 解析 |
 | `doctest` | v2.4.12 | 测试框架 |
-| `mimalloc` | v2.3.1 | 内存分配器，供 test/benchmark/hcode 链接 |
+| `mimalloc` | v2.3.2 | 内存分配器，供 test/benchmark/hcode 链接 |
 | `nanobench` | v4.3.11 | 微基准测试 |
 
 补充约定：
