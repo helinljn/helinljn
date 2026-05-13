@@ -1,28 +1,10 @@
 # AGENTS.md
 
-## 角色定位
-
-你是本仓库的 C++ 工程协作者，默认以 Modern C++（C++17）标准进行开发、重构、修复与审查。
-
-## 工作目标与决策优先级
-
-工作目标：
-
-- 保持接口清晰、职责单一、实现可维护。
-- 在不破坏现有行为的前提下，优先保障正确性、兼容性、性能和可测试性。
-- 遵循项目现有命名、结构和性能导向，不随意引入与仓库风格不一致的抽象。
-
-默认决策优先级：
-
-1. 正确性与稳定性
-2. 行为兼容性
-3. 热路径性能
-4. 可维护性与可测试性
-5. 扩展性
+本文件为后续编码代理提供本仓库的项目上下文和协作规则，帮助代理安全、准确地修改代码。
 
 ## 项目概览
 
-本项目 `sensitive-word` 是一个基于 C++17 的高性能敏感词检测库。当前核心能力包括：
+`sensitive-word` 是一个基于 Modern C++（C++17）的高性能敏感词检测库，核心能力包括：
 
 - Word 检测
 - Number 检测
@@ -30,217 +12,175 @@
 - 黑白名单管理
 - 匹配结果提取、过滤与替换
 
-实现侧重点：
+项目重点是生产可用、低拷贝、热路径性能和复杂 Unicode 归一化场景。修改核心匹配、归一化、替换和词库装载逻辑时，默认认为兼容性和性能风险较高。
 
-- 高性能、生产可用
-- 面向复杂文本归一化场景
-- 对 Unicode 变体、全半角、繁简体、零宽字符、重复字符等绕过方式具备防护能力
-- API 设计强调直观、稳定和低拷贝
+## 构建系统
 
-## 构建系统架构
+本项目使用 CMake 3.15+ 与 C++17。
 
-本项目使用 CMake 3.15+ 与 C++17。主要构建目标如下：
+主要目标：
 
-| 目标 | 类型 | 源码 | 关键说明 |
-|------|------|------|----------|
-| `core` | 动态库 | `src/core/` | 基础设施：base64、md5、datetime、symbol_loader、stack_trace、common 工具函数，以及 `src/core/sw/` 敏感词核心能力。链接 funchook、jsoncpp 与 opencc（Windows 还链接 Dbghelp，Linux 还链接 dl），对外暴露 brynet、spdlog、utfcpp 和 `sw` 头文件。 |
-| `test` | 可执行文件 | `src/test/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
-| `benchmark` | 可执行文件 | `src/benchmark/` | 链接 `core` 与 `mimalloc`，通过 `core` 使用敏感词核心能力。 |
-| `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `mimalloc`、`core`、`testa`，并使用 doctest 头文件。 |
-| `testa` | 动态库 | `src/hcode/testa/` | Hook 实验辅助动态库。 |
-| `testpatch` | 动态库 | `src/hcode/testpatch/` | Hook 实验补丁动态库。 |
+| 目标 | 类型 | 源码 | 说明 |
+|------|------|------|------|
+| `core` | 动态库 | `src/core/` | 基础设施与 `src/core/sw/` 敏感词核心能力。链接 funchook、jsoncpp、opencc；Windows 还链接 Dbghelp，Linux 还链接 dl。 |
+| `test` | 可执行文件 | `src/test/` | doctest 单元测试，链接 `core` 与 `mimalloc`。 |
+| `benchmark` | 可执行文件 | `src/benchmark/` | nanobench 基准测试，链接 `core` 与 `mimalloc`。 |
+| `hcode` | 可执行文件 | `src/hcode/hcode/` | Hook/热补丁实验验证目标，链接 `mimalloc`、`core`、`testa`。 |
+| `testa` | 动态库 | `src/hcode/testa/` | Hook 实验辅助库。 |
+| `testpatch` | 动态库 | `src/hcode/testpatch/` | Hook 实验补丁库。 |
 
 重要约定：
 
-- `src/core/sw/` 不是独立库目标，其源码被直接编译进 `core` 动态库。
-- 修改 `src/core/sw` 中的头文件或实现文件，会影响所有链接 `core` 的目标。
+- `src/core/sw/` 不是独立库目标，源码直接编译进 `core`。
+- 修改 `src/core/sw` 会影响所有链接 `core` 的目标。
 - 根 `CMakeLists.txt` 中的 `PROJECT_TARGET_APPLY_COMMON_OPTIONS` 统一应用平台编译选项。
-  - Windows：`/utf-8`、`/permissive-`、`/Zc:__cplusplus`、`/bigobj`、`/W4`、`/MP`、`/wd4251`。
-  - Linux：`-Wall`、`-Wextra`、`-Wpedantic`。
-- `compile_commands.json` 由 CMake 生成。需要依赖编译数据库的工具时，优先使用构建目录中的该文件。
+- Windows 公共 C++ 编译选项包括 `/utf-8`、`/permissive-`、`/Zc:__cplusplus`、`/bigobj`、`/W4`、`/MP`、`/wd4251`。
+- Linux 公共编译选项包括 `-Wall`、`-Wextra`、`-Wpedantic`。
+- `compile_commands.json` 由 CMake 生成；需要编译数据库时优先使用构建目录中的文件。
 
-## 目录职责
+## 常用命令
 
-在理解或修改代码时，优先按目录职责建立边界意识：
+首次构建或第三方依赖缺失时：
 
-- `src/core`
-  - 底层公共能力、基础设施，以及明确归入 `core` 动态库的敏感词核心模块。
-  - 典型内容包括 `common.h/cpp`、base64、md5、datetime、symbol_loader、stack_trace 等。
-  - 根层通用工具应尽量保持通用，不混入上层应用协议或业务语义。
-  - 不应反向依赖上层应用、网络服务或临时实验模块。
+```powershell
+.\init-3rd.bat
+```
 
-- `src/core/sw`
-  - 敏感词核心领域逻辑。
-  - 包括词典装载、归一化、匹配、结果条件、替换策略等。
-  - 这里承载核心业务语义，不应被 HTTP/JSON 细节污染。
-  - 典型文件：
-    - `sensitive_word.*`：公开 API、builder、engine、word_result。
-    - `trie_dictionary.*`：Trie 字典树实现。
-    - `text_normalizer.*`：UTF-8 解码与文本折叠归一化。
-    - `char_ignore.*`：扫描时的字符跳过策略。
-    - `result_condition.*`：命中后的条件过滤。
-    - `replace_strategy.*`：替换文本生成策略。
-    - `word_dictionary_loader.*`：黑白名单加载。
+Windows 构建：
 
-- `src/test`
-  - 单元测试与行为验证。
-  - 使用 doctest，主测试套件入口在 `test.cpp`。
-  - 修改核心行为后，优先补齐或更新这里的验证。
+```powershell
+.\build.windows.bat release
+.\build.windows.bat debug
+.\build.windows.bat all
+```
 
-- `src/benchmark`
-  - 性能验证与基准测试。
-  - 使用 nanobench。
-  - 涉及热路径变更时，优先关注这里的性能回退风险。
+Linux/WSL 构建：
 
-- `src/hcode`
-  - Hook/热补丁相关实验与验证目标。
-  - 默认不要把这里的实验性逻辑扩散到敏感词核心库或 HTTP 服务。
+```bash
+./init-3rd.sh
+./build.linux.sh release
+./build.linux.sh debug
+./build.linux.sh all
+```
 
-- `res`
-  - 敏感词词库等项目运行资源文件。
-  - 当前包含 `dict-2026-04-20.txt`（由 `scripts/optimize_dict.py` 生成的优化词库样例，76k+ 词条）。
-  - 修改词库路径或内容时，需要关注构建后拷贝、运行目录和使用方加载路径。
+运行普通单元测试：
 
-- 构建运行目录下的 `data/config` 与 `data/dictionary`
-  - OpenCC 配置与二进制词典资源。
-  - 由 `3rd/3rd-builds/opencc_data.cmake` 从 `3rd/opencc/data` 生成或复制。
-  - 修改 OpenCC 资源路径时，需要同时检查 `text_normalizer` 的搜索路径和构建后运行目录。
+```powershell
+cd .build\Release
+.\test.exe
+```
 
-- `scripts`
-  - 辅助脚本目录，包含 `optimize_dict.py`（词库去重、排序、长度过滤）。
-  - 运行 `optimize_dict.py` 需要 `charset-normalizer` 与 `opencc-python-reimplemented` 依赖。
-  - 修改脚本时要说明运行环境和副作用。
+运行基准测试：
 
-- `3rd`
-  - 第三方依赖目录。
-  - `3rd/3rd-builds` 包含本仓库对 distorm、funchook、jsoncpp、mimalloc、opencc、OpenCC 数据与词典生成目标的 CMake 封装。
-  - 默认视为外部代码，不直接修改；依赖初始化或更新应通过 `init-3rd.*` 或明确的升级任务完成。
+```powershell
+cd .build\Release
+.\benchmark.exe
+```
 
-## 通用编码要求
+运行 hcode 测试：
 
-### 设计与架构
+```powershell
+cd .build\Release
+.\hcode.exe
+```
 
-- 模块职责必须单一，接口保持简洁明确。
-- 明确依赖边界，避免循环依赖和无意义的跨层调用。
-- 新增逻辑优先考虑可扩展性与可测试性，不把策略硬编码在调用链深处。
-- 若已有实现已经体现 Pimpl、Builder、策略对象或工具函数分层，优先沿用现有模式。
-- 已有通用能力优先复用 `src/core`，例如字符串比较、大小写处理等应优先使用 `src/core/common.*` 中的工具函数，不在业务层重复实现。
-- 默认保持公共接口和既有行为稳定；若必须调整，明确说明影响范围和兼容性影响。
+构建目录与运行目录：
 
-### Modern C++ 约定
+- Windows CMake 配置目录：`.build/windows/x64-Release`、`.build/windows/x64-Debug`
+- Linux CMake 配置目录：`.build/linux/x64-Release`、`.build/linux/x64-Debug`
+- 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`
 
-- 遵循 Modern C++ 最佳实践，默认目标标准为 C++17。
-- 资源管理遵循 RAII，动态资源优先使用 `std::unique_ptr` 或 `std::shared_ptr`。
-- 优先使用范围 `for`、标准算法和标准库设施，而不是手写重复样板循环。
-- 合理使用 `auto`、`std::optional`、`std::variant`、移动语义、完美转发等现代特性。
-- 对确定不抛异常的函数正确标记 `noexcept`。
-- 头文件使用 `#pragma once` 或一致的 include guard。
+## 重要目录与文件
 
-### 可读性与维护性
+- `src/core/`：`core` 动态库的基础设施和敏感词核心模块。典型内容包括 `common.*`、base64、md5、datetime、symbol_loader、stack_trace、`sw/`。
+- `src/core/sw/`：敏感词核心领域逻辑，包括公开 API、Trie、归一化、字符忽略、结果条件、替换策略、词库加载。
+- `src/core/sw/sensitive_word.*`：公开 API、builder、engine、`word_result`、运行时增删词。
+- `src/core/sw/text_normalizer.*`：UTF-8 解码、全半角折叠、大小写折叠、繁转简、数字样式与英文样式折叠。
+- `src/core/sw/trie_dictionary.*`：Trie 字典树实现。
+- `src/core/sw/char_ignore.*`：扫描时的字符跳过策略。
+- `src/core/sw/result_condition.*`：命中后的条件过滤。
+- `src/core/sw/replace_strategy.*`：替换文本生成策略。
+- `src/core/sw/word_dictionary_loader.*`：deny / allow 词库加载。
+- `src/test/`：doctest 单元测试，主入口为 `test.cpp`，核心行为测试集中在 `sensitive-word-test.cpp`。
+- `src/benchmark/`：nanobench 性能验证。
+- `src/hcode/`：Hook/热补丁实验，不要把这里的实验逻辑扩散到敏感词核心库。
+- `res/`：敏感词资源，当前包含 `dict-2026-04-20.txt`，约 76k 词条。
+- `scripts/optimize_dict.py`：词库清洗、去重、长度过滤和报告输出脚本，需要 `charset-normalizer` 与 `opencc-python-reimplemented`。
+- `3rd/`：第三方依赖目录，默认视为外部代码。
+- `3rd/3rd-builds/`：本仓库对 distorm、funchook、jsoncpp、mimalloc、opencc、OpenCC 数据和词典生成目标的 CMake 封装。
 
-- 命名必须与项目现有风格一致，不混入另一套命名体系。
-- 函数应保持单一职责，避免超长函数和深层嵌套控制流。
-- 注释只保留必要信息：
-  - 函数头注释说明功能、参数、返回值与异常语义。
-  - 复杂逻辑处允许少量行内注释解释意图。
-- 删除未使用的头文件、变量和死代码。
-- 未使用变量若必须保留，显式使用 `std::ignore` 或等价方式处理。
+OpenCC 配置与二进制词典不在 `res/` 中，构建时会生成或复制到运行目录下的 `data/config` 与 `data/dictionary`。修改 OpenCC 资源路径时，需要同时检查 `text_normalizer` 搜索路径和构建后运行目录。
 
-### 文件格式约定
+## 敏感词核心语义
 
-- 新增或修改文本文件时，默认使用 UTF-8 编码。
-- 新增或修改文本文件时，默认使用 CRLF 行结束符，除非目标文件已有明确不同约定或工具链要求 LF。
-- 修改已有文件时，应尽量保持该文件现有编码与行结束符风格；若需要统一格式，必须说明影响范围，避免制造大面积无关 diff。
-- 文件末尾不要添加单独的空行；除非项目或工具链明确要求，不为文件结尾额外增加空白行。
-
-### 性能要求
-
-- 避免不必要的字符串和容器拷贝，大对象优先按引用或 `std::string_view` 传递。
-- 数据结构和算法选择必须符合性能目标，优先考虑热路径表现。
-- 对频繁执行路径，优先保持低分配、可预测和缓存友好的实现。
-- 若修改归一化、匹配、替换或词典装载逻辑，必须关注行为正确性与性能回退风险。
-
-## 分层边界约束
-
-- `src/core/sw` 负责词典、归一化、匹配、过滤、替换等敏感词核心领域逻辑，并随 `core` 动态库导出。
-- `src/core` 根层负责通用基础设施；除 `src/core/sw` 这个明确领域模块外，不承载具体业务规则。
-- 不要把上层业务规则、应用协议或临时服务逻辑硬编码在基础设施层。
-- 新增模块时，优先沿用现有分层，不随意绕过既有边界。
-
-## `src/core/sw` 与核心匹配能力要求
-
-- 涉及归一化、匹配、黑白名单、替换策略时，默认认为兼容性要求高。
-- 任何文本处理语义变更都应谨慎评估对绕过对抗、匹配结果和替换结果的影响。
-- 热路径优先低拷贝、低分配，不要为了抽象美观牺牲明显性能。
-
-### 引擎架构速览
-
-- `sensitive_word_engine` 是公开值类型包装，内部使用 Pimpl 隐藏实现细节。
+- `sensitive_word_engine` 是公开值类型包装，内部使用 Pimpl。
 - `sensitive_word_builder` 收集配置、词库和策略对象，并通过 `build()` 构建引擎。
-- `char_ignore`、`result_condition`、`replace_strategy` 采用策略模式；工厂函数分别位于 `char_ignores`、`result_conditions`、`replace_strategies` 命名空间。
-- 公开 API 对只读字符串参数优先使用 `std::string_view`，返回值使用 `std::string`。
-- 查询类方法应优先标记 `[[nodiscard]]`；移动构造和移动赋值在可行时标记 `noexcept`。
-- `result_condition` 提供三种实现：`always_true`、`english_word_match`（默认）和 `english_word_num_match`（同时要求 ASCII 字母和数字满足单词边界）。
-- `replace_strategy` 提供 `stars()`（默认 `*` 替换）和 `chars(char)`（指定字符替换）两种工厂函数。
-- 引擎支持运行时增删词：`add_word()`、`remove_word()`、`add_allow_word()`、`remove_allow_word()`，无需重建引擎实例；同一引擎实例的并发读写不应默认视为线程安全，调用方需要外部同步或使用新实例替换策略。
-- 引擎支持查询词条状态：`query_word_status()` 返回 `word_entry_status`（包含 `exists`、`in_deny`、`in_allow`）。
-- `replace` 提供多个重载：除接受 `match_options` 的版本外，还可以接受预计算的 `std::vector<word_result>` 做集中替换，或在调用时传入 `char` / `replace_strategy` 覆盖默认替换行为。
-- `config()` 访问器返回引擎当前 `sensitive_word_config` 的只读引用。
+- `char_ignore`、`result_condition`、`replace_strategy` 采用策略模式；工厂函数位于 `char_ignores`、`result_conditions`、`replace_strategies`。
+- 默认 `char_ignore` 是 `none()`，不会跳过字符；需要穿透特殊符号、标点或零宽字符时使用 `char_ignores::special_chars()`。
+- 默认 `result_condition` 是 `english_word_match()`，含 ASCII 字母的命中需要满足英文单词边界；需要子串命中时使用 `always_true()`。
+- `english_word_num_match()` 同时要求 ASCII 字母和数字满足单词边界。
+- 默认替换策略是 `replace_strategies::stars()`，也支持 `chars(char)` 和自定义 `replace_strategy`。
+- 引擎支持运行时增删词：`add_word()`、`remove_word()`、`add_allow_word()`、`remove_allow_word()`。
+- 同一引擎实例并发读写不默认线程安全；调用方需要外部同步，或构建新实例后替换引用。
+- `query_word_status()` 返回词条是否存在于 deny / allow 字典。
 
-### Trie 字典树
+匹配与扫描语义：
 
-- `trie_dictionary` 使用 Arena 内存池，目标是减少逐节点堆分配。
-- 子节点使用有序 `std::vector` 与 `std::lower_bound` 查找。
-- 根节点配备 `root_ascii_cache_` 数组，为纯 ASCII 文本提供快速放行路径。
-- 当前实现不是 AC 自动机；扫描流程依赖游标推进，并支持运行时轻量增删词，无需重建 failure 链接。
+- 核心流程为：`text_normalizer` → 遍历归一化码点 → `char_ignore::ignore()` 跳过干扰字符 → Trie 搜索 → `result_condition::match()` 过滤 → 输出 `word_result` → `replace_strategy` 基于原始字节区间替换。
+- `text_normalizer` 单次遍历完成 UTF-8 解码、全半角折叠、大小写折叠、繁转简、数字样式折叠和英文样式折叠。
+- 繁转简按单个代码点执行；基础 CJK 区间使用连续数组缓存，扩展区字符使用映射缓存。不要把整段文本分词级 OpenCC 转换引入热路径。
+- `ignore_repeat` 属于扫描层行为，不在 `text_normalizer_options` 中处理；重复字符尾部折叠不会改变归一化输出。
+- `contains()` 内部固定使用最短匹配，不要破坏这个性能语义。
+- `match_options::longest_match` 控制最短匹配与最长匹配；确认命中后扫描游标跳过已命中跨度，不输出交叉重叠的重复结果。
+- allow / deny 同起点同时命中时，只有 deny 明确长于 allow 才判定 deny，否则 allow 覆盖并跳过 allow 跨度。
+- Number 检测通过 `enable_num_check(true)` 开启，`num_check_len` 控制最小触发长度；数字检测复用归一化结果。
 
-### 文本归一化与扫描流程
+## 开发准则
 
-- `text_normalizer` 在单次遍历中完成 UTF-8 解码、全半角折叠、大小写折叠、繁转简映射、数字样式折叠和英文变体折叠。
-- 归一化输出包含 `char32_t` 序列与到原始 UTF-8 的字节偏移映射。
-- 繁转简映射按单个代码点执行；运行时通过 OpenCC `t2s.json` 转换首次遇到的 CJK 字符，并将基础 CJK 区间结果缓存到连续数组中，扩展区字符使用映射缓存。不要把整段文本分词级转换引入热路径。
-- 核心扫描流程：`text_normalizer` → 遍历码点 → `char_ignore::ignore()` 跳过干扰字符 → 沿 Trie 搜索 → `result_condition::match()` 过滤误杀 → 输出带原始字节位置的 `word_result` → `replace_strategy` 基于字节偏移生成替换文本。
-- `ignore_repeat` 属于扫描层行为（`sensitive_word_config`），不在 `text_normalizer`（`text_normalizer_options`）中处理。重复字符的尾部折叠在扫描期间执行，不会改变归一化输出。
-- `match_options::longest_match` 控制最短匹配与最长匹配；确认命中后扫描游标跳过已命中跨度，不产生交叉重叠的重复输出。
-- `contains()` 内部固定使用最短匹配，修改匹配策略时不得破坏这一性能语义。
+- 默认目标标准为 C++17，不引入更高标准特性。
+- 修改范围聚焦当前任务，不做无关重构、格式化或架构调整。
+- 保持公共接口和既有行为稳定；必须改变时说明影响面和兼容性。
+- 遵循现有命名、目录边界和性能导向。
+- `src/core` 根层保持通用基础设施职责，不混入业务协议或临时实验逻辑。
+- `src/core/sw` 承载敏感词领域逻辑，不引入 HTTP/JSON 等上层应用细节。
+- 优先复用仓库已有工具函数，例如 `src/core/common.*` 中的字符串能力。
+- 热路径优先低拷贝、低分配和缓存友好；大对象优先按引用或 `std::string_view` 传递。
+- RAII 管理资源，动态资源优先使用 `std::unique_ptr` 或 `std::shared_ptr`。
+- 删除未使用头文件、变量、死代码和残留调试逻辑。
+- 注释只解释必要意图，不写重复代码含义的空泛注释。
+- 新增或修改文本文件默认使用 UTF-8；修改已有文件时尽量保持原有行结束符风格。
+- `3rd/` 下源码默认不直接修改；依赖初始化或升级应通过 `init-3rd.*` 或明确升级任务完成。
 
-## 代码审查要求
+## 测试说明
 
-审查 C++ 代码时，重点关注以下内容，并给出具体建议：
+普通核心变更至少运行：
 
-- 是否存在 bug、行为回归或兼容性破坏。
-- 是否存在并发安全问题、状态不一致或服务生命周期风险。
-- 是否存在性能回退，尤其是匹配、归一化、词典装载和请求热路径。
-- 是否缺失必要测试，尤其是核心行为、网络接口或失败恢复路径。
-- 是否存在冗余逻辑、重复代码或可提取的公共能力。
-- 控制流、条件分支和表达式是否可以简化。
-- 是否存在不恰当、过时或误导性的注释与文档。
-- 是否有未使用的变量、头文件或残留调试代码。
-- 是否遵循 Modern C++ 最佳实践。
-- 结构是否易于理解、维护和扩展。
-- 是否有更合适的工具函数、抽象边界或复用方式。
+```powershell
+cd .build\Release
+.\test.exe
+```
 
-审查输出要求：
+涉及归一化、匹配、替换、词库装载或运行时增删词时，应补齐或更新 `src/test/sensitive-word-test.cpp` 中的行为测试。
 
-- 先给问题，再给结论。
-- 优先报告 bug、行为风险、性能回退、并发风险和缺失测试。
-- 建议必须具体，避免泛泛而谈。
+涉及热路径性能、Trie、归一化或替换策略的明显改动时，视风险运行：
 
-## 修改代码时的默认原则
+```powershell
+cd .build\Release
+.\benchmark.exe
+```
 
-- 优先做最小必要修改，不进行无关重构。
-- 保持现有公共接口和行为稳定；若必须修改，明确说明影响面。
-- 不要回滚、覆盖或删除用户已有改动；遇到未预期的工作区变更时，先判断是否与当前任务相关，相关则基于现状继续修改，不相关则忽略。
-- 新增代码应与现有目录职责一致，不把业务逻辑、工具逻辑和平台逻辑混杂。
-- `3rd/` 下的第三方依赖默认视为外部代码，不要为了适配项目逻辑直接修改；除非任务明确要求修改或升级第三方库，否则应在项目代码中封装兼容。
-- 若已有测试覆盖相关行为，修改后应补齐或更新测试。
-- 若用户明确要求不新增测试覆盖，不强行补测试，但仍应运行现有构建/测试并说明未新增覆盖。
-- 新增模块时应保持分层边界清晰。
-- 若修改服务生命周期或并发语义，默认需要额外关注失败路径与兼容性。
+涉及 Hook/热补丁实验目标时运行：
+
+```powershell
+cd .build\Release
+.\hcode.exe
+```
+
+无法运行测试时，必须说明原因；不要假设测试通过。
 
 ## 第三方依赖
 
-`3rd/` 下依赖由 `init-3rd.bat` 或 `init-3rd.sh` 按固定版本克隆。默认视为外部代码，不直接修改。
+`init-3rd.bat` / `init-3rd.sh` 会拉取以下依赖：
 
 | 依赖 | 版本 | 用途 |
 |------|------|------|
@@ -255,68 +195,21 @@
 | `mimalloc` | v2.3.2 | 内存分配器，供 test/benchmark/hcode 链接 |
 | `nanobench` | v4.3.11 | 微基准测试 |
 
-补充约定：
+构建 OpenCC 数据目标需要 Python3。OpenCC 数据会在构建输出目录下生成或复制到 `data/config` 与 `data/dictionary`。
 
-- 构建时 OpenCC 数据目标需要 Python3。
-- OpenCC 数据会在构建输出目录下生成或复制到 `data/config` 与 `data/dictionary`。
-- 运行时资源路径变更必须同时检查 `res/` 拷贝逻辑和 `text_normalizer` 的资源搜索路径。
+## 代码审查关注点
 
-## 构建与测试
+审查时优先报告具体问题，按严重程度排序。重点关注：
 
-Windows 环境默认操作如下：
+- bug、行为回归或兼容性破坏
+- 并发安全问题和状态不一致
+- 匹配、归一化、替换、词库装载等热路径性能回退
+- 核心行为、失败路径或边界条件缺失测试
+- 不合适的跨层依赖、重复逻辑、死代码和误导性注释
 
-1. 首次构建或第三方依赖缺失时，运行 `.\init-3rd.bat`。
-2. 构建命令：`.\build.windows.bat release`
-3. 运行测试：`cd .build\Release; .\test.exe`
-4. 若需运行基准测试：`cd .build\Release; .\benchmark.exe`
-5. 若需运行 hcode 测试：`cd .build\Release; .\hcode.exe`
+## Git 协作
 
-Windows 构建命令：
-
-```powershell
-.\init-3rd.bat
-.\build.windows.bat release
-.\build.windows.bat debug
-.\build.windows.bat all
-```
-
-Linux 构建命令：
-
-```bash
-./init-3rd.sh
-./build.linux.sh release
-./build.linux.sh debug
-./build.linux.sh all
-```
-
-运行目录与构建目录约定：
-
-- Windows 脚本的 CMake 配置目录为 `.build/windows/x64-Release` 与 `.build/windows/x64-Debug`。
-- Linux 脚本的 CMake 配置目录为 `.build/linux/x64-Release` 与 `.build/linux/x64-Debug`。
-- Windows 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
-- Linux 可执行文件和运行资源默认输出到 `.build/Release` 或 `.build/Debug`。
-
-补充约定：
-
-- 若运行 `scripts/optimize_dict.py`，需要安装脚本依赖 `charset-normalizer` 与 `opencc-python-reimplemented`；本机可按需要先激活约定的 Python/conda 环境。
-- 若只验证普通单元测试，优先运行 `test.exe`。
-- 若修改影响核心匹配行为、归一化逻辑或词库装载逻辑，应至少执行相关测试。
-- 若无法运行测试，需要明确说明原因，不要假设测试通过。
-
-## 输出要求
-
-- 回答以事实和结果为主，避免空泛表述。
-- 说明实现或审查结论时，优先写清楚改了什么、为什么改、风险在哪里。
-- 若提供代码审查结果，按严重程度排序。
-- 若提供实现说明，优先概括行为变化、兼容性影响和验证情况。
-- 若存在未验证路径、潜在兼容性风险或测试缺口，必须明确指出。
-
-## 禁止事项
-
-- 不要无根据地改动项目整体架构。
-- 不要在未明确要求的情况下修改 `3rd/` 下的第三方库源码。
-- 不要引入与 C++17 目标不兼容的特性。
-- 不要为了“现代化”而牺牲热路径性能或可读性。
-- 不要保留未使用代码、未使用头文件和无意义注释。
-- 不要在未验证影响的情况下修改敏感词匹配、归一化或替换语义。
-- 不要把平台细节或临时调试逻辑扩散到核心业务层。
+- 工作区可能存在无关本地改动。除非用户明确要求，不要回滚、覆盖或删除这些改动。
+- 如果未预期改动与当前任务相关，基于现状继续；如果无关，忽略它们。
+- 不要使用 `git reset --hard` 或 `git checkout --` 回滚用户改动，除非用户明确要求。
+- 当构建命令、目录职责、核心语义或必要验证步骤发生变化时，同步更新 `AGENTS.md`。
