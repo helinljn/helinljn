@@ -1,0 +1,172 @@
+# AGENTS.md
+
+本文件为后续编码代理提供本仓库的项目上下文和协作规则，帮助代理安全、准确地修改代码。
+
+## 项目概览
+
+这是一个基于 Django 的游戏 GM 命令后台管理系统。
+
+- Django 项目目录：`mysite/`
+- 主业务应用：`gmtool/`
+- 命令定义源文件：`idip_commands.json`
+- 本地 IDIP Mock 服务：`test/mock_idip_server.py`
+- 运行日志目录：`logs/`
+- 默认语言和时区：`zh-hans`、`Asia/Shanghai`
+
+业务界面基于 Django Template 实现，模板位于 `gmtool/templates/gmtool/`。本项目的日常 GM 操作不依赖 Django Admin。
+
+## 环境
+
+使用仓库内定义的 conda 环境。
+
+```bash
+conda env create -f environment.yml
+conda activate django-admin
+```
+
+Linux 部署目标使用 `environment-linux.yml`。
+
+配置通过 `python-decouple` 从 `.env` 加载。`.env` 属于本地运行配置，不要提交密钥或机器相关配置。关键配置包括：
+
+- `DJANGO_DEBUG`、`DJANGO_SECRET_KEY`、`DJANGO_ALLOWED_HOSTS`
+- `DB_ENGINE`、`DB_NAME`、`DB_USER`、`DB_PASSWORD`、`DB_HOST`、`DB_PORT`
+- `IDIP_API_URL`、`IDIP_TIMEOUT`、`IDIP_JSON_PATH`
+- `BATCH_EXECUTE_MAX_TARGETS`、`BATCH_EXECUTE_INTERVAL_MS`、`PAGE_SIZE`
+- `ENABLE_IDIP_FILE_MONITOR`、`IDIP_FILE_CHECK_INTERVAL`、`IDIP_USE_HASH_CHECK`
+- `LOGIN_MAX_ATTEMPTS`、`LOGIN_LOCKOUT_SECONDS`
+- `SENSITIVE_FIELDS`
+
+默认数据库为 SQLite。可通过环境变量切换到 MySQL。
+
+## 常用命令
+
+初始化或更新本地数据库：
+
+```bash
+python manage.py migrate
+python manage.py sync_commands
+```
+
+运行 Django 测试：
+
+```bash
+python manage.py test gmtool
+```
+
+运行 Django 系统检查：
+
+```bash
+python manage.py check
+```
+
+检查命令定义文件格式：
+
+```bash
+python manage.py format_idip_commands --check
+```
+
+格式化命令定义文件：
+
+```bash
+python manage.py format_idip_commands
+```
+
+使用项目脚本启动应用：
+
+```bash
+bash scripts/django-manager.sh start
+```
+
+默认访问地址：
+
+```text
+http://127.0.0.1:8000/gmtool/
+```
+
+启动本地 IDIP Mock 服务：
+
+```bash
+python test/mock_idip_server.py
+```
+
+Mock 服务默认地址：
+
+```text
+http://127.0.0.1:5510/cy_idip
+```
+
+## 重要文件与职责
+
+- `mysite/settings.py`：项目配置、环境变量、数据库选择、日志与安全开关。
+- `mysite/urls.py`：项目级 URL 路由。
+- `gmtool/models.py`：GM 命令、用户命令权限、用户扩展资料、命令日志、登录日志。
+- `gmtool/command_parser.py`：解析 `idip_commands.json`、校验协议 ID、补充 schema 元数据、同步命令到数据库。
+- `gmtool/command_services.py`：命令查询与执行前参数校验。
+- `gmtool/command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志。
+- `gmtool/api_views.py`：命令上传/同步接口、日志详情接口。
+- `gmtool/idip_client.py`：远端 IDIP HTTP 调用。
+- `gmtool/security_utils.py`：敏感字段脱敏、客户端 IP 辅助函数。
+- `gmtool/middleware.py`：可选的命令定义文件变更监控。
+- `gmtool/logging_handlers.py`：兼容 Windows 文件锁场景的按时间轮转日志处理器。
+- `gmtool/management/commands/`：自定义维护命令。
+- `gmtool/tests.py`：当前 Django 单元测试。
+- `locale/`：国际化翻译文件。
+- `test/README.md`：IDIP Mock 服务使用说明。
+
+## 开发准则
+
+- 修改范围应聚焦于当前任务，不要重构无关模块。
+- 遵循现有 Django 代码风格：函数视图、service/helper 模块、Django `TestCase`、模板位于 `gmtool/templates/gmtool/`。
+- 共享业务逻辑应放入 service、parser 或 helper 模块，避免在 view 中重复实现。
+- 保持现有命令定义工作流：`idip_commands.json` 是源文件，`sync_commands` 负责同步到数据库。
+- 修改命令协议 ID 时要格外谨慎。`request_id` 和 `response_id` 必须唯一，且不能互相重叠。
+- 修改 `idip_commands.json` 后，运行 `python manage.py format_idip_commands --check` 或 `python manage.py format_idip_commands`。
+- 修改模型后，需要添加 migration，并运行 `python manage.py test gmtool`。
+- 修改用户可见文案时，必要时同步更新翻译并运行 `makemessages` 与 `compilemessages`。
+- 除非任务明确要求，不要移除日志、审计日志、敏感字段脱敏、登录锁定、CSRF 处理或权限检查。
+- 不要在日志或响应中输出密钥、完整 `.env`、密码、token 或未经脱敏的敏感请求内容。
+
+## 测试说明
+
+大多数后端变更至少应执行：
+
+```bash
+python manage.py test gmtool
+python manage.py check
+```
+
+涉及命令定义变更时，还应执行：
+
+```bash
+python manage.py format_idip_commands --check
+python manage.py sync_commands
+```
+
+涉及 IDIP 集成时，在独立终端启动 Mock 服务：
+
+```bash
+python test/mock_idip_server.py
+```
+
+并将 `IDIP_API_URL` 指向：
+
+```text
+http://127.0.0.1:5510/cy_idip
+```
+
+## 安全与数据处理
+
+本项目涉及 GM 操作和审计数据。权限检查与日志处理都属于安全敏感逻辑。
+
+- 超级管理员拥有全部活跃命令访问权限；普通用户需要显式的 `UserCommandPermission` 授权。
+- 命令执行日志应尽量保证可持久化。当前行为允许远端执行成功但本地日志写入失败时返回 warning。
+- 日志详情接口必须继续对配置的敏感字段进行脱敏。
+- 登出应保持仅允许 POST。
+- 需要谨慎校验跳转目标、客户端 IP 提取、上传 JSON 大小与内容、命令参数。
+- 生产模式必须显式配置 `DJANGO_SECRET_KEY` 和 `DJANGO_ALLOWED_HOSTS`。
+
+## Git 协作
+
+- 工作区可能存在无关本地改动。除非用户明确要求，不要回滚或覆盖这些改动。
+- 忽略日志、SQLite 数据库、本地环境文件等运行期生成文件，除非任务明确涉及它们。
+- 当项目命令、结构或必要验证步骤发生变化时，同步更新 `AGENTS.md`。
