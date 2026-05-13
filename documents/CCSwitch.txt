@@ -2,25 +2,6 @@
     https://github.com/farion1231/cc-switch/releases
     CC-Switch-v3.14.1-Windows.msi
 
-    // codex -> gpt-5.5
-    {
-        "OPENAI_API_KEY": "xxx"
-    }
-
-    model_provider = "custom"
-    model = "gpt-5.5"
-    model_reasoning_effort = "high"
-    disable_response_storage = true
-    model_context_window = 1000000
-    model_auto_compact_token_limit = 900000
-    [model_providers.custom]
-    name = "custom"
-    wire_api = "responses"
-    requires_openai_auth = true
-    base_url = "https://www.right.codes/codex/v1"
-    [windows]
-    sandbox = "unelevated"
-
 2. 安装nodejs
     https://nodejs.cn/download
     node-v24.15.0-win-x64.zip
@@ -51,7 +32,30 @@
         "theme": "dark"
     }
 
-4. 配置deepseek-tui
+4. 配置codex
+    C:\Users\helin\.codex\config.toml
+        {
+            "OPENAI_API_KEY": "xxx"
+        }
+
+        model_provider = "custom"
+        model = "gpt-5.5"
+        model_reasoning_effort = "high"
+        disable_response_storage = true
+        model_context_window = 1000000
+        model_auto_compact_token_limit = 900000
+
+        [model_providers]
+        [model_providers.custom]
+        name = "custom"
+        wire_api = "responses"
+        requires_openai_auth = true
+        base_url = "https://www.right.codes/codex/v1"
+
+        [windows]
+        sandbox = "unelevated"
+
+5. 配置deepseek-tui
     C:\Users\helin\.deepseek\config.toml
         api_key = "xxx"
         base_url = "https://api.deepseek.com"
