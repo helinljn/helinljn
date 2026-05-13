@@ -83,6 +83,7 @@ d:\helinljn\codes\python\django\
 ├── environment.yml
 ├── environment-linux.yml
 ├── idip_commands.json
+├── AGENTS.md
 ├── README.md
 ├── scripts/
 │   ├── django-manager.sh
@@ -113,11 +114,14 @@ d:\helinljn\codes\python\django\
 │   ├── query_utils.py
 │   ├── security_utils.py
 │   ├── signals.py
+│   ├── tests.py
 │   ├── urls.py
+│   ├── utils.py
 │   ├── user_views.py
 │   ├── views.py
 │   ├── management/commands/
 │   ├── migrations/
+│   ├── static/gmtool/
 │   ├── templates/gmtool/
 │   └── templatetags/
 │       ├── __init__.py
@@ -148,9 +152,12 @@ d:\helinljn\codes\python\django\
 - `command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志
 - `user_views.py`：用户管理、用户编辑、删除、权限分配、登录日志查看
 - `api_views.py`：命令定义上传接口、日志详情接口
+- `forms.py`：用户、命令新增等页面表单校验
+- `decorators.py`：超级管理员与命令执行权限装饰器
 - `command_parser.py`：命令定义文件解析、ID 校验、JSON 快照读写、数据库同步
 - `command_services.py`：命令执行前的参数校验与命令查询辅助逻辑
 - `query_utils.py`：分页与时间范围筛选辅助函数，供列表页复用
+- `permission_service.py`：超级管理员判定等权限辅助逻辑
 - `idip_client.py`：与远端 IDIP 服务通信
 - `middleware.py`：命令定义文件变更监控
 - `security_utils.py`：脱敏与安全辅助函数
@@ -158,6 +165,12 @@ d:\helinljn\codes\python\django\
 - `logging_handlers.py`：Windows 友好的日志轮转处理器
 - `models.py`：命令、权限、用户扩展、日志等模型
 - `signals.py`：自动补齐 `UserProfile`
+- `views.py`：通用错误页与 CSRF 失败处理
+- `utils.py`：模板上下文等轻量辅助函数
+- `tests.py`：Django 单元测试
+- `static/gmtool/`：项目自定义 CSS 与本地 Tabler Icons 资源
+- `templates/gmtool/`：业务页面模板与 400/403/404/500 错误页
+- `templatetags/gmtool_tags.py`：模板标签
 
 ### 5.3 `test/`
 开发联调辅助内容。
@@ -703,6 +716,16 @@ bash scripts/django-manager.sh stop
 0.0.0.0:8000
 ```
 
+`scripts/django-manager.sh` 支持以下环境变量覆盖默认值：
+
+- `DJANGO_MANAGE_PY`：`manage.py` 路径
+- `DJANGO_PYTHON_BIN`：Python 可执行文件
+- `DJANGO_BIND_HOST`：监听地址，默认 `0.0.0.0`
+- `DJANGO_BIND_PORT`：监听端口，默认 `8000`
+- `DJANGO_LOG_DIR`：运行日志目录，默认 `logs/`
+- `DJANGO_LOG_FILE`：Django 运行日志文件，默认 `logs/django-server.log`
+- `DJANGO_PID_FILE`：PID 文件，默认 `logs/django-server.pid`
+
 访问地址按实际主机 IP 选择，例如：
 
 ```text
@@ -993,23 +1016,38 @@ python manage.py compilemessages
 
 ---
 
-## 20. 维护建议
+## 20. 前端与静态资源
+
+页面基于 Django Template 与 Tabler 样式构建：
+
+- Tabler Core CSS/JS 当前通过 CDN 引入
+- Tabler Icons 字体资源已放在 `gmtool/static/gmtool/vendor/tabler-icons/`
+- 项目自定义样式位于 `gmtool/static/gmtool/css/app.css`
+- 生产部署时执行 `python manage.py collectstatic --noinput` 收集静态文件
+
+如果生产环境不能访问外网 CDN，需要将 Tabler Core CSS/JS 本地化，并同步修改 `gmtool/templates/gmtool/base.html` 以及错误页模板中的资源引用。
+
+---
+
+## 21. 维护建议
 
 - 新增配置项后，同步更新：
   - `mysite/settings.py`
   - `.env`
   - `README.md`
+  - `AGENTS.md`（若会影响后续代理工作方式）
 
 - 调整命令定义结构后，同步更新：
   - `idip_commands.json`
   - `gmtool/command_parser.py`
   - `README.md`
+  - `AGENTS.md`（若会影响校验或同步流程）
 
 - 新增路由、模型、管理命令或安全策略后，及时同步更新文档
 
 ---
 
-## 21. 备注
+## 22. 备注
 
 - 当前默认数据库为 SQLite，更适合开发与轻量部署
 - 生产环境可通过 `DB_ENGINE=mysql` 切换到 MySQL

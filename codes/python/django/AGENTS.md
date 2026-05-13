@@ -15,6 +15,8 @@
 
 业务界面基于 Django Template 实现，模板位于 `gmtool/templates/gmtool/`。本项目的日常 GM 操作不依赖 Django Admin。
 
+前端样式基于 Tabler。Tabler Core CSS/JS 当前通过 CDN 引入，Tabler Icons 字体资源和项目自定义 CSS 位于 `gmtool/static/gmtool/`。
+
 ## 环境
 
 使用仓库内定义的 conda 环境。
@@ -77,6 +79,15 @@ python manage.py format_idip_commands
 bash scripts/django-manager.sh start
 ```
 
+停止或查看状态：
+
+```bash
+bash scripts/django-manager.sh stop
+bash scripts/django-manager.sh status
+```
+
+启动脚本默认执行 `python manage.py runserver 0.0.0.0:8000 --noreload`，日志写入 `logs/django-server.log`，PID 写入 `logs/django-server.pid`。可通过 `DJANGO_BIND_HOST`、`DJANGO_BIND_PORT`、`DJANGO_PYTHON_BIN`、`DJANGO_LOG_FILE` 等环境变量覆盖。
+
 默认访问地址：
 
 ```text
@@ -104,11 +115,16 @@ http://127.0.0.1:5510/cy_idip
 - `gmtool/command_services.py`：命令查询与执行前参数校验。
 - `gmtool/command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志。
 - `gmtool/api_views.py`：命令上传/同步接口、日志详情接口。
+- `gmtool/forms.py`：用户、命令新增等页面表单校验。
+- `gmtool/decorators.py`：超级管理员与命令执行权限装饰器。
 - `gmtool/idip_client.py`：远端 IDIP HTTP 调用。
 - `gmtool/security_utils.py`：敏感字段脱敏、客户端 IP 辅助函数。
 - `gmtool/middleware.py`：可选的命令定义文件变更监控。
 - `gmtool/logging_handlers.py`：兼容 Windows 文件锁场景的按时间轮转日志处理器。
 - `gmtool/management/commands/`：自定义维护命令。
+- `gmtool/static/gmtool/`：项目 CSS 与本地 Tabler Icons 资源。
+- `gmtool/templates/gmtool/`：业务页面模板与错误页模板。
+- `gmtool/templatetags/gmtool_tags.py`：模板标签。
 - `gmtool/tests.py`：当前 Django 单元测试。
 - `locale/`：国际化翻译文件。
 - `test/README.md`：IDIP Mock 服务使用说明。
@@ -120,9 +136,13 @@ http://127.0.0.1:5510/cy_idip
 - 共享业务逻辑应放入 service、parser 或 helper 模块，避免在 view 中重复实现。
 - 保持现有命令定义工作流：`idip_commands.json` 是源文件，`sync_commands` 负责同步到数据库。
 - 修改命令协议 ID 时要格外谨慎。`request_id` 和 `response_id` 必须唯一，且不能互相重叠。
+- 命令 JSON 中 `command_name` 的解析优先级为 `name` -> `command_name` -> `tab`；`request_desc` 和 `response_desc` 只作为 JSON 描述保留，不同步到数据库字段。
+- 请求结构体列表必须有对应 `*_count` 字段和正整数 `max_size`；响应结构体列表不要求 `max_size`。
 - 修改 `idip_commands.json` 后，运行 `python manage.py format_idip_commands --check` 或 `python manage.py format_idip_commands`。
 - 修改模型后，需要添加 migration，并运行 `python manage.py test gmtool`。
 - 修改用户可见文案时，必要时同步更新翻译并运行 `makemessages` 与 `compilemessages`。
+- 修改模板或前端静态资源时，注意 `base.html`、400/403/404/500 错误页和 `collectstatic` 部署链路。
+- 如果生产环境不能访问外网 CDN，需要将 Tabler Core CSS/JS 本地化，并同步改模板引用。
 - 除非任务明确要求，不要移除日志、审计日志、敏感字段脱敏、登录锁定、CSRF 处理或权限检查。
 - 不要在日志或响应中输出密钥、完整 `.env`、密码、token 或未经脱敏的敏感请求内容。
 
@@ -133,6 +153,12 @@ http://127.0.0.1:5510/cy_idip
 ```bash
 python manage.py test gmtool
 python manage.py check
+```
+
+生产部署相关变更还应执行：
+
+```bash
+python manage.py check --deploy
 ```
 
 涉及命令定义变更时，还应执行：
@@ -164,6 +190,7 @@ http://127.0.0.1:5510/cy_idip
 - 登出应保持仅允许 POST。
 - 需要谨慎校验跳转目标、客户端 IP 提取、上传 JSON 大小与内容、命令参数。
 - 生产模式必须显式配置 `DJANGO_SECRET_KEY` 和 `DJANGO_ALLOWED_HOSTS`。
+- 项目级路由包含兜底 404；新增路由时避免破坏 `/gmtool/`、`/i18n/`、`/jsi18n/` 和根路径重定向。
 
 ## Git 协作
 
