@@ -15,29 +15,25 @@
 
 3. 配置claude-code
     C:\Users\helin\.claude\settings.json
-    {
-        "env": {
-            "ANTHROPIC_BASE_URL": "https://www.right.codes/claude-aws",
-            "ANTHROPIC_AUTH_TOKEN": "xxx",
-            "ANTHROPIC_MODEL": "claude-opus-4-6",
-            "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6",
-            "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-6",
-            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-6",
-            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-            "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90",
-            "CLAUDE_CODE_EFFORT_LEVEL": "max",
-            "API_TIMEOUT_MS": "600000"
-        },
-        "includeCoAuthoredBy": false,
-        "theme": "dark"
-    }
+        {
+            "env": {
+                "ANTHROPIC_BASE_URL": "https://www.right.codes/claude-aws",
+                "ANTHROPIC_AUTH_TOKEN": "xxx",
+                "ANTHROPIC_MODEL": "claude-opus-4-6",
+                "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6",
+                "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-opus-4-6",
+                "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-opus-4-6",
+                "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+                "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90",
+                "CLAUDE_CODE_EFFORT_LEVEL": "max",
+                "API_TIMEOUT_MS": "600000"
+            },
+            "includeCoAuthoredBy": false,
+            "theme": "dark"
+        }
 
 4. 配置codex
     C:\Users\helin\.codex\config.toml
-        {
-            "OPENAI_API_KEY": "xxx"
-        }
-
         model_provider = "custom"
         model = "gpt-5.5"
         model_reasoning_effort = "xhigh"
@@ -61,3 +57,6 @@
         base_url = "https://api.deepseek.com"
         default_text_model = "deepseek-v4-pro"
         reasoning_effort = "max"
+        locale = "zh-Hans"
+        theme = "deepseek-dark"
+        show_cost = true
