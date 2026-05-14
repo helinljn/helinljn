@@ -27,7 +27,8 @@
    - 数字过长的数字/符号混合串
 5. 去重并排序；
 6. 可选执行更激进的二次裁剪；
-7. 输出优化词库、删除报告、统计报告和分析报告。
+7. 输出优化词库、删除报告、统计报告和分析报告；
+8. 可选输出高误伤风险候选和长词覆盖候选，辅助人工复核。
 
 说明：
 - 本脚本面向“敏感词词库”场景，不是通用文本处理工具。
@@ -68,6 +69,11 @@ DEFAULT_MIN_LENGTH = 1
 DEFAULT_MAX_LENGTH = 9
 DEFAULT_OUTPUT = "optimized_dict.txt"
 DEFAULT_CONTAINS_MIN_SUBWORD_LEN = 2
+DEFAULT_RISK_MAX_WORD_LEN = 2
+DEFAULT_RISK_MIN_CONTAINING_WORDS = 5
+DEFAULT_COVERED_LONG_WORD_MIN_LEN = 4
+DEFAULT_COVERED_CORE_MIN_LEN = 2
+DEFAULT_REPORT_SAMPLE_LIMIT = 12
 OUTPUT_ENCODING = "utf-8"
 
 URL_RE = re.compile(
@@ -127,6 +133,8 @@ class OptimizationStats:
 
     contains_candidate_groups: int = 0
     contains_candidate_pairs: int = 0
+    risk_candidate_words: int = 0
+    covered_long_word_candidates: int = 0
 
     def total_filtered(self) -> int:
         """返回第一阶段过滤总数。"""
@@ -170,6 +178,8 @@ class OptimizationStats:
             "normalization_collision_entries": self.normalization_collision_entries,
             "contains_candidate_groups": self.contains_candidate_groups,
             "contains_candidate_pairs": self.contains_candidate_pairs,
+            "risk_candidate_words": self.risk_candidate_words,
+            "covered_long_word_candidates": self.covered_long_word_candidates,
         }
 
 
@@ -184,6 +194,24 @@ class OptimizationContext:
     primary_words: set[str] = field(default_factory=set)
     final_words: set[str] = field(default_factory=set)
     removal_records: list[RemovalRecord] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class RiskCandidate:
+    """人工复核用的高误伤风险候选。"""
+
+    word: str
+    category: str
+    containing_word_count: int
+    examples: list[str]
+
+
+@dataclass(frozen=True)
+class CoveredLongWordCandidate:
+    """可能已被短核心词覆盖的长词候选。"""
+
+    word: str
+    core_words: list[str]
 
 
 def detect_encoding(data: bytes) -> Optional[str]:
@@ -399,6 +427,63 @@ def sort_words(words: Iterable[str], reverse: bool = False) -> list[str]:
     return sorted(words, reverse=reverse)
 
 
+def is_ascii_letter(char: str) -> bool:
+    """判断字符是否为 ASCII 字母。"""
+    return ("a" <= char <= "z") or ("A" <= char <= "Z")
+
+
+def is_cjk_char(char: str) -> bool:
+    """判断字符是否为基础 CJK 统一表意文字。"""
+    return "\u4e00" <= char <= "\u9fff"
+
+
+def has_ascii_letter(text: str) -> bool:
+    """判断文本是否包含 ASCII 字母。"""
+    return any(is_ascii_letter(char) for char in text)
+
+
+def has_digit(text: str) -> bool:
+    """判断文本是否包含数字。"""
+    return any(char.isdigit() for char in text)
+
+
+def is_cjk_only(text: str) -> bool:
+    """判断文本是否只包含基础 CJK 字符。"""
+    return bool(text) and all(is_cjk_char(char) for char in text)
+
+
+def classify_word_shape(word: str) -> str:
+    """按人工复核价值对词形做粗分类。"""
+    if len(word) == 1:
+        return "single_char"
+
+    if has_digit(word) and has_ascii_letter(word):
+        return "digit_ascii_mix"
+
+    if has_digit(word):
+        return "has_digit"
+
+    if has_ascii_letter(word):
+        return "has_ascii_letter"
+
+    if is_cjk_only(word):
+        return "cjk_only"
+
+    return "mixed_unicode"
+
+
+def iter_subwords(word: str, min_subword_length: int) -> Iterable[str]:
+    """枚举词条内部子串，不包含词条自身。"""
+    word_length = len(word)
+
+    for start in range(word_length):
+        for end in range(start + min_subword_length, word_length + 1):
+            if start == 0 and end == word_length:
+                continue
+
+            yield word[start:end]
+
+
 def build_normalization_collision_groups(
     normalized_to_raws: Dict[str, list[str]]
 ) -> dict[str, list[str]]:
@@ -440,21 +525,118 @@ def build_contains_candidates(
             continue
 
         subwords: set[str] = set()
-        word_length = len(word)
-
-        for start in range(word_length):
-            for end in range(start + min_subword_length, word_length + 1):
-                if start == 0 and end == word_length:
-                    continue
-
-                sub = word[start:end]
-                if sub != word and sub in word_set:
-                    subwords.add(sub)
+        for sub in iter_subwords(word, min_subword_length):
+            if sub in word_set:
+                subwords.add(sub)
 
         if subwords:
             result[word] = sorted(subwords, key=lambda item: (len(item), item))
 
     return result
+
+
+def build_contained_by_index(
+    words: set[str],
+    min_subword_length: int,
+) -> dict[str, list[str]]:
+    """构建“短词 -> 包含它的长词列表”的反向索引。"""
+    word_set = set(words)
+    contained_by: DefaultDict[str, set[str]] = defaultdict(set)
+
+    for word in sort_words(word_set):
+        if len(word) <= min_subword_length:
+            continue
+
+        for sub in iter_subwords(word, min_subword_length):
+            if sub in word_set:
+                contained_by[sub].add(word)
+
+    return {
+        word: sorted(containing_words, key=lambda item: (len(item), item))
+        for word, containing_words in contained_by.items()
+    }
+
+
+def build_risk_candidates(
+    words: set[str],
+    contained_by: dict[str, list[str]],
+    max_word_length: int,
+    min_containing_words: int,
+    sample_limit: int,
+) -> list[RiskCandidate]:
+    """构建高误伤风险候选，供人工复核。"""
+    candidates: list[RiskCandidate] = []
+
+    for word in sort_words(words):
+        containing_words = contained_by.get(word, [])
+        is_short = len(word) <= max_word_length
+        is_highly_contained = len(containing_words) >= min_containing_words
+
+        if not is_short and not is_highly_contained:
+            continue
+
+        if len(word) == 1:
+            category = "single_char"
+        elif is_short and is_highly_contained:
+            category = "short_high_containment"
+        elif is_short:
+            category = "short_word"
+        else:
+            category = "high_containment"
+
+        candidates.append(
+            RiskCandidate(
+                word=word,
+                category=category,
+                containing_word_count=len(containing_words),
+                examples=containing_words[:sample_limit],
+            )
+        )
+
+    return sorted(
+        candidates,
+        key=lambda item: (
+            0 if item.category == "single_char" else 1,
+            -item.containing_word_count,
+            len(item.word),
+            item.word,
+        ),
+    )
+
+
+def build_covered_long_word_candidates(
+    words: set[str],
+    contains_candidates: dict[str, list[str]],
+    min_word_length: int,
+    min_core_word_length: int,
+) -> list[CoveredLongWordCandidate]:
+    """构建可能已被短核心词覆盖的长词候选。"""
+    candidates: list[CoveredLongWordCandidate] = []
+    word_set = set(words)
+
+    for word in sort_words(word_set):
+        if len(word) < min_word_length:
+            continue
+
+        core_words = [
+            sub
+            for sub in contains_candidates.get(word, [])
+            if len(sub) >= min_core_word_length
+        ]
+        if not core_words:
+            continue
+
+        candidates.append(
+            CoveredLongWordCandidate(
+                word=word,
+                core_words=sorted(core_words, key=lambda item: (-len(item), item)),
+            )
+        )
+
+    return sorted(
+        candidates,
+        key=lambda item: (-len(item.core_words), -len(item.word), item.word),
+    )
 
 
 def apply_aggressive_cleanup(
@@ -574,6 +756,51 @@ def write_contains_candidate_report(
             f.write("\n")
 
 
+def write_risk_candidate_report(
+    report_file: Path,
+    risk_candidates: list[RiskCandidate],
+) -> None:
+    """输出高误伤风险候选报告。"""
+    with open(report_file, "w", encoding=OUTPUT_ENCODING, newline="") as f:
+        f.write("# Risk Candidate Report\n")
+        f.write("# review_only=true\n")
+        f.write(f"# count={len(risk_candidates)}\n\n")
+
+        for candidate in risk_candidates:
+            f.write(f"[word] {candidate.word}\n")
+            f.write(f"  - category: {candidate.category}\n")
+            f.write(f"  - shape: {classify_word_shape(candidate.word)}\n")
+            f.write(f"  - length: {len(candidate.word)}\n")
+            f.write(
+                f"  - containing_word_count: "
+                f"{candidate.containing_word_count}\n"
+            )
+            for example in candidate.examples:
+                f.write(f"  - example_contains: {example}\n")
+            f.write("\n")
+
+
+def write_covered_long_word_report(
+    report_file: Path,
+    candidates: list[CoveredLongWordCandidate],
+    sample_limit: int,
+) -> None:
+    """输出可能已被短核心词覆盖的长词候选报告。"""
+    with open(report_file, "w", encoding=OUTPUT_ENCODING, newline="") as f:
+        f.write("# Covered Long Word Candidate Report\n")
+        f.write("# review_only=true\n")
+        f.write("# note=Deleting these words may change find_all/replace ranges.\n")
+        f.write(f"# count={len(candidates)}\n\n")
+
+        for candidate in candidates:
+            f.write(f"[word] {candidate.word}\n")
+            f.write(f"  - length: {len(candidate.word)}\n")
+            f.write(f"  - core_word_count: {len(candidate.core_words)}\n")
+            for core_word in candidate.core_words[:sample_limit]:
+                f.write(f"  - covered_by: {core_word}\n")
+            f.write("\n")
+
+
 def write_removed_report(report_file: Path, removal_records: list[RemovalRecord]) -> None:
     """输出删除词条及原因报告。"""
     with open(report_file, "w", encoding=OUTPUT_ENCODING, newline="") as f:
@@ -617,6 +844,11 @@ def write_summary_report(
             f"- contains_candidate_groups: {stats.contains_candidate_groups}\n"
         )
         f.write(f"- contains_candidate_pairs: {stats.contains_candidate_pairs}\n")
+        f.write(f"- risk_candidate_words: {stats.risk_candidate_words}\n")
+        f.write(
+            f"- covered_long_word_candidates: "
+            f"{stats.covered_long_word_candidates}\n"
+        )
 
 
 def write_stats_json(stats_file: Path, stats: OptimizationStats) -> None:
@@ -648,7 +880,14 @@ def optimize_dictionary(
     report_dir: Optional[str] = None,
     report_normalization_collisions: bool = False,
     report_contains_candidates: bool = False,
+    report_risk_candidates: bool = False,
+    report_covered_long_words: bool = False,
     contains_min_subword_length: int = DEFAULT_CONTAINS_MIN_SUBWORD_LEN,
+    risk_max_word_len: int = DEFAULT_RISK_MAX_WORD_LEN,
+    risk_min_containing_words: int = DEFAULT_RISK_MIN_CONTAINING_WORDS,
+    covered_long_word_min_len: int = DEFAULT_COVERED_LONG_WORD_MIN_LEN,
+    covered_core_min_len: int = DEFAULT_COVERED_CORE_MIN_LEN,
+    report_sample_limit: int = DEFAULT_REPORT_SAMPLE_LIMIT,
     stats_json: Optional[str] = None,
     removed_report: Optional[str] = None,
     summary_report: Optional[str] = None,
@@ -717,6 +956,13 @@ def optimize_dictionary(
 
     collision_groups: dict[str, list[str]] = {}
     contains_candidates: dict[str, list[str]] = {}
+    contained_by_index: dict[str, list[str]] = {}
+    risk_candidates: list[RiskCandidate] = []
+    covered_long_word_candidates: list[CoveredLongWordCandidate] = []
+    needs_contains_analysis = (
+        report_contains_candidates
+        or report_covered_long_words
+    )
 
     if report_normalization_collisions:
         collision_groups = build_normalization_collision_groups(
@@ -727,14 +973,41 @@ def optimize_dictionary(
             len(raws) for raws in collision_groups.values()
         )
 
-    if report_contains_candidates:
+    if needs_contains_analysis:
         contains_candidates = build_contains_candidates(
             context.final_words,
             min_subword_length=contains_min_subword_length,
         )
+
+    if report_contains_candidates:
         context.stats.contains_candidate_groups = len(contains_candidates)
         context.stats.contains_candidate_pairs = sum(
             len(items) for items in contains_candidates.values()
+        )
+
+    if report_risk_candidates:
+        contained_by_index = build_contained_by_index(
+            context.final_words,
+            min_subword_length=1,
+        )
+        risk_candidates = build_risk_candidates(
+            context.final_words,
+            contained_by=contained_by_index,
+            max_word_length=risk_max_word_len,
+            min_containing_words=risk_min_containing_words,
+            sample_limit=report_sample_limit,
+        )
+        context.stats.risk_candidate_words = len(risk_candidates)
+
+    if report_covered_long_words:
+        covered_long_word_candidates = build_covered_long_word_candidates(
+            context.final_words,
+            contains_candidates=contains_candidates,
+            min_word_length=covered_long_word_min_len,
+            min_core_word_length=covered_core_min_len,
+        )
+        context.stats.covered_long_word_candidates = len(
+            covered_long_word_candidates
         )
 
     if report_path is not None:
@@ -750,6 +1023,19 @@ def optimize_dictionary(
             write_contains_candidate_report(
                 report_path / "contains_candidates.txt",
                 contains_candidates,
+            )
+
+        if report_risk_candidates:
+            write_risk_candidate_report(
+                report_path / "risk_candidates.txt",
+                risk_candidates,
+            )
+
+        if report_covered_long_words:
+            write_covered_long_word_report(
+                report_path / "covered_long_words.txt",
+                covered_long_word_candidates,
+                sample_limit=report_sample_limit,
             )
 
         if removed_report is None:
@@ -834,6 +1120,17 @@ def optimize_dictionary(
             f"候选关系 {context.stats.contains_candidate_pairs:>8} 条"
         )
 
+    if report_risk_candidates:
+        print(
+            f"误伤风险候选: {context.stats.risk_candidate_words:>8} 条"
+        )
+
+    if report_covered_long_words:
+        print(
+            f"长词覆盖候选: "
+            f"{context.stats.covered_long_word_candidates:>8} 条"
+        )
+
     print("-" * 40)
 
 
@@ -886,12 +1183,67 @@ def parse_args() -> argparse.Namespace:
         help="输出包含关系候选报告。",
     )
     parser.add_argument(
+        "--report-risk-candidates",
+        action="store_true",
+        help="输出高误伤风险候选报告，只用于人工复核，不自动删除。",
+    )
+    parser.add_argument(
+        "--report-covered-long-words",
+        action="store_true",
+        help="输出可能已被短核心词覆盖的长词候选报告，只用于人工复核。",
+    )
+    parser.add_argument(
         "--contains-min-subword-len",
         type=int,
         default=DEFAULT_CONTAINS_MIN_SUBWORD_LEN,
         help=(
             "包含关系分析时，参与判断的最短子词长度 "
             f"(默认: {DEFAULT_CONTAINS_MIN_SUBWORD_LEN})"
+        ),
+    )
+    parser.add_argument(
+        "--risk-max-word-len",
+        type=int,
+        default=DEFAULT_RISK_MAX_WORD_LEN,
+        help=(
+            "误伤风险报告中直接纳入复核的最大短词长度 "
+            f"(默认: {DEFAULT_RISK_MAX_WORD_LEN})"
+        ),
+    )
+    parser.add_argument(
+        "--risk-min-containing-words",
+        type=int,
+        default=DEFAULT_RISK_MIN_CONTAINING_WORDS,
+        help=(
+            "误伤风险报告中，高频被包含候选的最小长词数量 "
+            f"(默认: {DEFAULT_RISK_MIN_CONTAINING_WORDS})"
+        ),
+    )
+    parser.add_argument(
+        "--covered-long-word-min-len",
+        type=int,
+        default=DEFAULT_COVERED_LONG_WORD_MIN_LEN,
+        help=(
+            "长词覆盖报告中参与分析的最小长词长度 "
+            f"(默认: {DEFAULT_COVERED_LONG_WORD_MIN_LEN})"
+        ),
+    )
+    parser.add_argument(
+        "--covered-core-min-len",
+        type=int,
+        default=DEFAULT_COVERED_CORE_MIN_LEN,
+        help=(
+            "长词覆盖报告中短核心词的最小长度 "
+            f"(默认: {DEFAULT_COVERED_CORE_MIN_LEN})"
+        ),
+    )
+    parser.add_argument(
+        "--report-sample-limit",
+        type=int,
+        default=DEFAULT_REPORT_SAMPLE_LIMIT,
+        help=(
+            "风险/覆盖报告中每个候选最多输出的示例数量 "
+            f"(默认: {DEFAULT_REPORT_SAMPLE_LIMIT})"
         ),
     )
     parser.add_argument(
@@ -950,6 +1302,26 @@ def main() -> int:
         print("错误: --contains-min-subword-len 不能小于 1")
         return 1
 
+    if args.risk_max_word_len < 1:
+        print("错误: --risk-max-word-len 不能小于 1")
+        return 1
+
+    if args.risk_min_containing_words < 1:
+        print("错误: --risk-min-containing-words 不能小于 1")
+        return 1
+
+    if args.covered_long_word_min_len < 1:
+        print("错误: --covered-long-word-min-len 不能小于 1")
+        return 1
+
+    if args.covered_core_min_len < 1:
+        print("错误: --covered-core-min-len 不能小于 1")
+        return 1
+
+    if args.report_sample_limit < 1:
+        print("错误: --report-sample-limit 不能小于 1")
+        return 1
+
     if mode == CleanMode.SAFE and (args.drop_single_char or args.drop_contained_candidates):
         print("错误: --drop-single-char / --drop-contained-candidates 仅适用于 aggressive 模式")
         return 1
@@ -964,7 +1336,14 @@ def main() -> int:
         report_dir=args.report_dir,
         report_normalization_collisions=args.report_normalization_collisions,
         report_contains_candidates=args.report_contains_candidates,
+        report_risk_candidates=args.report_risk_candidates,
+        report_covered_long_words=args.report_covered_long_words,
         contains_min_subword_length=args.contains_min_subword_len,
+        risk_max_word_len=args.risk_max_word_len,
+        risk_min_containing_words=args.risk_min_containing_words,
+        covered_long_word_min_len=args.covered_long_word_min_len,
+        covered_core_min_len=args.covered_core_min_len,
+        report_sample_limit=args.report_sample_limit,
         stats_json=args.stats_json,
         removed_report=args.removed_report,
         summary_report=args.summary_report,
