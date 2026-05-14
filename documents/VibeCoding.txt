@@ -37,6 +37,11 @@
         }
 
 4. 配置codex
+    C:\Users\helin\.codex\auth.json
+        {
+            "OPENAI_API_KEY": "xxx"
+        }
+
     C:\Users\helin\.codex\config.toml
         model_provider = "custom"
         model = "gpt-5.5"
