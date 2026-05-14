@@ -79,6 +79,9 @@ conda config --add channels defaults
     导出当前环境的所有依赖到文件(不导出构建号)
     conda env export --no-builds > environment.yml
 
+    导出当前环境显式安装的包列表
+    conda env export --from-history > history.yml
+
     一键安装(重建环境)，根据yml文件创建新环境
     conda env create -f environment.yml
 
