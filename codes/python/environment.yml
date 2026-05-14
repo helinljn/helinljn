@@ -37,6 +37,7 @@ dependencies:
   - openssl=3.6.2
   - packaging=26.2
   - pip=26.1.1
+  - pipdeptree=2.35.2
   - polib=1.2.0
   - pysocks=1.7.1
   - python=3.12.13
