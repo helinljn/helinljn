@@ -53,7 +53,7 @@ TEST_SUITE("sensitive word usage")
         CHECK(engine1.replace("你怕是个大傻傻傻逼逼逼吧", longest_opts) == "你怕是个大******吧");
         CHECK(engine1.replace("ⒻⒻⒻfⓤuⓤ⒰cⓒ⒦ you!", longest_opts) == "*********** you!");
         CHECK(engine1.replace("FFFUUUCCCKKK you!", longest_opts) == "************ you!");
-        CHECK(engine.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
+        CHECK(engine1.replace(text) == "****迎风飘扬，***的画像屹立在***前。");
         CHECK(engine1.replace("64事件", longest_opts) == "****");
         CHECK(engine1.replace("我草泥马", longest_opts) == "**泥马");
         CHECK(engine1.replace("草泥女马", longest_opts) == "*泥**");
@@ -62,7 +62,7 @@ TEST_SUITE("sensitive word usage")
         engine1.add_allow_word("小草");
         engine1.add_allow_word("草地");
         CHECK(engine1.replace("小草草地艹", longest_opts) == "小草草地*");
-        CHECK(engine.replace("草-草-草") == "*-*-*");
+        CHECK(engine1.replace("草-草-草") == "*-*-*");
 
         engine1.remove_allow_word("草地");
         engine1.add_word("草");
