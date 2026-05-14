@@ -38,7 +38,7 @@
     "editor.detectIndentation": true,
     "editor.insertSpaces": true,
     "editor.stickyTabStops": true,
-    "editor.renderWhitespace": "all",
+    "editor.renderWhitespace": "selection",
     "editor.renderControlCharacters": true,
     "editor.trimAutoWhitespace": true,
     "editor.smoothScrolling": true,
