@@ -35,11 +35,10 @@ npm -v
     npm cache clean --force
 
 # 安装TypeScript常用全局工具
-npm i -g typescript@latest
+npm i -g typescript@6.0.3
+npm i -g ts-node@10.9.2
 npm i -g tsx@latest
-npm i -g ts-node@latest
 npm i -g pnpm@latest
-npm i -g yarn@latest
 
 # 查看和更新全局包
     查看全局包：
@@ -49,7 +48,7 @@ npm i -g yarn@latest
     npm outdated -g
 
     更新常用包：
-    npm i -g typescript@latest tsx@latest ts-node@latest pnpm@latest yarn@latest
+    npm i -g tsx@latest pnpm@latest
 
     卸载全局包：
     npm uninstall -g xxx
