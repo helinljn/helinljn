@@ -1,0 +1,13 @@
+.build
+*.def
+*.sln
+brynet
+distorm
+doctest
+funchook
+jsoncpp
+mimalloc
+nanobench
+opencc
+spdlog
+utfcpp
