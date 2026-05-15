@@ -1,0 +1,171 @@
+# TypeScript环境搭建，依赖nodejs
+# 如果已按VibeCoding.txt安装nodejs，可跳过nodejs安装
+https://nodejs.cn/download
+
+# 安装nodejs
+    Windows:
+        首选zip版，例如：node-v24.15.0-win-x64.zip
+        解压到：C:\ProgramData\node-v24.15.0-win-x64
+
+        用户变量Path中添加：
+        C:\ProgramData\node-v24.15.0-win-x64
+
+    Linux:
+        vi ~/.bashrc
+
+        # nodejs
+        export NODE_HOME=/usr/local/node
+        export PATH=$NODE_HOME/bin:$PATH
+
+# 验证nodejs和npm
+node -v
+npm -v
+
+# npm源
+    查看当前源：
+    npm config get registry
+
+    更换淘宝源：
+    npm config set registry https://registry.npmmirror.com
+
+    恢复官方源：
+    npm config set registry https://registry.npmjs.org/
+
+    清理缓存：
+    npm cache clean --force
+
+# 安装TypeScript常用全局工具
+npm i -g typescript@latest
+npm i -g tsx@latest
+npm i -g ts-node@latest
+npm i -g pnpm@latest
+npm i -g yarn@latest
+
+# 查看和更新全局包
+    查看全局包：
+    npm ls -g --depth=0
+
+    查看可更新包：
+    npm outdated -g
+
+    更新常用包：
+    npm i -g typescript@latest tsx@latest ts-node@latest pnpm@latest yarn@latest
+
+    卸载全局包：
+    npm uninstall -g xxx
+
+# pnpm配置(可选)
+    查看当前源：
+    pnpm config get registry
+
+    更换淘宝源：
+    pnpm config set registry https://registry.npmmirror.com
+
+    恢复官方源：
+    pnpm config set registry https://registry.npmjs.org/
+
+    查看store目录：
+    pnpm store path
+
+# TypeScript常用命令
+    查看版本：
+    tsc -v
+
+    生成tsconfig.json：
+    tsc --init
+
+    类型检查，不输出文件：
+    tsc --noEmit
+
+    监听编译：
+    tsc --watch
+
+    直接运行ts文件：
+    tsx src/index.ts
+    ts-node src/index.ts
+
+# 新建纯TypeScript项目
+    mkdir ts-demo
+    cd ts-demo
+    npm init -y
+    npm i -D typescript tsx @types/node
+    npx tsc --init
+
+    创建目录：
+    mkdir src
+
+    创建文件：src/index.ts
+        console.log("Hello TypeScript")
+
+    package.json常用配置：
+        {
+          "type": "module",
+          "scripts": {
+            "dev": "tsx watch src/index.ts",
+            "start": "tsx src/index.ts",
+            "build": "tsc",
+            "typecheck": "tsc --noEmit"
+          },
+          "devDependencies": {
+            "@types/node": "latest",
+            "tsx": "latest",
+            "typescript": "latest"
+          }
+        }
+
+    tsconfig.json推荐配置：
+        {
+          "compilerOptions": {
+            "target": "ES2022",
+            "module": "NodeNext",
+            "moduleResolution": "NodeNext",
+            "strict": true,
+            "esModuleInterop": true,
+            "skipLibCheck": true,
+            "forceConsistentCasingInFileNames": true,
+            "rootDir": "src",
+            "outDir": "dist"
+          },
+          "include": ["src/**/*.ts"]
+        }
+
+# 新建前端TypeScript项目(Vite)
+    原生TS：
+    npm create vite@latest my-app -- --template vanilla-ts
+
+    React + TS：
+    npm create vite@latest my-react-app -- --template react-ts
+
+    Vue + TS：
+    npm create vite@latest my-vue-app -- --template vue-ts
+
+    启动项目：
+    cd my-app
+    npm i
+    npm run dev
+
+    打包项目：
+    npm run build
+
+# VSCode插件(可选)
+    ESLint
+    Prettier - Code formatter
+    Vue - Official(写Vue时安装)
+
+# ESLint和Prettier(可选)
+    npm i -D eslint prettier typescript-eslint
+    npx eslint --init
+
+# 常见问题
+    如果node、npm、tsc提示不是内部或外部命令：
+        检查Path环境变量是否配置正确，然后重新打开终端
+
+    如果npm install很慢：
+        检查npm config get registry，并切换到https://registry.npmmirror.com
+
+    如果需要关闭npm代理：
+        npm config delete proxy
+        npm config delete https-proxy
+
+    如果全局安装包没有权限：
+        Windows使用管理员终端；Linux推荐使用nvm管理nodejs，避免sudo npm i -g
