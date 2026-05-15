@@ -34,12 +34,6 @@ npm -v
     清理缓存：
     npm cache clean --force
 
-# 安装TypeScript常用全局工具
-npm i -g typescript@6.0.3
-npm i -g ts-node@10.9.2
-npm i -g tsx@latest
-npm i -g pnpm@latest
-
 # 查看和更新全局包
     查看全局包：
     npm ls -g --depth=0
@@ -48,23 +42,10 @@ npm i -g pnpm@latest
     npm outdated -g
 
     更新常用包：
-    npm i -g tsx@latest pnpm@latest
+    npm i -g xxx
 
     卸载全局包：
     npm uninstall -g xxx
-
-# pnpm配置(可选)
-    查看当前源：
-    pnpm config get registry
-
-    更换淘宝源：
-    pnpm config set registry https://registry.npmmirror.com
-
-    恢复官方源：
-    pnpm config set registry https://registry.npmjs.org/
-
-    查看store目录：
-    pnpm store path
 
 # TypeScript常用命令
     查看版本：
@@ -145,15 +126,6 @@ npm i -g pnpm@latest
 
     打包项目：
     npm run build
-
-# VSCode插件(可选)
-    ESLint
-    Prettier - Code formatter
-    Vue - Official(写Vue时安装)
-
-# ESLint和Prettier(可选)
-    npm i -D eslint prettier typescript-eslint
-    npx eslint --init
 
 # 常见问题
     如果node、npm、tsc提示不是内部或外部命令：
