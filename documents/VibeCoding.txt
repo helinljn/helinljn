@@ -62,7 +62,7 @@
         sandbox = "unelevated"
 
 5. 配置gemini
-    C:\Users\helin\.codex\.env
+    C:\Users\helin\.gemini\.env
         GOOGLE_GEMINI_BASE_URL=https://www.right.codes/gemini
         GEMINI_API_KEY=xxx
         GEMINI_MODEL=gemini-3.1-pro-preview
