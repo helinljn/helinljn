@@ -15,6 +15,7 @@
     # 更新包
     npm i -g @anthropic-ai/claude-code@latest
     npm i -g @openai/codex@latest
+    npm i -g @google/gemini-cli@latest
     npm i -g deepseek-tui@latest
 
 3. 配置claude-code
@@ -60,7 +61,13 @@
         [windows]
         sandbox = "unelevated"
 
-5. 配置deepseek-tui
+5. 配置gemini
+    C:\Users\helin\.codex\.env
+        GOOGLE_GEMINI_BASE_URL=https://www.right.codes/gemini
+        GEMINI_API_KEY=xxx
+        GEMINI_MODEL=gemini-3.1-pro-preview
+
+6. 配置deepseek-tui
     C:\Users\helin\.deepseek\config.toml
         api_key = "xxx"
         base_url = "https://api.deepseek.com"
