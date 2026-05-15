@@ -1,0 +1,25 @@
+{
+  "name": "typescript-6-hello",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TypeScript 6.0 tutorial for developers with a C++ background.",
+  "engines": {
+    "node": "24.15.0"
+  },
+  "packageManager": "npm@11.14.1",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "node -e \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\"",
+    "prestart": "npm run build",
+    "start": "node dist/main.js",
+    "prechapter": "npm run build",
+    "chapter": "node dist/main.js chapter",
+    "pretest": "npm run build",
+    "test": "node --test dist/tests/chapters.test.js dist/tests/exercises.test.js dist/tests/projects.test.js"
+  },
+  "devDependencies": {
+    "@types/node": "24.12.4",
+    "typescript": "~6.0.3"
+  }
+}
