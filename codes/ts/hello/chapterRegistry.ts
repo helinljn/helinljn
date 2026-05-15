@@ -19,132 +19,132 @@ import { runExercises as runExercises03 } from "./练习题与答案/exercises_0
 import { runExercises as runExercises04 } from "./练习题与答案/exercises_04_综合.js";
 
 export const CHAPTERS: Chapter[] = [
-  {
-    id: 1,
-    title: "ch01 入门与环境",
-    phase: "基础",
-    path: "01_基础篇/chapter01_入门与环境.ts",
-    run: runChapter01
-  },
-  {
-    id: 2,
-    title: "ch02 变量、基本类型与控制流",
-    phase: "基础",
-    path: "01_基础篇/chapter02_变量类型与控制流.ts",
-    run: runChapter02
-  },
-  {
-    id: 3,
-    title: "ch03 必要的 JS 运行时语义",
-    phase: "JS运行时",
-    path: "02_JS运行时语义篇/chapter03_JS运行时语义.ts",
-    run: runChapter03
-  },
-  {
-    id: 4,
-    title: "ch04 类型系统基础",
-    phase: "类型系统",
-    path: "03_类型系统篇/chapter04_类型系统基础.ts",
-    run: runChapter04
-  },
-  {
-    id: 5,
-    title: "ch05 函数、重载与泛型",
-    phase: "函数泛型",
-    path: "04_函数与泛型篇/chapter05_函数与泛型.ts",
-    run: runChapter05
-  },
-  {
-    id: 6,
-    title: "ch06 面向对象与结构化类型",
-    phase: "OOP",
-    path: "05_面向对象篇/chapter06_面向对象.ts",
-    run: runChapter06
-  },
-  {
-    id: 7,
-    title: "ch07 模块系统与工程配置",
-    phase: "工程",
-    path: "06_模块与工程篇/chapter07_模块与工程.ts",
-    run: runChapter07
-  },
-  {
-    id: 8,
-    title: "ch08 高级类型工具",
-    phase: "高级类型",
-    path: "07_高级类型篇/chapter08_高级类型.ts",
-    run: runChapter08
-  },
-  {
-    id: 9,
-    title: "ch09 Node 运行时与常用 API",
-    phase: "Node API",
-    path: "08_Node运行时与API篇/chapter09_Node运行时与API.ts",
-    run: runChapter09
-  },
-  {
-    id: 10,
-    title: "ch10 异步、事件循环与网络",
-    phase: "异步网络",
-    path: "09_异步与网络篇/chapter10_异步与网络.ts",
-    run: runChapter10
-  },
-  {
-    id: 11,
-    title: "ch11 TypeScript 6.0 工程约束",
-    phase: "TS6",
-    path: "10_TS6工程约束篇/chapter11_TS6工程约束.ts",
-    run: runChapter11
-  },
-  {
-    id: 12,
-    title: "ch12 项目实战前的代码组织与规范",
-    phase: "项目",
-    path: "11_项目实战/chapter12_代码组织与规范.ts",
-    run: runChapter12
-  },
-  {
-    id: 13,
-    title: "ch13 项目1 文件批处理 CLI",
-    phase: "项目",
-    path: "11_项目实战/chapter12_项目1_文件批处理工具/main.ts",
-    run: runFileBatchDemo
-  },
-  {
-    id: 14,
-    title: "ch14 项目2 日志分析 CLI",
-    phase: "项目",
-    path: "11_项目实战/chapter13_项目2_日志分析工具/main.ts",
-    run: runLogAnalyzerDemo
-  },
-  {
-    id: 15,
-    title: "练习01 基础语法",
-    phase: "练习",
-    path: "练习题与答案/exercises_01_基础.ts",
-    run: runExercises01
-  },
-  {
-    id: 16,
-    title: "练习02 类型系统",
-    phase: "练习",
-    path: "练习题与答案/exercises_02_类型系统.ts",
-    run: runExercises02
-  },
-  {
-    id: 17,
-    title: "练习03 泛型与 OOP",
-    phase: "练习",
-    path: "练习题与答案/exercises_03_泛型与OOP.ts",
-    run: runExercises03
-  },
-  {
-    id: 18,
-    title: "练习04 综合练习",
-    phase: "练习",
-    path: "练习题与答案/exercises_04_综合.ts",
-    run: runExercises04
-  }
+    {
+        id: 1,
+        title: "ch01 入门与环境",
+        phase: "基础",
+        path: "01_基础篇/chapter01_入门与环境.ts",
+        run: runChapter01
+    },
+    {
+        id: 2,
+        title: "ch02 变量、基本类型与控制流",
+        phase: "基础",
+        path: "01_基础篇/chapter02_变量类型与控制流.ts",
+        run: runChapter02
+    },
+    {
+        id: 3,
+        title: "ch03 必要的 JS 运行时语义",
+        phase: "JS运行时",
+        path: "02_JS运行时语义篇/chapter03_JS运行时语义.ts",
+        run: runChapter03
+    },
+    {
+        id: 4,
+        title: "ch04 类型系统基础",
+        phase: "类型系统",
+        path: "03_类型系统篇/chapter04_类型系统基础.ts",
+        run: runChapter04
+    },
+    {
+        id: 5,
+        title: "ch05 函数、重载与泛型",
+        phase: "函数泛型",
+        path: "04_函数与泛型篇/chapter05_函数与泛型.ts",
+        run: runChapter05
+    },
+    {
+        id: 6,
+        title: "ch06 面向对象与结构化类型",
+        phase: "OOP",
+        path: "05_面向对象篇/chapter06_面向对象.ts",
+        run: runChapter06
+    },
+    {
+        id: 7,
+        title: "ch07 模块系统与工程配置",
+        phase: "工程",
+        path: "06_模块与工程篇/chapter07_模块与工程.ts",
+        run: runChapter07
+    },
+    {
+        id: 8,
+        title: "ch08 高级类型工具",
+        phase: "高级类型",
+        path: "07_高级类型篇/chapter08_高级类型.ts",
+        run: runChapter08
+    },
+    {
+        id: 9,
+        title: "ch09 Node 运行时与常用 API",
+        phase: "Node API",
+        path: "08_Node运行时与API篇/chapter09_Node运行时与API.ts",
+        run: runChapter09
+    },
+    {
+        id: 10,
+        title: "ch10 异步、事件循环与网络",
+        phase: "异步网络",
+        path: "09_异步与网络篇/chapter10_异步与网络.ts",
+        run: runChapter10
+    },
+    {
+        id: 11,
+        title: "ch11 TypeScript 6.0 工程约束",
+        phase: "TS6",
+        path: "10_TS6工程约束篇/chapter11_TS6工程约束.ts",
+        run: runChapter11
+    },
+    {
+        id: 12,
+        title: "ch12 项目实战前的代码组织与规范",
+        phase: "项目",
+        path: "11_项目实战/chapter12_代码组织与规范.ts",
+        run: runChapter12
+    },
+    {
+        id: 13,
+        title: "ch13 项目1 文件批处理 CLI",
+        phase: "项目",
+        path: "11_项目实战/chapter12_项目1_文件批处理工具/main.ts",
+        run: runFileBatchDemo
+    },
+    {
+        id: 14,
+        title: "ch14 项目2 日志分析 CLI",
+        phase: "项目",
+        path: "11_项目实战/chapter13_项目2_日志分析工具/main.ts",
+        run: runLogAnalyzerDemo
+    },
+    {
+        id: 15,
+        title: "练习01 基础语法",
+        phase: "练习",
+        path: "练习题与答案/exercises_01_基础.ts",
+        run: runExercises01
+    },
+    {
+        id: 16,
+        title: "练习02 类型系统",
+        phase: "练习",
+        path: "练习题与答案/exercises_02_类型系统.ts",
+        run: runExercises02
+    },
+    {
+        id: 17,
+        title: "练习03 泛型与 OOP",
+        phase: "练习",
+        path: "练习题与答案/exercises_03_泛型与OOP.ts",
+        run: runExercises03
+    },
+    {
+        id: 18,
+        title: "练习04 综合练习",
+        phase: "练习",
+        path: "练习题与答案/exercises_04_综合.ts",
+        run: runExercises04
+    }
 ];
 
 export const TEACHING_PHASES = new Set(CHAPTERS.map((chapter) => chapter.phase));
