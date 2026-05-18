@@ -1,6 +1,6 @@
 # TypeScript 6.0 教程改造计划
 
-> 版本: 2.4 | 生成: 2026-05-18 | 最后更新: 2026-05-18
+> 版本: 2.7 | 生成: 2026-05-18 | 最后更新: 2026-05-18
 >
 > **定位**：本文档是 `ts/hello` 教程改造的**唯一总规划**。
 > **规则**：任意 agent 重新打开后，应首先阅读本文档以理解全局目标和当前进度，然后按 Phase 顺序推进，不得偏离。
@@ -374,6 +374,51 @@ await runIfMain(import.meta.url, runChapter);
 
 第七章进度表只记录 Phase 级完成状态。若 Phase 为 pending 但磁盘上已有部分新文件，按 §10.3 和本节 checkpoint 规则恢复，不得仅凭进度表从头覆盖已有可运行文件。
 
+### 3.8 内容质量 Rubric
+
+> 目标：避免生成“行数达标但教学密度不足”的章节。每个章节入口文件必须同时满足以下质量要求。
+
+| 维度 | 必须满足 |
+|------|----------|
+| 概念解释 | 每个小节先用中文注释解释概念、适用场景和边界，再给代码 |
+| C++ 对照 | 每个小节给出 C++ 类比或明确写“无直接对照”，不得只写口号 |
+| 常见坑 | 每章至少包含 2 个常见坑或误区，并说明如何避免 |
+| 可运行 demo | 每个 demo 必须参与 `runChapter()` 执行，输出可读、稳定、无随机失败 |
+| 输出解释 | 关键输出前后必须有注释或 `note()` 解释为什么会得到该结果 |
+| 真实场景 | 每章至少包含 1 个贴近工程实践的小例子，而不是只演示孤立语法 |
+| 类型边界 | 涉及 `any`、断言、类型擦除、运行时 API 时，必须说明 TS 检查范围和 JS/Node 运行时边界 |
+| 线性阅读 | 不引用后续章节才会解释的概念；如确实需要提前出现，必须给“先知道即可”的过渡说明 |
+
+章节行数只是最低约束。若某章覆盖点较多，应优先保证解释完整、demo 可运行和 C++ 对照清晰，不得为了压缩行数删掉关键讲解。
+
+### 3.9 副作用与可重复运行边界
+
+> 目标：所有章节和项目都能被反复运行，且适合纳入全量验收。
+
+| 类型 | 规则 |
+|------|------|
+| 文件系统 | 示例写入临时目录或章节专属 `.tmp` 目录；运行结束必须清理，或明确保留为示例输出并加入 `.gitignore` |
+| 网络与 HTTP | 默认只启动本地 server；不得依赖公网；server 必须在 demo 结束前关闭 |
+| 定时器与异步 | 所有 `setTimeout`、interval、stream、watcher、worker 都必须有退出路径，章节运行不得挂起 |
+| 随机与时间 | 涉及随机数或当前时间时，输出必须稳定；可使用固定种子、固定样例时间或只输出范围说明 |
+| 环境变量 | 不要求用户机器已有特定环境变量；示例应提供 fallback |
+| 子进程 | 只运行跨平台、确定性的命令；不得依赖 shell 私有语法或外部工具 |
+| 资源清理 | 文件句柄、server、watcher、worker、stream 必须关闭；异常路径也要清理 |
+
+若某个 API 无法做到跨平台稳定演示，应把代码写成说明性小 demo，并在注释中解释平台差异，不得让全量验收依赖不稳定行为。
+
+### 3.10 版本敏感内容 Source of Truth
+
+> 当前本地基线：Node.js `24.15.0`，TypeScript `6.0.3`，`tsconfig.json` 使用 `target: "ES2023"`、`module: "NodeNext"`、`lib: ["ES2023", "DOM"]`。
+
+涉及 TypeScript、Node、Web API 或 TC39 预览能力时，必须按以下顺序确认：
+
+1. 先看本仓库 `package.json`、`package-lock.json`、`tsconfig.json`。
+2. 再用本地命令确认：`node --version`、`npm run build`、`npx --no-install tsc --version`、`npx --no-install tsc --all`。
+3. 若 API 在当前 `lib` 或 Node 运行时中不可直接使用，只能写成 feature-detect、说明性代码或注释说明，不得写成默认可运行路径。
+4. 对 `Temporal`、decorators、`using`、`--erasableSyntaxOnly`、fetch/Web API 类型等版本敏感内容，必须在章节中明确“当前教程采用的可运行边界”。
+5. 如果本地验证与记忆中的版本行为冲突，以本地验证结果为准。
+
 ---
 
 ## 四、各章知识点详列
@@ -458,6 +503,9 @@ await runIfMain(import.meta.url, runChapter);
 - interface vs type 取舍指南
 - extends vs &、索引签名、函数类型接口
 - readonly、结构化类型 vs 名义类型
+- excess property checks（对象字面量额外属性检查）vs assignment compatibility（变量赋值兼容）
+- branded/opaque type 模式：用交叉类型模拟名义类型，避免把 userId/orderId 混用
+- variance 基础：函数参数逆变、方法参数双变的历史兼容性、回调类型设计注意事项
 
 **ch12_泛型**
 - 泛型函数、约束 extends、泛型接口/别名
@@ -503,6 +551,9 @@ await runIfMain(import.meta.url, runChapter);
 - throw、try-catch-finally、Error 层级
 - 自定义错误类、catch 类型 unknown
 - Promise 异常、Error.cause
+- throw vs Result/Either 风格：库代码、CLI、HTTP handler 中的取舍
+- 自定义错误码、可恢复/不可恢复错误分类、CLI exit code 设计
+- async 边界统一捕获：顶层 `runChapter()`、HTTP handler、项目入口如何收敛异常
 - C++ 对照 + 异步思维提示
 
 ### 06_模块与工程篇（ch19-21）
@@ -510,11 +561,20 @@ await runIfMain(import.meta.url, runChapter);
 **ch19_模块系统**
 - ESM import/export、默认 vs 命名、import type
 - import.meta、CJS 简要、互操作、.js 后缀规则
+- NodeNext ESM 实战：`"type": "module"`、`module: "NodeNext"`、`moduleResolution: "NodeNext"` 的联动
+- TS 源码中相对导入写 `.js` 后缀的原因：类型检查源码、运行时加载 dist JS
+- `package.json` 的 `exports` / `imports`、Node subpath imports（含 `#/` 前缀概念）
+- JSON import attributes：使用 `with { type: "json" }`，不使用已弃用的 `assert { type: "json" }`
+- CJS/ESM interop 限制：默认导入、命名导入、动态 import、require(ESM) 的边界
 - barrel export、C++ 对照：#include vs 模块
 
 **ch20_工程配置与声明文件**
 - tsconfig.json 核心选项、tsc --init、references
 - .d.ts 声明文件、declare、@types
+- 类型声明产物：`declaration`、`declarationMap`、`emitDeclarationOnly`、`declarationDir`
+- 库发布基础：package `types` 字段、`exports` 搭配类型、源码/产物目录分离
+- 消费方类型体验：只暴露公共 API，避免把内部 helper 类型泄漏到 `.d.ts`
+- npm 依赖管理：semver、`package-lock.json`、`npm ci` vs `npm install`、`npm outdated`、安全升级策略
 - C++ 对照：头文件 vs 声明文件
 
 **ch21_装饰器**
@@ -572,6 +632,7 @@ await runIfMain(import.meta.url, runChapter);
 - path 模块：`join`、`resolve`、`dirname`、`basename`、`extname`、`parse`、`normalize`、`relative`
 - `__dirname` vs `import.meta.dirname`（ESM 中的差异：`__dirname` 不可用）
 - process：`argv`（CLI 参数，前两个是 node 路径和脚本路径）、`env`（环境变量）
+- 配置管理：默认值、环境变量、CLI 参数、配置文件的优先级；secret 不写入源码或日志
 - `cwd()` vs `import.meta.dirname`（当前工作目录 vs 脚本所在目录）
 - `exit(code)`、`platform`、`arch`
 - `process.stdout` / `stderr` / `stdin`
@@ -594,6 +655,11 @@ await runIfMain(import.meta.url, runChapter);
 - 响应对象：`writeHead(statusCode, headers)`、`end(body)`
 - `fetch`（Node 18+ 内置）：GET/POST、自定义 headers、`response.json()`
 - URL 解析：`new URL(urlString)`、searchParams
+- 请求体读取与 runtime validation：外部 JSON 先按 `unknown` 处理，再通过 type guard 转为业务类型
+- HTTP 错误处理：400/404/500 的职责边界、错误响应不泄漏内部栈
+- 安全基础：路径遍历、命令注入、请求体大小限制、只启动本地 server 做 demo
+- HTTP 后端最小闭环：routing、middleware 概念、health check、graceful shutdown
+- API 契约：JSON Schema/OpenAPI 的概念边界，说明如何约束请求/响应但不强制引入依赖
 - https 基础（证书概念简述，不深入）
 - Server-Sent Events（SSE）入门：`Content-Type: text/event-stream`
 - [异步] C++ 思维提示：C++ 网络编程通常每连接一个线程或使用 asio；Node 的 HTTP 服务器天然异步，每个请求只是事件循环中的一个任务
@@ -608,6 +674,7 @@ await runIfMain(import.meta.url, runChapter);
 - 密码哈希：`pbkdf2(password, salt, iterations, keylen, digest)` — 故意慢以抵抗暴力破解
 - `scrypt` 简介（内存硬哈希，更强）
 - 对称加密入门：`createCipheriv("aes-256-gcm", key, iv)` / `createDecipheriv`
+- 安全边界：hash 不等于 encryption、不要自创密码学、secret 不写入源码或日志
 - C++ 对照：OpenSSL C API vs crypto 模块
 
 **ch31_流** [异步]
@@ -620,6 +687,8 @@ await runIfMain(import.meta.url, runChapter);
 - 压缩流：`zlib.createGzip()` / `createGunzip()` 配合 pipeline
 - `readline.createInterface` 逐行处理大文件
 - 自定义 Transform 流（如实现大小写转换）
+- stream cleanup：`pipeline`/`finished` 处理错误和关闭资源，避免文件句柄泄漏
+- async iterable streams：`for await...of` 消费 readable，和 backpressure 的关系
 - [异步] C++ 思维提示：iostream 是同步阻塞的；Node stream 是异步事件驱动的，数据以 chunk 为单位通过事件循环传递
 
 **ch32_日期与时间**
@@ -648,6 +717,8 @@ await runIfMain(import.meta.url, runChapter);
 **ch34_日志与调试**
 - console 深入：`console.log` / `warn` / `error` / `debug` / `info`、`console.table`（表格化数组/对象输出）、`console.time` / `timeEnd`（计时对）
 - 结构化日志：JSON 格式输出规范（timestamp/level/message/context 字段）、`JSON.stringify` 配合 console
+- 日志安全：脱敏 token/password/email/IP，避免把 secret、完整请求体、堆栈细节写入普通日志
+- 可观测性概念：logs、metrics、traces 的职责差异；本教程只实现日志和简单计时，不引入后端监控依赖
 - debug 库：命名空间 `debug("app:db")`、级别控制、`DEBUG` 环境变量（如 `DEBUG=app:*`）
 - Node 调试：`node --inspect`（运行时附加 DevTools）、`node --inspect-brk`（首行暂停）
 - Chrome DevTools：Sources 断点、Watch、Call Stack、Console 交互
@@ -660,6 +731,8 @@ await runIfMain(import.meta.url, runChapter);
 - `node:test` 基本用法：`test(name, fn)`、`describe(name, fn)`、`it(name, fn)`（BDD 风格）
 - 断言：`assert.ok(cond)`、`assert.equal(actual, expected)`、`assert.deepEqual(actual, expected)`（深度比较对象/数组）、`assert.strictEqual(actual, expected)`（=== 比较）、`assert.throws(fn)` / `assert.rejects(promise)`
 - Mock：`mock.method(obj, methodName)`（替换对象方法）、`mock.fn(impl)`（创建 mock 函数）、mock 调用记录（`.mock.calls`）
+- 类型层测试：`// @ts-expect-error`、`satisfies`、compile-only 测试，用来锁定类型契约
+- 测试隔离：临时目录、固定样例数据、确定性时间/随机数、异步测试必须等待资源关闭
 - 覆盖率：`node --experimental-test-coverage --test`、覆盖率报告解读（行/分支/函数覆盖率）
 - 测试文件组织：`*.test.ts` 命名、与源文件同目录或集中 `tests/` 目录
 - C++ 对照：Google Test / Catch2 vs node:test——JS 测试框架内置，无需额外库
@@ -675,12 +748,19 @@ await runIfMain(import.meta.url, runChapter);
   - 同步操作阻塞事件循环（如 `readFileSync` 处理大文件）
   - 内存泄漏（闭包持有大对象、全局变量未释放、EventEmitter 监听器未移除）
   - 不必要的 JSON 序列化/反序列化
+- 轻量可观测性：用计数器、耗时分布、错误率理解服务状态；解释 metrics/tracing 与日志的边界
 - C++ 对照：std::chrono / perf / valgrind vs performance API / --prof
 
 **ch37_TS6工程约束**
-- TS 6.0 版本特性：`using` 声明（显式资源管理，TC39 Stage 3）、`--erasableSyntaxOnly`（禁止运行时语法）
-- TS 5.x → 6.0 迁移要点：`using` 替代手动 `try-finally`、类型推断增强、`--erasableSyntaxOnly` 开启后的限制
+- TS 6.0 迁移重点：`rootDir` 默认变为 tsconfig 所在目录；必要时显式设置 `"rootDir": "."` 或 `"rootDir": "./src"`
+- TS 6.0 迁移重点：`types` 默认不再枚举所有 `@types`；Node 项目应显式写 `"types": ["node"]`
+- TS 6.0 迁移重点：在含 `tsconfig.json` 的目录中执行 `tsc file.ts` 会报错；要么 `tsc -p tsconfig.json`，要么显式 `--ignoreConfig`
+- TS 6.0 弃用项：`moduleResolution: "node"/"node10"`、`moduleResolution: "classic"`、`target: "es5"`、`baseUrl`、`outFile`、AMD/UMD/SystemJS 等旧模块模式
+- TS 5.8 引入的 `--erasableSyntaxOnly`：配合 Node 直接 strip types 的边界；禁止 enum、runtime namespace、parameter properties、`import =`/`export =`
+- import assertions → import attributes：使用 `with { type: "json" }`，不使用 `assert { type: "json" }`
+- 现代 TS/JS 资源管理：`using`/显式资源管理作为现代能力讲解，但不得误写成 TS 6.0 独有特性
 - 版本锁定策略：`package.json` 中 `"typescript": "~6.0.3"`（补丁自动升级）、`package-lock.json` 锁定精确版本
+- 依赖升级工作流：先 `npm outdated` 评估，再小步升级，使用 `npm ci` 复现 lockfile，最后跑 build/test/章节全量验证
 - 与 TS 7 Beta 的边界梳理：`--erasableSyntaxOnly` 默认开启、装饰器 Stage 3 规范、类型导入 elision 行为变更——本教程**不默认采用** TS 7 Beta 行为
 - C++ 对照：C++11/14/17/20 标准版本管理 vs TS 版本演进——TS 向后兼容更好，大版本升级通常零改动
 
@@ -691,22 +771,31 @@ await runIfMain(import.meta.url, runChapter);
 - ESLint + Prettier：安装配置、与 TS 集成、pre-commit hook（lint-staged）
 - 命名规范：文件（kebab-case）、变量/函数（camelCase）、类/接口（PascalCase）、常量（UPPER_SNAKE_CASE）
 - Barrel export：`index.ts` 聚合导出、减少 import 路径深度
+- Runtime validation 组织方式：外部输入层使用 `unknown`，通过 type guard/validator 转成领域类型
+- 配置管理分层：默认配置、环境变量、CLI 参数、配置文件合并；优先级必须可解释、可测试
+- 错误处理分层：domain 返回 Result，入口层决定打印、HTTP status 或 exit code
+- 前端最小闭环：DOM 类型、事件对象、表单输入、fetch、TSX/React 边界（只做概念和最小示例，不展开框架）
+- API 契约与可观测性：把 JSON Schema/OpenAPI、logs/metrics/traces 作为真实项目边界概念介绍
 - Git 工作流：分支策略（main/dev/feature）、commit message 规范（Conventional Commits）
 
 **ch39_项目1_文件批处理CLI**
 - `main.ts` 作为章节入口，导出 `runChapter(): Promise<void>`；可保留 `runFileBatchDemo()` 供测试复用
 - CLI 参数解析（`process.argv` 手写，不使用第三方库）
+- CLI 参数 runtime validation：把字符串参数解析为明确配置类型，错误时返回可读 message 和非 0 exit code
 - 目录遍历（`readdir` 递归）
 - 文本转换（读文件 → 处理 → 写文件）
 - 批量重命名
+- 安全与可靠性：路径遍历防护、输出目录限制、dry-run、覆盖保护、临时文件 + 原子 rename
 - 日志输出、配置文件支持
 
 **ch40_项目2_日志分析CLI**
 - `main.ts` 作为章节入口，导出 `runChapter(): Promise<void>`；可保留 `runLogAnalyzerDemo()` 供测试复用
 - 按行解析（`readline`）
 - 正则提取关键字段
+- 日志行 runtime validation：解析失败行计数、错误样例收集、不中断全量处理
 - 聚合统计（Map 计数、分组）
 - JSON/CSV 报告输出
+- 安全与隐私：日志脱敏、CSV escaping、避免把 token/IP 等敏感数据原样输出到报告
 - 流式处理大文件
 
 ---
@@ -718,6 +807,7 @@ await runIfMain(import.meta.url, runChapter);
 > - 旧文件处理采用**直接删除**（git 可追溯）。
 > - Phase 内各文件按顺序生成，每完成一个文件用 §3.3b 的 build + dist 命令验证可独立运行。
 > - 目录改名、旧文件删除、registry 修改都视为 checkpoint；checkpoint 之后不得留下 import 指向不存在文件的状态。
+> - 目录改名、registry 路径迁移、`npm run build` 必须作为同一个不可中断 checkpoint 完成；若不能一次完成，不得开始目录改名。
 
 ---
 
@@ -736,7 +826,12 @@ await runIfMain(import.meta.url, runChapter);
 - 基础补充 >= 200 行
 - README 指向新 11 阶段、含完整命令
 
-**验收**：目视检查三个文件内容
+**验收 checklist**：
+- `TypeScript学习路线图.md`：列出 40 章完整顺序；每章包含学习目标、核心知识点、建议练习；并明确 11 个阶段的学习路径
+- `TypeScript基础补充.md`：覆盖 TS/JS/Node/Web API 边界、类型擦除、Node ESM、异步模型、版本基线，且不少于 200 行
+- `README.md`：包含环境要求、安装命令、build/test/chapter 运行命令、目录说明、11 阶段学习顺序、重开 agent 后应阅读 `plan.md` 的说明
+- 三个文档不得引用已删除的旧章节编号、旧目录名或旧命令 `npx tsx`
+- `npm run build` 必须仍然通过
 
 **Registry**：Phase 1 不改动 registry（文档不影响编译）
 
@@ -789,7 +884,7 @@ await runIfMain(import.meta.url, runChapter);
 | `05_面向对象篇/chapter17_继承与多态.ts` | 新增 | 纯新建 | |
 | `05_面向对象篇/chapter18_异常处理.ts` | 新增 | 纯新建 | |
 
-**目录改名**（本 Phase 开始立即执行）：
+**目录改名**（本 Phase 开始立即执行，且必须与 registry 路径迁移和 `npm run build` 作为同一个 checkpoint 完成）：
 1. `02_JS运行时语义篇` → `02_JS运行时篇`
 2. `04_函数与泛型篇` → `04_函数篇`
 
@@ -815,7 +910,7 @@ await runIfMain(import.meta.url, runChapter);
 
 ### Phase 4：ch19-37
 
-#### Phase 4a：目录改名（本 Phase 第一步）
+#### Phase 4a：目录改名（本 Phase 第一步，且必须与 registry 路径迁移和 `npm run build` 作为同一个 checkpoint 完成）
 
 > 涉及 08/09 编号互换的目录，必须按以下三步顺序操作：
 
@@ -930,7 +1025,10 @@ await runIfMain(import.meta.url, runChapter);
 **验收步骤**：
 1. `npm run build`
 2. `npm test`
-3. 抽查 5-10 个章节执行 `npm run build` + `node dist/<对应目录>/<入口>.js` 独立运行
+3. 全量运行 40 个教学章节入口：逐个执行 `node dist/<对应目录>/<入口>.js`
+4. 全量做章节质量 checklist：40 个教学章节逐个对照 §3.8 检查知识点覆盖、C++ 对照、常见坑、真实场景和类型边界
+5. 抽查 5-10 个章节做人工深度复核，重点检查讲解密度、线性阅读体验和输出解释
+6. 检查运行后无残留临时目录、未关闭 server、挂起 watcher 或多余输出文件
 
 ---
 
@@ -939,6 +1037,9 @@ await runIfMain(import.meta.url, runChapter);
 - [ ] `npm run build` 编译零错误（tsc --noEmit 等效检查）
 - [ ] `npm test` 全部通过
 - [ ] 所有 40 个章节可通过 §3.3b 的 build + dist 命令独立运行
+- [ ] 所有 40 个章节已按 §3.8 做内容质量复核：讲解、C++ 对照、常见坑、真实场景均达标
+- [ ] 涉及文件、网络、定时器、stream、watcher、worker、子进程的章节符合 §3.9 副作用边界
+- [ ] 涉及版本敏感 API 的章节符合 §3.10，并已按本地 Node/TypeScript 基线验证
 - [ ] 全部章节已在 chapterRegistry.ts 注册
 - [ ] 每个章节入口 `.ts` 文件第一行以 `// ====` 开头（格式规范自动化检查）
 - [ ] 每个章节入口 `.ts` 文件包含 `export function runChapter` 或 `export async function runChapter`
@@ -947,6 +1048,7 @@ await runIfMain(import.meta.url, runChapter);
 - [ ] 学习路线图覆盖 40 章全部知识点
 - [ ] TypeScript基础补充.md >= 200 行
 - [ ] README 含完整命令、11 阶段学习顺序和目录说明
+- [ ] `tests/chapters.test.ts` 或等效脚本从 `chapterRegistry.ts` 枚举 40 个教学章节并逐个运行，避免手工漏跑
 - [ ] 无残留旧文件（旧目录 `02_JS运行时语义篇`、`04_函数与泛型篇`、`07_高级类型篇`、`08_Node运行时与API篇`、`09_异步与网络篇`、`10_TS6工程约束篇` 均不存在）
 - [ ] 无残留临时目录（如 `08_tmp`）
 
@@ -970,16 +1072,16 @@ await runIfMain(import.meta.url, runChapter);
 
 | 旧文件（初始路径） | 执行 Phase 时的实际路径 | 处理 | 阶段 | 删除时机 |
 |--------|------|------|------|----------|
-| `01_基础篇/chapter02_变量类型与控制流.ts` | 同左（此目录不改名） | 删除 | Phase 2 | ch02 新文件创建后 |
-| `02_JS运行时语义篇/chapter03_JS运行时语义.ts` | Phase 3 改名后：`02_JS运行时篇/chapter03_JS运行时语义.ts` | 删除 | Phase 3 | ch06-08 全部完成后 |
-| `03_类型系统篇/chapter04_类型系统基础.ts` | 同左（此目录不改名） | 删除 | Phase 3 | ch09-10 完成后 |
-| `04_函数与泛型篇/chapter05_函数与泛型.ts` | Phase 3 改名后：`04_函数篇/chapter05_函数与泛型.ts` | 删除 | Phase 3 | ch12+ch14 完成后 |
-| `05_面向对象篇/chapter06_面向对象.ts` | 同左（此目录不改名） | 删除 | Phase 3 | ch16 完成后 |
-| `06_模块与工程篇/chapter07_模块与工程.ts` | 同左（此目录不改名） | 删除 | Phase 4 | ch19 完成后 |
-| `07_高级类型篇/chapter08_高级类型.ts` | 同左（Phase 4 才改此目录名，Phase 3 删除时路径不变） | 删除 | Phase 3 | ch13 完成后 |
-| `08_Node运行时与API篇/chapter09_Node运行时与API.ts` | Phase 4a 三步互换后：`09_Node_API篇/chapter09_Node运行时与API.ts` | 删除 | Phase 4 | ch26-33 全部完成后 |
-| `09_异步与网络篇/chapter10_异步与网络.ts` | Phase 4a 三步互换后：`08_异步编程篇/chapter10_异步与网络.ts` | 删除 | Phase 4 | ch23-25+ch29 全部完成后 |
-| `10_TS6工程约束篇/chapter11_TS6工程约束.ts` | Phase 4a 改名后：`10_工程实践篇/chapter11_TS6工程约束.ts` | 删除 | Phase 4 | ch37 完成后 |
+| `01_基础篇/chapter02_变量类型与控制流.ts` | 同左（此目录不改名） | 删除 | Phase 2 | ch02 新文件完成、registry 切换且 build 通过后 |
+| `02_JS运行时语义篇/chapter03_JS运行时语义.ts` | Phase 3 改名后：`02_JS运行时篇/chapter03_JS运行时语义.ts` | 删除 | Phase 3 | ch06-08 全部完成、registry 切换且 build 通过后 |
+| `03_类型系统篇/chapter04_类型系统基础.ts` | 同左（此目录不改名） | 删除 | Phase 3 | ch09-10 完成、registry 切换且 build 通过后 |
+| `04_函数与泛型篇/chapter05_函数与泛型.ts` | Phase 3 改名后：`04_函数篇/chapter05_函数与泛型.ts` | 删除 | Phase 3 | ch12+ch14 完成、registry 切换且 build 通过后 |
+| `05_面向对象篇/chapter06_面向对象.ts` | 同左（此目录不改名） | 删除 | Phase 3 | ch16 完成、registry 切换且 build 通过后 |
+| `06_模块与工程篇/chapter07_模块与工程.ts` | 同左（此目录不改名） | 删除 | Phase 4 | ch19 完成、registry 切换且 build 通过后 |
+| `07_高级类型篇/chapter08_高级类型.ts` | 同左（Phase 4 才改此目录名，Phase 3 删除时路径不变） | 删除 | Phase 3 | ch13 完成、registry 切换且 build 通过后 |
+| `08_Node运行时与API篇/chapter09_Node运行时与API.ts` | Phase 4a 三步互换后：`09_Node_API篇/chapter09_Node运行时与API.ts` | 删除 | Phase 4 | ch26-33 全部完成、registry 切换且 build 通过后 |
+| `09_异步与网络篇/chapter10_异步与网络.ts` | Phase 4a 三步互换后：`08_异步编程篇/chapter10_异步与网络.ts` | 删除 | Phase 4 | ch23-25+ch29 全部完成、registry 切换且 build 通过后 |
+| `10_TS6工程约束篇/chapter11_TS6工程约束.ts` | Phase 4a 改名后：`10_工程实践篇/chapter11_TS6工程约束.ts` | 删除 | Phase 4 | ch37 完成、registry 切换且 build 通过后 |
 | `11_项目实战/chapter12_代码组织与规范.ts` | 同左（此目录不改名） | 删除 | Phase 5 | ch38 已创建、registry 已切换且 build 通过后 |
 | `11_项目实战/chapter12_项目1_文件批处理工具/` | 同左 | 目录重命名→ch39 | Phase 5 | 重命名即完成 |
 | `11_项目实战/chapter13_项目2_日志分析工具/` | 同左 | 目录重命名→ch40 | Phase 5 | 重命名即完成 |
@@ -1052,6 +1154,7 @@ await runIfMain(import.meta.url, runChapter);
 若进度表显示某 Phase 为 `pending`，但该 Phase 的部分文件已存在：
 - 检查已有文件的行数是否达到目标范围
 - 检查已有文件按 §3.3b 是否可运行
+- 检查已有文件是否满足 §3.8 内容质量 Rubric、§3.9 副作用边界和 §3.10 版本边界
 - 检查已有文件是否已在 chapterRegistry.ts 注册
 - 根据检查结果决定从哪个文件继续
 
@@ -1105,7 +1208,8 @@ Phase 4b 涉及 19 个章节文件，若中途中断：
 2. 列出 Phase 4b 文件表（见 §Phase 4b），跳过磁盘上已存在且可按 §3.3b 运行的文件
 3. 从第一个不存在（或存在但无法运行）的文件开始继续生成
 4. 每完成一个文件立即更新 registry（增量注册），确保 registry 状态与磁盘一致
-5. 旧文件删除条件满足时及时删除（见 Phase 4b 旧文件删除表）
+5. 对涉及文件、网络、stream、watcher、worker 的章节额外检查 §3.9，确保可重复运行且不会挂起
+6. 旧文件删除条件满足时及时删除（见 Phase 4b 旧文件删除表）
 
 > 注意：ch29 标注为"基于旧文件改写"，旧文件在三步互换后位于 `08_异步编程篇/chapter10_异步与网络.ts`。若该文件在中断前已被删除但 ch29 尚未完成，agent 应从第四章知识点详列重新生成 ch29。
 
@@ -1129,4 +1233,4 @@ Phase 4b 涉及 19 个章节文件，若中途中断：
 
 ---
 
-*本文档版本 2.4。任何修改须更新版本号和最后更新日期。*
+*本文档版本 2.7。任何修改须更新版本号和最后更新日期。*
