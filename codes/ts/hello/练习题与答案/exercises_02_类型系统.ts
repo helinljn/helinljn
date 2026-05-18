@@ -1,4 +1,4 @@
-import { area, type Shape } from "../03_类型系统篇/chapter04_类型系统基础.js";
+import { area, type Shape } from "../03_类型系统篇/chapter10_联合类型与收窄.js";
 import { runIfMain, section, showJson } from "../shared/chapter.js";
 
 export type CompilerOptionsInput = {
