@@ -100,7 +100,7 @@ function demoRuntimeLayers(): void {
 //   本教程要确认 Node、npm、TypeScript 依赖和 package-lock.json 锁定版本。
 //
 // 当前章节只读取 Node 自身提供的稳定信息，不执行外部命令。
-// 真正的版本验收命令在 plan.md 中规定为：
+// 完整工具链验收命令建议为：
 //   node --version
 //   npm run build
 //   npx --no-install tsc --version

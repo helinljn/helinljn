@@ -86,7 +86,6 @@ node dist/01_基础篇/chapter01_入门与环境.js
 
 ```text
 .
-├── plan.md
 ├── TypeScript学习路线图.md
 ├── TypeScript基础补充.md
 ├── README.md
@@ -109,10 +108,6 @@ node dist/01_基础篇/chapter01_入门与环境.js
 ├── 练习题与答案/
 └── tests/
 ```
-
-当前改造过程以 [plan.md](./plan.md) 为唯一总规划。
-
-任意 agent 重新打开后，应先阅读 `plan.md`，按其中自检清单、进度表、checkpoint 规则和中断恢复指南继续。
 
 ## 章节编号
 
