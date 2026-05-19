@@ -12,7 +12,8 @@
 
 - Node.js `24.15.0`
 - npm `11.14.1`
-- TypeScript `6.0.3`，通过 `package-lock.json` 锁定
+- TypeScript `~6.0.3`，通过 `package-lock.json` 锁定
+- ESLint `^10.4.0`，使用 flat config 配置
 
 确认版本：
 
@@ -21,10 +22,20 @@ node --version
 npm --version
 ```
 
-安装依赖：
+安装依赖。推荐使用 `npm ci`，它会严格按 `package-lock.json` 复现依赖版本：
 
 ```bat
 npm ci
+```
+
+当前开发依赖：
+
+```text
+@eslint/js         ^10.0.1
+@types/node        25.5.0
+eslint             ^10.4.0
+typescript         ~6.0.3
+typescript-eslint  ^8.59.4
 ```
 
 ## 常用命令
@@ -33,6 +44,24 @@ npm ci
 
 ```bat
 npm run build
+```
+
+清理编译产物：
+
+```bat
+npm run clean
+```
+
+检查代码规范：
+
+```bat
+npm run lint
+```
+
+自动修复可修复的 lint 问题：
+
+```bat
+npm run lint:fix
 ```
 
 运行主菜单：
@@ -62,6 +91,20 @@ node dist/01_基础篇/chapter01_入门与环境.js
 
 项目章节入口同样先 build，再运行 dist 中的 `main.js`。
 
+## 代码规范
+
+项目使用 ESLint flat config，配置文件是 `eslint.config.js`。
+
+当前配置重点：
+
+- 对 TypeScript 源码启用 `typescript-eslint` 的类型感知规则。
+- 使用 `tsconfig.json` 作为类型检查上下文。
+- 忽略 `dist/`、`node_modules/`、`coverage/`。
+- 对教程章节和练习文件放宽部分规则，避免教学示例中的 `any`、`var`、未 await Promise 等演示代码被强行改写。
+- 对测试文件放宽 `no-floating-promises`，适配 Node 内置 test runner 的注册写法。
+
+`.editorconfig` 负责编辑器层面的基础格式，例如 UTF-8、4 空格缩进、CRLF 换行和文件末尾换行；ESLint 负责代码质量、类型安全和工程规则。两者职责不同，当前配置不冲突。
+
 ## 学习顺序
 
 推荐按 [TypeScript学习路线图.md](./TypeScript学习路线图.md) 从 ch01 线性读到 ch40。
@@ -89,7 +132,10 @@ node dist/01_基础篇/chapter01_入门与环境.js
 ├── TypeScript学习路线图.md
 ├── TypeScript基础补充.md
 ├── README.md
+├── .editorconfig
+├── eslint.config.js
 ├── package.json
+├── package-lock.json
 ├── tsconfig.json
 ├── main.ts
 ├── chapterRegistry.ts

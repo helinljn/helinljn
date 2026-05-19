@@ -11,6 +11,8 @@
     "scripts": {
         "build": "tsc -p tsconfig.json",
         "clean": "node -e \"import('node:fs').then(fs => fs.rmSync('dist', { recursive: true, force: true }))\"",
+        "lint": "eslint . --max-warnings=0",
+        "lint:fix": "eslint . --fix",
         "prestart": "npm run build",
         "start": "node dist/main.js",
         "prechapter": "npm run build",
@@ -19,8 +21,10 @@
         "test": "node --test dist/tests/chapters.test.js dist/tests/exercises.test.js dist/tests/projects.test.js"
     },
     "devDependencies": {
+        "@eslint/js": "^10.0.1",
         "@types/node": "25.5.0",
         "eslint": "^10.4.0",
-        "typescript": "~6.0.3"
+        "typescript": "~6.0.3",
+        "typescript-eslint": "^8.59.4"
     }
 }
