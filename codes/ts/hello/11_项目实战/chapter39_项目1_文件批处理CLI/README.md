@@ -4,7 +4,7 @@
 
 ```bat
 npm run build
-node dist/11_项目实战/chapter12_项目1_文件批处理工具/main.js --input input --output output --mode upper
+node dist/11_项目实战/chapter39_项目1_文件批处理CLI/main.js --input input --output output --mode upper
 ```
 
 支持模式：

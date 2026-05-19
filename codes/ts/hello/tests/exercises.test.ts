@@ -3,30 +3,36 @@ import test from "node:test";
 import { cartTotal, clamp, extractNumbers, fizzBuzz } from "../练习题与答案/exercises_01_基础.js";
 import { normalizeCompilerOptions, safeParseJson, totalShapeArea } from "../练习题与答案/exercises_02_类型系统.js";
 import { groupBy, MemoryRepository, Stack } from "../练习题与答案/exercises_03_泛型与OOP.js";
-import { summarizeLogText } from "../练习题与答案/exercises_04_综合.js";
+import { parseManyLogLines, summarizeLogText } from "../练习题与答案/exercises_04_综合.js";
 
-test("basic exercises", () => {
+test("basic exercises cover numbers, strings, control flow and arrays", () => {
     assert.equal(clamp(20, 0, 10), 10);
+    assert.equal(clamp(-1, 0, 10), 0);
+    assert.throws(() => clamp(1, 10, 0), /min must be less/);
     assert.deepEqual(extractNumbers("x=-2 y=3.5"), [-2, 3.5]);
     assert.equal(fizzBuzz(15).at(-1), "FizzBuzz");
     assert.equal(cartTotal([{ name: "book", price: 12, quantity: 3 }]), 36);
 });
 
-test("type system exercises", () => {
+test("type system exercises normalize config, parse JSON and aggregate shapes", () => {
     assert.deepEqual(normalizeCompilerOptions({}), {
         strict: true,
         target: "ES2023",
         module: "NodeNext"
     });
+    assert.equal(normalizeCompilerOptions({ strict: false }).strict, false);
     assert.equal(safeParseJson("{\"ok\":true}").ok, true);
+    assert.equal(safeParseJson("{oops").ok, false);
     assert.equal(totalShapeArea([{ kind: "rectangle", width: 2, height: 5 }]), 10);
 });
 
-test("generic and oop exercises", () => {
+test("generic and oop exercises preserve type-safe collection behavior", () => {
     const stack = new Stack<number>();
     stack.push(1);
     stack.push(2);
+    assert.equal(stack.peek(), 2);
     assert.equal(stack.pop(), 2);
+    assert.deepEqual(stack.toArray(), [1]);
 
     assert.deepEqual(groupBy(["ts", "js", "cpp"], (item) => item.length), {
         2: ["ts", "js"],
@@ -36,13 +42,20 @@ test("generic and oop exercises", () => {
     const repo = new MemoryRepository<{ id: string; name: string }>();
     repo.upsert({ id: "u1", name: "Ada" });
     assert.equal(repo.find("u1")?.name, "Ada");
+    assert.equal(repo.delete("u1"), true);
+    assert.equal(repo.find("u1"), undefined);
 });
 
-test("integrated log exercise", () => {
-    const summary = summarizeLogText([
+test("integrated log exercise skips invalid lines and summarizes valid entries", () => {
+    const lines = [
         '127.0.0.1 - - [15/May/2026:10:00:00 +0800] "GET / HTTP/1.1" 200 10 "curl"',
+        "not a log line",
         '127.0.0.1 - - [15/May/2026:10:00:01 +0800] "GET /missing HTTP/1.1" 404 5 "curl"'
-    ].join("\n"));
+    ];
+
+    assert.equal(parseManyLogLines(lines).length, 2);
+
+    const summary = summarizeLogText(lines.join("\n"));
     assert.equal(summary.totalRequests, 2);
     assert.equal(summary.statusCounts["4xx"], 1);
 });

@@ -4,7 +4,7 @@
 
 ```bat
 npm run build
-node dist/11_项目实战/chapter13_项目2_日志分析工具/main.js --log 11_项目实战/chapter13_项目2_日志分析工具/sample_logs/access.log --format text --top 3
+node dist/11_项目实战/chapter40_项目2_日志分析CLI/main.js --log 11_项目实战/chapter40_项目2_日志分析CLI/sample_logs/access.log --format text --top 3
 ```
 
 输出格式：
