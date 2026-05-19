@@ -4,7 +4,7 @@
 //
 // 【学习目标】
 //   1. 掌握 Node.js fs/promises 中常用的读写、目录、复制、重命名和删除 API
-//   2. 理解文本读取、Buffer 读取、文件元数据和分块读取的运行时边界
+//   2. 理解文本读取、Buffer 读取、文件元数据、分块读取和 libuv 线程池的运行时边界
 //   3. 建立可重复运行的文件系统 demo 习惯：临时目录、原子写入和资源清理
 //
 // 【运行方式】
@@ -42,8 +42,9 @@ import { note, runIfMain, section, showJson } from "../shared/chapter.js";
 // C++ 对照：readFile(path, "utf8") 像把字节流按 UTF-8 解码成 std::string；
 // 不传 encoding 时返回 Buffer，更接近 std::vector<std::byte> 或 uint8_t 缓冲区。
 //
-// C++ 思维提示：fs/promises 的文件 I/O 通过 Promise 暴露异步结果；等待 Promise
-// 不会让 JS 主线程像同步 fread 那样阻塞在当前调用栈上。
+// C++ 思维提示：fs/promises 的文件 I/O 通过 Promise 暴露异步结果；多数异步文件
+// 操作会交给 libuv 线程池调度到底层系统调用。等待 Promise 不会让 JS 主线程像同步
+// fread 那样阻塞在当前调用栈上，但线程池不是无限资源。
 
 async function demoReadFileEncoding(root: string): Promise<void> {
     section("26.1 读文件：文本字符串与 Buffer 是两种边界");
@@ -63,6 +64,7 @@ async function demoReadFileEncoding(root: string): Promise<void> {
         firstBytesUtf8: bytes.subarray(0, 6).toString("utf8")
     });
     note("输出解释", "字符串适合配置和日志；Buffer 适合二进制协议、图片、压缩包等字节级数据。");
+    note("运行时边界", "多数 fs/promises 文件 I/O 会由 libuv 线程池执行；await 等结果时 JS 事件循环仍可继续处理其他任务。");
     note("常见坑", "不要把未知编码的文件直接当 UTF-8 文本；乱码不是 TypeScript 类型系统能发现的问题。");
 }
 
