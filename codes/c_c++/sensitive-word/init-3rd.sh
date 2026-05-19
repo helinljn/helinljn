@@ -58,14 +58,14 @@ echo ------------------
 echo -- utfcpp
 cd $ROOT_INIT_DIR
 if [ ! -d $UTFCPP_INIT_DIR ]; then
-    git clone -b v4.0.9 https://github.com/nemtrif/utfcpp.git $UTFCPP_INIT_DIR
+    git clone -b v4.1.0 https://github.com/nemtrif/utfcpp.git $UTFCPP_INIT_DIR
 else
     cd $UTFCPP_INIT_DIR
     git remote set-url origin https://github.com/nemtrif/utfcpp.git
     git remote -v
     git checkout .
     git fetch -p origin
-    git checkout v4.0.9
+    git checkout v4.1.0
 fi
 
 echo ------------------
