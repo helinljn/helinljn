@@ -19,23 +19,27 @@
 
 import { note, runIfMain, section, showJson } from "../shared/chapter.js";
 
+/** Circle shape branch used by the discriminated union examples. */
 export type Circle = {
     readonly kind: "circle";
     readonly radius: number;
 };
 
+/** Rectangle shape branch used by the discriminated union examples. */
 export type Rectangle = {
     readonly kind: "rectangle";
     readonly width: number;
     readonly height: number;
 };
 
+/** Triangle shape branch used by the discriminated union examples. */
 export type Triangle = {
     readonly kind: "triangle";
     readonly base: number;
     readonly height: number;
 };
 
+/** Discriminated union of all supported shape variants. */
 export type Shape = Circle | Rectangle | Triangle;
 
 type ApiSuccess<T> = {

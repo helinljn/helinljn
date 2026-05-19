@@ -30,6 +30,17 @@ type CommandOptions = {
     dryRun?: boolean;
 };
 
+type CommandHooks = {
+    beforeRun?: (command: string) => void;
+    shouldRun?: (command: string) => boolean;
+};
+
+type CommandRunResult = {
+    command: string;
+    skipped: boolean;
+    output: string;
+};
+
 interface CounterContext {
     readonly name: string;
     count: number;
@@ -85,6 +96,25 @@ function formatCommand({ command, args = [], dryRun = false }: CommandOptions): 
     const prefix = dryRun ? "[dry-run] " : "";
     const suffix = args.length > 0 ? ` ${args.join(" ")}` : "";
     return `${prefix}${command}${suffix}`;
+}
+
+function runCommandQueue(commands: readonly string[], hooks: CommandHooks = {}): CommandRunResult[] {
+    return commands.map((command) => {
+        hooks.beforeRun?.(command);
+        const shouldRun = hooks.shouldRun?.(command) ?? true;
+        if (!shouldRun) {
+            return {
+                command,
+                skipped: true,
+                output: "skipped"
+            };
+        }
+        return {
+            command,
+            skipped: false,
+            output: `ran:${command}`
+        };
+    });
 }
 
 // =============================================================================
@@ -255,7 +285,45 @@ function demoCommandFormatterScenario(): void {
 }
 
 // =============================================================================
-// 14.7 本章复盘
+// 14.7 回调 API 设计：副作用回调、谓词回调和返回值边界
+// =============================================================================
+//
+// C++ 对照：
+//   回调签名类似把 std::function 放进 options struct。
+//   关键不是“能传函数”，而是把回调的职责和返回值语义写清楚。
+//
+// 类型边界：
+//   `(command) => void` 表达调用方不应依赖返回值。
+//   `(command) => boolean` 表达返回值会参与控制流，调用方必须返回明确布尔值。
+//
+// 常见坑：
+//   把所有 hook 都写成 `Function` 或 `(...args: any[]) => any` 会丢掉调用协议。
+//   这会让后续重构时很难知道哪些回调能影响流程，哪些只是记录日志。
+
+function demoCallbackApiDesign(): void {
+    section("14.7 回调 API 设计");
+    note("C++ 对照", "把回调放进 options 对象时，签名就是这个小型扩展点的契约。");
+
+    const audit: string[] = [];
+    const results = runCommandQueue(["build", "test", "deploy"], {
+        beforeRun(command) {
+            audit.push(`before:${command}`);
+        },
+        shouldRun(command) {
+            return command !== "deploy";
+        }
+    });
+
+    showJson("回调 API 设计", {
+        audit,
+        results
+    });
+    note("输出解释", "beforeRun 只记录副作用；shouldRun 的 boolean 返回值决定命令是否执行。");
+    note("常见坑", "void 回调的返回值会被调用方忽略；如果返回值影响流程，应在类型里明确写成 boolean 或 Result。");
+}
+
+// =============================================================================
+// 14.8 本章复盘
 // =============================================================================
 //
 // C++ 对照：
@@ -263,7 +331,7 @@ function demoCommandFormatterScenario(): void {
 //   位置参数、对象参数、重载、this 和返回类型都服务于这个边界。
 
 function demoChapterReview(): void {
-    section("14.7 本章复盘");
+    section("14.8 本章复盘");
     note("C++ 对照", "TS 重载与 this 参数都是类型层 API 设计，不会自动生成多份运行时代码。");
 
     const summary = [
@@ -272,7 +340,8 @@ function demoChapterReview(): void {
         "TS 重载是多签名一实现",
         "this 参数标注只约束调用上下文，不是实际入参",
         "void 表达忽略返回值，undefined 是具体值",
-        "配置对象参数适合工程 API 的长期演进"
+        "配置对象参数适合工程 API 的长期演进",
+        "回调 API 要区分副作用 hook 和参与控制流的谓词"
     ];
 
     showJson("关键结论", summary);
@@ -290,6 +359,7 @@ export function runChapter(): void {
     demoThisParameter();
     demoVoidVsUndefined();
     demoCommandFormatterScenario();
+    demoCallbackApiDesign();
     demoChapterReview();
 }
 

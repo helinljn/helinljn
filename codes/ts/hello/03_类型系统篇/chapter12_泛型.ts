@@ -45,6 +45,8 @@ const compilerDefaults = {
 
 type CompilerDefaults = typeof compilerDefaults;
 
+type Parser<T> = (value: unknown) => Result<T>;
+
 function first<T>(values: readonly T[]): T | undefined {
     return values[0];
 }
@@ -108,6 +110,40 @@ function createRepository<T extends Keyed>(): Repository<T> {
 
 function readCompilerDefault<K extends keyof CompilerDefaults>(key: K): CompilerDefaults[K] {
     return compilerDefaults[key];
+}
+
+function parseArray<T>(values: readonly unknown[], parser: Parser<T>): Result<T[]> {
+    const parsedValues: T[] = [];
+    for (const [index, value] of values.entries()) {
+        const parsed = parser(value);
+        if (!parsed.ok) {
+            return { ok: false, error: `index ${index}: ${parsed.error}` };
+        }
+        parsedValues.push(parsed.value);
+    }
+    return { ok: true, value: parsedValues };
+}
+
+function parseFeatureFlag(value: unknown): Result<{ name: string; enabled: boolean }> {
+    if (typeof value !== "object" || value === null) {
+        return { ok: false, error: "expected object" };
+    }
+
+    const record = value as Record<string, unknown>;
+    if (typeof record["name"] !== "string") {
+        return { ok: false, error: "name must be string" };
+    }
+    if (typeof record["enabled"] !== "boolean") {
+        return { ok: false, error: "enabled must be boolean" };
+    }
+
+    return {
+        ok: true,
+        value: {
+            name: record["name"],
+            enabled: record["enabled"]
+        }
+    };
 }
 
 // =============================================================================
@@ -280,7 +316,47 @@ function demoRepositoryScenario(): void {
 }
 
 // =============================================================================
-// 12.7 本章复盘
+// 12.7 泛型的运行时边界：T 不会替你校验 JSON
+// =============================================================================
+//
+// C++ 对照：
+//   C++ 模板实例化后仍然是编译进二进制的具体代码。
+//   TS 泛型在 emit 后会擦除，所以 `T` 不能在运行时帮你判断 JSON 是否正确。
+//
+// 类型边界：
+//   函数签名中的 `T` 只约束调用方和返回值的静态关系。
+//   外部输入进入系统时仍应先作为 unknown，再用 parser/type guard 收窄。
+//
+// 常见坑：
+//   `JSON.parse(text) as T` 只是告诉编译器“相信我”，不会验证字段。
+//   把 parser 作为参数传给泛型函数，才能同时保留复用性和运行时安全。
+
+function demoGenericRuntimeBoundary(): void {
+    section("12.7 泛型的运行时边界");
+    note("C++ 对照", "TS 泛型会被擦除，运行时没有 T 这个值可供判断。");
+
+    const rawFlags: readonly unknown[] = [
+        { name: "strictMode", enabled: true },
+        { name: "trace", enabled: false }
+    ];
+    const brokenFlags: readonly unknown[] = [
+        { name: "strictMode", enabled: true },
+        { name: "trace", enabled: "yes" }
+    ];
+
+    const valid = parseArray(rawFlags, parseFeatureFlag);
+    const invalid = parseArray(brokenFlags, parseFeatureFlag);
+
+    showJson("泛型 + runtime parser", {
+        valid,
+        invalid
+    });
+    note("输出解释", "parseArray<T> 复用遍历逻辑，但具体字段检查仍由 parseFeatureFlag 在运行时完成。");
+    note("常见坑", "不要把 `as T` 当成校验；它不会读取 JSON 字段，也不会在运行时报错。");
+}
+
+// =============================================================================
+// 12.8 本章复盘
 // =============================================================================
 //
 // C++ 对照：
@@ -288,7 +364,7 @@ function demoRepositoryScenario(): void {
 //   先推导，后显式；先约束边界，再谈灵活性。
 
 function demoChapterReview(): void {
-    section("12.7 本章复盘");
+    section("12.8 本章复盘");
     note("C++ 对照", "TS 泛型是编译期工具，运行时只保留一份实现。");
 
     const summary = [
@@ -298,7 +374,8 @@ function demoChapterReview(): void {
         "泛型接口/类型别名适合表达复用的对象形状",
         "默认类型参数减少边界处的重复",
         "typeof 可以把现有值的形状转成类型",
-        "Repository<T> 这类封装比 any 更适合工程代码"
+        "Repository<T> 这类封装比 any 更适合工程代码",
+        "泛型不会替外部输入做 runtime validation"
     ];
 
     showJson("关键结论", summary);
@@ -316,6 +393,7 @@ export function runChapter(): void {
     demoDefaultTypeParameters();
     demoTypeofWithGenerics();
     demoRepositoryScenario();
+    demoGenericRuntimeBoundary();
     demoChapterReview();
 }
 

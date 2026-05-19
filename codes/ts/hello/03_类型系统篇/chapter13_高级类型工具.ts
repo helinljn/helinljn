@@ -58,6 +58,11 @@ type UserFactory = () => UserRecord;
 type UserFactoryResult = ReturnType<UserFactory>;
 type UserFactoryParameters = Parameters<(id: string, active?: boolean) => UserRecord>;
 
+type UpdateCommand<T extends object> = {
+    readonly id: string;
+    readonly patch: Partial<T>;
+};
+
 function mutableCopy<T extends object>(source: T): Mutable<T> {
     return { ...source } as Mutable<T>;
 }
@@ -107,6 +112,13 @@ function stripEmail(user: UserRecord): UserPreview {
 
 function applyPatch(user: UserRecord, patch: UserPatch): UserRecord {
     return { ...user, ...patch };
+}
+
+function summarizePatch<T extends object>(command: UpdateCommand<T>): { id: string; changedKeys: string[] } {
+    return {
+        id: command.id,
+        changedKeys: Object.keys(command.patch).sort()
+    };
 }
 
 // =============================================================================
@@ -294,14 +306,59 @@ function demoAssertsFunctions(): void {
 }
 
 // =============================================================================
-// 13.7 本章复盘
+// 13.7 工程场景：用工具类型描述 API Patch 边界
+// =============================================================================
+//
+// C++ 对照：
+//   工具类型像把公共 DTO 的字段选择规则集中成一组可复用模板。
+//   但它们只改变编译期约束，不会替你修改或过滤运行时对象。
+//
+// 真实场景：
+//   对外 API 往往需要 preview、patch、event name、response envelope 等派生类型。
+//   这些类型应从源模型派生，避免手写两份字段清单后逐渐漂移。
+//
+// 常见坑：
+//   `Omit<UserRecord, "email">` 不会自动从对象里删除 email。
+//   真正对外返回前必须调用 stripEmail 之类的运行时函数。
+
+function demoApiPatchBoundary(): void {
+    section("13.7 工程场景：API Patch 边界");
+    note("C++ 对照", "工具类型能减少 DTO 重复，但运行时对象转换仍要显式执行。");
+
+    const user: UserRecord = {
+        id: "u9",
+        name: "Katherine",
+        email: "k@example.test",
+        active: false,
+        tags: ["math", "space"]
+    };
+    const command: UpdateCommand<UserPatch> = {
+        id: user.id,
+        patch: { active: true, name: "Katherine Johnson" }
+    };
+    const patched = applyPatch(user, command.patch);
+    const preview = stripEmail(patched);
+    const eventName = makeEventName("User", "Updated");
+
+    showJson("API Patch 派生类型", {
+        patchSummary: summarizePatch(command),
+        eventName,
+        preview,
+        emailStillOnPatchedRuntimeObject: "email" in patched
+    });
+    note("输出解释", "preview 通过 stripEmail 明确删除 email；工具类型本身不会改变 patched 这个运行时对象。");
+    note("常见坑", "高级类型越强，越要把运行时转换函数写清楚，否则很容易误以为类型已经改变了数据。");
+}
+
+// =============================================================================
+// 13.8 本章复盘
 // =============================================================================
 //
 // C++ 对照：
 //   高级类型像类型层工具箱。它能减少重复、表达边界，但不应取代清晰的运行时代码。
 
 function demoChapterReview(): void {
-    section("13.7 本章复盘");
+    section("13.8 本章复盘");
     note("C++ 对照", "TS 高级类型是编译期约束，不是代码生成器。");
 
     const summary = [
@@ -311,6 +368,7 @@ function demoChapterReview(): void {
         "模板字面量类型适合约束字符串协议",
         "递归类型要控制复杂度",
         "asserts 断言把运行时检查反馈给类型系统",
+        "API DTO 可以从源模型派生，但运行时过滤要显式实现",
         "高级类型服务于可读边界，不应为了炫技而压缩业务语义"
     ];
 
@@ -329,6 +387,7 @@ export function runChapter(): void {
     demoTemplateLiteralTypes();
     demoRecursiveTypes();
     demoAssertsFunctions();
+    demoApiPatchBoundary();
     demoChapterReview();
 }
 

@@ -132,6 +132,18 @@ function describeIdentified(item: Identified): string {
     return `#${item.id}`;
 }
 
+function transferFunds(from: BankAccount, to: BankAccount, amount: number): {
+    from: AccountSnapshot;
+    to: AccountSnapshot;
+} {
+    from.withdraw(amount);
+    to.deposit(amount);
+    return {
+        from: from.snapshot(),
+        to: to.snapshot()
+    };
+}
+
 // =============================================================================
 // 16.1 class、constructor 和实例成员
 // =============================================================================
@@ -282,7 +294,47 @@ function demoRepositoryScenario(): void {
 }
 
 // =============================================================================
-// 16.7 本章复盘
+// 16.7 运行时边界：用方法维护不变量，用快照暴露状态
+// =============================================================================
+//
+// C++ 对照：
+//   C++ 类常用 private 字段和 const 成员函数维护不变量。
+//   TS class 也可以表达这个意图，但要分清类型层 private 与 JS # 私有字段。
+//
+// 真实场景：
+//   金额、库存、配额这类数据不能让外部任意改字段。
+//   入口层应调用方法完成校验、状态变更和审计记录，再把只读快照传给外部。
+//
+// 常见坑：
+//   为了“方便测试”把内部字段改成 public，会让业务不变量失去集中维护点。
+//   更稳的做法是提供查询方法、快照方法和少量明确的命令方法。
+
+function demoRuntimeInvariantBoundary(): void {
+    section("16.7 运行时边界：方法维护不变量");
+    note("C++ 对照", "把余额变更收敛到 deposit/withdraw，类似把状态修改封进成员函数。");
+
+    const source = BankAccount.open("Source", 500);
+    const target = BankAccount.open("Target", 100);
+    const afterTransfer = transferFunds(source, target, 125);
+    let rejected = "";
+    try {
+        transferFunds(source, target, 1000);
+    } catch (error: unknown) {
+        rejected = error instanceof Error ? error.message : String(error);
+    }
+
+    showJson("账户不变量边界", {
+        afterTransfer,
+        rejected,
+        sourceAuditCount: source.auditCount,
+        targetAuditCount: target.auditCount
+    });
+    note("输出解释", "外部只能通过方法转账；余额不足会被 withdraw 拒绝，不会留下半更新状态。");
+    note("常见坑", "快照是对外阅读模型，不应把内部可变集合或私有字段直接暴露给调用方。");
+}
+
+// =============================================================================
+// 16.8 本章复盘
 // =============================================================================
 //
 // C++ 对照：
@@ -290,7 +342,7 @@ function demoRepositoryScenario(): void {
 //   学习重点是明确哪些约束存在于编译期，哪些存在于运行时。
 
 function demoChapterReview(): void {
-    section("16.7 本章复盘");
+    section("16.8 本章复盘");
     note("C++ 对照", "不要把 TS class 当成 C++ class；运行时模型和访问控制边界不同。");
 
     const summary = [
@@ -300,7 +352,8 @@ function demoChapterReview(): void {
         "TS private/protected 是类型层约束",
         "#field 是 JS 运行时私有字段",
         "readonly 与 implements 都主要服务于编译期边界",
-        "类适合封装不变量，仓库适合封装存储细节"
+        "类适合封装不变量，仓库适合封装存储细节",
+        "对外暴露快照和命令方法，而不是暴露内部可变字段"
     ];
 
     showJson("关键结论", summary);
@@ -318,6 +371,7 @@ export function runChapter(): void {
     demoPrivateBoundaries();
     demoReadonlyAndImplements();
     demoRepositoryScenario();
+    demoRuntimeInvariantBoundary();
     demoChapterReview();
 }
 

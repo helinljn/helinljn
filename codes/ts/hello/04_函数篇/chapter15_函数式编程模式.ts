@@ -27,6 +27,10 @@ type TimelineEvent<T> = {
     value: T;
 };
 
+type ValidationResult<T> =
+    | { ok: true; value: T }
+    | { ok: false; error: string };
+
 function manualMap<T, U>(values: readonly T[], mapper: Unary<T, U>): U[] {
     const result: U[] = [];
     for (const value of values) {
@@ -123,6 +127,34 @@ function simulateThrottle<T>(events: readonly TimelineEvent<T>[], intervalMs: nu
     }
 
     return emitted;
+}
+
+function parseMetricLine(line: string): ValidationResult<{ name: string; value: number }> {
+    const [name, valueText] = line.split("=");
+    if (name === undefined || name.trim() === "") {
+        return { ok: false, error: "missing metric name" };
+    }
+
+    const value = Number(valueText);
+    if (!Number.isFinite(value)) {
+        return { ok: false, error: `invalid metric value for ${name}` };
+    }
+
+    return { ok: true, value: { name: name.trim(), value } };
+}
+
+function partitionResults<T>(results: readonly ValidationResult<T>[]): { values: T[]; errors: string[] } {
+    return results.reduce(
+        (accumulator, result) => {
+            if (result.ok) {
+                accumulator.values.push(result.value);
+            } else {
+                accumulator.errors.push(result.error);
+            }
+            return accumulator;
+        },
+        { values: [] as T[], errors: [] as string[] }
+    );
 }
 
 // =============================================================================
@@ -296,7 +328,45 @@ function demoDebounceAndThrottle(): void {
 }
 
 // =============================================================================
-// 15.7 本章复盘
+// 15.7 工程场景：用小函数管线处理指标文本
+// =============================================================================
+//
+// C++ 对照：
+//   这类似用 ranges pipeline 把“清洗、解析、过滤、聚合”拆成多个小步骤。
+//   每个步骤都保持输入输出明确，测试时可以单独验证。
+//
+// 真实场景：
+//   日志、指标、配置行这类文本输入经常包含脏数据。
+//   函数式管线适合把预期内失败保留成值，而不是遇到第一条坏数据就抛异常。
+//
+// 常见坑：
+//   不要为了链式写法把所有逻辑塞进一长串 map/filter/reduce。
+//   一旦中间状态需要命名解释，就应拆成局部变量或命名函数。
+
+function demoMetricPipelineScenario(): void {
+    section("15.7 工程场景：指标文本处理管线");
+    note("C++ 对照", "把小函数串起来，接近 ranges/adaptor 的阅读方式。");
+
+    const rawLines = [" requests = 10 ", "errors=2", "bad-line", "latencyMs=125"];
+    const normalized = manualMap(rawLines, (line) => line.trim().replace(/\s+/g, ""));
+    const parsed = manualMap(normalized, parseMetricLine);
+    const { values, errors } = partitionResults(parsed);
+    const highValueMetrics = manualFilter(values, (metric) => metric.value >= 10);
+    const total = manualReduce(values, (sum, metric) => sum + metric.value, 0);
+
+    showJson("指标处理管线", {
+        normalized,
+        values,
+        errors,
+        highValueMetrics,
+        total
+    });
+    note("输出解释", "坏行被收集到 errors；好数据继续参与 filter/reduce 聚合。");
+    note("常见坑", "管线不等于少写变量；给关键中间结果命名能显著降低排查成本。");
+}
+
+// =============================================================================
+// 15.8 本章复盘
 // =============================================================================
 //
 // C++ 对照：
@@ -304,7 +374,7 @@ function demoDebounceAndThrottle(): void {
 //   对 C++ 背景读者来说，可以把它看成更轻量的 strategy/ranges/adaptor 组合。
 
 function demoChapterReview(): void {
-    section("15.7 本章复盘");
+    section("15.8 本章复盘");
     note("C++ 对照", "函数值 + 闭包让 JS/TS 很适合表达策略和小型转换管线。");
 
     const summary = [
@@ -313,7 +383,8 @@ function demoChapterReview(): void {
         "pipe/compose 组织数据转换顺序",
         "curry 用于提前固定部分参数",
         "memoize/once 依靠闭包保存私有状态",
-        "debounce/throttle 要管理定时器或时间窗口，本章用纯模拟避免副作用"
+        "debounce/throttle 要管理定时器或时间窗口，本章用纯模拟避免副作用",
+        "真实管线要保留错误信息，并给关键中间结果命名"
     ];
 
     showJson("关键结论", summary);
@@ -331,6 +402,7 @@ export function runChapter(): void {
     demoCurry();
     demoMemoizeAndOnce();
     demoDebounceAndThrottle();
+    demoMetricPipelineScenario();
     demoChapterReview();
 }
 

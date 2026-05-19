@@ -168,6 +168,17 @@ function serializeAll(items: readonly Serializable[]): Record<string, unknown>[]
     return items.map((item) => item.toJSON());
 }
 
+function moveThenRender<T extends Renderable & Movable>(
+    items: readonly T[],
+    deltaX: number,
+    deltaY: number
+): string[] {
+    for (const item of items) {
+        item.moveBy(deltaX, deltaY);
+    }
+    return renderAll(items);
+}
+
 // =============================================================================
 // 17.1 extends、super 和 override
 // =============================================================================
@@ -319,7 +330,42 @@ function demoCanvasScenario(): void {
 }
 
 // =============================================================================
-// 17.7 本章复盘
+// 17.7 设计边界：继承表达核心层级，接口表达能力组合
+// =============================================================================
+//
+// C++ 对照：
+//   C++ 项目里很容易通过继承层级表达所有关系，最后得到深而脆的基类树。
+//   TS 里接口没有运行时布局成本，更适合表达“这个对象能做什么”。
+//
+// 真实场景：
+//   渲染、移动、序列化、审计这些能力经常横跨多个领域对象。
+//   让函数依赖最小接口，可以避免为了复用一个函数而强迫所有对象继承同一个基类。
+//
+// 常见坑：
+//   看到两个类都有 render() 就抽一个巨大父类，通常会把无关状态也绑在一起。
+//   先问调用方需要哪些方法，再决定用基类、接口还是简单对象。
+
+function demoInheritanceVsCompositionBoundary(): void {
+    section("17.7 设计边界：继承 vs 能力组合");
+    note("C++ 对照", "接口表达横向能力，能让函数少依赖具体基类。");
+
+    const movableItems = [
+        new Rectangle("r6", 0, 0, 2, 2),
+        new Circle("c6", 3, 3, 1)
+    ];
+    const auditNote = new AuditNote("n2", "Audit", "renderable but not movable");
+
+    showJson("继承与组合边界", {
+        moved: moveThenRender(movableItems, 10, 0),
+        renderedOnly: renderAll([auditNote]),
+        serializedShapes: serializeAll(movableItems)
+    });
+    note("输出解释", "moveThenRender 只要求 Renderable & Movable；AuditNote 能渲染但不能移动，因此不传给移动流程。");
+    note("常见坑", "不要为了复用函数强行扩大基类；让函数依赖最小能力接口通常更稳。");
+}
+
+// =============================================================================
+// 17.8 本章复盘
 // =============================================================================
 //
 // C++ 对照：
@@ -327,7 +373,7 @@ function demoCanvasScenario(): void {
 //   遇到横切能力时，Mixin 通常比深继承链更实际。
 
 function demoChapterReview(): void {
-    section("17.7 本章复盘");
+    section("17.8 本章复盘");
     note("C++ 对照", "TS 没有 C++ 虚继承问题；接口不参与运行时对象布局。");
 
     const summary = [
@@ -336,7 +382,8 @@ function demoChapterReview(): void {
         "抽象类适合共享状态和部分实现",
         "implements 多接口只做编译期形状检查",
         "结构化类型让普通对象也能参与多态",
-        "Mixin 用类工厂组合横切能力"
+        "Mixin 用类工厂组合横切能力",
+        "函数应依赖最小能力接口，而不是默认依赖巨大基类"
     ];
 
     showJson("关键结论", summary);
@@ -354,6 +401,7 @@ export function runChapter(): void {
     demoStructuralPolymorphism();
     demoMixinPattern();
     demoCanvasScenario();
+    demoInheritanceVsCompositionBoundary();
     demoChapterReview();
 }
 

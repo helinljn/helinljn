@@ -31,6 +31,15 @@ type ErrorInfo = {
     cause?: string | undefined;
 };
 
+type HttpResponse = {
+    status: number;
+    body: {
+        ok: boolean;
+        error?: string;
+        code?: string;
+    };
+};
+
 class TutorialError extends Error {
     constructor(
         message: string,
@@ -132,6 +141,32 @@ async function runCliBoundary(action: () => Promise<void>): Promise<{ exitCode: 
             exitCode: info.exitCode ?? 1,
             message: `${info.name}:${info.message}`
         };
+    }
+}
+
+async function runHttpBoundary(action: () => Promise<unknown>): Promise<HttpResponse> {
+    try {
+        await action();
+        return {
+            status: 200,
+            body: { ok: true }
+        };
+    } catch (error: unknown) {
+        const info = describeUnknownError(error);
+        const status = info.code === "CONFIG_INVALID"
+            ? 500
+            : info.code === "DATA_INVALID"
+              ? 400
+              : 500;
+
+        const body: HttpResponse["body"] = {
+            ok: false,
+            error: status >= 500 ? "internal error" : info.message
+        };
+        if (info.code !== undefined) {
+            body.code = info.code;
+        }
+        return { status, body };
     }
 }
 
@@ -309,7 +344,46 @@ async function demoAsyncBoundary(): Promise<void> {
 }
 
 // =============================================================================
-// 18.8 本章复盘
+// 18.8 工程场景：同一业务错误映射到 CLI 与 HTTP 边界
+// =============================================================================
+//
+// C++ 对照：
+//   库层异常不应直接决定进程退出码或 HTTP status。
+//   入口层类似 main()/handler，负责把内部错误翻译成外部协议。
+//
+// 真实场景：
+//   CLI 可以暴露可读错误消息和 exit code。
+//   HTTP 服务应避免把内部栈、配置文件路径、secret 等信息直接返回给客户端。
+//
+// 常见坑：
+//   在领域函数里直接 console.error、process.exit 或写 HTTP response，会让同一逻辑无法复用。
+//   保持“业务抛业务错误，入口做协议映射”会更容易测试。
+
+async function demoProtocolBoundaryMapping(): Promise<void> {
+    section("18.8 工程场景：CLI 与 HTTP 错误映射");
+    note("C++ 对照", "异常层级是内部语义，exit code/status code 是外部协议。");
+
+    const cliResult = await runCliBoundary(async () => {
+        parsePortOrThrow("70000");
+    });
+    const httpDataError = await runHttpBoundary(async () => {
+        parsePortOrThrow("oops");
+    });
+    const httpConfigError = await runHttpBoundary(async () => {
+        readRequiredConfig({}, "secretPath");
+    });
+
+    showJson("协议边界映射", {
+        cliResult,
+        httpDataError,
+        httpConfigError
+    });
+    note("输出解释", "同样是内部异常，CLI 返回 exitCode；HTTP 返回 status 和经过脱敏的 body。");
+    note("常见坑", "HTTP 500 不应把内部错误细节原样发给客户端；日志和响应是两个边界。");
+}
+
+// =============================================================================
+// 18.9 本章复盘
 // =============================================================================
 //
 // C++ 对照：
@@ -317,7 +391,7 @@ async function demoAsyncBoundary(): Promise<void> {
 //   工程上应按边界选择，而不是统一用一种机制解决所有问题。
 
 function demoChapterReview(): void {
-    section("18.8 本章复盘");
+    section("18.9 本章复盘");
     note("C++ 对照", "异常处理的目标是让失败路径清楚、可恢复性明确、入口边界稳定。");
 
     const summary = [
@@ -326,7 +400,8 @@ function demoChapterReview(): void {
         "catch 变量是 unknown，需要先收窄",
         "Promise rejection 在 await 点进入 try/catch",
         "Result/Either 适合预期内失败和批处理",
-        "入口层应统一把异常收敛成 exit code、HTTP 响应或项目输出"
+        "入口层应统一把异常收敛成 exit code、HTTP 响应或项目输出",
+        "内部错误信息和外部协议响应要分层，避免泄漏实现细节"
     ];
 
     showJson("关键结论", summary);
@@ -345,6 +420,7 @@ export async function runChapter(): Promise<void> {
     demoThrowVsResult();
     demoErrorCodesAndExitCodes();
     await demoAsyncBoundary();
+    await demoProtocolBoundaryMapping();
     demoChapterReview();
 }
 

@@ -22,7 +22,10 @@ import { note, runIfMain, section, showJson } from "../shared/chapter.js";
 declare const userIdBrand: unique symbol;
 declare const orderIdBrand: unique symbol;
 
+/** Branded string that represents a user identifier and cannot be mixed with OrderId by accident. */
 export type UserId = string & { readonly [userIdBrand]: "UserId" };
+
+/** Branded string that represents an order identifier and cannot be mixed with UserId by accident. */
 export type OrderId = string & { readonly [orderIdBrand]: "OrderId" };
 
 interface NamedEntity {
