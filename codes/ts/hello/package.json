@@ -19,7 +19,7 @@
         "test": "node --test dist/tests/chapters.test.js dist/tests/exercises.test.js dist/tests/projects.test.js"
     },
     "devDependencies": {
-        "@types/node": "24.12.4",
+        "@types/node": "25.5.0",
         "typescript": "~6.0.3"
     }
 }

@@ -348,7 +348,7 @@ function demoDeclarationFiles(): void {
 //
 // 很多 JavaScript 包没有自带类型声明，社区会在 DefinitelyTyped 上维护 @types/* 包。
 // Node 平台 API 的类型来自 @types/node，本教程 package.json 已固定：
-//   "@types/node": "24.12.4"
+//   "@types/node": "25.5.0"
 //
 // 这解释了为什么源码里可以写 process、node:fs、node:http 的类型。
 // 但 @types 仍然只是类型，真正执行这些 API 的是本机 Node.js。
@@ -572,7 +572,7 @@ function demoNpmDependencyManagement(): void {
     section("20.10 npm 依赖管理：semver、lockfile 与升级策略");
     note("C++ 对照", "package-lock 像锁定的依赖解析结果；CI 应按锁文件复现安装。");
 
-    const ranges = ["~6.0.3", "^24.12.4", "1.2.3", ">=1.0.0 <2.0.0"] as const;
+    const ranges = ["~6.0.3", "^25.5.0", "1.2.3", ">=1.0.0 <2.0.0"] as const;
     showJson("semver 范围解释", ranges.map((range) => ({
         range,
         meaning: classifySemverRange(range)

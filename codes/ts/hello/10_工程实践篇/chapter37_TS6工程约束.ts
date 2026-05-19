@@ -143,7 +143,7 @@ function demoTypesAndLibBoundary(): void {
     showJson("本教程类型来源", [
         {
             api: "process.cwd()",
-            typeSource: "@types/node 24.12.4 via types: [\"node\"]",
+            typeSource: "@types/node 25.5.0 via types: [\"node\"]",
             runtimeSource: "Node.js 24.15.0",
             runnableInChapter: true
         },
@@ -404,7 +404,7 @@ function demoVersionLocking(): void {
     showJson("版本锁定策略", {
         packageJson: {
             typescript: "~6.0.3",
-            "@types/node": "24.12.4",
+            "@types/node": "25.5.0",
             engines: {
                 node: "24.15.0"
             },
@@ -412,8 +412,8 @@ function demoVersionLocking(): void {
         },
         packageLock: {
             typescript: "6.0.3",
-            "@types/node": "24.12.4",
-            undiciTypes: "7.16.0"
+            "@types/node": "25.5.0",
+            undiciTypes: "7.18.2"
         },
         commands: [
             "npm ci",
