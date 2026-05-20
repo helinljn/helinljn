@@ -16,10 +16,10 @@ echo ------------------
 echo -- brynet
 cd $ROOT_INIT_DIR
 if [ ! -d $BRYNET_INIT_DIR ]; then
-    git clone https://github.com/IronsDu/brynet.git $BRYNET_INIT_DIR
+    git clone https://github.com/helinljn/brynet.git $BRYNET_INIT_DIR
 else
     cd $BRYNET_INIT_DIR
-    git remote set-url origin https://github.com/IronsDu/brynet.git
+    git remote set-url origin https://github.com/helinljn/brynet.git
     git remote -v
     git checkout .
     git fetch -p origin
@@ -30,10 +30,10 @@ echo ------------------
 echo -- distorm
 cd $ROOT_INIT_DIR
 if [ ! -d $DISTORM_INIT_DIR ]; then
-    git clone https://github.com/gdabah/distorm.git $DISTORM_INIT_DIR
+    git clone https://github.com/helinljn/distorm.git $DISTORM_INIT_DIR
 else
     cd $DISTORM_INIT_DIR
-    git remote set-url origin https://github.com/gdabah/distorm.git
+    git remote set-url origin https://github.com/helinljn/distorm.git
     git remote -v
     git checkout .
     git fetch -p origin
@@ -44,10 +44,10 @@ echo ------------------
 echo -- funchook
 cd $ROOT_INIT_DIR
 if [ ! -d $FUNCHOOK_INIT_DIR ]; then
-    git clone https://github.com/kubo/funchook.git $FUNCHOOK_INIT_DIR
+    git clone https://github.com/helinljn/funchook.git $FUNCHOOK_INIT_DIR
 else
     cd $FUNCHOOK_INIT_DIR
-    git remote set-url origin https://github.com/kubo/funchook.git
+    git remote set-url origin https://github.com/helinljn/funchook.git
     git remote -v
     git checkout .
     git fetch -p origin
