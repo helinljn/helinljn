@@ -40,6 +40,12 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
 		endif()
 		set(${POCO_FLAG_VAR} "${POCO_FLAGS}" CACHE STRING "MSVC compiler flags" FORCE)
 	endforeach()
+
+	set(POCO_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+	if(NOT POCO_CXX_FLAGS MATCHES "(^| )/EHsc( |$)")
+		string(APPEND POCO_CXX_FLAGS " /EHsc")
+	endif()
+	set(CMAKE_CXX_FLAGS "${POCO_CXX_FLAGS}" CACHE STRING "MSVC C++ compiler flags" FORCE)
 endif()
 
 # Core build behavior
