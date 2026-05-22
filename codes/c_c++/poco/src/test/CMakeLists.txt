@@ -5,10 +5,12 @@ SET(CURRENT_SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR})
 # Poco库
 IF(WIN32)
     SET(Poco_DIR              "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/windows/x64-${CMAKE_BUILD_TYPE}/Poco")
+    SET(POCO_LIBRARY_DIR      "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/windows/x64-${CMAKE_BUILD_TYPE}/lib")
     SET(POCO_MYSQL_ROOT_DIR   "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysql-8.0.33/x64-windows")
     SET(POCO_OPENSSL_ROOT_DIR "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1t/x64-windows")
 ELSE()
     SET(Poco_DIR              "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/linux/x64-${CMAKE_BUILD_TYPE}/Poco")
+    SET(POCO_LIBRARY_DIR      "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/linux/x64-${CMAKE_BUILD_TYPE}/lib")
     SET(POCO_MYSQL_ROOT_DIR   "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysql-8.0.33/x64-ubuntu-24.04")
     SET(POCO_OPENSSL_ROOT_DIR "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1t/x64-ubuntu-24.04")
 ENDIF()
@@ -152,8 +154,12 @@ IF(WIN32)
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest PREFIX "doctest"
         FILES ${DOCTEST_SRC_LIST})
 
-    # Windows平台下的MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
+    # Windows平台下的Poco & MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${CURRENT_TARGET_NAME} PRE_BUILD
+        # Poco
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+            ${POCO_LIBRARY_DIR}
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
         # MySQL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_MYSQL_ROOT_DIR}/lib/libmysql.lib
@@ -176,8 +182,12 @@ IF(WIN32)
             ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
     )
 ELSE()
-    # Linux平台下的MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
+    # Linux平台下的Poco & MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${CURRENT_TARGET_NAME} PRE_BUILD
+        # Poco
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+            ${POCO_LIBRARY_DIR}
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
         # MySQL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_MYSQL_ROOT_DIR}/lib/libmysqlclient.so.21.2.33
