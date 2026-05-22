@@ -5,12 +5,10 @@ SET(CURRENT_SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR})
 # Poco库配置
 IF(WIN32)
     SET(Poco_DIR              "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/windows/x64-${CMAKE_BUILD_TYPE}/Poco")
-    SET(POCO_LIBRARY_DIR      "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/windows/x64-${CMAKE_BUILD_TYPE}/lib")
     SET(POCO_MYSQL_ROOT_DIR   "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysql-8.0.33/x64-windows")
     SET(POCO_OPENSSL_ROOT_DIR "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1t/x64-windows")
 ELSE()
     SET(Poco_DIR              "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/linux/x64-${CMAKE_BUILD_TYPE}/Poco")
-    SET(POCO_LIBRARY_DIR      "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/linux/x64-${CMAKE_BUILD_TYPE}/lib")
     SET(POCO_MYSQL_ROOT_DIR   "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysql-8.0.33/x64-ubuntu-24.04")
     SET(POCO_OPENSSL_ROOT_DIR "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1t/x64-ubuntu-24.04")
 ENDIF()
@@ -31,9 +29,7 @@ ELSE()
     SET(OPENSSL_CRYPTO_LIBRARY "${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto.so.1.1"        CACHE FILEPATH "OpenSSL Crypto library" FORCE)
 ENDIF()
 
-FIND_PACKAGE(MySQL   REQUIRED)
-FIND_PACKAGE(OpenSSL REQUIRED)
-FIND_PACKAGE(Poco    REQUIRED COMPONENTS
+SET(POCO_COMPONENTS
     Foundation
     Encodings
     XML
@@ -51,77 +47,52 @@ FIND_PACKAGE(Poco    REQUIRED COMPONENTS
     Zip
 )
 
+FIND_PACKAGE(MySQL   REQUIRED)
+FIND_PACKAGE(OpenSSL REQUIRED)
+FIND_PACKAGE(Poco    REQUIRED COMPONENTS ${POCO_COMPONENTS})
+
 ADD_LIBRARY(poco_all INTERFACE)
-TARGET_LINK_LIBRARIES(poco_all INTERFACE
-    Poco::Foundation
-    Poco::Encodings
-    Poco::XML
-    Poco::JSON
-    Poco::Util
-    Poco::Net
-    Poco::NetSSL
-    Poco::Crypto
-    Poco::Data
-    Poco::DataSQLite
-    Poco::DataMySQL
-    Poco::Redis
-    Poco::JWT
-    Poco::Prometheus
-    Poco::Zip
-)
+SET(POCO_LINK_TARGETS)
+FOREACH(POCO_COMPONENT ${POCO_COMPONENTS})
+    LIST(APPEND POCO_LINK_TARGETS Poco::${POCO_COMPONENT})
+ENDFOREACH()
+TARGET_LINK_LIBRARIES(poco_all INTERFACE ${POCO_LINK_TARGETS})
 
-# Poco运行时库拷贝命令：普通文件按差异拷贝，软链接按链接关系重建
-SET(POCO_RUNTIME_COPY_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/copy-poco-runtime.cmake")
-FILE(WRITE "${POCO_RUNTIME_COPY_SCRIPT}" [=[
-IF(NOT DEFINED POCO_RUNTIME_SOURCE_DIR)
-    MESSAGE(FATAL_ERROR "POCO_RUNTIME_SOURCE_DIR is not defined")
-ENDIF()
-
-IF(NOT DEFINED POCO_RUNTIME_TARGET_DIR)
-    MESSAGE(FATAL_ERROR "POCO_RUNTIME_TARGET_DIR is not defined")
-ENDIF()
-
-IF(NOT EXISTS "${POCO_RUNTIME_SOURCE_DIR}")
-    MESSAGE(FATAL_ERROR "Poco runtime directory does not exist: ${POCO_RUNTIME_SOURCE_DIR}")
-ENDIF()
-
-FILE(MAKE_DIRECTORY "${POCO_RUNTIME_TARGET_DIR}")
-FILE(GLOB POCO_RUNTIME_FILES LIST_DIRECTORIES FALSE "${POCO_RUNTIME_SOURCE_DIR}/*")
-
-FOREACH(POCO_RUNTIME_SOURCE_FILE ${POCO_RUNTIME_FILES})
-    GET_FILENAME_COMPONENT(POCO_RUNTIME_FILE_NAME "${POCO_RUNTIME_SOURCE_FILE}" NAME)
-    SET(POCO_RUNTIME_TARGET_FILE "${POCO_RUNTIME_TARGET_DIR}/${POCO_RUNTIME_FILE_NAME}")
-
-    IF(IS_SYMLINK "${POCO_RUNTIME_SOURCE_FILE}")
-        FILE(READ_SYMLINK "${POCO_RUNTIME_SOURCE_FILE}" POCO_RUNTIME_LINK_TARGET)
-        FILE(REMOVE "${POCO_RUNTIME_TARGET_FILE}")
-        EXECUTE_PROCESS(
-            COMMAND "${CMAKE_COMMAND}" -E create_symlink
-                "${POCO_RUNTIME_LINK_TARGET}"
-                "${POCO_RUNTIME_TARGET_FILE}"
-            RESULT_VARIABLE POCO_RUNTIME_COPY_RESULT
-        )
-    ELSE()
-        EXECUTE_PROCESS(
-            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
-                "${POCO_RUNTIME_SOURCE_FILE}"
-                "${POCO_RUNTIME_TARGET_FILE}"
-            RESULT_VARIABLE POCO_RUNTIME_COPY_RESULT
-        )
+STRING(TOUPPER "${CMAKE_BUILD_TYPE}" POCO_RUNTIME_CONFIG)
+SET(POCO_RUNTIME_COPY_COMMANDS)
+FOREACH(POCO_RUNTIME_TARGET ${POCO_LINK_TARGETS})
+    GET_TARGET_PROPERTY(POCO_RUNTIME_LIB ${POCO_RUNTIME_TARGET} IMPORTED_LOCATION_${POCO_RUNTIME_CONFIG})
+    IF(NOT POCO_RUNTIME_LIB)
+        GET_TARGET_PROPERTY(POCO_RUNTIME_LIB
+            ${POCO_RUNTIME_TARGET}
+            IMPORTED_LOCATION)
     ENDIF()
 
-    IF(NOT POCO_RUNTIME_COPY_RESULT EQUAL 0)
-        MESSAGE(FATAL_ERROR "Failed to copy Poco runtime: ${POCO_RUNTIME_SOURCE_FILE}")
+    IF(NOT POCO_RUNTIME_LIB)
+        MESSAGE(FATAL_ERROR "Poco runtime location is not defined: ${POCO_RUNTIME_TARGET}")
+    ENDIF()
+
+    GET_FILENAME_COMPONENT(POCO_RUNTIME_LIB_NAME "${POCO_RUNTIME_LIB}" NAME)
+    LIST(APPEND POCO_RUNTIME_COPY_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${POCO_RUNTIME_LIB}"
+            "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
+    )
+
+    IF(NOT WIN32)
+        IF(POCO_RUNTIME_LIB_NAME MATCHES "^(.*\\.so)\\..*$")
+            SET(POCO_RUNTIME_LINK_NAME "${CMAKE_MATCH_1}")
+            LIST(APPEND POCO_RUNTIME_COPY_COMMANDS
+                COMMAND ${CMAKE_COMMAND} -E remove -f
+                    "${PROJECT_DEBUGGER_WORKING_DIRECTORY}/${POCO_RUNTIME_LINK_NAME}"
+                COMMAND ${CMAKE_COMMAND} -E chdir "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
+                    ${CMAKE_COMMAND} -E create_symlink
+                        "${POCO_RUNTIME_LIB_NAME}"
+                        "${POCO_RUNTIME_LINK_NAME}"
+            )
+        ENDIF()
     ENDIF()
 ENDFOREACH()
-]=])
-
-SET(POCO_RUNTIME_COPY_COMMANDS
-    COMMAND ${CMAKE_COMMAND}
-        "-DPOCO_RUNTIME_SOURCE_DIR=${POCO_LIBRARY_DIR}"
-        "-DPOCO_RUNTIME_TARGET_DIR=${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
-        -P "${POCO_RUNTIME_COPY_SCRIPT}"
-)
 
 # 头文件目录
 SET(CURRENT_INCLUDE_DIRS
@@ -209,42 +180,42 @@ IF(WIN32)
 
     # Windows平台下的Poco & MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${CURRENT_TARGET_NAME} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
         # Poco
         ${POCO_RUNTIME_COPY_COMMANDS}
         # MySQL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${POCO_MYSQL_ROOT_DIR}/lib/libmysql.lib
-            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_MYSQL_ROOT_DIR}/lib/libmysql.dll
             ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
         # OpenSSL
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${POCO_OPENSSL_ROOT_DIR}/lib/libssl.lib
-            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto.lib
-            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_OPENSSL_ROOT_DIR}/lib/libssl-1_1-x64.dll
             ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto-1_1-x64.dll
             ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        VERBATIM
     )
 ELSE()
     # Linux平台下的Poco & MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
     ADD_CUSTOM_COMMAND(TARGET ${CURRENT_TARGET_NAME} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
         # Poco
         ${POCO_RUNTIME_COPY_COMMANDS}
         # MySQL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_MYSQL_ROOT_DIR}/lib/libmysqlclient.so.21.2.33
             ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E remove -f
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}/libmysqlclient.so.21
         COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
-            ln -sf libmysqlclient.so.21.2.33 libmysqlclient.so.21
+            ${CMAKE_COMMAND} -E create_symlink libmysqlclient.so.21.2.33 libmysqlclient.so.21
+        COMMAND ${CMAKE_COMMAND} -E remove -f
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}/libmysqlclient.so
         COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
-            ln -sf libmysqlclient.so.21 libmysqlclient.so
+            ${CMAKE_COMMAND} -E create_symlink libmysqlclient.so.21 libmysqlclient.so
         # OpenSSL
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_OPENSSL_ROOT_DIR}/lib/libssl.so.1.1
@@ -252,9 +223,14 @@ ELSE()
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto.so.1.1
             ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E remove -f
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}/libssl.so
         COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
-            ln -sf libssl.so.1.1 libssl.so
+            ${CMAKE_COMMAND} -E create_symlink libssl.so.1.1 libssl.so
+        COMMAND ${CMAKE_COMMAND} -E remove -f
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}/libcrypto.so
         COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
-            ln -sf libcrypto.so.1.1 libcrypto.so
+            ${CMAKE_COMMAND} -E create_symlink libcrypto.so.1.1 libcrypto.so
+        VERBATIM
     )
 ENDIF()
