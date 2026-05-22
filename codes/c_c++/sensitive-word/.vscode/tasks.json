@@ -8,12 +8,6 @@
             "type": "shell",
             "command": ".\\build.windows.bat all",
             "group": "build"
-        },
-        {
-            "label": "build linux all",
-            "type": "shell",
-            "command": "./build.linux.sh all",
-            "group": "build"
         }
     ]
 }

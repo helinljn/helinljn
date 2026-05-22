@@ -5,18 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch windows sensitive-word service debug",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/.build/Debug/service.exe",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/.build/Debug",
-            "environment": [],
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
             "name": "Launch windows sensitive-word test debug",
             "type": "cppvsdbg",
             "request": "launch",
