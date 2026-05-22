@@ -2,6 +2,62 @@
 SET(CURRENT_TARGET_NAME test)
 SET(CURRENT_SOURCE_DIR  ${CMAKE_CURRENT_SOURCE_DIR})
 
+# Poco库
+IF(WIN32)
+    SET(Poco_DIR              "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/windows/x64-${CMAKE_BUILD_TYPE}/Poco")
+    SET(POCO_MYSQL_ROOT_DIR   "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysql-8.0.33/x64-windows")
+    SET(POCO_OPENSSL_ROOT_DIR "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1t/x64-windows")
+ELSE()
+    SET(Poco_DIR              "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/.build/linux/x64-${CMAKE_BUILD_TYPE}/Poco")
+    SET(POCO_MYSQL_ROOT_DIR   "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/mysql-8.0.33/x64-ubuntu-24.04")
+    SET(POCO_OPENSSL_ROOT_DIR "${CMAKE_PROJECT_ROOT_DIR}/../3rd-libs/openssl-1.1.1t/x64-ubuntu-24.04")
+ENDIF()
+
+SET(CMAKE_MODULE_PATH    "${CMAKE_PROJECT_ROOT_DIR}/3rd/poco/cmake" ${CMAKE_MODULE_PATH})
+SET(MYSQL_ROOT_DIR       "${POCO_MYSQL_ROOT_DIR}")
+SET(MYSQL_INCLUDE_DIR    "${POCO_MYSQL_ROOT_DIR}/include")
+SET(OPENSSL_ROOT_DIR     "${POCO_OPENSSL_ROOT_DIR}")
+SET(OPENSSL_INCLUDE_DIR  "${POCO_OPENSSL_ROOT_DIR}/include")
+
+FIND_PACKAGE(MySQL   REQUIRED)
+FIND_PACKAGE(OpenSSL REQUIRED)
+FIND_PACKAGE(Poco    REQUIRED COMPONENTS
+    Foundation
+    Encodings
+    XML
+    JSON
+    Util
+    Net
+    NetSSL
+    Crypto
+    Data
+    DataSQLite
+    DataMySQL
+    Redis
+    JWT
+    Prometheus
+    Zip
+)
+
+ADD_LIBRARY(poco_all INTERFACE)
+TARGET_LINK_LIBRARIES(poco_all INTERFACE
+    Poco::Foundation
+    Poco::Encodings
+    Poco::XML
+    Poco::JSON
+    Poco::Util
+    Poco::Net
+    Poco::NetSSL
+    Poco::Crypto
+    Poco::Data
+    Poco::DataSQLite
+    Poco::DataMySQL
+    Poco::Redis
+    Poco::JWT
+    Poco::Prometheus
+    Poco::Zip
+)
+
 # 头文件目录
 SET(CURRENT_INCLUDE_DIRS
     ${CURRENT_SOURCE_DIR}
@@ -24,6 +80,7 @@ IF(WIN32)
     # 链接库
     SET(CURRENT_LINK_LIBS
         mimalloc
+        poco_all
     )
 ELSE()
     # 宏定义
@@ -39,6 +96,7 @@ ELSE()
     # 链接库
     SET(CURRENT_LINK_LIBS
         mimalloc
+        poco_all
     )
 ENDIF()
 
@@ -83,4 +141,51 @@ IF(WIN32)
         FILES ${TEST_SRC_LIST})
     SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/doctest/doctest PREFIX "doctest"
         FILES ${DOCTEST_SRC_LIST})
+
+    # Windows平台下的MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
+    ADD_CUSTOM_COMMAND(TARGET ${CURRENT_TARGET_NAME} PRE_BUILD
+        # MySQL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_MYSQL_ROOT_DIR}/lib/libmysql.lib
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_MYSQL_ROOT_DIR}/lib/libmysql.dll
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        # OpenSSL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_OPENSSL_ROOT_DIR}/lib/libssl.lib
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto.lib
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_OPENSSL_ROOT_DIR}/lib/libssl-1_1-x64.dll
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto-1_1-x64.dll
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+    )
+ELSE()
+    # Linux平台下的MySQL & OpenSSL使用的是动态库，所以需要将其对应的动态库拷贝至生成目录
+    ADD_CUSTOM_COMMAND(TARGET ${CURRENT_TARGET_NAME} PRE_BUILD
+        # MySQL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_MYSQL_ROOT_DIR}/lib/libmysqlclient.so.21.2.33
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+            ln -sf libmysqlclient.so.21.2.33 libmysqlclient.so.21
+        COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+            ln -sf libmysqlclient.so.21 libmysqlclient.so
+        # OpenSSL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_OPENSSL_ROOT_DIR}/lib/libssl.so.1.1
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto.so.1.1
+            ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+        COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+            ln -sf libssl.so.1.1 libssl.so
+        COMMAND ${CMAKE_COMMAND} -E chdir ${PROJECT_DEBUGGER_WORKING_DIRECTORY}
+            ln -sf libcrypto.so.1.1 libcrypto.so
+    )
 ENDIF()
