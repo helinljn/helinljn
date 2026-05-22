@@ -2,3 +2,5 @@
 *.def
 *.sln
 poco
+doctest
+mimalloc

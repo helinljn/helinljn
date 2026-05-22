@@ -2,7 +2,7 @@
 
 set ROOT_DIR=%~dp0
 set POCO_LINK=%ROOT_DIR%\poco_d.sln
-set POCO_TARGET=%ROOT_DIR%\poco\.build\windows\x64-Debug\poco.sln
+set POCO_TARGET=%ROOT_DIR%\.build\windows\x64-Debug\poco.sln
 
 @rem poco debug shortcut
 whoami /priv | findstr /i "SeSecurityPrivilege" >nul 2>&1
