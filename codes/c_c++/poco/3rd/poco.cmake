@@ -13,12 +13,20 @@ set(POCO_CMAKE_OVERRIDE_DIR "${POCO_PRESET_ROOT}/.build/${POCO_PLATFORM_DIR}/cma
 
 # Force Poco's C++20 probe to fail so the upstream CMakeLists uses its C++17 fallback.
 file(MAKE_DIRECTORY "${POCO_CMAKE_OVERRIDE_DIR}")
-file(WRITE "${POCO_CMAKE_OVERRIDE_DIR}/CXX2x.cmake" [=[
+set(POCO_CXX2X_OVERRIDE_FILE "${POCO_CMAKE_OVERRIDE_DIR}/CXX2x.cmake")
+set(POCO_CXX2X_OVERRIDE_CONTENT [=[
 function(check_for_cxx20_compiler _VAR)
     message(STATUS "Checking for C++20 compiler - disabled by poco.cmake")
     set(${_VAR} OFF PARENT_SCOPE)
 endfunction()
 ]=])
+set(POCO_CXX2X_OVERRIDE_CURRENT "")
+if(EXISTS "${POCO_CXX2X_OVERRIDE_FILE}")
+    file(READ "${POCO_CXX2X_OVERRIDE_FILE}" POCO_CXX2X_OVERRIDE_CURRENT)
+endif()
+if(NOT POCO_CXX2X_OVERRIDE_CURRENT STREQUAL POCO_CXX2X_OVERRIDE_CONTENT)
+    file(WRITE "${POCO_CXX2X_OVERRIDE_FILE}" "${POCO_CXX2X_OVERRIDE_CONTENT}")
+endif()
 
 set(CMAKE_MODULE_PATH "${POCO_CMAKE_OVERRIDE_DIR}" CACHE STRING "CMake module path" FORCE)
 

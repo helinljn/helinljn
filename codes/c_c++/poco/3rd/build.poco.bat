@@ -5,58 +5,90 @@ set VS_VERSION="Visual Studio 17 2022"
 set ROOT_DIR=%~dp0
 set DEBUG_DIR=%ROOT_DIR%/poco/.build/windows/x64-Debug
 set RELEASE_DIR=%ROOT_DIR%/poco/.build/windows/x64-Release
+set POCO_MODULES=Foundation Encodings XML JSON Util Net NetSSL Crypto Data DataSQLite DataMySQL Redis JWT Prometheus Zip
 
-if %1 equ debug (
-    mkdir "%DEBUG_DIR%" 2>nul
+goto :main
 
-    cd %DEBUG_DIR%
+:build_poco_config
+set "POCO_CONFIG=%~1"
+set "POCO_BUILD_DIR=%~2"
 
-    cmake -G %VS_VERSION% -A x64 -C %ROOT_DIR%poco.cmake -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
+mkdir "%POCO_BUILD_DIR%" 2>nul
+pushd "%POCO_BUILD_DIR%" || exit /b 1
+
+cmake -G %VS_VERSION% -A x64 -C "%ROOT_DIR%poco.cmake" -DCMAKE_CONFIGURATION_TYPES=%POCO_CONFIG% -DCMAKE_BUILD_TYPE=%POCO_CONFIG% ../../../
+if errorlevel 1 (
+    popd
+    exit /b 1
+)
+
+cmake --build . --config %POCO_CONFIG%
+if errorlevel 1 (
+    popd
+    exit /b 1
+)
+
+popd
+
+call :install_poco_config "%POCO_CONFIG%" "%POCO_BUILD_DIR%"
+exit /b %ERRORLEVEL%
+
+:install_poco_config
+set "POCO_CONFIG=%~1"
+set "POCO_BUILD_DIR=%~2"
+set "POCO_BIN_DIR=%POCO_BUILD_DIR%\bin"
+set "POCO_LIB_DIR=%POCO_BUILD_DIR%\lib"
+
+if /I "%POCO_CONFIG%"=="Debug" (
+    set "POCO_SUFFIX=d"
+) else (
+    set "POCO_SUFFIX="
+)
+
+mkdir "%POCO_LIB_DIR%" 2>nul
+
+for %%M in (%POCO_MODULES%) do (
+    call :copy_required "%POCO_BIN_DIR%\Poco%%M%POCO_SUFFIX%.dll" "%POCO_LIB_DIR%"
     if errorlevel 1 exit /b 1
 
-    cmake --build . --config Debug --parallel 16
+    call :copy_required "%POCO_BIN_DIR%\Poco%%M%POCO_SUFFIX%.lib" "%POCO_LIB_DIR%"
     if errorlevel 1 exit /b 1
 
-    cd %ROOT_DIR%
-) else if %1 equ release (
-    mkdir "%RELEASE_DIR%" 2>nul
+    if /I "%POCO_CONFIG%"=="Debug" (
+        call :copy_required "%POCO_BIN_DIR%\Poco%%M%POCO_SUFFIX%.pdb" "%POCO_LIB_DIR%"
+        if errorlevel 1 exit /b 1
+    )
+)
 
-    cd %RELEASE_DIR%
+exit /b 0
 
-    cmake -G %VS_VERSION% -A x64 -C %ROOT_DIR%poco.cmake -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
+:copy_required
+if not exist "%~1" (
+    echo Missing Poco build artifact: %~1
+    exit /b 1
+)
+
+copy /Y "%~1" "%~2\" >nul
+if errorlevel 1 exit /b 1
+
+exit /b 0
+
+:main
+if /I "%~1"=="debug" (
+    call :build_poco_config "Debug" "%DEBUG_DIR%"
     if errorlevel 1 exit /b 1
-
-    cmake --build . --config Release --parallel 16
+) else if /I "%~1"=="release" (
+    call :build_poco_config "Release" "%RELEASE_DIR%"
     if errorlevel 1 exit /b 1
-
-    cd %ROOT_DIR%
-) else if %1 equ all (
-    mkdir "%DEBUG_DIR%" 2>nul
-
-    cd %DEBUG_DIR%
-
-    cmake -G %VS_VERSION% -A x64 -C %ROOT_DIR%poco.cmake -DCMAKE_CONFIGURATION_TYPES=Debug -DCMAKE_BUILD_TYPE=Debug ../../../
-    if errorlevel 1 exit /b 1
-
-    cmake --build . --config Debug --parallel 16
+) else if /I "%~1"=="all" (
+    call :build_poco_config "Debug" "%DEBUG_DIR%"
     if errorlevel 1 exit /b 1
     echo.
     echo.
     echo.
 
-    cd %ROOT_DIR%
-
-    mkdir "%RELEASE_DIR%" 2>nul
-
-    cd %RELEASE_DIR%
-
-    cmake -G %VS_VERSION% -A x64 -C %ROOT_DIR%poco.cmake -DCMAKE_CONFIGURATION_TYPES=Release -DCMAKE_BUILD_TYPE=Release ../../../
+    call :build_poco_config "Release" "%RELEASE_DIR%"
     if errorlevel 1 exit /b 1
-
-    cmake --build . --config Release --parallel 16
-    if errorlevel 1 exit /b 1
-
-    cd %ROOT_DIR%
 ) else (
     echo "Usage: build.poco.bat [debug | release | all]"
 )
