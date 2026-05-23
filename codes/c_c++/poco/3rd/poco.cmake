@@ -11,30 +11,15 @@ else()
 endif()
 set(POCO_CMAKE_OVERRIDE_DIR "${POCO_PRESET_ROOT}/.build/${POCO_PLATFORM_DIR}/cmake-overrides" CACHE PATH "Poco CMake override directory" FORCE)
 
-# Force Poco's C++20 probe to fail so the upstream CMakeLists uses its C++17 fallback.
-file(MAKE_DIRECTORY "${POCO_CMAKE_OVERRIDE_DIR}")
-set(POCO_CXX2X_OVERRIDE_FILE "${POCO_CMAKE_OVERRIDE_DIR}/CXX2x.cmake")
-set(POCO_CXX2X_OVERRIDE_CONTENT [=[
-function(check_for_cxx20_compiler _VAR)
-    message(STATUS "Checking for C++20 compiler - disabled by poco.cmake")
-    set(${_VAR} OFF PARENT_SCOPE)
-endfunction()
-]=])
-set(POCO_CXX2X_OVERRIDE_CURRENT "")
-if(EXISTS "${POCO_CXX2X_OVERRIDE_FILE}")
-    file(READ "${POCO_CXX2X_OVERRIDE_FILE}" POCO_CXX2X_OVERRIDE_CURRENT)
-endif()
-if(NOT POCO_CXX2X_OVERRIDE_CURRENT STREQUAL POCO_CXX2X_OVERRIDE_CONTENT)
-    file(WRITE "${POCO_CXX2X_OVERRIDE_FILE}" "${POCO_CXX2X_OVERRIDE_CONTENT}")
-endif()
-
-set(CMAKE_MODULE_PATH "${POCO_CMAKE_OVERRIDE_DIR}" CACHE STRING "CMake module path" FORCE)
+# Remove the legacy override that disabled Poco's C++20 compiler detection.
+file(REMOVE "${POCO_CMAKE_OVERRIDE_DIR}/CXX2x.cmake")
+set(CMAKE_MODULE_PATH "${POCO_PRESET_ROOT}/cmake" CACHE STRING "CMake module path" FORCE)
 
 # Language standards
 set(CMAKE_C_STANDARD 11 CACHE STRING "C standard" FORCE)
 set(CMAKE_C_STANDARD_REQUIRED ON CACHE BOOL "Require the selected C standard" FORCE)
 set(CMAKE_C_EXTENSIONS OFF CACHE BOOL "Disable compiler-specific C extensions" FORCE)
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard" FORCE)
+set(CMAKE_CXX_STANDARD 20 CACHE STRING "C++ standard" FORCE)
 set(CMAKE_CXX_STANDARD_REQUIRED ON CACHE BOOL "Require the selected C++ standard" FORCE)
 set(CMAKE_CXX_EXTENSIONS OFF CACHE BOOL "Disable compiler-specific C++ extensions" FORCE)
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
@@ -95,6 +80,7 @@ set(POCO_DATA_NO_SQL_PARSER OFF CACHE BOOL "Disable SQL parser" FORCE)
 set(POCO_SOO ON CACHE BOOL "Enable small object optimization in Poco::Foundation" FORCE)
 set(POCO_NO_FORK_EXEC OFF CACHE BOOL "Disable fork() and exec*()" FORCE)
 set(POCO_ENABLE_STD_MUTEX OFF CACHE BOOL "Use std::mutex implementation" FORCE)
+set(POCO_ENABLE_CPP20 ON CACHE BOOL "Enable C++20 Poco options" FORCE)
 
 # Enabled Poco modules and features
 set(ENABLE_FOUNDATION ON CACHE BOOL "Enable Foundation" FORCE)
@@ -112,13 +98,12 @@ set(ENABLE_DATA_SQLITE ON CACHE BOOL "Enable Data SQLite" FORCE)
 set(ENABLE_DATA_MYSQL ON CACHE BOOL "Enable Data MySQL" FORCE)
 set(ENABLE_PROMETHEUS ON CACHE BOOL "Enable Prometheus" FORCE)
 set(ENABLE_ZIP ON CACHE BOOL "Enable Zip" FORCE)
+set(ENABLE_TRACE ON CACHE BOOL "Enable stack tracing" FORCE)
 set(ENABLE_FASTLOGGER ON CACHE BOOL "Enable FastLogger" FORCE)
 set(ENABLE_CPPUNIT ON CACHE BOOL "Enable CppUnit" FORCE)
 set(ENABLE_TESTS ON CACHE BOOL "Enable tests" FORCE)
 
 # Disabled Poco modules and features
-set(POCO_ENABLE_CPP20 OFF CACHE BOOL "Disable C++20-only Poco options" FORCE)
-set(ENABLE_TRACE OFF CACHE BOOL "Disable stack tracing for strict C++17 builds" FORCE)
 set(ENABLE_TEST_DEPRECATED OFF CACHE BOOL "Disable deprecated tests" FORCE)
 set(ENABLE_INSTALL_CPPUNIT OFF CACHE BOOL "Disable CppUnit installation" FORCE)
 set(ENABLE_SAMPLES OFF CACHE BOOL "Disable samples" FORCE)

@@ -43,7 +43,7 @@ bool verify_mimalloc()
 
 int main(int argc, char** argv)
 {
-    static_assert(__cplusplus == 201703);
+    static_assert(__cplusplus == 202002);
 
     if (!verify_mimalloc())
         return EXIT_FAILURE;
