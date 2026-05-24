@@ -29,24 +29,6 @@ ELSE()
     SET(OPENSSL_CRYPTO_LIBRARY "${POCO_OPENSSL_ROOT_DIR}/lib/libcrypto.so.1.1"        CACHE FILEPATH "OpenSSL Crypto library" FORCE)
 ENDIF()
 
-SET(POCO_COMPONENTS
-    Foundation
-    Encodings
-    XML
-    JSON
-    Util
-    Net
-    NetSSL
-    Crypto
-    Data
-    DataSQLite
-    DataMySQL
-    Redis
-    JWT
-    Prometheus
-    Zip
-)
-
 FIND_PACKAGE(MySQL   REQUIRED)
 FIND_PACKAGE(OpenSSL REQUIRED)
 FIND_PACKAGE(Poco    REQUIRED COMPONENTS ${POCO_COMPONENTS})
