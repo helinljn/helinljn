@@ -1,123 +1,133 @@
-# 项目名字
-SET(CURRENT_TARGET_NAME mimalloc)
+STRING(TOLOWER "${CMAKE_BUILD_TYPE}" MIMALLOC_BUILD_TYPE_LC)
+IF(MIMALLOC_BUILD_TYPE_LC MATCHES "^(release|relwithdebinfo|minsizerel|none)$")
+    SET(MIMALLOC_LIB_NAME "mimalloc")
+ELSE()
+    SET(MIMALLOC_LIB_NAME "mimalloc-${MIMALLOC_BUILD_TYPE_LC}")
+ENDIF()
 
-# 头文件目录
-SET(CURRENT_PRIVATE_INCLUDE_DIRS
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src
-)
-
-SET(CURRENT_PUBLIC_INCLUDE_DIRS
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include
-)
-
-# 宏定义、编译选项、链接库
 IF(WIN32)
-    # 宏定义
-    SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
-        -DMI_SHARED_LIB
-        -DMI_SHARED_LIB_EXPORT
-        -DMI_MALLOC_OVERRIDE
-    )
+    SET(MIMALLOC_BUILD_DIR    "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/.build/windows/x64-${CMAKE_BUILD_TYPE}" CACHE PATH     "mimalloc build directory" FORCE)
+    SET(MIMALLOC_RUNTIME_LIB  "${MIMALLOC_BUILD_DIR}/bin/${MIMALLOC_LIB_NAME}.dll"                            CACHE FILEPATH "mimalloc runtime library" FORCE)
+    SET(MIMALLOC_IMPORT_LIB   "${MIMALLOC_BUILD_DIR}/bin/${MIMALLOC_LIB_NAME}.dll.lib"                        CACHE FILEPATH "mimalloc import library" FORCE)
+    SET(MIMALLOC_REDIRECT_DLL "${MIMALLOC_BUILD_DIR}/bin/mimalloc-redirect.dll"                               CACHE FILEPATH "mimalloc redirect runtime" FORCE)
+ELSE()
+    SET(MIMALLOC_BUILD_DIR   "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/.build/linux/x64-${CMAKE_BUILD_TYPE}" CACHE PATH     "mimalloc build directory" FORCE)
+    SET(MIMALLOC_RUNTIME_LIB "${MIMALLOC_BUILD_DIR}/bin/lib${MIMALLOC_LIB_NAME}.so.2.3"                    CACHE FILEPATH "mimalloc runtime library" FORCE)
+    SET(MIMALLOC_SONAME      "lib${MIMALLOC_LIB_NAME}.so.2"                                                CACHE STRING   "mimalloc runtime soname" FORCE)
+    SET(MIMALLOC_LINK_NAME   "lib${MIMALLOC_LIB_NAME}.so"                                                  CACHE STRING   "mimalloc runtime link name" FORCE)
+ENDIF()
 
-    SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
-    )
+SET(MIMALLOC_INCLUDE_DIR "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include" CACHE PATH "mimalloc include directory" FORCE)
 
-    # 编译选项
-    SET(CURRENT_COMPILE_OPTIONS
-        # ...
-    )
+ADD_LIBRARY(mimalloc_shared SHARED IMPORTED GLOBAL)
+SET_TARGET_PROPERTIES(mimalloc_shared PROPERTIES
+    IMPORTED_LOCATION "${MIMALLOC_RUNTIME_LIB}"
+    INTERFACE_INCLUDE_DIRECTORIES "${MIMALLOC_INCLUDE_DIR}"
+)
 
-    # 链接库
-    SET(CURRENT_LINK_LIBS
-        # ...
+IF(WIN32)
+    SET_TARGET_PROPERTIES(mimalloc_shared PROPERTIES
+        IMPORTED_IMPLIB "${MIMALLOC_IMPORT_LIB}"
     )
 ELSE()
-    # 宏定义
-    SET(CURRENT_PRIVATE_COMPILE_DEFINITIONS
-        -DMI_SHARED_LIB
-        -DMI_SHARED_LIB_EXPORT
-        -DMI_MALLOC_OVERRIDE
-    )
-
-    SET(CURRENT_PUBLIC_COMPILE_DEFINITIONS
-        # ...
-    )
-
-    # 编译选项
-    SET(CURRENT_COMPILE_OPTIONS
-        -Wno-pedantic
-        -fno-builtin-malloc
-        -fvisibility=hidden
-    )
-
-    # 链接库
-    SET(CURRENT_LINK_LIBS
-        # ...
+    SET_TARGET_PROPERTIES(mimalloc_shared PROPERTIES
+        IMPORTED_SONAME "${MIMALLOC_SONAME}"
     )
 ENDIF()
 
-# mimalloc头文件
-SET(MIMALLOC_INCLUDE_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include/mimalloc.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include/mimalloc-override.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include/mimalloc-new-delete.h
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include/mimalloc-stats.h
-)
+ADD_LIBRARY(mimalloc INTERFACE)
+TARGET_LINK_LIBRARIES(mimalloc INTERFACE mimalloc_shared)
 
-# mimalloc源文件
-SET(MIMALLOC_SRC_LIST
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/alloc.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/alloc-aligned.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/alloc-posix.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/arena.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/bitmap.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/heap.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/init.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/libc.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/options.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/os.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/page.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/random.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/segment.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/segment-map.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/stats.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/prim/prim.c
-)
+FUNCTION(PROJECT_GET_MIMALLOC_RUNTIME_COPY_COMMANDS OUTPUT_VARIABLE)
+    IF(NOT TARGET mimalloc_shared)
+        MESSAGE(FATAL_ERROR "Target is not defined: mimalloc_shared")
+    ENDIF()
 
-# 生成动态库
-ADD_LIBRARY(${CURRENT_TARGET_NAME} SHARED ${MIMALLOC_INCLUDE_LIST} ${MIMALLOC_SRC_LIST})
-PROJECT_TARGET_APPLY_COMMON_OPTIONS(${CURRENT_TARGET_NAME})
-TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_PRIVATE_INCLUDE_DIRS})
-TARGET_INCLUDE_DIRECTORIES(${CURRENT_TARGET_NAME} PUBLIC  ${CURRENT_PUBLIC_INCLUDE_DIRS})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_TARGET_NAME} PRIVATE ${CURRENT_PRIVATE_COMPILE_DEFINITIONS})
-TARGET_COMPILE_DEFINITIONS(${CURRENT_TARGET_NAME} PUBLIC  ${CURRENT_PUBLIC_COMPILE_DEFINITIONS})
-TARGET_COMPILE_OPTIONS(${CURRENT_TARGET_NAME}     PRIVATE ${CURRENT_COMPILE_OPTIONS})
-TARGET_LINK_DIRECTORIES(${CURRENT_TARGET_NAME}    PRIVATE ${PROJECT_DEBUGGER_WORKING_DIRECTORY})
-TARGET_LINK_LIBRARIES(${CURRENT_TARGET_NAME}      PUBLIC  ${CURRENT_LINK_LIBS})
+    STRING(TOUPPER "${CMAKE_BUILD_TYPE}" MIMALLOC_RUNTIME_CONFIG)
+    GET_TARGET_PROPERTY(MIMALLOC_RUNTIME_LIB mimalloc_shared IMPORTED_LOCATION_${MIMALLOC_RUNTIME_CONFIG})
+    IF(NOT MIMALLOC_RUNTIME_LIB)
+        GET_TARGET_PROPERTY(MIMALLOC_RUNTIME_LIB
+            mimalloc_shared
+            IMPORTED_LOCATION)
+    ENDIF()
 
-# 其它设置
-IF(WIN32)
-    # mimalloc 在 MSVC 下按 C++ 编译，以使用较新的原子实现
-    SET_SOURCE_FILES_PROPERTIES(${MIMALLOC_SRC_LIST} PROPERTIES LANGUAGE CXX)
+    IF(NOT MIMALLOC_RUNTIME_LIB)
+        MESSAGE(FATAL_ERROR "mimalloc runtime location is not defined.")
+    ENDIF()
 
-    # 复制 mimalloc-redirect.dll 到 mimalloc.dll 的同级目录
-    ADD_CUSTOM_COMMAND(TARGET ${CURRENT_TARGET_NAME} POST_BUILD
+    SET(MIMALLOC_RUNTIME_COPY_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/bin/mimalloc-redirect.dll"
-            "${PROJECT_DEBUGGER_WORKING_DIRECTORY}/mimalloc-redirect.dll"
+            "${MIMALLOC_RUNTIME_LIB}"
+            "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
     )
 
-    # Windows 下使用 mimalloc 官方 redirect 机制
-    TARGET_LINK_LIBRARIES(${CURRENT_TARGET_NAME} PRIVATE "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/bin/mimalloc-redirect.lib")
+    IF(WIN32)
+        LIST(APPEND MIMALLOC_RUNTIME_COPY_COMMANDS
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${MIMALLOC_REDIRECT_DLL}"
+                "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
+        )
+    ELSE()
+        GET_FILENAME_COMPONENT(MIMALLOC_RUNTIME_LIB_NAME "${MIMALLOC_RUNTIME_LIB}" NAME)
+        GET_TARGET_PROPERTY(MIMALLOC_RUNTIME_SONAME mimalloc_shared IMPORTED_SONAME)
+        IF(NOT MIMALLOC_RUNTIME_SONAME)
+            SET(MIMALLOC_RUNTIME_SONAME "libmimalloc.so.2")
+        ENDIF()
 
-    # MSVC运行库设置
-    SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+        LIST(APPEND MIMALLOC_RUNTIME_COPY_COMMANDS
+            COMMAND ${CMAKE_COMMAND} -E remove -f
+                "${PROJECT_DEBUGGER_WORKING_DIRECTORY}/${MIMALLOC_RUNTIME_SONAME}"
+            COMMAND ${CMAKE_COMMAND} -E chdir "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
+                ${CMAKE_COMMAND} -E create_symlink
+                    "${MIMALLOC_RUNTIME_LIB_NAME}"
+                    "${MIMALLOC_RUNTIME_SONAME}"
+            COMMAND ${CMAKE_COMMAND} -E remove -f
+                "${PROJECT_DEBUGGER_WORKING_DIRECTORY}/${MIMALLOC_LINK_NAME}"
+            COMMAND ${CMAKE_COMMAND} -E chdir "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
+                ${CMAKE_COMMAND} -E create_symlink
+                    "${MIMALLOC_RUNTIME_SONAME}"
+                    "${MIMALLOC_LINK_NAME}"
+        )
+    ENDIF()
 
-    # VS工程设置
-    SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY FOLDER "projects")
-    SET_PROPERTY(TARGET ${CURRENT_TARGET_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DEBUGGER_WORKING_DIRECTORY}")
+    SET(${OUTPUT_VARIABLE} ${MIMALLOC_RUNTIME_COPY_COMMANDS} PARENT_SCOPE)
+ENDFUNCTION()
 
-    SOURCE_GROUP(TREE ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc PREFIX "mimalloc"
-        FILES ${MIMALLOC_INCLUDE_LIST} ${MIMALLOC_SRC_LIST})
+PROJECT_GET_MIMALLOC_RUNTIME_COPY_COMMANDS(MIMALLOC_RUNTIME_COPY_COMMANDS)
+ADD_CUSTOM_TARGET(mimalloc_runtime_copy
+    ${MIMALLOC_RUNTIME_COPY_COMMANDS}
+    VERBATIM
+)
+ADD_DEPENDENCIES(mimalloc mimalloc_runtime_copy)
+
+IF(WIN32)
+    SET_PROPERTY(TARGET mimalloc_runtime_copy PROPERTY FOLDER "cmake")
+ENDIF()
+
+IF(WIN32 AND CMAKE_GENERATOR MATCHES "Visual Studio")
+    SET(MIMALLOC_VSPROJ_BUILD_DIR "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/.build/windows/x64-${CMAKE_BUILD_TYPE}")
+
+    FUNCTION(ADD_MIMALLOC_EXTERNAL_MSPROJECT TARGET_NAME PROJECT_PATH)
+        SET(MIMALLOC_VSPROJ "${MIMALLOC_VSPROJ_BUILD_DIR}/${PROJECT_PATH}")
+
+        IF(EXISTS "${MIMALLOC_VSPROJ}")
+            INCLUDE_EXTERNAL_MSPROJECT(
+                ${TARGET_NAME}
+                "${MIMALLOC_VSPROJ}"
+                PLATFORM x64
+            )
+
+            SET_PROPERTY(TARGET ${TARGET_NAME} PROPERTY FOLDER "mimalloc")
+            ADD_DEPENDENCIES(mimalloc_runtime_copy ${TARGET_NAME})
+        ELSE()
+            MESSAGE(WARNING
+                "Mimalloc vcxproj not found: ${MIMALLOC_VSPROJ}. "
+                "Run 3rd/mimalloc.build.bat ${CMAKE_BUILD_TYPE} before generating the main Visual Studio solution."
+            )
+        ENDIF()
+    ENDFUNCTION()
+
+    ADD_MIMALLOC_EXTERNAL_MSPROJECT(MimallocExternal "mimalloc.vcxproj")
 ENDIF()
