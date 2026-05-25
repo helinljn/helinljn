@@ -1,4 +1,8 @@
 {
+    "cmake.buildTask": true,
+    "cmake.configureOnOpen": false,
+    "cmake.clearOutputBeforeBuild": true,
+
     "C_Cpp.intelliSenseCacheSize": 0,
     "C_Cpp.intelliSenseCachePath": "${workspaceFolder}/.build/cache",
     "C_Cpp.default.browse.databaseFilename": "${workspaceFolder}/.build/cache/browse.vc.db",
