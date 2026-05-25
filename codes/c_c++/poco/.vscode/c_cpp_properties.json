@@ -7,10 +7,7 @@
             ],
             "browse": {
                 "path": [
-                    "${workspaceFolder}",
-                    "${workspaceFolder}/3rd/doctest",
-                    "${workspaceFolder}/3rd/mimalloc",
-                    "${workspaceFolder}/3rd/poco"
+                    "${workspaceFolder}/**"
                 ]
             },
             "defines": [],
