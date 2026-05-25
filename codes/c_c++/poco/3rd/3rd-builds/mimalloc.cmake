@@ -49,6 +49,7 @@ ELSE()
         -Wno-pedantic
         -fno-builtin-malloc
         -fvisibility=hidden
+        -ftls-model=initial-exec
     )
 
     # 链接库
