@@ -6,15 +6,15 @@ ELSE()
 ENDIF()
 
 IF(WIN32)
-    SET(MIMALLOC_BUILD_DIR    "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/.build/windows/x64-${CMAKE_BUILD_TYPE}" CACHE PATH     "mimalloc build directory" FORCE)
+    SET(MIMALLOC_BUILD_DIR    "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/.build/windows/x64-${CMAKE_BUILD_TYPE}" CACHE PATH "mimalloc build directory" FORCE)
     SET(MIMALLOC_RUNTIME_LIB  "${MIMALLOC_BUILD_DIR}/bin/${MIMALLOC_LIB_NAME}.dll"                            CACHE FILEPATH "mimalloc runtime library" FORCE)
     SET(MIMALLOC_IMPORT_LIB   "${MIMALLOC_BUILD_DIR}/bin/${MIMALLOC_LIB_NAME}.dll.lib"                        CACHE FILEPATH "mimalloc import library" FORCE)
     SET(MIMALLOC_REDIRECT_DLL "${MIMALLOC_BUILD_DIR}/bin/mimalloc-redirect.dll"                               CACHE FILEPATH "mimalloc redirect runtime" FORCE)
 ELSE()
-    SET(MIMALLOC_BUILD_DIR   "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/.build/linux/x64-${CMAKE_BUILD_TYPE}" CACHE PATH     "mimalloc build directory" FORCE)
+    SET(MIMALLOC_BUILD_DIR   "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/.build/linux/x64-${CMAKE_BUILD_TYPE}" CACHE PATH "mimalloc build directory" FORCE)
     SET(MIMALLOC_RUNTIME_LIB "${MIMALLOC_BUILD_DIR}/bin/lib${MIMALLOC_LIB_NAME}.so.2.3"                    CACHE FILEPATH "mimalloc runtime library" FORCE)
-    SET(MIMALLOC_SONAME      "lib${MIMALLOC_LIB_NAME}.so.2"                                                CACHE STRING   "mimalloc runtime soname" FORCE)
-    SET(MIMALLOC_LINK_NAME   "lib${MIMALLOC_LIB_NAME}.so"                                                  CACHE STRING   "mimalloc runtime link name" FORCE)
+    SET(MIMALLOC_SONAME      "lib${MIMALLOC_LIB_NAME}.so.2"                                                CACHE STRING "mimalloc runtime soname" FORCE)
+    SET(MIMALLOC_LINK_NAME   "lib${MIMALLOC_LIB_NAME}.so"                                                  CACHE STRING "mimalloc runtime link name" FORCE)
 ENDIF()
 
 SET(MIMALLOC_INCLUDE_DIR "${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/include" CACHE PATH "mimalloc include directory" FORCE)
@@ -44,6 +44,11 @@ FUNCTION(PROJECT_GET_MIMALLOC_RUNTIME_COPY_COMMANDS OUTPUT_VARIABLE)
     ENDIF()
 
     STRING(TOUPPER "${CMAKE_BUILD_TYPE}" MIMALLOC_RUNTIME_CONFIG)
+    SET(MIMALLOC_RUNTIME_COPY_COMMANDS
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
+    )
+
     GET_TARGET_PROPERTY(MIMALLOC_RUNTIME_LIB mimalloc_shared IMPORTED_LOCATION_${MIMALLOC_RUNTIME_CONFIG})
     IF(NOT MIMALLOC_RUNTIME_LIB)
         GET_TARGET_PROPERTY(MIMALLOC_RUNTIME_LIB
@@ -52,12 +57,11 @@ FUNCTION(PROJECT_GET_MIMALLOC_RUNTIME_COPY_COMMANDS OUTPUT_VARIABLE)
     ENDIF()
 
     IF(NOT MIMALLOC_RUNTIME_LIB)
-        MESSAGE(FATAL_ERROR "mimalloc runtime location is not defined.")
+        MESSAGE(FATAL_ERROR "Mimalloc runtime location is not defined.")
     ENDIF()
 
-    SET(MIMALLOC_RUNTIME_COPY_COMMANDS
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-            "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
+    GET_FILENAME_COMPONENT(MIMALLOC_RUNTIME_LIB_NAME "${MIMALLOC_RUNTIME_LIB}" NAME)
+    LIST(APPEND MIMALLOC_RUNTIME_COPY_COMMANDS
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${MIMALLOC_RUNTIME_LIB}"
             "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
@@ -70,10 +74,9 @@ FUNCTION(PROJECT_GET_MIMALLOC_RUNTIME_COPY_COMMANDS OUTPUT_VARIABLE)
                 "${PROJECT_DEBUGGER_WORKING_DIRECTORY}"
         )
     ELSE()
-        GET_FILENAME_COMPONENT(MIMALLOC_RUNTIME_LIB_NAME "${MIMALLOC_RUNTIME_LIB}" NAME)
         GET_TARGET_PROPERTY(MIMALLOC_RUNTIME_SONAME mimalloc_shared IMPORTED_SONAME)
         IF(NOT MIMALLOC_RUNTIME_SONAME)
-            SET(MIMALLOC_RUNTIME_SONAME "libmimalloc.so.2")
+            SET(MIMALLOC_RUNTIME_SONAME "lib${MIMALLOC_LIB_NAME}.so.2")
         ENDIF()
 
         LIST(APPEND MIMALLOC_RUNTIME_COPY_COMMANDS
