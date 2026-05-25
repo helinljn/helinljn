@@ -4,6 +4,18 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "build windows debug",
+            "type": "shell",
+            "command": ".\\build.windows.bat debug",
+            "group": "build"
+        },
+        {
+            "label": "build windows release",
+            "type": "shell",
+            "command": ".\\build.windows.bat release",
+            "group": "build"
+        },
+        {
             "label": "build windows all",
             "type": "shell",
             "command": ".\\build.windows.bat all",
