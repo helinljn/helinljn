@@ -5,12 +5,19 @@
             "includePath": [
                 "${workspaceFolder}/**"
             ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/3rd/doctest",
+                    "${workspaceFolder}/3rd/mimalloc",
+                    "${workspaceFolder}/3rd/poco"
+                ]
+            },
             "defines": [],
             "compilerPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe",
             "cStandard": "c11",
             "cppStandard": "c++20",
-            "intelliSenseMode": "windows-msvc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "intelliSenseMode": "windows-msvc-x64"
         }
     ],
     "version": 4
