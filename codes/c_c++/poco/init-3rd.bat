@@ -2,6 +2,7 @@
 
 set ROOT_INIT_DIR=%~dp0
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
+set CURL_INIT_DIR=%ROOT_INIT_DIR%/3rd/curl
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
 set MIMALLOC_INIT_DIR=%ROOT_INIT_DIR%/3rd/mimalloc
 
@@ -17,6 +18,20 @@ if not exist %POCO_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout poco-1.15.3-release
+)
+
+echo ------------------
+echo -- curl
+cd %ROOT_INIT_DIR%
+if not exist %CURL_INIT_DIR% (
+    git clone -b curl-8_20_0 https://github.com/curl/curl.git %CURL_INIT_DIR%
+) else (
+    cd %CURL_INIT_DIR%
+    git remote set-url origin https://github.com/curl/curl.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout curl-8_20_0
 )
 
 echo ------------------
