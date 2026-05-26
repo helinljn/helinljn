@@ -1,3 +1,2 @@
 INCLUDE(mimalloc.cmake)
 INCLUDE(poco.cmake)
-INCLUDE(curl.cmake)
