@@ -1,2 +1,4 @@
+INCLUDE(distorm.cmake)
+INCLUDE(funchook.cmake)
 INCLUDE(mimalloc.cmake)
 INCLUDE(poco.cmake)

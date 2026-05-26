@@ -1,10 +1,39 @@
 #!/bin/bash
 
 ROOT_INIT_DIR=`pwd`
+DISTORM_INIT_DIR=$ROOT_INIT_DIR/3rd/distorm
+FUNCHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/funchook
 POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
-CURL_INIT_DIR=$ROOT_INIT_DIR/3rd/curl
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
 MIMALLOC_INIT_DIR=$ROOT_INIT_DIR/3rd/mimalloc
+
+echo ------------------
+echo -- distorm
+cd $ROOT_INIT_DIR
+if [ ! -d $DISTORM_INIT_DIR ]; then
+    git clone https://github.com/helinljn/distorm.git $DISTORM_INIT_DIR
+else
+    cd $DISTORM_INIT_DIR
+    git remote set-url origin https://github.com/helinljn/distorm.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
+
+echo ------------------
+echo -- funchook
+cd $ROOT_INIT_DIR
+if [ ! -d $FUNCHOOK_INIT_DIR ]; then
+    git clone https://github.com/helinljn/funchook.git $FUNCHOOK_INIT_DIR
+else
+    cd $FUNCHOOK_INIT_DIR
+    git remote set-url origin https://github.com/helinljn/funchook.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git pull
+fi
 
 echo ------------------
 echo -- poco
@@ -18,20 +47,6 @@ else
     git checkout .
     git fetch -p origin
     git checkout poco-1.15.3-release
-fi
-
-echo ------------------
-echo -- curl
-cd $ROOT_INIT_DIR
-if [ ! -d $CURL_INIT_DIR ]; then
-    git clone -b curl-8_20_0 https://github.com/curl/curl.git $CURL_INIT_DIR
-else
-    cd $CURL_INIT_DIR
-    git remote set-url origin https://github.com/curl/curl.git
-    git remote -v
-    git checkout .
-    git fetch -p origin
-    git checkout curl-8_20_0
 fi
 
 echo ------------------
