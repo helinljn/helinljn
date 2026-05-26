@@ -2,8 +2,8 @@
 
 set VS_VERSION="Visual Studio 17 2022"
 set ROOT_DIR=%~dp0
-set DEBUG_DIR=%ROOT_DIR%/poco/.build/windows/x64-Debug
-set RELEASE_DIR=%ROOT_DIR%/poco/.build/windows/x64-Release
+set DEBUG_DIR=%ROOT_DIR%/../poco/.build/windows/x64-Debug
+set RELEASE_DIR=%ROOT_DIR%/../poco/.build/windows/x64-Release
 
 if %1 equ debug (
     mkdir "%DEBUG_DIR%" 2>nul

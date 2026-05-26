@@ -1,4 +1,4 @@
-set(POCO_PRESET_ROOT "${CMAKE_CURRENT_LIST_DIR}/poco" CACHE PATH "Poco preset root" FORCE)
+set(POCO_PRESET_ROOT "${CMAKE_CURRENT_LIST_DIR}/../poco" CACHE PATH "Poco preset root" FORCE)
 set(POCO_THIRD_DIR "${POCO_PRESET_ROOT}/../../../3rd-libs" CACHE PATH "Poco third-party dependency root" FORCE)
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     set(POCO_PLATFORM_DIR "windows")

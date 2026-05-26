@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ROOT_DIR=`pwd`
-DEBUG_DIR=$ROOT_DIR/poco/.build/linux/x64-Debug
-RELEASE_DIR=$ROOT_DIR/poco/.build/linux/x64-Release
+DEBUG_DIR=$ROOT_DIR/../poco/.build/linux/x64-Debug
+RELEASE_DIR=$ROOT_DIR/../poco/.build/linux/x64-Release
 
 if   [ "$1" = "debug" ]; then
     mkdir -p $DEBUG_DIR
