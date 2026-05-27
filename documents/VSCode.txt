@@ -1,13 +1,11 @@
 【安装插件】
     1. Chinese (Simplified) (简体中文) Language Pack for Visual Studio Code
 
-    2. GBKtoUTF8
+    2. C/C++ Extension Pack
 
-    3. C/C++ Extension Pack
+    3. Python
 
-    4. Python
-
-    5. Markdown All in One
+    4. Markdown All in One
 
 【下载地址】
     https://update.code.visualstudio.com/1.111.0/win32-x64/stable
