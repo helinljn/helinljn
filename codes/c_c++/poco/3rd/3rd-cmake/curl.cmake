@@ -75,9 +75,8 @@ set(ENABLE_CURL_MANUAL        OFF CACHE BOOL "Build curl manual" FORCE)
 set(CURL_DISABLE_INSTALL      ON  CACHE BOOL "Disable installation targets" FORCE)
 set(CURL_ENABLE_EXPORT_TARGET OFF CACHE BOOL "Disable CMake export target" FORCE)
 
-set(LIBCURL_OUTPUT_NAME "curl" CACHE STRING "libcurl output name" FORCE)
-set(CMAKE_DEBUG_POSTFIX ""     CACHE STRING "Do not suffix Debug artifacts" FORCE)
-set(IMPORT_LIB_SUFFIX   ""     CACHE STRING "Do not suffix Windows import libraries" FORCE)
+set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "Do not suffix Debug artifacts" FORCE)
+set(IMPORT_LIB_SUFFIX   "" CACHE STRING "Do not suffix Windows import libraries" FORCE)
 
 # Required protocol stack: async HTTP/HTTPS and WebSocket over OpenSSL.
 set(CURL_ENABLE_SSL                       ON  CACHE BOOL "Enable SSL support" FORCE)
