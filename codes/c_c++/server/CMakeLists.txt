@@ -2,7 +2,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.26.0)
 
 # 项目名字
-PROJECT(poco)
+PROJECT(server)
 
 # C/C++语言标准
 SET(CMAKE_C_STANDARD            11)
