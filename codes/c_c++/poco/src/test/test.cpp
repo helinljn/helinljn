@@ -2,6 +2,7 @@
 #include "doctest.h"
 #include "mimalloc.h"
 #include "core/stack_trace.h"
+#include "curl/curl.h"
 #include <cstdlib>
 #include <new>
 
@@ -64,6 +65,10 @@ int main(int argc, char** argv)
     static_assert(__cplusplus == 202002);
 
     if (!verify_mimalloc())
+        return EXIT_FAILURE;
+
+    const std::string cver = curl_version();
+    if (cver != "libcurl/8.20.0-DEV OpenSSL/3.0.20")
         return EXIT_FAILURE;
 
     initializer init;
