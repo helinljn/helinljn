@@ -31,6 +31,7 @@ IF(WIN32)
     SET(CURRENT_LINK_LIBS
         funchook
         poco_all
+        curl
         Dbghelp
     )
 ELSE()
@@ -52,6 +53,7 @@ ELSE()
     SET(CURRENT_LINK_LIBS
         funchook
         poco_all
+        curl
         dl
     )
 ENDIF()
