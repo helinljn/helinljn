@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
-
 ROOT_DIR=`pwd`
 BUILD_DIR=$ROOT_DIR/3rd/3rd-cmake
 
