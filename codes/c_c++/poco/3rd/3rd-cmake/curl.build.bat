@@ -41,5 +41,5 @@ if %1 equ debug (
 
     cd %ROOT_DIR%
 ) else (
-    echo "Usage: build.curl.bat [debug | release | all]"
+    echo Usage: build.curl.bat [debug ^| release ^| all]
 )
