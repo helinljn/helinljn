@@ -11,7 +11,27 @@
                 ]
             },
             "defines": [
-                "_WIN32_WINNT=0x0A00"
+                "WIN32",
+                "_WINDOWS",
+                "_WIN32_WINNT=0x0A00",
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "POCO_LOG_DEBUG",
+                "POCO_NEW_STATE_ON_MOVE",
+                "POCO_NO_AUTOMATIC_LIBS",
+                "POCO_NO_AUTOMATIC_LIB_INIT",
+                "UTF8PROC_STATIC",
+                "POCO_ENABLE_FASTLOGGER",
+                "POCO_DLL",
+                "POCO_CMAKE",
+                "POCO_ENABLE_CPP20",
+                "POCO_OS_FAMILY_WINDOWS",
+                "POCO_ENABLE_TRACE",
+                "SQLParser_EXPORTS",
+                "THREADSAFE",
+                "NO_TCL",
+                "__LCC__"
             ],
             "compilerArgs": [
                 "/Zc:__cplusplus"
