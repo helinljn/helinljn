@@ -4,7 +4,7 @@ set VS_VERSION="Visual Studio 17 2022"
 set ROOT_DIR=%~dp0
 set DEBUG_DIR=%ROOT_DIR%/.build/windows/x64-Debug
 
-@rem poco debug config
+@rem server debug config
 mkdir "%DEBUG_DIR%" 2>nul
 cd %DEBUG_DIR%
 
