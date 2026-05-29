@@ -16,10 +16,10 @@ echo ------------------
 echo -- brynet
 cd $ROOT_INIT_DIR
 if [ ! -d $BRYNET_INIT_DIR ]; then
-    git clone https://github.com/helinljn/brynet.git $BRYNET_INIT_DIR
+    git clone https://github.com/IronsDu/brynet.git $BRYNET_INIT_DIR
 else
     cd $BRYNET_INIT_DIR
-    git remote set-url origin https://github.com/helinljn/brynet.git
+    git remote set-url origin https://github.com/IronsDu/brynet.git
     git remote -v
     git checkout .
     git fetch -p origin
