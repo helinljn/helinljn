@@ -46,6 +46,17 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     set(CMAKE_CXX_FLAGS "${POCO_CXX_FLAGS}" CACHE STRING "MSVC C++ compiler flags" FORCE)
 endif()
 
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/poco-definitions.cmake")
+
+set(POCO_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+foreach(POCO_COMPILE_DEFINITION ${POCO_EXTRA_COMPILE_DEFINITIONS})
+    string(FIND " ${POCO_CXX_FLAGS} " " ${POCO_COMPILE_DEFINITION} " POCO_DEFINITION_FOUND)
+    if(POCO_DEFINITION_FOUND EQUAL -1)
+        string(APPEND POCO_CXX_FLAGS " ${POCO_COMPILE_DEFINITION}")
+    endif()
+endforeach()
+set(CMAKE_CXX_FLAGS "${POCO_CXX_FLAGS}" CACHE STRING "Poco C++ compiler flags" FORCE)
+
 # Core build behavior
 set(POCO_OUTPUT_DIR                "${CMAKE_BINARY_DIR}/bin" CACHE PATH "Poco build output directory" FORCE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${POCO_OUTPUT_DIR}"      CACHE PATH "Runtime output" FORCE)
