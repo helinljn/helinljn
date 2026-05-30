@@ -67,9 +67,15 @@ curl_multi_add_handle(multi, easy);
 - `CURLOPT_PRIVATE`：把业务请求对象挂到 easy 上，完成后通过 `curl_easy_getinfo(..., CURLINFO_PRIVATE, ...)` 取回。
 - `CURLOPT_TIMEOUT_MS`：整个请求总超时。
 - `CURLOPT_CONNECTTIMEOUT_MS`：DNS、TCP、TLS 等连接阶段超时。
+- `CURLOPT_DNS_CACHE_TIMEOUT`：DNS cache 的生命周期，默认 60 秒；失败解析结果有效时间约为该值的一半。
 - `CURLOPT_PROTOCOLS_STR`：如果 URL 来自外部输入，建议限制为 `http,https,ws,wss`。
 - `CURLOPT_WS_OPTIONS`：WebSocket 选项，例如 `CURLWS_RAW_MODE`、`CURLWS_NOAUTOPONG`。
 - `CURLOPT_CONNECT_ONLY=2L`：WebSocket connect-only 模型，完成握手后交给业务调用 `curl_ws_send()` / `curl_ws_recv()`。
+
+multi 级别常见 DNS 相关选项：
+
+- `CURLMOPT_RESOLVE_THREADS_MAX`：调整 threaded resolver 的最大 DNS worker 数。
+- `CURLMOPT_NETWORK_CHANGED`：网络变化时可清 DNS cache 和连接池。
 
 ### 2.2 WebSocket 两种 API 模型
 
@@ -351,7 +357,189 @@ Curl_dnscache_get()
 
 如果 cache 未命中，进入真正解析。
 
-### 5.3 threaded resolver 启动
+### 5.3 DNS cache TTL、命中和清理
+
+DNS cache 的默认超时时间来自 easy handle 默认配置：
+
+```text
+url.c
+  -> set->dns_cache_timeout_ms = 60000
+```
+
+也就是默认缓存 60 秒。应用层可以通过：
+
+```cpp
+curl_easy_setopt(easy, CURLOPT_DNS_CACHE_TIMEOUT, seconds);
+```
+
+调整缓存时间：
+
+- `seconds > 0`：缓存指定秒数。
+- `seconds = 0`：禁用 DNS cache。
+- `seconds = -1`：DNS cache 永不过期，只受 cache 清空和进程生命周期影响。
+
+libcurl 不使用 DNS 响应里的真实 TTL；`CURLOPT_DNS_CACHE_TIMEOUT` 是 libcurl 自己的推测性缓存时间。
+
+DNS cache 归属：
+
+```text
+默认：
+  multi->dnscache
+
+如果使用 curl_share 且共享 CURL_LOCK_DATA_DNS：
+  share->dnscache
+```
+
+本项目如果直接使用一个 `CURLM* multi` 管理多个 easy handle，那么这些 easy 默认共享该 multi 的 DNS cache。
+
+cache 命中条件：
+
+```text
+hostname + port 命中
+  -> DNS entry 未过期
+  -> entry 覆盖本次需要的 DNS query 类型
+     例如本次需要 A+AAAA，cache entry 也必须覆盖 A+AAAA
+  -> 返回 Curl_dns_entry，refcount++
+```
+
+cache miss 或 stale：
+
+```text
+fetch_addr()
+  -> dnscache_entry_is_stale()
+    -> age >= dns_cache_timeout_ms
+  -> Curl_hash_delete()
+  -> 重新进入 threaded resolver
+```
+
+负缓存：
+
+```text
+解析失败
+  -> Curl_dnscache_add_negative()
+  -> cache entry 没有 addr
+```
+
+负缓存的有效时间是普通 DNS cache timeout 的一半。源码里通过：
+
+```text
+if(!dns->addr)
+  age *= 2;
+```
+
+实现。因此默认 `CURLOPT_DNS_CACHE_TIMEOUT=60` 秒时：
+
+- 成功解析结果默认最多复用 60 秒。
+- 失败解析结果默认最多复用约 30 秒。
+
+DNS cache 清理时机：
+
+```text
+multi_done()
+  -> Curl_dnscache_prune()
+```
+
+同时，lookup 时如果发现 entry 已过期，也会立即删除。cache 过大时还会强制裁剪；当前 curl 源码限制 DNS cache 大小约 30000 条，超过后会按年龄继续 prune。
+
+应用层也可以通过 multi 选项主动通知网络变化：
+
+```text
+curl_multi_setopt(multi, CURLMOPT_NETWORK_CHANGED, CURLMNWC_CLEAR_DNS)
+  -> Curl_dnscache_clear()
+```
+
+这会清空 DNS cache，下一次请求重新解析。
+
+### 5.4 DNS 线程池参数
+
+本仓库启用了 `ENABLE_THREADED_RESOLVER=ON`，实际编译出的配置包含 `USE_RESOLV_THREADED`。multi 初始化时会创建 DNS 线程队列：
+
+```text
+curl_multi_init()
+  -> Curl_multi_handle(CURL_XFER_TABLE_SIZE, ...)
+  -> Curl_async_thrdd_multi_init(multi, 0, 20, 2000)
+    -> Curl_thrdq_create(&multi->resolv_thrdq,
+                         "DNS",
+                         max_len = 0,
+                         min_threads = 0,
+                         max_threads = 20,
+                         idle_time_ms = 2000,
+                         async_thrdd_item_process,
+                         async_thrdd_event,
+                         multi)
+```
+
+实际含义：
+
+- DNS 队列名是 `"DNS"`。
+- `max_len = 0` 表示发送队列长度不限制。
+- `min_threads = 0` 表示没有常驻 DNS 线程。
+- `max_threads = 20` 表示真实 multi handle 默认最多 20 个 DNS worker 线程。
+- `idle_time_ms = 2000` 表示空闲线程超过 2 秒且线程数大于最小值时退出。
+
+如果使用 `curl_easy_perform()`，libcurl 内部会创建一个 “easy multi”，参数更小：
+
+```text
+Curl_multi_handle(16, 1, 3, 7, 3)
+  -> Curl_async_thrdd_multi_init(multi, 0, 2, 10)
+```
+
+也就是：
+
+- 最多 2 个 DNS worker 线程。
+- 空闲 10ms 后可退出。
+
+本文主要讨论用户显式使用 multi interface 的异步 client，因此默认按 `max_threads=20` 理解。
+
+应用层可以调整 DNS 最大线程数：
+
+```cpp
+curl_multi_setopt(multi, CURLMOPT_RESOLVE_THREADS_MAX, 32L);
+```
+
+对应内部调用：
+
+```text
+CURLMOPT_RESOLVE_THREADS_MAX
+  -> Curl_async_thrdd_multi_set_props(multi, 0, max_threads, 2000)
+```
+
+注意：
+
+- 只能调整最大线程数。
+- `min_threads` 仍为 0。
+- `idle_time_ms` 仍为 2000。
+- DNS queue 最大长度仍为 0，也就是不限制。
+
+线程创建是懒加载的：
+
+```text
+async_thrdd_query()
+  -> Curl_thrdq_send()
+    -> Curl_thrdpool_signal(number_of_queued_items)
+      -> 唤醒 idle worker
+      -> 如果 worker 不够且未超过 max_threads，则创建新线程
+```
+
+一个域名解析通常可能投递两个 item：
+
+```text
+AAAA 查询
+A 查询
+```
+
+所以大量并发请求同一时间 miss DNS cache 时，DNS 线程池会按队列压力增长到上限。
+
+DNS 查询 item 带有 timeout：
+
+```text
+async_thrdd_query()
+  -> Curl_thrdq_send(..., async->timeout_ms)
+```
+
+如果 item 在发送队列中等待超过 timeout，还没被 worker 取走，`thrdqueue` 会把它移动到完成队列，后续主线程收取时按失败/超时路径处理。这个 timeout 来自当前请求剩余时间，受总超时和连接超时影响。
+
+### 5.5 threaded resolver 启动
 
 由于本仓库 `ENABLE_ARES=OFF` 且 `CURL_DISABLE_DOH=ON`，普通域名解析走 threaded resolver：
 
@@ -390,17 +578,19 @@ hostip_resolv_start()
 
 这时主线程没有阻塞在 DNS 上，请求留在 multi 状态机里，等待 DNS 线程返回结果。
 
-### 5.4 DNS worker 线程执行 getaddrinfo
+### 5.6 DNS worker 线程执行 getaddrinfo
 
-DNS 线程池由 multi handle 初始化：
+DNS worker 从 `resolv_thrdq` 取到 queue item 后，会调用队列创建时传入的处理函数：
 
 ```text
-multi_init()
-  -> Curl_async_thrdd_multi_init()
-    -> Curl_thrdq_create(..., async_thrdd_item_process, ...)
+Curl_thrdpool
+  -> thrdslot_run()
+    -> thrdq_tpool_take()
+    -> thrdq_tpool_process()
+      -> async_thrdd_item_process()
 ```
 
-worker 线程拿到 DNS item 后执行：
+具体解析执行：
 
 ```text
 async_thrdd_item_process()
@@ -417,7 +607,7 @@ async_thrdd_item_process()
 - 如果一次查询同时允许 A/AAAA，可能使用 `PF_UNSPEC`。
 - `socktype` 和 `protocol` 会根据传输类型设置，普通 HTTP/HTTPS 是 TCP。
 
-### 5.5 主线程取 DNS 结果
+### 5.7 主线程取 DNS 结果
 
 multi 状态机每次运行时会处理 DNS 线程队列：
 
@@ -461,7 +651,7 @@ cf_dns_connect()
   -> Curl_conn_cf_connect(cf->next)
 ```
 
-### 5.6 DNS 和 Happy Eyeballs 的关系
+### 5.8 DNS 和 Happy Eyeballs 的关系
 
 curl 8.x 的 DNS filter 不一定等待所有 DNS 查询完全结束才开始连接。它会判断是否“足够开始连接”：
 
@@ -1274,10 +1464,13 @@ DNS
   Curl_resolv()
   hostip_resolv()
   Curl_dnscache_get()
+    -> 命中且未过期：直接返回，默认正缓存 60s，负缓存约 30s
+    -> 未命中或 stale：进入 threaded resolver
   hostip_resolv_start()
   Curl_async_getaddrinfo()
   async_thrdd_query(A/AAAA)
   Curl_thrdq_send()
+    -> resolv_thrdq: max_threads=20, min_threads=0, idle=2000ms
 
 DNS worker
   async_thrdd_item_process()
@@ -1501,6 +1694,10 @@ curl_easy_getinfo(easy, CURLINFO_RESPONSE_CODE, &http_code);
 - `3rd/curl/lib/cf-dns.c`：DNS filter。
 - `3rd/curl/lib/hostip.c`：DNS cache、`Curl_resolv()`、resolver 调度。
 - `3rd/curl/lib/asyn-thrdd.c`：threaded resolver、DNS 线程队列、`getaddrinfo()` 执行。
+- `3rd/curl/lib/thrdqueue.c`：DNS queue 的 send/recv、队列超时、队列长度控制。
+- `3rd/curl/lib/thrdpool.c`：DNS worker 线程池的懒创建、idle 退出、最大线程数控制。
+- `3rd/curl/lib/dnscache.c`：DNS cache 命中、stale 判断、负缓存和 prune。
+- `3rd/curl/docs/libcurl/opts/CURLOPT_DNS_CACHE_TIMEOUT.md`：DNS cache timeout 的公开选项说明。
 - `3rd/curl/lib/cf-socket.c`：socket connect/send/recv。
 - `3rd/curl/lib/vtls/openssl.c`：OpenSSL TLS 握手和读写。
 - `3rd/curl/lib/http.c`：HTTP/1.x 请求构建、响应解析。
