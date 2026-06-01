@@ -169,7 +169,7 @@ IF(WIN32 AND CMAKE_GENERATOR MATCHES "Visual Studio")
                 PLATFORM x64
             )
 
-            SET_PROPERTY(TARGET ${TARGET_NAME} PROPERTY FOLDER "3rd")
+            SET_PROPERTY(TARGET ${TARGET_NAME} PROPERTY FOLDER "3rd/poco")
         ELSE()
             MESSAGE(WARNING
                 "Poco vcxproj not found: ${POCO_VSPROJ}. "
