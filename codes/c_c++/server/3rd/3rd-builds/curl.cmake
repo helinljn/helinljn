@@ -105,7 +105,7 @@ IF(WIN32 AND CMAKE_GENERATOR MATCHES "Visual Studio")
                 PLATFORM x64
             )
 
-            SET_PROPERTY(TARGET ${TARGET_NAME} PROPERTY FOLDER "curl")
+            SET_PROPERTY(TARGET ${TARGET_NAME} PROPERTY FOLDER "3rd")
         ELSE()
             MESSAGE(WARNING
                 "curl vcxproj not found: ${CURL_VSPROJ}. "
