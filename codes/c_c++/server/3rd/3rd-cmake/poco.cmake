@@ -10,11 +10,6 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
 else()
     message(FATAL_ERROR "Unsupported host platform for poco.cmake: ${CMAKE_HOST_SYSTEM_NAME}")
 endif()
-set(POCO_CMAKE_OVERRIDE_DIR "${POCO_PRESET_ROOT}/.build/${POCO_PLATFORM_DIR}/cmake-overrides" CACHE PATH "Poco CMake override directory" FORCE)
-
-# Remove the legacy override that disabled Poco's C++20 compiler detection.
-file(REMOVE "${POCO_CMAKE_OVERRIDE_DIR}/CXX2x.cmake")
-set(CMAKE_MODULE_PATH "${POCO_PRESET_ROOT}/cmake" CACHE STRING "CMake module path" FORCE)
 
 # Language standards
 set(CMAKE_C_STANDARD 11 CACHE STRING "C standard" FORCE)
