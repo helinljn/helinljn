@@ -18,12 +18,6 @@ if   [ "$1" = "debug" ]; then
     chmod +x curl.build.sh
     ./curl.build.sh debug
 
-    echo ""
-    echo "--------------------------------"
-    echo "-- Building libhv..."
-    chmod +x libhv.build.sh
-    ./libhv.build.sh debug
-
     cd $ROOT_DIR
 elif [ "$1" = "release" ]; then
     cd $BUILD_DIR
@@ -40,12 +34,6 @@ elif [ "$1" = "release" ]; then
     chmod +x curl.build.sh
     ./curl.build.sh release
 
-    echo ""
-    echo "--------------------------------"
-    echo "-- Building libhv..."
-    chmod +x libhv.build.sh
-    ./libhv.build.sh release
-
     cd $ROOT_DIR
 elif [ "$1" = "all" ]; then
     cd $BUILD_DIR
@@ -61,12 +49,6 @@ elif [ "$1" = "all" ]; then
     echo "-- Building curl..."
     chmod +x curl.build.sh
     ./curl.build.sh all
-
-    echo ""
-    echo "--------------------------------"
-    echo "-- Building libhv..."
-    chmod +x libhv.build.sh
-    ./libhv.build.sh all
 
     cd $ROOT_DIR
 else

@@ -16,11 +16,6 @@ if %1 equ debug (
     echo -- Building curl...
     call curl.build.bat debug
 
-    echo.
-    echo --------------------------------
-    echo -- Building libhv...
-    call libhv.build.bat debug
-
     cd %ROOT_DIR%
 ) else if %1 equ release (
     cd %BUILD_DIR%
@@ -35,11 +30,6 @@ if %1 equ debug (
     echo -- Building curl...
     call curl.build.bat release
 
-    echo.
-    echo --------------------------------
-    echo -- Building libhv...
-    call libhv.build.bat release
-
     cd %ROOT_DIR%
 ) else if %1 equ all (
     cd %BUILD_DIR%
@@ -53,11 +43,6 @@ if %1 equ debug (
     echo --------------------------------
     echo -- Building curl...
     call curl.build.bat all
-
-    echo.
-    echo --------------------------------
-    echo -- Building libhv...
-    call libhv.build.bat all
 
     cd %ROOT_DIR%
 ) else (
