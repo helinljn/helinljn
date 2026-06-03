@@ -2,7 +2,7 @@
 
 set ROOT_DIR=%~dp0
 set LIBHV_LINK=%ROOT_DIR%/libhv_d.sln
-set LIBHV_TARGET=%ROOT_DIR%/../libhv/.build/windows/x64-Debug/libhv.sln
+set LIBHV_TARGET=%ROOT_DIR%/../libhv/.build/windows/x64-Debug/hv.sln
 
 @rem libhv debug shortcut
 whoami /priv | findstr /i "SeSecurityPrivilege" >nul 2>&1

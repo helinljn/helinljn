@@ -64,6 +64,63 @@ function(install)
     endif()
 endfunction()
 
+function(libhv_collect_target_headers LIBHV_SOURCE_OUTPUT_VARIABLE LIBHV_GENERATED_OUTPUT_VARIABLE LIBHV_ALL_OUTPUT_VARIABLE)
+    set(LIBHV_SOURCE_HEADERS)
+    set(LIBHV_GENERATED_HEADERS)
+    set(LIBHV_ALL_HEADERS)
+
+    if(DEFINED LIBHV_HEADERS)
+        libhv_redirect_hconfig_argument(LIBHV_TARGET_HEADER_ARGS ${LIBHV_HEADERS})
+        foreach(LIBHV_TARGET_HEADER IN LISTS LIBHV_TARGET_HEADER_ARGS)
+            if(IS_ABSOLUTE "${LIBHV_TARGET_HEADER}")
+                set(LIBHV_ABSOLUTE_HEADER "${LIBHV_TARGET_HEADER}")
+            else()
+                get_filename_component(LIBHV_ABSOLUTE_HEADER "${LIBHV_TARGET_HEADER}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+            endif()
+
+            list(APPEND LIBHV_ALL_HEADERS "${LIBHV_ABSOLUTE_HEADER}")
+            if("${LIBHV_ABSOLUTE_HEADER}" STREQUAL "${LIBHV_GENERATED_CONFIG_HEADER}")
+                list(APPEND LIBHV_GENERATED_HEADERS "${LIBHV_ABSOLUTE_HEADER}")
+            else()
+                list(APPEND LIBHV_SOURCE_HEADERS "${LIBHV_ABSOLUTE_HEADER}")
+            endif()
+        endforeach()
+    endif()
+
+    set(${LIBHV_SOURCE_OUTPUT_VARIABLE} ${LIBHV_SOURCE_HEADERS} PARENT_SCOPE)
+    set(${LIBHV_GENERATED_OUTPUT_VARIABLE} ${LIBHV_GENERATED_HEADERS} PARENT_SCOPE)
+    set(${LIBHV_ALL_OUTPUT_VARIABLE} ${LIBHV_ALL_HEADERS} PARENT_SCOPE)
+endfunction()
+
+function(libhv_add_headers_to_target LIBHV_TARGET_NAME)
+    if(NOT TARGET "${LIBHV_TARGET_NAME}")
+        return()
+    endif()
+
+    libhv_collect_target_headers(LIBHV_SOURCE_HEADERS LIBHV_GENERATED_HEADERS LIBHV_ALL_HEADERS)
+    if(NOT LIBHV_ALL_HEADERS)
+        return()
+    endif()
+
+    set_source_files_properties(${LIBHV_ALL_HEADERS} PROPERTIES HEADER_FILE_ONLY TRUE)
+    target_sources("${LIBHV_TARGET_NAME}" PRIVATE ${LIBHV_ALL_HEADERS})
+
+    if(LIBHV_SOURCE_HEADERS)
+        source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Header Files" FILES ${LIBHV_SOURCE_HEADERS})
+    endif()
+    if(LIBHV_GENERATED_HEADERS)
+        source_group("Header Files\\Generated" FILES ${LIBHV_GENERATED_HEADERS})
+    endif()
+endfunction()
+
+function(add_library)
+    _add_library(${ARGV})
+
+    if(ARGC GREATER 0 AND ("${ARGV0}" STREQUAL "hv" OR "${ARGV0}" STREQUAL "hv_static"))
+        libhv_add_headers_to_target("${ARGV0}")
+    endif()
+endfunction()
+
 function(target_include_directories)
     _target_include_directories(${ARGV})
 
