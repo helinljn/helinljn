@@ -32,6 +32,7 @@ IF(WIN32)
         funchook
         poco_all
         curl
+        hv
         Dbghelp
     )
 ELSE()
@@ -54,6 +55,7 @@ ELSE()
         funchook
         poco_all
         curl
+        hv
         dl
     )
 ENDIF()
