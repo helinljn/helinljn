@@ -11,6 +11,9 @@ else()
     message(FATAL_ERROR "Unsupported host platform for libhv.cmake: ${CMAKE_HOST_SYSTEM_NAME}")
 endif()
 
+set(LIBHV_PROJECT_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/libhv-project-include.cmake" CACHE FILEPATH "libhv project hook" FORCE)
+set(CMAKE_PROJECT_INCLUDE "${LIBHV_PROJECT_INCLUDE}" CACHE FILEPATH "CMake project hook" FORCE)
+
 # Language standards
 set(CMAKE_C_STANDARD 11 CACHE STRING "C standard" FORCE)
 set(CMAKE_C_STANDARD_REQUIRED ON CACHE BOOL "Require the selected C standard" FORCE)
@@ -94,15 +97,15 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 # Disabled libhv modules and optional dependencies
-set(WITH_PROTOCOL OFF CACHE BOOL "Disable extra protocol sources" FORCE)
-set(WITH_MQTT     OFF CACHE BOOL "Disable MQTT support" FORCE)
-set(WITH_CURL     OFF CACHE BOOL "Disable deprecated curl integration" FORCE)
-set(WITH_NGHTTP2  OFF CACHE BOOL "Disable nghttp2 support" FORCE)
-set(WITH_GNUTLS   OFF CACHE BOOL "Disable GnuTLS support" FORCE)
-set(WITH_MBEDTLS  OFF CACHE BOOL "Disable mbedTLS support" FORCE)
-set(WITH_KCP      OFF CACHE BOOL "Disable KCP support" FORCE)
-set(ENABLE_UDS    OFF CACHE BOOL "Disable Unix domain sockets" FORCE)
-set(USE_MULTIMAP  OFF CACHE BOOL "Disable MultiMap" FORCE)
+set(WITH_PROTOCOL  OFF CACHE BOOL "Disable extra protocol sources" FORCE)
+set(WITH_MQTT      OFF CACHE BOOL "Disable MQTT support" FORCE)
+set(WITH_CURL      OFF CACHE BOOL "Disable deprecated curl integration" FORCE)
+set(WITH_NGHTTP2   OFF CACHE BOOL "Disable nghttp2 support" FORCE)
+set(WITH_GNUTLS    OFF CACHE BOOL "Disable GnuTLS support" FORCE)
+set(WITH_MBEDTLS   OFF CACHE BOOL "Disable mbedTLS support" FORCE)
+set(WITH_KCP       OFF CACHE BOOL "Disable KCP support" FORCE)
+set(ENABLE_UDS     OFF CACHE BOOL "Disable Unix domain sockets" FORCE)
+set(USE_MULTIMAP   OFF CACHE BOOL "Disable MultiMap" FORCE)
 set(ENABLE_WINDUMP OFF CACHE BOOL "Disable Windows minidump support" FORCE)
 
 # External dependencies
