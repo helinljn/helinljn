@@ -5,6 +5,7 @@ DISTORM_INIT_DIR=$ROOT_INIT_DIR/3rd/distorm
 FUNCHOOK_INIT_DIR=$ROOT_INIT_DIR/3rd/funchook
 POCO_INIT_DIR=$ROOT_INIT_DIR/3rd/poco
 CURL_INIT_DIR=$ROOT_INIT_DIR/3rd/curl
+LIBHV_INIT_DIR=$ROOT_INIT_DIR/3rd/libhv
 DOCTEST_INIT_DIR=$ROOT_INIT_DIR/3rd/doctest
 MIMALLOC_INIT_DIR=$ROOT_INIT_DIR/3rd/mimalloc
 
@@ -62,6 +63,20 @@ else
     git checkout .
     git fetch -p origin
     git checkout curl-8_20_0
+fi
+
+echo ------------------
+echo -- libhv
+cd $ROOT_INIT_DIR
+if [ ! -d $LIBHV_INIT_DIR ]; then
+    git clone -b v1.3.4 https://github.com/ithewei/libhv.git $LIBHV_INIT_DIR
+else
+    cd $LIBHV_INIT_DIR
+    git remote set-url origin https://github.com/ithewei/libhv.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v1.3.4
 fi
 
 echo ------------------

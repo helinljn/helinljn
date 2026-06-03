@@ -5,6 +5,7 @@ set DISTORM_INIT_DIR=%ROOT_INIT_DIR%/3rd/distorm
 set FUNCHOOK_INIT_DIR=%ROOT_INIT_DIR%/3rd/funchook
 set POCO_INIT_DIR=%ROOT_INIT_DIR%/3rd/poco
 set CURL_INIT_DIR=%ROOT_INIT_DIR%/3rd/curl
+set LIBHV_INIT_DIR=%ROOT_INIT_DIR%/3rd/libhv
 set DOCTEST_INIT_DIR=%ROOT_INIT_DIR%/3rd/doctest
 set MIMALLOC_INIT_DIR=%ROOT_INIT_DIR%/3rd/mimalloc
 
@@ -62,6 +63,20 @@ if not exist %CURL_INIT_DIR% (
     git checkout .
     git fetch -p origin
     git checkout curl-8_20_0
+)
+
+echo ------------------
+echo -- libhv
+cd %ROOT_INIT_DIR%
+if not exist %LIBHV_INIT_DIR% (
+    git clone -b v1.3.4 https://github.com/ithewei/libhv.git %LIBHV_INIT_DIR%
+) else (
+    cd %LIBHV_INIT_DIR%
+    git remote set-url origin https://github.com/ithewei/libhv.git
+    git remote -v
+    git checkout .
+    git fetch -p origin
+    git checkout v1.3.4
 )
 
 echo ------------------
