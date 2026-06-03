@@ -16,7 +16,7 @@
     npm i -g @anthropic-ai/claude-code@latest
     npm i -g @openai/codex@latest
     npm i -g @google/gemini-cli@latest
-    npm i -g deepseek-tui@latest
+    npm i -g codewhale@latest
 
 3. 配置claude-code
     C:\Users\helin\.claude\settings.json
@@ -67,8 +67,8 @@
         GEMINI_API_KEY=xxx
         GEMINI_MODEL=gemini-3.1-pro-preview
 
-6. 配置deepseek-tui
-    C:\Users\helin\.deepseek\config.toml
+6. 配置codewhale
+    C:\Users\helin\.codewhale\config.toml
         api_key = "xxx"
         base_url = "https://api.deepseek.com"
         default_text_model = "deepseek-v4-pro"
