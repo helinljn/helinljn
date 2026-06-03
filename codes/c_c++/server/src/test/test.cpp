@@ -3,7 +3,6 @@
 #include "mimalloc.h"
 #include "core/stack_trace.h"
 #include "curl/curl.h"
-#include "hv/hversion.h"
 #include <cstdlib>
 #include <new>
 
@@ -70,10 +69,6 @@ int main(int argc, char** argv)
 
     const std::string cver = curl_version();
     if (cver != "libcurl/8.20.0-DEV OpenSSL/3.0.20")
-        return EXIT_FAILURE;
-
-    const std::string hver = hv_compile_version();
-    if (!hver.starts_with("1."))
         return EXIT_FAILURE;
 
     initializer init;
