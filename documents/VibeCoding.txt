@@ -1,6 +1,6 @@
 1. 安装CCSwitch
     https://github.com/farion1231/cc-switch/releases
-    CC-Switch-v3.14.1-Windows.msi
+    CC-Switch-v3.16.2-Windows.msi
 
 2. 安装nodejs
     https://nodejs.cn/download
