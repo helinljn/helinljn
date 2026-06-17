@@ -72,6 +72,7 @@ SET(MIMALLOC_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/alloc-aligned.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/alloc-posix.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/arena.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/arena-meta.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/bitmap.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/heap.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/init.c
@@ -79,10 +80,11 @@ SET(MIMALLOC_SRC_LIST
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/options.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/os.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/page.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/page-map.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/random.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/segment.c
-    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/segment-map.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/stats.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/theap.c
+    ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/threadlocal.c
     ${CMAKE_PROJECT_ROOT_DIR}/3rd/mimalloc/src/prim/prim.c
 )
 

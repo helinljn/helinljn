@@ -82,12 +82,12 @@ echo ------------------
 echo -- mimalloc
 cd $ROOT_INIT_DIR
 if [ ! -d $MIMALLOC_INIT_DIR ]; then
-    git clone -b v2.3.2 https://github.com/microsoft/mimalloc.git $MIMALLOC_INIT_DIR
+    git clone -b v3.3.2 https://github.com/microsoft/mimalloc.git $MIMALLOC_INIT_DIR
 else
     cd $MIMALLOC_INIT_DIR
     git remote set-url origin https://github.com/microsoft/mimalloc.git
     git remote -v
     git checkout .
     git fetch -p origin
-    git checkout v2.3.2
+    git checkout v3.3.2
 fi
