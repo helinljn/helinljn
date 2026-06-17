@@ -10,22 +10,6 @@
 <style>
     .result-box { max-height: 400px; overflow-y: auto; }
     pre { margin: 0; white-space: pre-wrap; word-wrap: break-word; }
-    .batch-toggle { cursor: pointer; user-select: none; }
-    .batch-toggle input[type="checkbox"] { cursor: pointer; }
-    .batch-textarea { display: none; font-family: monospace; resize: vertical; min-height: 100px; }
-    .batch-textarea.active { display: block; }
-    .single-input.hidden { display: none; }
-    .batch-hint { font-size: 0.75rem; color: #6c757d; margin-top: 4px; }
-    .batch-progress { height: 4px; }
-    .batch-result-table { max-height: 500px; overflow-y: auto; }
-    .batch-result-table td, .batch-result-table th { white-space: nowrap; }
-    .batch-result-table td.result-cell { white-space: normal; max-width: 400px; overflow: hidden; text-overflow: ellipsis; }
-    .status-success { color: #2fb344; }
-    .status-failed { color: #d63939; }
-    .status-pending { color: #6c757d; }
-    .status-running { color: #4299e1; }
-    .file-import-label { cursor: pointer; font-size: 0.8rem; }
-    .file-import-label:hover { text-decoration: underline; }
     .param-label-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
     .structured-result-section + .structured-result-section { margin-top: 1rem; }
     .structured-table th, .structured-table td { vertical-align: top; }
@@ -73,12 +57,6 @@
                                 {{ param.name }}
                                 {% if param.isnull == "true" %}
                                 <span class="form-label-description">{% trans "可选" %}</span>
-                                {% endif %}
-                                {% if param.id != "AreaId" and param.id != "Partition" and param.id != "PlatId" and not param.children %}
-                                <span class="batch-toggle ms-2">
-                                    <input type="checkbox" class="batch-mode-toggle" data-param-id="{{ param.id }}" onchange="toggleFieldBatchMode('{{ param.id }}', this.checked)">
-                                    {% trans "批量" %}
-                                </span>
                                 {% endif %}
                             </span>
                         </label>
@@ -142,20 +120,6 @@
                                    {% if param.isnull != "true" %}required{% endif %}>
 
                         {% endif %}
-                        {# Batch textarea (hidden by default) #}
-                        <textarea class="form-control batch-textarea"
-                                  id="batch_{{ param.id }}"
-                                  data-param-id="{{ param.id }}"
-                                  data-param-type="{{ param.type }}"
-                                  placeholder="{% trans '输入多个值，每行一个或用逗号分隔，如：&#10;值1&#10;值2&#10;值3' %}"
-                        ></textarea>
-                        <div class="batch-hint" id="hint_{{ param.id }}" style="display:none;">
-                            {% trans "支持逗号分隔、换行分隔" %} |
-                            <label class="file-import-label text-primary">
-                                <i class="ti ti-file-import me-1"></i>{% trans "从文件导入" %}
-                                <input type="file" class="file-import-input" data-target="{{ param.id }}" accept=".txt,.csv" style="display:none;" onchange="importValuesFromFile(this)">
-                            </label>
-                        </div>
                         {% endif %}
                         {% endif %}
                     </div>
@@ -164,9 +128,6 @@
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary" id="submitBtn">
                             <i class="ti ti-player-play me-1"></i><span id="submitBtnText">{% trans "执行命令" %}</span>
-                        </button>
-                        <button type="button" class="btn btn-danger ms-2 d-none" id="cancelBatchBtn" onclick="cancelBatch()">
-                            <i class="ti ti-player-stop me-1"></i>{% trans "取消" %}
                         </button>
                         <button type="reset" class="btn btn-outline-secondary ms-2" id="resetBtn">
                             <i class="ti ti-rotate me-1"></i>{% trans "重置" %}
@@ -233,39 +194,6 @@
     </div>
 </div>
 
-<!-- 批量执行结果 -->
-<div class="card mt-3 d-none" id="batchResultCard">
-    <div class="card-header">
-        <h3 class="card-title"><i class="ti ti-list-check me-2"></i>{% trans "批量执行结果" %}</h3>
-        <div class="card-actions">
-            <span class="me-2" id="batchProgressText"></span>
-            <button class="btn btn-sm btn-outline-primary me-1 d-none" id="exportResultBtn" onclick="exportBatchResults()">
-                <i class="ti ti-download me-1"></i>{% trans "导出" %}
-            </button>
-            <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('batchResultCard').classList.add('d-none')">
-                <i class="ti ti-x"></i>
-            </button>
-        </div>
-    </div>
-    <div class="progress batch-progress rounded-0">
-        <div class="progress-bar" id="batchProgressBar" role="progressbar" style="width: 0%"></div>
-    </div>
-    <div class="table-responsive batch-result-table">
-        <table class="table table-vcenter card-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>{% trans "目标" %}</th>
-                    <th>{% trans "状态" %}</th>
-                    <th>{% trans "结果" %}</th>
-                </tr>
-            </thead>
-            <tbody id="batchResultBody">
-            </tbody>
-        </table>
-    </div>
-</div>
-
 <!-- 加载中遮罩 -->
 <div class="d-none position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 align-items-center justify-content-center"
      id="loadingOverlay" style="z-index:9999;">
@@ -278,16 +206,9 @@
 
 {% block extra_js %}
 <script>
-const BATCH_MAX_TARGETS = Number('{{ batch_max_targets|default:200 }}');
-const BATCH_INTERVAL_MS = Number('{{ batch_interval_ms|default:200 }}');
 const REQUEST_SCHEMA = JSON.parse('{{ request_params_json|default:"[]"|escapejs }}');
 const RESPONSE_SCHEMA = JSON.parse('{{ response_params_json|default:"[]"|escapejs }}');
 const RESPONSE_FIELD_LABELS = JSON.parse('{{ response_field_labels_json|default:"{}"|escapejs }}');
-
-// Track which param fields are in batch mode
-const batchFields = new Set();
-let batchCancelled = false;
-let batchResults = [];
 
 function clearResultViews() {
     const structuredWrap = document.getElementById('structuredResultWrap');
@@ -482,48 +403,6 @@ function renderStructuredResult(payload) {
     dataBody.appendChild(dataTableWrap);
 
     structuredWrap.classList.remove('d-none');
-}
-
-function toggleFieldBatchMode(paramId, checked) {
-    const singleInput = document.getElementById('single_' + paramId);
-    const batchInput = document.getElementById('batch_' + paramId);
-    const hint = document.getElementById('hint_' + paramId);
-
-    if (checked) {
-        batchFields.add(paramId);
-        singleInput.classList.add('hidden');
-        singleInput.removeAttribute('required');
-        batchInput.classList.add('active');
-        batchInput.setAttribute('required', '');
-        hint.style.display = 'block';
-    } else {
-        batchFields.delete(paramId);
-        singleInput.classList.remove('hidden');
-        restoreSingleInputRequired(singleInput);
-        batchInput.classList.remove('active');
-
-        batchInput.removeAttribute('required');
-        hint.style.display = 'none';
-    }
-    updateSubmitButtonText();
-}
-
-function updateSubmitButtonText() {
-    const btnText = document.getElementById('submitBtnText');
-    if (batchFields.size > 0) {
-        btnText.textContent = '{% trans "批量执行" %}';
-    } else {
-        btnText.textContent = '{% trans "执行命令" %}';
-    }
-}
-
-function restoreSingleInputRequired(input) {
-    if (!input) return;
-    if (input.dataset.required === 'true') {
-        input.setAttribute('required', '');
-    } else {
-        input.removeAttribute('required');
-    }
 }
 
 function convertParamValue(paramType, value, paramId) {
@@ -745,33 +624,6 @@ function initializeStructuredInputs() {
     });
 }
 
-function parseBatchValues(input) {
-    const values = [];
-    const lines = input.split(/[\n,;]+/);
-    for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed) values.push(trimmed);
-    }
-    return values;
-}
-
-function importValuesFromFile(input) {
-    const paramId = input.dataset.target;
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const batchInput = document.getElementById('batch_' + paramId);
-        batchInput.value = e.target.result;
-    };
-    reader.readAsText(file);
-    input.value = '';
-}
-
-function cancelBatch() {
-    batchCancelled = true;
-}
-
 function normalizeExecuteResponse(data) {
     // 旧协议：{success: bool, data/error}
     if (data && typeof data === 'object' && Object.prototype.hasOwnProperty.call(data, 'success')) {
@@ -795,105 +647,12 @@ function normalizeExecuteResponse(data) {
     return { success: false, error: '{% trans "未知错误" %}', data: data };
 }
 
-function addResultRow(index, targetLabel, rawData) {
-    const data = normalizeExecuteResponse(rawData);
-    const tbody = document.getElementById('batchResultBody');
-    const row = document.createElement('tr');
-
-    let statusClass, statusText, resultText;
-    if (data.success) {
-        statusClass = 'status-success';
-        statusText = '{% trans "成功" %}';
-        resultText = JSON.stringify(data.data, null, 2);
-    } else if (data.command_deactivated) {
-        statusClass = 'status-failed';
-        statusText = '{% trans "已停用" %}';
-        resultText = data.error || '{% trans "命令已失效" %}';
-    } else {
-        statusClass = 'status-failed';
-        statusText = '{% trans "失败" %}';
-        resultText = data.error || '{% trans "未知错误" %}';
-    }
-
-    batchResults.push({ target: targetLabel, success: data.success, error: data.error || null, data: data.data || null });
-
-    const tdIndex = document.createElement('td');
-    tdIndex.textContent = String(index);
-
-    const tdTarget = document.createElement('td');
-    const code = document.createElement('code');
-    code.textContent = String(targetLabel || '');
-    tdTarget.appendChild(code);
-
-    const tdStatus = document.createElement('td');
-    const statusSpan = document.createElement('span');
-    statusSpan.className = statusClass;
-    const statusIcon = document.createElement('i');
-    statusIcon.className = `ti ${data.success ? 'ti-circle-check' : 'ti-circle-x'} me-1`;
-    statusSpan.appendChild(statusIcon);
-    statusSpan.appendChild(document.createTextNode(statusText));
-    tdStatus.appendChild(statusSpan);
-
-    const tdResult = document.createElement('td');
-    tdResult.className = 'result-cell';
-
-    if (data.success) {
-        // 与单次执行保持一致：结构化展示（并使用 name 字段映射）
-        tdResult.appendChild(renderValueElement(data.data));
-    } else {
-        const pre = document.createElement('pre');
-        pre.style.margin = '0';
-        pre.style.whiteSpace = 'pre-wrap';
-        pre.style.wordBreak = 'break-all';
-        pre.style.maxHeight = '80px';
-        pre.style.overflowY = 'auto';
-        pre.textContent = String(resultText || '');
-        tdResult.appendChild(pre);
-    }
-
-    row.appendChild(tdIndex);
-    row.appendChild(tdTarget);
-    row.appendChild(tdStatus);
-    row.appendChild(tdResult);
-    tbody.appendChild(row);
-}
-
-function updateBatchProgress(current, total) {
-    const pct = Math.round((current / total) * 100);
-    const bar = document.getElementById('batchProgressBar');
-    const text = document.getElementById('batchProgressText');
-    bar.style.width = pct + '%';
-    text.textContent = current + '/' + total;
-}
-
-function exportBatchResults() {
-    if (!batchResults.length) return;
-    const header = 'Target,Status,Error,Result\n';
-    const rows = batchResults.map(r => {
-        const status = r.success ? '{% trans "成功" %}' : '{% trans "失败" %}';
-        const error = (r.error || '').replace(/"/g, '""');
-        const result = JSON.stringify(r.data || {}).replace(/"/g, '""');
-        return `${r.target},${status},"${error}","${result}"`;
-    }).join('\n');
-    const csv = header + rows;
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'batch_results_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-}
-
 function collectSingleParams() {
     const params = {};
     let hasError = false;
 
     document.querySelectorAll('.single-input.param-field').forEach(field => {
         const id = field.dataset.paramId;
-        // Skip fields that are in batch mode
-        if (batchFields.has(id)) return;
-
         let value = field.value.trim();
         if (!value) return;
 
@@ -927,17 +686,10 @@ function collectSingleParams() {
     return params;
 }
 
-function getBatchValues(paramId) {
-    const textarea = document.getElementById('batch_' + paramId);
-    if (!textarea) return [];
-    return parseBatchValues(textarea.value);
-}
-
 async function singleExecute() {
     const params = collectSingleParams();
     if (params === null) return;
 
-    // Also collect any batch fields that might have a single value (shouldn't normally happen)
     const overlay = document.getElementById('loadingOverlay');
     overlay.classList.remove('d-none');
     overlay.classList.add('d-flex');
@@ -985,172 +737,9 @@ async function singleExecute() {
     }
 }
 
-async function batchExecute() {
-    // Find all batch-enabled fields and their values
-    const batchData = {};
-    let maxCount = 0;
-    let primaryBatchField = null;
-
-    for (const paramId of batchFields) {
-        const values = getBatchValues(paramId);
-        if (values.length === 0) {
-            const textarea = document.getElementById('batch_' + paramId);
-            const paramLabel = textarea ? textarea.closest('.mb-3').querySelector('.form-label').textContent.trim() : paramId;
-            alert('{% trans "请为批量字段输入至少一个值" %}: ' + paramLabel);
-            return;
-        }
-        if (values.length > BATCH_MAX_TARGETS) {
-            alert('{% trans "值数量超过限制" %}' + ' (' + BATCH_MAX_TARGETS + ')');
-            return;
-        }
-        batchData[paramId] = values;
-        if (values.length > maxCount) {
-            maxCount = values.length;
-            primaryBatchField = paramId;
-        }
-    }
-
-    if (maxCount === 0) return;
-
-    // Check all batch fields have the same count, or single-value fields that repeat
-    for (const paramId of batchFields) {
-        if (batchData[paramId].length !== maxCount && batchData[paramId].length !== 1) {
-            const textarea = document.getElementById('batch_' + paramId);
-            const paramLabel = textarea ? textarea.closest('.mb-3').querySelector('.form-label').textContent.trim() : paramId;
-            alert('{% trans "批量字段数量不匹配" %}: ' + paramLabel + ' (' + batchData[paramId].length + ' vs ' + maxCount + '). {% trans "每个批量字段的值数量必须相同，或仅输入1个值以对所有目标复用" %}');
-            return;
-        }
-    }
-
-    batchCancelled = false;
-    batchResults = [];
-
-    const resultCard = document.getElementById('resultCard');
-    resultCard.classList.add('d-none');
-    const batchResultCard = document.getElementById('batchResultCard');
-    batchResultCard.classList.remove('d-none');
-    document.getElementById('batchResultBody').innerHTML = '';
-    document.getElementById('exportResultBtn').classList.add('d-none');
-
-    const submitBtn = document.getElementById('submitBtn');
-    const cancelBtn = document.getElementById('cancelBatchBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    submitBtn.disabled = true;
-    cancelBtn.classList.remove('d-none');
-    resetBtn.disabled = true;
-
-    const baseParams = collectSingleParams();
-    if (baseParams === null) {
-        submitBtn.disabled = false;
-        cancelBtn.classList.add('d-none');
-        resetBtn.disabled = false;
-        return;
-    }
-
-    for (let i = 0; i < maxCount; i++) {
-        if (batchCancelled) break;
-
-        updateBatchProgress(i, maxCount);
-
-        // Build params: base + batch field values for this iteration
-        const params = { ...baseParams };
-        let targetLabel = '';
-        let iterationHasError = false;
-        let iterationErrorMsg = '';
-
-        for (const paramId of batchFields) {
-            const values = batchData[paramId];
-            const valueIndex = values.length === 1 ? 0 : i;
-            let value = values[valueIndex];
-
-            // Use the primary batch field for the label
-            if (paramId === primaryBatchField) {
-                targetLabel = values[valueIndex];
-            }
-
-            // Type conversion
-            const textarea = document.getElementById('batch_' + paramId);
-            const paramType = textarea ? textarea.dataset.paramType : 'string';
-            const converted = convertParamValue(paramType, value, paramId);
-            if (!converted.ok) {
-                iterationHasError = true;
-                iterationErrorMsg = converted.error;
-                break;
-            }
-
-            params[paramId] = converted.value;
-
-        }
-
-        // If targetLabel is still empty, use first batch field
-        if (!targetLabel && batchFields.size > 0) {
-            const firstField = [...batchFields][0];
-            targetLabel = batchData[firstField][batchData[firstField].length === 1 ? 0 : i];
-        }
-
-        if (iterationHasError) {
-            addResultRow(i + 1, targetLabel || '-', { success: false, error: iterationErrorMsg });
-            continue;
-        }
-
-        try {
-            const response = await fetch(window.location.href, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-                body: JSON.stringify({ params }),
-            });
-            const rawData = await response.json();
-            const data = normalizeExecuteResponse(rawData);
-            addResultRow(i + 1, targetLabel, rawData);
-
-            if (data.command_deactivated) {
-                batchCancelled = true;
-                setTimeout(function() {
-                    window.location.href = '{% url "gmtool:command_list" %}';
-                }, 2000);
-            }
-        } catch (err) {
-            addResultRow(i + 1, targetLabel, { success: false, error: err.message });
-        }
-
-        if (i < maxCount - 1 && !batchCancelled) {
-            await new Promise(r => setTimeout(r, BATCH_INTERVAL_MS));
-        }
-    }
-
-    updateBatchProgress(maxCount, maxCount);
-    submitBtn.disabled = false;
-    cancelBtn.classList.add('d-none');
-    resetBtn.disabled = false;
-    document.getElementById('exportResultBtn').classList.remove('d-none');
-}
-
 document.getElementById('commandForm').addEventListener('submit', async function(e) {
     e.preventDefault();
-    if (batchFields.size > 0) {
-        await batchExecute();
-    } else {
-        await singleExecute();
-    }
-});
-
-document.getElementById('commandForm').addEventListener('reset', function() {
-    setTimeout(function() {
-        // Reset all batch mode toggles
-        document.querySelectorAll('.batch-mode-toggle').forEach(toggle => {
-            if (toggle.checked) {
-                toggle.checked = false;
-                toggleFieldBatchMode(toggle.dataset.paramId, false);
-            }
-        });
-        // Clear batch textareas
-        document.querySelectorAll('.batch-textarea').forEach(ta => {
-            ta.value = '';
-        });
-    }, 0);
+    await singleExecute();
 });
 
 initializeStructuredInputs();

@@ -34,7 +34,6 @@
 - 仪表盘首页
 - 命令列表按分组展示
 - 动态参数表单执行 GM 命令
-- 支持批量执行参数配置
 - 在线新增命令并写入 `idip_commands.json`
 - 超级管理员可上传命令定义 JSON 并自动同步数据库
 - JSON 中不存在的命令自动标记为停用
@@ -508,8 +507,6 @@ python manage.py format_idip_commands --check
 - `UPLOAD_MAX_SIZE`
 
 ### 11.4 命令执行与展示
-- `BATCH_EXECUTE_MAX_TARGETS`
-- `BATCH_EXECUTE_INTERVAL_MS`
 - `PAGE_SIZE`
 
 ### 11.5 文件监控

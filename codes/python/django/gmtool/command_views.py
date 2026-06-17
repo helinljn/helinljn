@@ -221,8 +221,6 @@ def command_execute(request, cmd_id):
         'response_field_labels_json': json.dumps(response_field_labels, ensure_ascii=False),
         'response_name': command.response_name,
         'is_admin': is_super_admin(request.user, request),
-        'batch_max_targets': settings.BATCH_EXECUTE_MAX_TARGETS,
-        'batch_interval_ms': settings.BATCH_EXECUTE_INTERVAL_MS,
     })
 
 

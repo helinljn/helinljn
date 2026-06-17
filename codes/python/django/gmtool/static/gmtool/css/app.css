@@ -300,7 +300,6 @@ code {
 }
 
 .result-box,
-.batch-result-table,
 .raw-json-box,
 .detail-pre {
     scrollbar-color: rgba(var(--gm-primary-rgb), 0.55) #eef2f7;
