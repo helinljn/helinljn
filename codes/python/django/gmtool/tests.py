@@ -430,7 +430,7 @@ class AnnouncementFormTests(TestCase):
     def test_create_form_builds_reserve_1_only_for_persistent_announcement(self):
         form = AnnouncementCreateForm(data={
             'Platform': 'Android',
-            'Channel': ['小米', 'VIVO'],
+            'Channel': '小米',
             'AnnouncementType': '2',
             'Title': '标题',
             'Content': '正文',
@@ -454,7 +454,7 @@ class AnnouncementFormTests(TestCase):
         for announcement_type in ('1', '3'):
             form = AnnouncementCreateForm(data={
                 'Platform': 'Android',
-                'Channel': ['小米'],
+                'Channel': '小米',
                 'AnnouncementType': announcement_type,
                 'Title': '标题',
                 'Content': '正文',
@@ -462,6 +462,91 @@ class AnnouncementFormTests(TestCase):
             })
             self.assertTrue(form.is_valid(), form.errors)
             self.assertEqual(form.to_payload('小米')['Reserve_1'], '')
+
+    @override_settings(
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    def test_carousel_create_form_does_not_require_title_or_content(self):
+        form = AnnouncementCreateForm(data={
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '3',
+            'Priority': '-1',
+            'Image_1': 'https://example.com/a.png',
+            'ImageLink_1': 'https://example.com/a',
+        })
+
+        self.assertTrue(form.is_valid(), form.errors)
+        payload = form.to_payload()
+        self.assertEqual(payload['Title'], '')
+        self.assertEqual(payload['Content'], '')
+        self.assertEqual(payload['Image_1'], 'https://example.com/a.png')
+        self.assertEqual(payload['ImageLink_1'], 'https://example.com/a')
+        self.assertEqual(payload['Reserve_1'], '')
+
+    @override_settings(
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    def test_non_carousel_create_form_clears_image_fields(self):
+        for announcement_type in ('1', '2'):
+            form = AnnouncementCreateForm(data={
+                'Platform': 'Android',
+                'Channel': '小米',
+                'AnnouncementType': announcement_type,
+                'Title': '标题',
+                'Content': '正文',
+                'Priority': '3',
+                'Image_1': 'https://example.com/a.png',
+                'ImageLink_1': 'https://example.com/a',
+                'Image_2': 'https://example.com/b.png',
+                'ImageLink_2': 'https://example.com/b',
+                'Image_3': 'https://example.com/c.png',
+                'ImageLink_3': 'https://example.com/c',
+            })
+
+            self.assertTrue(form.is_valid(), form.errors)
+            payload = form.to_payload()
+            self.assertEqual(payload['Image_1'], '')
+            self.assertEqual(payload['ImageLink_1'], '')
+            self.assertEqual(payload['Image_2'], '')
+            self.assertEqual(payload['ImageLink_2'], '')
+            self.assertEqual(payload['Image_3'], '')
+            self.assertEqual(payload['ImageLink_3'], '')
+
+    @override_settings(
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    def test_persistent_create_form_rejects_negative_priority(self):
+        form = AnnouncementCreateForm(data={
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '2',
+            'Title': '标题',
+            'Content': '正文',
+            'Priority': '-1',
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Priority', form.errors)
+
+    @override_settings(
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    def test_weekly_create_form_requires_title_and_content(self):
+        form = AnnouncementCreateForm(data={
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '1',
+            'Priority': '0',
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Title', form.errors)
+        self.assertIn('Content', form.errors)
 
     @override_settings(
         ANNOUNCEMENT_PLATFORMS=['Android'],
@@ -490,10 +575,10 @@ class AnnouncementViewTests(TestCase):
         self.client.defaults['HTTP_HOST'] = '127.0.0.1'
         self.client.force_login(self.admin)
 
-    def _valid_create_payload(self, announcement_type='2', channels=None):
+    def _valid_create_payload(self, announcement_type='2', channel='小米'):
         return {
             'Platform': 'Android',
-            'Channel': channels or ['小米'],
+            'Channel': channel,
             'AnnouncementType': announcement_type,
             'Title': '维护公告',
             'Content': '今晚维护',
@@ -550,7 +635,7 @@ class AnnouncementViewTests(TestCase):
     def test_query_does_not_call_client_when_base_url_configuration_is_invalid(self, mocked_query):
         response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
-            'Channel': ['小米'],
+            'Channel': '小米',
             'AnnouncementType': '1',
         })
 
@@ -564,17 +649,17 @@ class AnnouncementViewTests(TestCase):
         ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
     )
     @patch('gmtool.announcement_views.query_announcements')
-    def test_query_multiple_channels_calls_client_without_writing_logs(self, mocked_query):
+    def test_query_single_channel_calls_client_without_writing_logs(self, mocked_query):
         mocked_query.return_value = ([{'AnnouncementId': '1'}], '', '[]', '')
 
         response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
-            'Channel': ['小米', 'VIVO'],
+            'Channel': '小米',
             'AnnouncementType': '1',
         })
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(mocked_query.call_count, 2)
+        mocked_query.assert_called_once_with('Android', '小米', '1')
         self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
@@ -593,7 +678,7 @@ class AnnouncementViewTests(TestCase):
 
         response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
-            'Channel': ['小米'],
+            'Channel': '小米',
             'AnnouncementType': '2',
         })
 
@@ -628,20 +713,81 @@ class AnnouncementViewTests(TestCase):
     )
     @patch('gmtool.announcement_views.log_operation')
     @patch('gmtool.announcement_views.create_announcement')
-    def test_create_multiple_channels_writes_log_per_remote_call(self, mocked_create, mocked_audit):
+    def test_create_single_channel_writes_log_per_remote_call(self, mocked_create, mocked_audit):
         mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
 
         response = self.client.post(
             reverse('gmtool:announcement_create'),
-            data=self._valid_create_payload(channels=['小米', 'VIVO']),
+            data=self._valid_create_payload(channel='小米'),
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(mocked_create.call_count, 2)
-        self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 2)
+        mocked_create.assert_called_once()
+        self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 1)
         detail = mocked_audit.call_args.kwargs['detail']
-        self.assertEqual(detail['success_channels'], ['小米', 'VIVO'])
-        self.assertEqual(detail['remote_call_count'], 2)
+        self.assertEqual(detail['success_channels'], ['小米'])
+        self.assertEqual(detail['remote_call_count'], 1)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.log_operation')
+    @patch('gmtool.announcement_views.create_announcement')
+    def test_create_carousel_without_title_or_content_sends_blank_payload(self, mocked_create, mocked_audit):
+        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+
+        response = self.client.post(reverse('gmtool:announcement_create'), data={
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '3',
+            'Priority': '9',
+            'Image_1': 'https://example.com/banner.png',
+            'ImageLink_1': 'https://example.com/open',
+            'Image_2': '',
+            'ImageLink_2': '',
+            'Image_3': '',
+            'ImageLink_3': '',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        mocked_create.assert_called_once()
+        payload = mocked_create.call_args.args[0]
+        self.assertEqual(payload['Title'], '')
+        self.assertEqual(payload['Content'], '')
+        self.assertEqual(payload['Image_1'], 'https://example.com/banner.png')
+        self.assertEqual(payload['ImageLink_1'], 'https://example.com/open')
+        self.assertEqual(payload['Reserve_1'], '')
+        self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 1)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.log_operation')
+    @patch('gmtool.announcement_views.delete_announcement')
+    @patch('gmtool.announcement_views.query_announcements')
+    @patch('gmtool.announcement_views.create_announcement')
+    def test_create_persistent_does_not_query_or_delete_old_announcements(
+        self,
+        mocked_create,
+        mocked_query,
+        mocked_delete,
+        mocked_audit,
+    ):
+        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+
+        response = self.client.post(
+            reverse('gmtool:announcement_create'),
+            data=self._valid_create_payload(announcement_type='2'),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        mocked_query.assert_not_called()
+        mocked_delete.assert_not_called()
+        mocked_create.assert_called_once()
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',

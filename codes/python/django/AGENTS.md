@@ -173,8 +173,10 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - 公告功能独立于 IDIP 命令，不写入 `idip_commands.json`，不参与 `sync_commands`，也不伪装成 `GMCommand`。
 - 公告请求使用 `application/x-www-form-urlencoded`。发布/删除为 POST form data，查询为 GET query params。
 - 公告管理使用二级页签：查询公告、发布公告、删除公告、公告日志；查询结果中的删除按钮跳转到删除页预填字段，不直接 POST 删除。
+- 查询公告、发布公告、删除公告的平台、渠道、公告类型控件统一使用单选下拉；发布类型三选一：周更新公告、常驻公告、轮播图。
 - `ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS` 在 settings 层解析为去重列表；页面提交值必须严格来自配置原值。
 - 周更新公告发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。
+- 仅常驻公告显示并使用显示优先级；轮播图隐藏公告标题和公告正文，后端不要求填写并向目录服传空字符串；周更新公告和常驻公告隐藏图片字段，后端向目录服传空字符串。
 - 公告发布、删除写 `AnnouncementLog` 和 audit log；查询不写公告操作日志和 audit log。
 - 公告日志详情接口必须继续对配置的敏感字段进行脱敏。
 - 修改 `idip_commands.json` 后，运行 `python manage.py format_idip_commands --check` 或 `python manage.py format_idip_commands`。

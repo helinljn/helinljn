@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-23 20:55+0800\n"
+"POT-Creation-Date: 2026-06-23 21:30+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -97,45 +97,45 @@ msgstr ""
 "The command request completed, but recording the execution result failed. "
 "Please ask the administrator to check the application logs"
 
-#: .\gmtool\announcement_views.py:206
-msgid "公告查询失败，请查看渠道失败明细"
-msgstr ""
+#: .\gmtool\announcement_views.py:207
+msgid "公告查询失败，请查看失败明细"
+msgstr "Announcement query failed. Check the failure details."
 
-#: .\gmtool\announcement_views.py:208
-msgid "部分渠道公告查询失败，请查看失败明细"
-msgstr ""
+#: .\gmtool\announcement_views.py:209
+msgid "公告查询部分失败，请查看失败明细"
+msgstr "Announcement query partially failed. Check the failure details."
 
-#: .\gmtool\announcement_views.py:310
+#: .\gmtool\announcement_views.py:311
 msgid "公告发布表单校验失败，请检查输入"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:342
+#: .\gmtool\announcement_views.py:344
 msgid "旧周更新公告缺少有效公告 ID"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:430
+#: .\gmtool\announcement_views.py:432
 msgid "公告发布成功"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:434
-msgid "部分渠道公告发布失败，请查看失败明细"
-msgstr ""
-
 #: .\gmtool\announcement_views.py:436
+msgid "公告发布部分失败，请查看失败明细"
+msgstr "Announcement publishing partially failed. Check the failure details."
+
+#: .\gmtool\announcement_views.py:438
 msgid "公告发布失败，请查看失败明细"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:463
+#: .\gmtool\announcement_views.py:465
 #, fuzzy
 #| msgid "删除确认失败，请重试"
 msgid "公告删除表单校验失败，请刷新后重试"
 msgstr "Deletion confirmation failed. Please try again"
 
-#: .\gmtool\announcement_views.py:514
+#: .\gmtool\announcement_views.py:516
 msgid "公告删除成功"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:521
+#: .\gmtool\announcement_views.py:523
 #, fuzzy, python-format
 #| msgid "文件写入失败: %(error)s"
 msgid "公告删除失败: %(error)s"
@@ -240,11 +240,11 @@ msgstr "Page has expired, please log in again."
 msgid "JSON 中存在重复键: %(keys)s"
 msgstr "Duplicate keys found in JSON: %(keys)s"
 
-#: .\gmtool\command_parser.py:114 .\gmtool\forms.py:386
+#: .\gmtool\command_parser.py:114 .\gmtool\forms.py:403
 msgid "请求 ID 和响应 ID 不能相同"
 msgstr "Request ID and Response ID cannot be the same"
 
-#: .\gmtool\command_parser.py:121 .\gmtool\forms.py:352
+#: .\gmtool\command_parser.py:121 .\gmtool\forms.py:369
 #, python-format
 msgid "命令 ID %(id)s 已存在"
 msgstr "Command ID %(id)s already exists"
@@ -521,45 +521,57 @@ msgstr ""
 msgid "平台"
 msgstr ""
 
-#: .\gmtool\forms.py:43 .\gmtool\models.py:150
-#: .\gmtool\templates\gmtool\announcement_log.html:68
-#: .\gmtool\templates\gmtool\announcement_log.html:107
-msgid "公告类型"
-msgstr ""
-
-#: .\gmtool\forms.py:64 .\gmtool\forms.py:137 .\gmtool\models.py:149
+#: .\gmtool\forms.py:43 .\gmtool\models.py:149
 #: .\gmtool\templates\gmtool\announcement_log.html:59
 #: .\gmtool\templates\gmtool\announcement_log.html:106
 msgid "渠道"
 msgstr ""
 
-#: .\gmtool\forms.py:77
+#: .\gmtool\forms.py:48 .\gmtool\models.py:150
+#: .\gmtool\templates\gmtool\announcement_log.html:68
+#: .\gmtool\templates\gmtool\announcement_log.html:107
+msgid "公告类型"
+msgstr ""
+
+#: .\gmtool\forms.py:74
 msgid "公告标题"
 msgstr ""
 
-#: .\gmtool\forms.py:82
+#: .\gmtool\forms.py:80
 msgid "公告正文"
 msgstr ""
 
-#: .\gmtool\forms.py:87
+#: .\gmtool\forms.py:86
 msgid "常驻公告显示优先级"
 msgstr ""
 
-#: .\gmtool\forms.py:142 .\gmtool\models.py:151
+#: .\gmtool\forms.py:106
+msgid "公告标题不能为空"
+msgstr "Announcement title is required"
+
+#: .\gmtool\forms.py:108
+msgid "公告正文不能为空"
+msgstr "Announcement content is required"
+
+#: .\gmtool\forms.py:118
+msgid "常驻公告显示优先级必须是整数"
+msgstr "Persistent announcement display priority must be an integer"
+
+#: .\gmtool\forms.py:121
+msgid "常驻公告显示优先级不能小于 0"
+msgstr "Persistent announcement display priority cannot be less than 0"
+
+#: .\gmtool\forms.py:169 .\gmtool\models.py:151
 #: .\gmtool\templates\gmtool\announcement_log.html:108
 #: .\gmtool\templates\gmtool\announcement_query.html:100
 msgid "公告ID"
 msgstr ""
 
-#: .\gmtool\forms.py:154
-msgid "非法渠道"
-msgstr ""
-
-#: .\gmtool\forms.py:160
+#: .\gmtool\forms.py:177
 msgid "删除公告必须使用实际公告 ID"
 msgstr ""
 
-#: .\gmtool\forms.py:178 .\gmtool\models.py:184
+#: .\gmtool\forms.py:195 .\gmtool\models.py:184
 #: .\gmtool\templates\gmtool\command_log.html:91
 #: .\gmtool\templates\gmtool\login.html:57
 #: .\gmtool\templates\gmtool\login_log.html:17
@@ -568,145 +580,145 @@ msgstr ""
 msgid "用户名"
 msgstr "Username"
 
-#: .\gmtool\forms.py:179 .\gmtool\templates\gmtool\user_list.html:35
+#: .\gmtool\forms.py:196 .\gmtool\templates\gmtool\user_list.html:35
 msgid "邮箱"
 msgstr "Email"
 
-#: .\gmtool\forms.py:180 .\gmtool\models.py:22
+#: .\gmtool\forms.py:197 .\gmtool\models.py:22
 msgid "是否启用"
 msgstr "Active"
 
-#: .\gmtool\forms.py:187 .\gmtool\models.py:84
+#: .\gmtool\forms.py:204 .\gmtool\models.py:84
 #: .\gmtool\templates\gmtool\user_list.html:36
 msgid "联系电话"
 msgstr "Phone"
 
-#: .\gmtool\forms.py:197 .\gmtool\templates\gmtool\login.html:67
+#: .\gmtool\forms.py:214 .\gmtool\templates\gmtool\login.html:67
 msgid "密码"
 msgstr "Password"
 
-#: .\gmtool\forms.py:202
+#: .\gmtool\forms.py:219
 msgid "确认密码"
 msgstr "Confirm Password"
 
-#: .\gmtool\forms.py:217
+#: .\gmtool\forms.py:234
 msgid "两次密码输入不一致"
 msgstr "Passwords do not match"
 
-#: .\gmtool\forms.py:236
+#: .\gmtool\forms.py:253
 msgid "新密码（留空不修改）"
 msgstr "New Password (leave blank to keep unchanged)"
 
-#: .\gmtool\forms.py:264 .\gmtool\user_views.py:101
+#: .\gmtool\forms.py:281 .\gmtool\user_views.py:101
 msgid "不能禁用自己的账号"
 msgstr "You cannot disable your own account"
 
-#: .\gmtool\forms.py:269
+#: .\gmtool\forms.py:286
 msgid "超级管理员账号不可禁用"
 msgstr "Super admin account cannot be disabled"
 
-#: .\gmtool\forms.py:289 .\gmtool\models.py:8
+#: .\gmtool\forms.py:306 .\gmtool\models.py:8
 #: .\gmtool\templates\gmtool\command_execute.html:149
 #: .\gmtool\templates\gmtool\command_list.html:37
 msgid "命令编号"
 msgstr "Command ID"
 
-#: .\gmtool\forms.py:292
+#: .\gmtool\forms.py:309
 msgid "唯一的命令标识符，如 10226011"
 msgstr "Unique command identifier, e.g. 10226011"
 
-#: .\gmtool\forms.py:295 .\gmtool\models.py:10
+#: .\gmtool\forms.py:312 .\gmtool\models.py:10
 msgid "分组标签"
 msgstr "Tab Group"
 
-#: .\gmtool\forms.py:297
+#: .\gmtool\forms.py:314
 msgid "e.g. 查询XXX"
 msgstr "e.g. Query XXX"
 
-#: .\gmtool\forms.py:300 .\gmtool\models.py:9
+#: .\gmtool\forms.py:317 .\gmtool\models.py:9
 #: .\gmtool\templates\gmtool\command_list.html:38
 msgid "命令名称"
 msgstr "Command Name"
 
-#: .\gmtool\forms.py:302
+#: .\gmtool\forms.py:319
 msgid "命令显示名称"
 msgstr "Command display name"
 
-#: .\gmtool\forms.py:305 .\gmtool\models.py:11
+#: .\gmtool\forms.py:322 .\gmtool\models.py:11
 #: .\gmtool\templates\gmtool\command_execute.html:153
 #: .\gmtool\templates\gmtool\command_list.html:39
 msgid "请求名"
 msgstr "Request Name"
 
-#: .\gmtool\forms.py:310 .\gmtool\models.py:12
+#: .\gmtool\forms.py:327 .\gmtool\models.py:12
 msgid "协议请求ID"
 msgstr "Request ID"
 
-#: .\gmtool\forms.py:312
+#: .\gmtool\forms.py:329
 msgid "必须在所有命令中唯一（包括请求ID和响应ID）"
 msgstr "Must be unique across all commands (both request and response IDs)"
 
-#: .\gmtool\forms.py:315
+#: .\gmtool\forms.py:332
 msgid "请求描述"
 msgstr "Request Description"
 
-#: .\gmtool\forms.py:318
+#: .\gmtool\forms.py:335
 msgid "请求描述（可选）"
 msgstr "Request description (optional)"
 
-#: .\gmtool\forms.py:321 .\gmtool\models.py:13
+#: .\gmtool\forms.py:338 .\gmtool\models.py:13
 #: .\gmtool\templates\gmtool\command_execute.html:161
 msgid "响应名"
 msgstr "Response Name"
 
-#: .\gmtool\forms.py:326 .\gmtool\models.py:14
+#: .\gmtool\forms.py:343 .\gmtool\models.py:14
 #: .\gmtool\templates\gmtool\command_execute.html:165
 msgid "协议响应ID"
 msgstr "Response ID"
 
-#: .\gmtool\forms.py:328
+#: .\gmtool\forms.py:345
 msgid "必须在所有命令中唯一，通常为请求ID + 1"
 msgstr "Must be unique across all commands, typically request_id + 1"
 
-#: .\gmtool\forms.py:331
+#: .\gmtool\forms.py:348
 msgid "响应描述"
 msgstr "Response Description"
 
-#: .\gmtool\forms.py:334
+#: .\gmtool\forms.py:351
 msgid "响应描述（可选）"
 msgstr "Response description (optional)"
 
-#: .\gmtool\forms.py:337
+#: .\gmtool\forms.py:354
 msgid "请求参数定义（JSON）"
 msgstr "Request Params (JSON)"
 
-#: .\gmtool\forms.py:340
+#: .\gmtool\forms.py:357
 msgid ""
 "请求参数定义的 JSON 数组。留空则使用默认的 AreaId/Partition/PlatId 字段。"
 msgstr ""
 "JSON array of request parameter definitions. Leave empty for default AreaId/"
 "Partition/PlatId fields."
 
-#: .\gmtool\forms.py:343
+#: .\gmtool\forms.py:360
 msgid "响应参数定义（JSON）"
 msgstr "Response Params (JSON)"
 
-#: .\gmtool\forms.py:346
+#: .\gmtool\forms.py:363
 msgid "响应参数定义的 JSON 数组。留空则使用默认的 Result/RetMsg 字段。"
 msgstr ""
 "JSON array of response parameter definitions. Leave empty for default Result/"
 "RetMsg fields."
 
-#: .\gmtool\forms.py:362
+#: .\gmtool\forms.py:379
 msgid "请求参数必须是 JSON 数组"
 msgstr "Request params must be a JSON array"
 
-#: .\gmtool\forms.py:365 .\gmtool\forms.py:377
+#: .\gmtool\forms.py:382 .\gmtool\forms.py:394
 #, python-format
 msgid "无效的 JSON: %(error)s"
 msgstr "Invalid JSON: %(error)s"
 
-#: .\gmtool\forms.py:374
+#: .\gmtool\forms.py:391
 msgid "响应参数必须是 JSON 数组"
 msgstr "Response params must be a JSON array"
 
@@ -1033,7 +1045,7 @@ msgstr ""
 msgid "失败渠道明细"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_create.html:101
+#: .\gmtool\templates\gmtool\announcement_create.html:128
 msgid "发布新的周更新公告会先删除同平台同渠道已有周更新公告，确认继续？"
 msgstr ""
 

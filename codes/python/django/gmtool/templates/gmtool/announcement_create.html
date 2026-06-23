@@ -24,7 +24,7 @@
         <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>{% trans "发布公告" %}</h3>
     </div>
     <div class="card-body">
-        <form method="post" action="{% url 'gmtool:announcement_create' %}" class="row g-3">
+        <form method="post" action="{% url 'gmtool:announcement_create' %}" class="row g-3" id="announcement-create-form">
             {% csrf_token %}
             {% if create_form.non_field_errors %}
             <div class="col-12">
@@ -36,7 +36,7 @@
                 {{ create_form.Platform }}
                 {{ create_form.Platform.errors }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">{{ create_form.Channel.label }}</label>
                 {{ create_form.Channel }}
                 {{ create_form.Channel.errors }}
@@ -46,42 +46,42 @@
                 {{ create_form.AnnouncementType }}
                 {{ create_form.AnnouncementType.errors }}
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3 js-priority-field">
                 <label class="form-label">{{ create_form.Priority.label }}</label>
                 {{ create_form.Priority }}
                 {{ create_form.Priority.errors }}
             </div>
-            <div class="col-md-12">
+            <div class="col-md-12 js-title-content-field">
                 <label class="form-label">{{ create_form.Title.label }}</label>
                 {{ create_form.Title }}
                 {{ create_form.Title.errors }}
             </div>
-            <div class="col-12">
+            <div class="col-12 js-title-content-field">
                 <label class="form-label">{{ create_form.Content.label }}</label>
                 {{ create_form.Content }}
                 {{ create_form.Content.errors }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 js-image-field">
                 <label class="form-label">Image_1</label>
                 {{ create_form.Image_1 }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 js-image-field">
                 <label class="form-label">Image_2</label>
                 {{ create_form.Image_2 }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 js-image-field">
                 <label class="form-label">Image_3</label>
                 {{ create_form.Image_3 }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 js-image-field">
                 <label class="form-label">ImageLink_1</label>
                 {{ create_form.ImageLink_1 }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 js-image-field">
                 <label class="form-label">ImageLink_2</label>
                 {{ create_form.ImageLink_2 }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 js-image-field">
                 <label class="form-label">ImageLink_3</label>
                 {{ create_form.ImageLink_3 }}
             </div>
@@ -95,6 +95,39 @@
 </div>
 
 <script>
+function updateAnnouncementCreateFields(form) {
+    var typeField = form.querySelector('[name="AnnouncementType"]');
+    var titleField = form.querySelector('[name="Title"]');
+    var contentField = form.querySelector('[name="Content"]');
+    var priorityField = form.querySelector('[name="Priority"]');
+    var announcementType = typeField ? typeField.value : '';
+    var isCarousel = announcementType === '3';
+    var isPersistent = announcementType === '2';
+
+    form.querySelectorAll('.js-title-content-field').forEach(function (field) {
+        field.classList.toggle('d-none', isCarousel);
+    });
+    form.querySelectorAll('.js-priority-field').forEach(function (field) {
+        field.classList.toggle('d-none', !isPersistent);
+    });
+    form.querySelectorAll('.js-image-field').forEach(function (field) {
+        field.classList.toggle('d-none', !isCarousel);
+        field.querySelectorAll('input').forEach(function (input) {
+            input.disabled = !isCarousel;
+        });
+    });
+
+    if (titleField) {
+        titleField.required = !isCarousel;
+    }
+    if (contentField) {
+        contentField.required = !isCarousel;
+    }
+    if (priorityField) {
+        priorityField.required = false;
+    }
+}
+
 function confirmWeeklyReplacement(form) {
     var typeField = form.querySelector('[name="AnnouncementType"]');
     if (typeField && typeField.value === '1') {
@@ -102,5 +135,19 @@ function confirmWeeklyReplacement(form) {
     }
     return true;
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('announcement-create-form');
+    if (!form) {
+        return;
+    }
+    updateAnnouncementCreateFields(form);
+    var typeField = form.querySelector('[name="AnnouncementType"]');
+    if (typeField) {
+        typeField.addEventListener('change', function () {
+            updateAnnouncementCreateFields(form);
+        });
+    }
+});
 </script>
 {% endblock %}

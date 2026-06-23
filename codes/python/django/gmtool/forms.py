@@ -39,6 +39,11 @@ class AnnouncementBaseForm(forms.Form):
         choices=(),
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
+    Channel = forms.ChoiceField(
+        label=_('渠道'),
+        choices=(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
     AnnouncementType = forms.ChoiceField(
         label=_('公告类型'),
         choices=ANNOUNCEMENT_TYPE_CHOICES,
@@ -48,6 +53,7 @@ class AnnouncementBaseForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['Platform'].choices = _choice_pairs(getattr(settings, 'ANNOUNCEMENT_PLATFORMS', []))
+        self.fields['Channel'].choices = _choice_pairs(getattr(settings, 'ANNOUNCEMENT_CHANNELS', []))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -60,15 +66,6 @@ class AnnouncementBaseForm(forms.Form):
 
 class AnnouncementQueryForm(AnnouncementBaseForm):
     """公告查询表单。"""
-    Channel = forms.MultipleChoiceField(
-        label=_('渠道'),
-        choices=(),
-        widget=forms.SelectMultiple(attrs={'class': 'form-select'}),
-    )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['Channel'].choices = _choice_pairs(getattr(settings, 'ANNOUNCEMENT_CHANNELS', []))
 
 
 class AnnouncementCreateForm(AnnouncementQueryForm):
@@ -76,17 +73,19 @@ class AnnouncementCreateForm(AnnouncementQueryForm):
     Title = forms.CharField(
         label=_('公告标题'),
         max_length=200,
+        required=False,
         widget=forms.TextInput(attrs={'class': 'form-control'}),
     )
     Content = forms.CharField(
         label=_('公告正文'),
         max_length=5000,
+        required=False,
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
     )
-    Priority = forms.IntegerField(
+    Priority = forms.CharField(
         label=_('常驻公告显示优先级'),
-        min_value=0,
         initial=0,
+        required=False,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
     )
 
@@ -99,9 +98,37 @@ class AnnouncementCreateForm(AnnouncementQueryForm):
         )
     del field_name
 
-    def to_payload(self, channel):
+    def clean(self):
+        cleaned_data = super().clean()
+        announcement_type = cleaned_data.get('AnnouncementType')
+        if announcement_type in ('1', '2'):
+            if not cleaned_data.get('Title'):
+                self.add_error('Title', _('公告标题不能为空'))
+            if not cleaned_data.get('Content'):
+                self.add_error('Content', _('公告正文不能为空'))
+
+        if announcement_type == '2':
+            priority = cleaned_data.get('Priority')
+            if priority in (None, ''):
+                cleaned_data['Priority'] = 0
+            else:
+                try:
+                    priority = int(priority)
+                except (TypeError, ValueError):
+                    self.add_error('Priority', _('常驻公告显示优先级必须是整数'))
+                else:
+                    if priority < 0:
+                        self.add_error('Priority', _('常驻公告显示优先级不能小于 0'))
+                    else:
+                        cleaned_data['Priority'] = priority
+        else:
+            cleaned_data['Priority'] = 0
+        return cleaned_data
+
+    def to_payload(self, channel=None):
         """生成单渠道远端发布 payload。"""
         announcement_type = self.cleaned_data['AnnouncementType']
+        channel = channel or self.cleaned_data['Channel']
         reserve_1 = ''
         if announcement_type == '2':
             reserve_1 = json.dumps(
@@ -111,20 +138,37 @@ class AnnouncementCreateForm(AnnouncementQueryForm):
                 ensure_ascii=False,
                 separators=(',', ':'),
             )
+        title = self.cleaned_data.get('Title', '')
+        content = self.cleaned_data.get('Content', '')
+        if announcement_type == '3':
+            title = ''
+            content = ''
+        image_payload = {
+            'Image_1': '',
+            'ImageLink_1': '',
+            'Image_2': '',
+            'ImageLink_2': '',
+            'Image_3': '',
+            'ImageLink_3': '',
+        }
+        if announcement_type == '3':
+            image_payload = {
+                'Image_1': self.cleaned_data.get('Image_1', '') or '',
+                'ImageLink_1': self.cleaned_data.get('ImageLink_1', '') or '',
+                'Image_2': self.cleaned_data.get('Image_2', '') or '',
+                'ImageLink_2': self.cleaned_data.get('ImageLink_2', '') or '',
+                'Image_3': self.cleaned_data.get('Image_3', '') or '',
+                'ImageLink_3': self.cleaned_data.get('ImageLink_3', '') or '',
+            }
 
         payload = {
             'Platform': self.cleaned_data['Platform'],
             'Channel': channel,
             'AnnouncementType': announcement_type,
             'AnnouncementId': '-1',
-            'Title': self.cleaned_data.get('Title', ''),
-            'Content': self.cleaned_data.get('Content', ''),
-            'Image_1': self.cleaned_data.get('Image_1', '') or '',
-            'ImageLink_1': self.cleaned_data.get('ImageLink_1', '') or '',
-            'Image_2': self.cleaned_data.get('Image_2', '') or '',
-            'ImageLink_2': self.cleaned_data.get('ImageLink_2', '') or '',
-            'Image_3': self.cleaned_data.get('Image_3', '') or '',
-            'ImageLink_3': self.cleaned_data.get('ImageLink_3', '') or '',
+            'Title': title,
+            'Content': content,
+            **image_payload,
             'Reserve_1': reserve_1,
             'Reserve_2': '',
         }
@@ -133,26 +177,11 @@ class AnnouncementCreateForm(AnnouncementQueryForm):
 
 class AnnouncementDeleteForm(AnnouncementBaseForm):
     """公告删除表单。"""
-    Channel = forms.ChoiceField(
-        label=_('渠道'),
-        choices=(),
-        widget=forms.Select(attrs={'class': 'form-select'}),
-    )
     AnnouncementId = forms.IntegerField(
         label=_('公告ID'),
         min_value=1,
         widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['Channel'].choices = _choice_pairs(getattr(settings, 'ANNOUNCEMENT_CHANNELS', []))
-
-    def clean_Channel(self):
-        channel = self.cleaned_data.get('Channel', '')
-        if channel not in getattr(settings, 'ANNOUNCEMENT_CHANNELS', []):
-            raise forms.ValidationError(_('非法渠道'))
-        return channel
 
     def clean_AnnouncementId(self):
         announcement_id = self.cleaned_data.get('AnnouncementId')
