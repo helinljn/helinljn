@@ -16,7 +16,7 @@ from .command_parser import _enrich_schema_fields, sync_commands_to_db, validate
 from .command_services import validate_command_params_basic
 from .context_processors import gmtool_permissions
 from .decorators import announcement_permission_required, has_announcement_permission
-from .forms import AnnouncementCreateForm, AnnouncementDeleteForm
+from .forms import AnnouncementCreateForm, AnnouncementDeleteForm, AnnouncementQueryForm
 from .idip_client import send_idip_command
 from .models import AnnouncementLog, CommandLog, GMCommand, UserAnnouncementPermission, UserCommandPermission, UserProfile
 from .security_utils import get_client_ip
@@ -174,7 +174,7 @@ class AnnouncementClientTests(TestCase):
                 return FakeResponse()
 
         with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
-            response_data, error_message, raw_response, error_type = query_announcements('IOS', 'OPPO', '3')
+            response_data, error_message, raw_response, error_type = query_announcements('IOS', 'OPPO')
 
         self.assertEqual(response_data, [{'AnnouncementId': '1'}])
         self.assertEqual(error_message, '')
@@ -184,7 +184,6 @@ class AnnouncementClientTests(TestCase):
         self.assertEqual(captured['params'], {
             'Platform': 'IOS',
             'Channel': 'OPPO',
-            'AnnouncementType': '3',
         })
 
     @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
@@ -246,7 +245,7 @@ class AnnouncementClientTests(TestCase):
                 return FakeResponse()
 
         with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
-            response_data, error_message, _raw_response, error_type = query_announcements('Android', '小米', '1')
+            response_data, error_message, _raw_response, error_type = query_announcements('Android', '小米')
 
         self.assertIsNone(response_data)
         self.assertIn('JSON 数组', error_message)
@@ -300,7 +299,7 @@ class AnnouncementClientTests(TestCase):
 
     @override_settings(ANNOUNCEMENT_BASE_URL='ftp://example.com')
     def test_invalid_base_url_scheme_is_configuration_error(self):
-        response_data, error_message, _raw_response, error_type = query_announcements('Android', '小米', '1')
+        response_data, error_message, _raw_response, error_type = query_announcements('Android', '小米')
 
         self.assertIsNone(response_data)
         self.assertIn('HTTP/HTTPS', error_message)
@@ -319,7 +318,6 @@ class AnnouncementClientTests(TestCase):
                     response_data, error_message, raw_response, error_type = query_announcements(
                         'Android',
                         '小米',
-                        '1',
                     )
 
                 self.assertIsNone(response_data)
@@ -337,7 +335,7 @@ class AnnouncementClientTests(TestCase):
                 raise RuntimeError('connection refused')
 
         with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
-            response_data, error_message, raw_response, error_type = query_announcements('Android', '小米', '1')
+            response_data, error_message, raw_response, error_type = query_announcements('Android', '小米')
 
         self.assertIsNone(response_data)
         self.assertIn('connection refused', error_message)
@@ -423,6 +421,21 @@ class AnnouncementPermissionTests(TestCase):
 
 
 class AnnouncementFormTests(TestCase):
+    @override_settings(
+        ANNOUNCEMENT_PLATFORMS=['Android', 'IOS'],
+        ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
+    )
+    def test_query_form_does_not_include_announcement_type(self):
+        form = AnnouncementQueryForm(data={
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '1',
+        })
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(list(form.fields), ['Platform', 'Channel'])
+        self.assertNotIn('AnnouncementType', form.cleaned_data)
+
     @override_settings(
         ANNOUNCEMENT_PLATFORMS=['Android', 'IOS'],
         ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
@@ -607,10 +620,15 @@ class AnnouncementViewTests(TestCase):
     def test_announcement_list_redirects_to_query_page(self):
         response = self.client.get(reverse('gmtool:announcement_list'), {
             'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '1',
         })
 
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].endswith(reverse('gmtool:announcement_query') + '?Platform=Android'))
+        self.assertTrue(response['Location'].endswith(
+            reverse('gmtool:announcement_query') + '?Platform=Android&Channel=%E5%B0%8F%E7%B1%B3',
+        ))
+        self.assertNotIn('AnnouncementType', response['Location'])
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='',
@@ -636,7 +654,6 @@ class AnnouncementViewTests(TestCase):
         response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
             'Channel': '小米',
-            'AnnouncementType': '1',
         })
 
         self.assertEqual(response.status_code, 200)
@@ -655,12 +672,12 @@ class AnnouncementViewTests(TestCase):
         response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
             'Channel': '小米',
-            'AnnouncementType': '1',
         })
 
         self.assertEqual(response.status_code, 200)
-        mocked_query.assert_called_once_with('Android', '小米', '1')
+        mocked_query.assert_called_once_with('Android', '小米')
         self.assertEqual(AnnouncementLog.objects.count(), 0)
+        self.assertNotContains(response, 'name="AnnouncementType"')
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
@@ -679,13 +696,13 @@ class AnnouncementViewTests(TestCase):
         response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
             'Channel': '小米',
-            'AnnouncementType': '2',
         })
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse('gmtool:announcement_delete'))
         self.assertContains(response, 'AnnouncementId=123')
         self.assertContains(response, 'Channel=%E5%B0%8F%E7%B1%B3')
+        self.assertContains(response, 'AnnouncementType=2')
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
@@ -722,6 +739,7 @@ class AnnouncementViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
+        self.assertNotIn('AnnouncementType', response['Location'])
         mocked_create.assert_called_once()
         self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 1)
         detail = mocked_audit.call_args.kwargs['detail']
@@ -813,11 +831,56 @@ class AnnouncementViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
-        mocked_query.assert_called_once_with('Android', '小米', '1')
+        mocked_query.assert_called_once_with('Android', '小米')
         mocked_delete.assert_called_once_with('Android', '小米', '1', 'old-1')
         mocked_create.assert_called_once()
         self.assertEqual(AnnouncementLog.objects.filter(action='delete').count(), 1)
         self.assertEqual(AnnouncementLog.objects.filter(action='create').count(), 1)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.create_announcement')
+    @patch('gmtool.announcement_views.delete_announcement')
+    @patch('gmtool.announcement_views.query_announcements')
+    def test_weekly_create_only_deletes_weekly_announcements(self, mocked_query, mocked_delete, mocked_create):
+        mocked_query.return_value = ([
+            {
+                'Platform': 'Android',
+                'Channel': '小米',
+                'AnnouncementType': '1',
+                'AnnouncementId': 'old-weekly',
+            },
+            {
+                'Platform': 'Android',
+                'Channel': '小米',
+                'AnnouncementType': '2',
+                'AnnouncementId': 'old-persistent',
+            },
+            {
+                'Platform': 'Android',
+                'Channel': '小米',
+                'AnnouncementType': '3',
+                'AnnouncementId': 'old-carousel',
+            },
+        ], '', '[]', '')
+        mocked_delete.return_value = ({'result': 'OK'}, '', 'OK', '')
+        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+
+        response = self.client.post(
+            reverse('gmtool:announcement_create'),
+            data=self._valid_create_payload(announcement_type='1'),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        mocked_query.assert_called_once_with('Android', '小米')
+        mocked_delete.assert_called_once_with('Android', '小米', '1', 'old-weekly')
+        mocked_create.assert_called_once()
+        self.assertEqual(AnnouncementLog.objects.filter(action='delete').count(), 1)
+        self.assertFalse(AnnouncementLog.objects.filter(announcement_id='old-persistent').exists())
+        self.assertFalse(AnnouncementLog.objects.filter(announcement_id='old-carousel').exists())
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
@@ -858,6 +921,7 @@ class AnnouncementViewTests(TestCase):
         })
 
         self.assertEqual(response.status_code, 302)
+        self.assertNotIn('AnnouncementType', response['Location'])
         mocked_delete.assert_called_once_with('Android', 'VIVO', '3', '99')
         log = AnnouncementLog.objects.get()
         self.assertEqual(log.channel, 'VIVO')

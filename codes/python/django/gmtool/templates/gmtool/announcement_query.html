@@ -61,11 +61,6 @@
                 {{ query_form.Channel }}
                 {{ query_form.Channel.errors }}
             </div>
-            <div class="col-md-3">
-                <label class="form-label">{{ query_form.AnnouncementType.label }}</label>
-                {{ query_form.AnnouncementType }}
-                {{ query_form.AnnouncementType.errors }}
-            </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100" {% if announcement_config_errors %}disabled{% endif %}>
                     <i class="ti ti-search me-1"></i>{% trans "查询" %}
@@ -118,7 +113,7 @@
                         {% elif announcement.AnnouncementType == '3' %}
                         {% trans "轮播图" %}
                         {% else %}
-                        {{ announcement.AnnouncementType|default:selected_query.AnnouncementType }}
+                        {{ announcement.AnnouncementType|default:"-" }}
                         {% endif %}
                     </td>
                     <td><div class="announcement-text" title="{{ announcement.Title }}">{{ announcement.Title|truncatechars:12 }}</div></td>

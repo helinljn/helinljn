@@ -95,7 +95,7 @@ def _post_text(path, payload):
     )
 
 
-def query_announcements(platform, channel, announcement_type):
+def query_announcements(platform, channel):
     """查询公告列表。"""
     raw_response = ''
     try:
@@ -106,7 +106,6 @@ def query_announcements(platform, channel, announcement_type):
             params={
                 'Platform': platform,
                 'Channel': channel,
-                'AnnouncementType': announcement_type,
             },
             timeout=settings.ANNOUNCEMENT_TIMEOUT,
         )
@@ -132,10 +131,9 @@ def query_announcements(platform, channel, announcement_type):
     except Exception as exc:
         if _is_timeout_error(exc):
             logger.warning(
-                'Announcement query timeout: platform=%s channel=%s type=%s',
+                'Announcement query timeout: platform=%s channel=%s',
                 platform,
                 channel,
-                announcement_type,
             )
             return _request_failed(_('公告查询请求超时，请稍后重试'), raw_response, 'timeout')
         logger.warning('Announcement query request failed: %s', exc)

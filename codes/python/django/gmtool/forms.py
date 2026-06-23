@@ -44,11 +44,6 @@ class AnnouncementBaseForm(forms.Form):
         choices=(),
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
-    AnnouncementType = forms.ChoiceField(
-        label=_('公告类型'),
-        choices=ANNOUNCEMENT_TYPE_CHOICES,
-        widget=forms.Select(attrs={'class': 'form-select'}),
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,7 +63,16 @@ class AnnouncementQueryForm(AnnouncementBaseForm):
     """公告查询表单。"""
 
 
-class AnnouncementCreateForm(AnnouncementQueryForm):
+class AnnouncementTypedForm(AnnouncementBaseForm):
+    """需要公告类型的公告表单。"""
+    AnnouncementType = forms.ChoiceField(
+        label=_('公告类型'),
+        choices=ANNOUNCEMENT_TYPE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+
+
+class AnnouncementCreateForm(AnnouncementTypedForm):
     """公告发布表单。"""
     Title = forms.CharField(
         label=_('公告标题'),
@@ -175,7 +179,7 @@ class AnnouncementCreateForm(AnnouncementQueryForm):
         return payload
 
 
-class AnnouncementDeleteForm(AnnouncementBaseForm):
+class AnnouncementDeleteForm(AnnouncementTypedForm):
     """公告删除表单。"""
     AnnouncementId = forms.IntegerField(
         label=_('公告ID'),
