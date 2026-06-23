@@ -1,0 +1,24 @@
+{% load i18n %}
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if active_announcement_tab == 'query' %}active{% endif %}" href="{% url 'gmtool:announcement_query' %}">
+            <i class="ti ti-search me-1"></i>{% trans "查询公告" %}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_announcement_tab == 'create' %}active{% endif %}" href="{% url 'gmtool:announcement_create' %}">
+            <i class="ti ti-send me-1"></i>{% trans "发布公告" %}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_announcement_tab == 'delete' %}active{% endif %}" href="{% url 'gmtool:announcement_delete' %}">
+            <i class="ti ti-trash me-1"></i>{% trans "删除公告" %}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_announcement_tab == 'logs' %}active{% endif %}" href="{% url 'gmtool:announcement_log_list' %}">
+            <i class="ti ti-list-details me-1"></i>{% trans "公告日志" %}
+        </a>
+    </li>
+</ul>

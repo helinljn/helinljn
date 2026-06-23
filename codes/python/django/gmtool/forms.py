@@ -133,8 +133,20 @@ class AnnouncementCreateForm(AnnouncementQueryForm):
 
 class AnnouncementDeleteForm(AnnouncementBaseForm):
     """公告删除表单。"""
-    Channel = forms.CharField(label=_('渠道'), max_length=50)
-    AnnouncementId = forms.IntegerField(label=_('公告ID'), min_value=1)
+    Channel = forms.ChoiceField(
+        label=_('渠道'),
+        choices=(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    AnnouncementId = forms.IntegerField(
+        label=_('公告ID'),
+        min_value=1,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['Channel'].choices = _choice_pairs(getattr(settings, 'ANNOUNCEMENT_CHANNELS', []))
 
     def clean_Channel(self):
         channel = self.cleaned_data.get('Channel', '')

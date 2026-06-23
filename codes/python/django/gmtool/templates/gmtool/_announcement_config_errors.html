@@ -1,0 +1,10 @@
+{% load i18n %}
+
+{% if announcement_config_errors %}
+<div class="alert alert-danger">
+    <div class="fw-bold mb-2">{% trans "公告目录服配置不可用" %}</div>
+    {% for error in announcement_config_errors %}
+    <div>{{ error }}</div>
+    {% endfor %}
+</div>
+{% endif %}

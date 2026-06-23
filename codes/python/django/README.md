@@ -521,10 +521,11 @@ python manage.py format_idip_commands --check
 - `/gmtool/logs/login/`
 
 #### 公告管理
-- `/gmtool/announcements/`
-- `/gmtool/announcements/create/`
-- `/gmtool/announcements/delete/`
-- `/gmtool/announcements/logs/`
+- `/gmtool/announcements/`：兼容入口，默认跳转查询公告页
+- `/gmtool/announcements/query/`：查询公告
+- `/gmtool/announcements/create/`：发布公告
+- `/gmtool/announcements/delete/`：删除公告
+- `/gmtool/announcements/logs/`：公告日志
 
 #### API
 - `/gmtool/api/v1/commands/sync/`
@@ -839,10 +840,10 @@ http://127.0.0.1:5510/cy_idip
 ### 15.6 公告功能本地配置与使用
 1. 在 `.env` 中配置 `ANNOUNCEMENT_BASE_URL`、`ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS`，修改后重启 Django 进程。
 2. 使用超级管理员登录 `/gmtool/`；普通用户需要先在用户权限页勾选“公告管理权限”。
-3. 进入 `/gmtool/announcements/`，选择平台、一个或多个渠道、公告类型后查询现有公告。
-4. 发布公告时，后端按渠道分别调用目录服；发布周更新公告会先查询并删除同平台同渠道旧周更新公告，再发布新公告。
-5. 查询结果列表中可删除单条公告；删除使用公告自身的 `Channel` 和 `AnnouncementType`。
-6. 进入 `/gmtool/announcements/logs/` 查看发布、删除日志和脱敏后的日志详情。
+3. 进入 `/gmtool/announcements/` 或 `/gmtool/announcements/query/`，在“查询公告”子页签选择平台、一个或多个渠道、公告类型后查询现有公告。
+4. 在“发布公告”子页签发布公告；后端按渠道分别调用目录服，发布周更新公告会先查询并删除同平台同渠道旧周更新公告，再发布新公告。
+5. 在“删除公告”子页签删除单条公告；从查询结果进入删除页时会预填公告自身的 `Channel`、`AnnouncementType` 和 `AnnouncementId`。
+6. 进入“公告日志”子页签或 `/gmtool/announcements/logs/` 查看发布、删除日志和脱敏后的日志详情。
 
 ---
 

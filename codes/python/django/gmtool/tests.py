@@ -513,11 +513,19 @@ class AnnouncementViewTests(TestCase):
     )
     @patch('gmtool.announcement_views.query_announcements')
     def test_first_get_does_not_query_or_create_logs(self, mocked_query):
-        response = self.client.get(reverse('gmtool:announcement_list'))
+        response = self.client.get(reverse('gmtool:announcement_query'))
 
         self.assertEqual(response.status_code, 200)
         mocked_query.assert_not_called()
         self.assertEqual(AnnouncementLog.objects.count(), 0)
+
+    def test_announcement_list_redirects_to_query_page(self):
+        response = self.client.get(reverse('gmtool:announcement_list'), {
+            'Platform': 'Android',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['Location'].endswith(reverse('gmtool:announcement_query') + '?Platform=Android'))
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='',
@@ -526,7 +534,7 @@ class AnnouncementViewTests(TestCase):
     )
     @patch('gmtool.announcement_views.query_announcements')
     def test_first_get_shows_base_url_configuration_error(self, mocked_query):
-        response = self.client.get(reverse('gmtool:announcement_list'))
+        response = self.client.get(reverse('gmtool:announcement_query'))
 
         self.assertEqual(response.status_code, 200)
         mocked_query.assert_not_called()
@@ -540,7 +548,7 @@ class AnnouncementViewTests(TestCase):
     )
     @patch('gmtool.announcement_views.query_announcements')
     def test_query_does_not_call_client_when_base_url_configuration_is_invalid(self, mocked_query):
-        response = self.client.get(reverse('gmtool:announcement_list'), {
+        response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
             'Channel': ['小米'],
             'AnnouncementType': '1',
@@ -559,7 +567,7 @@ class AnnouncementViewTests(TestCase):
     def test_query_multiple_channels_calls_client_without_writing_logs(self, mocked_query):
         mocked_query.return_value = ([{'AnnouncementId': '1'}], '', '[]', '')
 
-        response = self.client.get(reverse('gmtool:announcement_list'), {
+        response = self.client.get(reverse('gmtool:announcement_query'), {
             'Platform': 'Android',
             'Channel': ['小米', 'VIVO'],
             'AnnouncementType': '1',
@@ -568,6 +576,50 @@ class AnnouncementViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(mocked_query.call_count, 2)
         self.assertEqual(AnnouncementLog.objects.count(), 0)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.query_announcements')
+    def test_query_result_delete_link_points_to_delete_page(self, mocked_query):
+        mocked_query.return_value = ([{
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '2',
+            'AnnouncementId': '123',
+        }], '', '[]', '')
+
+        response = self.client.get(reverse('gmtool:announcement_query'), {
+            'Platform': 'Android',
+            'Channel': ['小米'],
+            'AnnouncementType': '2',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse('gmtool:announcement_delete'))
+        self.assertContains(response, 'AnnouncementId=123')
+        self.assertContains(response, 'Channel=%E5%B0%8F%E7%B1%B3')
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    def test_create_and_delete_pages_render_forms(self):
+        create_response = self.client.get(reverse('gmtool:announcement_create'))
+        delete_response = self.client.get(reverse('gmtool:announcement_delete'), {
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '2',
+            'AnnouncementId': '123',
+        })
+
+        self.assertEqual(create_response.status_code, 200)
+        self.assertContains(create_response, '发布公告')
+        self.assertEqual(delete_response.status_code, 200)
+        self.assertContains(delete_response, 'value="123"')
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',

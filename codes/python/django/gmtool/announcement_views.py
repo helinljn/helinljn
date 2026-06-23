@@ -9,7 +9,7 @@ from django.http import QueryDict
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_http_methods
 
 from .announcement_client import (
     create_announcement,
@@ -57,25 +57,32 @@ def _query_string(platform, channels, announcement_type):
     return urlencode(query, doseq=True)
 
 
-def _redirect_to_announcement_list(platform, channels, announcement_type):
+def _redirect_to_announcement_query(platform, channels, announcement_type):
     query_string = _query_string(platform, channels, announcement_type)
-    url = reverse('gmtool:announcement_list')
+    url = reverse('gmtool:announcement_query')
     if query_string:
         url = f'{url}?{query_string}'
     return redirect(url)
 
 
-def _return_query_data_from_post(request):
-    query_data = QueryDict('', mutable=True)
-    platform = request.POST.get('return_Platform') or request.POST.get('Platform', '')
-    announcement_type = request.POST.get('return_AnnouncementType') or request.POST.get('AnnouncementType', '')
-    channels = request.POST.getlist('return_Channel') or request.POST.getlist('Channel')
-    if not channels and request.POST.get('Channel'):
-        channels = [request.POST.get('Channel')]
-    query_data['Platform'] = platform
-    query_data['AnnouncementType'] = announcement_type
-    query_data.setlist('Channel', channels)
-    return query_data
+def _delete_initial_from_data(data):
+    if not data:
+        return {}
+    return {
+        'Platform': data.get('Platform', ''),
+        'Channel': data.get('Channel', ''),
+        'AnnouncementType': data.get('AnnouncementType', ''),
+        'AnnouncementId': data.get('AnnouncementId', ''),
+    }
+
+
+def _announcement_config_errors():
+    errors = []
+    base_url_error = get_announcement_base_url_error()
+    if base_url_error:
+        errors.append(base_url_error)
+    errors.extend(get_announcement_config_errors())
+    return errors
 
 
 def _status_from_error(error_message, error_type):
@@ -150,33 +157,37 @@ def _query_for_form(query_form):
                 'raw_response': raw_response,
             })
             continue
+        announcements = []
+        for announcement in response_data or []:
+            announcement_data = dict(announcement)
+            announcement_data['delete_query_string'] = urlencode({
+                'Platform': announcement_data.get('Platform') or platform,
+                'Channel': announcement_data.get('Channel') or channel,
+                'AnnouncementType': announcement_data.get('AnnouncementType') or announcement_type,
+                'AnnouncementId': announcement_data.get('AnnouncementId', ''),
+            })
+            announcements.append(announcement_data)
+
         results.append({
             'channel': channel,
-            'announcements': response_data or [],
+            'announcements': announcements,
             'raw_response': raw_response,
         })
     return results, failures
 
 
-def _render_announcement_page(
+def _render_announcement_query_page(
     request,
     *,
     query_data=None,
     run_query=False,
     query_form=None,
-    create_form=None,
-    delete_form=None,
-    operation_results=None,
     status=200,
 ):
     query_data = query_data if query_data is not None else request.GET
     query_results = []
     query_failures = []
-    announcement_config_errors = []
-    base_url_error = get_announcement_base_url_error()
-    if base_url_error:
-        announcement_config_errors.append(base_url_error)
-    announcement_config_errors.extend(get_announcement_config_errors())
+    announcement_config_errors = _announcement_config_errors()
 
     if query_form is None:
         if _has_query_input(query_data):
@@ -196,22 +207,65 @@ def _render_announcement_page(
         elif query_failures:
             messages.warning(request, _('部分渠道公告查询失败，请查看失败明细'))
 
+    return render(
+        request,
+        'gmtool/announcement_query.html',
+        {
+            'active_announcement_tab': 'query',
+            'query_form': query_form,
+            'query_results': query_results,
+            'query_failures': query_failures,
+            'current_query_string': query_data.urlencode(),
+            'selected_query': _query_initial_from_data(query_data),
+            'announcement_config_errors': announcement_config_errors,
+        },
+        status=status,
+    )
+
+
+def _render_announcement_create_page(
+    request,
+    *,
+    query_data=None,
+    create_form=None,
+    operation_results=None,
+    status=200,
+):
+    query_data = query_data if query_data is not None else request.GET
     if create_form is None:
         create_form = AnnouncementCreateForm(initial=_query_initial_from_data(query_data))
 
     return render(
         request,
-        'gmtool/announcement_list.html',
+        'gmtool/announcement_create.html',
         {
-            'query_form': query_form,
+            'active_announcement_tab': 'create',
             'create_form': create_form,
-            'delete_form': delete_form,
-            'query_results': query_results,
-            'query_failures': query_failures,
             'operation_results': operation_results or {},
-            'current_query_string': query_data.urlencode(),
-            'selected_query': _query_initial_from_data(query_data),
-            'announcement_config_errors': announcement_config_errors,
+            'announcement_config_errors': _announcement_config_errors(),
+        },
+        status=status,
+    )
+
+
+def _render_announcement_delete_page(
+    request,
+    *,
+    delete_form=None,
+    operation_results=None,
+    status=200,
+):
+    if delete_form is None:
+        delete_form = AnnouncementDeleteForm(initial=_delete_initial_from_data(request.GET))
+
+    return render(
+        request,
+        'gmtool/announcement_delete.html',
+        {
+            'active_announcement_tab': 'delete',
+            'delete_form': delete_form,
+            'operation_results': operation_results or {},
+            'announcement_config_errors': _announcement_config_errors(),
         },
         status=status,
     )
@@ -227,21 +281,34 @@ def _append_failure(failures, channel, error_message):
 @announcement_permission_required
 @require_GET
 def announcement_list(request):
-    """公告查询和发布页面。"""
-    return _render_announcement_page(
+    """公告管理兼容入口，默认进入查询公告页。"""
+    url = reverse('gmtool:announcement_query')
+    if request.META.get('QUERY_STRING'):
+        url = f'{url}?{request.META["QUERY_STRING"]}'
+    return redirect(url)
+
+
+@announcement_permission_required
+@require_GET
+def announcement_query(request):
+    """公告查询页面。"""
+    return _render_announcement_query_page(
         request,
         run_query=_has_query_input(request.GET),
     )
 
 
 @announcement_permission_required
-@require_POST
+@require_http_methods(['GET', 'POST'])
 def announcement_create(request):
     """发布公告。"""
+    if request.method == 'GET':
+        return _render_announcement_create_page(request)
+
     form = AnnouncementCreateForm(request.POST)
     if not form.is_valid():
         messages.error(request, _('公告发布表单校验失败，请检查输入'))
-        return _render_announcement_page(
+        return _render_announcement_create_page(
             request,
             query_data=request.POST,
             create_form=form,
@@ -361,7 +428,7 @@ def announcement_create(request):
 
     if success_channels and not failed_channels:
         messages.success(request, _('公告发布成功'))
-        return _redirect_to_announcement_list(platform, channels, announcement_type)
+        return _redirect_to_announcement_query(platform, channels, announcement_type)
 
     if success_channels:
         messages.warning(request, _('部分渠道公告发布失败，请查看失败明细'))
@@ -372,7 +439,7 @@ def announcement_create(request):
     query_data['Platform'] = platform
     query_data['AnnouncementType'] = announcement_type
     query_data.setlist('Channel', channels)
-    return _render_announcement_page(
+    return _render_announcement_create_page(
         request,
         query_data=query_data,
         create_form=form,
@@ -385,17 +452,17 @@ def announcement_create(request):
 
 
 @announcement_permission_required
-@require_POST
+@require_http_methods(['GET', 'POST'])
 def announcement_delete(request):
     """删除单条公告。"""
+    if request.method == 'GET':
+        return _render_announcement_delete_page(request)
+
     form = AnnouncementDeleteForm(request.POST)
-    query_data = _return_query_data_from_post(request)
     if not form.is_valid():
         messages.error(request, _('公告删除表单校验失败，请刷新后重试'))
-        return _render_announcement_page(
+        return _render_announcement_delete_page(
             request,
-            query_data=query_data,
-            run_query=_has_query_input(query_data),
             delete_form=form,
             status=400,
         )
@@ -445,17 +512,15 @@ def announcement_delete(request):
 
     if not error_message:
         messages.success(request, _('公告删除成功'))
-        return _redirect_to_announcement_list(
-            query_data.get('Platform') or payload['Platform'],
-            query_data.getlist('Channel') or [payload['Channel']],
-            query_data.get('AnnouncementType') or payload['AnnouncementType'],
+        return _redirect_to_announcement_query(
+            payload['Platform'],
+            [payload['Channel']],
+            payload['AnnouncementType'],
         )
 
     messages.error(request, _('公告删除失败: %(error)s') % {'error': error_message})
-    return _render_announcement_page(
+    return _render_announcement_delete_page(
         request,
-        query_data=query_data,
-        run_query=_has_query_input(query_data),
         delete_form=form,
         operation_results={
             'failed_channels': [{'channel': payload['Channel'], 'error': error_message}],
@@ -507,6 +572,7 @@ def announcement_log_list(request):
         {
             'page_obj': page_obj,
             'elided_page_range': elided_page_range,
+            'active_announcement_tab': 'logs',
             'action_filter': action_filter,
             'status_filter': status_filter,
             'platform_filter': platform_filter,

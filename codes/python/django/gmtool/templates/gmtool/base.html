@@ -35,7 +35,7 @@
                         </li>
                         {% if has_announcement_permission %}
                         <li class="nav-item">
-                            <a class="nav-link {% block nav_announcements %}{% endblock %}" href="{% url 'gmtool:announcement_list' %}">
+                            <a class="nav-link {% block nav_announcements %}{% endblock %}" href="{% url 'gmtool:announcement_query' %}">
                                 <span class="nav-link-icon"><i class="ti ti-speakerphone"></i></span>
                                 <span class="nav-link-title">{% trans "公告管理" %}</span>
                             </a>

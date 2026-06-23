@@ -130,7 +130,7 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `gmtool/models.py`：GM 命令、用户命令权限、公告权限、用户扩展资料、命令日志、公告日志、登录日志。
 - `gmtool/auth_views.py`：登录、登出、登录失败限速与登录日志。
 - `gmtool/announcement_client.py`：公告目录服 HTTP 调用。
-- `gmtool/announcement_views.py`：公告查询、发布、删除、公告日志列表。
+- `gmtool/announcement_views.py`：公告查询、发布、删除、公告日志列表；`/announcements/` 为兼容入口，默认跳转 `/announcements/query/`。
 - `gmtool/command_parser.py`：解析 `idip_commands.json`、校验协议 ID、补充 schema 元数据、同步命令到数据库。
 - `gmtool/command_services.py`：命令查询与执行前参数校验。
 - `gmtool/command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志。
@@ -172,6 +172,7 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `send_idip_command(command, params)` 返回 `(response_data, error_message, request_content_str, error_type)`，兼容 `status/id/json` 包装响应和旧版直接 JSON 响应。
 - 公告功能独立于 IDIP 命令，不写入 `idip_commands.json`，不参与 `sync_commands`，也不伪装成 `GMCommand`。
 - 公告请求使用 `application/x-www-form-urlencoded`。发布/删除为 POST form data，查询为 GET query params。
+- 公告管理使用二级页签：查询公告、发布公告、删除公告、公告日志；查询结果中的删除按钮跳转到删除页预填字段，不直接 POST 删除。
 - `ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS` 在 settings 层解析为去重列表；页面提交值必须严格来自配置原值。
 - 周更新公告发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。
 - 公告发布、删除写 `AnnouncementLog` 和 audit log；查询不写公告操作日志和 audit log。

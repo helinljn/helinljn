@@ -1,0 +1,106 @@
+{% extends "gmtool/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "发布公告" %} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_announcements %}active{% endblock %}
+{% block page_pretitle %}{% trans "公告" %}{% endblock %}
+{% block page_title %}{% trans "发布公告" %}{% endblock %}
+
+{% block content %}
+{% include "gmtool/_announcement_tabs.html" %}
+{% include "gmtool/_announcement_config_errors.html" %}
+
+{% if operation_results.failed_channels %}
+<div class="alert alert-warning">
+    <div class="fw-bold mb-2">{% trans "失败渠道明细" %}</div>
+    {% for item in operation_results.failed_channels %}
+    <div><span class="badge bg-warning-lt">{{ item.channel }}</span> {{ item.error }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>{% trans "发布公告" %}</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% url 'gmtool:announcement_create' %}" class="row g-3">
+            {% csrf_token %}
+            {% if create_form.non_field_errors %}
+            <div class="col-12">
+                <div class="alert alert-danger mb-0">{{ create_form.non_field_errors }}</div>
+            </div>
+            {% endif %}
+            <div class="col-md-3">
+                <label class="form-label">{{ create_form.Platform.label }}</label>
+                {{ create_form.Platform }}
+                {{ create_form.Platform.errors }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">{{ create_form.Channel.label }}</label>
+                {{ create_form.Channel }}
+                {{ create_form.Channel.errors }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{{ create_form.AnnouncementType.label }}</label>
+                {{ create_form.AnnouncementType }}
+                {{ create_form.AnnouncementType.errors }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{{ create_form.Priority.label }}</label>
+                {{ create_form.Priority }}
+                {{ create_form.Priority.errors }}
+            </div>
+            <div class="col-md-12">
+                <label class="form-label">{{ create_form.Title.label }}</label>
+                {{ create_form.Title }}
+                {{ create_form.Title.errors }}
+            </div>
+            <div class="col-12">
+                <label class="form-label">{{ create_form.Content.label }}</label>
+                {{ create_form.Content }}
+                {{ create_form.Content.errors }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Image_1</label>
+                {{ create_form.Image_1 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Image_2</label>
+                {{ create_form.Image_2 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Image_3</label>
+                {{ create_form.Image_3 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ImageLink_1</label>
+                {{ create_form.ImageLink_1 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ImageLink_2</label>
+                {{ create_form.ImageLink_2 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ImageLink_3</label>
+                {{ create_form.ImageLink_3 }}
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-success" onclick="return confirmWeeklyReplacement(this.form);" {% if announcement_config_errors %}disabled{% endif %}>
+                    <i class="ti ti-send me-1"></i>{% trans "发布公告" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function confirmWeeklyReplacement(form) {
+    var typeField = form.querySelector('[name="AnnouncementType"]');
+    if (typeField && typeField.value === '1') {
+        return confirm('{% trans "发布新的周更新公告会先删除同平台同渠道已有周更新公告，确认继续？" %}');
+    }
+    return true;
+}
+</script>
+{% endblock %}
