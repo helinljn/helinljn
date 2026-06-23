@@ -691,6 +691,8 @@ class AnnouncementViewTests(TestCase):
             'Channel': '小米',
             'AnnouncementType': '2',
             'AnnouncementId': '123',
+            'Title': '完整标题',
+            'Content': '完整正文',
         }], '', '[]', '')
 
         response = self.client.get(reverse('gmtool:announcement_query'), {
@@ -703,6 +705,9 @@ class AnnouncementViewTests(TestCase):
         self.assertContains(response, 'AnnouncementId=123')
         self.assertContains(response, 'Channel=%E5%B0%8F%E7%B1%B3')
         self.assertContains(response, 'AnnouncementType=2')
+        self.assertContains(response, 'query-announcement-detail-btn')
+        self.assertContains(response, 'queryAnnouncementModal')
+        self.assertNotContains(response, 'data-bs-toggle="collapse"')
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
@@ -984,6 +989,8 @@ class AnnouncementViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'user=a%26b')
         self.assertContains(response, 'Channel=%E5%B0%8F%E7%B1%B3')
+        self.assertContains(response, 'announcement-log-detail-btn')
+        self.assertContains(response, '/gmtool/api/v1/announcements/logs/')
 
 
 class AnnouncementPermissionAssignmentTests(TestCase):

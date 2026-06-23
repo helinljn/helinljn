@@ -16,6 +16,25 @@
     white-space: nowrap;
     vertical-align: middle;
 }
+.detail-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+}
+.detail-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1051;
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #fff;
+}
 </style>
 {% endblock %}
 
@@ -142,9 +161,11 @@
                     </td>
                     <td><span class="announcement-log-preview" title="{{ log.error_message }}">{{ log.error_message|truncatechars:40|default:"-" }}</span></td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-outline-info" onclick="showAnnouncementLogDetail({{ log.id }})">
+                        <a href="{% url 'gmtool:announcement_log_detail_api' log_id=log.id %}"
+                           class="btn btn-sm btn-outline-info announcement-log-detail-btn"
+                           data-log-id="{{ log.id }}">
                             <i class="ti ti-eye"></i>
-                        </button>
+                        </a>
                     </td>
                 </tr>
                 {% empty %}
@@ -185,11 +206,11 @@
 </div>
 {% endif %}
 
-<div id="announcementLogOverlay" class="detail-overlay" onclick="closeAnnouncementLogDetail()"></div>
+<div id="announcementLogOverlay" class="detail-overlay" data-announcement-log-close></div>
 <div id="announcementLogModal" class="detail-modal" data-api-url="{% url 'gmtool:announcement_log_detail_api' log_id=0 %}">
     <div class="detail-modal-header">
         <h5 class="m-0"><i class="ti ti-file-text me-2"></i>{% trans "公告日志详情" %}</h5>
-        <button type="button" class="detail-modal-close" onclick="closeAnnouncementLogDetail()">&times;</button>
+        <button type="button" class="detail-modal-close" data-announcement-log-close>&times;</button>
     </div>
     <div id="announcementLogDetailBody" class="detail-modal-body"></div>
 </div>
@@ -218,8 +239,18 @@ function showAnnouncementLogDetail(id) {
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 
-    fetch(apiUrl)
-        .then(function(resp) { return resp.json(); })
+    fetch(apiUrl, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(function(resp) {
+            if (!resp.ok) {
+                throw new Error('HTTP ' + resp.status);
+            }
+            return resp.json();
+        })
         .then(function(data) {
             document.getElementById('announcementLogDetailBody').innerHTML =
                 '<h4 class="detail-section-title">{{ request_data_title|escapejs }}</h4>' +
@@ -241,6 +272,27 @@ function closeAnnouncementLogDetail() {
     document.getElementById('announcementLogOverlay').style.display = 'none';
     document.getElementById('announcementLogModal').style.display = 'none';
     document.body.style.overflow = '';
+}
+
+window.showAnnouncementLogDetail = showAnnouncementLogDetail;
+window.closeAnnouncementLogDetail = closeAnnouncementLogDetail;
+
+function bindAnnouncementLogDetailButtons() {
+    document.querySelectorAll('.announcement-log-detail-btn').forEach(function(button) {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            showAnnouncementLogDetail(button.getAttribute('data-log-id'));
+        });
+    });
+    document.querySelectorAll('[data-announcement-log-close]').forEach(function(button) {
+        button.addEventListener('click', closeAnnouncementLogDetail);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindAnnouncementLogDetailButtons);
+} else {
+    bindAnnouncementLogDetailButtons();
 }
 </script>
 {% endblock %}

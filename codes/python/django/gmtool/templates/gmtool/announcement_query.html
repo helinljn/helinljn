@@ -21,17 +21,24 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.announcement-detail {
-    white-space: pre-wrap;
-    word-break: break-word;
+.detail-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
 }
-.announcement-detail-box {
-    background: #f8fafc;
-    border: 1px solid #d8e0ea;
-    border-radius: 8px;
-    padding: 0.75rem;
-    max-height: 260px;
-    overflow: auto;
+.detail-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1051;
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #fff;
 }
 </style>
 {% endblock %}
@@ -127,37 +134,23 @@
                         <div class="announcement-reserve text-muted" title="{{ announcement.Reserve_2 }}">R2: {{ announcement.Reserve_2|default:"" }}</div>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#announcement_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-info query-announcement-detail-btn"
+                                data-title="{{ announcement.Title|default:'' }}"
+                                data-content="{{ announcement.Content|default:'' }}"
+                                data-image-1="{{ announcement.Image_1|default:'' }}"
+                                data-image-link-1="{{ announcement.ImageLink_1|default:'' }}"
+                                data-image-2="{{ announcement.Image_2|default:'' }}"
+                                data-image-link-2="{{ announcement.ImageLink_2|default:'' }}"
+                                data-image-3="{{ announcement.Image_3|default:'' }}"
+                                data-image-link-3="{{ announcement.ImageLink_3|default:'' }}"
+                                data-reserve-1="{{ announcement.Reserve_1|default:'' }}"
+                                data-reserve-2="{{ announcement.Reserve_2|default:'' }}">
                             <i class="ti ti-eye"></i>
                         </button>
                         <a href="{% url 'gmtool:announcement_delete' %}?{{ announcement.delete_query_string }}" class="btn btn-sm btn-outline-danger">
                             <i class="ti ti-trash"></i>
                         </a>
-                    </td>
-                </tr>
-                <tr class="collapse" id="announcement_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
-                    <td colspan="7">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="subheader">{% trans "完整标题" %}</div>
-                                <div class="announcement-detail-box">{{ announcement.Title }}</div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="subheader">{% trans "图片链接" %}</div>
-                                <div class="announcement-detail-box">
-                                    Image_1: {{ announcement.Image_1|default:"" }}<br>
-                                    ImageLink_1: {{ announcement.ImageLink_1|default:"" }}<br>
-                                    Image_2: {{ announcement.Image_2|default:"" }}<br>
-                                    ImageLink_2: {{ announcement.ImageLink_2|default:"" }}<br>
-                                    Image_3: {{ announcement.Image_3|default:"" }}<br>
-                                    ImageLink_3: {{ announcement.ImageLink_3|default:"" }}
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="subheader">{% trans "完整正文" %}</div>
-                                <div class="announcement-detail-box announcement-detail">{{ announcement.Content }}</div>
-                            </div>
-                        </div>
                     </td>
                 </tr>
                 {% empty %}
@@ -175,4 +168,84 @@
     <i class="ti ti-info-circle me-2"></i>{% trans "没有任何游戏登录公告！！！" %}
 </div>
 {% endif %}
+
+<div id="queryAnnouncementOverlay" class="detail-overlay" data-query-announcement-close></div>
+<div id="queryAnnouncementModal" class="detail-modal">
+    <div class="detail-modal-header">
+        <h5 class="m-0"><i class="ti ti-file-text me-2"></i>{% trans "公告详情" %}</h5>
+        <button type="button" class="detail-modal-close" data-query-announcement-close>&times;</button>
+    </div>
+    <div id="queryAnnouncementDetailBody" class="detail-modal-body"></div>
+</div>
+
+{% trans "完整标题" as full_title_text %}
+{% trans "图片链接" as image_links_text %}
+{% trans "完整正文" as full_content_text %}
+{% trans "预留字段" as reserve_fields_text %}
+{% trans "无数据" as no_data_text %}
+
+<script>
+function escapeQueryAnnouncementHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+}
+
+function queryAnnouncementValue(button, name) {
+    var value = button.getAttribute(name);
+    return value || '{{ no_data_text|escapejs }}';
+}
+
+function showQueryAnnouncementDetail(button) {
+    var imageLinks = [
+        'Image_1: ' + queryAnnouncementValue(button, 'data-image-1'),
+        'ImageLink_1: ' + queryAnnouncementValue(button, 'data-image-link-1'),
+        'Image_2: ' + queryAnnouncementValue(button, 'data-image-2'),
+        'ImageLink_2: ' + queryAnnouncementValue(button, 'data-image-link-2'),
+        'Image_3: ' + queryAnnouncementValue(button, 'data-image-3'),
+        'ImageLink_3: ' + queryAnnouncementValue(button, 'data-image-link-3')
+    ].join('\n');
+    var reserves = [
+        'Reserve_1: ' + queryAnnouncementValue(button, 'data-reserve-1'),
+        'Reserve_2: ' + queryAnnouncementValue(button, 'data-reserve-2')
+    ].join('\n');
+
+    document.getElementById('queryAnnouncementDetailBody').innerHTML =
+        '<h4 class="detail-section-title">{{ full_title_text|escapejs }}</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(queryAnnouncementValue(button, 'data-title')) + '</pre>' +
+        '<h4 class="detail-section-title">{{ image_links_text|escapejs }}</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(imageLinks) + '</pre>' +
+        '<h4 class="detail-section-title">{{ reserve_fields_text|escapejs }}</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(reserves) + '</pre>' +
+        '<h4 class="detail-section-title">{{ full_content_text|escapejs }}</h4>' +
+        '<pre class="detail-pre">' + escapeQueryAnnouncementHtml(queryAnnouncementValue(button, 'data-content')) + '</pre>';
+
+    document.getElementById('queryAnnouncementOverlay').style.display = 'block';
+    document.getElementById('queryAnnouncementModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeQueryAnnouncementDetail() {
+    document.getElementById('queryAnnouncementOverlay').style.display = 'none';
+    document.getElementById('queryAnnouncementModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function bindQueryAnnouncementDetailButtons() {
+    document.querySelectorAll('.query-announcement-detail-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            showQueryAnnouncementDetail(button);
+        });
+    });
+    document.querySelectorAll('[data-query-announcement-close]').forEach(function(button) {
+        button.addEventListener('click', closeQueryAnnouncementDetail);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindQueryAnnouncementDetailButtons);
+} else {
+    bindQueryAnnouncementDetailButtons();
+}
+</script>
 {% endblock %}
