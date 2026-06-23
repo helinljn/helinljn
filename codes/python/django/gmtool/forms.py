@@ -3,12 +3,158 @@ import json
 
 from django import forms
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from .command_parser import validate_command_ids
 from .models import GMCommand, UserProfile
 
 User = get_user_model()
+
+ANNOUNCEMENT_TYPE_CHOICES = [
+    ('1', _('周更新公告')),
+    ('2', _('常驻公告')),
+    ('3', _('轮播图')),
+]
+
+
+def get_announcement_config_errors():
+    """返回公告平台/渠道配置错误。"""
+    errors = []
+    if not getattr(settings, 'ANNOUNCEMENT_PLATFORMS', []):
+        errors.append(_('公告平台配置为空，请检查 ANNOUNCEMENT_PLATFORMS'))
+    if not getattr(settings, 'ANNOUNCEMENT_CHANNELS', []):
+        errors.append(_('公告渠道配置为空，请检查 ANNOUNCEMENT_CHANNELS'))
+    return errors
+
+
+def _choice_pairs(values):
+    return [(value, value) for value in values]
+
+
+class AnnouncementBaseForm(forms.Form):
+    """公告表单共享配置。"""
+    Platform = forms.ChoiceField(
+        label=_('平台'),
+        choices=(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    AnnouncementType = forms.ChoiceField(
+        label=_('公告类型'),
+        choices=ANNOUNCEMENT_TYPE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['Platform'].choices = _choice_pairs(getattr(settings, 'ANNOUNCEMENT_PLATFORMS', []))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        config_errors = get_announcement_config_errors()
+        if config_errors:
+            for error in config_errors:
+                self.add_error(None, error)
+        return cleaned_data
+
+
+class AnnouncementQueryForm(AnnouncementBaseForm):
+    """公告查询表单。"""
+    Channel = forms.MultipleChoiceField(
+        label=_('渠道'),
+        choices=(),
+        widget=forms.SelectMultiple(attrs={'class': 'form-select'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['Channel'].choices = _choice_pairs(getattr(settings, 'ANNOUNCEMENT_CHANNELS', []))
+
+
+class AnnouncementCreateForm(AnnouncementQueryForm):
+    """公告发布表单。"""
+    Title = forms.CharField(
+        label=_('公告标题'),
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+    )
+    Content = forms.CharField(
+        label=_('公告正文'),
+        max_length=5000,
+        widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
+    )
+    Priority = forms.IntegerField(
+        label=_('常驻公告显示优先级'),
+        min_value=0,
+        initial=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+    )
+
+    for field_name in ('Image_1', 'ImageLink_1', 'Image_2', 'ImageLink_2', 'Image_3', 'ImageLink_3'):
+        locals()[field_name] = forms.CharField(
+            label=field_name,
+            max_length=500,
+            required=False,
+            widget=forms.TextInput(attrs={'class': 'form-control'}),
+        )
+    del field_name
+
+    def to_payload(self, channel):
+        """生成单渠道远端发布 payload。"""
+        announcement_type = self.cleaned_data['AnnouncementType']
+        reserve_1 = ''
+        if announcement_type == '2':
+            reserve_1 = json.dumps(
+                {
+                    'priority': self.cleaned_data.get('Priority') or 0,
+                },
+                ensure_ascii=False,
+                separators=(',', ':'),
+            )
+
+        payload = {
+            'Platform': self.cleaned_data['Platform'],
+            'Channel': channel,
+            'AnnouncementType': announcement_type,
+            'AnnouncementId': '-1',
+            'Title': self.cleaned_data.get('Title', ''),
+            'Content': self.cleaned_data.get('Content', ''),
+            'Image_1': self.cleaned_data.get('Image_1', '') or '',
+            'ImageLink_1': self.cleaned_data.get('ImageLink_1', '') or '',
+            'Image_2': self.cleaned_data.get('Image_2', '') or '',
+            'ImageLink_2': self.cleaned_data.get('ImageLink_2', '') or '',
+            'Image_3': self.cleaned_data.get('Image_3', '') or '',
+            'ImageLink_3': self.cleaned_data.get('ImageLink_3', '') or '',
+            'Reserve_1': reserve_1,
+            'Reserve_2': '',
+        }
+        return payload
+
+
+class AnnouncementDeleteForm(AnnouncementBaseForm):
+    """公告删除表单。"""
+    Channel = forms.CharField(label=_('渠道'), max_length=50)
+    AnnouncementId = forms.IntegerField(label=_('公告ID'), min_value=1)
+
+    def clean_Channel(self):
+        channel = self.cleaned_data.get('Channel', '')
+        if channel not in getattr(settings, 'ANNOUNCEMENT_CHANNELS', []):
+            raise forms.ValidationError(_('非法渠道'))
+        return channel
+
+    def clean_AnnouncementId(self):
+        announcement_id = self.cleaned_data.get('AnnouncementId')
+        if announcement_id == -1:
+            raise forms.ValidationError(_('删除公告必须使用实际公告 ID'))
+        return announcement_id
+
+    def to_payload(self):
+        return {
+            'Platform': self.cleaned_data['Platform'],
+            'Channel': self.cleaned_data['Channel'],
+            'AnnouncementType': self.cleaned_data['AnnouncementType'],
+            'AnnouncementId': str(self.cleaned_data['AnnouncementId']),
+        }
 
 # 用户表单共享的 widgets 和 labels 定义，避免 DRY 违规
 _USER_WIDGETS = {

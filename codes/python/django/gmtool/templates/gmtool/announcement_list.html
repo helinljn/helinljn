@@ -1,0 +1,300 @@
+{% extends "gmtool/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "公告管理" %} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_announcements %}active{% endblock %}
+{% block page_pretitle %}{% trans "公告" %}{% endblock %}
+{% block page_title %}{% trans "公告管理" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.announcement-text {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.announcement-url,
+.announcement-reserve {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.announcement-detail {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.announcement-detail-box {
+    background: #f8fafc;
+    border: 1px solid #d8e0ea;
+    border-radius: 8px;
+    padding: 0.75rem;
+    max-height: 260px;
+    overflow: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% if announcement_config_errors %}
+<div class="alert alert-danger">
+    <div class="fw-bold mb-2">{% trans "公告目录服配置不可用" %}</div>
+    {% for error in announcement_config_errors %}
+    <div>{{ error }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if operation_results.failed_channels %}
+<div class="alert alert-warning">
+    <div class="fw-bold mb-2">{% trans "失败渠道明细" %}</div>
+    {% for item in operation_results.failed_channels %}
+    <div><span class="badge bg-warning-lt">{{ item.channel }}</span> {{ item.error }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-search me-2"></i>{% trans "查询公告" %}</h3>
+        <div class="card-actions">
+            <a href="{% url 'gmtool:announcement_log_list' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="ti ti-list-details me-1"></i>{% trans "公告日志" %}
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            {% if query_form.non_field_errors %}
+            <div class="col-12">
+                <div class="alert alert-danger mb-0">{{ query_form.non_field_errors }}</div>
+            </div>
+            {% endif %}
+            <div class="col-md-3">
+                <label class="form-label">{{ query_form.Platform.label }}</label>
+                {{ query_form.Platform }}
+                {{ query_form.Platform.errors }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">{{ query_form.Channel.label }}</label>
+                {{ query_form.Channel }}
+                {{ query_form.Channel.errors }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{{ query_form.AnnouncementType.label }}</label>
+                {{ query_form.AnnouncementType }}
+                {{ query_form.AnnouncementType.errors }}
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100" {% if announcement_config_errors %}disabled{% endif %}>
+                    <i class="ti ti-search me-1"></i>{% trans "查询" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>{% trans "发布公告" %}</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% url 'gmtool:announcement_create' %}" class="row g-3">
+            {% csrf_token %}
+            {% if create_form.non_field_errors %}
+            <div class="col-12">
+                <div class="alert alert-danger mb-0">{{ create_form.non_field_errors }}</div>
+            </div>
+            {% endif %}
+            <div class="col-md-3">
+                <label class="form-label">{{ create_form.Platform.label }}</label>
+                {{ create_form.Platform }}
+                {{ create_form.Platform.errors }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">{{ create_form.Channel.label }}</label>
+                {{ create_form.Channel }}
+                {{ create_form.Channel.errors }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{{ create_form.AnnouncementType.label }}</label>
+                {{ create_form.AnnouncementType }}
+                {{ create_form.AnnouncementType.errors }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{{ create_form.Priority.label }}</label>
+                {{ create_form.Priority }}
+                {{ create_form.Priority.errors }}
+            </div>
+            <div class="col-md-12">
+                <label class="form-label">{{ create_form.Title.label }}</label>
+                {{ create_form.Title }}
+                {{ create_form.Title.errors }}
+            </div>
+            <div class="col-12">
+                <label class="form-label">{{ create_form.Content.label }}</label>
+                {{ create_form.Content }}
+                {{ create_form.Content.errors }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Image_1</label>
+                {{ create_form.Image_1 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Image_2</label>
+                {{ create_form.Image_2 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Image_3</label>
+                {{ create_form.Image_3 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ImageLink_1</label>
+                {{ create_form.ImageLink_1 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ImageLink_2</label>
+                {{ create_form.ImageLink_2 }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ImageLink_3</label>
+                {{ create_form.ImageLink_3 }}
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn btn-success" onclick="return confirmWeeklyReplacement(this.form);" {% if announcement_config_errors %}disabled{% endif %}>
+                    <i class="ti ti-send me-1"></i>{% trans "发布公告" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if query_failures %}
+<div class="alert alert-warning">
+    <div class="fw-bold mb-2">{% trans "查询失败渠道" %}</div>
+    {% for item in query_failures %}
+    <div><span class="badge bg-warning-lt">{{ item.channel }}</span> {{ item.error }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if query_results %}
+{% for group in query_results %}
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-list me-2"></i>{{ group.channel }}</h3>
+        <div class="card-actions">
+            <span class="badge bg-secondary-lt">{{ group.announcements|length }}</span>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table" style="table-layout:fixed;">
+            <thead>
+                <tr>
+                    <th style="width:150px;">{% trans "公告ID" %}</th>
+                    <th style="width:110px;">{% trans "类型" %}</th>
+                    <th style="width:14%;">{% trans "标题" %}</th>
+                    <th>{% trans "正文" %}</th>
+                    <th style="width:16%;">{% trans "图片" %}</th>
+                    <th style="width:16%;">{% trans "预留字段" %}</th>
+                    <th style="width:150px;">{% trans "操作" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for announcement in group.announcements %}
+                <tr>
+                    <td><code>{{ announcement.AnnouncementId|default:"-" }}</code></td>
+                    <td>
+                        {% if announcement.AnnouncementType == '1' %}
+                        {% trans "周更新公告" %}
+                        {% elif announcement.AnnouncementType == '2' %}
+                        {% trans "常驻公告" %}
+                        {% elif announcement.AnnouncementType == '3' %}
+                        {% trans "轮播图" %}
+                        {% else %}
+                        {{ announcement.AnnouncementType|default:selected_query.AnnouncementType }}
+                        {% endif %}
+                    </td>
+                    <td><div class="announcement-text" title="{{ announcement.Title }}">{{ announcement.Title|truncatechars:12 }}</div></td>
+                    <td><div class="announcement-text" title="{{ announcement.Content }}">{{ announcement.Content|truncatechars:36 }}</div></td>
+                    <td>
+                        <div class="announcement-url" title="{{ announcement.Image_1 }}">{{ announcement.Image_1|default:"-" }}</div>
+                        <div class="announcement-url text-muted" title="{{ announcement.ImageLink_1 }}">{{ announcement.ImageLink_1|default:"-" }}</div>
+                    </td>
+                    <td>
+                        <div class="announcement-reserve" title="{{ announcement.Reserve_1 }}">R1: {{ announcement.Reserve_1|default:"" }}</div>
+                        <div class="announcement-reserve text-muted" title="{{ announcement.Reserve_2 }}">R2: {{ announcement.Reserve_2|default:"" }}</div>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="collapse" data-bs-target="#announcement_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+                            <i class="ti ti-eye"></i>
+                        </button>
+                        <form method="post" action="{% url 'gmtool:announcement_delete' %}" class="d-inline" onsubmit="return confirm('{% trans '确认删除该公告？' %}');">
+                            {% csrf_token %}
+                            <input type="hidden" name="Platform" value="{{ announcement.Platform|default:selected_query.Platform }}">
+                            <input type="hidden" name="Channel" value="{{ announcement.Channel|default:group.channel }}">
+                            <input type="hidden" name="AnnouncementType" value="{{ announcement.AnnouncementType|default:selected_query.AnnouncementType }}">
+                            <input type="hidden" name="AnnouncementId" value="{{ announcement.AnnouncementId }}">
+                            <input type="hidden" name="return_Platform" value="{{ selected_query.Platform }}">
+                            <input type="hidden" name="return_AnnouncementType" value="{{ selected_query.AnnouncementType }}">
+                            {% for channel in selected_query.Channel %}
+                            <input type="hidden" name="return_Channel" value="{{ channel }}">
+                            {% endfor %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" {% if announcement_config_errors %}disabled{% endif %}>
+                                <i class="ti ti-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr class="collapse" id="announcement_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+                    <td colspan="7">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="subheader">{% trans "完整标题" %}</div>
+                                <div class="announcement-detail-box">{{ announcement.Title }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="subheader">{% trans "图片链接" %}</div>
+                                <div class="announcement-detail-box">
+                                    Image_1: {{ announcement.Image_1|default:"" }}<br>
+                                    ImageLink_1: {{ announcement.ImageLink_1|default:"" }}<br>
+                                    Image_2: {{ announcement.Image_2|default:"" }}<br>
+                                    ImageLink_2: {{ announcement.ImageLink_2|default:"" }}<br>
+                                    Image_3: {{ announcement.Image_3|default:"" }}<br>
+                                    ImageLink_3: {{ announcement.ImageLink_3|default:"" }}
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="subheader">{% trans "完整正文" %}</div>
+                                <div class="announcement-detail-box announcement-detail">{{ announcement.Content }}</div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">{% trans "没有任何游戏登录公告！！！" %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% elif query_form.is_bound and query_form.is_valid and not query_failures and not announcement_config_errors %}
+<div class="alert alert-info">
+    <i class="ti ti-info-circle me-2"></i>{% trans "没有任何游戏登录公告！！！" %}
+</div>
+{% endif %}
+
+<script>
+function confirmWeeklyReplacement(form) {
+    var typeField = form.querySelector('[name="AnnouncementType"]');
+    if (typeField && typeField.value === '1') {
+        return confirm('{% trans "发布新的周更新公告会先删除同平台同渠道已有周更新公告，确认继续？" %}');
+    }
+    return true;
+}
+</script>
+{% endblock %}

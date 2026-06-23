@@ -1,0 +1,250 @@
+{% extends "gmtool/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "公告日志" %} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_announcements %}active{% endblock %}
+{% block page_pretitle %}{% trans "公告" %}{% endblock %}
+{% block page_title %}{% trans "公告日志" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.announcement-log-preview {
+    max-width: 260px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'gmtool:announcement_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="ti ti-arrow-left me-1"></i>{% trans "返回公告页" %}
+    </a>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">{% trans "筛选条件" %}</h3>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">{% trans "操作类型" %}</label>
+                <select name="action" class="form-select form-select-sm">
+                    <option value="">{% trans "全部操作" %}</option>
+                    {% for value, label in action_choices %}
+                    <option value="{{ value }}" {% if action_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "状态" %}</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">{% trans "全部状态" %}</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "平台" %}</label>
+                <select name="Platform" class="form-select form-select-sm">
+                    <option value="">{% trans "全部平台" %}</option>
+                    {% for platform in platforms %}
+                    <option value="{{ platform }}" {% if platform_filter == platform %}selected{% endif %}>{{ platform }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "渠道" %}</label>
+                <select name="Channel" class="form-select form-select-sm">
+                    <option value="">{% trans "全部渠道" %}</option>
+                    {% for channel in channels %}
+                    <option value="{{ channel }}" {% if channel_filter == channel %}selected{% endif %}>{{ channel }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "公告类型" %}</label>
+                <select name="AnnouncementType" class="form-select form-select-sm">
+                    <option value="">{% trans "全部类型" %}</option>
+                    <option value="1" {% if type_filter == '1' %}selected{% endif %}>{% trans "周更新公告" %}</option>
+                    <option value="2" {% if type_filter == '2' %}selected{% endif %}>{% trans "常驻公告" %}</option>
+                    <option value="3" {% if type_filter == '3' %}selected{% endif %}>{% trans "轮播图" %}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "操作用户" %}</label>
+                <input type="text" name="user" class="form-control form-control-sm" value="{{ user_filter }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{% trans "开始时间" %}</label>
+                <input type="datetime-local" name="start_time" class="form-control form-control-sm" value="{{ start_time_filter }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{% trans "结束时间" %}</label>
+                <input type="datetime-local" name="end_time" class="form-control form-control-sm" value="{{ end_time_filter }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="ti ti-search me-1"></i>{% trans "筛选" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table" style="table-layout:fixed;">
+            <thead>
+                <tr>
+                    <th style="width:150px;">{% trans "时间" %}</th>
+                    <th style="width:110px;">{% trans "操作人" %}</th>
+                    <th style="width:90px;">{% trans "动作" %}</th>
+                    <th style="width:90px;">{% trans "平台" %}</th>
+                    <th style="width:90px;">{% trans "渠道" %}</th>
+                    <th style="width:110px;">{% trans "公告类型" %}</th>
+                    <th style="width:140px;">{% trans "公告ID" %}</th>
+                    <th style="width:90px;">{% trans "状态" %}</th>
+                    <th>{% trans "错误摘要" %}</th>
+                    <th style="width:90px;">{% trans "操作" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in page_obj %}
+                <tr>
+                    <td class="text-muted">{{ log.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td>{{ log.operator_username|default:"-" }}</td>
+                    <td>{{ log.get_action_display }}</td>
+                    <td>{{ log.platform }}</td>
+                    <td>{{ log.channel }}</td>
+                    <td>
+                        {% if log.announcement_type == '1' %}
+                        {% trans "周更新公告" %}
+                        {% elif log.announcement_type == '2' %}
+                        {% trans "常驻公告" %}
+                        {% elif log.announcement_type == '3' %}
+                        {% trans "轮播图" %}
+                        {% else %}
+                        {{ log.announcement_type }}
+                        {% endif %}
+                    </td>
+                    <td><code>{{ log.announcement_id|default:"-" }}</code></td>
+                    <td>
+                        {% if log.status == 'success' %}
+                        <span class="badge bg-success-lt">{% trans "成功" %}</span>
+                        {% elif log.status == 'timeout' %}
+                        <span class="badge bg-warning-lt">{% trans "超时" %}</span>
+                        {% else %}
+                        <span class="badge bg-danger-lt">{% trans "失败" %}</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="announcement-log-preview" title="{{ log.error_message }}">{{ log.error_message|truncatechars:40|default:"-" }}</span></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-info" onclick="showAnnouncementLogDetail({{ log.id }})">
+                            <i class="ti ti-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="10" class="text-center text-muted py-3">{% trans "暂无公告日志" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="card-footer d-flex align-items-center justify-content-center">
+    <ul class="pagination m-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if log_filter_query_string %}&{{ log_filter_query_string }}{% endif %}">
+                <i class="ti ti-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in elided_page_range %}
+        {% if num == page_obj.paginator.ELLIPSIS %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% else %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if log_filter_query_string %}&{{ log_filter_query_string }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if log_filter_query_string %}&{{ log_filter_query_string }}{% endif %}">
+                <i class="ti ti-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+
+<div id="announcementLogOverlay" class="detail-overlay" onclick="closeAnnouncementLogDetail()"></div>
+<div id="announcementLogModal" class="detail-modal" data-api-url="{% url 'gmtool:announcement_log_detail_api' log_id=0 %}">
+    <div class="detail-modal-header">
+        <h5 class="m-0"><i class="ti ti-file-text me-2"></i>{% trans "公告日志详情" %}</h5>
+        <button type="button" class="detail-modal-close" onclick="closeAnnouncementLogDetail()">&times;</button>
+    </div>
+    <div id="announcementLogDetailBody" class="detail-modal-body"></div>
+</div>
+
+{% trans "加载中..." as loading_text %}
+{% trans "加载失败，请重试" as load_failed_text %}
+{% trans "请求数据" as request_data_title %}
+{% trans "响应数据" as response_data_title %}
+{% trans "原始响应" as raw_response_title %}
+{% trans "错误信息" as error_message_title %}
+{% trans "无数据" as no_data_text %}
+
+<script>
+function escapeAnnouncementLogHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+}
+
+function showAnnouncementLogDetail(id) {
+    var modal = document.getElementById('announcementLogModal');
+    var apiUrl = modal.getAttribute('data-api-url').replace(/\/0\/$/, '/' + id + '/');
+    document.getElementById('announcementLogDetailBody').innerHTML =
+        '<div class="text-center py-4"><span class="text-muted">{{ loading_text|escapejs }}</span></div>';
+    document.getElementById('announcementLogOverlay').style.display = 'block';
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    fetch(apiUrl)
+        .then(function(resp) { return resp.json(); })
+        .then(function(data) {
+            document.getElementById('announcementLogDetailBody').innerHTML =
+                '<h4 class="detail-section-title">{{ request_data_title|escapejs }}</h4>' +
+                '<pre class="detail-pre">' + escapeAnnouncementLogHtml(data.request_data || '{{ no_data_text|escapejs }}') + '</pre>' +
+                '<h4 class="detail-section-title">{{ response_data_title|escapejs }}</h4>' +
+                '<pre class="detail-pre detail-pre-sm">' + escapeAnnouncementLogHtml(data.response_data || '{{ no_data_text|escapejs }}') + '</pre>' +
+                '<h4 class="detail-section-title">{{ raw_response_title|escapejs }}</h4>' +
+                '<pre class="detail-pre detail-pre-sm">' + escapeAnnouncementLogHtml(data.raw_response || '{{ no_data_text|escapejs }}') + '</pre>' +
+                '<h4 class="detail-section-title">{{ error_message_title|escapejs }}</h4>' +
+                '<pre class="detail-pre detail-pre-sm">' + escapeAnnouncementLogHtml(data.error_message || '{{ no_data_text|escapejs }}') + '</pre>';
+        })
+        .catch(function() {
+            document.getElementById('announcementLogDetailBody').innerHTML =
+                '<div class="text-center py-4 text-danger">{{ load_failed_text|escapejs }}</div>';
+        });
+}
+
+function closeAnnouncementLogDetail() {
+    document.getElementById('announcementLogOverlay').style.display = 'none';
+    document.getElementById('announcementLogModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+</script>
+{% endblock %}

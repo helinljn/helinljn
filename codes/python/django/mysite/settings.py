@@ -33,6 +33,18 @@ def csv_config(name, default=''):
     return [item.strip() for item in raw.split(',') if item.strip()]
 
 
+def csv_unique_config(name, default=''):
+    """Read a comma-separated env var into a stripped de-duplicated list."""
+    values = []
+    seen = set()
+    for item in config(name, default=default).split(','):
+        value = item.strip()
+        if value and value not in seen:
+            values.append(value)
+            seen.add(value)
+    return values
+
+
 # =============================================================================
 # Core runtime settings
 # =============================================================================
@@ -101,6 +113,7 @@ TEMPLATES = [
                 'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'gmtool.context_processors.gmtool_permissions',
             ],
         },
     },
@@ -202,6 +215,18 @@ IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:5510/cy_idip')
 IDIP_TIMEOUT = config('IDIP_TIMEOUT', default=30, cast=int)
 IDIP_JSON_PATH = config('IDIP_JSON_PATH', default=str(BASE_DIR / 'idip_commands.json'))
 UPLOAD_MAX_SIZE = config('UPLOAD_MAX_SIZE', default=10 * 1024 * 1024, cast=int)
+
+# 公告目录服接口
+ANNOUNCEMENT_BASE_URL = config('ANNOUNCEMENT_BASE_URL', default='')
+ANNOUNCEMENT_TIMEOUT = config('ANNOUNCEMENT_TIMEOUT', default=30, cast=float)
+ANNOUNCEMENT_PLATFORMS = csv_unique_config(
+    'ANNOUNCEMENT_PLATFORMS',
+    default='PS',
+)
+ANNOUNCEMENT_CHANNELS = csv_unique_config(
+    'ANNOUNCEMENT_CHANNELS',
+    default='1001',
+)
 
 # 命令展示
 PAGE_SIZE = config('PAGE_SIZE', default=20, cast=int)

@@ -1,7 +1,7 @@
 """GM命令后台管理系统 - URL路由"""
 from django.urls import path
 
-from . import api_views, auth_views, command_views, user_views
+from . import announcement_views, api_views, auth_views, command_views, user_views
 
 app_name = 'gmtool'
 
@@ -27,8 +27,15 @@ urlpatterns = [
     path('logs/', command_views.command_log_list, name='command_log_list'),
     path('logs/login/', user_views.login_log_list, name='login_log_list'),
 
+    # 公告管理
+    path('announcements/', announcement_views.announcement_list, name='announcement_list'),
+    path('announcements/create/', announcement_views.announcement_create, name='announcement_create'),
+    path('announcements/delete/', announcement_views.announcement_delete, name='announcement_delete'),
+    path('announcements/logs/', announcement_views.announcement_log_list, name='announcement_log_list'),
+
     # API v1
     path('api/v1/commands/sync/', command_views.sync_commands_api, name='sync_commands_api'),
     path('api/v1/commands/upload/', api_views.upload_commands_api, name='upload_commands_api'),
     path('api/v1/logs/<int:log_id>/', api_views.log_detail_api, name='log_detail_api'),
+    path('api/v1/announcements/logs/<int:log_id>/', api_views.announcement_log_detail_api, name='announcement_log_detail_api'),
 ]

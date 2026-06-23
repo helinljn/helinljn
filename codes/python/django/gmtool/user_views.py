@@ -14,7 +14,7 @@ from django.views.decorators.http import require_POST
 from .audit_log import log_operation
 from .decorators import is_super_admin, super_admin_required
 from .forms import UserCreateForm, UserEditForm
-from .models import GMCommand, LoginLog, UserCommandPermission, UserProfile
+from .models import GMCommand, LoginLog, UserAnnouncementPermission, UserCommandPermission, UserProfile
 from .query_utils import apply_time_range_filters_to_queryset, paginate_request_queryset
 from .security_utils import get_client_ip, verify_confirm_token
 
@@ -175,10 +175,12 @@ def user_permissions(request, user_id):
 
     if request.method == 'POST':
         selected_ids = request.POST.getlist('commands')
+        wants_announcement_permission = request.POST.get('announcement_permission') == 'on'
         # 记录变更前的权限
         old_perm_ids = set(UserCommandPermission.objects.filter(
             user=user_obj
         ).values_list('command_id', flat=True))
+        old_has_announcement_permission = UserAnnouncementPermission.objects.filter(user=user_obj).exists()
 
         # 校验：仅允许分配活跃命令的权限，忽略非法ID避免500
         valid_ids = []
@@ -220,7 +222,13 @@ def user_permissions(request, user_id):
                 ]
                 UserCommandPermission.objects.bulk_create(new_user_perms)
 
+            if wants_announcement_permission:
+                UserAnnouncementPermission.objects.get_or_create(user=user_obj)
+            else:
+                UserAnnouncementPermission.objects.filter(user=user_obj).delete()
+
         new_perm_ids = set(valid_ids)
+        new_has_announcement_permission = UserAnnouncementPermission.objects.filter(user=user_obj).exists()
         log_operation(
             'permission',
             'assign',
@@ -232,6 +240,9 @@ def user_permissions(request, user_id):
                 'added': list(new_perm_ids - old_perm_ids),
                 'removed': list(old_perm_ids - new_perm_ids),
                 'total': len(new_perm_ids),
+                'announcement_permission_before': old_has_announcement_permission,
+                'announcement_permission_after': new_has_announcement_permission,
+                'announcement_permission_changed': old_has_announcement_permission != new_has_announcement_permission,
             },
         )
         return redirect('gmtool:user_list')
@@ -240,6 +251,7 @@ def user_permissions(request, user_id):
     permitted_ids = set(UserCommandPermission.objects.filter(
         user=user_obj
     ).values_list('command_id', flat=True))
+    target_has_announcement_permission = UserAnnouncementPermission.objects.filter(user=user_obj).exists()
 
     # 按 tab 分组
     tab_groups = {}
@@ -257,6 +269,7 @@ def user_permissions(request, user_id):
     return render(request, 'gmtool/user_permissions.html', {
         'target_user': user_obj,
         'tab_groups': tab_groups,
+        'target_has_announcement_permission': target_has_announcement_permission,
         'is_admin': True,
     })
 

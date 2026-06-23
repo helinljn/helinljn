@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from django.db import DatabaseError
 
@@ -20,8 +20,8 @@ from .command_parser import (
     validate_json_command_ids,
     write_commands_json_content,
 )
-from .decorators import is_super_admin, super_admin_required
-from .models import CommandLog
+from .decorators import announcement_permission_required, is_super_admin, super_admin_required
+from .models import AnnouncementLog, CommandLog
 from .security_utils import get_client_ip, mask_sensitive_data
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,31 @@ def log_detail_api(request, log_id):
         'request_content': masked_request_content,
         'request_data': json.dumps(masked_request_data, ensure_ascii=False) if masked_request_data else '',
         'response_data': json.dumps(masked_response_data, ensure_ascii=False) if masked_response_data else '',
+    })
+
+
+@announcement_permission_required
+@require_GET
+def announcement_log_detail_api(request, log_id):
+    """公告日志详情 API，返回脱敏后的请求、响应和原始响应。"""
+    log = get_object_or_404(AnnouncementLog, pk=log_id)
+
+    masked_request_data = mask_sensitive_data(log.request_data) if log.request_data else ''
+    masked_response_data = mask_sensitive_data(log.response_data) if log.response_data else ''
+
+    masked_raw_response = log.raw_response or ''
+    if masked_raw_response:
+        try:
+            parsed_raw = json.loads(masked_raw_response)
+            masked_raw_response = json.dumps(mask_sensitive_data(parsed_raw), ensure_ascii=False)
+        except (TypeError, ValueError, json.JSONDecodeError):
+            masked_raw_response = masked_raw_response[:20000]
+
+    return JsonResponse({
+        'request_data': json.dumps(masked_request_data, ensure_ascii=False) if masked_request_data else '',
+        'response_data': json.dumps(masked_response_data, ensure_ascii=False) if masked_response_data else '',
+        'raw_response': masked_raw_response,
+        'error_message': log.error_message[:20000] if log.error_message else '',
     })
 
 

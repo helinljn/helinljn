@@ -9,6 +9,7 @@
 - Django 项目目录：`mysite/`
 - 主业务应用：`gmtool/`
 - 命令定义源文件：`idip_commands.json`
+- 公告协议参考：`announcement.md`
 - 本地 IDIP Mock 服务：`test/mock_idip_server.py`
 - 运行日志目录：`logs/`
 - 默认语言和时区：`zh-hans`、`Asia/Shanghai`
@@ -33,6 +34,7 @@ Linux 部署目标使用 `environment-linux.yml`。
 - `DJANGO_DEBUG`、`DJANGO_SECRET_KEY`、`DJANGO_ALLOWED_HOSTS`
 - `DB_ENGINE`、`DB_NAME`、`DB_SQLITE_TIMEOUT`、`DB_USER`、`DB_PASSWORD`、`DB_HOST`、`DB_PORT`、`DB_CONN_MAX_AGE`
 - `IDIP_API_URL`、`IDIP_TIMEOUT`、`IDIP_JSON_PATH`、`UPLOAD_MAX_SIZE`
+- `ANNOUNCEMENT_BASE_URL`、`ANNOUNCEMENT_TIMEOUT`、`ANNOUNCEMENT_PLATFORMS`、`ANNOUNCEMENT_CHANNELS`
 - `PAGE_SIZE`
 - `ENABLE_IDIP_FILE_MONITOR`、`IDIP_FILE_CHECK_INTERVAL`、`IDIP_USE_HASH_CHECK`
 - `LOGIN_MAX_ATTEMPTS`、`LOGIN_LOCKOUT_SECONDS`
@@ -109,20 +111,34 @@ Mock 服务默认地址：
 http://127.0.0.1:5510/cy_idip
 ```
 
+公告目录服接口配置示例：
+
+```env
+ANNOUNCEMENT_BASE_URL=http://example.com
+ANNOUNCEMENT_TIMEOUT=5
+ANNOUNCEMENT_PLATFORMS=Android,IOS,OpenHarmony
+ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
+```
+
+`ANNOUNCEMENT_BASE_URL` 只保存目录服基础地址，不包含 `/server/announcementSave.php` 等具体路径。
+
 ## 重要文件与职责
 
 - `mysite/settings.py`：项目配置、环境变量、数据库选择、日志与安全开关。
 - `mysite/urls.py`：项目级 URL 路由。
 - `gmtool/apps.py`：应用配置，启动时注册 signals。
-- `gmtool/models.py`：GM 命令、用户命令权限、用户扩展资料、命令日志、登录日志。
+- `gmtool/models.py`：GM 命令、用户命令权限、公告权限、用户扩展资料、命令日志、公告日志、登录日志。
 - `gmtool/auth_views.py`：登录、登出、登录失败限速与登录日志。
+- `gmtool/announcement_client.py`：公告目录服 HTTP 调用。
+- `gmtool/announcement_views.py`：公告查询、发布、删除、公告日志列表。
 - `gmtool/command_parser.py`：解析 `idip_commands.json`、校验协议 ID、补充 schema 元数据、同步命令到数据库。
 - `gmtool/command_services.py`：命令查询与执行前参数校验。
 - `gmtool/command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志。
 - `gmtool/user_views.py`：用户管理、用户编辑、删除、权限分配、登录日志列表。
-- `gmtool/api_views.py`：命令上传/同步接口、日志详情接口。
-- `gmtool/forms.py`：用户、命令新增等页面表单校验。
-- `gmtool/decorators.py`：超级管理员与命令执行权限装饰器。
+- `gmtool/api_views.py`：命令上传/同步接口、命令日志详情接口、公告日志详情接口。
+- `gmtool/forms.py`：用户、命令新增、公告查询/发布/删除等页面表单校验。
+- `gmtool/decorators.py`：超级管理员、命令执行权限与公告管理权限装饰器。
+- `gmtool/context_processors.py`：模板导航权限上下文。
 - `gmtool/permission_service.py`：超级管理员判定等权限辅助逻辑。
 - `gmtool/query_utils.py`：分页与时间范围筛选辅助函数。
 - `gmtool/audit_log.py`：审计日志封装。
@@ -154,6 +170,12 @@ http://127.0.0.1:5510/cy_idip
 - 上传命令定义必须是 `.json` 文件，大小受 `UPLOAD_MAX_SIZE` 限制，且顶层必须是对象。
 - IDIP 请求使用 `application/x-www-form-urlencoded`，字段为 `id`、`GSA`、`content`；`content` 是扁平 JSON 字符串，避免手工双重 URL 编码。
 - `send_idip_command(command, params)` 返回 `(response_data, error_message, request_content_str, error_type)`，兼容 `status/id/json` 包装响应和旧版直接 JSON 响应。
+- 公告功能独立于 IDIP 命令，不写入 `idip_commands.json`，不参与 `sync_commands`，也不伪装成 `GMCommand`。
+- 公告请求使用 `application/x-www-form-urlencoded`。发布/删除为 POST form data，查询为 GET query params。
+- `ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS` 在 settings 层解析为去重列表；页面提交值必须严格来自配置原值。
+- 周更新公告发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。
+- 公告发布、删除写 `AnnouncementLog` 和 audit log；查询不写公告操作日志和 audit log。
+- 公告日志详情接口必须继续对配置的敏感字段进行脱敏。
 - 修改 `idip_commands.json` 后，运行 `python manage.py format_idip_commands --check` 或 `python manage.py format_idip_commands`。
 - 修改模型后，需要添加 migration，并运行 `python manage.py test gmtool`。
 - 修改用户可见文案时，必要时同步更新翻译并运行 `makemessages` 与 `compilemessages`。
@@ -196,13 +218,17 @@ python test/mock_idip_server.py
 http://127.0.0.1:5510/cy_idip
 ```
 
+涉及公告目录服集成时，优先 mock `gmtool.announcement_views.query_announcements`、`create_announcement`、`delete_announcement` 或 mock `gmtool.announcement_client._get_requests`；不要依赖真实目录服跑单元测试。
+
 ## 安全与数据处理
 
 本项目涉及 GM 操作和审计数据。权限检查与日志处理都属于安全敏感逻辑。
 
 - 超级管理员拥有全部活跃命令访问权限；普通用户需要显式的 `UserCommandPermission` 授权。
 - 命令执行日志应尽量保证可持久化。当前行为允许远端执行成功但本地日志写入失败时返回 warning。
+- 公告发布/删除日志也应尽量保证可持久化。远端公告操作成功但本地 `AnnouncementLog` 写入失败时，页面仍按远端成功处理并提示 warning。
 - 日志详情接口必须继续对配置的敏感字段进行脱敏。
+- 公告日志页面和详情接口必须受公告管理权限保护；超级管理员和拥有 `UserAnnouncementPermission` 的普通用户可查看全部公告日志。
 - 登出应保持仅允许 POST。
 - 需要谨慎校验跳转目标、客户端 IP 提取、上传 JSON 大小与内容、命令参数。
 - 生产模式必须显式配置 `DJANGO_SECRET_KEY` 和 `DJANGO_ALLOWED_HOSTS`。

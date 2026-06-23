@@ -60,6 +60,24 @@ class UserCommandPermission(models.Model):
         return f'{self.user.username} - {self.command.command_name}'
 
 
+class UserAnnouncementPermission(models.Model):
+    """用户公告管理权限。超级管理员不需要写入此表。"""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_('用户'))
+
+    class Meta:
+        verbose_name = _('用户公告权限')
+        verbose_name_plural = _('用户公告权限')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'],
+                name='uniq_user_announcement_permission',
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} - announcement'
+
+
 class UserProfile(models.Model):
     """用户扩展信息"""
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_('用户'))
@@ -104,6 +122,55 @@ class CommandLog(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.command} - {self.status}'
+
+
+class AnnouncementLog(models.Model):
+    """公告发布、删除操作日志。"""
+    ACTION_CHOICES = [
+        ('create', _('发布')),
+        ('delete', _('删除')),
+    ]
+    STATUS_CHOICES = [
+        ('success', _('成功')),
+        ('failed', _('失败')),
+        ('timeout', _('超时')),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name=_('用户'),
+    )
+    operator_username = models.CharField(_('操作用户名'), max_length=150, blank=True, default='')
+    action = models.CharField(_('操作类型'), max_length=20, choices=ACTION_CHOICES)
+    platform = models.CharField(_('平台'), max_length=50)
+    channel = models.CharField(_('渠道'), max_length=50)
+    announcement_type = models.CharField(_('公告类型'), max_length=10)
+    announcement_id = models.CharField(_('公告ID'), max_length=64, blank=True, default='')
+    request_data = models.JSONField(_('请求数据'), default=dict)
+    response_data = models.JSONField(_('响应数据'), null=True, blank=True)
+    raw_response = models.TextField(_('原始响应'), blank=True, default='')
+    status = models.CharField(_('状态'), max_length=20, choices=STATUS_CHOICES)
+    error_message = models.TextField(_('错误信息'), blank=True, default='')
+    ip_address = models.GenericIPAddressField(_('IP地址'))
+    created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('公告日志')
+        verbose_name_plural = _('公告日志')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at'], name='annlog_created_idx'),
+            models.Index(fields=['user', '-created_at'], name='annlog_user_created_idx'),
+            models.Index(fields=['status', '-created_at'], name='annlog_status_created_idx'),
+            models.Index(fields=['action', '-created_at'], name='annlog_action_created_idx'),
+            models.Index(fields=['platform', 'channel', '-created_at'], name='annlog_plat_chan_ct_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.operator_username} - {self.get_action_display()} - {self.status}'
 
 
 class LoginLog(models.Model):

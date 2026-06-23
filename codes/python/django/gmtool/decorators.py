@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 
-from .models import GMCommand, UserCommandPermission
+from .models import GMCommand, UserAnnouncementPermission, UserCommandPermission
 from .permission_service import is_super_admin_user
 
 
@@ -15,6 +15,7 @@ def _wants_json_response(request):
     accept = (request.headers.get('Accept') or '').lower()
     return (
         request.method != 'GET'
+        or request.path.startswith('/gmtool/api/')
         or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
         or 'application/json' in accept
     )
@@ -109,4 +110,48 @@ def command_permission_required(view_func):
             return JsonResponse({'error': _('您没有执行该命令的权限')}, status=403)
         messages.warning(request, _('您没有执行该命令的权限'))
         return redirect('gmtool:command_list')
+    return wrapper
+
+
+def has_announcement_permission(user, request=None):
+    """判断用户是否拥有公告管理权限，超级管理员自动拥有。"""
+    if not user.is_authenticated:
+        return False
+
+    if is_super_admin(user, request):
+        return True
+
+    if request:
+        cache = getattr(request, '_announcement_permission_cache', None)
+        if cache is not None and user.id in cache:
+            return cache[user.id]
+
+    result = UserAnnouncementPermission.objects.filter(user=user).exists()
+
+    if request:
+        if not hasattr(request, '_announcement_permission_cache'):
+            request._announcement_permission_cache = {}
+        request._announcement_permission_cache[user.id] = result
+    return result
+
+
+def announcement_permission_required(view_func):
+    """
+    公告管理权限装饰器。
+    未登录跳转登录页或返回 JSON 401；超级管理员和拥有公告权限的普通用户可访问。
+    """
+    @functools.wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            if _wants_json_response(request):
+                return JsonResponse({'error': _('请先登录')}, status=401)
+            return redirect('gmtool:login')
+
+        if has_announcement_permission(request.user, request):
+            return view_func(request, *args, **kwargs)
+
+        if _wants_json_response(request):
+            return JsonResponse({'error': _('您没有公告管理权限')}, status=403)
+        messages.warning(request, _('您没有公告管理权限'))
+        return redirect('gmtool:dashboard')
     return wrapper

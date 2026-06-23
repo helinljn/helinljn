@@ -39,15 +39,25 @@
 - JSON 中不存在的命令自动标记为停用
 - 停用命令不可继续执行
 
-### 2.3 日志与审计
+### 2.3 公告管理
+- 查询、发布、删除游戏公告
+- 公告接口独立于 IDIP 命令，调用目录服 Web PHP 接口
+- 支持平台单选、渠道多选、公告类型选择
+- 周更新公告发布前会先查询并删除同平台同渠道旧周更新公告
+- 超级管理员自动拥有公告管理权限，普通用户需单独授权
+- 发布、删除写公告操作日志和 audit log，查询不写操作日志
+
+### 2.4 日志与审计
 - 登录日志 `LoginLog`
 - 命令执行日志 `CommandLog`
+- 公告操作日志 `AnnouncementLog`
 - 审计日志 `gmtool.audit`
 - 应用日志 `gmtool`
 - 日志详情接口自动脱敏敏感字段
 - 若远端命令执行成功但本地日志写入失败，接口会返回 `warning` 与 `log_persisted=false`
+- 若远端公告操作成功但本地公告日志写入失败，页面会保留远端成功结果并提示 warning
 
-### 2.4 配置与运行
+### 2.5 配置与运行
 - `.env` 驱动核心配置
 - 默认使用 SQLite，可通过环境变量切换到 MySQL
 - 支持国际化（简体中文 / 英文）
@@ -146,16 +156,19 @@ C:\helin\helinljn\codes\python\django\
 主业务应用。
 
 - `auth_views.py`：登录、登出与认证相关逻辑
+- `announcement_client.py`：公告目录服 HTTP 调用
+- `announcement_views.py`：公告查询、发布、删除和公告日志列表
 - `command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志
 - `user_views.py`：用户管理、用户编辑、删除、权限分配、登录日志查看
-- `api_views.py`：命令定义上传接口、日志详情接口
-- `forms.py`：用户、命令新增等页面表单校验
-- `decorators.py`：超级管理员与命令执行权限装饰器
+- `api_views.py`：命令定义上传接口、命令日志详情接口、公告日志详情接口
+- `forms.py`：用户、命令新增、公告查询/发布/删除等页面表单校验
+- `decorators.py`：超级管理员、命令执行权限和公告管理权限装饰器
 - `command_parser.py`：命令定义文件解析、ID 校验、JSON 快照读写、数据库同步
 - `command_services.py`：命令执行前的参数校验与命令查询辅助逻辑
 - `query_utils.py`：分页与时间范围筛选辅助函数，供列表页复用
 - `permission_service.py`：超级管理员判定等权限辅助逻辑
 - `idip_client.py`：与远端 IDIP 服务通信
+- `context_processors.py`：模板导航权限上下文
 - `middleware.py`：命令定义文件变更监控
 - `security_utils.py`：脱敏与安全辅助函数
 - `audit_log.py`：审计日志封装
@@ -211,14 +224,24 @@ GM 命令定义模型，由 `idip_commands.json` 同步生成。
 关键约束：
 - `(user, command)` 唯一
 
-### 6.3 `UserProfile`
+### 6.3 `UserAnnouncementPermission`
+普通用户的公告管理权限。
+
+关键约束：
+- `user` 唯一
+
+说明：
+- 超级管理员自动拥有公告管理权限，不需要写入此表
+- 普通用户存在此记录即拥有公告管理权限
+
+### 6.4 `UserProfile`
 用户扩展信息模型。
 
 当前字段：
 - `user`
 - `phone`
 
-### 6.4 `CommandLog`
+### 6.5 `CommandLog`
 命令执行日志。
 
 关键字段：
@@ -238,7 +261,35 @@ GM 命令定义模型，由 `idip_commands.json` 同步生成。
 - `failed`
 - `timeout`
 
-### 6.5 `LoginLog`
+### 6.6 `AnnouncementLog`
+公告发布、删除操作日志。
+
+关键字段：
+- `user`
+- `operator_username`
+- `action`
+- `platform`
+- `channel`
+- `announcement_type`
+- `announcement_id`
+- `request_data`
+- `response_data`
+- `raw_response`
+- `status`
+- `error_message`
+- `ip_address`
+- `created_at`
+
+动作枚举：
+- `create`
+- `delete`
+
+状态枚举：
+- `success`
+- `failed`
+- `timeout`
+
+### 6.7 `LoginLog`
 登录行为日志。
 
 关键字段：
@@ -262,11 +313,14 @@ GM 命令定义模型，由 `idip_commands.json` 同步生成。
 ### 7.1 设计原则
 1. 命令权限直接按用户分配
 2. 超级管理员身份只以 Django `is_superuser` 为准
-3. `UserProfile` 只承载扩展资料，不承担权限职责
+3. 公告管理权限使用单独功能权限，不伪装成 GM 命令
+4. `UserProfile` 只承载扩展资料，不承担权限职责
 
 ### 7.2 行为规则
 - 超级管理员自动拥有全部活跃命令权限
+- 超级管理员自动拥有公告管理权限
 - 普通用户只能访问显式授权的命令
+- 普通用户需要 `UserAnnouncementPermission` 才能访问公告管理
 - 普通用户不能将目标用户提升为超级管理员
 - 超级管理员用户不能被删除
 - 用户不能禁用自己
@@ -466,10 +520,17 @@ python manage.py format_idip_commands --check
 - `/gmtool/logs/`
 - `/gmtool/logs/login/`
 
+#### 公告管理
+- `/gmtool/announcements/`
+- `/gmtool/announcements/create/`
+- `/gmtool/announcements/delete/`
+- `/gmtool/announcements/logs/`
+
 #### API
 - `/gmtool/api/v1/commands/sync/`
 - `/gmtool/api/v1/commands/upload/`
 - `/gmtool/api/v1/logs/<log_id>/`
+- `/gmtool/api/v1/announcements/logs/<log_id>/`
 
 说明：
 - `/gmtool/api/v1/commands/sync/` 与 `/gmtool/api/v1/commands/upload/` 均仅超级管理员可用
@@ -506,22 +567,44 @@ python manage.py format_idip_commands --check
 - `IDIP_JSON_PATH`
 - `UPLOAD_MAX_SIZE`
 
-### 11.4 命令执行与展示
+### 11.4 公告目录服接口
+- `ANNOUNCEMENT_BASE_URL`：目录服 Web 基础地址，不包含具体 PHP 路径
+- `ANNOUNCEMENT_TIMEOUT`：公告接口超时时间，默认 5 秒
+- `ANNOUNCEMENT_PLATFORMS`：英文逗号分隔的平台列表，默认 `Android,IOS,OpenHarmony`
+- `ANNOUNCEMENT_CHANNELS`：英文逗号分隔的渠道列表，默认 `小米,VIVO,OPPO`
+
+`.env` 示例：
+
+```env
+ANNOUNCEMENT_BASE_URL=http://example.com
+ANNOUNCEMENT_TIMEOUT=5
+ANNOUNCEMENT_PLATFORMS=Android,IOS,OpenHarmony
+ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
+```
+
+公告调用路径由客户端拼接：
+- 发布：`{ANNOUNCEMENT_BASE_URL}/server/announcementSave.php`
+- 删除：`{ANNOUNCEMENT_BASE_URL}/server/announcementDelete.php`
+- 查询：`{ANNOUNCEMENT_BASE_URL}/client/announcement.php`
+
+`ANNOUNCEMENT_BASE_URL` 只允许 `http://` 或 `https://`，不能带 query string 或 fragment。未配置或配置非法时，公告页会展示配置错误；查询不会请求目录服，发布和删除会写入失败公告日志用于审计。
+
+### 11.5 命令执行与展示
 - `PAGE_SIZE`
 
-### 11.5 文件监控
+### 11.6 文件监控
 - `ENABLE_IDIP_FILE_MONITOR`
 - `IDIP_FILE_CHECK_INTERVAL`
 - `IDIP_USE_HASH_CHECK`
 
-### 11.6 登录安全
+### 11.7 登录安全
 - `LOGIN_MAX_ATTEMPTS`
 - `LOGIN_LOCKOUT_SECONDS`
 
-### 11.7 日志脱敏
+### 11.8 日志脱敏
 - `SENSITIVE_FIELDS`
 
-### 11.8 代理 / Cookie / HTTPS
+### 11.9 代理 / Cookie / HTTPS
 - `DJANGO_TRUSTED_PROXY`
 - `DJANGO_TRUSTED_PROXY_COUNT`
 - `SESSION_COOKIE_AGE`
@@ -529,7 +612,7 @@ python manage.py format_idip_commands --check
 - `SESSION_COOKIE_SECURE`
 - `CSRF_COOKIE_SECURE`
 
-### 11.9 默认行为说明
+### 11.10 默认行为说明
 - 开发环境默认 `DEBUG=True`
 - 非开发环境必须显式配置：
   - `DJANGO_SECRET_KEY`
@@ -551,6 +634,8 @@ python manage.py format_idip_commands --check
 - 登录失败限速
 - 登录跳转地址安全校验
 - 登出仅允许 `POST`
+- 公告管理使用独立功能权限，未授权用户不能通过 URL 或 POST 绕过
+- 公告日志详情接口按 `SENSITIVE_FIELDS` 脱敏
 - 日志敏感字段脱敏
 - `SESSION_COOKIE_HTTPONLY`
 - `SESSION_COOKIE_SECURE`
@@ -575,6 +660,7 @@ python manage.py format_idip_commands --check
 
 ### 13.1 数据库日志
 - `CommandLog`
+- `AnnouncementLog`
 - `LoginLog`
 
 ### 13.2 文件日志
@@ -749,6 +835,14 @@ python test/mock_idip_server.py
 ```text
 http://127.0.0.1:5510/cy_idip
 ```
+
+### 15.6 公告功能本地配置与使用
+1. 在 `.env` 中配置 `ANNOUNCEMENT_BASE_URL`、`ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS`，修改后重启 Django 进程。
+2. 使用超级管理员登录 `/gmtool/`；普通用户需要先在用户权限页勾选“公告管理权限”。
+3. 进入 `/gmtool/announcements/`，选择平台、一个或多个渠道、公告类型后查询现有公告。
+4. 发布公告时，后端按渠道分别调用目录服；发布周更新公告会先查询并删除同平台同渠道旧周更新公告，再发布新公告。
+5. 查询结果列表中可删除单条公告；删除使用公告自身的 `Channel` 和 `AnnouncementType`。
+6. 进入 `/gmtool/announcements/logs/` 查看发布、删除日志和脱敏后的日志详情。
 
 ---
 

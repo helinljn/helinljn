@@ -20,6 +20,19 @@
 
 <form method="post">
     {% csrf_token %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h3 class="card-title"><i class="ti ti-settings-check me-2"></i>{% trans "功能权限" %}</h3>
+        </div>
+        <div class="card-body">
+            <label class="form-check">
+                <input type="checkbox" class="form-check-input" name="announcement_permission"
+                       {% if target_has_announcement_permission %}checked{% endif %}>
+                <span class="form-check-label">{% trans "公告管理" %}</span>
+            </label>
+        </div>
+    </div>
+
     {% for tab, cmds in tab_groups.items %}
     <div class="card mb-3">
         <div class="card-header">
