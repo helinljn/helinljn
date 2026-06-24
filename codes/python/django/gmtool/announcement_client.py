@@ -1,4 +1,5 @@
 """公告目录服 HTTP 客户端。"""
+from collections.abc import Mapping
 import json
 import logging
 from urllib.parse import urlparse
@@ -63,6 +64,17 @@ def _request_failed(error_message, raw_response='', error_type='failed'):
     return None, error_message, raw_response, error_type
 
 
+def _payload_log_summary(payload):
+    """返回不包含公告正文、图片等详细内容的日志摘要。"""
+    if not isinstance(payload, Mapping):
+        return {}
+    return {
+        key: str(payload.get(key, ''))
+        for key in ('Platform', 'Channel', 'AnnouncementType', 'AnnouncementId')
+        if key in payload
+    }
+
+
 def _is_timeout_error(exc):
     try:
         req = _get_requests()
@@ -120,7 +132,9 @@ def query_announcements(platform, channel):
 
         if not isinstance(data, list):
             return _request_failed(_('公告查询响应必须是 JSON 数组'), raw_response)
-        return data, '', raw_response, ''
+        if not all(isinstance(item, Mapping) for item in data):
+            return _request_failed(_('公告查询响应数组元素必须是对象'), raw_response)
+        return [dict(item) for item in data], '', raw_response, ''
     except AnnouncementConfigError as exc:
         return _request_failed(str(exc))
     except ImportError as exc:
@@ -154,7 +168,7 @@ def create_announcement(payload):
         return _request_failed(str(exc))
     except Exception as exc:
         if _is_timeout_error(exc):
-            logger.warning('Announcement create timeout: payload=%s', payload)
+            logger.warning('Announcement create timeout: payload=%s', _payload_log_summary(payload))
             return _request_failed(_('公告发布请求超时，请稍后重试'), raw_response, 'timeout')
         logger.warning('Announcement create request failed: %s', exc)
         return _request_failed(_('公告发布请求失败: %(error)s') % {'error': str(exc)}, raw_response)
@@ -180,7 +194,7 @@ def delete_announcement(platform, channel, announcement_type, announcement_id):
         return _request_failed(str(exc))
     except Exception as exc:
         if _is_timeout_error(exc):
-            logger.warning('Announcement delete timeout: payload=%s', payload)
+            logger.warning('Announcement delete timeout: payload=%s', _payload_log_summary(payload))
             return _request_failed(_('公告删除请求超时，请稍后重试'), raw_response, 'timeout')
         logger.warning('Announcement delete request failed: %s', exc)
         return _request_failed(_('公告删除请求失败: %(error)s') % {'error': str(exc)}, raw_response)

@@ -84,6 +84,7 @@ class AnnouncementCreateForm(AnnouncementTypedForm):
         label=_('公告正文'),
         max_length=5000,
         required=False,
+        strip=False,
         widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 6}),
     )
     Priority = forms.CharField(
@@ -108,7 +109,7 @@ class AnnouncementCreateForm(AnnouncementTypedForm):
         if announcement_type in ('1', '2'):
             if not cleaned_data.get('Title'):
                 self.add_error('Title', _('公告标题不能为空'))
-            if not cleaned_data.get('Content'):
+            if not (cleaned_data.get('Content') or '').strip():
                 self.add_error('Content', _('公告正文不能为空'))
 
         if announcement_type == '2':

@@ -343,7 +343,11 @@ def announcement_create(request):
 
             delete_failed = False
             for old_announcement in old_announcements or []:
-                old_type = str(old_announcement.get('AnnouncementType') or announcement_type)
+                old_type = str(old_announcement.get('AnnouncementType') or '')
+                if not old_type:
+                    _append_failure(failed_channels, channel, _('旧公告缺少公告类型，已停止发布以避免误删'))
+                    delete_failed = True
+                    break
                 if old_type != announcement_type:
                     continue
 

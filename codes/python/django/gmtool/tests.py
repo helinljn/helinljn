@@ -252,6 +252,29 @@ class AnnouncementClientTests(TestCase):
         self.assertEqual(error_type, 'failed')
 
     @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    def test_query_announcements_rejects_non_object_items(self):
+        class FakeResponse:
+            status_code = 200
+            text = '[null]'
+
+            def json(self):
+                return [None]
+
+        class FakeRequests:
+            class Timeout(Exception):
+                pass
+
+            def get(self, url, params, timeout):
+                return FakeResponse()
+
+        with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
+            response_data, error_message, _raw_response, error_type = query_announcements('Android', '小米')
+
+        self.assertIsNone(response_data)
+        self.assertIn('数组元素必须是对象', error_message)
+        self.assertEqual(error_type, 'failed')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
     def test_http_error_is_failed_and_keeps_raw_response(self):
         class FakeResponse:
             status_code = 500
@@ -287,6 +310,33 @@ class AnnouncementClientTests(TestCase):
         self.assertIsNone(response_data)
         self.assertIn('超时', error_message)
         self.assertEqual(error_type, 'timeout')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    def test_create_timeout_log_uses_payload_summary(self):
+        class FakeRequests:
+            class Timeout(Exception):
+                pass
+
+            def post(self, url, data, timeout):
+                raise self.Timeout('slow')
+
+        payload = {
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '1',
+            'AnnouncementId': '-1',
+            'Title': '标题',
+            'Content': 'secret body',
+        }
+        with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
+            with self.assertLogs('gmtool.announcement_client', level='WARNING') as captured:
+                create_announcement(payload)
+
+        joined_logs = '\n'.join(captured.output)
+        self.assertIn('Android', joined_logs)
+        self.assertNotIn('secret body', joined_logs)
+        self.assertNotIn('Title', joined_logs)
+        self.assertNotIn('Content', joined_logs)
 
     @override_settings(ANNOUNCEMENT_BASE_URL='')
     def test_empty_base_url_is_configuration_error(self):
@@ -458,6 +508,23 @@ class AnnouncementFormTests(TestCase):
         self.assertEqual(payload['Reserve_2'], '')
         reserve_1 = json.loads(payload['Reserve_1'])
         self.assertEqual(reserve_1, {'priority': 5})
+
+    @override_settings(
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    def test_create_form_preserves_content_outer_whitespace(self):
+        form = AnnouncementCreateForm(data={
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementType': '1',
+            'Title': '标题',
+            'Content': '\n  正文\n  ',
+            'Priority': '0',
+        })
+
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.to_payload()['Content'], '\n  正文\n  ')
 
     @override_settings(
         ANNOUNCEMENT_PLATFORMS=['Android'],
@@ -886,6 +953,37 @@ class AnnouncementViewTests(TestCase):
         self.assertEqual(AnnouncementLog.objects.filter(action='delete').count(), 1)
         self.assertFalse(AnnouncementLog.objects.filter(announcement_id='old-persistent').exists())
         self.assertFalse(AnnouncementLog.objects.filter(announcement_id='old-carousel').exists())
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.create_announcement')
+    @patch('gmtool.announcement_views.delete_announcement')
+    @patch('gmtool.announcement_views.query_announcements')
+    def test_weekly_create_stops_when_old_announcement_type_missing(
+        self,
+        mocked_query,
+        mocked_delete,
+        mocked_create,
+    ):
+        mocked_query.return_value = ([{
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementId': 'old-unknown',
+        }], '', '[]', '')
+
+        response = self.client.post(
+            reverse('gmtool:announcement_create'),
+            data=self._valid_create_payload(announcement_type='1'),
+        )
+
+        self.assertEqual(response.status_code, 400)
+        mocked_delete.assert_not_called()
+        mocked_create.assert_not_called()
+        self.assertContains(response, '旧公告缺少公告类型', status_code=400)
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',

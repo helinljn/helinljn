@@ -23,79 +23,71 @@ msgstr "requests library not installed, please run: pip install requests"
 
 #: .\gmtool\announcement_client.py:33
 msgid "公告目录服地址未配置"
-msgstr ""
+msgstr "Announcement server base URL is not configured"
 
 #: .\gmtool\announcement_client.py:37
 msgid "公告目录服地址必须是有效的 HTTP/HTTPS 地址"
-msgstr ""
+msgstr "Announcement server base URL must be a valid HTTP/HTTPS URL"
 
 #: .\gmtool\announcement_client.py:39
 msgid "公告目录服基础地址不能包含 query string 或 fragment"
-msgstr ""
+msgstr "Announcement server base URL must not contain a query string or fragment"
 
 #: .\gmtool\announcement_client.py:55
 #, python-format
 msgid "公告接口 HTTP 错误: %(status)s"
-msgstr ""
+msgstr "Announcement API HTTP error: %(status)s"
 
 #: .\gmtool\announcement_client.py:93
 #, python-format
 msgid "公告接口返回未知结果: %(result)s"
-msgstr ""
+msgstr "Announcement API returned an unknown result: %(result)s"
 
 #: .\gmtool\announcement_client.py:123
-#, fuzzy
-#| msgid "响应参数必须是 JSON 数组"
 msgid "公告查询响应必须是 JSON 数组"
-msgstr "Response params must be a JSON array"
+msgstr "Announcement query response must be a JSON array"
+
+#: .\gmtool\announcement_client.py:125
+msgid "公告查询响应数组元素必须是对象"
+msgstr "Announcement query response array items must be objects"
 
 #: .\gmtool\announcement_client.py:131
 msgid "公告查询响应解析失败"
-msgstr ""
+msgstr "Failed to parse announcement query response"
 
 #: .\gmtool\announcement_client.py:140
-#, fuzzy
-#| msgid "请求超时，请稍后重试"
 msgid "公告查询请求超时，请稍后重试"
-msgstr "Request timed out, please try again later"
+msgstr "Announcement query timed out. Please try again later"
 
 #: .\gmtool\announcement_client.py:142
-#, fuzzy, python-format
-#| msgid "请求失败: %(error)s"
+#, python-format
 msgid "公告查询请求失败: %(error)s"
-msgstr "Request failed: %(error)s"
+msgstr "Announcement query request failed: %(error)s"
 
 #: .\gmtool\announcement_client.py:160
-#, fuzzy
-#| msgid "请求超时，请稍后重试"
 msgid "公告发布请求超时，请稍后重试"
-msgstr "Request timed out, please try again later"
+msgstr "Announcement publish request timed out. Please try again later"
 
 #: .\gmtool\announcement_client.py:162
-#, fuzzy, python-format
-#| msgid "请求失败: %(error)s"
+#, python-format
 msgid "公告发布请求失败: %(error)s"
-msgstr "Request failed: %(error)s"
+msgstr "Announcement publish request failed: %(error)s"
 
 #: .\gmtool\announcement_client.py:186
-#, fuzzy
-#| msgid "请求超时，请稍后重试"
 msgid "公告删除请求超时，请稍后重试"
-msgstr "Request timed out, please try again later"
+msgstr "Announcement delete request timed out. Please try again later"
 
 #: .\gmtool\announcement_client.py:188
-#, fuzzy, python-format
-#| msgid "请求失败: %(error)s"
+#, python-format
 msgid "公告删除请求失败: %(error)s"
-msgstr "Request failed: %(error)s"
+msgstr "Announcement delete request failed: %(error)s"
 
 #: .\gmtool\announcement_views.py:34
-#, fuzzy
-#| msgid "命令请求已完成，但执行结果记录失败，请联系管理员核查应用日志"
 msgid "公告远端操作已完成，但本地公告日志记录失败，请联系管理员核查应用日志"
 msgstr ""
-"The command request completed, but recording the execution result failed. "
-"Please ask the administrator to check the application logs"
+"The remote announcement operation completed, but writing the local "
+"announcement log failed. Please ask the administrator to check the "
+"application logs"
 
 #: .\gmtool\announcement_views.py:207
 msgid "公告查询失败，请查看失败明细"
@@ -107,15 +99,21 @@ msgstr "Announcement query partially failed. Check the failure details."
 
 #: .\gmtool\announcement_views.py:311
 msgid "公告发布表单校验失败，请检查输入"
-msgstr ""
+msgstr "Announcement publish form validation failed. Please check your input"
 
 #: .\gmtool\announcement_views.py:344
 msgid "旧周更新公告缺少有效公告 ID"
+msgstr "The existing weekly announcement is missing a valid announcement ID"
+
+#: .\gmtool\announcement_views.py:350
+msgid "旧公告缺少公告类型，已停止发布以避免误删"
 msgstr ""
+"The existing announcement is missing an announcement type. Publishing was "
+"stopped to avoid deleting the wrong announcement"
 
 #: .\gmtool\announcement_views.py:432
 msgid "公告发布成功"
-msgstr ""
+msgstr "Announcement published successfully"
 
 #: .\gmtool\announcement_views.py:436
 msgid "公告发布部分失败，请查看失败明细"
@@ -123,23 +121,20 @@ msgstr "Announcement publishing partially failed. Check the failure details."
 
 #: .\gmtool\announcement_views.py:438
 msgid "公告发布失败，请查看失败明细"
-msgstr ""
+msgstr "Announcement publishing failed. Check the failure details"
 
 #: .\gmtool\announcement_views.py:465
-#, fuzzy
-#| msgid "删除确认失败，请重试"
 msgid "公告删除表单校验失败，请刷新后重试"
-msgstr "Deletion confirmation failed. Please try again"
+msgstr "Announcement delete form validation failed. Please refresh and try again"
 
 #: .\gmtool\announcement_views.py:516
 msgid "公告删除成功"
-msgstr ""
+msgstr "Announcement deleted successfully"
 
 #: .\gmtool\announcement_views.py:523
-#, fuzzy, python-format
-#| msgid "文件写入失败: %(error)s"
+#, python-format
 msgid "公告删除失败: %(error)s"
-msgstr "Failed to write file: %(error)s"
+msgstr "Announcement deletion failed: %(error)s"
 
 #: .\gmtool\api_views.py:92
 msgid "请选择文件"
@@ -487,63 +482,63 @@ msgstr "You do not have permission to execute this command"
 
 #: .\gmtool\decorators.py:154 .\gmtool\decorators.py:155
 msgid "您没有公告管理权限"
-msgstr ""
+msgstr "You do not have announcement management permission"
 
 #: .\gmtool\forms.py:15 .\gmtool\templates\gmtool\announcement_log.html:71
 #: .\gmtool\templates\gmtool\announcement_log.html:124
 #: .\gmtool\templates\gmtool\announcement_query.html:115
 msgid "周更新公告"
-msgstr ""
+msgstr "Weekly update announcement"
 
 #: .\gmtool\forms.py:16 .\gmtool\templates\gmtool\announcement_log.html:72
 #: .\gmtool\templates\gmtool\announcement_log.html:126
 #: .\gmtool\templates\gmtool\announcement_query.html:117
 msgid "常驻公告"
-msgstr ""
+msgstr "Persistent announcement"
 
 #: .\gmtool\forms.py:17 .\gmtool\templates\gmtool\announcement_log.html:73
 #: .\gmtool\templates\gmtool\announcement_log.html:128
 #: .\gmtool\templates\gmtool\announcement_query.html:119
 msgid "轮播图"
-msgstr ""
+msgstr "Carousel image"
 
 #: .\gmtool\forms.py:25
 msgid "公告平台配置为空，请检查 ANNOUNCEMENT_PLATFORMS"
-msgstr ""
+msgstr "Announcement platform configuration is empty. Check ANNOUNCEMENT_PLATFORMS"
 
 #: .\gmtool\forms.py:27
 msgid "公告渠道配置为空，请检查 ANNOUNCEMENT_CHANNELS"
-msgstr ""
+msgstr "Announcement channel configuration is empty. Check ANNOUNCEMENT_CHANNELS"
 
 #: .\gmtool\forms.py:38 .\gmtool\models.py:148
 #: .\gmtool\templates\gmtool\announcement_log.html:50
 #: .\gmtool\templates\gmtool\announcement_log.html:105
 msgid "平台"
-msgstr ""
+msgstr "Platform"
 
 #: .\gmtool\forms.py:43 .\gmtool\models.py:149
 #: .\gmtool\templates\gmtool\announcement_log.html:59
 #: .\gmtool\templates\gmtool\announcement_log.html:106
 msgid "渠道"
-msgstr ""
+msgstr "Channel"
 
 #: .\gmtool\forms.py:48 .\gmtool\models.py:150
 #: .\gmtool\templates\gmtool\announcement_log.html:68
 #: .\gmtool\templates\gmtool\announcement_log.html:107
 msgid "公告类型"
-msgstr ""
+msgstr "Announcement type"
 
 #: .\gmtool\forms.py:74
 msgid "公告标题"
-msgstr ""
+msgstr "Announcement title"
 
 #: .\gmtool\forms.py:80
 msgid "公告正文"
-msgstr ""
+msgstr "Announcement content"
 
 #: .\gmtool\forms.py:86
 msgid "常驻公告显示优先级"
-msgstr ""
+msgstr "Persistent announcement display priority"
 
 #: .\gmtool\forms.py:106
 msgid "公告标题不能为空"
@@ -565,11 +560,11 @@ msgstr "Persistent announcement display priority cannot be less than 0"
 #: .\gmtool\templates\gmtool\announcement_log.html:108
 #: .\gmtool\templates\gmtool\announcement_query.html:100
 msgid "公告ID"
-msgstr ""
+msgstr "Announcement ID"
 
 #: .\gmtool\forms.py:177
 msgid "删除公告必须使用实际公告 ID"
-msgstr ""
+msgstr "Deleting an announcement requires an actual announcement ID"
 
 #: .\gmtool\forms.py:195 .\gmtool\models.py:184
 #: .\gmtool\templates\gmtool\command_log.html:91
@@ -782,7 +777,7 @@ msgstr "User Command Permission"
 
 #: .\gmtool\models.py:68 .\gmtool\models.py:69
 msgid "用户公告权限"
-msgstr ""
+msgstr "User announcement permission"
 
 #: .\gmtool\models.py:87 .\gmtool\models.py:88
 msgid "用户信息"
@@ -865,7 +860,7 @@ msgstr "Command Log"
 
 #: .\gmtool\models.py:130
 msgid "发布"
-msgstr ""
+msgstr "Publish"
 
 #: .\gmtool\models.py:131 .\gmtool\templates\gmtool\command_execute.html:538
 #: .\gmtool\templates\gmtool\user_list.html:91
@@ -881,18 +876,18 @@ msgstr "Action"
 
 #: .\gmtool\models.py:154 .\gmtool\templates\gmtool\announcement_log.html:201
 msgid "原始响应"
-msgstr ""
+msgstr "Raw response"
 
 #: .\gmtool\models.py:156 .\gmtool\templates\gmtool\announcement_log.html:202
 msgid "错误信息"
-msgstr ""
+msgstr "Error message"
 
 #: .\gmtool\models.py:161 .\gmtool\models.py:162
 #: .\gmtool\templates\gmtool\_announcement_tabs.html:21
 #: .\gmtool\templates\gmtool\announcement_log.html:4
 #: .\gmtool\templates\gmtool\announcement_log.html:7
 msgid "公告日志"
-msgstr ""
+msgstr "Announcement logs"
 
 #: .\gmtool\models.py:179 .\gmtool\templates\gmtool\login.html:6
 #: .\gmtool\templates\gmtool\login.html:78
@@ -1008,14 +1003,14 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\_announcement_config_errors.html:5
 msgid "公告目录服配置不可用"
-msgstr ""
+msgstr "Announcement server configuration is unavailable"
 
 #: .\gmtool\templates\gmtool\_announcement_tabs.html:6
 #: .\gmtool\templates\gmtool\announcement_query.html:4
 #: .\gmtool\templates\gmtool\announcement_query.html:7
 #: .\gmtool\templates\gmtool\announcement_query.html:45
 msgid "查询公告"
-msgstr ""
+msgstr "Query announcements"
 
 #: .\gmtool\templates\gmtool\_announcement_tabs.html:11
 #: .\gmtool\templates\gmtool\announcement_create.html:4
@@ -1023,7 +1018,7 @@ msgstr ""
 #: .\gmtool\templates\gmtool\announcement_create.html:24
 #: .\gmtool\templates\gmtool\announcement_create.html:90
 msgid "发布公告"
-msgstr ""
+msgstr "Publish announcement"
 
 #: .\gmtool\templates\gmtool\_announcement_tabs.html:16
 #: .\gmtool\templates\gmtool\announcement_delete.html:4
@@ -1031,27 +1026,29 @@ msgstr ""
 #: .\gmtool\templates\gmtool\announcement_delete.html:24
 #: .\gmtool\templates\gmtool\announcement_delete.html:56
 msgid "删除公告"
-msgstr ""
+msgstr "Delete announcement"
 
 #: .\gmtool\templates\gmtool\announcement_create.html:6
 #: .\gmtool\templates\gmtool\announcement_delete.html:6
 #: .\gmtool\templates\gmtool\announcement_log.html:6
 #: .\gmtool\templates\gmtool\announcement_query.html:6
 msgid "公告"
-msgstr ""
+msgstr "Announcements"
 
 #: .\gmtool\templates\gmtool\announcement_create.html:15
 #: .\gmtool\templates\gmtool\announcement_delete.html:15
 msgid "失败渠道明细"
-msgstr ""
+msgstr "Failed channel details"
 
 #: .\gmtool\templates\gmtool\announcement_create.html:128
 msgid "发布新的周更新公告会先删除同平台同渠道已有周更新公告，确认继续？"
 msgstr ""
+"Publishing a new weekly update announcement will first delete existing "
+"weekly update announcements for the same platform and channel. Continue?"
 
 #: .\gmtool\templates\gmtool\announcement_delete.html:27
 msgid "确认删除该公告？"
-msgstr ""
+msgstr "Delete this announcement?"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:27
 #: .\gmtool\templates\gmtool\command_log.html:86
@@ -1063,7 +1060,7 @@ msgstr "Filter"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:34
 msgid "全部操作"
-msgstr ""
+msgstr "All actions"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:43
 #: .\gmtool\templates\gmtool\command_log.html:108
@@ -1072,11 +1069,11 @@ msgstr "All Statuses"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:52
 msgid "全部平台"
-msgstr ""
+msgstr "All platforms"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:61
 msgid "全部渠道"
-msgstr ""
+msgstr "All channels"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:70
 #: .\gmtool\templates\gmtool\login_log.html:23
@@ -1084,10 +1081,8 @@ msgid "全部类型"
 msgstr "All Types"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:77
-#, fuzzy
-#| msgid "操作用户名"
 msgid "操作用户"
-msgstr "Operator Username"
+msgstr "Operator"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:81
 #: .\gmtool\templates\gmtool\command_log.html:115
@@ -1102,8 +1097,6 @@ msgid "结束时间"
 msgstr "End Time"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:90
-#, fuzzy
-#| msgid "筛选条件"
 msgid "筛选"
 msgstr "Filter"
 
@@ -1115,18 +1108,16 @@ msgid "时间"
 msgstr "Time"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:103
-#, fuzzy
-#| msgid "操作"
 msgid "操作人"
-msgstr "Actions"
+msgstr "Operator"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:104
 msgid "动作"
-msgstr ""
+msgstr "Action"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:110
 msgid "错误摘要"
-msgstr ""
+msgstr "Error summary"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:111
 #: .\gmtool\templates\gmtool\announcement_query.html:106
@@ -1138,13 +1129,11 @@ msgstr "Actions"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:151
 msgid "暂无公告日志"
-msgstr ""
+msgstr "No announcement logs"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:191
-#, fuzzy
-#| msgid "日志详情"
 msgid "公告日志详情"
-msgstr "Log Details"
+msgstr "Announcement log details"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:197
 #: .\gmtool\templates\gmtool\command_log.html:232
@@ -1165,55 +1154,49 @@ msgid "无数据"
 msgstr "No data"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:71
-#, fuzzy
-#| msgid "e.g. 查询XXX"
 msgid "查询"
-msgstr "e.g. Query XXX"
+msgstr "Query"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:80
 msgid "查询失败渠道"
-msgstr ""
+msgstr "Channels with query failures"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:101
-#, fuzzy
-#| msgid "操作类型"
 msgid "类型"
-msgstr "Action"
+msgstr "Type"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:102
 msgid "标题"
-msgstr ""
+msgstr "Title"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:103
-#, fuzzy
-#| msgid "中文"
 msgid "正文"
-msgstr "Chinese"
+msgstr "Content"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:104
 msgid "图片"
-msgstr ""
+msgstr "Images"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:105
 msgid "预留字段"
-msgstr ""
+msgstr "Reserved fields"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:147
 msgid "完整标题"
-msgstr ""
+msgstr "Full title"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:151
 msgid "图片链接"
-msgstr ""
+msgstr "Image links"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:162
 msgid "完整正文"
-msgstr ""
+msgstr "Full content"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:170
 #: .\gmtool\templates\gmtool\announcement_query.html:180
 msgid "没有任何游戏登录公告！！！"
-msgstr ""
+msgstr "No game login announcements."
 
 #: .\gmtool\templates\gmtool\base.html:27
 #: .\gmtool\templates\gmtool\base.html:82
@@ -1234,7 +1217,7 @@ msgstr "Commands"
 #: .\gmtool\templates\gmtool\base.html:40
 #: .\gmtool\templates\gmtool\user_permissions.html:31
 msgid "公告管理"
-msgstr ""
+msgstr "Announcement management"
 
 #: .\gmtool\templates\gmtool\base.html:48
 #: .\gmtool\templates\gmtool\user_list.html:4

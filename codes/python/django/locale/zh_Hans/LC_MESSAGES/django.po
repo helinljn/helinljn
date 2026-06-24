@@ -47,6 +47,10 @@ msgstr ""
 msgid "公告查询响应必须是 JSON 数组"
 msgstr ""
 
+#: .\gmtool\announcement_client.py:125
+msgid "公告查询响应数组元素必须是对象"
+msgstr ""
+
 #: .\gmtool\announcement_client.py:131
 msgid "公告查询响应解析失败"
 msgstr ""
@@ -96,6 +100,10 @@ msgstr ""
 
 #: .\gmtool\announcement_views.py:344
 msgid "旧周更新公告缺少有效公告 ID"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:350
+msgid "旧公告缺少公告类型，已停止发布以避免误删"
 msgstr ""
 
 #: .\gmtool\announcement_views.py:432
