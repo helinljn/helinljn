@@ -781,6 +781,52 @@ class AnnouncementViewTests(TestCase):
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
+    @patch('gmtool.announcement_views.query_announcements')
+    def test_query_detail_modal_filters_sections_by_announcement_type(self, mocked_query):
+        mocked_query.return_value = ([
+            {
+                'Platform': 'Android',
+                'Channel': '小米',
+                'AnnouncementType': '1',
+                'AnnouncementId': 'weekly-1',
+                'Title': '周更标题',
+                'Content': '周更正文',
+                'Image_1': 'https://example.com/weekly.png',
+                'Reserve_1': 'weekly reserve',
+            },
+            {
+                'Platform': 'Android',
+                'Channel': '小米',
+                'AnnouncementType': '3',
+                'AnnouncementId': 'carousel-1',
+                'Title': '轮播标题',
+                'Content': '轮播正文',
+                'Image_1': 'https://example.com/banner.png',
+                'ImageLink_1': 'https://example.com/open',
+                'Reserve_1': 'carousel reserve',
+            },
+        ], '', '[]', '')
+
+        response = self.client.get(reverse('gmtool:announcement_query'), {
+            'Platform': 'Android',
+            'Channel': '小米',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'data-announcement-type="1"')
+        self.assertContains(response, 'data-announcement-type="3"')
+        content = response.content.decode()
+        self.assertIn("if (announcementType === '1' || announcementType === '2')", content)
+        self.assertIn('detailHtml = titleSection + contentSection;', content)
+        self.assertIn("} else if (announcementType === '3') {", content)
+        self.assertIn('detailHtml = imageSection;', content)
+        self.assertIn('detailHtml = titleSection + imageSection + reserveSection + contentSection;', content)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
     def test_create_and_delete_pages_render_forms(self):
         create_response = self.client.get(reverse('gmtool:announcement_create'))
         delete_response = self.client.get(reverse('gmtool:announcement_delete'), {

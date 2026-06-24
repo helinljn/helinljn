@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-24 11:25+0800\n"
+"POT-Creation-Date: 2026-06-24 13:38+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1150,7 +1150,7 @@ msgid "加载失败，请重试"
 msgstr "Failed to load, please retry"
 
 #: .\gmtool\templates\gmtool\announcement_log.html:224
-#: .\gmtool\templates\gmtool\announcement_query.html:185
+#: .\gmtool\templates\gmtool\announcement_query.html:186
 #: .\gmtool\templates\gmtool\command_execute.html:260
 #: .\gmtool\templates\gmtool\command_execute.html:285
 #: .\gmtool\templates\gmtool\command_execute.html:398
@@ -1183,28 +1183,28 @@ msgid "图片"
 msgstr "Images"
 
 #: .\gmtool\templates\gmtool\announcement_query.html:107
-#: .\gmtool\templates\gmtool\announcement_query.html:184
+#: .\gmtool\templates\gmtool\announcement_query.html:185
 msgid "预留字段"
 msgstr "Reserved fields"
 
-#: .\gmtool\templates\gmtool\announcement_query.html:158
-#: .\gmtool\templates\gmtool\announcement_query.html:168
+#: .\gmtool\templates\gmtool\announcement_query.html:159
+#: .\gmtool\templates\gmtool\announcement_query.html:169
 msgid "没有任何游戏登录公告！！！"
 msgstr "No game login announcements."
 
-#: .\gmtool\templates\gmtool\announcement_query.html:175
+#: .\gmtool\templates\gmtool\announcement_query.html:176
 msgid "公告详情"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:181
+#: .\gmtool\templates\gmtool\announcement_query.html:182
 msgid "完整标题"
 msgstr "Full title"
 
-#: .\gmtool\templates\gmtool\announcement_query.html:182
+#: .\gmtool\templates\gmtool\announcement_query.html:183
 msgid "图片链接"
 msgstr "Image links"
 
-#: .\gmtool\templates\gmtool\announcement_query.html:183
+#: .\gmtool\templates\gmtool\announcement_query.html:184
 msgid "完整正文"
 msgstr "Full content"
 

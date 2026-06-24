@@ -44,6 +44,7 @@
 - 公告接口独立于 IDIP 命令，调用目录服 Web PHP 接口
 - 查询公告支持平台、渠道单选；发布和删除公告支持平台、渠道、公告类型单选
 - 发布公告类型包括周更新公告、常驻公告、轮播图；轮播图无需填写标题和正文，周更新公告/常驻公告不填写图片字段
+- 查询结果详情按公告类型展示字段：周更新公告、常驻公告只显示标题和正文；轮播图只显示图片链接；预留字段不在详情弹窗中展示
 - 周更新公告发布前会先查询并删除同平台同渠道旧周更新公告
 - 超级管理员自动拥有公告管理权限，普通用户需单独授权
 - 发布、删除写公告操作日志和 audit log，查询不写操作日志
@@ -571,11 +572,11 @@ python manage.py format_idip_commands --check
 
 ### 11.4 公告目录服接口
 - `ANNOUNCEMENT_BASE_URL`：目录服 Web 基础地址，不包含具体 PHP 路径
-- `ANNOUNCEMENT_TIMEOUT`：公告接口超时时间，默认 5 秒
-- `ANNOUNCEMENT_PLATFORMS`：英文逗号分隔的平台列表，默认 `Android,IOS,OpenHarmony`
-- `ANNOUNCEMENT_CHANNELS`：英文逗号分隔的渠道列表，默认 `小米,VIVO,OPPO`
+- `ANNOUNCEMENT_TIMEOUT`：公告接口超时时间，默认 30 秒
+- `ANNOUNCEMENT_PLATFORMS`：英文逗号分隔的平台列表，默认 `PS`
+- `ANNOUNCEMENT_CHANNELS`：英文逗号分隔的渠道列表，默认 `1001`
 
-`.env` 示例：
+`.env` 示例（按实际目录服配置调整）：
 
 ```env
 ANNOUNCEMENT_BASE_URL=http://example.com
@@ -767,14 +768,14 @@ python manage.py createsuperuser
 ## 15. 本地开发与联调
 
 ### 15.1 创建环境
-Windows 或当前开发环境可使用 `environment.yml`：
+Windows 或当前开发环境可使用上一层目录的 `../environment.yml`：
 
 ```bash
-conda env create -f environment.yml
+conda env create -f ../environment.yml
 conda activate py312
 ```
 
-Ubuntu 24.04 部署使用 `environment-linux.yml`，见第 16 节。
+Ubuntu 24.04 部署使用上一层目录的 `../environment-linux.yml`，见第 16 节。部署时如已将环境文件复制到项目根目录，可按实际路径调整命令。
 
 ### 15.2 初始化数据库
 ```bash
@@ -842,9 +843,10 @@ http://127.0.0.1:5510/cy_idip
 1. 在 `.env` 中配置 `ANNOUNCEMENT_BASE_URL`、`ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS`，修改后重启 Django 进程。
 2. 使用超级管理员登录 `/gmtool/`；普通用户需要先在用户权限页勾选“公告管理权限”。
 3. 进入 `/gmtool/announcements/` 或 `/gmtool/announcements/query/`，在“查询公告”子页签选择平台、渠道后查询现有公告。
-4. 在“发布公告”子页签发布公告；发布周更新公告会先查询并删除同平台同渠道旧周更新公告，再发布新公告；发布轮播图时无需填写标题和正文；发布周更新公告或常驻公告时不填写图片字段。
-5. 在“删除公告”子页签删除单条公告；从查询结果进入删除页时会预填公告自身的 `Channel`、`AnnouncementType` 和 `AnnouncementId`。
-6. 进入“公告日志”子页签或 `/gmtool/announcements/logs/` 查看发布、删除日志和脱敏后的日志详情。
+4. 查询结果详情中，周更新公告、常驻公告只显示标题和正文；轮播图只显示图片链接；预留字段不展示。
+5. 在“发布公告”子页签发布公告；发布周更新公告会先查询并删除同平台同渠道旧周更新公告，再发布新公告；发布轮播图时无需填写标题和正文；发布周更新公告或常驻公告时不填写图片字段。
+6. 在“删除公告”子页签删除单条公告；从查询结果进入删除页时会预填公告自身的 `Channel`、`AnnouncementType` 和 `AnnouncementId`。
+7. 进入“公告日志”子页签或 `/gmtool/announcements/logs/` 查看发布、删除日志和脱敏后的日志详情。
 
 ---
 
@@ -906,14 +908,14 @@ source /home/django/.bashrc
 
 ```bash
 cd /opt/gmtool
-conda env create -f environment-linux.yml
+conda env create -f ../environment-linux.yml
 conda activate py312
 ```
 
 如果环境已存在，使用：
 
 ```bash
-conda env update -f environment-linux.yml
+conda env update -f ../environment-linux.yml
 conda activate py312
 ```
 
@@ -958,7 +960,7 @@ sudo service mysql restart
 更新 conda 环境，安装 Django MySQL 驱动：
 
 ```bash
-conda env update -f environment-linux.yml
+conda env update -f ../environment-linux.yml
 conda activate py312
 ```
 
@@ -1062,7 +1064,7 @@ sudo service mysql start
 重置或重装后，重新执行本节的配置文件安装、建库授权和 Django 初始化步骤。
 
 ### 17.8 常见问题
-- `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f environment-linux.yml`，并在 `py312` 环境中运行项目。
+- `ModuleNotFoundError: MySQLdb`：确认已执行 `conda env update -f ../environment-linux.yml`，并在 `py312` 环境中运行项目。
 - `Access denied for user`：检查 `DB_USER`、`DB_PASSWORD`、账号授权主机和 MySQL 服务端监听地址。
 - 中文或 JSON 内容乱码：确认数据库字符集为 `utf8mb4`。
 - `check --deploy` 提示 Cookie 或 Host 配置风险：按生产域名和 HTTPS 代理实际情况修正 `.env`。

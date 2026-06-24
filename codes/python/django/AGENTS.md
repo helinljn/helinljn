@@ -9,7 +9,6 @@
 - Django 项目目录：`mysite/`
 - 主业务应用：`gmtool/`
 - 命令定义源文件：`idip_commands.json`
-- 公告协议参考：`announcement.md`
 - 本地 IDIP Mock 服务：`test/mock_idip_server.py`
 - 运行日志目录：`logs/`
 - 默认语言和时区：`zh-hans`、`Asia/Shanghai`
@@ -20,14 +19,14 @@
 
 ## 环境
 
-使用仓库内定义的 conda 环境。
+使用上一层目录定义的 conda 环境。
 
 ```bash
-conda env create -f environment.yml
+conda env create -f ../environment.yml
 conda activate py312
 ```
 
-Linux 部署目标使用 `environment-linux.yml`。
+Linux 部署目标使用 `../environment-linux.yml`。
 
 配置通过 `python-decouple` 从 `.env` 加载。`.env` 属于本地运行配置，不要提交密钥或机器相关配置。关键配置包括：
 
@@ -111,7 +110,7 @@ Mock 服务默认地址：
 http://127.0.0.1:5510/cy_idip
 ```
 
-公告目录服接口配置示例：
+公告目录服接口配置示例（按实际目录服配置调整）：
 
 ```env
 ANNOUNCEMENT_BASE_URL=http://example.com
@@ -177,6 +176,7 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS` 在 settings 层解析为去重列表；页面提交值必须严格来自配置原值。
 - 周更新公告发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。
 - 仅常驻公告显示并使用显示优先级；轮播图隐藏公告标题和公告正文，后端不要求填写并向目录服传空字符串；周更新公告和常驻公告隐藏图片字段，后端向目录服传空字符串。
+- 查询公告详情弹窗按类型展示字段：周更新公告、常驻公告只显示标题和正文；轮播图只显示图片链接；预留字段不展示。
 - 公告发布、删除写 `AnnouncementLog` 和 audit log；查询不写公告操作日志和 audit log。
 - 公告日志详情接口必须继续对配置的敏感字段进行脱敏。
 - 修改 `idip_commands.json` 后，运行 `python manage.py format_idip_commands --check` 或 `python manage.py format_idip_commands`。

@@ -136,6 +136,7 @@
                     <td>
                         <button type="button"
                                 class="btn btn-sm btn-outline-info query-announcement-detail-btn"
+                                data-announcement-type="{{ announcement.AnnouncementType|default:'' }}"
                                 data-title="{{ announcement.Title|default:'' }}"
                                 data-content="{{ announcement.Content|default:'' }}"
                                 data-image-1="{{ announcement.Image_1|default:'' }}"
@@ -197,6 +198,7 @@ function queryAnnouncementValue(button, name) {
 }
 
 function showQueryAnnouncementDetail(button) {
+    var announcementType = button.getAttribute('data-announcement-type') || '';
     var imageLinks = [
         'Image_1: ' + queryAnnouncementValue(button, 'data-image-1'),
         'ImageLink_1: ' + queryAnnouncementValue(button, 'data-image-link-1'),
@@ -209,16 +211,29 @@ function showQueryAnnouncementDetail(button) {
         'Reserve_1: ' + queryAnnouncementValue(button, 'data-reserve-1'),
         'Reserve_2: ' + queryAnnouncementValue(button, 'data-reserve-2')
     ].join('\n');
-
-    document.getElementById('queryAnnouncementDetailBody').innerHTML =
+    var titleSection =
         '<h4 class="detail-section-title">{{ full_title_text|escapejs }}</h4>' +
-        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(queryAnnouncementValue(button, 'data-title')) + '</pre>' +
-        '<h4 class="detail-section-title">{{ image_links_text|escapejs }}</h4>' +
-        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(imageLinks) + '</pre>' +
-        '<h4 class="detail-section-title">{{ reserve_fields_text|escapejs }}</h4>' +
-        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(reserves) + '</pre>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(queryAnnouncementValue(button, 'data-title')) + '</pre>';
+    var contentSection =
         '<h4 class="detail-section-title">{{ full_content_text|escapejs }}</h4>' +
         '<pre class="detail-pre">' + escapeQueryAnnouncementHtml(queryAnnouncementValue(button, 'data-content')) + '</pre>';
+    var imageSection =
+        '<h4 class="detail-section-title">{{ image_links_text|escapejs }}</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(imageLinks) + '</pre>';
+    var reserveSection =
+        '<h4 class="detail-section-title">{{ reserve_fields_text|escapejs }}</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeQueryAnnouncementHtml(reserves) + '</pre>';
+    var detailHtml;
+
+    if (announcementType === '1' || announcementType === '2') {
+        detailHtml = titleSection + contentSection;
+    } else if (announcementType === '3') {
+        detailHtml = imageSection;
+    } else {
+        detailHtml = titleSection + imageSection + reserveSection + contentSection;
+    }
+
+    document.getElementById('queryAnnouncementDetailBody').innerHTML = detailHtml;
 
     document.getElementById('queryAnnouncementOverlay').style.display = 'block';
     document.getElementById('queryAnnouncementModal').style.display = 'block';
