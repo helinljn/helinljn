@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-24 13:38+0800\n"
+"POT-Creation-Date: 2026-06-25 14:34+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,46 +38,46 @@ msgstr ""
 msgid "公告接口 HTTP 错误: %(status)s"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:105
+#: .\gmtool\announcement_client.py:116
 #, python-format
 msgid "公告接口返回未知结果: %(result)s"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:134
+#: .\gmtool\announcement_client.py:145
 msgid "公告查询响应必须是 JSON 数组"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:136
+#: .\gmtool\announcement_client.py:147
 msgid "公告查询响应数组元素必须是对象"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:144
+#: .\gmtool\announcement_client.py:155
 msgid "公告查询响应解析失败"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:152
+#: .\gmtool\announcement_client.py:163
 msgid "公告查询请求超时，请稍后重试"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:154
+#: .\gmtool\announcement_client.py:165
 #, python-format
 msgid "公告查询请求失败: %(error)s"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:172
+#: .\gmtool\announcement_client.py:183
 msgid "公告发布请求超时，请稍后重试"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:174
+#: .\gmtool\announcement_client.py:185
 #, python-format
 msgid "公告发布请求失败: %(error)s"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:198
+#: .\gmtool\announcement_client.py:209
 msgid "公告删除请求超时，请稍后重试"
 msgstr ""
 
-#: .\gmtool\announcement_client.py:200
+#: .\gmtool\announcement_client.py:211
 #, python-format
 msgid "公告删除请求失败: %(error)s"
 msgstr ""
@@ -86,49 +86,65 @@ msgstr ""
 msgid "公告远端操作已完成，但本地公告日志记录失败，请联系管理员核查应用日志"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:211
+#: .\gmtool\announcement_views.py:200
 msgid "公告查询失败，请查看失败明细"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:213
+#: .\gmtool\announcement_views.py:202
 msgid "公告查询部分失败，请查看失败明细"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:316
+#: .\gmtool\announcement_views.py:282
 msgid "公告发布表单校验失败，请检查输入"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:348
+#: .\gmtool\announcement_views.py:314
 msgid "旧公告缺少公告类型，已停止发布以避免误删"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:356
+#: .\gmtool\announcement_views.py:322
 msgid "旧周更新公告缺少有效公告 ID"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:443
+#: .\gmtool\announcement_views.py:409
 msgid "公告发布成功"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:447
+#: .\gmtool\announcement_views.py:413
 msgid "公告发布部分失败，请查看失败明细"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:449
+#: .\gmtool\announcement_views.py:415
 msgid "公告发布失败，请查看失败明细"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:476
-msgid "公告删除表单校验失败，请刷新后重试"
+#: .\gmtool\announcement_views.py:442
+#: .\gmtool\templates\gmtool\announcement_query.html:215
+msgid "请至少选择一条公告"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:527
-msgid "公告删除成功"
-msgstr ""
-
-#: .\gmtool\announcement_views.py:533
+#: .\gmtool\announcement_views.py:447
 #, python-format
-msgid "公告删除失败: %(error)s"
+msgid "单次批量删除不能超过 %(n)s 条"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:458
+msgid "选中项数据非法"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:515
+#, python-format
+msgid "批量删除成功：共 %(n)s 条"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:519
+#, python-format
+msgid "批量删除部分失败：成功 %(ok)s 条，失败 %(fail)s 条"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:523
+#, python-format
+msgid "批量删除失败：%(n)s 条均未成功"
 msgstr ""
 
 #: .\gmtool\api_views.py:92
@@ -459,19 +475,19 @@ msgstr ""
 
 #: .\gmtool\forms.py:15 .\gmtool\templates\gmtool\announcement_log.html:90
 #: .\gmtool\templates\gmtool\announcement_log.html:143
-#: .\gmtool\templates\gmtool\announcement_query.html:117
+#: .\gmtool\templates\gmtool\announcement_query.html:130
 msgid "周更新公告"
 msgstr ""
 
 #: .\gmtool\forms.py:16 .\gmtool\templates\gmtool\announcement_log.html:91
 #: .\gmtool\templates\gmtool\announcement_log.html:145
-#: .\gmtool\templates\gmtool\announcement_query.html:119
+#: .\gmtool\templates\gmtool\announcement_query.html:132
 msgid "常驻公告"
 msgstr ""
 
 #: .\gmtool\forms.py:17 .\gmtool\templates\gmtool\announcement_log.html:92
 #: .\gmtool\templates\gmtool\announcement_log.html:147
-#: .\gmtool\templates\gmtool\announcement_query.html:121
+#: .\gmtool\templates\gmtool\announcement_query.html:134
 msgid "轮播图"
 msgstr ""
 
@@ -531,7 +547,7 @@ msgstr ""
 
 #: .\gmtool\forms.py:186 .\gmtool\models.py:151
 #: .\gmtool\templates\gmtool\announcement_log.html:127
-#: .\gmtool\templates\gmtool\announcement_query.html:102
+#: .\gmtool\templates\gmtool\announcement_query.html:112
 msgid "公告ID"
 msgstr ""
 
@@ -829,7 +845,8 @@ msgstr ""
 msgid "发布"
 msgstr ""
 
-#: .\gmtool\models.py:131 .\gmtool\templates\gmtool\command_execute.html:538
+#: .\gmtool\models.py:131 .\gmtool\templates\gmtool\announcement_query.html:168
+#: .\gmtool\templates\gmtool\command_execute.html:538
 #: .\gmtool\templates\gmtool\user_list.html:91
 msgid "删除"
 msgstr ""
@@ -850,7 +867,7 @@ msgid "错误信息"
 msgstr ""
 
 #: .\gmtool\models.py:161 .\gmtool\models.py:162
-#: .\gmtool\templates\gmtool\_announcement_tabs.html:21
+#: .\gmtool\templates\gmtool\_announcement_tabs.html:16
 #: .\gmtool\templates\gmtool\announcement_log.html:4
 #: .\gmtool\templates\gmtool\announcement_log.html:7
 msgid "公告日志"
@@ -896,7 +913,6 @@ msgstr ""
 #: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\403.html:7
 #: .\gmtool\templates\gmtool\404.html:7 .\gmtool\templates\gmtool\500.html:7
 #: .\gmtool\templates\gmtool\announcement_create.html:4
-#: .\gmtool\templates\gmtool\announcement_delete.html:4
 #: .\gmtool\templates\gmtool\announcement_log.html:4
 #: .\gmtool\templates\gmtool\announcement_query.html:4
 #: .\gmtool\templates\gmtool\base.html:6 .\gmtool\templates\gmtool\base.html:19
@@ -980,32 +996,18 @@ msgstr ""
 msgid "发布公告"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\_announcement_tabs.html:16
-#: .\gmtool\templates\gmtool\announcement_delete.html:4
-#: .\gmtool\templates\gmtool\announcement_delete.html:7
-#: .\gmtool\templates\gmtool\announcement_delete.html:24
-#: .\gmtool\templates\gmtool\announcement_delete.html:56
-msgid "删除公告"
-msgstr ""
-
 #: .\gmtool\templates\gmtool\announcement_create.html:6
-#: .\gmtool\templates\gmtool\announcement_delete.html:6
 #: .\gmtool\templates\gmtool\announcement_log.html:6
 #: .\gmtool\templates\gmtool\announcement_query.html:6
 msgid "公告"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_create.html:15
-#: .\gmtool\templates\gmtool\announcement_delete.html:15
 msgid "失败渠道明细"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_create.html:134
 msgid "发布新的周更新公告会先删除同平台同渠道已有周更新公告，确认继续？"
-msgstr ""
-
-#: .\gmtool\templates\gmtool\announcement_delete.html:27
-msgid "确认删除该公告？"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:46
@@ -1078,7 +1080,7 @@ msgid "错误摘要"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:130
-#: .\gmtool\templates\gmtool\announcement_query.html:108
+#: .\gmtool\templates\gmtool\announcement_query.html:118
 #: .\gmtool\templates\gmtool\command_list.html:41
 #: .\gmtool\templates\gmtool\command_log.html:144
 #: .\gmtool\templates\gmtool\user_list.html:39
@@ -1104,7 +1106,7 @@ msgid "加载失败，请重试"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:224
-#: .\gmtool\templates\gmtool\announcement_query.html:186
+#: .\gmtool\templates\gmtool\announcement_query.html:203
 #: .\gmtool\templates\gmtool\command_execute.html:260
 #: .\gmtool\templates\gmtool\command_execute.html:285
 #: .\gmtool\templates\gmtool\command_execute.html:398
@@ -1120,46 +1122,66 @@ msgstr ""
 msgid "查询失败渠道"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:103
+#: .\gmtool\templates\gmtool\announcement_query.html:101
+msgid "批量删除"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_query.html:110
+msgid "全选"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_query.html:113
 msgid "类型"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:104
+#: .\gmtool\templates\gmtool\announcement_query.html:114
 msgid "标题"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:105
+#: .\gmtool\templates\gmtool\announcement_query.html:115
 msgid "正文"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:106
+#: .\gmtool\templates\gmtool\announcement_query.html:116
 msgid "图片"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:107
-#: .\gmtool\templates\gmtool\announcement_query.html:185
+#: .\gmtool\templates\gmtool\announcement_query.html:117
+#: .\gmtool\templates\gmtool\announcement_query.html:202
 msgid "预留字段"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:159
-#: .\gmtool\templates\gmtool\announcement_query.html:169
+#: .\gmtool\templates\gmtool\announcement_query.html:175
+#: .\gmtool\templates\gmtool\announcement_query.html:186
 msgid "没有任何游戏登录公告！！！"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:176
+#: .\gmtool\templates\gmtool\announcement_query.html:193
 msgid "公告详情"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:182
+#: .\gmtool\templates\gmtool\announcement_query.html:199
 msgid "完整标题"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:183
+#: .\gmtool\templates\gmtool\announcement_query.html:200
 msgid "图片链接"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_query.html:184
+#: .\gmtool\templates\gmtool\announcement_query.html:201
 msgid "完整正文"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_query.html:218
+msgid "确认删除选中的"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_query.html:218
+msgid "条公告？"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_query.html:222
+msgid "确认删除该公告？"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\base.html:27

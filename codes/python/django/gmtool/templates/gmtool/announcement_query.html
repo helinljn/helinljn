@@ -162,9 +162,12 @@
                                 data-reserve-2="{{ announcement.Reserve_2|default:'' }}">
                             <i class="ti ti-eye"></i>
                         </button>
-                        <a href="{% url 'gmtool:announcement_delete' %}?{{ announcement.delete_query_string }}" class="btn btn-sm btn-outline-danger">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger ann-delete-one"
+                                data-item="{{ announcement.delete_query_string }}"
+                                title="{% trans '删除' %}">
                             <i class="ti ti-trash"></i>
-                        </a>
+                        </button>
                     </td>
                 </tr>
                 {% empty %}
@@ -213,6 +216,21 @@ function confirmBatchDelete(form) {
         return false;
     }
     return confirm('{% trans "确认删除选中的" %} ' + checked + ' {% trans "条公告？" %}');
+}
+
+function deleteSingleAnnouncement(button) {
+    if (!confirm('{% trans "确认删除该公告？" %}')) {
+        return;
+    }
+    var form = button.closest('form');
+    if (!form) {
+        return;
+    }
+    // 仅勾选当前行、清空同组其它选择，复用批量删除表单提交单条
+    form.querySelectorAll('input[name="items"]').forEach(function(cb) {
+        cb.checked = (cb.value === button.getAttribute('data-item'));
+    });
+    form.submit();
 }
 
 function escapeQueryAnnouncementHtml(text) {
@@ -283,6 +301,11 @@ function bindQueryAnnouncementDetailButtons() {
     });
     document.querySelectorAll('[data-query-announcement-close]').forEach(function(button) {
         button.addEventListener('click', closeQueryAnnouncementDetail);
+    });
+    document.querySelectorAll('.ann-delete-one').forEach(function(button) {
+        button.addEventListener('click', function() {
+            deleteSingleAnnouncement(button);
+        });
     });
 }
 

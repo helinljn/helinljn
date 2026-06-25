@@ -31,7 +31,6 @@ urlpatterns = [
     path('announcements/', announcement_views.announcement_list, name='announcement_list'),
     path('announcements/query/', announcement_views.announcement_query, name='announcement_query'),
     path('announcements/create/', announcement_views.announcement_create, name='announcement_create'),
-    path('announcements/delete/', announcement_views.announcement_delete, name='announcement_delete'),
     path('announcements/batch-delete/', announcement_views.announcement_batch_delete, name='announcement_batch_delete'),
     path('announcements/logs/', announcement_views.announcement_log_list, name='announcement_log_list'),
 

@@ -71,17 +71,6 @@ def _redirect_to_announcement_query(platform, channel):
     return redirect(url)
 
 
-def _delete_initial_from_data(data):
-    if not data:
-        return {}
-    return {
-        'Platform': data.get('Platform', ''),
-        'Channel': data.get('Channel', ''),
-        'AnnouncementType': data.get('AnnouncementType', ''),
-        'AnnouncementId': data.get('AnnouncementId', ''),
-    }
-
-
 def _announcement_config_errors():
     errors = []
     base_url_error = get_announcement_base_url_error()
@@ -246,29 +235,6 @@ def _render_announcement_create_page(
         {
             'active_announcement_tab': 'create',
             'create_form': create_form,
-            'operation_results': operation_results or {},
-            'announcement_config_errors': _announcement_config_errors(),
-        },
-        status=status,
-    )
-
-
-def _render_announcement_delete_page(
-    request,
-    *,
-    delete_form=None,
-    operation_results=None,
-    status=200,
-):
-    if delete_form is None:
-        delete_form = AnnouncementDeleteForm(initial=_delete_initial_from_data(request.GET))
-
-    return render(
-        request,
-        'gmtool/announcement_delete.html',
-        {
-            'active_announcement_tab': 'delete',
-            'delete_form': delete_form,
             'operation_results': operation_results or {},
             'announcement_config_errors': _announcement_config_errors(),
         },
@@ -459,83 +425,6 @@ def announcement_create(request):
         operation_results={
             'success_channels': success_channels,
             'failed_channels': failed_channels,
-        },
-        status=400,
-    )
-
-
-@announcement_permission_required
-@require_http_methods(['GET', 'POST'])
-def announcement_delete(request):
-    """删除单条公告。"""
-    if request.method == 'GET':
-        return _render_announcement_delete_page(request)
-
-    form = AnnouncementDeleteForm(request.POST)
-    if not form.is_valid():
-        messages.error(request, _('公告删除表单校验失败，请刷新后重试'))
-        return _render_announcement_delete_page(
-            request,
-            delete_form=form,
-            status=400,
-        )
-
-    payload = form.to_payload()
-    response_data, error_message, raw_response, error_type = delete_announcement(
-        payload['Platform'],
-        payload['Channel'],
-        payload['AnnouncementType'],
-        payload['AnnouncementId'],
-    )
-    status = _status_from_error(error_message, error_type)
-    log_persisted = _write_announcement_log(
-        request,
-        action='delete',
-        platform=payload['Platform'],
-        channel=payload['Channel'],
-        announcement_type=payload['AnnouncementType'],
-        announcement_id=payload['AnnouncementId'],
-        request_data=payload,
-        response_data=response_data,
-        raw_response=raw_response,
-        status=status,
-        error_message=error_message,
-    )
-
-    log_operation(
-        'announcement',
-        'delete',
-        user=request.user,
-        ip_address=get_client_ip(request),
-        detail={
-            'platform': payload['Platform'],
-            'channels': [payload['Channel']],
-            'announcement_type': payload['AnnouncementType'],
-            'announcement_id': payload['AnnouncementId'],
-            'remote_call_count': 1,
-            'success_channels': [] if error_message else [payload['Channel']],
-            'failed_channels': [{'channel': payload['Channel'], 'error': error_message}] if error_message else [],
-            'status': status,
-            'log_persisted': log_persisted,
-        },
-    )
-
-    if not log_persisted:
-        messages.warning(request, _ANNOUNCEMENT_LOG_PERSISTENCE_WARNING)
-
-    if not error_message:
-        messages.success(request, _('公告删除成功'))
-        return _redirect_to_announcement_query(
-            payload['Platform'],
-            payload['Channel'],
-        )
-
-    messages.error(request, _('公告删除失败: %(error)s') % {'error': error_message})
-    return _render_announcement_delete_page(
-        request,
-        delete_form=form,
-        operation_results={
-            'failed_channels': [{'channel': payload['Channel'], 'error': error_message}],
         },
         status=400,
     )

@@ -2,6 +2,7 @@ import json
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
+from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -843,7 +844,7 @@ class AnnouncementViewTests(TestCase):
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
     @patch('gmtool.announcement_views.query_announcements')
-    def test_query_result_delete_link_points_to_delete_page(self, mocked_query):
+    def test_query_result_offers_inline_and_batch_delete(self, mocked_query):
         mocked_query.return_value = ([{
             'Platform': 'Android',
             'Channel': '小米',
@@ -859,10 +860,14 @@ class AnnouncementViewTests(TestCase):
         })
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, reverse('gmtool:announcement_delete'))
+        # 删除均走批量删除端点，不再跳转独立删除页
+        self.assertContains(response, reverse('gmtool:announcement_batch_delete'))
+        # 单条删除按钮携带该公告的 item 数据
+        self.assertContains(response, 'ann-delete-one')
         self.assertContains(response, 'AnnouncementId=123')
-        self.assertContains(response, 'Channel=%E5%B0%8F%E7%B1%B3')
         self.assertContains(response, 'AnnouncementType=2')
+        # 批量删除多选 checkbox
+        self.assertContains(response, 'name="items"')
         self.assertContains(response, 'query-announcement-detail-btn')
         self.assertContains(response, 'queryAnnouncementModal')
         self.assertNotContains(response, 'data-bs-toggle="collapse"')
@@ -918,19 +923,11 @@ class AnnouncementViewTests(TestCase):
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
-    def test_create_and_delete_pages_render_forms(self):
+    def test_create_page_renders_form(self):
         create_response = self.client.get(reverse('gmtool:announcement_create'))
-        delete_response = self.client.get(reverse('gmtool:announcement_delete'), {
-            'Platform': 'Android',
-            'Channel': '小米',
-            'AnnouncementType': '2',
-            'AnnouncementId': '123',
-        })
 
         self.assertEqual(create_response.status_code, 200)
         self.assertContains(create_response, '发布公告')
-        self.assertEqual(delete_response.status_code, 200)
-        self.assertContains(delete_response, 'value="123"')
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
@@ -1146,26 +1143,128 @@ class AnnouncementViewTests(TestCase):
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
     )
+    @patch('gmtool.announcement_views.log_operation')
     @patch('gmtool.announcement_views.delete_announcement')
-    def test_delete_uses_announcement_own_channel_and_type(self, mocked_delete):
+    def test_single_delete_uses_announcement_own_channel_and_type(self, mocked_delete, mocked_audit):
         mocked_delete.return_value = ({'result': 'OK'}, '', 'OK', '')
 
-        response = self.client.post(reverse('gmtool:announcement_delete'), data={
+        # 单条删除复用批量删除端点：item 为该公告的四元组 query string
+        item = urlencode({
             'Platform': 'Android',
             'Channel': 'VIVO',
             'AnnouncementType': '3',
             'AnnouncementId': '99',
-            'return_Platform': 'Android',
-            'return_Channel': ['小米'],
-            'return_AnnouncementType': '1',
+        })
+        response = self.client.post(reverse('gmtool:announcement_batch_delete'), data={
+            'items': [item],
+            'Platform': 'Android',
+            'Channel': '小米',
         })
 
         self.assertEqual(response.status_code, 302)
-        self.assertNotIn('AnnouncementType', response['Location'])
         mocked_delete.assert_called_once_with('Android', 'VIVO', '3', '99')
         log = AnnouncementLog.objects.get()
         self.assertEqual(log.channel, 'VIVO')
         self.assertEqual(log.announcement_type, '3')
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.log_operation')
+    @patch('gmtool.announcement_views.delete_announcement')
+    def test_batch_delete_removes_each_selected_announcement(self, mocked_delete, mocked_audit):
+        mocked_delete.return_value = ({'result': 'OK'}, '', 'OK', '')
+
+        items = [
+            urlencode({'Platform': 'Android', 'Channel': '小米',
+                       'AnnouncementType': '2', 'AnnouncementId': str(i)})
+            for i in (101, 102, 103)
+        ]
+        response = self.client.post(reverse('gmtool:announcement_batch_delete'), data={
+            'items': items,
+            'Platform': 'Android',
+            'Channel': '小米',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(mocked_delete.call_count, 3)
+        self.assertEqual(AnnouncementLog.objects.filter(action='delete', status='success').count(), 3)
+        detail = mocked_audit.call_args.kwargs['detail']
+        self.assertEqual(detail['success_count'], 3)
+        self.assertEqual(detail['failed_count'], 0)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.log_operation')
+    @patch('gmtool.announcement_views.delete_announcement')
+    def test_batch_delete_continues_and_aggregates_on_partial_failure(self, mocked_delete, mocked_audit):
+        # 第一条成功，第二条远端失败：应继续删除并汇总
+        mocked_delete.side_effect = [
+            ({'result': 'OK'}, '', 'OK', ''),
+            (None, 'FAIL: busy', 'FAIL: busy', 'failed'),
+        ]
+
+        items = [
+            urlencode({'Platform': 'Android', 'Channel': '小米',
+                       'AnnouncementType': '2', 'AnnouncementId': '201'}),
+            urlencode({'Platform': 'Android', 'Channel': '小米',
+                       'AnnouncementType': '2', 'AnnouncementId': '202'}),
+        ]
+        response = self.client.post(reverse('gmtool:announcement_batch_delete'), data={
+            'items': items,
+            'Platform': 'Android',
+            'Channel': '小米',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(mocked_delete.call_count, 2)
+        detail = mocked_audit.call_args.kwargs['detail']
+        self.assertEqual(detail['success_count'], 1)
+        self.assertEqual(detail['failed_count'], 1)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+        BATCH_EXECUTE_MAX_TARGETS=2,
+    )
+    @patch('gmtool.announcement_views.delete_announcement')
+    def test_batch_delete_rejects_when_over_max_targets(self, mocked_delete):
+        items = [
+            urlencode({'Platform': 'Android', 'Channel': '小米',
+                       'AnnouncementType': '2', 'AnnouncementId': str(i)})
+            for i in (1, 2, 3)
+        ]
+        response = self.client.post(reverse('gmtool:announcement_batch_delete'), data={
+            'items': items,
+            'Platform': 'Android',
+            'Channel': '小米',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        mocked_delete.assert_not_called()
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    @patch('gmtool.announcement_views.delete_announcement')
+    def test_batch_delete_without_selection_does_nothing(self, mocked_delete):
+        response = self.client.post(reverse('gmtool:announcement_batch_delete'), data={
+            'Platform': 'Android',
+            'Channel': '小米',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        mocked_delete.assert_not_called()
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
