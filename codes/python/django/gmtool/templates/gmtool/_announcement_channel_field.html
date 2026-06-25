@@ -1,0 +1,67 @@
+{% load i18n %}
+{% comment %}
+渠道多选：行内复选框组 + 全选开关。
+复用 user_permissions.html 同款 form-check 样式。
+调用：{% include "gmtool/_announcement_channel_field.html" with channel_field=query_form.Channel %}
+提交值仍为多值 Channel=A&Channel=B，由后端 getlist 解析。
+{% endcomment %}
+<label class="form-label">{{ channel_field.label }}</label>
+<div data-channel-group>
+    <label class="form-check form-check-inline mb-0 me-4">
+        <input type="checkbox" class="form-check-input" data-channel-all onclick="toggleChannelGroup(this);">
+        <span class="form-check-label text-muted fw-bold">{% trans "全选" %}</span>
+    </label>
+    {% for checkbox in channel_field %}
+    <label class="form-check form-check-inline">
+        {{ checkbox.tag }}
+        <span class="form-check-label">{{ checkbox.choice_label }}</span>
+    </label>
+    {% endfor %}
+    {{ channel_field.errors }}
+</div>
+<script>
+(function () {
+    if (window.__channelGroupBound) {
+        return;
+    }
+    window.__channelGroupBound = true;
+
+    window.toggleChannelGroup = function (master) {
+        var group = master.closest('[data-channel-group]');
+        if (!group) {
+            return;
+        }
+        group.querySelectorAll('.channel-check').forEach(function (cb) {
+            cb.checked = master.checked;
+        });
+    };
+
+    function syncChannelMaster(group) {
+        var master = group.querySelector('[data-channel-all]');
+        var boxes = group.querySelectorAll('.channel-check');
+        if (!master || !boxes.length) {
+            return;
+        }
+        master.checked = Array.prototype.every.call(boxes, function (cb) {
+            return cb.checked;
+        });
+    }
+
+    function bindChannelGroups() {
+        document.querySelectorAll('[data-channel-group]').forEach(function (group) {
+            group.querySelectorAll('.channel-check').forEach(function (cb) {
+                cb.addEventListener('change', function () {
+                    syncChannelMaster(group);
+                });
+            });
+            syncChannelMaster(group);
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindChannelGroups);
+    } else {
+        bindChannelGroups();
+    }
+})();
+</script>
