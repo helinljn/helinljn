@@ -88,17 +88,27 @@
 
 {% if query_results %}
 {% for group in query_results %}
+<form method="post" action="{% url 'gmtool:announcement_batch_delete' %}" onsubmit="return confirmBatchDelete(this);">
+{% csrf_token %}
+<input type="hidden" name="Platform" value="{{ selected_query.Platform }}">
+<input type="hidden" name="Channel" value="{{ group.channel }}">
 <div class="card mb-3">
     <div class="card-header">
         <h3 class="card-title"><i class="ti ti-list me-2"></i>{{ group.channel }}</h3>
         <div class="card-actions">
-            <span class="badge bg-secondary-lt">{{ group.announcements|length }}</span>
+            <span class="badge bg-secondary-lt me-2">{{ group.announcements|length }}</span>
+            <button type="submit" class="btn btn-sm btn-danger">
+                <i class="ti ti-trash me-1"></i>{% trans "批量删除" %}
+            </button>
         </div>
     </div>
     <div class="table-responsive">
         <table class="table table-vcenter card-table" style="table-layout:fixed;">
             <thead>
                 <tr>
+                    <th style="width:40px;">
+                        <input type="checkbox" class="form-check-input m-0" onclick="toggleGroup(this, '{{ forloop.counter }}')" title="{% trans '全选' %}">
+                    </th>
                     <th style="width:150px;">{% trans "公告ID" %}</th>
                     <th style="width:110px;">{% trans "类型" %}</th>
                     <th style="width:14%;">{% trans "标题" %}</th>
@@ -111,6 +121,9 @@
             <tbody>
                 {% for announcement in group.announcements %}
                 <tr>
+                    <td>
+                        <input type="checkbox" class="form-check-input m-0 ann-check-{{ forloop.parentloop.counter }}" name="items" value="{{ announcement.delete_query_string }}">
+                    </td>
                     <td><code>{{ announcement.AnnouncementId|default:"-" }}</code></td>
                     <td>
                         {% if announcement.AnnouncementType == '1' %}
@@ -156,13 +169,14 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">{% trans "没有任何游戏登录公告！！！" %}</td>
+                    <td colspan="8" class="text-center text-muted py-4">{% trans "没有任何游戏登录公告！！！" %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+</form>
 {% endfor %}
 {% elif query_form.is_bound and query_form.is_valid and not query_failures and not announcement_config_errors %}
 <div class="alert alert-info">
@@ -186,6 +200,21 @@
 {% trans "无数据" as no_data_text %}
 
 <script>
+function toggleGroup(el, idx) {
+    document.querySelectorAll('.ann-check-' + idx).forEach(function(cb) {
+        cb.checked = el.checked;
+    });
+}
+
+function confirmBatchDelete(form) {
+    var checked = form.querySelectorAll('input[name="items"]:checked').length;
+    if (checked === 0) {
+        alert('{% trans "请至少选择一条公告" %}');
+        return false;
+    }
+    return confirm('{% trans "确认删除选中的" %} ' + checked + ' {% trans "条公告？" %}');
+}
+
 function escapeQueryAnnouncementHtml(text) {
     var div = document.createElement('div');
     div.textContent = text == null ? '' : String(text);

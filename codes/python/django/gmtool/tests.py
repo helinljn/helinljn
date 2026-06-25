@@ -229,6 +229,97 @@ class AnnouncementClientTests(TestCase):
         self.assertEqual(error_type, 'failed')
 
     @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    def test_create_announcement_accepts_ok_after_php_warning_noise(self):
+        """远端在 OK 之前掺入 PHP/MySQL Warning 时，应取末行结果判定成功。"""
+        noisy_text = (
+            '<br />\n'
+            '<b>Warning</b>:  Packets out of order. Expected 1 received 0. '
+            'Packet size=145 in <b>/data1/DirServerNew/webroot20008/common/'
+            'announcementBase.php</b> on line <b>230</b><br />\n'
+            'OK'
+        )
+
+        class FakeResponse:
+            status_code = 200
+            text = noisy_text
+
+        class FakeRequests:
+            class Timeout(Exception):
+                pass
+
+            def post(self, url, data, timeout):
+                return FakeResponse()
+
+        with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
+            response_data, error_message, raw_response, error_type = create_announcement({})
+
+        self.assertEqual(response_data, {'result': 'OK'})
+        self.assertEqual(error_message, '')
+        self.assertEqual(raw_response, noisy_text)
+        self.assertEqual(error_type, '')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    def test_delete_announcement_accepts_ok_after_php_warning_noise(self):
+        """删除接口同样需要在 Warning 噪音后识别末行 OK。"""
+        noisy_text = (
+            '<br />\n'
+            '<b>Warning</b>:  Packets out of order. Expected 1 received 0. '
+            'Packet size=145 in <b>/data1/DirServerNew/webroot20008/common/'
+            'announcementBase.php</b> on line <b>230</b><br />\n'
+            'OK'
+        )
+
+        class FakeResponse:
+            status_code = 200
+            text = noisy_text
+
+        class FakeRequests:
+            class Timeout(Exception):
+                pass
+
+            def post(self, url, data, timeout):
+                return FakeResponse()
+
+        with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
+            response_data, error_message, raw_response, error_type = delete_announcement(
+                'Android',
+                'VIVO',
+                '2',
+                123,
+            )
+
+        self.assertEqual(response_data, {'result': 'OK'})
+        self.assertEqual(error_message, '')
+        self.assertEqual(error_type, '')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    def test_post_text_keeps_fail_result_after_warning_noise(self):
+        """结果行为 FAIL 时即便前面有 Warning 也应判定失败。"""
+        noisy_text = (
+            '<br />\n'
+            '<b>Warning</b>:  Packets out of order in <b>announcementBase.php</b><br />\n'
+            'FAIL: busy'
+        )
+
+        class FakeResponse:
+            status_code = 200
+            text = noisy_text
+
+        class FakeRequests:
+            class Timeout(Exception):
+                pass
+
+            def post(self, url, data, timeout):
+                return FakeResponse()
+
+        with patch('gmtool.announcement_client._get_requests', return_value=FakeRequests()):
+            response_data, error_message, raw_response, error_type = create_announcement({})
+
+        self.assertIsNone(response_data)
+        self.assertEqual(error_message, 'FAIL: busy')
+        self.assertEqual(error_type, 'failed')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
     def test_query_announcements_rejects_non_array_json(self):
         class FakeResponse:
             status_code = 200

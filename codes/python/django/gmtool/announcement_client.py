@@ -84,6 +84,17 @@ def _is_timeout_error(exc):
     return bool(timeout_cls and isinstance(exc, timeout_cls))
 
 
+def _result_line(raw_response):
+    """提取远端响应中代表结果的最后一个非空行。
+
+    公告目录服在真正的结果（OK / Invalid: / FAIL:）之前可能掺入
+    MySQL 连接层的 PHP Warning（如 "Packets out of order..."）。
+    这些噪音总是出现在结果行之前，因此取最后一个非空行作为权威结果。
+    """
+    lines = [line.strip() for line in raw_response.splitlines() if line.strip()]
+    return lines[-1] if lines else ''
+
+
 def _post_text(path, payload):
     req = _get_requests()
     url = _build_url(path)
@@ -96,7 +107,7 @@ def _post_text(path, payload):
     if not 200 <= getattr(response, 'status_code', 200) < 300:
         return _request_failed(_http_error_message(response), raw_response)
 
-    result_text = raw_response.strip()
+    result_text = _result_line(raw_response)
     if result_text == 'OK':
         return {'result': 'OK'}, '', raw_response, ''
     if result_text.startswith('Invalid:') or result_text.startswith('FAIL:'):

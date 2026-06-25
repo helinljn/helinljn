@@ -9,7 +9,7 @@ from django.http import QueryDict
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from .announcement_client import (
     create_announcement,
@@ -539,6 +539,101 @@ def announcement_delete(request):
         },
         status=400,
     )
+
+
+@announcement_permission_required
+@require_POST
+def announcement_batch_delete(request):
+    """批量删除公告：服务端循环调用远端单条删除接口，逐条记录日志并汇总结果。"""
+    items = request.POST.getlist('items')
+    redirect_platform = request.POST.get('Platform', '')
+    redirect_channel = request.POST.get('Channel', '')
+
+    if not items:
+        messages.error(request, _('请至少选择一条公告'))
+        return _redirect_to_announcement_query(redirect_platform, redirect_channel)
+
+    max_targets = getattr(settings, 'BATCH_EXECUTE_MAX_TARGETS', 100)
+    if len(items) > max_targets:
+        messages.error(request, _('单次批量删除不能超过 %(n)s 条') % {'n': max_targets})
+        return _redirect_to_announcement_query(redirect_platform, redirect_channel)
+
+    success_items = []
+    failed_items = []
+    remote_call_count = 0
+    log_persisted = True
+
+    for item in items:
+        form = AnnouncementDeleteForm(QueryDict(item))
+        if not form.is_valid():
+            failed_items.append({'item': item, 'error': _('选中项数据非法')})
+            continue
+
+        payload = form.to_payload()
+        response_data, error_message, raw_response, error_type = delete_announcement(
+            payload['Platform'],
+            payload['Channel'],
+            payload['AnnouncementType'],
+            payload['AnnouncementId'],
+        )
+        remote_call_count += 1
+        status = _status_from_error(error_message, error_type)
+        item_log_persisted = _write_announcement_log(
+            request,
+            action='delete',
+            platform=payload['Platform'],
+            channel=payload['Channel'],
+            announcement_type=payload['AnnouncementType'],
+            announcement_id=payload['AnnouncementId'],
+            request_data=payload,
+            response_data=response_data,
+            raw_response=raw_response,
+            status=status,
+            error_message=error_message,
+        )
+        log_persisted = log_persisted and item_log_persisted
+
+        if error_message:
+            failed_items.append({
+                'channel': payload['Channel'],
+                'announcement_id': payload['AnnouncementId'],
+                'error': error_message,
+            })
+        else:
+            success_items.append(payload['AnnouncementId'])
+
+    overall_status = 'success' if success_items and not failed_items else 'failed'
+    log_operation(
+        'announcement',
+        'batch_delete',
+        user=request.user,
+        ip_address=get_client_ip(request),
+        detail={
+            'requested': len(items),
+            'remote_call_count': remote_call_count,
+            'success_count': len(success_items),
+            'failed_count': len(failed_items),
+            'failed_items': failed_items,
+            'status': overall_status,
+            'log_persisted': log_persisted,
+        },
+    )
+
+    if not log_persisted:
+        messages.warning(request, _ANNOUNCEMENT_LOG_PERSISTENCE_WARNING)
+
+    if not failed_items:
+        messages.success(request, _('批量删除成功：共 %(n)s 条') % {'n': len(success_items)})
+    elif success_items:
+        messages.warning(
+            request,
+            _('批量删除部分失败：成功 %(ok)s 条，失败 %(fail)s 条')
+            % {'ok': len(success_items), 'fail': len(failed_items)},
+        )
+    else:
+        messages.error(request, _('批量删除失败：%(n)s 条均未成功') % {'n': len(failed_items)})
+
+    return _redirect_to_announcement_query(redirect_platform, redirect_channel)
 
 
 @announcement_permission_required

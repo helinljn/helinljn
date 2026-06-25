@@ -221,14 +221,16 @@ ANNOUNCEMENT_BASE_URL = config('ANNOUNCEMENT_BASE_URL', default='')
 ANNOUNCEMENT_TIMEOUT = config('ANNOUNCEMENT_TIMEOUT', default=30, cast=float)
 ANNOUNCEMENT_PLATFORMS = csv_unique_config(
     'ANNOUNCEMENT_PLATFORMS',
-    default='PS',
+    default='CY',
 )
 ANNOUNCEMENT_CHANNELS = csv_unique_config(
     'ANNOUNCEMENT_CHANNELS',
-    default='1001',
+    default='1001(XiaoMi)',
 )
 
-# 命令展示
+# 命令执行 / 展示
+BATCH_EXECUTE_MAX_TARGETS = config('BATCH_EXECUTE_MAX_TARGETS', default=100, cast=int)
+BATCH_EXECUTE_INTERVAL_MS = config('BATCH_EXECUTE_INTERVAL_MS', default=100, cast=int)
 PAGE_SIZE = config('PAGE_SIZE', default=20, cast=int)
 
 # 文件监控（仅作为开发便利功能；生产环境建议通过显式同步命令或上传后同步）
