@@ -38,12 +38,22 @@ def _has_query_input(data):
     return bool(data.get('Platform') or data.get('Channel'))
 
 
+def _channels_from_data(data):
+    """从请求数据中提取渠道列表，兼容无 getlist 的普通 dict。"""
+    if not data:
+        return []
+    if hasattr(data, 'getlist'):
+        return data.getlist('Channel')
+    channel = data.get('Channel', '')
+    return [channel] if channel else []
+
+
 def _query_initial_from_data(data):
     if not data:
         return {}
     return {
         'Platform': data.get('Platform', ''),
-        'Channel': data.get('Channel', ''),
+        'Channel': _channels_from_data(data),
     }
 
 
@@ -54,17 +64,27 @@ def _typed_initial_from_data(data):
     return initial
 
 
-def _query_string(platform, channel):
+def _normalize_channels(channels):
+    """将渠道参数归一为列表，兼容单值字符串。"""
+    if not channels:
+        return []
+    if isinstance(channels, str):
+        return [channels]
+    return [channel for channel in channels if channel]
+
+
+def _query_string(platform, channels):
     query = {}
     if platform:
         query['Platform'] = platform
-    if channel:
-        query['Channel'] = channel
-    return urlencode(query)
+    channel_list = _normalize_channels(channels)
+    if channel_list:
+        query['Channel'] = channel_list
+    return urlencode(query, doseq=True)
 
 
-def _redirect_to_announcement_query(platform, channel):
-    query_string = _query_string(platform, channel)
+def _redirect_to_announcement_query(platform, channels):
+    query_string = _query_string(platform, channels)
     url = reverse('gmtool:announcement_query')
     if query_string:
         url = f'{url}?{query_string}'
@@ -137,36 +157,37 @@ def _query_for_form(query_form):
         return results, failures
 
     platform = query_form.cleaned_data['Platform']
-    channel = query_form.cleaned_data['Channel']
-    response_data, error_message, raw_response, error_type = query_announcements(
-        platform,
-        channel,
-    )
-    if error_message:
-        failures.append({
+    channels = query_form.cleaned_data['Channel']
+    for channel in channels:
+        response_data, error_message, raw_response, error_type = query_announcements(
+            platform,
+            channel,
+        )
+        if error_message:
+            failures.append({
+                'channel': channel,
+                'error': error_message,
+                'error_type': error_type,
+                'raw_response': raw_response,
+            })
+            continue
+
+        announcements = []
+        for announcement in response_data or []:
+            announcement_data = dict(announcement)
+            announcement_data['delete_query_string'] = urlencode({
+                'Platform': announcement_data.get('Platform') or platform,
+                'Channel': announcement_data.get('Channel') or channel,
+                'AnnouncementType': announcement_data.get('AnnouncementType', ''),
+                'AnnouncementId': announcement_data.get('AnnouncementId', ''),
+            })
+            announcements.append(announcement_data)
+
+        results.append({
             'channel': channel,
-            'error': error_message,
-            'error_type': error_type,
+            'announcements': announcements,
             'raw_response': raw_response,
         })
-        return results, failures
-
-    announcements = []
-    for announcement in response_data or []:
-        announcement_data = dict(announcement)
-        announcement_data['delete_query_string'] = urlencode({
-            'Platform': announcement_data.get('Platform') or platform,
-            'Channel': announcement_data.get('Channel') or channel,
-            'AnnouncementType': announcement_data.get('AnnouncementType', ''),
-            'AnnouncementId': announcement_data.get('AnnouncementId', ''),
-        })
-        announcements.append(announcement_data)
-
-    results.append({
-        'channel': channel,
-        'announcements': announcements,
-        'raw_response': raw_response,
-    })
     return results, failures
 
 
@@ -209,7 +230,7 @@ def _render_announcement_query_page(
             'query_form': query_form,
             'query_results': query_results,
             'query_failures': query_failures,
-            'current_query_string': _query_string(query_data.get('Platform'), query_data.get('Channel')),
+            'current_query_string': _query_string(query_data.get('Platform'), _channels_from_data(query_data)),
             'selected_query': _query_initial_from_data(query_data),
             'announcement_config_errors': announcement_config_errors,
         },
@@ -254,7 +275,7 @@ def _append_failure(failures, channel, error_message):
 def announcement_list(request):
     """公告管理兼容入口，默认进入查询公告页。"""
     url = reverse('gmtool:announcement_query')
-    query_string = _query_string(request.GET.get('Platform'), request.GET.get('Channel'))
+    query_string = _query_string(request.GET.get('Platform'), _channels_from_data(request.GET))
     if query_string:
         url = f'{url}?{query_string}'
     return redirect(url)
@@ -288,8 +309,7 @@ def announcement_create(request):
         )
 
     platform = form.cleaned_data['Platform']
-    channel = form.cleaned_data['Channel']
-    channels = [channel]
+    channels = form.cleaned_data['Channel']
     announcement_type = form.cleaned_data['AnnouncementType']
     client_ip = get_client_ip(request)
     success_channels = []
@@ -407,20 +427,17 @@ def announcement_create(request):
 
     if success_channels and not failed_channels:
         messages.success(request, _('公告发布成功'))
-        return _redirect_to_announcement_query(platform, channel)
+        return _redirect_to_announcement_query(platform, success_channels)
 
     if success_channels:
         messages.warning(request, _('公告发布部分失败，请查看失败明细'))
     else:
         messages.error(request, _('公告发布失败，请查看失败明细'))
 
-    query_data = QueryDict('', mutable=True)
-    query_data['Platform'] = platform
-    query_data['AnnouncementType'] = announcement_type
-    query_data['Channel'] = channel
+    # 绑定表单已保留用户的多选渠道等输入，直接重渲染即可。
     return _render_announcement_create_page(
         request,
-        query_data=query_data,
+        query_data=request.POST,
         create_form=form,
         operation_results={
             'success_channels': success_channels,

@@ -172,7 +172,8 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - 公告功能独立于 IDIP 命令，不写入 `idip_commands.json`，不参与 `sync_commands`，也不伪装成 `GMCommand`。
 - 公告请求使用 `application/x-www-form-urlencoded`。发布/删除为 POST form data，查询为 GET query params。
 - 公告管理使用二级页签：查询公告、发布公告、删除公告、公告日志；查询结果中的删除按钮跳转到删除页预填字段，不直接 POST 删除。
-- 查询公告只使用平台、渠道单选下拉，不提交公告类型参数；发布公告、删除公告仍使用公告类型单选下拉，类型三选一：周更新公告、常驻公告、轮播图。
+- 查询公告只使用平台单选下拉、渠道多选，不提交公告类型参数；发布公告渠道也为多选，公告类型仍单选；删除公告渠道保持单选，类型三选一：周更新公告、常驻公告、轮播图。
+- 渠道多选仅作用于查询公告与发布公告表单（`_MultiChannelMixin`，`CheckboxSelectMultiple` 行内复选框组 + 全选开关，共享模板 `_announcement_channel_field.html`）；目录服不支持批量提交，多渠道按渠道逐个调用 `query_announcements` / `create_announcement`，每渠道各产出一个查询结果分组或一条 `AnnouncementLog`。`AnnouncementDeleteForm` 必须保持单渠道。
 - `ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS` 在 settings 层解析为去重列表；页面提交值必须严格来自配置原值。
 - 周更新公告发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。
 - 仅常驻公告显示并使用显示优先级；轮播图隐藏公告标题和公告正文，后端不要求填写并向目录服传空字符串；周更新公告和常驻公告隐藏图片字段，后端向目录服传空字符串。

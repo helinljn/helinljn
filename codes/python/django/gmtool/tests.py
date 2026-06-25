@@ -570,7 +570,7 @@ class AnnouncementFormTests(TestCase):
     def test_query_form_does_not_include_announcement_type(self):
         form = AnnouncementQueryForm(data={
             'Platform': 'Android',
-            'Channel': '小米',
+            'Channel': ['小米'],
             'AnnouncementType': '1',
         })
 
@@ -585,7 +585,7 @@ class AnnouncementFormTests(TestCase):
     def test_create_form_builds_reserve_1_only_for_persistent_announcement(self):
         form = AnnouncementCreateForm(data={
             'Platform': 'Android',
-            'Channel': '小米',
+            'Channel': ['小米'],
             'AnnouncementType': '2',
             'Title': '标题',
             'Content': '正文',
@@ -608,7 +608,7 @@ class AnnouncementFormTests(TestCase):
     def test_create_form_preserves_content_outer_whitespace(self):
         form = AnnouncementCreateForm(data={
             'Platform': 'Android',
-            'Channel': '小米',
+            'Channel': ['小米'],
             'AnnouncementType': '1',
             'Title': '标题',
             'Content': '\n  正文\n  ',
@@ -616,7 +616,7 @@ class AnnouncementFormTests(TestCase):
         })
 
         self.assertTrue(form.is_valid(), form.errors)
-        self.assertEqual(form.to_payload()['Content'], '\n  正文\n  ')
+        self.assertEqual(form.to_payload('小米')['Content'], '\n  正文\n  ')
 
     @override_settings(
         ANNOUNCEMENT_PLATFORMS=['Android'],
@@ -626,7 +626,7 @@ class AnnouncementFormTests(TestCase):
         for announcement_type in ('1', '3'):
             form = AnnouncementCreateForm(data={
                 'Platform': 'Android',
-                'Channel': '小米',
+                'Channel': ['小米'],
                 'AnnouncementType': announcement_type,
                 'Title': '标题',
                 'Content': '正文',
@@ -642,7 +642,7 @@ class AnnouncementFormTests(TestCase):
     def test_carousel_create_form_does_not_require_title_or_content(self):
         form = AnnouncementCreateForm(data={
             'Platform': 'Android',
-            'Channel': '小米',
+            'Channel': ['小米'],
             'AnnouncementType': '3',
             'Priority': '-1',
             'Image_1': 'https://example.com/a.png',
@@ -650,7 +650,7 @@ class AnnouncementFormTests(TestCase):
         })
 
         self.assertTrue(form.is_valid(), form.errors)
-        payload = form.to_payload()
+        payload = form.to_payload('小米')
         self.assertEqual(payload['Title'], '')
         self.assertEqual(payload['Content'], '')
         self.assertEqual(payload['Image_1'], 'https://example.com/a.png')
@@ -665,7 +665,7 @@ class AnnouncementFormTests(TestCase):
         for announcement_type in ('1', '2'):
             form = AnnouncementCreateForm(data={
                 'Platform': 'Android',
-                'Channel': '小米',
+                'Channel': ['小米'],
                 'AnnouncementType': announcement_type,
                 'Title': '标题',
                 'Content': '正文',
@@ -679,7 +679,7 @@ class AnnouncementFormTests(TestCase):
             })
 
             self.assertTrue(form.is_valid(), form.errors)
-            payload = form.to_payload()
+            payload = form.to_payload('小米')
             self.assertEqual(payload['Image_1'], '')
             self.assertEqual(payload['ImageLink_1'], '')
             self.assertEqual(payload['Image_2'], '')
@@ -694,7 +694,7 @@ class AnnouncementFormTests(TestCase):
     def test_persistent_create_form_rejects_negative_priority(self):
         form = AnnouncementCreateForm(data={
             'Platform': 'Android',
-            'Channel': '小米',
+            'Channel': ['小米'],
             'AnnouncementType': '2',
             'Title': '标题',
             'Content': '正文',
@@ -711,7 +711,7 @@ class AnnouncementFormTests(TestCase):
     def test_weekly_create_form_requires_title_and_content(self):
         form = AnnouncementCreateForm(data={
             'Platform': 'Android',
-            'Channel': '小米',
+            'Channel': ['小米'],
             'AnnouncementType': '1',
             'Priority': '0',
         })
@@ -1325,6 +1325,103 @@ class AnnouncementViewTests(TestCase):
         self.assertContains(response, 'Channel=%E5%B0%8F%E7%B1%B3')
         self.assertContains(response, 'announcement-log-detail-btn')
         self.assertContains(response, '/gmtool/api/v1/announcements/logs/')
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
+    )
+    @patch('gmtool.announcement_views.query_announcements')
+    def test_query_multi_channel_calls_client_per_channel(self, mocked_query):
+        # 目录服不支持批量查询：每个渠道各调一次，结果分组返回
+        mocked_query.side_effect = [
+            ([{'AnnouncementId': '1', 'AnnouncementType': '2'}], '', '[]', ''),
+            ([{'AnnouncementId': '2', 'AnnouncementType': '2'}], '', '[]', ''),
+        ]
+
+        response = self.client.get(reverse('gmtool:announcement_query'), {
+            'Platform': 'Android',
+            'Channel': ['小米', 'VIVO'],
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mocked_query.call_count, 2)
+        mocked_query.assert_any_call('Android', '小米')
+        mocked_query.assert_any_call('Android', 'VIVO')
+        self.assertEqual(len(response.context['query_results']), 2)
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
+    )
+    @patch('gmtool.announcement_views.query_announcements')
+    def test_query_multi_channel_partial_failure_groups_results_and_failures(self, mocked_query):
+        mocked_query.side_effect = [
+            ([{'AnnouncementId': '1', 'AnnouncementType': '2'}], '', '[]', ''),
+            (None, 'FAIL: busy', 'FAIL: busy', 'failed'),
+        ]
+
+        response = self.client.get(reverse('gmtool:announcement_query'), {
+            'Platform': 'Android',
+            'Channel': ['小米', 'VIVO'],
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['query_results']), 1)
+        self.assertEqual(len(response.context['query_failures']), 1)
+        self.assertEqual(response.context['query_failures'][0]['channel'], 'VIVO')
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
+    )
+    @patch('gmtool.announcement_views.log_operation')
+    @patch('gmtool.announcement_views.create_announcement')
+    def test_create_multi_channel_sends_per_channel_and_logs_each(self, mocked_create, mocked_audit):
+        # 目录服不支持批量发布：每个渠道各发一次，各记一条日志
+        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+
+        payload = self._valid_create_payload()
+        payload['Channel'] = ['小米', 'VIVO']
+        response = self.client.post(reverse('gmtool:announcement_create'), data=payload)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(mocked_create.call_count, 2)
+        sent_channels = sorted(call.args[0]['Channel'] for call in mocked_create.call_args_list)
+        self.assertEqual(sent_channels, ['VIVO', '小米'])
+        self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 2)
+        detail = mocked_audit.call_args.kwargs['detail']
+        self.assertEqual(sorted(detail['success_channels']), ['VIVO', '小米'])
+        self.assertEqual(detail['remote_call_count'], 2)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
+    )
+    @patch('gmtool.announcement_views.log_operation')
+    @patch('gmtool.announcement_views.create_announcement')
+    def test_create_multi_channel_partial_failure_aggregates(self, mocked_create, mocked_audit):
+        mocked_create.side_effect = [
+            ({'result': 'OK'}, '', 'OK', ''),
+            (None, 'FAIL: busy', 'FAIL: busy', 'failed'),
+        ]
+
+        payload = self._valid_create_payload()
+        payload['Channel'] = ['小米', 'VIVO']
+        response = self.client.post(reverse('gmtool:announcement_create'), data=payload)
+
+        # 部分失败：停留在发布页（400）并展示失败明细
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(mocked_create.call_count, 2)
+        detail = mocked_audit.call_args.kwargs['detail']
+        self.assertEqual(detail['success_channels'], ['小米'])
+        self.assertEqual(len(detail['failed_channels']), 1)
+        self.assertEqual(detail['failed_channels'][0]['channel'], 'VIVO')
+        self.assertEqual(detail['status'], 'failed')
 
 
 class AnnouncementPermissionAssignmentTests(TestCase):

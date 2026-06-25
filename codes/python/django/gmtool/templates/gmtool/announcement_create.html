@@ -36,10 +36,8 @@
                 {{ create_form.Platform }}
                 {{ create_form.Platform.errors }}
             </div>
-            <div class="col-md-3">
-                <label class="form-label">{{ create_form.Channel.label }}</label>
-                {{ create_form.Channel }}
-                {{ create_form.Channel.errors }}
+            <div class="col-md-6">
+                {% include "gmtool/_announcement_channel_field.html" with channel_field=create_form.Channel %}
             </div>
             <div class="col-md-3">
                 <label class="form-label">{{ create_form.AnnouncementType.label }}</label>

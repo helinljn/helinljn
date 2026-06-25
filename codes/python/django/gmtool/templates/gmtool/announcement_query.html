@@ -63,10 +63,8 @@
                 {{ query_form.Platform }}
                 {{ query_form.Platform.errors }}
             </div>
-            <div class="col-md-3">
-                <label class="form-label">{{ query_form.Channel.label }}</label>
-                {{ query_form.Channel }}
-                {{ query_form.Channel.errors }}
+            <div class="col-md-6">
+                {% include "gmtool/_announcement_channel_field.html" with channel_field=query_form.Channel %}
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100" {% if announcement_config_errors %}disabled{% endif %}>

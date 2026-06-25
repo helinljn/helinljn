@@ -59,8 +59,21 @@ class AnnouncementBaseForm(forms.Form):
         return cleaned_data
 
 
-class AnnouncementQueryForm(AnnouncementBaseForm):
-    """公告查询表单。"""
+class _MultiChannelMixin(forms.Form):
+    """将渠道字段改为多选（仅查询/发布使用，删除仍为单选）。
+
+    choices 仍由 AnnouncementBaseForm.__init__ 统一填充。
+    渲染为行内复选框组，模板侧另提供「全选」开关。
+    """
+    Channel = forms.MultipleChoiceField(
+        label=_('渠道'),
+        choices=(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input channel-check'}),
+    )
+
+
+class AnnouncementQueryForm(_MultiChannelMixin, AnnouncementBaseForm):
+    """公告查询表单。渠道支持多选。"""
 
 
 class AnnouncementTypedForm(AnnouncementBaseForm):
@@ -72,7 +85,7 @@ class AnnouncementTypedForm(AnnouncementBaseForm):
     )
 
 
-class AnnouncementCreateForm(AnnouncementTypedForm):
+class AnnouncementCreateForm(_MultiChannelMixin, AnnouncementTypedForm):
     """公告发布表单。"""
     Title = forms.CharField(
         label=_('公告标题'),
@@ -130,10 +143,12 @@ class AnnouncementCreateForm(AnnouncementTypedForm):
             cleaned_data['Priority'] = 0
         return cleaned_data
 
-    def to_payload(self, channel=None):
-        """生成单渠道远端发布 payload。"""
+    def to_payload(self, channel):
+        """生成单渠道远端发布 payload。
+
+        channel 由调用方按渠道循环显式传入（cleaned_data['Channel'] 现为列表）。
+        """
         announcement_type = self.cleaned_data['AnnouncementType']
-        channel = channel or self.cleaned_data['Channel']
         reserve_1 = ''
         if announcement_type == '2':
             reserve_1 = json.dumps(
