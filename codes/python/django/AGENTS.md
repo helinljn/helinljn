@@ -171,8 +171,8 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `send_idip_command(command, params)` 返回 `(response_data, error_message, request_content_str, error_type)`，兼容 `status/id/json` 包装响应和旧版直接 JSON 响应。
 - 公告功能独立于 IDIP 命令，不写入 `idip_commands.json`，不参与 `sync_commands`，也不伪装成 `GMCommand`。
 - 公告请求使用 `application/x-www-form-urlencoded`。发布/删除为 POST form data，查询为 GET query params。
-- 公告管理使用二级页签：查询公告、发布公告、删除公告、公告日志；查询结果中的删除按钮跳转到删除页预填字段，不直接 POST 删除。
-- 查询公告只使用平台单选下拉、渠道多选，不提交公告类型参数；发布公告渠道也为多选，公告类型仍单选；删除公告渠道保持单选，类型三选一：周更新公告、常驻公告、轮播图。
+- 公告管理使用二级页签：查询公告、发布公告、公告日志；没有独立的删除公告页，删除在查询结果中进行：单条删除按钮和「批量删除」都复用 `announcement_batch_delete` 端点（POST `items` 四元组列表），不再跳转独立删除页。
+- 查询公告只使用平台单选下拉、渠道多选，不提交公告类型参数；发布公告渠道也为多选，公告类型仍单选。删除复用 `AnnouncementDeleteForm` 校验每个 `items` 四元组（单渠道、类型三选一：周更新公告、常驻公告、轮播图），不在页面上单独选渠道。
 - 渠道多选仅作用于查询公告与发布公告表单（`_MultiChannelMixin`，`CheckboxSelectMultiple` 行内复选框组 + 全选开关，共享模板 `_announcement_channel_field.html`）；目录服不支持批量提交，多渠道按渠道逐个调用 `query_announcements` / `create_announcement`，每渠道各产出一个查询结果分组或一条 `AnnouncementLog`。`AnnouncementDeleteForm` 必须保持单渠道。
 - `ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS` 在 settings 层解析为去重列表；页面提交值必须严格来自配置原值。
 - 周更新公告发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。

@@ -129,7 +129,7 @@ function updateAnnouncementCreateFields(form) {
 function confirmWeeklyReplacement(form) {
     var typeField = form.querySelector('[name="AnnouncementType"]');
     if (typeField && typeField.value === '1') {
-        return confirm('{% trans "发布新的周更新公告会先删除同平台同渠道已有周更新公告，确认继续？" %}');
+        return confirm('{% trans "发布新的周更新公告会先删除所选平台、各所选渠道下已有的周更新公告，确认继续？" %}');
     }
     return true;
 }

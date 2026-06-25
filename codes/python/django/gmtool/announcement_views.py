@@ -437,7 +437,6 @@ def announcement_create(request):
     # 绑定表单已保留用户的多选渠道等输入，直接重渲染即可。
     return _render_announcement_create_page(
         request,
-        query_data=request.POST,
         create_form=form,
         operation_results={
             'success_channels': success_channels,
