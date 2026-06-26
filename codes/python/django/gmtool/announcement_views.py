@@ -1,10 +1,8 @@
 """公告管理相关视图。"""
-import logging
 from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
-from django.db import DatabaseError
 from django.http import QueryDict
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -12,11 +10,16 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 from .announcement_client import (
-    create_announcement,
     delete_announcement,
     get_announcement_base_url_error,
     query_announcements,
 )
+from .announcement_log_services import (
+    ANNOUNCEMENT_LOG_PERSISTENCE_WARNING,
+    announcement_status_from_error,
+    write_announcement_log,
+)
+from .announcement_review_services import submit_announcement_reviews
 from .audit_log import log_operation
 from .decorators import announcement_permission_required
 from .forms import (
@@ -28,10 +31,6 @@ from .forms import (
 from .models import AnnouncementLog
 from .query_utils import apply_time_range_filters_to_queryset, paginate_request_queryset
 from .security_utils import get_client_ip
-
-logger = logging.getLogger(__name__)
-
-_ANNOUNCEMENT_LOG_PERSISTENCE_WARNING = _('公告远端操作已完成，但本地公告日志记录失败，请联系管理员核查应用日志')
 
 
 def _has_query_input(data):
@@ -101,11 +100,7 @@ def _announcement_config_errors():
 
 
 def _status_from_error(error_message, error_type):
-    if not error_message:
-        return 'success'
-    if error_type == 'timeout':
-        return 'timeout'
-    return 'failed'
+    return announcement_status_from_error(error_message, error_type)
 
 
 def _write_announcement_log(
@@ -122,32 +117,20 @@ def _write_announcement_log(
     status,
     error_message,
 ):
-    try:
-        AnnouncementLog.objects.create(
-            user=request.user,
-            operator_username=request.user.username,
-            action=action,
-            platform=platform,
-            channel=channel,
-            announcement_type=announcement_type,
-            announcement_id=str(announcement_id or ''),
-            request_data=request_data,
-            response_data=response_data,
-            raw_response=raw_response or '',
-            status=status,
-            error_message=error_message or '',
-            ip_address=get_client_ip(request),
-        )
-    except DatabaseError as exc:
-        logger.exception(
-            'Announcement log persistence failed: action=%s user=%s status=%s error=%s',
-            action,
-            request.user.username,
-            status,
-            exc,
-        )
-        return False
-    return True
+    return write_announcement_log(
+        request.user,
+        get_client_ip(request),
+        action=action,
+        platform=platform,
+        channel=channel,
+        announcement_type=announcement_type,
+        announcement_id=announcement_id,
+        request_data=request_data,
+        response_data=response_data,
+        raw_response=raw_response,
+        status=status,
+        error_message=error_message,
+    )
 
 
 def _query_for_form(query_form):
@@ -257,17 +240,10 @@ def _render_announcement_create_page(
             'active_announcement_tab': 'create',
             'create_form': create_form,
             'operation_results': operation_results or {},
-            'announcement_config_errors': _announcement_config_errors(),
+            'announcement_config_errors': get_announcement_config_errors(),
         },
         status=status,
     )
-
-
-def _append_failure(failures, channel, error_message):
-    failures.append({
-        'channel': channel,
-        'error': str(error_message),
-    })
 
 
 @announcement_permission_required
@@ -294,13 +270,13 @@ def announcement_query(request):
 @announcement_permission_required
 @require_http_methods(['GET', 'POST'])
 def announcement_create(request):
-    """发布公告。"""
+    """提交公告审核。"""
     if request.method == 'GET':
         return _render_announcement_create_page(request)
 
     form = AnnouncementCreateForm(request.POST)
     if not form.is_valid():
-        messages.error(request, _('公告发布表单校验失败，请检查输入'))
+        messages.error(request, _('公告提交审核表单校验失败，请检查输入'))
         return _render_announcement_create_page(
             request,
             query_data=request.POST,
@@ -308,140 +284,24 @@ def announcement_create(request):
             status=400,
         )
 
-    platform = form.cleaned_data['Platform']
-    channels = form.cleaned_data['Channel']
-    announcement_type = form.cleaned_data['AnnouncementType']
-    client_ip = get_client_ip(request)
-    success_channels = []
-    failed_channels = []
-    remote_call_count = 0
-    log_persisted = True
-
-    for channel in channels:
-        if announcement_type == '1':
-            old_announcements, query_error, _raw_response, _error_type = query_announcements(
-                platform,
-                channel,
-            )
-            if query_error:
-                _append_failure(failed_channels, channel, query_error)
-                continue
-
-            delete_failed = False
-            for old_announcement in old_announcements or []:
-                old_type = str(old_announcement.get('AnnouncementType') or '')
-                if not old_type:
-                    _append_failure(failed_channels, channel, _('旧公告缺少公告类型，已停止发布以避免误删'))
-                    delete_failed = True
-                    break
-                if old_type != announcement_type:
-                    continue
-
-                old_announcement_id = old_announcement.get('AnnouncementId')
-                if not old_announcement_id or str(old_announcement_id) == '-1':
-                    _append_failure(failed_channels, channel, _('旧周更新公告缺少有效公告 ID'))
-                    delete_failed = True
-                    break
-
-                old_channel = old_announcement.get('Channel') or channel
-                delete_response, delete_error, delete_raw, delete_error_type = delete_announcement(
-                    platform,
-                    old_channel,
-                    old_type,
-                    old_announcement_id,
-                )
-                remote_call_count += 1
-                delete_status = _status_from_error(delete_error, delete_error_type)
-                delete_log_persisted = _write_announcement_log(
-                    request,
-                    action='delete',
-                    platform=platform,
-                    channel=old_channel,
-                    announcement_type=old_type,
-                    announcement_id=old_announcement_id,
-                    request_data={
-                        'Platform': platform,
-                        'Channel': old_channel,
-                        'AnnouncementType': old_type,
-                        'AnnouncementId': str(old_announcement_id),
-                    },
-                    response_data=delete_response,
-                    raw_response=delete_raw,
-                    status=delete_status,
-                    error_message=delete_error,
-                )
-                log_persisted = log_persisted and delete_log_persisted
-                if delete_error:
-                    _append_failure(failed_channels, channel, delete_error)
-                    delete_failed = True
-                    break
-
-            if delete_failed:
-                continue
-
-        payload = form.to_payload(channel)
-        response_data, error_message, raw_response, error_type = create_announcement(payload)
-        remote_call_count += 1
-        status = _status_from_error(error_message, error_type)
-        create_log_persisted = _write_announcement_log(
-            request,
-            action='create',
-            platform=platform,
-            channel=channel,
-            announcement_type=announcement_type,
-            announcement_id=payload['AnnouncementId'],
-            request_data=payload,
-            response_data=response_data,
-            raw_response=raw_response,
-            status=status,
-            error_message=error_message,
-        )
-        log_persisted = log_persisted and create_log_persisted
-
-        if error_message:
-            _append_failure(failed_channels, channel, error_message)
-        else:
-            success_channels.append(channel)
-
-    overall_status = 'success' if success_channels and not failed_channels else 'failed'
-    log_operation(
-        'announcement',
-        'create',
-        user=request.user,
-        ip_address=client_ip,
-        detail={
-            'platform': platform,
-            'channels': channels,
-            'announcement_type': announcement_type,
-            'announcement_id': '-1',
-            'remote_call_count': remote_call_count,
-            'success_channels': success_channels,
-            'failed_channels': failed_channels,
-            'status': overall_status,
-            'log_persisted': log_persisted,
-        },
-    )
-
-    if not log_persisted:
-        messages.warning(request, _ANNOUNCEMENT_LOG_PERSISTENCE_WARNING)
+    operation_results = submit_announcement_reviews(form, request.user, get_client_ip(request))
+    success_channels = operation_results['success_channels']
+    failed_channels = operation_results['failed_channels']
 
     if success_channels and not failed_channels:
-        messages.success(request, _('公告发布成功'))
-        return _redirect_to_announcement_query(platform, success_channels)
+        messages.success(request, _('公告已提交审核'))
+        return redirect('gmtool:review_announcement_list')
 
     if success_channels:
-        messages.warning(request, _('公告发布部分失败，请查看失败明细'))
+        messages.warning(request, _('公告审核部分提交失败，请查看失败明细'))
     else:
-        messages.error(request, _('公告发布失败，请查看失败明细'))
+        messages.error(request, _('公告提交审核失败，请查看失败明细'))
 
     # 绑定表单已保留用户的多选渠道等输入，直接重渲染即可。
     return _render_announcement_create_page(
         request,
         create_form=form,
-        operation_results={
-            'success_channels': success_channels,
-            'failed_channels': failed_channels,
-        },
+        operation_results=operation_results,
         status=400,
     )
 
@@ -525,7 +385,7 @@ def announcement_batch_delete(request):
     )
 
     if not log_persisted:
-        messages.warning(request, _ANNOUNCEMENT_LOG_PERSISTENCE_WARNING)
+        messages.warning(request, ANNOUNCEMENT_LOG_PERSISTENCE_WARNING)
 
     if not failed_items:
         messages.success(request, _('批量删除成功：共 %(n)s 条') % {'n': len(success_items)})

@@ -1,14 +1,23 @@
 {% extends "gmtool/base.html" %}
 {% load i18n %}
 
-{% block title %}{% trans "发布公告" %} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block title %}{% trans "提交公告审核" %} - {% trans "GM命令管理系统" %}{% endblock %}
 {% block nav_announcements %}active{% endblock %}
 {% block page_pretitle %}{% trans "公告" %}{% endblock %}
-{% block page_title %}{% trans "发布公告" %}{% endblock %}
+{% block page_title %}{% trans "提交公告审核" %}{% endblock %}
 
 {% block content %}
 {% include "gmtool/_announcement_tabs.html" %}
 {% include "gmtool/_announcement_config_errors.html" %}
+
+{% if operation_results.success_channels %}
+<div class="alert alert-success">
+    <div class="fw-bold mb-2">{% trans "已提交审核渠道" %}</div>
+    {% for channel in operation_results.success_channels %}
+    <span class="badge bg-success-lt me-1">{{ channel }}</span>
+    {% endfor %}
+</div>
+{% endif %}
 
 {% if operation_results.failed_channels %}
 <div class="alert alert-warning">
@@ -21,7 +30,7 @@
 
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>{% trans "发布公告" %}</h3>
+        <h3 class="card-title"><i class="ti ti-speakerphone me-2"></i>{% trans "提交审核" %}</h3>
     </div>
     <div class="card-body">
         <form method="post" action="{% url 'gmtool:announcement_create' %}" class="row g-3" id="announcement-create-form">
@@ -62,30 +71,41 @@
             <div class="col-md-4 js-image-field">
                 <label class="form-label">Image_1</label>
                 {{ create_form.Image_1 }}
+                {{ create_form.Image_1.errors }}
             </div>
             <div class="col-md-4 js-image-field">
                 <label class="form-label">Image_2</label>
                 {{ create_form.Image_2 }}
+                {{ create_form.Image_2.errors }}
             </div>
             <div class="col-md-4 js-image-field">
                 <label class="form-label">Image_3</label>
                 {{ create_form.Image_3 }}
+                {{ create_form.Image_3.errors }}
             </div>
             <div class="col-md-4 js-image-field">
                 <label class="form-label">ImageLink_1</label>
                 {{ create_form.ImageLink_1 }}
+                {{ create_form.ImageLink_1.errors }}
             </div>
             <div class="col-md-4 js-image-field">
                 <label class="form-label">ImageLink_2</label>
                 {{ create_form.ImageLink_2 }}
+                {{ create_form.ImageLink_2.errors }}
             </div>
             <div class="col-md-4 js-image-field">
                 <label class="form-label">ImageLink_3</label>
                 {{ create_form.ImageLink_3 }}
+                {{ create_form.ImageLink_3.errors }}
+            </div>
+            <div class="col-12 js-weekly-review-warning">
+                <div class="alert alert-warning mb-0">
+                    <i class="ti ti-alert-triangle me-2"></i>{% trans "审核通过后会替换所选平台、渠道下已有周更新公告" %}
+                </div>
             </div>
             <div class="col-12 d-flex justify-content-end">
                 <button type="submit" class="btn btn-success" onclick="return confirmWeeklyReplacement(this.form);" {% if announcement_config_errors %}disabled{% endif %}>
-                    <i class="ti ti-send me-1"></i>{% trans "发布公告" %}
+                    <i class="ti ti-send me-1"></i>{% trans "提交审核" %}
                 </button>
             </div>
         </form>
@@ -98,9 +118,11 @@ function updateAnnouncementCreateFields(form) {
     var titleField = form.querySelector('[name="Title"]');
     var contentField = form.querySelector('[name="Content"]');
     var priorityField = form.querySelector('[name="Priority"]');
+    var image1Field = form.querySelector('[name="Image_1"]');
     var announcementType = typeField ? typeField.value : '';
     var isCarousel = announcementType === '3';
     var isPersistent = announcementType === '2';
+    var isWeekly = announcementType === '1';
 
     form.querySelectorAll('.js-title-content-field').forEach(function (field) {
         field.classList.toggle('d-none', isCarousel);
@@ -114,6 +136,9 @@ function updateAnnouncementCreateFields(form) {
             input.disabled = !isCarousel;
         });
     });
+    form.querySelectorAll('.js-weekly-review-warning').forEach(function (field) {
+        field.classList.toggle('d-none', !isWeekly);
+    });
 
     if (titleField) {
         titleField.required = !isCarousel;
@@ -124,12 +149,15 @@ function updateAnnouncementCreateFields(form) {
     if (priorityField) {
         priorityField.required = false;
     }
+    if (image1Field) {
+        image1Field.required = isCarousel;
+    }
 }
 
 function confirmWeeklyReplacement(form) {
     var typeField = form.querySelector('[name="AnnouncementType"]');
     if (typeField && typeField.value === '1') {
-        return confirm('{% trans "发布新的周更新公告会先删除所选平台、各所选渠道下已有的周更新公告，确认继续？" %}');
+        return confirm('{% trans "确认提交此周更新公告审核？审核通过后会替换所选平台、渠道下已有周更新公告。" %}');
     }
     return true;
 }

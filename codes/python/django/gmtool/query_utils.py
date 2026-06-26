@@ -12,6 +12,8 @@ def parse_time_range_filters(request, default_days=7):
     end_time_filter = request.GET.get('end_time', '')
 
     if not start_time_filter and not end_time_filter:
+        if default_days is None:
+            return '', '', None, None
         default_start = timezone.now() - timedelta(days=default_days)
         start_time_filter = default_start.strftime('%Y-%m-%dT%H:%M')
         return start_time_filter, end_time_filter, default_start, None

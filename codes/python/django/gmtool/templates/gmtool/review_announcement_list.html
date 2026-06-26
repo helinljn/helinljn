@@ -1,0 +1,389 @@
+{% extends "gmtool/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "公告审核" %} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+{% block page_pretitle %}{% trans "审核" %}{% endblock %}
+{% block page_title %}{% trans "公告审核" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+.review-preview {
+    max-width: 240px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.review-actions {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.review-actions form {
+    margin: 0;
+}
+.review-error-preview {
+    max-width: 110px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "gmtool/_review_tabs.html" %}
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">{% trans "筛选条件" %}</h3>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">{% trans "状态" %}</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="" {% if status_filter == '' %}selected{% endif %}>{% trans "全部状态" %}</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "平台" %}</label>
+                <select name="Platform" class="form-select form-select-sm">
+                    <option value="">{% trans "全部平台" %}</option>
+                    {% for platform in platforms %}
+                    <option value="{{ platform }}" {% if platform_filter == platform %}selected{% endif %}>{{ platform }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "渠道" %}</label>
+                <select name="Channel" class="form-select form-select-sm">
+                    <option value="">{% trans "全部渠道" %}</option>
+                    {% for channel in channels %}
+                    <option value="{{ channel }}" {% if channel_filter == channel %}selected{% endif %}>{{ channel }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "公告类型" %}</label>
+                <select name="AnnouncementType" class="form-select form-select-sm">
+                    <option value="">{% trans "全部类型" %}</option>
+                    {% for value, label in type_choices %}
+                    <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "提交人" %}</label>
+                <input type="text" name="submitter" class="form-control form-control-sm" value="{{ submitter_filter }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "开始时间" %}</label>
+                <input type="datetime-local" name="start_time" class="form-control form-control-sm" value="{{ start_time_filter }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{% trans "结束时间" %}</label>
+                <input type="datetime-local" name="end_time" class="form-control form-control-sm" value="{{ end_time_filter }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary w-100">
+                    <i class="ti ti-search me-1"></i>{% trans "筛选" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table" style="table-layout:fixed;">
+            <thead>
+                <tr>
+                    <th style="width:90px;">{% trans "待审核ID" %}</th>
+                    <th style="width:90px;">{% trans "平台" %}</th>
+                    <th style="width:110px;">{% trans "渠道" %}</th>
+                    <th style="width:110px;">{% trans "公告类型" %}</th>
+                    <th style="width:13%;">{% trans "公告标题" %}</th>
+                    <th>{% trans "公告正文/图片" %}</th>
+                    <th style="width:100px;">{% trans "显示优先级" %}</th>
+                    <th style="width:95px;">{% trans "状态" %}</th>
+                    <th style="width:110px;">{% trans "提交人" %}</th>
+                    <th style="width:150px;">{% trans "提交时间" %}</th>
+                    <th style="width:190px;">{% trans "操作" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in page_obj %}
+                <tr>
+                    <td><code>{{ review.id }}</code></td>
+                    <td>{{ review.platform }}</td>
+                    <td>{{ review.channel }}</td>
+                    <td>{{ review.get_announcement_type_display }}</td>
+                    <td>
+                        {% if review.announcement_type == '3' %}
+                        -
+                        {% else %}
+                        <span class="review-preview" title="{{ review.title }}">{{ review.title|truncatechars:18|default:"-" }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if review.announcement_type == '3' %}
+                        <span class="review-preview" title="{{ review.image_1 }}">{{ review.image_1|truncatechars:36|default:"-" }}</span>
+                        {% else %}
+                        <span class="review-preview" title="{{ review.content }}">{{ review.content|truncatechars:36|default:"-" }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if review.announcement_type == '2' %}
+                        {{ review.priority }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if review.status == 'pending' %}
+                        <span class="badge bg-warning-lt">{{ review.get_status_display }}</span>
+                        {% elif review.status == 'approved' %}
+                        <span class="badge bg-success-lt">{{ review.get_status_display }}</span>
+                        {% elif review.status == 'failed' %}
+                        <span class="badge bg-danger-lt">{{ review.get_status_display }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary-lt">{{ review.get_status_display }}</span>
+                        {% endif %}
+                        {% if review.error_message %}
+                        <span class="review-error-preview text-danger small mt-1" title="{{ review.error_message }}">
+                            {{ review.error_message|truncatechars:18 }}
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ review.submitter_username|default:"-" }}</td>
+                    <td class="text-muted">{{ review.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        <div class="review-actions">
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-info review-detail-btn"
+                                    title="{% trans '查看' %}"
+                                    data-review-id="{{ review.id }}"
+                                    data-platform="{{ review.platform }}"
+                                    data-channel="{{ review.channel }}"
+                                    data-type="{{ review.get_announcement_type_display }}"
+                                    data-title="{{ review.title|default:'' }}"
+                                    data-content="{{ review.content|default:'' }}"
+                                    data-priority="{{ review.priority }}"
+                                    data-status="{{ review.get_status_display }}"
+                                    data-submitter="{{ review.submitter_username|default:'' }}"
+                                    data-created-at="{{ review.created_at|date:"Y-m-d H:i:s" }}"
+                                    data-error-message="{{ review.error_message|default:'' }}"
+                                    data-image-1="{{ review.image_1|default:'' }}"
+                                    data-image-link-1="{{ review.image_link_1|default:'' }}"
+                                    data-image-2="{{ review.image_2|default:'' }}"
+                                    data-image-link-2="{{ review.image_link_2|default:'' }}"
+                                    data-image-3="{{ review.image_3|default:'' }}"
+                                    data-image-link-3="{{ review.image_link_3|default:'' }}"
+                                    data-payload="{{ review.payload_json }}">
+                                <i class="ti ti-eye"></i>
+                            </button>
+                            {% if review.submitter_id == request.user.id %}
+                            <span class="text-muted small">{% trans "本人提交" %}</span>
+                            {% elif review.status == 'pending' %}
+                            <form method="post" action="{% url 'gmtool:review_announcement_approve' review_id=review.id %}" onsubmit="return confirm('{% trans "确认通过此条公告审核？通过后将调用目录服发布接口。" %}');">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ current_review_path }}">
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="{% trans '通过' %}">
+                                    <i class="ti ti-check"></i>
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'gmtool:review_announcement_reject' review_id=review.id %}" onsubmit="return confirmRejectReview(this);">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ current_review_path }}">
+                                <input type="hidden" name="review_comment" value="">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans '作废' %}">
+                                    <i class="ti ti-ban"></i>
+                                </button>
+                            </form>
+                            {% elif review.status == 'failed' %}
+                            <form method="post" action="{% url 'gmtool:review_announcement_retry' review_id=review.id %}" onsubmit="return confirm('{% trans "确认重试发布此条公告？重试后将再次调用目录服发布接口。" %}');">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ current_review_path }}">
+                                <button type="submit" class="btn btn-sm btn-outline-primary" title="{% trans '重试' %}">
+                                    <i class="ti ti-refresh"></i>
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'gmtool:review_announcement_reject' review_id=review.id %}" onsubmit="return confirmRejectReview(this);">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ current_review_path }}">
+                                <input type="hidden" name="review_comment" value="">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans '作废' %}">
+                                    <i class="ti ti-ban"></i>
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="11" class="text-center text-muted py-4">{% trans "暂无公告审核记录" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="card-footer d-flex align-items-center justify-content-center">
+    <ul class="pagination m-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if review_filter_query_string %}&{{ review_filter_query_string }}{% endif %}">
+                <i class="ti ti-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in elided_page_range %}
+        {% if num == page_obj.paginator.ELLIPSIS %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% else %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if review_filter_query_string %}&{{ review_filter_query_string }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if review_filter_query_string %}&{{ review_filter_query_string }}{% endif %}">
+                <i class="ti ti-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+
+<div id="reviewDetailOverlay" class="detail-overlay" data-review-detail-close></div>
+<div id="reviewDetailModal" class="detail-modal">
+    <div class="detail-modal-header">
+        <h5 class="m-0"><i class="ti ti-file-text me-2"></i>{% trans "公告审核详情" %}</h5>
+        <button type="button" class="detail-modal-close" data-review-detail-close>&times;</button>
+    </div>
+    <div id="reviewDetailBody" class="detail-modal-body"></div>
+</div>
+
+{% trans "基本信息" as basic_title %}
+{% trans "标题" as title_text %}
+{% trans "正文" as content_text %}
+{% trans "图片地址" as images_text %}
+{% trans "失败原因" as error_text %}
+{% trans "原始 payload" as payload_text %}
+{% trans "无数据" as no_data_text %}
+{% trans "确认作废此条公告审核？作废后不会发布。" as reject_confirm_text %}
+{% trans "作废备注（可选）" as reject_comment_text %}
+
+<script>
+function escapeReviewHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+}
+
+function reviewValue(button, name) {
+    var value = button.getAttribute(name);
+    return value || '{{ no_data_text|escapejs }}';
+}
+
+function showReviewDetail(button) {
+    var basic = [
+        'ID: ' + reviewValue(button, 'data-review-id'),
+        '{% trans "平台" %}: ' + reviewValue(button, 'data-platform'),
+        '{% trans "渠道" %}: ' + reviewValue(button, 'data-channel'),
+        '{% trans "公告类型" %}: ' + reviewValue(button, 'data-type'),
+        '{% trans "显示优先级" %}: ' + reviewValue(button, 'data-priority'),
+        '{% trans "状态" %}: ' + reviewValue(button, 'data-status'),
+        '{% trans "提交人" %}: ' + reviewValue(button, 'data-submitter'),
+        '{% trans "提交时间" %}: ' + reviewValue(button, 'data-created-at')
+    ].join('\n');
+    var images = [
+        'Image_1: ' + reviewValue(button, 'data-image-1'),
+        'ImageLink_1: ' + reviewValue(button, 'data-image-link-1'),
+        'Image_2: ' + reviewValue(button, 'data-image-2'),
+        'ImageLink_2: ' + reviewValue(button, 'data-image-link-2'),
+        'Image_3: ' + reviewValue(button, 'data-image-3'),
+        'ImageLink_3: ' + reviewValue(button, 'data-image-link-3')
+    ].join('\n');
+    var html =
+        '<h4 class="detail-section-title">{{ basic_title|escapejs }}</h4>' +
+        '<pre class="detail-pre detail-pre-sm">' + escapeReviewHtml(basic) + '</pre>';
+
+    if ((button.getAttribute('data-title') || '') || (button.getAttribute('data-content') || '')) {
+        html +=
+            '<h4 class="detail-section-title">{{ title_text|escapejs }}</h4>' +
+            '<pre class="detail-pre detail-pre-sm">' + escapeReviewHtml(reviewValue(button, 'data-title')) + '</pre>' +
+            '<h4 class="detail-section-title">{{ content_text|escapejs }}</h4>' +
+            '<pre class="detail-pre">' + escapeReviewHtml(reviewValue(button, 'data-content')) + '</pre>';
+    } else {
+        html +=
+            '<h4 class="detail-section-title">{{ images_text|escapejs }}</h4>' +
+            '<pre class="detail-pre detail-pre-sm">' + escapeReviewHtml(images) + '</pre>';
+    }
+
+    html +=
+        (button.getAttribute('data-error-message') || '' ?
+            '<h4 class="detail-section-title">{{ error_text|escapejs }}</h4>' +
+            '<pre class="detail-pre detail-pre-sm">' + escapeReviewHtml(button.getAttribute('data-error-message')) + '</pre>' :
+            '') +
+        '<h4 class="detail-section-title">{{ payload_text|escapejs }}</h4>' +
+        '<pre class="detail-pre">' + escapeReviewHtml(reviewValue(button, 'data-payload')) + '</pre>';
+
+    document.getElementById('reviewDetailBody').innerHTML = html;
+    document.getElementById('reviewDetailOverlay').style.display = 'block';
+    document.getElementById('reviewDetailModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeReviewDetail() {
+    document.getElementById('reviewDetailOverlay').style.display = 'none';
+    document.getElementById('reviewDetailModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function confirmRejectReview(form) {
+    if (!confirm('{{ reject_confirm_text|escapejs }}')) {
+        return false;
+    }
+    var comment = prompt('{{ reject_comment_text|escapejs }}', '');
+    if (comment === null) {
+        return false;
+    }
+    var commentField = form.querySelector('[name="review_comment"]');
+    if (commentField) {
+        commentField.value = comment;
+    }
+    return true;
+}
+
+function bindReviewDetailButtons() {
+    document.querySelectorAll('.review-detail-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            showReviewDetail(button);
+        });
+    });
+    document.querySelectorAll('[data-review-detail-close]').forEach(function(button) {
+        button.addEventListener('click', closeReviewDetail);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindReviewDetailButtons);
+} else {
+    bindReviewDetailButtons();
+}
+</script>
+{% endblock %}

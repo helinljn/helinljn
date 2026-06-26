@@ -1,0 +1,18 @@
+{% extends "gmtool/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "走马灯审核" %} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+{% block page_pretitle %}{% trans "审核" %}{% endblock %}
+{% block page_title %}{% trans "走马灯审核" %}{% endblock %}
+
+{% block content %}
+{% include "gmtool/_review_tabs.html" %}
+
+<div class="card">
+    <div class="card-body text-center text-muted py-5">
+        <i class="ti ti-news fs-1 d-block mb-3"></i>
+        {% trans "该审核类型暂未接入" %}
+    </div>
+</div>
+{% endblock %}

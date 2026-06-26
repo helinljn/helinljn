@@ -19,7 +19,15 @@ from .context_processors import gmtool_permissions
 from .decorators import announcement_permission_required, has_announcement_permission
 from .forms import AnnouncementCreateForm, AnnouncementDeleteForm, AnnouncementQueryForm
 from .idip_client import send_idip_command
-from .models import AnnouncementLog, CommandLog, GMCommand, UserAnnouncementPermission, UserCommandPermission, UserProfile
+from .models import (
+    AnnouncementLog,
+    AnnouncementReview,
+    CommandLog,
+    GMCommand,
+    UserAnnouncementPermission,
+    UserCommandPermission,
+    UserProfile,
+)
 from .security_utils import get_client_ip
 
 
@@ -624,14 +632,17 @@ class AnnouncementFormTests(TestCase):
     )
     def test_create_form_uses_empty_reserve_1_for_weekly_and_carousel(self):
         for announcement_type in ('1', '3'):
-            form = AnnouncementCreateForm(data={
+            data = {
                 'Platform': 'Android',
                 'Channel': ['小米'],
                 'AnnouncementType': announcement_type,
                 'Title': '标题',
                 'Content': '正文',
                 'Priority': '0',
-            })
+            }
+            if announcement_type == '3':
+                data['Image_1'] = 'https://example.com/banner.png'
+            form = AnnouncementCreateForm(data=data)
             self.assertTrue(form.is_valid(), form.errors)
             self.assertEqual(form.to_payload('小米')['Reserve_1'], '')
 
@@ -719,6 +730,21 @@ class AnnouncementFormTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn('Title', form.errors)
         self.assertIn('Content', form.errors)
+
+    @override_settings(
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米'],
+    )
+    def test_carousel_create_form_requires_image_1(self):
+        form = AnnouncementCreateForm(data={
+            'Platform': 'Android',
+            'Channel': ['小米'],
+            'AnnouncementType': '3',
+            'Priority': '0',
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('Image_1', form.errors)
 
     @override_settings(
         ANNOUNCEMENT_PLATFORMS=['Android'],
@@ -927,41 +953,41 @@ class AnnouncementViewTests(TestCase):
         create_response = self.client.get(reverse('gmtool:announcement_create'))
 
         self.assertEqual(create_response.status_code, 200)
-        self.assertContains(create_response, '发布公告')
+        self.assertContains(create_response, '提交审核')
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
     )
-    @patch('gmtool.announcement_views.log_operation')
-    @patch('gmtool.announcement_views.create_announcement')
-    def test_create_single_channel_writes_log_per_remote_call(self, mocked_create, mocked_audit):
-        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
-
+    @patch('gmtool.announcement_review_services.create_announcement')
+    @patch('gmtool.announcement_review_services.query_announcements')
+    def test_create_single_channel_submits_review_without_remote_call(self, mocked_query, mocked_create):
         response = self.client.post(
             reverse('gmtool:announcement_create'),
             data=self._valid_create_payload(channel='小米'),
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertNotIn('AnnouncementType', response['Location'])
-        mocked_create.assert_called_once()
-        self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 1)
-        detail = mocked_audit.call_args.kwargs['detail']
-        self.assertEqual(detail['success_channels'], ['小米'])
-        self.assertEqual(detail['remote_call_count'], 1)
+        self.assertEqual(response['Location'], reverse('gmtool:review_announcement_list'))
+        mocked_query.assert_not_called()
+        mocked_create.assert_not_called()
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
+        review = AnnouncementReview.objects.get()
+        self.assertEqual(review.status, 'pending')
+        self.assertEqual(review.platform, 'Android')
+        self.assertEqual(review.channel, '小米')
+        self.assertEqual(review.announcement_type, '2')
+        self.assertEqual(review.title, '维护公告')
+        self.assertEqual(review.payload['Channel'], '小米')
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
-    @patch('gmtool.announcement_views.log_operation')
-    @patch('gmtool.announcement_views.create_announcement')
-    def test_create_carousel_without_title_or_content_sends_blank_payload(self, mocked_create, mocked_audit):
-        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
-
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_create_carousel_without_title_or_content_stores_blank_payload(self, mocked_create):
         response = self.client.post(reverse('gmtool:announcement_create'), data={
             'Platform': 'Android',
             'Channel': '小米',
@@ -976,33 +1002,31 @@ class AnnouncementViewTests(TestCase):
         })
 
         self.assertEqual(response.status_code, 302)
-        mocked_create.assert_called_once()
-        payload = mocked_create.call_args.args[0]
-        self.assertEqual(payload['Title'], '')
-        self.assertEqual(payload['Content'], '')
-        self.assertEqual(payload['Image_1'], 'https://example.com/banner.png')
-        self.assertEqual(payload['ImageLink_1'], 'https://example.com/open')
-        self.assertEqual(payload['Reserve_1'], '')
-        self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 1)
+        mocked_create.assert_not_called()
+        review = AnnouncementReview.objects.get()
+        self.assertEqual(review.title, '')
+        self.assertEqual(review.content, '')
+        self.assertEqual(review.image_1, 'https://example.com/banner.png')
+        self.assertEqual(review.image_link_1, 'https://example.com/open')
+        self.assertEqual(review.reserve_1, '')
+        self.assertEqual(review.payload['Title'], '')
+        self.assertEqual(review.payload['Content'], '')
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
-    @patch('gmtool.announcement_views.log_operation')
-    @patch('gmtool.announcement_views.delete_announcement')
-    @patch('gmtool.announcement_views.query_announcements')
-    @patch('gmtool.announcement_views.create_announcement')
-    def test_create_persistent_does_not_query_or_delete_old_announcements(
+    @patch('gmtool.announcement_review_services.delete_announcement')
+    @patch('gmtool.announcement_review_services.query_announcements')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_create_persistent_does_not_query_delete_or_publish(
         self,
         mocked_create,
         mocked_query,
         mocked_delete,
-        mocked_audit,
     ):
-        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
-
         response = self.client.post(
             reverse('gmtool:announcement_create'),
             data=self._valid_create_payload(announcement_type='2'),
@@ -1011,132 +1035,119 @@ class AnnouncementViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         mocked_query.assert_not_called()
         mocked_delete.assert_not_called()
-        mocked_create.assert_called_once()
+        mocked_create.assert_not_called()
+        self.assertEqual(AnnouncementReview.objects.count(), 1)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
-    @patch('gmtool.announcement_views.create_announcement')
-    @patch('gmtool.announcement_views.delete_announcement')
-    @patch('gmtool.announcement_views.query_announcements')
-    def test_weekly_create_deletes_old_announcements_before_create(self, mocked_query, mocked_delete, mocked_create):
-        mocked_query.return_value = ([{
-            'Platform': 'Android',
-            'Channel': '小米',
-            'AnnouncementType': '1',
-            'AnnouncementId': 'old-1',
-        }], '', '[]', '')
-        mocked_delete.return_value = ({'result': 'OK'}, '', 'OK', '')
-        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
-
+    @patch('gmtool.announcement_review_services.delete_announcement')
+    @patch('gmtool.announcement_review_services.query_announcements')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_weekly_create_only_submits_pending_review(self, mocked_create, mocked_query, mocked_delete):
         response = self.client.post(
             reverse('gmtool:announcement_create'),
             data=self._valid_create_payload(announcement_type='1'),
         )
 
         self.assertEqual(response.status_code, 302)
-        mocked_query.assert_called_once_with('Android', '小米')
-        mocked_delete.assert_called_once_with('Android', '小米', '1', 'old-1')
-        mocked_create.assert_called_once()
-        self.assertEqual(AnnouncementLog.objects.filter(action='delete').count(), 1)
-        self.assertEqual(AnnouncementLog.objects.filter(action='create').count(), 1)
+        mocked_query.assert_not_called()
+        mocked_delete.assert_not_called()
+        mocked_create.assert_not_called()
+        review = AnnouncementReview.objects.get()
+        self.assertEqual(review.status, 'pending')
+        self.assertEqual(review.announcement_type, '1')
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
-    @patch('gmtool.announcement_views.create_announcement')
-    @patch('gmtool.announcement_views.delete_announcement')
-    @patch('gmtool.announcement_views.query_announcements')
-    def test_weekly_create_only_deletes_weekly_announcements(self, mocked_query, mocked_delete, mocked_create):
-        mocked_query.return_value = ([
-            {
+    def test_weekly_create_rejects_duplicate_pending_review(self):
+        AnnouncementReview.objects.create(
+            submitter=self.admin,
+            submitter_username=self.admin.username,
+            platform='Android',
+            channel='小米',
+            announcement_type='1',
+            announcement_id='-1',
+            title='旧待审',
+            content='旧待审',
+            payload={
                 'Platform': 'Android',
                 'Channel': '小米',
                 'AnnouncementType': '1',
-                'AnnouncementId': 'old-weekly',
+                'AnnouncementId': '-1',
             },
-            {
-                'Platform': 'Android',
-                'Channel': '小米',
-                'AnnouncementType': '2',
-                'AnnouncementId': 'old-persistent',
-            },
-            {
-                'Platform': 'Android',
-                'Channel': '小米',
-                'AnnouncementType': '3',
-                'AnnouncementId': 'old-carousel',
-            },
-        ], '', '[]', '')
-        mocked_delete.return_value = ({'result': 'OK'}, '', 'OK', '')
-        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+        )
 
         response = self.client.post(
             reverse('gmtool:announcement_create'),
             data=self._valid_create_payload(announcement_type='1'),
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, '已有待审核周更新公告', status_code=400)
+        self.assertEqual(AnnouncementReview.objects.count(), 1)
+
+    @override_settings(
+        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_PLATFORMS=['Android'],
+        ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
+    )
+    def test_create_multi_channel_submits_per_channel_review(self):
+        payload = self._valid_create_payload()
+        payload['Channel'] = ['小米', 'VIVO']
+        response = self.client.post(
+            reverse('gmtool:announcement_create'),
+            data=payload,
         )
 
         self.assertEqual(response.status_code, 302)
-        mocked_query.assert_called_once_with('Android', '小米')
-        mocked_delete.assert_called_once_with('Android', '小米', '1', 'old-weekly')
-        mocked_create.assert_called_once()
-        self.assertEqual(AnnouncementLog.objects.filter(action='delete').count(), 1)
-        self.assertFalse(AnnouncementLog.objects.filter(announcement_id='old-persistent').exists())
-        self.assertFalse(AnnouncementLog.objects.filter(announcement_id='old-carousel').exists())
-
-    @override_settings(
-        ANNOUNCEMENT_BASE_URL='http://example.com',
-        ANNOUNCEMENT_PLATFORMS=['Android'],
-        ANNOUNCEMENT_CHANNELS=['小米'],
-    )
-    @patch('gmtool.announcement_views.create_announcement')
-    @patch('gmtool.announcement_views.delete_announcement')
-    @patch('gmtool.announcement_views.query_announcements')
-    def test_weekly_create_stops_when_old_announcement_type_missing(
-        self,
-        mocked_query,
-        mocked_delete,
-        mocked_create,
-    ):
-        mocked_query.return_value = ([{
-            'Platform': 'Android',
-            'Channel': '小米',
-            'AnnouncementId': 'old-unknown',
-        }], '', '[]', '')
-
-        response = self.client.post(
-            reverse('gmtool:announcement_create'),
-            data=self._valid_create_payload(announcement_type='1'),
+        self.assertEqual(AnnouncementReview.objects.count(), 2)
+        self.assertEqual(
+            sorted(AnnouncementReview.objects.values_list('channel', flat=True)),
+            ['VIVO', '小米'],
         )
-
-        self.assertEqual(response.status_code, 400)
-        mocked_delete.assert_not_called()
-        mocked_create.assert_not_called()
-        self.assertContains(response, '旧公告缺少公告类型', status_code=400)
         self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
         ANNOUNCEMENT_PLATFORMS=['Android'],
-        ANNOUNCEMENT_CHANNELS=['小米'],
+        ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
     )
-    @patch('gmtool.announcement_views.create_announcement')
-    @patch('gmtool.announcement_views.query_announcements')
-    def test_weekly_create_does_not_create_when_old_query_fails(self, mocked_query, mocked_create):
-        mocked_query.return_value = (None, '查询失败', '', 'failed')
+    def test_create_multi_channel_duplicate_weekly_allows_partial_success(self):
+        AnnouncementReview.objects.create(
+            submitter=self.admin,
+            submitter_username=self.admin.username,
+            platform='Android',
+            channel='VIVO',
+            announcement_type='1',
+            announcement_id='-1',
+            title='旧待审',
+            content='旧待审',
+            payload={
+                'Platform': 'Android',
+                'Channel': 'VIVO',
+                'AnnouncementType': '1',
+                'AnnouncementId': '-1',
+            },
+        )
+        payload = self._valid_create_payload(announcement_type='1')
+        payload['Channel'] = ['小米', 'VIVO']
 
         response = self.client.post(
             reverse('gmtool:announcement_create'),
-            data=self._valid_create_payload(announcement_type='1'),
+            data=payload,
         )
 
         self.assertEqual(response.status_code, 400)
-        mocked_create.assert_not_called()
-        self.assertEqual(AnnouncementLog.objects.count(), 0)
+        self.assertContains(response, '小米', status_code=400)
+        self.assertContains(response, '已有待审核周更新公告', status_code=400)
+        self.assertEqual(AnnouncementReview.objects.filter(status='pending').count(), 2)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
@@ -1267,29 +1278,19 @@ class AnnouncementViewTests(TestCase):
         self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
-        ANNOUNCEMENT_BASE_URL='http://example.com',
+        ANNOUNCEMENT_BASE_URL='',
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米'],
     )
-    @patch('gmtool.announcement_views.log_operation')
-    @patch('gmtool.announcement_views.AnnouncementLog.objects.create', side_effect=DatabaseError('db failed'))
-    @patch('gmtool.announcement_views.create_announcement')
-    def test_remote_success_still_redirects_when_log_persistence_fails(
-        self,
-        mocked_create,
-        mocked_log_create,
-        mocked_audit,
-    ):
-        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
-
+    def test_submit_review_does_not_require_announcement_base_url(self):
         response = self.client.post(
             reverse('gmtool:announcement_create'),
             data=self._valid_create_payload(),
         )
 
         self.assertEqual(response.status_code, 302)
-        mocked_log_create.assert_called_once()
-        self.assertFalse(mocked_audit.call_args.kwargs['detail']['log_persisted'])
+        self.assertEqual(AnnouncementReview.objects.count(), 1)
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
@@ -1378,50 +1379,379 @@ class AnnouncementViewTests(TestCase):
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
     )
-    @patch('gmtool.announcement_views.log_operation')
-    @patch('gmtool.announcement_views.create_announcement')
-    def test_create_multi_channel_sends_per_channel_and_logs_each(self, mocked_create, mocked_audit):
-        # 目录服不支持批量发布：每个渠道各发一次，各记一条日志
-        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
-
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_create_multi_channel_does_not_publish_or_log_remote_actions(self, mocked_create):
         payload = self._valid_create_payload()
         payload['Channel'] = ['小米', 'VIVO']
         response = self.client.post(reverse('gmtool:announcement_create'), data=payload)
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(mocked_create.call_count, 2)
-        sent_channels = sorted(call.args[0]['Channel'] for call in mocked_create.call_args_list)
-        self.assertEqual(sent_channels, ['VIVO', '小米'])
-        self.assertEqual(AnnouncementLog.objects.filter(action='create', status='success').count(), 2)
-        detail = mocked_audit.call_args.kwargs['detail']
-        self.assertEqual(sorted(detail['success_channels']), ['VIVO', '小米'])
-        self.assertEqual(detail['remote_call_count'], 2)
+        mocked_create.assert_not_called()
+        self.assertEqual(AnnouncementReview.objects.count(), 2)
+        self.assertEqual(AnnouncementLog.objects.filter(action='create').count(), 0)
 
     @override_settings(
         ANNOUNCEMENT_BASE_URL='http://example.com',
         ANNOUNCEMENT_PLATFORMS=['Android'],
         ANNOUNCEMENT_CHANNELS=['小米', 'VIVO'],
     )
-    @patch('gmtool.announcement_views.log_operation')
-    @patch('gmtool.announcement_views.create_announcement')
-    def test_create_multi_channel_partial_failure_aggregates(self, mocked_create, mocked_audit):
-        mocked_create.side_effect = [
-            ({'result': 'OK'}, '', 'OK', ''),
-            (None, 'FAIL: busy', 'FAIL: busy', 'failed'),
-        ]
+    def test_create_multi_channel_weekly_duplicate_partial_failure_aggregates(self):
+        AnnouncementReview.objects.create(
+            submitter=self.admin,
+            submitter_username=self.admin.username,
+            platform='Android',
+            channel='VIVO',
+            announcement_type='1',
+            title='旧待审',
+            content='旧待审',
+            payload={
+                'Platform': 'Android',
+                'Channel': 'VIVO',
+                'AnnouncementType': '1',
+                'AnnouncementId': '-1',
+            },
+        )
 
-        payload = self._valid_create_payload()
+        payload = self._valid_create_payload(announcement_type='1')
         payload['Channel'] = ['小米', 'VIVO']
         response = self.client.post(reverse('gmtool:announcement_create'), data=payload)
 
-        # 部分失败：停留在发布页（400）并展示失败明细
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(mocked_create.call_count, 2)
-        detail = mocked_audit.call_args.kwargs['detail']
-        self.assertEqual(detail['success_channels'], ['小米'])
-        self.assertEqual(len(detail['failed_channels']), 1)
-        self.assertEqual(detail['failed_channels'][0]['channel'], 'VIVO')
-        self.assertEqual(detail['status'], 'failed')
+        self.assertContains(response, '小米', status_code=400)
+        self.assertContains(response, 'VIVO', status_code=400)
+        self.assertEqual(AnnouncementReview.objects.filter(status='pending').count(), 2)
+
+
+class AnnouncementReviewViewTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.submitter = user_model.objects.create_user(
+            username='review_submitter',
+            email='review_submitter@example.com',
+            password='password123',
+        )
+        self.reviewer = user_model.objects.create_user(
+            username='reviewer',
+            email='reviewer@example.com',
+            password='password123',
+        )
+        self.no_permission_user = user_model.objects.create_user(
+            username='review_no_perm',
+            email='review_no_perm@example.com',
+            password='password123',
+        )
+        UserAnnouncementPermission.objects.create(user=self.submitter)
+        UserAnnouncementPermission.objects.create(user=self.reviewer)
+        self.client.defaults['HTTP_HOST'] = '127.0.0.1'
+        self.client.force_login(self.reviewer)
+
+    def _review_payload(self, announcement_type='2', channel='小米'):
+        payload = {
+            'Platform': 'Android',
+            'Channel': channel,
+            'AnnouncementType': announcement_type,
+            'AnnouncementId': '-1',
+            'Title': '待审核标题',
+            'Content': '待审核正文',
+            'Image_1': '',
+            'ImageLink_1': '',
+            'Image_2': '',
+            'ImageLink_2': '',
+            'Image_3': '',
+            'ImageLink_3': '',
+            'Reserve_1': '',
+            'Reserve_2': '',
+        }
+        if announcement_type == '3':
+            payload.update({
+                'Title': '',
+                'Content': '',
+                'Image_1': 'https://example.com/banner.png',
+                'ImageLink_1': 'https://example.com/open',
+            })
+        return payload
+
+    def _create_review(self, *, status='pending', announcement_type='2', submitter=None, channel='小米'):
+        submitter = submitter or self.submitter
+        payload = self._review_payload(announcement_type=announcement_type, channel=channel)
+        return AnnouncementReview.objects.create(
+            status=status,
+            submitter=submitter,
+            submitter_username=submitter.username,
+            platform=payload['Platform'],
+            channel=payload['Channel'],
+            announcement_type=payload['AnnouncementType'],
+            announcement_id=payload['AnnouncementId'],
+            title=payload['Title'],
+            content=payload['Content'],
+            priority=7 if announcement_type == '2' else 0,
+            image_1=payload['Image_1'],
+            image_link_1=payload['ImageLink_1'],
+            payload=payload,
+            error_message='上次失败' if status == 'failed' else '',
+        )
+
+    def test_review_index_redirects_to_announcement_review(self):
+        response = self.client.get(reverse('gmtool:review_index'))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], reverse('gmtool:review_announcement_list'))
+
+    def test_review_urls_require_announcement_permission(self):
+        self.client.force_login(self.no_permission_user)
+
+        response = self.client.get(reverse('gmtool:review_announcement_list'))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], reverse('gmtool:dashboard'))
+
+    def test_review_navigation_visible_only_with_permission(self):
+        response = self.client.get(reverse('gmtool:dashboard'))
+        self.assertContains(response, '审核管理')
+
+        self.client.force_login(self.no_permission_user)
+        response = self.client.get(reverse('gmtool:dashboard'))
+        self.assertNotContains(response, '审核管理')
+
+    def test_review_list_defaults_to_pending_and_can_filter_failed(self):
+        pending = self._create_review(status='pending')
+        failed = self._create_review(status='failed', channel='VIVO')
+        pending.title = 'PENDING_REVIEW_MARKER'
+        pending.save(update_fields=['title'])
+        failed.title = 'FAILED_REVIEW_MARKER'
+        failed.error_message = 'FAIL_REASON_MARKER'
+        failed.save(update_fields=['title', 'error_message'])
+
+        response = self.client.get(reverse('gmtool:review_announcement_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'PENDING_REVIEW_MARKER')
+        self.assertNotContains(response, 'FAILED_REVIEW_MARKER')
+
+        response = self.client.get(reverse('gmtool:review_announcement_list'), {'status': 'failed'})
+        self.assertContains(response, 'FAILED_REVIEW_MARKER')
+        self.assertContains(response, 'FAIL_REASON_MARKER')
+        self.assertNotContains(response, 'PENDING_REVIEW_MARKER')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_reject_updates_status_without_remote_call(self, mocked_create):
+        review = self._create_review(status='pending')
+
+        response = self.client.post(
+            reverse('gmtool:review_announcement_reject', args=[review.id]),
+            data={'review_comment': '无需发布'},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        mocked_create.assert_not_called()
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'rejected')
+        self.assertEqual(review.reviewer, self.reviewer)
+        self.assertEqual(review.review_comment, '无需发布')
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
+
+    def test_submitter_cannot_reject_own_review(self):
+        review = self._create_review(status='pending', submitter=self.submitter)
+        self.client.force_login(self.submitter)
+
+        response = self.client.post(reverse('gmtool:review_announcement_reject', args=[review.id]))
+
+        self.assertEqual(response.status_code, 403)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'pending')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.query_announcements')
+    @patch('gmtool.announcement_review_services.delete_announcement')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_approve_persistent_review_publishes_and_writes_log(
+        self,
+        mocked_create,
+        mocked_delete,
+        mocked_query,
+    ):
+        review = self._create_review(status='pending', announcement_type='2')
+        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+
+        response = self.client.post(reverse('gmtool:review_announcement_approve', args=[review.id]))
+
+        self.assertEqual(response.status_code, 302)
+        mocked_query.assert_not_called()
+        mocked_delete.assert_not_called()
+        mocked_create.assert_called_once_with(review.payload)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'approved')
+        self.assertEqual(review.reviewer, self.reviewer)
+        log = AnnouncementLog.objects.get(action='create', status='success')
+        self.assertEqual(log.user, self.submitter)
+        self.assertEqual(log.operator_username, self.submitter.username)
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.query_announcements')
+    @patch('gmtool.announcement_review_services.delete_announcement')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_weekly_approve_deletes_old_weekly_before_create(
+        self,
+        mocked_create,
+        mocked_delete,
+        mocked_query,
+    ):
+        events = []
+        review = self._create_review(status='pending', announcement_type='1')
+
+        def fake_query(platform, channel):
+            events.append('query')
+            return ([
+                {
+                    'Platform': platform,
+                    'Channel': channel,
+                    'AnnouncementType': '1',
+                    'AnnouncementId': 'old-weekly',
+                },
+                {
+                    'Platform': platform,
+                    'Channel': channel,
+                    'AnnouncementType': '2',
+                    'AnnouncementId': 'old-persistent',
+                },
+            ], '', '[]', '')
+
+        def fake_delete(*args):
+            events.append('delete')
+            return ({'result': 'OK'}, '', 'OK', '')
+
+        def fake_create(*args):
+            events.append('create')
+            return ({'result': 'OK'}, '', 'OK', '')
+
+        mocked_query.side_effect = fake_query
+        mocked_delete.side_effect = fake_delete
+        mocked_create.side_effect = fake_create
+
+        response = self.client.post(reverse('gmtool:review_announcement_approve', args=[review.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(events, ['query', 'delete', 'create'])
+        mocked_delete.assert_called_once_with('Android', '小米', '1', 'old-weekly')
+        delete_log = AnnouncementLog.objects.get(action='delete', announcement_id='old-weekly')
+        create_log = AnnouncementLog.objects.get(action='create')
+        self.assertEqual(delete_log.user, self.submitter)
+        self.assertEqual(delete_log.operator_username, self.submitter.username)
+        self.assertEqual(create_log.user, self.submitter)
+        self.assertEqual(create_log.operator_username, self.submitter.username)
+        self.assertFalse(AnnouncementLog.objects.filter(announcement_id='old-persistent').exists())
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_approve_failure_marks_failed_and_retry_success(self, mocked_create):
+        review = self._create_review(status='pending', announcement_type='2')
+        mocked_create.return_value = (None, 'FAIL: busy', 'FAIL: busy', 'failed')
+
+        response = self.client.post(reverse('gmtool:review_announcement_approve', args=[review.id]))
+
+        self.assertEqual(response.status_code, 302)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'failed')
+        self.assertEqual(review.error_message, 'FAIL: busy')
+        failed_log = AnnouncementLog.objects.get(action='create', status='failed')
+        self.assertEqual(failed_log.user, self.submitter)
+        self.assertEqual(failed_log.operator_username, self.submitter.username)
+
+        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+        response = self.client.post(reverse('gmtool:review_announcement_retry', args=[review.id]))
+
+        self.assertEqual(response.status_code, 302)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'approved')
+        self.assertEqual(review.error_message, '')
+        success_log = AnnouncementLog.objects.get(action='create', status='success')
+        self.assertEqual(success_log.user, self.submitter)
+        self.assertEqual(success_log.operator_username, self.submitter.username)
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_retry_failure_keeps_failed_status(self, mocked_create):
+        review = self._create_review(status='failed', announcement_type='2')
+        mocked_create.return_value = (None, 'FAIL: busy again', 'FAIL: busy again', 'failed')
+
+        response = self.client.post(reverse('gmtool:review_announcement_retry', args=[review.id]))
+
+        self.assertEqual(response.status_code, 302)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'failed')
+        self.assertEqual(review.error_message, 'FAIL: busy again')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_submitter_cannot_approve_or_retry_own_review(self, mocked_create):
+        pending = self._create_review(status='pending', submitter=self.submitter)
+        failed = self._create_review(status='failed', submitter=self.submitter, channel='VIVO')
+        self.client.force_login(self.submitter)
+
+        approve_response = self.client.post(reverse('gmtool:review_announcement_approve', args=[pending.id]))
+        retry_response = self.client.post(reverse('gmtool:review_announcement_retry', args=[failed.id]))
+
+        self.assertEqual(approve_response.status_code, 403)
+        self.assertEqual(retry_response.status_code, 403)
+        mocked_create.assert_not_called()
+        pending.refresh_from_db()
+        failed.refresh_from_db()
+        self.assertEqual(pending.status, 'pending')
+        self.assertEqual(failed.status, 'failed')
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.query_announcements')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_weekly_approve_fails_when_old_announcement_type_missing(self, mocked_create, mocked_query):
+        review = self._create_review(status='pending', announcement_type='1')
+        mocked_query.return_value = ([{
+            'Platform': 'Android',
+            'Channel': '小米',
+            'AnnouncementId': 'old-unknown',
+        }], '', '[]', '')
+
+        response = self.client.post(reverse('gmtool:review_announcement_approve', args=[review.id]))
+
+        self.assertEqual(response.status_code, 302)
+        mocked_create.assert_not_called()
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'failed')
+        self.assertIn('旧公告缺少公告类型', review.error_message)
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_log_services.AnnouncementLog.objects.create', side_effect=DatabaseError('db failed'))
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_log_persistence_database_error_does_not_rollback_approval(self, mocked_create, mocked_log_create):
+        review = self._create_review(status='pending', announcement_type='2')
+        mocked_create.return_value = ({'result': 'OK'}, '', 'OK', '')
+
+        response = self.client.post(reverse('gmtool:review_announcement_approve', args=[review.id]))
+
+        self.assertEqual(response.status_code, 302)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'approved')
+        mocked_log_create.assert_called_once()
+        self.assertEqual(AnnouncementLog.objects.count(), 0)
+
+    @override_settings(ANNOUNCEMENT_BASE_URL='http://example.com')
+    @patch('gmtool.announcement_review_services.query_announcements')
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_weekly_retry_rejects_stale_failed_review_when_newer_review_exists(
+        self,
+        mocked_create,
+        mocked_query,
+    ):
+        stale = self._create_review(status='failed', announcement_type='1')
+        self._create_review(status='approved', announcement_type='1')
+
+        response = self.client.post(reverse('gmtool:review_announcement_retry', args=[stale.id]))
+
+        self.assertEqual(response.status_code, 302)
+        mocked_query.assert_not_called()
+        mocked_create.assert_not_called()
+        stale.refresh_from_db()
+        self.assertEqual(stale.status, 'failed')
 
 
 class AnnouncementPermissionAssignmentTests(TestCase):

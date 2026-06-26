@@ -173,6 +173,86 @@ class AnnouncementLog(models.Model):
         return f'{self.operator_username} - {self.get_action_display()} - {self.status}'
 
 
+class AnnouncementReview(models.Model):
+    """公告待审核记录。"""
+    STATUS_CHOICES = [
+        ('pending', _('待审核')),
+        ('approved', _('已通过')),
+        ('rejected', _('已作废')),
+        ('failed', _('发布失败')),
+    ]
+    ANNOUNCEMENT_TYPE_CHOICES = [
+        ('1', _('周更新公告')),
+        ('2', _('常驻公告')),
+        ('3', _('轮播图')),
+    ]
+
+    status = models.CharField(_('审核状态'), max_length=20, choices=STATUS_CHOICES, default='pending')
+    submitter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='submitted_announcement_reviews',
+        verbose_name=_('提交人'),
+    )
+    submitter_username = models.CharField(_('提交用户名'), max_length=150, blank=True, default='')
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_announcement_reviews',
+        verbose_name=_('审核人'),
+    )
+    reviewer_username = models.CharField(_('审核用户名'), max_length=150, blank=True, default='')
+    platform = models.CharField(_('平台'), max_length=50)
+    channel = models.CharField(_('渠道'), max_length=50)
+    announcement_type = models.CharField(_('公告类型'), max_length=10, choices=ANNOUNCEMENT_TYPE_CHOICES)
+    announcement_id = models.CharField(_('公告ID'), max_length=64, blank=True, default='-1')
+    title = models.CharField(_('公告标题'), max_length=200, blank=True, default='')
+    content = models.TextField(_('公告正文'), blank=True, default='')
+    priority = models.IntegerField(_('显示优先级'), default=0)
+    image_1 = models.CharField(_('Image_1'), max_length=500, blank=True, default='')
+    image_link_1 = models.CharField(_('ImageLink_1'), max_length=500, blank=True, default='')
+    image_2 = models.CharField(_('Image_2'), max_length=500, blank=True, default='')
+    image_link_2 = models.CharField(_('ImageLink_2'), max_length=500, blank=True, default='')
+    image_3 = models.CharField(_('Image_3'), max_length=500, blank=True, default='')
+    image_link_3 = models.CharField(_('ImageLink_3'), max_length=500, blank=True, default='')
+    reserve_1 = models.TextField(_('Reserve_1'), blank=True, default='')
+    reserve_2 = models.TextField(_('Reserve_2'), blank=True, default='')
+    payload = models.JSONField(_('待发布数据'), default=dict)
+    review_comment = models.TextField(_('审核备注'), blank=True, default='')
+    remote_response = models.JSONField(_('远端响应'), null=True, blank=True)
+    raw_response = models.TextField(_('远端原始响应'), blank=True, default='')
+    error_message = models.TextField(_('失败原因'), blank=True, default='')
+    created_at = models.DateTimeField(_('提交时间'), auto_now_add=True)
+    reviewed_at = models.DateTimeField(_('审核时间'), null=True, blank=True)
+    updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('公告审核')
+        verbose_name_plural = _('公告审核')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', '-created_at'], name='annrev_status_created_idx'),
+            models.Index(fields=['submitter', '-created_at'], name='annrev_submit_created_idx'),
+            models.Index(fields=['reviewer', '-reviewed_at'], name='annrev_reviewed_idx'),
+            models.Index(fields=['platform', 'channel', 'status'], name='annrev_plat_chan_stat_idx'),
+            models.Index(fields=['announcement_type', 'status'], name='annrev_type_status_idx'),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['platform', 'channel', 'announcement_type'],
+                condition=models.Q(status='pending', announcement_type='1'),
+                name='uniq_pending_weekly_review',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.platform} - {self.channel} - {self.get_announcement_type_display()} - {self.status}'
+
+
 class LoginLog(models.Model):
     """登录日志"""
     ACTION_CHOICES = [

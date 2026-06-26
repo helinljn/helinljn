@@ -125,6 +125,9 @@ class AnnouncementCreateForm(_MultiChannelMixin, AnnouncementTypedForm):
             if not (cleaned_data.get('Content') or '').strip():
                 self.add_error('Content', _('公告正文不能为空'))
 
+        if announcement_type == '3' and not (cleaned_data.get('Image_1') or '').strip():
+            self.add_error('Image_1', _('轮播图必须填写 Image_1'))
+
         if announcement_type == '2':
             priority = cleaned_data.get('Priority')
             if priority in (None, ''):
@@ -141,6 +144,13 @@ class AnnouncementCreateForm(_MultiChannelMixin, AnnouncementTypedForm):
                         cleaned_data['Priority'] = priority
         else:
             cleaned_data['Priority'] = 0
+
+        if announcement_type == '3':
+            cleaned_data['Title'] = ''
+            cleaned_data['Content'] = ''
+        elif announcement_type in ('1', '2'):
+            for field_name in ('Image_1', 'ImageLink_1', 'Image_2', 'ImageLink_2', 'Image_3', 'ImageLink_3'):
+                cleaned_data[field_name] = ''
         return cleaned_data
 
     def to_payload(self, channel):

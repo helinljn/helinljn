@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 17:24+0800\n"
+"POT-Creation-Date: 2026-06-26 14:13+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -82,67 +82,101 @@ msgstr ""
 msgid "公告删除请求失败: %(error)s"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:34
+#: .\gmtool\announcement_log_services.py:11
 msgid "公告远端操作已完成，但本地公告日志记录失败，请联系管理员核查应用日志"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:221
-msgid "公告查询失败，请查看失败明细"
+#: .\gmtool\announcement_review_services.py:82
+#: .\gmtool\announcement_review_services.py:91
+msgid "该平台和渠道已有待审核周更新公告"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:223
-msgid "公告查询部分失败，请查看失败明细"
+#: .\gmtool\announcement_review_services.py:94
+#, python-format
+msgid "待审核记录保存失败: %(error)s"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:303
-msgid "公告发布表单校验失败，请检查输入"
+#: .\gmtool\announcement_review_services.py:122
+msgid "不能审核自己提交的内容"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:334
+#: .\gmtool\announcement_review_services.py:145
+msgid "待审核公告不存在"
+msgstr ""
+
+#: .\gmtool\announcement_review_services.py:220
 msgid "旧公告缺少公告类型，已停止发布以避免误删"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:342
+#: .\gmtool\announcement_review_services.py:241
 msgid "旧周更新公告缺少有效公告 ID"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:429
-msgid "公告发布成功"
+#: .\gmtool\announcement_review_services.py:364
+msgid "只有待审核公告可以通过"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:433
-msgid "公告发布部分失败，请查看失败明细"
+#: .\gmtool\announcement_review_services.py:390
+msgid "只有发布失败的公告可以重试"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:435
-msgid "公告发布失败，请查看失败明细"
+#: .\gmtool\announcement_review_services.py:393
+msgid "该周更新公告已有更新的审核记录，请先处理最新记录"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:458
+#: .\gmtool\announcement_review_services.py:418
+msgid "只有待审核或发布失败的公告可以作废"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:204
+msgid "公告查询失败，请查看失败明细"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:206
+msgid "公告查询部分失败，请查看失败明细"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:279
+msgid "公告提交审核表单校验失败，请检查输入"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:292
+msgid "公告已提交审核"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:296
+msgid "公告审核部分提交失败，请查看失败明细"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:298
+msgid "公告提交审核失败，请查看失败明细"
+msgstr ""
+
+#: .\gmtool\announcement_views.py:318
 #: .\gmtool\templates\gmtool\announcement_query.html:213
 msgid "请至少选择一条公告"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:463
+#: .\gmtool\announcement_views.py:323
 #, python-format
 msgid "单次批量删除不能超过 %(n)s 条"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:474
+#: .\gmtool\announcement_views.py:334
 msgid "选中项数据非法"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:531
+#: .\gmtool\announcement_views.py:391
 #, python-format
 msgid "批量删除成功：共 %(n)s 条"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:535
+#: .\gmtool\announcement_views.py:395
 #, python-format
 msgid "批量删除部分失败：成功 %(ok)s 条，失败 %(fail)s 条"
 msgstr ""
 
-#: .\gmtool\announcement_views.py:539
+#: .\gmtool\announcement_views.py:399
 #, python-format
 msgid "批量删除失败：%(n)s 条均未成功"
 msgstr ""
@@ -244,11 +278,11 @@ msgstr ""
 msgid "JSON 中存在重复键: %(keys)s"
 msgstr ""
 
-#: .\gmtool\command_parser.py:114 .\gmtool\forms.py:435
+#: .\gmtool\command_parser.py:114 .\gmtool\forms.py:445
 msgid "请求 ID 和响应 ID 不能相同"
 msgstr ""
 
-#: .\gmtool\command_parser.py:121 .\gmtool\forms.py:401
+#: .\gmtool\command_parser.py:121 .\gmtool\forms.py:411
 #, python-format
 msgid "命令 ID %(id)s 已存在"
 msgstr ""
@@ -473,19 +507,22 @@ msgstr ""
 msgid "您没有公告管理权限"
 msgstr ""
 
-#: .\gmtool\forms.py:15 .\gmtool\templates\gmtool\announcement_log.html:90
+#: .\gmtool\forms.py:15 .\gmtool\models.py:185
+#: .\gmtool\templates\gmtool\announcement_log.html:90
 #: .\gmtool\templates\gmtool\announcement_log.html:143
 #: .\gmtool\templates\gmtool\announcement_query.html:128
 msgid "周更新公告"
 msgstr ""
 
-#: .\gmtool\forms.py:16 .\gmtool\templates\gmtool\announcement_log.html:91
+#: .\gmtool\forms.py:16 .\gmtool\models.py:186
+#: .\gmtool\templates\gmtool\announcement_log.html:91
 #: .\gmtool\templates\gmtool\announcement_log.html:145
 #: .\gmtool\templates\gmtool\announcement_query.html:130
 msgid "常驻公告"
 msgstr ""
 
-#: .\gmtool\forms.py:17 .\gmtool\templates\gmtool\announcement_log.html:92
+#: .\gmtool\forms.py:17 .\gmtool\models.py:187
+#: .\gmtool\templates\gmtool\announcement_log.html:92
 #: .\gmtool\templates\gmtool\announcement_log.html:147
 #: .\gmtool\templates\gmtool\announcement_query.html:132
 msgid "轮播图"
@@ -499,29 +536,39 @@ msgstr ""
 msgid "公告渠道配置为空，请检查 ANNOUNCEMENT_CHANNELS"
 msgstr ""
 
-#: .\gmtool\forms.py:38 .\gmtool\models.py:148
+#: .\gmtool\forms.py:38 .\gmtool\models.py:148 .\gmtool\models.py:209
 #: .\gmtool\templates\gmtool\announcement_log.html:69
 #: .\gmtool\templates\gmtool\announcement_log.html:124
+#: .\gmtool\templates\gmtool\review_announcement_list.html:57
+#: .\gmtool\templates\gmtool\review_announcement_list.html:110
+#: .\gmtool\templates\gmtool\review_announcement_list.html:305
 msgid "平台"
 msgstr ""
 
 #: .\gmtool\forms.py:43 .\gmtool\forms.py:69 .\gmtool\models.py:149
-#: .\gmtool\templates\gmtool\announcement_log.html:78
+#: .\gmtool\models.py:210 .\gmtool\templates\gmtool\announcement_log.html:78
 #: .\gmtool\templates\gmtool\announcement_log.html:125
+#: .\gmtool\templates\gmtool\review_announcement_list.html:66
+#: .\gmtool\templates\gmtool\review_announcement_list.html:111
+#: .\gmtool\templates\gmtool\review_announcement_list.html:306
 msgid "渠道"
 msgstr ""
 
-#: .\gmtool\forms.py:82 .\gmtool\models.py:150
+#: .\gmtool\forms.py:82 .\gmtool\models.py:150 .\gmtool\models.py:211
 #: .\gmtool\templates\gmtool\announcement_log.html:87
 #: .\gmtool\templates\gmtool\announcement_log.html:126
+#: .\gmtool\templates\gmtool\review_announcement_list.html:75
+#: .\gmtool\templates\gmtool\review_announcement_list.html:112
+#: .\gmtool\templates\gmtool\review_announcement_list.html:307
 msgid "公告类型"
 msgstr ""
 
-#: .\gmtool\forms.py:91
+#: .\gmtool\forms.py:91 .\gmtool\models.py:213
+#: .\gmtool\templates\gmtool\review_announcement_list.html:113
 msgid "公告标题"
 msgstr ""
 
-#: .\gmtool\forms.py:97
+#: .\gmtool\forms.py:97 .\gmtool\models.py:214
 msgid "公告正文"
 msgstr ""
 
@@ -537,25 +584,29 @@ msgstr ""
 msgid "公告正文不能为空"
 msgstr ""
 
-#: .\gmtool\forms.py:136
-msgid "常驻公告显示优先级必须是整数"
+#: .\gmtool\forms.py:129
+msgid "轮播图必须填写 Image_1"
 msgstr ""
 
 #: .\gmtool\forms.py:139
+msgid "常驻公告显示优先级必须是整数"
+msgstr ""
+
+#: .\gmtool\forms.py:142
 msgid "常驻公告显示优先级不能小于 0"
 msgstr ""
 
-#: .\gmtool\forms.py:201 .\gmtool\models.py:151
+#: .\gmtool\forms.py:211 .\gmtool\models.py:151 .\gmtool\models.py:212
 #: .\gmtool\templates\gmtool\announcement_log.html:127
 #: .\gmtool\templates\gmtool\announcement_query.html:110
 msgid "公告ID"
 msgstr ""
 
-#: .\gmtool\forms.py:209
+#: .\gmtool\forms.py:219
 msgid "删除公告必须使用实际公告 ID"
 msgstr ""
 
-#: .\gmtool\forms.py:227 .\gmtool\models.py:184
+#: .\gmtool\forms.py:237 .\gmtool\models.py:264
 #: .\gmtool\templates\gmtool\command_log.html:91
 #: .\gmtool\templates\gmtool\login.html:57
 #: .\gmtool\templates\gmtool\login_log.html:17
@@ -564,141 +615,141 @@ msgstr ""
 msgid "用户名"
 msgstr ""
 
-#: .\gmtool\forms.py:228 .\gmtool\templates\gmtool\user_list.html:35
+#: .\gmtool\forms.py:238 .\gmtool\templates\gmtool\user_list.html:35
 msgid "邮箱"
 msgstr ""
 
-#: .\gmtool\forms.py:229 .\gmtool\models.py:22
+#: .\gmtool\forms.py:239 .\gmtool\models.py:22
 msgid "是否启用"
 msgstr ""
 
-#: .\gmtool\forms.py:236 .\gmtool\models.py:84
+#: .\gmtool\forms.py:246 .\gmtool\models.py:84
 #: .\gmtool\templates\gmtool\user_list.html:36
 msgid "联系电话"
 msgstr ""
 
-#: .\gmtool\forms.py:246 .\gmtool\templates\gmtool\login.html:67
+#: .\gmtool\forms.py:256 .\gmtool\templates\gmtool\login.html:67
 msgid "密码"
 msgstr ""
 
-#: .\gmtool\forms.py:251
+#: .\gmtool\forms.py:261
 msgid "确认密码"
 msgstr ""
 
-#: .\gmtool\forms.py:266
+#: .\gmtool\forms.py:276
 msgid "两次密码输入不一致"
 msgstr ""
 
-#: .\gmtool\forms.py:285
+#: .\gmtool\forms.py:295
 msgid "新密码（留空不修改）"
 msgstr ""
 
-#: .\gmtool\forms.py:313 .\gmtool\user_views.py:101
+#: .\gmtool\forms.py:323 .\gmtool\user_views.py:101
 msgid "不能禁用自己的账号"
 msgstr ""
 
-#: .\gmtool\forms.py:318
+#: .\gmtool\forms.py:328
 msgid "超级管理员账号不可禁用"
 msgstr ""
 
-#: .\gmtool\forms.py:338 .\gmtool\models.py:8
+#: .\gmtool\forms.py:348 .\gmtool\models.py:8
 #: .\gmtool\templates\gmtool\command_execute.html:149
 #: .\gmtool\templates\gmtool\command_list.html:37
 msgid "命令编号"
 msgstr ""
 
-#: .\gmtool\forms.py:341
+#: .\gmtool\forms.py:351
 msgid "唯一的命令标识符，如 10226011"
 msgstr ""
 
-#: .\gmtool\forms.py:344 .\gmtool\models.py:10
+#: .\gmtool\forms.py:354 .\gmtool\models.py:10
 msgid "分组标签"
 msgstr ""
 
-#: .\gmtool\forms.py:346
+#: .\gmtool\forms.py:356
 msgid "e.g. 查询XXX"
 msgstr ""
 
-#: .\gmtool\forms.py:349 .\gmtool\models.py:9
+#: .\gmtool\forms.py:359 .\gmtool\models.py:9
 #: .\gmtool\templates\gmtool\command_list.html:38
 msgid "命令名称"
 msgstr ""
 
-#: .\gmtool\forms.py:351
+#: .\gmtool\forms.py:361
 msgid "命令显示名称"
 msgstr ""
 
-#: .\gmtool\forms.py:354 .\gmtool\models.py:11
+#: .\gmtool\forms.py:364 .\gmtool\models.py:11
 #: .\gmtool\templates\gmtool\command_execute.html:153
 #: .\gmtool\templates\gmtool\command_list.html:39
 msgid "请求名"
 msgstr ""
 
-#: .\gmtool\forms.py:359 .\gmtool\models.py:12
+#: .\gmtool\forms.py:369 .\gmtool\models.py:12
 msgid "协议请求ID"
 msgstr ""
 
-#: .\gmtool\forms.py:361
+#: .\gmtool\forms.py:371
 msgid "必须在所有命令中唯一（包括请求ID和响应ID）"
 msgstr ""
 
-#: .\gmtool\forms.py:364
+#: .\gmtool\forms.py:374
 msgid "请求描述"
 msgstr ""
 
-#: .\gmtool\forms.py:367
+#: .\gmtool\forms.py:377
 msgid "请求描述（可选）"
 msgstr ""
 
-#: .\gmtool\forms.py:370 .\gmtool\models.py:13
+#: .\gmtool\forms.py:380 .\gmtool\models.py:13
 #: .\gmtool\templates\gmtool\command_execute.html:161
 msgid "响应名"
 msgstr ""
 
-#: .\gmtool\forms.py:375 .\gmtool\models.py:14
+#: .\gmtool\forms.py:385 .\gmtool\models.py:14
 #: .\gmtool\templates\gmtool\command_execute.html:165
 msgid "协议响应ID"
 msgstr ""
 
-#: .\gmtool\forms.py:377
+#: .\gmtool\forms.py:387
 msgid "必须在所有命令中唯一，通常为请求ID + 1"
 msgstr ""
 
-#: .\gmtool\forms.py:380
+#: .\gmtool\forms.py:390
 msgid "响应描述"
 msgstr ""
 
-#: .\gmtool\forms.py:383
+#: .\gmtool\forms.py:393
 msgid "响应描述（可选）"
 msgstr ""
 
-#: .\gmtool\forms.py:386
+#: .\gmtool\forms.py:396
 msgid "请求参数定义（JSON）"
 msgstr ""
 
-#: .\gmtool\forms.py:389
+#: .\gmtool\forms.py:399
 msgid ""
 "请求参数定义的 JSON 数组。留空则使用默认的 AreaId/Partition/PlatId 字段。"
 msgstr ""
 
-#: .\gmtool\forms.py:392
+#: .\gmtool\forms.py:402
 msgid "响应参数定义（JSON）"
 msgstr ""
 
-#: .\gmtool\forms.py:395
+#: .\gmtool\forms.py:405
 msgid "响应参数定义的 JSON 数组。留空则使用默认的 Result/RetMsg 字段。"
 msgstr ""
 
-#: .\gmtool\forms.py:411
+#: .\gmtool\forms.py:421
 msgid "请求参数必须是 JSON 数组"
 msgstr ""
 
-#: .\gmtool\forms.py:414 .\gmtool\forms.py:426
+#: .\gmtool\forms.py:424 .\gmtool\forms.py:436
 #, python-format
 msgid "无效的 JSON: %(error)s"
 msgstr ""
 
-#: .\gmtool\forms.py:423
+#: .\gmtool\forms.py:433
 msgid "响应参数必须是 JSON 数组"
 msgstr ""
 
@@ -742,7 +793,7 @@ msgid "GM命令"
 msgstr ""
 
 #: .\gmtool\models.py:46 .\gmtool\models.py:65 .\gmtool\models.py:83
-#: .\gmtool\models.py:101 .\gmtool\models.py:144 .\gmtool\models.py:183
+#: .\gmtool\models.py:101 .\gmtool\models.py:144 .\gmtool\models.py:263
 #: .\gmtool\templates\gmtool\command_log.html:137
 msgid "用户"
 msgstr ""
@@ -824,16 +875,19 @@ msgstr ""
 #: .\gmtool\templates\gmtool\command_log.html:106
 #: .\gmtool\templates\gmtool\command_log.html:142
 #: .\gmtool\templates\gmtool\dashboard.html:99
+#: .\gmtool\templates\gmtool\review_announcement_list.html:48
+#: .\gmtool\templates\gmtool\review_announcement_list.html:116
+#: .\gmtool\templates\gmtool\review_announcement_list.html:309
 #: .\gmtool\templates\gmtool\user_list.html:38
 msgid "状态"
 msgstr ""
 
-#: .\gmtool\models.py:109 .\gmtool\models.py:157 .\gmtool\models.py:186
+#: .\gmtool\models.py:109 .\gmtool\models.py:157 .\gmtool\models.py:266
 #: .\gmtool\templates\gmtool\login_log.html:54
 msgid "IP地址"
 msgstr ""
 
-#: .\gmtool\models.py:110 .\gmtool\models.py:158 .\gmtool\models.py:189
+#: .\gmtool\models.py:110 .\gmtool\models.py:158 .\gmtool\models.py:269
 msgid "创建时间"
 msgstr ""
 
@@ -851,7 +905,7 @@ msgstr ""
 msgid "删除"
 msgstr ""
 
-#: .\gmtool\models.py:147 .\gmtool\models.py:185
+#: .\gmtool\models.py:147 .\gmtool\models.py:265
 #: .\gmtool\templates\gmtool\announcement_log.html:51
 #: .\gmtool\templates\gmtool\login_log.html:21
 #: .\gmtool\templates\gmtool\login_log.html:53
@@ -873,37 +927,175 @@ msgstr ""
 msgid "公告日志"
 msgstr ""
 
-#: .\gmtool\models.py:179 .\gmtool\templates\gmtool\login.html:6
+#: .\gmtool\models.py:179
+msgid "待审核"
+msgstr ""
+
+#: .\gmtool\models.py:180
+msgid "已通过"
+msgstr ""
+
+#: .\gmtool\models.py:181
+msgid "已作废"
+msgstr ""
+
+#: .\gmtool\models.py:182
+msgid "发布失败"
+msgstr ""
+
+#: .\gmtool\models.py:190
+msgid "审核状态"
+msgstr ""
+
+#: .\gmtool\models.py:197
+#: .\gmtool\templates\gmtool\review_announcement_list.html:84
+#: .\gmtool\templates\gmtool\review_announcement_list.html:117
+#: .\gmtool\templates\gmtool\review_announcement_list.html:310
+msgid "提交人"
+msgstr ""
+
+#: .\gmtool\models.py:199
+msgid "提交用户名"
+msgstr ""
+
+#: .\gmtool\models.py:206
+msgid "审核人"
+msgstr ""
+
+#: .\gmtool\models.py:208
+msgid "审核用户名"
+msgstr ""
+
+#: .\gmtool\models.py:215
+#: .\gmtool\templates\gmtool\review_announcement_list.html:115
+#: .\gmtool\templates\gmtool\review_announcement_list.html:308
+msgid "显示优先级"
+msgstr ""
+
+#: .\gmtool\models.py:216
+msgid "Image_1"
+msgstr ""
+
+#: .\gmtool\models.py:217
+msgid "ImageLink_1"
+msgstr ""
+
+#: .\gmtool\models.py:218
+msgid "Image_2"
+msgstr ""
+
+#: .\gmtool\models.py:219
+msgid "ImageLink_2"
+msgstr ""
+
+#: .\gmtool\models.py:220
+msgid "Image_3"
+msgstr ""
+
+#: .\gmtool\models.py:221
+msgid "ImageLink_3"
+msgstr ""
+
+#: .\gmtool\models.py:222
+msgid "Reserve_1"
+msgstr ""
+
+#: .\gmtool\models.py:223
+msgid "Reserve_2"
+msgstr ""
+
+#: .\gmtool\models.py:224
+msgid "待发布数据"
+msgstr ""
+
+#: .\gmtool\models.py:225
+msgid "审核备注"
+msgstr ""
+
+#: .\gmtool\models.py:226
+msgid "远端响应"
+msgstr ""
+
+#: .\gmtool\models.py:227
+msgid "远端原始响应"
+msgstr ""
+
+#: .\gmtool\models.py:228 .\gmtool\models.py:268
+#: .\gmtool\templates\gmtool\login_log.html:56
+#: .\gmtool\templates\gmtool\review_announcement_list.html:284
+msgid "失败原因"
+msgstr ""
+
+#: .\gmtool\models.py:229
+#: .\gmtool\templates\gmtool\review_announcement_list.html:118
+#: .\gmtool\templates\gmtool\review_announcement_list.html:311
+msgid "提交时间"
+msgstr ""
+
+#: .\gmtool\models.py:230
+msgid "审核时间"
+msgstr ""
+
+#: .\gmtool\models.py:231
+msgid "更新时间"
+msgstr ""
+
+#: .\gmtool\models.py:234 .\gmtool\models.py:235
+#: .\gmtool\templates\gmtool\_review_tabs.html:11
+#: .\gmtool\templates\gmtool\review_announcement_list.html:4
+#: .\gmtool\templates\gmtool\review_announcement_list.html:7
+msgid "公告审核"
+msgstr ""
+
+#: .\gmtool\models.py:259 .\gmtool\templates\gmtool\login.html:6
 #: .\gmtool\templates\gmtool\login.html:78
 #: .\gmtool\templates\gmtool\login_log.html:24
 #: .\gmtool\templates\gmtool\login_log.html:66
 msgid "登录"
 msgstr ""
 
-#: .\gmtool\models.py:180 .\gmtool\templates\gmtool\base.html:116
+#: .\gmtool\models.py:260 .\gmtool\templates\gmtool\base.html:122
 #: .\gmtool\templates\gmtool\login_log.html:25
 #: .\gmtool\templates\gmtool\login_log.html:68
 msgid "登出"
 msgstr ""
 
-#: .\gmtool\models.py:181 .\gmtool\templates\gmtool\login_log.html:26
+#: .\gmtool\models.py:261 .\gmtool\templates\gmtool\login_log.html:26
 #: .\gmtool\templates\gmtool\login_log.html:70
 msgid "登录失败"
 msgstr ""
 
-#: .\gmtool\models.py:187
+#: .\gmtool\models.py:267
 msgid "浏览器标识"
 msgstr ""
 
-#: .\gmtool\models.py:188 .\gmtool\templates\gmtool\login_log.html:56
-msgid "失败原因"
-msgstr ""
-
-#: .\gmtool\models.py:192 .\gmtool\models.py:193
-#: .\gmtool\templates\gmtool\base.html:62
+#: .\gmtool\models.py:272 .\gmtool\models.py:273
+#: .\gmtool\templates\gmtool\base.html:68
 #: .\gmtool\templates\gmtool\login_log.html:4
 #: .\gmtool\templates\gmtool\login_log.html:7
 msgid "登录日志"
+msgstr ""
+
+#: .\gmtool\review_views.py:165
+msgid "公告审核已通过并发布"
+msgstr ""
+
+#: .\gmtool\review_views.py:166
+#, python-format
+msgid "公告发布失败，已标记为发布失败：%(error)s"
+msgstr ""
+
+#: .\gmtool\review_views.py:185
+msgid "公告已重试发布成功"
+msgstr ""
+
+#: .\gmtool\review_views.py:186
+#, python-format
+msgid "公告重试发布失败：%(error)s"
+msgstr ""
+
+#: .\gmtool\review_views.py:207
+msgid "公告审核已作废"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\400.html:7 .\gmtool\templates\gmtool\400.html:34
@@ -925,6 +1117,9 @@ msgstr ""
 #: .\gmtool\templates\gmtool\login.html:16
 #: .\gmtool\templates\gmtool\login.html:100
 #: .\gmtool\templates\gmtool\login_log.html:4
+#: .\gmtool\templates\gmtool\review_announcement_list.html:4
+#: .\gmtool\templates\gmtool\review_mail.html:4
+#: .\gmtool\templates\gmtool\review_marquee.html:4
 #: .\gmtool\templates\gmtool\user_form.html:4
 #: .\gmtool\templates\gmtool\user_list.html:4
 #: .\gmtool\templates\gmtool\user_permissions.html:4
@@ -996,9 +1191,19 @@ msgstr ""
 #: .\gmtool\templates\gmtool\_announcement_tabs.html:11
 #: .\gmtool\templates\gmtool\announcement_create.html:4
 #: .\gmtool\templates\gmtool\announcement_create.html:7
-#: .\gmtool\templates\gmtool\announcement_create.html:24
-#: .\gmtool\templates\gmtool\announcement_create.html:88
-msgid "发布公告"
+msgid "提交公告审核"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\_review_tabs.html:6
+#: .\gmtool\templates\gmtool\review_mail.html:4
+#: .\gmtool\templates\gmtool\review_mail.html:7
+msgid "邮件审核"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\_review_tabs.html:16
+#: .\gmtool\templates\gmtool\review_marquee.html:4
+#: .\gmtool\templates\gmtool\review_marquee.html:7
+msgid "走马灯审核"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_create.html:6
@@ -1008,12 +1213,25 @@ msgid "公告"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_create.html:15
+msgid "已提交审核渠道"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_create.html:24
 msgid "失败渠道明细"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\announcement_create.html:132
+#: .\gmtool\templates\gmtool\announcement_create.html:33
+#: .\gmtool\templates\gmtool\announcement_create.html:108
+msgid "提交审核"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_create.html:103
+msgid "审核通过后会替换所选平台、渠道下已有周更新公告"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\announcement_create.html:160
 msgid ""
-"发布新的周更新公告会先删除所选平台、各所选渠道下已有的周更新公告，确认继续？"
+"确认提交此周更新公告审核？审核通过后会替换所选平台、渠道下已有周更新公告。"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:46
@@ -1021,6 +1239,7 @@ msgstr ""
 #: .\gmtool\templates\gmtool\command_log.html:124
 #: .\gmtool\templates\gmtool\login_log.html:12
 #: .\gmtool\templates\gmtool\login_log.html:39
+#: .\gmtool\templates\gmtool\review_announcement_list.html:43
 msgid "筛选条件"
 msgstr ""
 
@@ -1030,19 +1249,23 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:62
 #: .\gmtool\templates\gmtool\command_log.html:108
+#: .\gmtool\templates\gmtool\review_announcement_list.html:50
 msgid "全部状态"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:71
+#: .\gmtool\templates\gmtool\review_announcement_list.html:59
 msgid "全部平台"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:80
+#: .\gmtool\templates\gmtool\review_announcement_list.html:68
 msgid "全部渠道"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:89
 #: .\gmtool\templates\gmtool\login_log.html:23
+#: .\gmtool\templates\gmtool\review_announcement_list.html:77
 msgid "全部类型"
 msgstr ""
 
@@ -1053,16 +1276,19 @@ msgstr ""
 #: .\gmtool\templates\gmtool\announcement_log.html:100
 #: .\gmtool\templates\gmtool\command_log.html:115
 #: .\gmtool\templates\gmtool\login_log.html:30
+#: .\gmtool\templates\gmtool\review_announcement_list.html:88
 msgid "开始时间"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:104
 #: .\gmtool\templates\gmtool\command_log.html:119
 #: .\gmtool\templates\gmtool\login_log.html:34
+#: .\gmtool\templates\gmtool\review_announcement_list.html:92
 msgid "结束时间"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_log.html:109
+#: .\gmtool\templates\gmtool\review_announcement_list.html:97
 msgid "筛选"
 msgstr ""
 
@@ -1089,6 +1315,7 @@ msgstr ""
 #: .\gmtool\templates\gmtool\announcement_query.html:116
 #: .\gmtool\templates\gmtool\command_list.html:41
 #: .\gmtool\templates\gmtool\command_log.html:144
+#: .\gmtool\templates\gmtool\review_announcement_list.html:119
 #: .\gmtool\templates\gmtool\user_list.html:39
 msgid "操作"
 msgstr ""
@@ -1117,6 +1344,7 @@ msgstr ""
 #: .\gmtool\templates\gmtool\command_execute.html:285
 #: .\gmtool\templates\gmtool\command_execute.html:398
 #: .\gmtool\templates\gmtool\command_log.html:230
+#: .\gmtool\templates\gmtool\review_announcement_list.html:286
 msgid "无数据"
 msgstr ""
 
@@ -1137,10 +1365,12 @@ msgid "类型"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_query.html:112
+#: .\gmtool\templates\gmtool\review_announcement_list.html:281
 msgid "标题"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\announcement_query.html:113
+#: .\gmtool\templates\gmtool\review_announcement_list.html:282
 msgid "正文"
 msgstr ""
 
@@ -1187,7 +1417,7 @@ msgid "确认删除该公告？"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\base.html:27
-#: .\gmtool\templates\gmtool\base.html:82
+#: .\gmtool\templates\gmtool\base.html:88
 #: .\gmtool\templates\gmtool\dashboard.html:4
 #: .\gmtool\templates\gmtool\dashboard.html:7
 msgid "仪表盘"
@@ -1207,39 +1437,43 @@ msgstr ""
 msgid "公告管理"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\base.html:48
+#: .\gmtool\templates\gmtool\base.html:46
+msgid "审核管理"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\base.html:54
 #: .\gmtool\templates\gmtool\user_list.html:4
 #: .\gmtool\templates\gmtool\user_list.html:7
 msgid "用户管理"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\base.html:55
+#: .\gmtool\templates\gmtool\base.html:61
 #: .\gmtool\templates\gmtool\command_log.html:4
 #: .\gmtool\templates\gmtool\command_log.html:7
 msgid "操作日志"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\base.html:80
+#: .\gmtool\templates\gmtool\base.html:86
 #: .\gmtool\templates\gmtool\dashboard.html:6
 msgid "首页"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\base.html:90
+#: .\gmtool\templates\gmtool\base.html:96
 msgid "中文"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\base.html:90
-#: .\gmtool\templates\gmtool\base.html:104
+#: .\gmtool\templates\gmtool\base.html:96
+#: .\gmtool\templates\gmtool\base.html:110
 #: .\gmtool\templates\gmtool\login.html:91
 msgid "英文"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\base.html:97
+#: .\gmtool\templates\gmtool\base.html:103
 #: .\gmtool\templates\gmtool\login.html:97
 msgid "简体中文"
 msgstr ""
 
-#: .\gmtool\templates\gmtool\base.html:111
+#: .\gmtool\templates\gmtool\base.html:117
 #: .\gmtool\templates\gmtool\user_list.html:52
 msgid "管理员"
 msgstr ""
@@ -1249,6 +1483,7 @@ msgid "返回仪表盘"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\command_add.html:27
+#: .\gmtool\templates\gmtool\review_announcement_list.html:280
 msgid "基本信息"
 msgstr ""
 
@@ -1617,6 +1852,78 @@ msgstr ""
 
 #: .\gmtool\templates\gmtool\login_log.html:55
 msgid "浏览器"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:6
+#: .\gmtool\templates\gmtool\review_mail.html:6
+#: .\gmtool\templates\gmtool\review_marquee.html:6
+msgid "审核"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:109
+msgid "待审核ID"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:114
+msgid "公告正文/图片"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:172
+msgid "查看"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:194
+msgid "本人提交"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:196
+msgid "确认通过此条公告审核？通过后将调用目录服发布接口。"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:199
+msgid "通过"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:207
+#: .\gmtool\templates\gmtool\review_announcement_list.html:223
+msgid "作废"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:212
+msgid "确认重试发布此条公告？重试后将再次调用目录服发布接口。"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:215
+msgid "重试"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:234
+msgid "暂无公告审核记录"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:274
+msgid "公告审核详情"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:283
+msgid "图片地址"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:285
+msgid "原始 payload"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:287
+msgid "确认作废此条公告审核？作废后不会发布。"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_announcement_list.html:288
+msgid "作废备注（可选）"
+msgstr ""
+
+#: .\gmtool\templates\gmtool\review_mail.html:15
+#: .\gmtool\templates\gmtool\review_marquee.html:15
+msgid "该审核类型暂未接入"
 msgstr ""
 
 #: .\gmtool\templates\gmtool\user_form.html:6

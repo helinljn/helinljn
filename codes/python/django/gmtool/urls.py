@@ -1,7 +1,7 @@
 """GM命令后台管理系统 - URL路由"""
 from django.urls import path
 
-from . import announcement_views, api_views, auth_views, command_views, user_views
+from . import announcement_views, api_views, auth_views, command_views, review_views, user_views
 
 app_name = 'gmtool'
 
@@ -33,6 +33,27 @@ urlpatterns = [
     path('announcements/create/', announcement_views.announcement_create, name='announcement_create'),
     path('announcements/batch-delete/', announcement_views.announcement_batch_delete, name='announcement_batch_delete'),
     path('announcements/logs/', announcement_views.announcement_log_list, name='announcement_log_list'),
+
+    # 审核管理
+    path('reviews/', review_views.review_index, name='review_index'),
+    path('reviews/mail/', review_views.review_mail, name='review_mail'),
+    path('reviews/announcements/', review_views.review_announcement_list, name='review_announcement_list'),
+    path(
+        'reviews/announcements/<int:review_id>/approve/',
+        review_views.review_announcement_approve,
+        name='review_announcement_approve',
+    ),
+    path(
+        'reviews/announcements/<int:review_id>/reject/',
+        review_views.review_announcement_reject,
+        name='review_announcement_reject',
+    ),
+    path(
+        'reviews/announcements/<int:review_id>/retry/',
+        review_views.review_announcement_retry,
+        name='review_announcement_retry',
+    ),
+    path('reviews/marquee/', review_views.review_marquee, name='review_marquee'),
 
     # API v1
     path('api/v1/commands/sync/', command_views.sync_commands_api, name='sync_commands_api'),

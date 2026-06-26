@@ -1,0 +1,19 @@
+{% load i18n %}
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if active_review_tab == 'mail' %}active{% endif %}" href="{% url 'gmtool:review_mail' %}">
+            <i class="ti ti-mail me-1"></i>{% trans "邮件审核" %}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_review_tab == 'announcements' %}active{% endif %}" href="{% url 'gmtool:review_announcement_list' %}">
+            <i class="ti ti-speakerphone me-1"></i>{% trans "公告审核" %}
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if active_review_tab == 'marquee' %}active{% endif %}" href="{% url 'gmtool:review_marquee' %}">
+            <i class="ti ti-news me-1"></i>{% trans "走马灯审核" %}
+        </a>
+    </li>
+</ul>
