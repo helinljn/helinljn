@@ -11,7 +11,7 @@
 - 为不同用户提供受控的 GM 命令执行入口
 - 从 `idip_commands.json` 解析命令定义并同步到数据库
 - 根据命令定义动态渲染请求表单并展示响应结果
-- 支持用户管理、命令权限分配、登录日志与命令执行日志
+- 支持用户管理、命令权限分配、审核管理、登录日志与命令执行日志
 - 提供审计日志、应用日志与敏感字段脱敏能力
 - 支持中英文国际化
 - 支持反向代理部署与 HTTPS 场景
@@ -43,14 +43,21 @@
 - 查询、发布、删除游戏公告
 - 公告接口独立于 IDIP 命令，调用目录服 Web PHP 接口
 - 查询公告支持平台单选、渠道多选；发布公告支持平台单选、渠道多选、公告类型单选；删除在查询结果中进行（单条删除按钮或批量删除），按每条公告自身的渠道、类型、ID 删除，无独立删除页
-- 目录服不支持批量提交，多渠道查询/发布会按渠道逐个调用接口：查询结果每个渠道一个分组，发布每个渠道各写一条公告日志
+- 目录服不支持批量提交，多渠道查询会按渠道逐个调用接口并按渠道分组展示；多渠道发布会按渠道逐个提交公告审核
 - 发布公告类型包括周更新公告、常驻公告、轮播图；轮播图无需填写标题和正文，周更新公告/常驻公告不填写图片字段
 - 查询结果详情按公告类型展示字段：周更新公告、常驻公告只显示标题和正文；轮播图只显示图片链接；预留字段不在详情弹窗中展示
-- 周更新公告发布前会先查询并删除同平台同渠道旧周更新公告
+- 周更新公告审核通过发布前会先查询并删除同平台同渠道旧周更新公告
 - 超级管理员自动拥有公告管理权限，普通用户需单独授权
-- 发布、删除写公告操作日志和 audit log，查询不写操作日志
+- 发布公告页面只提交审核并写 audit log；审核通过/重试后实际发布并写公告操作日志；删除写公告操作日志和 audit log，查询不写操作日志
 
-### 2.4 日志与审计
+### 2.4 审核管理
+- 公告审核、邮件审核、走马灯审核统一在审核管理导航下
+- 公告发布需先提交 `AnnouncementReview`，审核通过后才调用目录服发布
+- 邮件命令和走马灯发布命令需先提交 `CommandReview`，审核通过后才调用 IDIP；走马灯查询和删除命令不需要审核
+- 邮件/走马灯审核权限来自对应命令权限；公告审核权限来自公告管理权限；提交人不能审核自己的记录
+- 审核通过或重试时先标记为处理中，再调用远端服务，最后更新为已通过或失败
+
+### 2.5 日志与审计
 - 登录日志 `LoginLog`
 - 命令执行日志 `CommandLog`
 - 公告操作日志 `AnnouncementLog`
@@ -60,7 +67,7 @@
 - 若远端命令执行成功但本地日志写入失败，接口会返回 `warning` 与 `log_persisted=false`
 - 若远端公告操作成功但本地公告日志写入失败，页面会保留远端成功结果并提示 warning
 
-### 2.5 配置与运行
+### 2.6 配置与运行
 - `.env` 驱动核心配置
 - 默认使用 SQLite，可通过环境变量切换到 MySQL
 - 支持国际化（简体中文 / 英文）
@@ -108,10 +115,15 @@ C:\helin\helinljn\codes\python\django\
 │   ├── urls.py
 │   └── wsgi.py
 ├── gmtool/
+│   ├── announcement_client.py
+│   ├── announcement_log_services.py
+│   ├── announcement_review_services.py
+│   ├── announcement_views.py
 │   ├── api_views.py
 │   ├── audit_log.py
 │   ├── auth_views.py
 │   ├── command_parser.py
+│   ├── command_review_services.py
 │   ├── command_services.py
 │   ├── command_views.py
 │   ├── decorators.py
@@ -122,6 +134,7 @@ C:\helin\helinljn\codes\python\django\
 │   ├── models.py
 │   ├── permission_service.py
 │   ├── query_utils.py
+│   ├── review_views.py
 │   ├── security_utils.py
 │   ├── signals.py
 │   ├── tests.py
@@ -160,8 +173,12 @@ C:\helin\helinljn\codes\python\django\
 
 - `auth_views.py`：登录、登出与认证相关逻辑
 - `announcement_client.py`：公告目录服 HTTP 调用
-- `announcement_views.py`：公告查询、发布、删除和公告日志列表
+- `announcement_log_services.py`：公告远端发布/删除日志写入封装
+- `announcement_review_services.py`：公告提交审核、审核通过发布、作废、重试等业务逻辑
+- `announcement_views.py`：公告查询、提交发布审核、删除和公告日志列表
 - `command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志
+- `command_review_services.py`：邮件和走马灯 GM 命令审核、审核权限判断、审核通过后执行 IDIP
+- `review_views.py`：审核管理入口、公告审核、邮件审核、走马灯审核列表与操作
 - `user_views.py`：用户管理、用户编辑、删除、权限分配、登录日志查看
 - `api_views.py`：命令定义上传接口、命令日志详情接口、公告日志详情接口
 - `forms.py`：用户、命令新增、公告查询/发布/删除等页面表单校验
@@ -265,7 +282,7 @@ GM 命令定义模型，由 `idip_commands.json` 同步生成。
 - `timeout`
 
 ### 6.6 `AnnouncementLog`
-公告发布、删除操作日志。
+公告远端发布、删除操作日志。发布公告审核通过/重试时写入的公告日志按提交人记录操作人，审核动作本身的 audit log 按审核人记录。
 
 关键字段：
 - `user`
@@ -292,7 +309,94 @@ GM 命令定义模型，由 `idip_commands.json` 同步生成。
 - `failed`
 - `timeout`
 
-### 6.7 `LoginLog`
+### 6.7 `AnnouncementReview`
+公告待审核记录。发布公告页面只创建审核记录，不直接调用目录服。
+
+关键字段：
+- `status`
+- `submitter`
+- `submitter_username`
+- `reviewer`
+- `reviewer_username`
+- `platform`
+- `channel`
+- `announcement_type`
+- `announcement_id`
+- `title`
+- `content`
+- `priority`
+- `image_1` / `image_link_1`
+- `image_2` / `image_link_2`
+- `image_3` / `image_link_3`
+- `reserve_1` / `reserve_2`
+- `payload`
+- `review_comment`
+- `remote_response`
+- `raw_response`
+- `error_message`
+- `created_at`
+- `reviewed_at`
+- `updated_at`
+
+状态枚举：
+- `pending`：待审核
+- `processing`：发布中
+- `approved`：已通过
+- `rejected`：已作废
+- `failed`：发布失败
+
+说明：
+- 同平台、同渠道、同类型的周更新公告仅允许存在一条待审核记录
+- 审核通过和重试会先标记为 `processing`，再在事务外调用目录服，最后更新终态
+- 提交人不能审核自己提交的记录
+
+### 6.8 `CommandReview`
+邮件/走马灯 GM 命令待审核记录。需要审核的命令在执行页提交后不会立即调用 IDIP。
+
+关键字段：
+- `review_type`
+- `status`
+- `command`
+- `command_code`
+- `command_name`
+- `command_tab`
+- `request_name`
+- `request_id`
+- `response_name`
+- `response_id`
+- `submitter`
+- `submitter_username`
+- `reviewer`
+- `reviewer_username`
+- `partition`
+- `params`
+- `request_content`
+- `response_data`
+- `review_comment`
+- `error_message`
+- `ip_address`
+- `created_at`
+- `reviewed_at`
+- `updated_at`
+
+审核类型：
+- `mail`：邮件审核
+- `marquee`：走马灯审核
+
+状态枚举：
+- `pending`：待审核
+- `processing`：执行中
+- `approved`：已通过
+- `rejected`：已作废
+- `failed`：执行失败
+
+说明：
+- 邮件命令按命令文本中的邮件/mail 识别
+- 走马灯审核复用 `idip_commands.json` 中的公告发布类命令，查询和删除公告命令不需要审核
+- 审核通过和重试会先标记为 `processing`，再在事务外调用 IDIP，最后更新终态
+- 提交人不能审核自己提交的记录
+
+### 6.9 `LoginLog`
 登录行为日志。
 
 关键字段：
@@ -317,13 +421,18 @@ GM 命令定义模型，由 `idip_commands.json` 同步生成。
 1. 命令权限直接按用户分配
 2. 超级管理员身份只以 Django `is_superuser` 为准
 3. 公告管理权限使用单独功能权限，不伪装成 GM 命令
-4. `UserProfile` 只承载扩展资料，不承担权限职责
+4. 公告审核权限来自公告管理权限，邮件/走马灯审核权限来自对应命令权限
+5. `UserProfile` 只承载扩展资料，不承担权限职责
 
 ### 7.2 行为规则
 - 超级管理员自动拥有全部活跃命令权限
 - 超级管理员自动拥有公告管理权限
+- 超级管理员自动拥有公告审核、邮件审核和走马灯审核权限
 - 普通用户只能访问显式授权的命令
 - 普通用户需要 `UserAnnouncementPermission` 才能访问公告管理
+- 普通用户拥有邮件命令权限时可访问邮件审核，拥有走马灯发布命令权限时可访问走马灯审核
+- 走马灯审核只覆盖公告发布类 IDIP 命令，查询和删除公告命令不进入审核
+- 公告审核、邮件审核、走马灯审核都不允许提交人审核自己的记录
 - 普通用户不能将目标用户提升为超级管理员
 - 超级管理员用户不能被删除
 - 用户不能禁用自己
@@ -487,6 +596,16 @@ python manage.py format_idip_commands --check
 }
 ```
 
+### 9.4 命令审核执行
+命令执行页会先判断命令是否需要审核：
+
+- 普通命令直接调用 `send_idip_command`
+- 邮件命令创建 `CommandReview(type=mail)`，审核通过或重试时再调用 IDIP
+- 走马灯发布命令创建 `CommandReview(type=marquee)`，审核通过或重试时再调用 IDIP
+- 走马灯查询和删除命令不创建审核记录
+
+审核通过或重试执行成功/失败后写 `CommandLog`，日志操作人按提交人记录；审核动作本身写 audit log，操作人按审核人记录。
+
 ---
 
 ## 10. 路由说明
@@ -526,9 +645,21 @@ python manage.py format_idip_commands --check
 #### 公告管理
 - `/gmtool/announcements/`：兼容入口，默认跳转查询公告页
 - `/gmtool/announcements/query/`：查询公告（查询结果内进行单条/批量删除）
-- `/gmtool/announcements/create/`：发布公告
+- `/gmtool/announcements/create/`：提交发布公告审核
 - `/gmtool/announcements/batch-delete/`：批量删除公告（POST，复用为单条删除入口）
 - `/gmtool/announcements/logs/`：公告日志
+
+#### 审核管理
+- `/gmtool/reviews/`：审核管理入口，跳转到当前用户可访问的第一个审核页
+- `/gmtool/reviews/mail/`：邮件审核列表
+- `/gmtool/reviews/marquee/`：走马灯审核列表
+- `/gmtool/reviews/commands/<review_type>/<review_id>/approve/`：通过并执行邮件/走马灯审核记录（POST）
+- `/gmtool/reviews/commands/<review_type>/<review_id>/reject/`：作废邮件/走马灯审核记录（POST）
+- `/gmtool/reviews/commands/<review_type>/<review_id>/retry/`：重试执行失败的邮件/走马灯审核记录（POST）
+- `/gmtool/reviews/announcements/`：公告审核列表
+- `/gmtool/reviews/announcements/<review_id>/approve/`：通过并发布公告审核记录（POST）
+- `/gmtool/reviews/announcements/<review_id>/reject/`：作废公告审核记录（POST）
+- `/gmtool/reviews/announcements/<review_id>/retry/`：重试发布失败的公告审核记录（POST）
 
 #### API
 - `/gmtool/api/v1/commands/sync/`
@@ -591,7 +722,7 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - 删除：`{ANNOUNCEMENT_BASE_URL}/server/announcementDelete.php`
 - 查询：`{ANNOUNCEMENT_BASE_URL}/client/announcement.php`
 
-`ANNOUNCEMENT_BASE_URL` 只允许 `http://` 或 `https://`，不能带 query string 或 fragment。未配置或配置非法时，公告页会展示配置错误；查询不会请求目录服，发布和删除会写入失败公告日志用于审计。
+`ANNOUNCEMENT_BASE_URL` 只允许 `http://` 或 `https://`，不能带 query string 或 fragment。未配置或配置非法时，公告页会展示配置错误；查询不会请求目录服；提交发布公告审核不要求目录服地址可用，审核通过/重试发布和删除公告时会调用目录服并按结果写公告日志用于审计。
 
 ### 11.5 命令执行与展示
 - `PAGE_SIZE`
@@ -639,7 +770,9 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - 登录跳转地址安全校验
 - 登出仅允许 `POST`
 - 公告管理使用独立功能权限，未授权用户不能通过 URL 或 POST 绕过
-- 公告日志详情接口按 `SENSITIVE_FIELDS` 脱敏
+- 审核管理按公告权限或命令权限控制，提交人不能审核自己的记录
+- 审核通过和重试会先标记为 `processing`，再在事务外调用远端服务，避免长事务包裹远端调用
+- 公告日志详情接口按 `SENSITIVE_FIELDS` 脱敏，非 JSON 原始响应和错误文本也会脱敏
 - 日志敏感字段脱敏
 - `SESSION_COOKIE_HTTPONLY`
 - `SESSION_COOKIE_SECURE`
@@ -666,6 +799,10 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `CommandLog`
 - `AnnouncementLog`
 - `LoginLog`
+
+说明：
+- 邮件/走马灯审核通过或重试后写入的 `CommandLog` 按提交人记录操作人，审核动作本身的 audit log 按审核人记录
+- 公告审核通过或重试后写入的 `AnnouncementLog` 按提交人记录操作人，审核动作本身的 audit log 按审核人记录
 
 ### 13.2 文件日志
 日志目录为：
@@ -845,9 +982,10 @@ http://127.0.0.1:5510/cy_idip
 2. 使用超级管理员登录 `/gmtool/`；普通用户需要先在用户权限页勾选“公告管理权限”。
 3. 进入 `/gmtool/announcements/` 或 `/gmtool/announcements/query/`，在“查询公告”子页签选择平台、渠道（渠道可多选）后查询现有公告；多选渠道时每个渠道按目录服接口逐个查询，结果按渠道分组展示。
 4. 查询结果详情中，周更新公告、常驻公告只显示标题和正文；轮播图只显示图片链接；预留字段不展示。
-5. 在“发布公告”子页签发布公告，渠道可多选；多选渠道时按目录服接口逐个发布，每个渠道各写一条公告日志。发布周更新公告会先查询并删除同平台同渠道旧周更新公告，再发布新公告；发布轮播图时无需填写标题和正文；发布周更新公告或常驻公告时不填写图片字段。
-6. 删除公告在“查询公告”结果中进行：每条公告有单条删除按钮，每个渠道分组上方有“批量删除”按钮，按所选公告自身的 `Channel`、`AnnouncementType` 和 `AnnouncementId` 删除，无独立删除子页签。
-7. 进入“公告日志”子页签或 `/gmtool/announcements/logs/` 查看发布、删除日志和脱敏后的日志详情。
+5. 在“发布公告”子页签提交公告审核，渠道可多选；多选渠道时每个渠道各创建一条 `AnnouncementReview`。发布轮播图时无需填写标题和正文；发布周更新公告或常驻公告时不填写图片字段。
+6. 进入“审核管理 > 公告审核”处理待审核记录；审核通过或重试时才调用目录服发布并写公告日志。发布周更新公告会先查询并删除同平台同渠道旧周更新公告，再发布新公告。
+7. 删除公告在“查询公告”结果中进行：每条公告有单条删除按钮，每个渠道分组上方有“批量删除”按钮，按所选公告自身的 `Channel`、`AnnouncementType` 和 `AnnouncementId` 删除，无独立删除子页签。
+8. 进入“公告日志”子页签或 `/gmtool/announcements/logs/` 查看发布、删除日志和脱敏后的日志详情。
 
 ---
 

@@ -126,13 +126,17 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `mysite/settings.py`：项目配置、环境变量、数据库选择、日志与安全开关。
 - `mysite/urls.py`：项目级 URL 路由。
 - `gmtool/apps.py`：应用配置，启动时注册 signals。
-- `gmtool/models.py`：GM 命令、用户命令权限、公告权限、用户扩展资料、命令日志、公告日志、登录日志。
+- `gmtool/models.py`：GM 命令、用户命令权限、公告权限、用户扩展资料、命令日志、公告日志、公告审核、命令审核、登录日志。
 - `gmtool/auth_views.py`：登录、登出、登录失败限速与登录日志。
 - `gmtool/announcement_client.py`：公告目录服 HTTP 调用。
-- `gmtool/announcement_views.py`：公告查询、发布、删除、公告日志列表；`/announcements/` 为兼容入口，默认跳转 `/announcements/query/`。
+- `gmtool/announcement_log_services.py`：公告远端发布/删除日志写入封装。
+- `gmtool/announcement_review_services.py`：公告提交审核、审核通过发布、作废、重试等业务逻辑。
+- `gmtool/announcement_views.py`：公告查询、提交发布审核、删除、公告日志列表；`/announcements/` 为兼容入口，默认跳转 `/announcements/query/`。
 - `gmtool/command_parser.py`：解析 `idip_commands.json`、校验协议 ID、补充 schema 元数据、同步命令到数据库。
+- `gmtool/command_review_services.py`：邮件和走马灯 GM 命令审核、审核权限判断、审核通过后执行 IDIP。
 - `gmtool/command_services.py`：命令查询与执行前参数校验。
 - `gmtool/command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志。
+- `gmtool/review_views.py`：审核管理入口、公告审核、邮件审核、走马灯审核列表与操作。
 - `gmtool/user_views.py`：用户管理、用户编辑、删除、权限分配、登录日志列表。
 - `gmtool/api_views.py`：命令上传/同步接口、命令日志详情接口、公告日志详情接口。
 - `gmtool/forms.py`：用户、命令新增、公告查询/发布/删除等页面表单校验。
@@ -170,16 +174,22 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - IDIP 请求使用 `application/x-www-form-urlencoded`，字段为 `id`、`GSA`、`content`；`content` 是扁平 JSON 字符串，避免手工双重 URL 编码。
 - `send_idip_command(command, params)` 返回 `(response_data, error_message, request_content_str, error_type)`，兼容 `status/id/json` 包装响应和旧版直接 JSON 响应。
 - 公告功能独立于 IDIP 命令，不写入 `idip_commands.json`，不参与 `sync_commands`，也不伪装成 `GMCommand`。
-- 公告请求使用 `application/x-www-form-urlencoded`。发布/删除为 POST form data，查询为 GET query params。
+- 公告请求使用 `application/x-www-form-urlencoded`。目录服发布/删除为 POST form data，查询为 GET query params；发布公告页面只提交 `AnnouncementReview`，不直接调用目录服。
 - 公告管理使用二级页签：查询公告、发布公告、公告日志；没有独立的删除公告页，删除在查询结果中进行：单条删除按钮和「批量删除」都复用 `announcement_batch_delete` 端点（POST `items` 四元组列表），不再跳转独立删除页。
 - 查询公告只使用平台单选下拉、渠道多选，不提交公告类型参数；发布公告渠道也为多选，公告类型仍单选。删除复用 `AnnouncementDeleteForm` 校验每个 `items` 四元组（单渠道、类型三选一：周更新公告、常驻公告、轮播图），不在页面上单独选渠道。
-- 渠道多选仅作用于查询公告与发布公告表单（`_MultiChannelMixin`，`CheckboxSelectMultiple` 行内复选框组 + 全选开关，共享模板 `_announcement_channel_field.html`）；目录服不支持批量提交，多渠道按渠道逐个调用 `query_announcements` / `create_announcement`，每渠道各产出一个查询结果分组或一条 `AnnouncementLog`。`AnnouncementDeleteForm` 必须保持单渠道。
+- 渠道多选仅作用于查询公告与发布公告表单（`_MultiChannelMixin`，`CheckboxSelectMultiple` 行内复选框组 + 全选开关，共享模板 `_announcement_channel_field.html`）；目录服不支持批量提交，多渠道查询按渠道逐个调用 `query_announcements`，每渠道各产出一个查询结果分组；多渠道发布按渠道逐个创建 `AnnouncementReview`，审核通过/重试时再逐条调用 `create_announcement` 并写 `AnnouncementLog`。`AnnouncementDeleteForm` 必须保持单渠道。
 - `ANNOUNCEMENT_PLATFORMS` 和 `ANNOUNCEMENT_CHANNELS` 在 settings 层解析为去重列表；页面提交值必须严格来自配置原值。
-- 周更新公告发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。
+- 周更新公告审核通过发布前会自动查询并删除同平台同渠道旧周更新公告；该行为已确认，修改时必须保留页面风险提示和后端顺序保护。
 - 仅常驻公告显示并使用显示优先级；轮播图隐藏公告标题和公告正文，后端不要求填写并向目录服传空字符串；周更新公告和常驻公告隐藏图片字段，后端向目录服传空字符串。
 - 查询公告详情弹窗按类型展示字段：周更新公告、常驻公告只显示标题和正文；轮播图只显示图片链接；预留字段不展示。
-- 公告发布、删除写 `AnnouncementLog` 和 audit log；查询不写公告操作日志和 audit log。
-- 公告日志详情接口必须继续对配置的敏感字段进行脱敏。
+- 发布公告页面提交 `AnnouncementReview` 并写 audit log，不写 `AnnouncementLog`；审核通过/重试实际发布时写 `AnnouncementLog`，日志操作人按提交人记录，audit log 按审核人记录；直接删除公告写 `AnnouncementLog` 和 audit log；查询不写公告操作日志和 audit log。
+- `AnnouncementReview` 状态包括 `pending`、`processing`、`approved`、`rejected`、`failed`。审核通过和重试要在短事务内先置为 `processing`，再在事务外调用目录服，最后更新终态。
+- 公告审核不能由提交人审核自己的记录；失败记录可重试或作废，待审核记录可通过或作废。
+- 邮件审核和走马灯审核使用 `CommandReview`。邮件命令按命令文本中的邮件/mail 识别；走马灯审核复用 `idip_commands.json` 中的公告发布类命令，查询和删除公告命令不需要审核。
+- 邮件/走马灯审核权限来自对应命令的 `UserCommandPermission`，超级管理员自动拥有；具有发邮件或发走马灯命令权限的用户可审核同类记录，但不能审核自己提交的记录。
+- `CommandReview` 状态包括 `pending`、`processing`、`approved`、`rejected`、`failed`。审核通过和重试要在短事务内先置为 `processing`，再在事务外调用 IDIP，最后更新终态。
+- 邮件/走马灯命令审核通过后写 `CommandLog`，日志操作人按提交人记录，audit log 按审核人记录。
+- 公告日志详情接口必须继续对配置的敏感字段进行脱敏；非 JSON 的原始响应和错误文本也要用 `mask_sensitive_text` 脱敏。
 - 修改 `idip_commands.json` 后，运行 `python manage.py format_idip_commands --check` 或 `python manage.py format_idip_commands`。
 - 修改模型后，需要添加 migration，并运行 `python manage.py test gmtool`。
 - 修改用户可见文案时，必要时同步更新翻译并运行 `makemessages` 与 `compilemessages`。
@@ -222,7 +232,7 @@ python test/mock_idip_server.py
 http://127.0.0.1:5510/cy_idip
 ```
 
-涉及公告目录服集成时，优先 mock `gmtool.announcement_views.query_announcements`、`create_announcement`、`delete_announcement` 或 mock `gmtool.announcement_client._get_requests`；不要依赖真实目录服跑单元测试。
+涉及公告目录服集成时，优先 mock 调用点：查询/直接删除相关测试 mock `gmtool.announcement_views.query_announcements`、`gmtool.announcement_views.delete_announcement`；审核发布相关测试 mock `gmtool.announcement_review_services.query_announcements`、`gmtool.announcement_review_services.create_announcement`、`gmtool.announcement_review_services.delete_announcement`；客户端底层测试可 mock `gmtool.announcement_client._get_requests`。不要依赖真实目录服跑单元测试。
 
 ## 安全与数据处理
 
@@ -231,7 +241,8 @@ http://127.0.0.1:5510/cy_idip
 - 超级管理员拥有全部活跃命令访问权限；普通用户需要显式的 `UserCommandPermission` 授权。
 - 命令执行日志应尽量保证可持久化。当前行为允许远端执行成功但本地日志写入失败时返回 warning。
 - 公告发布/删除日志也应尽量保证可持久化。远端公告操作成功但本地 `AnnouncementLog` 写入失败时，页面仍按远端成功处理并提示 warning。
-- 日志详情接口必须继续对配置的敏感字段进行脱敏。
+- 邮件/走马灯审核通过后的命令执行日志也应尽量保证可持久化。远端 IDIP 执行成功但本地 `CommandLog` 写入失败时，页面仍按远端成功处理并提示 warning。
+- 日志详情接口必须继续对配置的敏感字段进行脱敏，包括结构化 JSON、公告原始响应文本和错误文本。
 - 公告日志页面和详情接口必须受公告管理权限保护；超级管理员和拥有 `UserAnnouncementPermission` 的普通用户可查看全部公告日志。
 - 登出应保持仅允许 POST。
 - 需要谨慎校验跳转目标、客户端 IP 提取、上传 JSON 大小与内容、命令参数。
