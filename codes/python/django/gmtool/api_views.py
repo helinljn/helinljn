@@ -22,7 +22,7 @@ from .command_parser import (
 )
 from .decorators import announcement_permission_required, is_super_admin, super_admin_required
 from .models import AnnouncementLog, CommandLog
-from .security_utils import get_client_ip, mask_sensitive_data
+from .security_utils import get_client_ip, mask_sensitive_data, mask_sensitive_text
 
 logger = logging.getLogger(__name__)
 
@@ -70,13 +70,13 @@ def announcement_log_detail_api(request, log_id):
             parsed_raw = json.loads(masked_raw_response)
             masked_raw_response = json.dumps(mask_sensitive_data(parsed_raw), ensure_ascii=False)
         except (TypeError, ValueError, json.JSONDecodeError):
-            masked_raw_response = masked_raw_response[:20000]
+            masked_raw_response = mask_sensitive_text(masked_raw_response)[:20000]
 
     return JsonResponse({
         'request_data': json.dumps(masked_request_data, ensure_ascii=False) if masked_request_data else '',
         'response_data': json.dumps(masked_response_data, ensure_ascii=False) if masked_response_data else '',
         'raw_response': masked_raw_response,
-        'error_message': log.error_message[:20000] if log.error_message else '',
+        'error_message': mask_sensitive_text(log.error_message)[:20000] if log.error_message else '',
     })
 
 

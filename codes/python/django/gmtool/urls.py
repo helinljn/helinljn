@@ -37,6 +37,21 @@ urlpatterns = [
     # 审核管理
     path('reviews/', review_views.review_index, name='review_index'),
     path('reviews/mail/', review_views.review_mail, name='review_mail'),
+    path(
+        'reviews/commands/<str:review_type>/<int:review_id>/approve/',
+        review_views.review_command_approve,
+        name='review_command_approve',
+    ),
+    path(
+        'reviews/commands/<str:review_type>/<int:review_id>/reject/',
+        review_views.review_command_reject,
+        name='review_command_reject',
+    ),
+    path(
+        'reviews/commands/<str:review_type>/<int:review_id>/retry/',
+        review_views.review_command_retry,
+        name='review_command_retry',
+    ),
     path('reviews/announcements/', review_views.review_announcement_list, name='review_announcement_list'),
     path(
         'reviews/announcements/<int:review_id>/approve/',

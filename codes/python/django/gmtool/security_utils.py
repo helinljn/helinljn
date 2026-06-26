@@ -1,6 +1,7 @@
 """安全相关辅助函数。"""
 import hashlib
 import hmac
+import re
 import time
 
 from django.conf import settings
@@ -69,3 +70,26 @@ def mask_sensitive_data(data):
     if isinstance(data, list):
         return [mask_sensitive_data(item) for item in data]
     return data
+
+
+def mask_sensitive_text(text):
+    """对非结构化文本中的常见 key=value/key: value 敏感字段做脱敏。"""
+    if not isinstance(text, str) or not text:
+        return text
+
+    field_names = sorted((str(name) for name in SENSITIVE_FIELD_NAMES if name), key=len, reverse=True)
+    if not field_names:
+        return text
+
+    field_pattern = '|'.join(re.escape(name) for name in field_names)
+    quoted_pattern = re.compile(
+        rf'(["\']?(?:{field_pattern})["\']?\s*[:=]\s*["\'])(.*?)(["\'])',
+        re.IGNORECASE,
+    )
+    unquoted_pattern = re.compile(
+        rf'(\b(?:{field_pattern})\b\s*[:=]\s*)(?!["\'])([^&\s,;]+)',
+        re.IGNORECASE,
+    )
+
+    masked = quoted_pattern.sub(lambda match: f'{match.group(1)}***{match.group(3)}', text)
+    return unquoted_pattern.sub(lambda match: f'{match.group(1)}***', masked)

@@ -185,7 +185,23 @@ def _update_review_after_publish(
     ])
 
 
-def _publish_locked_review(review, user, ip_address):
+def _mark_review_processing(review, user):
+    review.status = 'processing'
+    review.reviewer = user
+    review.reviewer_username = getattr(user, 'username', '') or ''
+    review.reviewed_at = timezone.now()
+    review.error_message = ''
+    review.save(update_fields=[
+        'status',
+        'reviewer',
+        'reviewer_username',
+        'reviewed_at',
+        'error_message',
+        'updated_at',
+    ])
+
+
+def _publish_review(review, user, ip_address):
     remote_call_count = 0
     log_persisted = True
     announcement_log_user = review.submitter
@@ -363,7 +379,9 @@ def approve_announcement_review(review_id, user, ip_address):
         if review.status != 'pending':
             raise ReviewActionError(_('只有待审核公告可以通过'))
         _ensure_can_operate(review, user)
-        result = _publish_locked_review(review, user, ip_address)
+        _mark_review_processing(review, user)
+
+    result = _publish_review(review, user, ip_address)
 
     log_operation(
         'announcement_review',
@@ -391,7 +409,9 @@ def retry_announcement_review(review_id, user, ip_address):
         _ensure_can_operate(review, user)
         if _has_newer_weekly_review(review):
             raise ReviewActionError(_('该周更新公告已有更新的审核记录，请先处理最新记录'))
-        result = _publish_locked_review(review, user, ip_address)
+        _mark_review_processing(review, user)
+
+    result = _publish_review(review, user, ip_address)
 
     log_operation(
         'announcement_review',

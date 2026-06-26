@@ -177,6 +177,7 @@ class AnnouncementReview(models.Model):
     """公告待审核记录。"""
     STATUS_CHOICES = [
         ('pending', _('待审核')),
+        ('processing', _('发布中')),
         ('approved', _('已通过')),
         ('rejected', _('已作废')),
         ('failed', _('发布失败')),
@@ -251,6 +252,83 @@ class AnnouncementReview(models.Model):
 
     def __str__(self):
         return f'{self.platform} - {self.channel} - {self.get_announcement_type_display()} - {self.status}'
+
+
+class CommandReview(models.Model):
+    """邮件/走马灯等 GM 命令待审核记录。"""
+    TYPE_MAIL = 'mail'
+    TYPE_MARQUEE = 'marquee'
+    REVIEW_TYPE_CHOICES = [
+        (TYPE_MAIL, _('邮件审核')),
+        (TYPE_MARQUEE, _('走马灯审核')),
+    ]
+    STATUS_CHOICES = [
+        ('pending', _('待审核')),
+        ('processing', _('执行中')),
+        ('approved', _('已通过')),
+        ('rejected', _('已作废')),
+        ('failed', _('执行失败')),
+    ]
+
+    review_type = models.CharField(_('审核类型'), max_length=20, choices=REVIEW_TYPE_CHOICES)
+    status = models.CharField(_('审核状态'), max_length=20, choices=STATUS_CHOICES, default='pending')
+    command = models.ForeignKey(
+        GMCommand,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='command_reviews',
+        verbose_name=_('命令'),
+    )
+    command_code = models.CharField(_('命令编号'), max_length=20)
+    command_name = models.CharField(_('命令名称'), max_length=200)
+    command_tab = models.CharField(_('分组标签'), max_length=200, blank=True, default='')
+    request_name = models.CharField(_('请求名'), max_length=100)
+    request_id = models.IntegerField(_('协议请求ID'))
+    response_name = models.CharField(_('响应名'), max_length=100)
+    response_id = models.IntegerField(_('协议响应ID'))
+    submitter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='submitted_command_reviews',
+        verbose_name=_('提交人'),
+    )
+    submitter_username = models.CharField(_('提交用户名'), max_length=150, blank=True, default='')
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_command_reviews',
+        verbose_name=_('审核人'),
+    )
+    reviewer_username = models.CharField(_('审核用户名'), max_length=150, blank=True, default='')
+    partition = models.IntegerField(_('服务器组号'), default=0)
+    params = models.JSONField(_('请求参数'), default=dict)
+    request_content = models.TextField(_('完整请求JSON'), blank=True, default='')
+    response_data = models.JSONField(_('响应数据'), null=True, blank=True)
+    review_comment = models.TextField(_('审核备注'), blank=True, default='')
+    error_message = models.TextField(_('失败原因'), blank=True, default='')
+    ip_address = models.GenericIPAddressField(_('IP地址'))
+    created_at = models.DateTimeField(_('提交时间'), auto_now_add=True)
+    reviewed_at = models.DateTimeField(_('审核时间'), null=True, blank=True)
+    updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('命令审核')
+        verbose_name_plural = _('命令审核')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['review_type', 'status', '-created_at'], name='cmdrev_type_status_ct_idx'),
+            models.Index(fields=['submitter', '-created_at'], name='cmdrev_submit_ct_idx'),
+            models.Index(fields=['reviewer', '-reviewed_at'], name='cmdrev_reviewed_idx'),
+            models.Index(fields=['command_code', '-created_at'], name='cmdrev_cmd_ct_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.get_review_type_display()} - {self.command_name} - {self.status}'
 
 
 class LoginLog(models.Model):

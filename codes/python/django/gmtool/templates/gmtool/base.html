@@ -40,6 +40,8 @@
                                 <span class="nav-link-title">{% trans "公告管理" %}</span>
                             </a>
                         </li>
+                        {% endif %}
+                        {% if has_review_permission %}
                         <li class="nav-item">
                             <a class="nav-link {% block nav_reviews %}{% endblock %}" href="{% url 'gmtool:review_index' %}">
                                 <span class="nav-link-icon"><i class="ti ti-clipboard-check"></i></span>

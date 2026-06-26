@@ -7,13 +7,15 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import DatabaseError, IntegrityError
+from django.db import DatabaseError, IntegrityError, connection
 from django.http import JsonResponse
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 
 from .announcement_client import create_announcement, delete_announcement, query_announcements
+from .announcement_review_services import approve_announcement_review
 from .command_parser import _enrich_schema_fields, sync_commands_to_db, validate_json_command_ids
+from .command_review_services import approve_command_review, get_command_review_type, has_command_review_type_permission
 from .command_services import validate_command_params_basic
 from .context_processors import gmtool_permissions
 from .decorators import announcement_permission_required, has_announcement_permission
@@ -23,6 +25,7 @@ from .models import (
     AnnouncementLog,
     AnnouncementReview,
     CommandLog,
+    CommandReview,
     GMCommand,
     UserAnnouncementPermission,
     UserCommandPermission,
@@ -1754,6 +1757,521 @@ class AnnouncementReviewViewTests(TestCase):
         self.assertEqual(stale.status, 'failed')
 
 
+class CommandReviewClassificationTests(TestCase):
+    def _command(self, *, tab, command_name, request_name):
+        return GMCommand(
+            command_id='cmd',
+            command_name=command_name,
+            tab=tab,
+            request_name=request_name,
+            request_id=1,
+            response_name=request_name.replace('Req', 'Rsp'),
+            response_id=2,
+        )
+
+    def test_mail_command_requires_mail_review(self):
+        command = self._command(
+            tab='发邮件送道具',
+            command_name='发邮件送道具',
+            request_name='DoSendMailReq',
+        )
+
+        self.assertEqual(get_command_review_type(command), CommandReview.TYPE_MAIL)
+
+    def test_marquee_publish_command_requires_marquee_review(self):
+        command = self._command(
+            tab='发公告',
+            command_name='发公告',
+            request_name='DoSendRollingMsgReq',
+        )
+
+        self.assertEqual(get_command_review_type(command), CommandReview.TYPE_MARQUEE)
+
+    def test_marquee_query_and_delete_commands_do_not_require_review(self):
+        query_command = self._command(
+            tab='查询公告',
+            command_name='查询公告',
+            request_name='DoQueryRollingMsgReq',
+        )
+        delete_command = self._command(
+            tab='删除公告',
+            command_name='删除公告',
+            request_name='DoDeleteRollingMsgReq',
+        )
+
+        self.assertEqual(get_command_review_type(query_command), '')
+        self.assertEqual(get_command_review_type(delete_command), '')
+
+
+class CommandReviewFlowTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.submitter = user_model.objects.create_user(
+            username='cmd_review_submitter',
+            email='cmd_review_submitter@example.com',
+            password='password123',
+        )
+        self.mail_reviewer = user_model.objects.create_user(
+            username='mail_reviewer',
+            email='mail_reviewer@example.com',
+            password='password123',
+        )
+        self.marquee_reviewer = user_model.objects.create_user(
+            username='marquee_reviewer',
+            email='marquee_reviewer@example.com',
+            password='password123',
+        )
+        self.no_permission_user = user_model.objects.create_user(
+            username='cmd_review_no_perm',
+            email='cmd_review_no_perm@example.com',
+            password='password123',
+        )
+        self.mail_command = self._create_command(
+            command_id='10226008',
+            command_name='发邮件送道具',
+            tab='发邮件送道具',
+            request_name='DoSendMailReq',
+            request_id=4211,
+            response_name='DoSendMailRsp',
+            response_id=4212,
+        )
+        self.marquee_publish_command = self._create_command(
+            command_id='10226001',
+            command_name='发公告',
+            tab='发公告',
+            request_name='DoSendRollingMsgReq',
+            request_id=4201,
+            response_name='DoSendRollingMsgRsp',
+            response_id=4202,
+        )
+        self.marquee_query_command = self._create_command(
+            command_id='10226002',
+            command_name='查询公告',
+            tab='查询公告',
+            request_name='DoQueryRollingMsgReq',
+            request_id=4203,
+            response_name='DoQueryRollingMsgRsp',
+            response_id=4204,
+        )
+        self.marquee_delete_command = self._create_command(
+            command_id='10226003',
+            command_name='删除公告',
+            tab='删除公告',
+            request_name='DoDeleteRollingMsgReq',
+            request_id=4205,
+            response_name='DoDeleteRollingMsgRsp',
+            response_id=4206,
+        )
+        UserCommandPermission.objects.create(user=self.submitter, command=self.mail_command)
+        UserCommandPermission.objects.create(user=self.submitter, command=self.marquee_publish_command)
+        UserCommandPermission.objects.create(user=self.submitter, command=self.marquee_query_command)
+        UserCommandPermission.objects.create(user=self.submitter, command=self.marquee_delete_command)
+        UserCommandPermission.objects.create(user=self.mail_reviewer, command=self.mail_command)
+        UserCommandPermission.objects.create(user=self.marquee_reviewer, command=self.marquee_publish_command)
+        self.client.defaults['HTTP_HOST'] = '127.0.0.1'
+
+    def _create_command(self, **kwargs):
+        return GMCommand.objects.create(
+            request_params=[
+                {'id': 'AreaId', 'type': 'uint32', 'isnull': 'false'},
+                {'id': 'Partition', 'type': 'uint32', 'isnull': 'false'},
+                {'id': 'PlatId', 'type': 'uint8', 'isnull': 'false'},
+            ],
+            response_params=[],
+            field_labels={},
+            is_active=True,
+            **kwargs,
+        )
+
+    def _params(self, partition=1):
+        return {
+            'AreaId': 10,
+            'Partition': partition,
+            'PlatId': 1,
+        }
+
+    def _post_execute(self, command, params=None):
+        return self.client.post(
+            reverse('gmtool:command_execute', args=[command.command_id]),
+            data=json.dumps({'params': params or self._params()}),
+            content_type='application/json',
+        )
+
+    def _create_review(self, *, status='pending', review_type=CommandReview.TYPE_MAIL, submitter=None):
+        submitter = submitter or self.submitter
+        command = self.mail_command if review_type == CommandReview.TYPE_MAIL else self.marquee_publish_command
+        return CommandReview.objects.create(
+            review_type=review_type,
+            status=status,
+            command=command,
+            command_code=command.command_id,
+            command_name=command.command_name,
+            command_tab=command.tab,
+            request_name=command.request_name,
+            request_id=command.request_id,
+            response_name=command.response_name,
+            response_id=command.response_id,
+            submitter=submitter,
+            submitter_username=submitter.username,
+            partition=1,
+            params=self._params(),
+            error_message='上次失败' if status == 'failed' else '',
+            ip_address='127.0.0.1',
+        )
+
+    @patch('gmtool.command_views.send_idip_command')
+    def test_mail_command_submit_creates_review_without_remote_call(self, mocked_send):
+        self.client.force_login(self.submitter)
+
+        response = self._post_execute(self.mail_command, self._params(partition='2'))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload['review_required'])
+        self.assertEqual(payload['review_type'], CommandReview.TYPE_MAIL)
+        mocked_send.assert_not_called()
+        self.assertEqual(CommandLog.objects.count(), 0)
+        review = CommandReview.objects.get()
+        self.assertEqual(review.status, 'pending')
+        self.assertEqual(review.submitter, self.submitter)
+        self.assertEqual(review.partition, 2)
+        self.assertEqual(review.params['Partition'], 2)
+
+    @patch('gmtool.command_views.send_idip_command')
+    def test_marquee_publish_command_submit_creates_review(self, mocked_send):
+        self.client.force_login(self.submitter)
+
+        response = self._post_execute(self.marquee_publish_command)
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload['review_required'])
+        self.assertEqual(payload['review_type'], CommandReview.TYPE_MARQUEE)
+        mocked_send.assert_not_called()
+        review = CommandReview.objects.get()
+        self.assertEqual(review.command_code, self.marquee_publish_command.command_id)
+        self.assertEqual(review.status, 'pending')
+
+    @patch('gmtool.command_views.send_idip_command')
+    def test_marquee_query_and_delete_commands_execute_directly(self, mocked_send):
+        self.client.force_login(self.submitter)
+        mocked_send.return_value = (
+            {'status': True, 'id': 4203, 'json': {'Result': 0, 'RetMsg': 'OK'}},
+            None,
+            '{"mock": true}',
+            '',
+        )
+
+        for command in (self.marquee_query_command, self.marquee_delete_command):
+            with self.subTest(command=command.command_name):
+                response = self._post_execute(command)
+
+                self.assertEqual(response.status_code, 200)
+                payload = response.json()
+                self.assertNotIn('review_required', payload)
+                self.assertTrue(payload['status'])
+
+        self.assertEqual(mocked_send.call_count, 2)
+        self.assertEqual(CommandReview.objects.count(), 0)
+        self.assertEqual(CommandLog.objects.count(), 2)
+
+    def test_reviewed_command_execute_page_uses_submit_review_label(self):
+        self.client.force_login(self.submitter)
+
+        response = self.client.get(reverse('gmtool:command_execute', args=[self.mail_command.command_id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '提交审核')
+
+    def test_review_permissions_follow_command_permissions(self):
+        self.assertTrue(has_command_review_type_permission(self.mail_reviewer, CommandReview.TYPE_MAIL))
+        self.assertFalse(has_command_review_type_permission(self.mail_reviewer, CommandReview.TYPE_MARQUEE))
+        self.assertTrue(has_command_review_type_permission(self.marquee_reviewer, CommandReview.TYPE_MARQUEE))
+        self.assertFalse(has_command_review_type_permission(self.no_permission_user, CommandReview.TYPE_MAIL))
+
+    def test_review_navigation_and_pages_use_command_review_permissions(self):
+        self.client.force_login(self.mail_reviewer)
+        response = self.client.get(reverse('gmtool:dashboard'))
+        self.assertContains(response, '审核管理')
+        response = self.client.get(reverse('gmtool:review_index'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], reverse('gmtool:review_mail'))
+        response = self.client.get(reverse('gmtool:review_mail'))
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('gmtool:review_marquee'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], reverse('gmtool:dashboard'))
+
+        self.client.force_login(self.marquee_reviewer)
+        response = self.client.get(reverse('gmtool:review_index'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], reverse('gmtool:review_marquee'))
+        response = self.client.get(reverse('gmtool:review_marquee'))
+        self.assertEqual(response.status_code, 200)
+
+        self.client.force_login(self.no_permission_user)
+        response = self.client.get(reverse('gmtool:dashboard'))
+        self.assertNotContains(response, '审核管理')
+        response = self.client.get(reverse('gmtool:review_index'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], reverse('gmtool:dashboard'))
+
+    @patch('gmtool.command_review_services.send_idip_command')
+    def test_approve_executes_command_and_writes_log_for_submitter(self, mocked_send):
+        review = self._create_review(status='pending')
+        self.client.force_login(self.mail_reviewer)
+        mocked_send.return_value = (
+            {'status': True, 'id': self.mail_command.request_id, 'json': {'Result': 0, 'RetMsg': 'OK'}},
+            None,
+            '{"mock": true}',
+            '',
+        )
+
+        response = self.client.post(
+            reverse(
+                'gmtool:review_command_approve',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': review.id},
+            ),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        mocked_send.assert_called_once()
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'approved')
+        self.assertEqual(review.reviewer, self.mail_reviewer)
+        self.assertEqual(review.request_content, '{"mock": true}')
+        log = CommandLog.objects.get(status='success')
+        self.assertEqual(log.user, self.submitter)
+        self.assertEqual(log.operator_username, self.submitter.username)
+        self.assertEqual(log.command, self.mail_command)
+
+    @patch('gmtool.command_review_services.send_idip_command')
+    def test_approve_failure_marks_failed_and_retry_success(self, mocked_send):
+        review = self._create_review(status='pending')
+        self.client.force_login(self.mail_reviewer)
+        mocked_send.return_value = (None, 'FAIL: busy', 'FAIL: busy', 'failed')
+
+        response = self.client.post(
+            reverse(
+                'gmtool:review_command_approve',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': review.id},
+            ),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'failed')
+        self.assertEqual(review.error_message, 'FAIL: busy')
+        self.assertEqual(CommandLog.objects.get().status, 'failed')
+
+        mocked_send.return_value = (
+            {'status': True, 'id': self.mail_command.request_id, 'json': {'Result': 0, 'RetMsg': 'OK'}},
+            None,
+            '{"mock": true}',
+            '',
+        )
+        response = self.client.post(
+            reverse(
+                'gmtool:review_command_retry',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': review.id},
+            ),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'approved')
+        self.assertEqual(review.error_message, '')
+        self.assertEqual(CommandLog.objects.filter(status='success').count(), 1)
+
+    @patch('gmtool.command_review_services.send_idip_command')
+    def test_submitter_cannot_approve_retry_or_reject_own_review(self, mocked_send):
+        pending = self._create_review(status='pending', submitter=self.submitter)
+        failed = self._create_review(status='failed', submitter=self.submitter)
+        self.client.force_login(self.submitter)
+
+        approve_response = self.client.post(
+            reverse(
+                'gmtool:review_command_approve',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': pending.id},
+            ),
+        )
+        retry_response = self.client.post(
+            reverse(
+                'gmtool:review_command_retry',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': failed.id},
+            ),
+        )
+        reject_response = self.client.post(
+            reverse(
+                'gmtool:review_command_reject',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': pending.id},
+            ),
+        )
+
+        self.assertEqual(approve_response.status_code, 403)
+        self.assertEqual(retry_response.status_code, 403)
+        self.assertEqual(reject_response.status_code, 403)
+        mocked_send.assert_not_called()
+        pending.refresh_from_db()
+        failed.refresh_from_db()
+        self.assertEqual(pending.status, 'pending')
+        self.assertEqual(failed.status, 'failed')
+
+    @patch('gmtool.command_review_services.send_idip_command')
+    def test_reject_updates_status_without_remote_call(self, mocked_send):
+        review = self._create_review(status='pending')
+        self.client.force_login(self.mail_reviewer)
+
+        response = self.client.post(
+            reverse(
+                'gmtool:review_command_reject',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': review.id},
+            ),
+            data={'review_comment': '无需执行'},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        mocked_send.assert_not_called()
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'rejected')
+        self.assertEqual(review.reviewer, self.mail_reviewer)
+        self.assertEqual(review.review_comment, '无需执行')
+        self.assertEqual(CommandLog.objects.count(), 0)
+
+    @patch('gmtool.command_review_services.CommandLog.objects.create', side_effect=DatabaseError('db failed'))
+    @patch('gmtool.command_review_services.send_idip_command')
+    def test_command_log_persistence_error_does_not_block_approval(self, mocked_send, mocked_log_create):
+        review = self._create_review(status='pending')
+        self.client.force_login(self.mail_reviewer)
+        mocked_send.return_value = (
+            {'status': True, 'id': self.mail_command.request_id, 'json': {'Result': 0, 'RetMsg': 'OK'}},
+            None,
+            '{"mock": true}',
+            '',
+        )
+
+        response = self.client.post(
+            reverse(
+                'gmtool:review_command_approve',
+                kwargs={'review_type': CommandReview.TYPE_MAIL, 'review_id': review.id},
+            ),
+        )
+
+        self.assertEqual(response.status_code, 302)
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'approved')
+        mocked_log_create.assert_called_once()
+        self.assertEqual(CommandLog.objects.count(), 0)
+
+
+class ReviewProcessingStateTests(TransactionTestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.submitter = user_model.objects.create_user(
+            username='processing_submitter',
+            email='processing_submitter@example.com',
+            password='password123',
+        )
+        self.reviewer = user_model.objects.create_user(
+            username='processing_reviewer',
+            email='processing_reviewer@example.com',
+            password='password123',
+        )
+        self.command = GMCommand.objects.create(
+            command_id='processing_mail',
+            command_name='发邮件送道具',
+            tab='发邮件送道具',
+            request_name='DoSendMailReq',
+            request_id=8801,
+            response_name='DoSendMailRsp',
+            response_id=8802,
+            request_params=[],
+            response_params=[],
+            field_labels={},
+            is_active=True,
+        )
+        self.command_review = CommandReview.objects.create(
+            review_type=CommandReview.TYPE_MAIL,
+            status='pending',
+            command=self.command,
+            command_code=self.command.command_id,
+            command_name=self.command.command_name,
+            command_tab=self.command.tab,
+            request_name=self.command.request_name,
+            request_id=self.command.request_id,
+            response_name=self.command.response_name,
+            response_id=self.command.response_id,
+            submitter=self.submitter,
+            submitter_username=self.submitter.username,
+            partition=1,
+            params={'AreaId': 10, 'Partition': 1, 'PlatId': 1},
+            ip_address='127.0.0.1',
+        )
+        self.announcement_review = AnnouncementReview.objects.create(
+            status='pending',
+            submitter=self.submitter,
+            submitter_username=self.submitter.username,
+            platform='Android',
+            channel='小米',
+            announcement_type='2',
+            announcement_id='-1',
+            title='待审核标题',
+            content='待审核正文',
+            priority=1,
+            payload={
+                'Platform': 'Android',
+                'Channel': '小米',
+                'AnnouncementType': '2',
+                'AnnouncementId': '-1',
+                'Title': '待审核标题',
+                'Content': '待审核正文',
+            },
+        )
+
+    @patch('gmtool.command_review_services.send_idip_command')
+    def test_command_remote_call_runs_after_processing_state_is_committed(self, mocked_send):
+        atomic_states = []
+
+        def fake_send(_command, _params):
+            atomic_states.append(connection.in_atomic_block)
+            self.command_review.refresh_from_db()
+            self.assertEqual(self.command_review.status, 'processing')
+            return (
+                {'status': True, 'id': self.command.request_id, 'json': {'Result': 0, 'RetMsg': 'OK'}},
+                None,
+                '{"mock": true}',
+                '',
+            )
+
+        mocked_send.side_effect = fake_send
+
+        result = approve_command_review(self.command_review.id, self.reviewer, '127.0.0.1')
+
+        self.assertEqual(atomic_states, [False])
+        self.assertTrue(result.succeeded)
+        self.command_review.refresh_from_db()
+        self.assertEqual(self.command_review.status, 'approved')
+
+    @patch('gmtool.announcement_review_services.create_announcement')
+    def test_announcement_remote_call_runs_after_processing_state_is_committed(self, mocked_create):
+        atomic_states = []
+
+        def fake_create(_payload):
+            atomic_states.append(connection.in_atomic_block)
+            self.announcement_review.refresh_from_db()
+            self.assertEqual(self.announcement_review.status, 'processing')
+            return ({'result': 'OK'}, '', 'OK', '')
+
+        mocked_create.side_effect = fake_create
+
+        result = approve_announcement_review(self.announcement_review.id, self.reviewer, '127.0.0.1')
+
+        self.assertEqual(atomic_states, [False])
+        self.assertTrue(result.succeeded)
+        self.announcement_review.refresh_from_db()
+        self.assertEqual(self.announcement_review.status, 'approved')
+
+
 class AnnouncementPermissionAssignmentTests(TestCase):
     def setUp(self):
         user_model = get_user_model()
@@ -1843,6 +2361,25 @@ class AnnouncementLogDetailApiTests(TestCase):
         self.assertIn('"token": "***"', payload['request_data'])
         self.assertIn('"access_token": "***"', payload['response_data'])
         self.assertIn('"password": "***"', payload['raw_response'])
+
+    def test_non_json_raw_response_masks_sensitive_key_value_text(self):
+        self.log.raw_response = 'FAIL token=secret-token password: plain-secret access_token="abc123"'
+        self.log.error_message = 'remote secret=hidden'
+        self.log.save(update_fields=['raw_response', 'error_message'])
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse('gmtool:announcement_log_detail_api', args=[self.log.id]))
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertNotIn('secret-token', payload['raw_response'])
+        self.assertNotIn('plain-secret', payload['raw_response'])
+        self.assertNotIn('abc123', payload['raw_response'])
+        self.assertIn('token=***', payload['raw_response'])
+        self.assertIn('password: ***', payload['raw_response'])
+        self.assertIn('access_token="***"', payload['raw_response'])
+        self.assertNotIn('hidden', payload['error_message'])
+        self.assertIn('secret=***', payload['error_message'])
 
     def test_unauthorized_user_cannot_fetch_announcement_log_detail(self):
         other = get_user_model().objects.create_user(

@@ -127,7 +127,7 @@
 
                     <div class="form-footer">
                         <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="ti ti-player-play me-1"></i><span id="submitBtnText">{% trans "执行命令" %}</span>
+                            <i class="ti {% if command_review_type %}ti-send{% else %}ti-player-play{% endif %} me-1"></i><span id="submitBtnText">{% if command_review_type %}{% trans "提交审核" %}{% else %}{% trans "执行命令" %}{% endif %}</span>
                         </button>
                         <button type="reset" class="btn btn-outline-secondary ms-2" id="resetBtn">
                             <i class="ti ti-rotate me-1"></i>{% trans "重置" %}
@@ -713,9 +713,13 @@ async function singleExecute() {
         clearResultViews();
 
         if (data.success) {
-            renderStructuredResult(data.data);
-            if (document.getElementById('structuredResultWrap').classList.contains('d-none')) {
-                showRawJsonFallback(data.data);
+            if (data.review_required) {
+                showRawJsonFallback(data.message || '{% trans "命令已提交审核" %}');
+            } else {
+                renderStructuredResult(data.data);
+                if (document.getElementById('structuredResultWrap').classList.contains('d-none')) {
+                    showRawJsonFallback(data.data);
+                }
             }
         } else if (data.command_deactivated) {
             showRawJsonFallback('{% trans "命令已失效" %}: ' + (data.error || '{% trans "该命令已被停用或删除，即将跳转到命令列表..." %}'));

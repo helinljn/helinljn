@@ -19,6 +19,7 @@ from .command_parser import (
     sync_commands_to_db,
     validate_json_command_ids,
 )
+from .command_review_services import get_command_review_type, submit_command_review
 from .command_services import get_visible_commands_queryset, group_commands_by_tab, validate_command_params_basic
 from .decorators import command_permission_required, is_super_admin, super_admin_required
 from .forms import AddGMCommandForm
@@ -146,6 +147,29 @@ def command_execute(request, cmd_id):
             # 归一化写回，确保后续下游与日志类型一致
             params['Partition'] = partition
 
+            command_review_type = get_command_review_type(command)
+            if command_review_type:
+                client_ip = get_client_ip(request)
+                try:
+                    review = submit_command_review(command, params, request.user, client_ip)
+                except DatabaseError:
+                    logger.exception(
+                        'Command review persistence failed: cmd=%s user=%s',
+                        cmd_id,
+                        request.user.username,
+                    )
+                    return JsonResponse(
+                        {'success': False, 'error': _('审核记录保存失败，请稍后重试')},
+                        status=500,
+                    )
+                return JsonResponse({
+                    'success': True,
+                    'review_required': True,
+                    'review_id': review.id,
+                    'review_type': review.review_type,
+                    'message': _('命令已提交审核，请等待审核通过后执行'),
+                })
+
             # 调用 IDIP API
             response_data, error, request_content, error_type = send_idip_command(command, params)
 
@@ -214,6 +238,7 @@ def command_execute(request, cmd_id):
 
     return render(request, 'gmtool/command_execute.html', {
         'command': command,
+        'command_review_type': get_command_review_type(command),
         'request_params': command.request_params,
         'response_params': command.response_params,
         'request_params_json': json.dumps(command.request_params, ensure_ascii=False),
