@@ -3,7 +3,7 @@
     {
       "id": "gpt-5.6-sol",
       "name": "gpt-5.6-sol",
-      "vendor": "user",
+      "vendor": "Custom",
       "url": "https://www.rightapi.ai/codex/v1",
       "apiKey": "xxx",
       "supportsToolCall": true,
@@ -23,7 +23,7 @@
     {
       "id": "claude-opus-4-8",
       "name": "claude-opus-4-8",
-      "vendor": "user",
+      "vendor": "Custom",
       "url": "https://www.rightapi.ai/claude-aws/v1",
       "apiKey": "xxx",
       "supportsToolCall": true,
@@ -43,7 +43,7 @@
     {
       "id": "gemini-3.1-pro-preview",
       "name": "gemini-3.1-pro-preview",
-      "vendor": "user",
+      "vendor": "Custom",
       "url": "https://www.rightapi.ai/gemini/v1",
       "apiKey": "xxx",
       "supportsToolCall": true,
