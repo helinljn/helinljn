@@ -21,7 +21,7 @@
     C:\Users\helin\.claude\settings.json
         {
             "env": {
-                "ANTHROPIC_BASE_URL": "https://www.right.codes/claude-aws",
+                "ANTHROPIC_BASE_URL": "https://www.rightapi.ai/claude-aws",
                 "ANTHROPIC_AUTH_TOKEN": "xxx",
                 "ANTHROPIC_MODEL": "claude-opus-4-8",
                 "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8",
@@ -55,13 +55,13 @@
         name = "custom"
         wire_api = "responses"
         requires_openai_auth = true
-        base_url = "https://www.right.codes/codex/v1"
+        base_url = "https://www.rightapi.ai/codex/v1"
 
         [windows]
         sandbox = "unelevated"
 
 5. 配置gemini
     C:\Users\helin\.gemini\.env
-        GOOGLE_GEMINI_BASE_URL=https://www.right.codes/gemini
+        GOOGLE_GEMINI_BASE_URL=https://www.rightapi.ai/gemini
         GEMINI_API_KEY=xxx
         GEMINI_MODEL=gemini-3.1-pro-preview
