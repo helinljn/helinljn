@@ -4,7 +4,7 @@
       "id": "grok-4.5",
       "name": "grok-4.5",
       "vendor": "Custom",
-      "url": "https://yunwu.ai/v1",
+      "url": "https://www.rightapi.ai/codex/v1",
       "apiKey": "xxx",
       "supportsToolCall": true,
       "supportsImages": true,
