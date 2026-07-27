@@ -24,8 +24,8 @@
             "env": {
                 "ANTHROPIC_BASE_URL": "https://www.rightapi.ai/claude-aws",
                 "ANTHROPIC_AUTH_TOKEN": "xxx",
-                "ANTHROPIC_MODEL": "claude-opus-4-8",
-                "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-8",
+                "ANTHROPIC_MODEL": "claude-opus-5",
+                "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5",
                 "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5",
                 "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-sonnet-5",
                 "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",

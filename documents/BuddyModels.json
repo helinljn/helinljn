@@ -41,8 +41,8 @@
       }
     },
     {
-      "id": "claude-opus-4-8",
-      "name": "claude-opus-4-8",
+      "id": "claude-opus-5",
+      "name": "claude-opus-5",
       "vendor": "Custom",
       "url": "https://www.rightapi.ai/claude-aws/v1",
       "apiKey": "xxx",
