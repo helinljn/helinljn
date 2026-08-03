@@ -1,26 +1,6 @@
 {
   "models": [
     {
-      "id": "grok-4.5",
-      "name": "grok-4.5",
-      "vendor": "Custom",
-      "url": "https://api3.wlai.vip/v1",
-      "apiKey": "xxx",
-      "supportsToolCall": true,
-      "supportsImages": true,
-      "supportsReasoning": true,
-      "useCustomProtocol": false,
-      "onlyReasoning": true,
-      "reasoning": {
-        "defaultEffort": "high",
-        "supportedEfforts": [
-          "high",
-          "xhigh"
-        ],
-        "canDisableThinking": false
-      }
-    },
-    {
       "id": "gpt-5.6-sol",
       "name": "gpt-5.6-sol",
       "vendor": "Custom",
@@ -32,7 +12,7 @@
       "useCustomProtocol": false,
       "onlyReasoning": true,
       "reasoning": {
-        "defaultEffort": "high",
+        "defaultEffort": "xhigh",
         "supportedEfforts": [
           "high",
           "xhigh"
@@ -52,7 +32,7 @@
       "useCustomProtocol": false,
       "onlyReasoning": true,
       "reasoning": {
-        "defaultEffort": "high",
+        "defaultEffort": "xhigh",
         "supportedEfforts": [
           "high",
           "xhigh"
@@ -72,7 +52,7 @@
       "useCustomProtocol": false,
       "onlyReasoning": true,
       "reasoning": {
-        "defaultEffort": "high",
+        "defaultEffort": "xhigh",
         "supportedEfforts": [
           "high",
           "xhigh"
