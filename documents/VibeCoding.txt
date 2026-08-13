@@ -13,31 +13,9 @@
     npm outdated -g
 
     # 更新包
-    npm i -g @anthropic-ai/claude-code@latest
     npm i -g @openai/codex@latest
-    npm i -g @google/gemini-cli@latest
-    npm i -g @tencent-ai/codebuddy-code
 
-3. 配置claude-code
-    C:\Users\helin\.claude\settings.json
-        {
-            "env": {
-                "ANTHROPIC_BASE_URL": "https://www.rightapi.ai/claude-aws",
-                "ANTHROPIC_AUTH_TOKEN": "xxx",
-                "ANTHROPIC_MODEL": "claude-opus-5",
-                "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-5",
-                "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-5",
-                "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-sonnet-5",
-                "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-                "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "90",
-                "CLAUDE_CODE_EFFORT_LEVEL": "max",
-                "API_TIMEOUT_MS": "600000"
-            },
-            "includeCoAuthoredBy": false,
-            "theme": "dark"
-        }
-
-4. 配置codex
+3. 配置codex
     C:\Users\helin\.codex\auth.json
         {
             "auth_mode": "apikey",
@@ -60,12 +38,3 @@
 
         [windows]
         sandbox = "unelevated"
-
-5. 配置gemini
-    C:\Users\helin\.gemini\.env
-        GOOGLE_GEMINI_BASE_URL=https://www.rightapi.ai/gemini
-        GEMINI_API_KEY=xxx
-        GEMINI_MODEL=gemini-3.1-pro-preview
-
-6. 配置codebuddy
-    C:\Users\helin\.codebuddy\models.json
