@@ -8,8 +8,9 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .audit_log import log_operation
+from .batch_execute_service import FIRST_RUN_JOB_STATUSES, execute_job, retry_failed_items
 from .idip_client import send_idip_command
-from .models import CommandLog, CommandReview, GMCommand
+from .models import BatchExecuteJob, CommandLog, CommandReview, GMCommand
 from .permission_service import is_super_admin_user
 
 
@@ -157,6 +158,54 @@ def submit_command_review(command, params, user, ip_address):
     return review
 
 
+def submit_batch_command_review(batch_job, user, ip_address):
+    """为整批任务创建一条审核记录。"""
+    command = batch_job.command
+    review_type = batch_job.review_type or get_command_review_type(command)
+    if not review_type:
+        raise CommandReviewActionError(_('该命令不需要审核'))
+
+    review = CommandReview.objects.create(
+        review_type=review_type,
+        batch_job=batch_job,
+        command=command,
+        command_code=batch_job.command_code,
+        command_name=batch_job.command_name,
+        command_tab=getattr(command, 'tab', '') if command else '',
+        request_name=getattr(command, 'request_name', '') if command else '',
+        request_id=getattr(command, 'request_id', 0) if command else 0,
+        response_name=getattr(command, 'response_name', '') if command else '',
+        response_id=getattr(command, 'response_id', 0) if command else 0,
+        submitter=user,
+        submitter_username=getattr(user, 'username', '') or '',
+        partition=0,
+        params={
+            'batch_job_id': batch_job.id,
+            'total_items': batch_job.total_items,
+        },
+        ip_address=ip_address,
+    )
+
+    batch_job.status = BatchExecuteJob.STATUS_PENDING_REVIEW
+    batch_job.review_type = review_type
+    batch_job.save(update_fields=['status', 'review_type', 'updated_at'])
+
+    log_operation(
+        'command_review',
+        'submit_batch',
+        user=user,
+        ip_address=ip_address,
+        detail={
+            'review_id': review.id,
+            'review_type': review.review_type,
+            'batch_job_id': batch_job.id,
+            'command_id': batch_job.command_code,
+            'total_items': batch_job.total_items,
+        },
+    )
+    return review
+
+
 def _ensure_can_operate(review, user):
     if review.submitter_id and user and review.submitter_id == user.id:
         raise CommandReviewSelfActionError(_('不能审核自己提交的内容'))
@@ -293,6 +342,66 @@ def _publish_review(review, user, ip_address):
     )
 
 
+def _batch_review_summary(batch_job):
+    return str(
+        _('批量执行完成：成功 %(ok)s 条，失败 %(fail)s 条，结果未知 %(unknown)s 条')
+        % {
+            'ok': batch_job.success_count,
+            'fail': batch_job.failed_count,
+            'unknown': batch_job.unknown_count,
+        }
+    )
+
+
+def _save_batch_review_result(review, batch_job, user):
+    succeeded = batch_job.status == BatchExecuteJob.STATUS_COMPLETED
+    review.reviewer = user
+    review.reviewer_username = getattr(user, 'username', '') or ''
+    review.reviewed_at = timezone.now()
+    review.response_data = {
+        'batch_job_id': batch_job.id,
+        'status': batch_job.status,
+        'total': batch_job.total_items,
+        'success': batch_job.success_count,
+        'failed': batch_job.failed_count,
+        'unknown': batch_job.unknown_count,
+    }
+    if succeeded:
+        review.status = 'approved'
+        review.error_message = ''
+    else:
+        review.status = 'failed'
+        review.error_message = _batch_review_summary(batch_job)
+    review.save(update_fields=[
+        'reviewer',
+        'reviewer_username',
+        'reviewed_at',
+        'response_data',
+        'status',
+        'error_message',
+        'updated_at',
+    ])
+    return CommandReviewActionResult(
+        review=review,
+        succeeded=succeeded,
+        error_message='' if succeeded else review.error_message,
+    )
+
+
+def _publish_batch_review(review, batch_job, user, ip_address):
+    """审核通过后执行整批任务。"""
+    execute_job(batch_job, user, ip_address, allowed_statuses=FIRST_RUN_JOB_STATUSES)
+    batch_job.refresh_from_db()
+    return _save_batch_review_result(review, batch_job, user)
+
+
+def _retry_batch_review(review, batch_job, user, ip_address):
+    """重试整批任务中的失败明细。"""
+    retry_failed_items(batch_job, user, ip_address)
+    batch_job.refresh_from_db()
+    return _save_batch_review_result(review, batch_job, user)
+
+
 def approve_command_review(review_id, user, ip_address, *, expected_type=None):
     """审核通过 pending 命令，并执行 IDIP。"""
     with transaction.atomic():
@@ -301,8 +410,12 @@ def approve_command_review(review_id, user, ip_address, *, expected_type=None):
             raise CommandReviewActionError(_('只有待审核命令可以通过'))
         _ensure_can_operate(review, user)
         _mark_review_processing(review, user)
+        batch_job = review.batch_job
 
-    result = _publish_review(review, user, ip_address)
+    if batch_job is not None:
+        result = _publish_batch_review(review, batch_job, user, ip_address)
+    else:
+        result = _publish_review(review, user, ip_address)
 
     log_operation(
         'command_review',
@@ -330,8 +443,12 @@ def retry_command_review(review_id, user, ip_address, *, expected_type=None):
             raise CommandReviewActionError(_('只有执行失败的命令可以重试'))
         _ensure_can_operate(review, user)
         _mark_review_processing(review, user)
+        batch_job = review.batch_job
 
-    result = _publish_review(review, user, ip_address)
+    if batch_job is not None:
+        result = _retry_batch_review(review, batch_job, user, ip_address)
+    else:
+        result = _publish_review(review, user, ip_address)
 
     log_operation(
         'command_review',
@@ -371,6 +488,11 @@ def reject_command_review(review_id, user, ip_address, *, expected_type=None, co
             'review_comment',
             'updated_at',
         ])
+
+        batch_job = review.batch_job
+        if batch_job is not None:
+            batch_job.status = BatchExecuteJob.STATUS_REJECTED
+            batch_job.save(update_fields=['status', 'updated_at'])
 
     log_operation(
         'command_review',

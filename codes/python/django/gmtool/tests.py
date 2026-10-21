@@ -14,8 +14,28 @@ from django.urls import reverse
 
 from .announcement_client import create_announcement, delete_announcement, query_announcements
 from .announcement_review_services import approve_announcement_review
+from .batch_execute_service import (
+    confirm_unknown_and_retry,
+    execute_job,
+    retry_failed_items,
+)
+from .batch_import_service import (
+    BatchImportError,
+    build_template_csv,
+    parse_rows,
+    parse_uploaded_file,
+    read_tabular_rows,
+)
 from .command_parser import _enrich_schema_fields, sync_commands_to_db, validate_json_command_ids
-from .command_review_services import approve_command_review, get_command_review_type, has_command_review_type_permission
+from .command_review_services import (
+    CommandReviewActionError,
+    approve_command_review,
+    get_command_review_type,
+    has_command_review_type_permission,
+    reject_command_review,
+    retry_command_review,
+    submit_batch_command_review,
+)
 from .command_services import validate_command_params_basic
 from .context_processors import gmtool_permissions
 from .decorators import announcement_permission_required, has_announcement_permission
@@ -24,6 +44,8 @@ from .idip_client import send_idip_command
 from .models import (
     AnnouncementLog,
     AnnouncementReview,
+    BatchExecuteItem,
+    BatchExecuteJob,
     CommandLog,
     CommandReview,
     GMCommand,
@@ -3051,3 +3073,524 @@ class GMCommandDatabaseConstraintTests(TestCase):
                 field_labels={},
                 is_active=True,
             )
+
+
+def _make_flat_batch_command(**overrides):
+    defaults = {
+        'command_id': '30001',
+        'command_name': '批量发邮件送道具',
+        'tab': '发邮件送道具',
+        'request_name': 'DoSendMailReq',
+        'request_id': 5101,
+        'response_name': 'DoSendMailRsp',
+        'response_id': 5102,
+        'request_params': [
+            {'id': 'AreaId', 'type': 'uint32', 'isnull': 'false'},
+            {'id': 'Partition', 'type': 'uint32', 'isnull': 'false'},
+            {'id': 'PlatId', 'type': 'uint8', 'isnull': 'false'},
+            {'id': 'OpenId', 'type': 'string', 'isnull': 'false'},
+            {'id': 'ItemId', 'type': 'uint32', 'isnull': 'false'},
+        ],
+        'response_params': [],
+        'field_labels': {},
+        'is_active': True,
+    }
+    defaults.update(overrides)
+    return GMCommand.objects.create(**defaults)
+
+
+def _make_struct_batch_command(**overrides):
+    defaults = {
+        'command_id': '30002',
+        'command_name': '批量发邮件送多个道具',
+        'tab': '发邮件送多个道具',
+        'request_name': 'DoSendMultiMailReq',
+        'request_id': 5201,
+        'response_name': 'DoSendMultiMailRsp',
+        'response_id': 5202,
+        'request_params': [
+            {'id': 'AreaId', 'type': 'uint32', 'isnull': 'false'},
+            {'id': 'Partition', 'type': 'uint32', 'isnull': 'false'},
+            {'id': 'PlatId', 'type': 'uint8', 'isnull': 'false'},
+            {'id': 'OpenId', 'type': 'string', 'isnull': 'false'},
+            {'id': 'ItemList1_count', 'type': 'uint32', 'isnull': 'false', 'auto_count_for': 'ItemList1'},
+            {
+                'id': 'ItemList1',
+                'type': 'SItemInfo',
+                'isnull': 'false',
+                'max_size': 5,
+                'count_id': 'ItemList1_count',
+                'children': [
+                    {'id': 'ItemId', 'type': 'uint32', 'isnull': 'false'},
+                    {'id': 'ItemNum', 'type': 'uint32', 'isnull': 'false'},
+                    {'id': 'Star', 'type': 'uint32', 'isnull': 'false'},
+                    {'id': 'ExtraParam', 'type': 'uint32', 'isnull': 'false'},
+                ],
+            },
+        ],
+        'response_params': [],
+        'field_labels': {},
+        'is_active': True,
+    }
+    defaults.update(overrides)
+    return GMCommand.objects.create(**defaults)
+
+
+class BatchImportServiceTests(TestCase):
+    def setUp(self):
+        self.command = _make_flat_batch_command()
+
+    def _upload(self, content, name='rows.txt', encoding='utf-8'):
+        data = content.encode(encoding) if isinstance(content, str) else content
+        return SimpleUploadedFile(name, data, content_type='text/plain')
+
+    def test_parse_tsv_success(self):
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemId\n'
+            '10\t1\t1\tacct1\t100\n'
+            '10\t2\t1\tacct2\t200\n'
+        )
+        result = parse_uploaded_file(self.command, self._upload(content))
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.total_rows, 2)
+        self.assertEqual(result.rows[0].params['OpenId'], 'acct1')
+        self.assertEqual(result.rows[0].params['Partition'], 1)
+        self.assertEqual(result.rows[1].params['ItemId'], 200)
+
+    def test_parse_csv_success(self):
+        content = (
+            'AreaId,Partition,PlatId,OpenId,ItemId\n'
+            '10,3,1,acct3,300\n'
+        )
+        result = parse_uploaded_file(self.command, self._upload(content, name='rows.csv'))
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.rows[0].params['Partition'], 3)
+
+    def test_parse_gbk_encoding(self):
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemId\n'
+            '10\t1\t1\t账号一\t100\n'
+        )
+        result = parse_uploaded_file(self.command, self._upload(content, encoding='gbk'))
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.rows[0].params['OpenId'], '账号一')
+
+    def test_parse_utf16_encoding(self):
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemId\n'
+            '10\t1\t1\t账号二\t100\n'
+        )
+        result = parse_uploaded_file(self.command, self._upload(content, encoding='utf-16'))
+        self.assertTrue(result.is_valid)
+        self.assertEqual(result.rows[0].params['OpenId'], '账号二')
+
+    def test_missing_required_column_raises(self):
+        content = (
+            'AreaId\tPartition\tPlatId\tItemId\n'
+            '10\t1\t1\t100\n'
+        )
+        with self.assertRaises(BatchImportError):
+            parse_uploaded_file(self.command, self._upload(content))
+
+    def test_invalid_row_reports_error(self):
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemId\n'
+            '10\t1\t1\t\t100\n'
+        )
+        result = parse_uploaded_file(self.command, self._upload(content))
+        self.assertFalse(result.is_valid)
+        self.assertEqual(len(result.invalid_rows), 1)
+        self.assertIn('OpenId', result.invalid_rows[0].error_message)
+
+    def test_duplicate_header_raises(self):
+        headers = ['AreaId', 'Partition', 'PlatId', 'OpenId', 'ItemId', 'OpenId']
+        rows = [['10', '1', '1', 'acct', '100', 'acct']]
+        with self.assertRaises(BatchImportError):
+            parse_rows(self.command, headers, rows)
+
+    def test_struct_list_json_cell(self):
+        command = _make_struct_batch_command()
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemList1\n'
+            '10\t1\t1\tacct\t[{"ItemId":1,"ItemNum":10,"Star":0,"ExtraParam":0}]\n'
+        )
+        result = parse_uploaded_file(command, self._upload(content))
+        self.assertTrue(result.is_valid)
+        params = result.rows[0].params
+        self.assertEqual(params['ItemList1'][0]['ItemId'], 1)
+        self.assertEqual(params['ItemList1_count'], 1)
+
+    def test_invalid_struct_json_reports_error(self):
+        command = _make_struct_batch_command()
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemList1\n'
+            '10\t1\t1\tacct\t[{"ItemId":1,]\n'
+        )
+        result = parse_uploaded_file(command, self._upload(content))
+        self.assertFalse(result.is_valid)
+        self.assertIn('ItemList1', result.invalid_rows[0].error_message)
+
+    def test_template_excludes_auto_count_fields(self):
+        command = _make_struct_batch_command()
+        content = build_template_csv(command).decode('utf-8-sig')
+        header = content.strip().splitlines()[0].split(',')
+        self.assertIn('ItemList1', header)
+        self.assertNotIn('ItemList1_count', header)
+
+
+@override_settings(BATCH_EXECUTE_INTERVAL_MS=0)
+class BatchExecuteServiceTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username='batch_exec_user',
+            password='password123',
+        )
+        self.command = _make_flat_batch_command(command_id='30011', request_id=5111, response_id=5112)
+
+    def _create_job(self, status=BatchExecuteJob.STATUS_DRAFT, partitions=(1, 2)):
+        job = BatchExecuteJob.objects.create(
+            command=self.command,
+            command_code=self.command.command_id,
+            command_name=self.command.command_name,
+            status=status,
+            submitter=self.user,
+            submitter_username=self.user.username,
+            total_items=len(partitions),
+        )
+        for index, partition in enumerate(partitions, start=1):
+            BatchExecuteItem.objects.create(
+                job=job,
+                row_index=index,
+                params={'AreaId': 10, 'Partition': partition, 'PlatId': 1, 'OpenId': f'acct{index}', 'ItemId': 100},
+            )
+        return job
+
+    @staticmethod
+    def _success():
+        return ({'status': True, 'id': 5101, 'json': {'Result': 0, 'RetMsg': 'OK'}}, None, '{}', '')
+
+    @staticmethod
+    def _failure():
+        return ({'status': False, 'id': 5101, 'json': {'Result': -1, 'RetMsg': '发放失败'}}, None, '{}', '')
+
+    @staticmethod
+    def _timeout():
+        return (None, '请求超时，请稍后重试', '{}', 'timeout')
+
+    @patch('gmtool.batch_execute_service.send_idip_command', return_value=_success())
+    def test_execute_all_success(self, mocked_send):
+        job = self._create_job()
+        result = execute_job(job, self.user, '127.0.0.1', allowed_statuses=(BatchExecuteJob.STATUS_DRAFT,))
+        job.refresh_from_db()
+        self.assertTrue(result.started)
+        self.assertEqual(result.executed_count, 2)
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_COMPLETED)
+        self.assertEqual(job.success_count, 2)
+        self.assertEqual(job.items.filter(status=BatchExecuteItem.STATUS_SUCCESS).count(), 2)
+        self.assertEqual(CommandLog.objects.filter(user=self.user).count(), 2)
+
+    @patch('gmtool.batch_execute_service.send_idip_command', return_value=_failure())
+    def test_wrapped_failure_marks_failed(self, mocked_send):
+        job = self._create_job(partitions=(1,))
+        execute_job(job, self.user, '127.0.0.1', allowed_statuses=(BatchExecuteJob.STATUS_DRAFT,))
+        job.refresh_from_db()
+        item = job.items.get()
+        self.assertEqual(item.status, BatchExecuteItem.STATUS_FAILED)
+        self.assertEqual(item.error_message, '发放失败')
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_FAILED)
+        self.assertEqual(job.failed_count, 1)
+
+    @patch('gmtool.batch_execute_service.send_idip_command', return_value=_timeout())
+    def test_timeout_marks_unknown_and_is_not_auto_retried(self, mocked_send):
+        job = self._create_job(partitions=(1,))
+        execute_job(job, self.user, '127.0.0.1', allowed_statuses=(BatchExecuteJob.STATUS_DRAFT,))
+        job.refresh_from_db()
+        item = job.items.get()
+        self.assertEqual(item.status, BatchExecuteItem.STATUS_UNKNOWN)
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_FAILED)
+        self.assertEqual(job.unknown_count, 1)
+
+        retry_failed_items(job, self.user, '127.0.0.1')
+        self.assertEqual(mocked_send.call_count, 1)
+
+    @patch('gmtool.batch_execute_service.send_idip_command')
+    def test_retry_skips_success_and_only_reruns_failed(self, mocked_send):
+        mocked_send.side_effect = [self._success(), self._failure(), self._success()]
+        job = self._create_job()
+        execute_job(job, self.user, '127.0.0.1', allowed_statuses=(BatchExecuteJob.STATUS_DRAFT,))
+        job.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_PARTIAL_FAILED)
+        self.assertEqual(mocked_send.call_count, 2)
+
+        success_item = job.items.get(status=BatchExecuteItem.STATUS_SUCCESS)
+        success_attempts = success_item.attempt_count
+
+        retry_failed_items(job, self.user, '127.0.0.1')
+        job.refresh_from_db()
+        success_item.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_COMPLETED)
+        self.assertEqual(mocked_send.call_count, 3)
+        self.assertEqual(success_item.attempt_count, success_attempts)
+
+    @patch('gmtool.batch_execute_service.send_idip_command')
+    def test_confirm_unknown_resets_and_retries(self, mocked_send):
+        mocked_send.side_effect = [self._timeout(), self._success()]
+        job = self._create_job(partitions=(1,))
+        execute_job(job, self.user, '127.0.0.1', allowed_statuses=(BatchExecuteJob.STATUS_DRAFT,))
+        job.refresh_from_db()
+        self.assertEqual(job.unknown_count, 1)
+
+        confirm_unknown_and_retry(job, self.user, '127.0.0.1')
+        job.refresh_from_db()
+        self.assertEqual(mocked_send.call_count, 2)
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_COMPLETED)
+        self.assertEqual(job.success_count, 1)
+        self.assertEqual(job.unknown_count, 0)
+
+
+class BatchImportViewTests(TestCase):
+    def setUp(self):
+        self.admin = get_user_model().objects.create_superuser(
+            username='batch_admin',
+            email='batch_admin@example.com',
+            password='password123',
+        )
+        self.command = _make_flat_batch_command(command_id='30021', request_id=5121, response_id=5122)
+        self.client.defaults['HTTP_HOST'] = '127.0.0.1'
+        self.client.force_login(self.admin)
+
+    def _post_file(self, content, name='rows.txt'):
+        uploaded = SimpleUploadedFile(name, content.encode('utf-8'), content_type='text/plain')
+        return self.client.post(
+            reverse('gmtool:command_batch', args=[self.command.command_id]),
+            {'file': uploaded},
+        )
+
+    def test_upload_creates_draft_job(self):
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemId\n'
+            '10\t1\t1\ta1\t100\n'
+            '10\t2\t1\ta2\t200\n'
+        )
+        response = self._post_file(content)
+        self.assertEqual(response.status_code, 302)
+        job = BatchExecuteJob.objects.get()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_DRAFT)
+        self.assertEqual(job.total_items, 2)
+        self.assertEqual(job.items.count(), 2)
+
+    def test_invalid_row_does_not_create_job(self):
+        content = (
+            'AreaId\tPartition\tPlatId\tOpenId\tItemId\n'
+            '10\t1\t1\t\t100\n'
+        )
+        response = self._post_file(content)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(BatchExecuteJob.objects.exists())
+
+    def test_wrong_extension_is_rejected(self):
+        response = self._post_file('AreaId,Partition\n10,1\n', name='rows.xlsx')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(BatchExecuteJob.objects.exists())
+
+    @patch('gmtool.batch_execute_service.send_idip_command')
+    def test_confirm_non_review_job_executes(self, mocked_send):
+        mocked_send.return_value = (
+            {'status': True, 'id': 5121, 'json': {'Result': 0, 'RetMsg': 'OK'}},
+            None,
+            '{}',
+            '',
+        )
+        job = BatchExecuteJob.objects.create(
+            command=self.command,
+            command_code=self.command.command_id,
+            command_name=self.command.command_name,
+            status=BatchExecuteJob.STATUS_DRAFT,
+            submitter=self.admin,
+            submitter_username=self.admin.username,
+            total_items=1,
+        )
+        BatchExecuteItem.objects.create(
+            job=job,
+            row_index=1,
+            params={'AreaId': 10, 'Partition': 1, 'PlatId': 1, 'OpenId': 'a1', 'ItemId': 100},
+        )
+        response = self.client.post(reverse('gmtool:batch_job_confirm', args=[job.id]))
+        self.assertEqual(response.status_code, 302)
+        job.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_COMPLETED)
+        self.assertEqual(mocked_send.call_count, 1)
+
+    def test_confirm_review_command_creates_batch_review(self):
+        mail_command = _make_flat_batch_command(
+            command_id='30022',
+            command_name='发邮件送道具',
+            request_id=5131,
+            response_id=5132,
+        )
+        job = BatchExecuteJob.objects.create(
+            command=mail_command,
+            command_code=mail_command.command_id,
+            command_name=mail_command.command_name,
+            review_type=CommandReview.TYPE_MAIL,
+            status=BatchExecuteJob.STATUS_DRAFT,
+            submitter=self.admin,
+            submitter_username=self.admin.username,
+            total_items=1,
+        )
+        BatchExecuteItem.objects.create(
+            job=job,
+            row_index=1,
+            params={'AreaId': 10, 'Partition': 1, 'PlatId': 1, 'OpenId': 'a1', 'ItemId': 100},
+        )
+        response = self.client.post(reverse('gmtool:batch_job_confirm', args=[job.id]))
+        self.assertEqual(response.status_code, 302)
+        job.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_PENDING_REVIEW)
+        review = CommandReview.objects.get(batch_job=job)
+        self.assertEqual(review.review_type, CommandReview.TYPE_MAIL)
+        self.assertEqual(review.status, 'pending')
+
+
+@override_settings(BATCH_EXECUTE_INTERVAL_MS=0)
+class BatchReviewIntegrationTests(TestCase):
+    def setUp(self):
+        user_model = get_user_model()
+        self.submitter = user_model.objects.create_user(
+            username='batch_submitter',
+            email='batch_submitter@example.com',
+            password='password123',
+        )
+        self.reviewer = user_model.objects.create_user(
+            username='batch_reviewer',
+            email='batch_reviewer@example.com',
+            password='password123',
+        )
+        self.command = _make_flat_batch_command(command_id='30031', request_id=5141, response_id=5142)
+        UserCommandPermission.objects.create(user=self.submitter, command=self.command)
+        UserCommandPermission.objects.create(user=self.reviewer, command=self.command)
+
+    @staticmethod
+    def _success():
+        return ({'status': True, 'id': 5141, 'json': {'Result': 0, 'RetMsg': 'OK'}}, None, '{}', '')
+
+    @staticmethod
+    def _failure():
+        return ({'status': False, 'id': 5141, 'json': {'Result': -1, 'RetMsg': '发放失败'}}, None, '{}', '')
+
+    def _create_review_job(self, partitions=(1, 2)):
+        job = BatchExecuteJob.objects.create(
+            command=self.command,
+            command_code=self.command.command_id,
+            command_name=self.command.command_name,
+            review_type=CommandReview.TYPE_MAIL,
+            status=BatchExecuteJob.STATUS_DRAFT,
+            submitter=self.submitter,
+            submitter_username=self.submitter.username,
+            total_items=len(partitions),
+        )
+        for index, partition in enumerate(partitions, start=1):
+            BatchExecuteItem.objects.create(
+                job=job,
+                row_index=index,
+                params={'AreaId': 10, 'Partition': partition, 'PlatId': 1, 'OpenId': f'a{index}', 'ItemId': 100},
+            )
+        submit_batch_command_review(job, self.submitter, '127.0.0.1')
+        return job, CommandReview.objects.get(batch_job=job)
+
+    @patch('gmtool.batch_execute_service.send_idip_command', return_value=_success())
+    def test_approve_batch_review_executes_batch(self, mocked_send):
+        job, review = self._create_review_job()
+        result = approve_command_review(
+            review.id,
+            self.reviewer,
+            '127.0.0.1',
+            expected_type=CommandReview.TYPE_MAIL,
+        )
+        job.refresh_from_db()
+        review.refresh_from_db()
+        self.assertTrue(result.succeeded)
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_COMPLETED)
+        self.assertEqual(review.status, 'approved')
+        self.assertEqual(mocked_send.call_count, 2)
+
+    def test_reject_batch_review_marks_job_rejected(self):
+        job, review = self._create_review_job()
+        reject_command_review(
+            review.id,
+            self.reviewer,
+            '127.0.0.1',
+            expected_type=CommandReview.TYPE_MAIL,
+        )
+        job.refresh_from_db()
+        review.refresh_from_db()
+        self.assertEqual(review.status, 'rejected')
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_REJECTED)
+
+    def test_submitter_cannot_approve_own_batch(self):
+        job, review = self._create_review_job()
+        with self.assertRaises(CommandReviewActionError):
+            approve_command_review(
+                review.id,
+                self.submitter,
+                '127.0.0.1',
+                expected_type=CommandReview.TYPE_MAIL,
+            )
+        job.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_PENDING_REVIEW)
+
+    def test_reviewer_can_view_batch_detail_but_cannot_confirm(self):
+        job, review = self._create_review_job()
+        self.client.defaults['HTTP_HOST'] = '127.0.0.1'
+        self.client.force_login(self.reviewer)
+
+        response = self.client.get(reverse('gmtool:batch_job_detail', args=[job.id]))
+        self.assertEqual(response.status_code, 200)
+
+        confirm_response = self.client.post(
+            reverse('gmtool:batch_job_confirm', args=[job.id])
+        )
+        self.assertEqual(confirm_response.status_code, 404)
+        job.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_PENDING_REVIEW)
+
+    def test_unrelated_user_cannot_view_batch_detail(self):
+        job, review = self._create_review_job()
+        outsider = get_user_model().objects.create_user(
+            username='batch_outsider',
+            password='password123',
+        )
+        self.client.defaults['HTTP_HOST'] = '127.0.0.1'
+        self.client.force_login(outsider)
+
+        response = self.client.get(reverse('gmtool:batch_job_detail', args=[job.id]))
+        self.assertEqual(response.status_code, 404)
+
+    @patch('gmtool.batch_execute_service.send_idip_command')
+    def test_batch_review_partial_failure_then_retry(self, mocked_send):
+        mocked_send.side_effect = [self._success(), self._failure(), self._success()]
+        job, review = self._create_review_job()
+
+        approve_command_review(
+            review.id,
+            self.reviewer,
+            '127.0.0.1',
+            expected_type=CommandReview.TYPE_MAIL,
+        )
+        job.refresh_from_db()
+        review.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_PARTIAL_FAILED)
+        self.assertEqual(review.status, 'failed')
+        self.assertEqual(mocked_send.call_count, 2)
+
+        retry_command_review(
+            review.id,
+            self.reviewer,
+            '127.0.0.1',
+            expected_type=CommandReview.TYPE_MAIL,
+        )
+        job.refresh_from_db()
+        review.refresh_from_db()
+        self.assertEqual(job.status, BatchExecuteJob.STATUS_COMPLETED)
+        self.assertEqual(review.status, 'approved')
+        self.assertEqual(mocked_send.call_count, 3)

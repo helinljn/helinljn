@@ -1,0 +1,143 @@
+{% extends "gmtool/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "批量导入" %} - {{ command.command_name }} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_commands %}active{% endblock %}
+{% block page_pretitle %}{% trans "命令管理" %}{% endblock %}
+{% block page_title %}{{ command.command_name }} - {% trans "批量导入" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .batch-preview-params {
+        max-width: 520px;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: monospace;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'gmtool:command_execute' command.command_id %}" class="btn btn-sm btn-outline-secondary me-2">
+        <i class="ti ti-arrow-left me-1"></i>{% trans "返回命令" %}
+    </a>
+    <a href="{% url 'gmtool:command_batch_template' command.command_id %}" class="btn btn-sm btn-outline-primary">
+        <i class="ti ti-download me-1"></i>{% trans "下载 CSV 模板" %}
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="ti ti-upload me-2"></i>{% trans "上传导入文件" %}</h3>
+                <div class="card-actions">
+                    <code>{{ command.command_id }}</code>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
+                        {{ form.file }}
+                        {% if form.file.help_text %}
+                        <div class="form-text">{{ form.file.help_text }}</div>
+                        {% endif %}
+                        {% for error in form.file.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% for error in form.non_field_errors %}
+                    <div class="text-danger small mb-2">{{ error }}</div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-checklist me-1"></i>{% trans "解析并预览" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if import_result %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-table me-2"></i>{% trans "解析预览" %}
+                </h3>
+                <div class="card-actions">
+                    <span class="badge bg-secondary-lt">{% trans "共" %} {{ import_result.total_rows }} {% trans "行" %}</span>
+                    {% if import_result.invalid_rows %}
+                    <span class="badge bg-danger-lt">{% trans "异常" %} {{ import_result.invalid_rows|length }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                {% if import_result.unknown_headers %}
+                <div class="alert alert-warning">
+                    {% trans "以下列未匹配到协议字段，已忽略：" %}
+                    <code>{{ import_result.unknown_headers|join:", " }}</code>
+                </div>
+                {% endif %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-vcenter">
+                        <thead>
+                            <tr>
+                                <th style="width:70px;">{% trans "行号" %}</th>
+                                <th style="width:90px;">{% trans "校验" %}</th>
+                                <th>{% trans "参数" %}</th>
+                                <th>{% trans "错误信息" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in display_rows %}
+                            <tr>
+                                <td>{{ row.row_index }}</td>
+                                <td>
+                                    {% if row.is_valid %}
+                                    <span class="badge bg-success-lt">{% trans "通过" %}</span>
+                                    {% else %}
+                                    <span class="badge bg-danger-lt">{% trans "失败" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="batch-preview-params" title="{{ row.params_json }}">{{ row.params_json|default:"-" }}</span>
+                                </td>
+                                <td class="text-danger small">{{ row.error_message|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted py-4">{% trans "无可预览数据" %}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-danger mb-0">
+                    {% trans "存在校验未通过的行，请修正文件后重新上传。" %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>{% trans "文件格式说明" %}</h3>
+            </div>
+            <div class="card-body">
+                <ul class="mb-0 ps-3">
+                    <li>{% trans "支持 .txt、.tsv、.csv 文件（无需额外依赖）。" %}</li>
+                    <li>{% trans "第一行为表头，列名必须是协议字段 id（如 OpenId、RoleId）。" %}</li>
+                    <li>{% trans "一行代表一条命令，逐行拆分执行。" %}</li>
+                    <li>{% trans "结构体列表字段（如 ItemList1）请填写单行 JSON 数组。" %}</li>
+                    <li>{% trans "长数字账号/ID 建议在 Excel 中先设为“文本”格式，避免精度丢失。" %}</li>
+                    <li>{% trans "单次导入行数受 BATCH_IMPORT_MAX_ROWS 限制。" %}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

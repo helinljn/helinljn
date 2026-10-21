@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+from .batch_import_service import BatchImportError, validate_upload_filename, validate_upload_size
 from .command_parser import validate_command_ids
 from .models import GMCommand, UserProfile
 
@@ -457,3 +458,27 @@ class AddGMCommandForm(forms.Form):
                     self.add_error('request_id', error_msg)
 
         return cleaned_data
+
+
+class BatchImportForm(forms.Form):
+    """批量导入文件表单。"""
+
+    file = forms.FileField(
+        label=_('导入文件'),
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.txt,.tsv,.csv',
+        }),
+        help_text=_('支持 .txt/.tsv/.csv，建议将 Excel 另存为「文本文件(制表符分隔)」或 CSV'),
+    )
+
+    def clean_file(self):
+        uploaded = self.cleaned_data.get('file')
+        if not uploaded:
+            raise forms.ValidationError(_('请选择导入文件'))
+        try:
+            validate_upload_filename(uploaded.name)
+            validate_upload_size(uploaded.size)
+        except BatchImportError as exc:
+            raise forms.ValidationError(str(exc))
+        return uploaded

@@ -1,0 +1,262 @@
+{% extends "gmtool/base.html" %}
+{% load i18n gmtool_tags %}
+
+{% block title %}{% trans "批量任务" %} #{{ job.id }} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_batch %}active{% endblock %}
+{% block page_pretitle %}{% trans "命令管理 / 批量任务" %}{% endblock %}
+{% block page_title %}{% trans "批量任务" %} #{{ job.id }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .batch-item-params,
+    .batch-item-response {
+        max-width: 460px;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: monospace;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-3 d-flex flex-wrap gap-2">
+    <a href="{% url 'gmtool:batch_job_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="ti ti-arrow-left me-1"></i>{% trans "批量任务列表" %}
+    </a>
+    {% if job.command %}
+    <a href="{% url 'gmtool:command_execute' job.command_code %}" class="btn btn-sm btn-outline-secondary">
+        <i class="ti ti-terminal-2 me-1"></i>{% trans "命令页面" %}
+    </a>
+    {% endif %}
+</div>
+
+<div class="row row-cards mb-3">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">{% trans "总条数" %}</div>
+                <div class="h2 m-0">{{ job.total_items }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">{% trans "成功" %}</div>
+                <div class="h2 m-0 text-success">{{ job.success_count }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">{% trans "失败" %}</div>
+                <div class="h2 m-0 text-danger">{{ job.failed_count }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-muted small">{% trans "结果未知" %}</div>
+                <div class="h2 m-0 text-warning">{{ job.unknown_count }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-info-circle me-2"></i>{% trans "任务信息" %}</h3>
+        <div class="card-actions">
+            {% if job.status == 'draft' %}
+            <span class="badge bg-secondary-lt">{{ job.get_status_display }}</span>
+            {% elif job.status == 'pending_review' %}
+            <span class="badge bg-warning-lt">{{ job.get_status_display }}</span>
+            {% elif job.status == 'running' %}
+            <span class="badge bg-info-lt">{{ job.get_status_display }}</span>
+            {% elif job.status == 'completed' %}
+            <span class="badge bg-success-lt">{{ job.get_status_display }}</span>
+            {% elif job.status == 'partial_failed' %}
+            <span class="badge bg-warning-lt">{{ job.get_status_display }}</span>
+            {% elif job.status == 'failed' or job.status == 'rejected' %}
+            <span class="badge bg-danger-lt">{{ job.get_status_display }}</span>
+            {% else %}
+            <span class="badge bg-secondary-lt">{{ job.get_status_display }}</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="text-muted small">{% trans "命令" %}</div>
+                <div>{{ job.command_name }} <code>{{ job.command_code }}</code></div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">{% trans "来源文件" %}</div>
+                <div>{{ job.source_filename|default:"-" }}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">{% trans "提交人" %}</div>
+                <div>{{ job.submitter_username|default:"-" }}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">{% trans "提交时间" %}</div>
+                <div>{{ job.created_at|date:"Y-m-d H:i:s" }}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">{% trans "开始时间" %}</div>
+                <div>{{ job.started_at|date:"Y-m-d H:i:s"|default:"-" }}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">{% trans "结束时间" %}</div>
+                <div>{{ job.finished_at|date:"Y-m-d H:i:s"|default:"-" }}</div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">{% trans "审核" %}</div>
+                <div>
+                    {% if job.review %}
+                    {{ job.review.get_status_display }} <span class="text-muted">#{{ job.review.id }}</span>
+                    {% else %}
+                    -
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if can_confirm %}
+        <hr>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <form method="post" action="{% url 'gmtool:batch_job_confirm' job.id %}" class="m-0"
+                  onsubmit="return confirm('{% trans "确认导入并提交该批量任务？" %}');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-send me-1"></i>
+                    {% if job.review_type %}{% trans "提交审核" %}{% else %}{% trans "确认并执行" %}{% endif %}
+                </button>
+            </form>
+            <form method="post" action="{% url 'gmtool:batch_job_discard' job.id %}" class="m-0"
+                  onsubmit="return confirm('{% trans "确认放弃该批量任务？" %}');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="ti ti-trash me-1"></i>{% trans "放弃" %}
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if can_retry %}
+        <hr>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <form method="post" action="{% url 'gmtool:batch_job_retry' job.id %}" class="m-0"
+                  onsubmit="return confirm('{% trans "确认重试失败项？已成功的明细不会重复执行。" %}');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="ti ti-refresh me-1"></i>{% trans "重试失败项" %}
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if can_resolve_unknown %}
+        <hr>
+        <div class="alert alert-warning mb-2">
+            <i class="ti ti-alert-triangle me-1"></i>
+            {% trans "存在结果未知的明细：远端可能已执行成功。自动重试不会重发这些明细，请先人工核实。" %}
+        </div>
+        <form method="post" action="{% url 'gmtool:batch_job_resolve_unknown' job.id %}" class="m-0"
+              onsubmit="return confirm('{% trans "确认已人工核实这些明细未成功，并重新发送？此操作可能导致重复发放，请谨慎确认。" %}');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-warning">
+                <i class="ti ti-alert-triangle me-1"></i>{% trans "人工确认后重发未知项" %}
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title"><i class="ti ti-list me-2"></i>{% trans "执行明细" %}</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th style="width:70px;">{% trans "行号" %}</th>
+                    <th style="width:100px;">{% trans "状态" %}</th>
+                    <th>{% trans "参数" %}</th>
+                    <th>{% trans "错误信息" %}</th>
+                    <th style="width:120px;">{% trans "响应" %}</th>
+                    <th style="width:70px;">{% trans "尝试" %}</th>
+                    <th style="width:160px;">{% trans "执行时间" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in page_obj %}
+                <tr>
+                    <td>{{ item.row_index }}</td>
+                    <td>
+                        {% if item.status == 'success' %}
+                        <span class="badge bg-success-lt">{{ item.get_status_display }}</span>
+                        {% elif item.status == 'failed' %}
+                        <span class="badge bg-danger-lt">{{ item.get_status_display }}</span>
+                        {% elif item.status == 'unknown' %}
+                        <span class="badge bg-warning-lt">{{ item.get_status_display }}</span>
+                        {% elif item.status == 'running' %}
+                        <span class="badge bg-info-lt">{{ item.get_status_display }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary-lt">{{ item.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="batch-item-params" title="{{ item.params|json_compact }}">{{ item.params|json_compact }}</span>
+                    </td>
+                    <td class="text-danger small">{{ item.error_message|default:"-" }}</td>
+                    <td>
+                        <span class="batch-item-response" title="{{ item.response_data|json_compact }}">{{ item.response_data|json_compact|default:"-" }}</span>
+                    </td>
+                    <td>{{ item.attempt_count }}</td>
+                    <td class="text-muted small">{{ item.executed_at|date:"Y-m-d H:i:s"|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted py-4">{% trans "暂无执行明细" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="card-footer d-flex align-items-center justify-content-center">
+    <ul class="pagination m-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                <i class="ti ti-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in elided_page_range %}
+        {% if num == page_obj.paginator.ELLIPSIS %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% else %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                <i class="ti ti-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}

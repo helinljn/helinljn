@@ -35,6 +35,7 @@ Linux 部署目标使用 `../environment-linux.yml`。
 - `IDIP_API_URL`、`IDIP_TIMEOUT`、`IDIP_JSON_PATH`、`UPLOAD_MAX_SIZE`
 - `ANNOUNCEMENT_BASE_URL`、`ANNOUNCEMENT_TIMEOUT`、`ANNOUNCEMENT_PLATFORMS`、`ANNOUNCEMENT_CHANNELS`
 - `PAGE_SIZE`
+- `BATCH_EXECUTE_MAX_TARGETS`、`BATCH_EXECUTE_INTERVAL_MS`、`BATCH_IMPORT_MAX_ROWS`
 - `ENABLE_IDIP_FILE_MONITOR`、`IDIP_FILE_CHECK_INTERVAL`、`IDIP_USE_HASH_CHECK`
 - `LOGIN_MAX_ATTEMPTS`、`LOGIN_LOCKOUT_SECONDS`
 - `SENSITIVE_FIELDS`
@@ -126,7 +127,7 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `mysite/settings.py`：项目配置、环境变量、数据库选择、日志与安全开关。
 - `mysite/urls.py`：项目级 URL 路由。
 - `gmtool/apps.py`：应用配置，启动时注册 signals。
-- `gmtool/models.py`：GM 命令、用户命令权限、公告权限、用户扩展资料、命令日志、公告日志、公告审核、命令审核、登录日志。
+- `gmtool/models.py`：GM 命令、用户命令权限、公告权限、用户扩展资料、命令日志、公告日志、公告审核、命令审核、批量执行任务、批量执行明细、登录日志。
 - `gmtool/auth_views.py`：登录、登出、登录失败限速与登录日志。
 - `gmtool/announcement_client.py`：公告目录服 HTTP 调用。
 - `gmtool/announcement_log_services.py`：公告远端发布/删除日志写入封装。
@@ -136,6 +137,9 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 - `gmtool/command_review_services.py`：邮件和走马灯 GM 命令审核、审核权限判断、审核通过后执行 IDIP。
 - `gmtool/command_services.py`：命令查询与执行前参数校验。
 - `gmtool/command_views.py`：仪表盘、命令列表、命令执行、命令新增、命令同步、命令日志。
+- `gmtool/batch_import_service.py`：批量导入解析，支持 txt/tsv/csv（标准库，编码探测、分隔符探测、表头校验、结构体列表 JSON 单元格）。
+- `gmtool/batch_execute_service.py`：批量执行引擎，明细级幂等、超时/未知结果处理、并发抢占与重试。
+- `gmtool/batch_views.py`：批量导入预览、确认导入、模板下载、批量任务列表与详情、重试与未知项重发。
 - `gmtool/review_views.py`：审核管理入口、公告审核、邮件审核、走马灯审核列表与操作。
 - `gmtool/user_views.py`：用户管理、用户编辑、删除、权限分配、登录日志列表。
 - `gmtool/api_views.py`：命令上传/同步接口、命令日志详情接口、公告日志详情接口。
@@ -234,6 +238,8 @@ http://127.0.0.1:5510/cy_idip
 
 涉及公告目录服集成时，优先 mock 调用点：查询/直接删除相关测试 mock `gmtool.announcement_views.query_announcements`、`gmtool.announcement_views.delete_announcement`；审核发布相关测试 mock `gmtool.announcement_review_services.query_announcements`、`gmtool.announcement_review_services.create_announcement`、`gmtool.announcement_review_services.delete_announcement`；客户端底层测试可 mock `gmtool.announcement_client._get_requests`。不要依赖真实目录服跑单元测试。
 
+涉及批量执行时，mock `gmtool.batch_execute_service.send_idip_command`，并通过 `BatchExecuteItem.status` 验证幂等（success 不重跑）、超时记 `unknown`、人工确认后重发等行为。
+
 ## 安全与数据处理
 
 本项目涉及 GM 操作和审计数据。权限检查与日志处理都属于安全敏感逻辑。
@@ -242,6 +248,11 @@ http://127.0.0.1:5510/cy_idip
 - 命令执行日志应尽量保证可持久化。当前行为允许远端执行成功但本地日志写入失败时返回 warning。
 - 公告发布/删除日志也应尽量保证可持久化。远端公告操作成功但本地 `AnnouncementLog` 写入失败时，页面仍按远端成功处理并提示 warning。
 - 邮件/走马灯审核通过后的命令执行日志也应尽量保证可持久化。远端 IDIP 执行成功但本地 `CommandLog` 写入失败时，页面仍按远端成功处理并提示 warning。
+- 批量执行采用「任务 + 明细」持久化模型：`BatchExecuteJob` 记录任务状态与汇总，`BatchExecuteItem` 记录逐行状态（`pending/running/success/failed/unknown`）与 `CommandLog` 关联。
+- 批量执行只领取 `pending`/`failed` 明细，`success` 永远跳过；`unique(job, row_index)` 防止同一行重复生成；通过条件更新抢占任务防止并发重复执行。
+- 批量执行中凡无法确定远端结果的情况（超时、连接失败、响应非 JSON）一律记为 `unknown`，**默认不自动重试**，必须走「人工确认后重发」，避免重复发放。
+- 需要审核的命令批量提交时只创建一条 `CommandReview`（通过 `CommandReview.batch_job` 关联），审核通过后批量执行，审核作废会把任务置为 `rejected`。
+- 批量导入仅支持 `.txt`/`.tsv`/`.csv`，使用标准库 `csv` 解析，不引入 Excel 依赖；表头使用协议字段 `id`，结构体列表字段使用单行 JSON 数组。
 - 日志详情接口必须继续对配置的敏感字段进行脱敏，包括结构化 JSON、公告原始响应文本和错误文本。
 - 公告日志页面和详情接口必须受公告管理权限保护；超级管理员和拥有 `UserAnnouncementPermission` 的普通用户可查看全部公告日志。
 - 登出应保持仅允许 POST。

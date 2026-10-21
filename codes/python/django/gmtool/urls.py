@@ -1,7 +1,7 @@
 """GM命令后台管理系统 - URL路由"""
 from django.urls import path
 
-from . import announcement_views, api_views, auth_views, command_views, review_views, user_views
+from . import announcement_views, api_views, auth_views, batch_views, command_views, review_views, user_views
 
 app_name = 'gmtool'
 
@@ -15,6 +15,20 @@ urlpatterns = [
     path('commands/', command_views.command_list, name='command_list'),
     path('commands/add/', command_views.add_gm_command, name='add_gm_command'),
     path('commands/<str:cmd_id>/execute/', command_views.command_execute, name='command_execute'),
+
+    # 批量命令执行
+    path('commands/<str:cmd_id>/batch/', batch_views.command_batch, name='command_batch'),
+    path('commands/<str:cmd_id>/batch/template/', batch_views.command_batch_template, name='command_batch_template'),
+    path('commands/batch/', batch_views.batch_job_list, name='batch_job_list'),
+    path('commands/batch/<int:job_id>/', batch_views.batch_job_detail, name='batch_job_detail'),
+    path('commands/batch/<int:job_id>/confirm/', batch_views.batch_job_confirm, name='batch_job_confirm'),
+    path('commands/batch/<int:job_id>/retry/', batch_views.batch_job_retry, name='batch_job_retry'),
+    path(
+        'commands/batch/<int:job_id>/resolve-unknown/',
+        batch_views.batch_job_resolve_unknown,
+        name='batch_job_resolve_unknown',
+    ),
+    path('commands/batch/<int:job_id>/discard/', batch_views.batch_job_discard, name='batch_job_discard'),
 
     # 用户管理
     path('users/', user_views.user_list, name='user_list'),

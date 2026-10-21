@@ -212,7 +212,7 @@ CSRF_FAILURE_VIEW = 'gmtool.views.csrf_failure'
 
 # IDIP / 命令定义
 IDIP_API_URL = config('IDIP_API_URL', default='http://127.0.0.1:5510/cy_idip')
-IDIP_TIMEOUT = config('IDIP_TIMEOUT', default=30, cast=int)
+IDIP_TIMEOUT = config('IDIP_TIMEOUT', default=5, cast=int)
 IDIP_JSON_PATH = config('IDIP_JSON_PATH', default=str(BASE_DIR / 'idip_commands.json'))
 UPLOAD_MAX_SIZE = config('UPLOAD_MAX_SIZE', default=10 * 1024 * 1024, cast=int)
 
@@ -231,6 +231,10 @@ ANNOUNCEMENT_CHANNELS = csv_unique_config(
 # 命令执行 / 展示
 BATCH_EXECUTE_MAX_TARGETS = config('BATCH_EXECUTE_MAX_TARGETS', default=100, cast=int)
 BATCH_EXECUTE_INTERVAL_MS = config('BATCH_EXECUTE_INTERVAL_MS', default=100, cast=int)
+
+# 批量导入
+BATCH_IMPORT_MAX_ROWS = config('BATCH_IMPORT_MAX_ROWS', default=100, cast=int)
+
 PAGE_SIZE = config('PAGE_SIZE', default=20, cast=int)
 
 # 文件监控（仅作为开发便利功能；生产环境建议通过显式同步命令或上传后同步）

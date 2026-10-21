@@ -1,0 +1,134 @@
+{% extends "gmtool/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "批量任务" %} - {% trans "GM命令管理系统" %}{% endblock %}
+{% block nav_batch %}active{% endblock %}
+{% block page_pretitle %}{% trans "命令管理" %}{% endblock %}
+{% block page_title %}{% trans "批量任务" %}{% endblock %}
+
+{% block content %}
+<div class="card mb-3">
+    <div class="card-header">
+        <h3 class="card-title">{% trans "筛选条件" %}</h3>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">{% trans "任务状态" %}</label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">{% trans "全部状态" %}</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="ti ti-search me-1"></i>{% trans "筛选" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th style="width:70px;">ID</th>
+                    <th>{% trans "命令" %}</th>
+                    <th style="width:120px;">{% trans "状态" %}</th>
+                    <th style="width:80px;">{% trans "总数" %}</th>
+                    <th style="width:80px;">{% trans "成功" %}</th>
+                    <th style="width:80px;">{% trans "失败" %}</th>
+                    <th style="width:90px;">{% trans "未知" %}</th>
+                    <th style="width:130px;">{% trans "提交人" %}</th>
+                    <th style="width:160px;">{% trans "提交时间" %}</th>
+                    <th style="width:130px;">{% trans "操作" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in page_obj %}
+                <tr>
+                    <td><code>{{ job.id }}</code></td>
+                    <td>
+                        <div>{{ job.command_name }}</div>
+                        <div class="text-muted small"><code>{{ job.command_code }}</code></div>
+                    </td>
+                    <td>
+                        {% if job.status == 'pending_review' %}
+                        <span class="badge bg-warning-lt">{{ job.get_status_display }}</span>
+                        {% elif job.status == 'running' %}
+                        <span class="badge bg-info-lt">{{ job.get_status_display }}</span>
+                        {% elif job.status == 'completed' %}
+                        <span class="badge bg-success-lt">{{ job.get_status_display }}</span>
+                        {% elif job.status == 'partial_failed' %}
+                        <span class="badge bg-warning-lt">{{ job.get_status_display }}</span>
+                        {% elif job.status == 'failed' or job.status == 'rejected' %}
+                        <span class="badge bg-danger-lt">{{ job.get_status_display }}</span>
+                        {% else %}
+                        <span class="badge bg-secondary-lt">{{ job.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ job.total_items }}</td>
+                    <td class="text-success">{{ job.success_count }}</td>
+                    <td class="text-danger">{{ job.failed_count }}</td>
+                    <td class="text-warning">{{ job.unknown_count }}</td>
+                    <td>{{ job.submitter_username|default:"-" }}</td>
+                    <td class="text-muted small">{{ job.created_at|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'gmtool:batch_job_detail' job.id %}" class="btn btn-sm btn-outline-info" title="{% trans '查看' %}">
+                                <i class="ti ti-eye"></i>
+                            </a>
+                            {% if job.status == 'draft' %}
+                            <form method="post" action="{% url 'gmtool:batch_job_discard' job.id %}" class="m-0"
+                                  onsubmit="return confirm('{% trans "确认放弃该批量任务？" %}');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans '放弃' %}">
+                                    <i class="ti ti-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="10" class="text-center text-muted py-4">{% trans "暂无批量任务" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="card-footer d-flex align-items-center justify-content-center">
+    <ul class="pagination m-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                <i class="ti ti-chevron-left"></i>
+            </a>
+        </li>
+        {% endif %}
+        {% for num in elided_page_range %}
+        {% if num == page_obj.paginator.ELLIPSIS %}
+        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+        {% else %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                <i class="ti ti-chevron-right"></i>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+{% endblock %}

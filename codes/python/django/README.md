@@ -38,6 +38,10 @@
 - 超级管理员可上传命令定义 JSON 并自动同步数据库
 - JSON 中不存在的命令自动标记为停用
 - 停用命令不可继续执行
+- 支持按命令批量导入 `.txt/.tsv/.csv`，一行拆分为一条命令后批量执行，无需额外依赖
+- 批量任务持久化为 `BatchExecuteJob` + `BatchExecuteItem`，逐行记录成功/失败/结果未知
+- 重试只重跑失败项，成功项永不重复执行；超时等结果未知项需人工确认后才允许重发，避免重复发放
+- 邮件/走马灯等需审核命令的批量任务只提交一条整批审核，审核通过后批量执行
 
 ### 2.3 公告管理
 - 查询、发布、删除游戏公告
@@ -630,6 +634,14 @@ python manage.py format_idip_commands --check
 - `/gmtool/commands/`
 - `/gmtool/commands/add/`
 - `/gmtool/commands/<cmd_id>/execute/`
+- `/gmtool/commands/<cmd_id>/batch/`：批量导入上传与预览
+- `/gmtool/commands/<cmd_id>/batch/template/`：下载该命令的 CSV 模板
+- `/gmtool/commands/batch/`：批量任务列表
+- `/gmtool/commands/batch/<job_id>/`：批量任务详情
+- `/gmtool/commands/batch/<job_id>/confirm/`：确认导入并提交任务（POST）
+- `/gmtool/commands/batch/<job_id>/retry/`：重试失败项（POST）
+- `/gmtool/commands/batch/<job_id>/resolve-unknown/`：人工确认后重发未知项（POST）
+- `/gmtool/commands/batch/<job_id>/discard/`：放弃草稿任务（POST）
 
 #### 用户管理
 - `/gmtool/users/`
@@ -726,6 +738,9 @@ ANNOUNCEMENT_CHANNELS=小米,VIVO,OPPO
 
 ### 11.5 命令执行与展示
 - `PAGE_SIZE`
+- `BATCH_EXECUTE_MAX_TARGETS`：单次批量执行/批量删除上限，默认 100
+- `BATCH_EXECUTE_INTERVAL_MS`：批量执行逐条间隔毫秒，默认 100
+- `BATCH_IMPORT_MAX_ROWS`：单次批量导入最大行数，默认 100
 
 ### 11.6 文件监控
 - `ENABLE_IDIP_FILE_MONITOR`

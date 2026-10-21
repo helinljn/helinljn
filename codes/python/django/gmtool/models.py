@@ -272,6 +272,14 @@ class CommandReview(models.Model):
 
     review_type = models.CharField(_('审核类型'), max_length=20, choices=REVIEW_TYPE_CHOICES)
     status = models.CharField(_('审核状态'), max_length=20, choices=STATUS_CHOICES, default='pending')
+    batch_job = models.OneToOneField(
+        'BatchExecuteJob',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='review',
+        verbose_name=_('批量任务'),
+    )
     command = models.ForeignKey(
         GMCommand,
         on_delete=models.SET_NULL,
@@ -359,3 +367,133 @@ class LoginLog(models.Model):
 
     def __str__(self):
         return f'{self.username} - {self.get_action_display()} - {self.created_at}'
+
+
+class BatchExecuteJob(models.Model):
+    """GM 命令批量执行任务。"""
+    STATUS_DRAFT = 'draft'
+    STATUS_PENDING_REVIEW = 'pending_review'
+    STATUS_RUNNING = 'running'
+    STATUS_COMPLETED = 'completed'
+    STATUS_PARTIAL_FAILED = 'partial_failed'
+    STATUS_FAILED = 'failed'
+    STATUS_REJECTED = 'rejected'
+    STATUS_CHOICES = [
+        (STATUS_DRAFT, _('待确认')),
+        (STATUS_PENDING_REVIEW, _('待审核')),
+        (STATUS_RUNNING, _('执行中')),
+        (STATUS_COMPLETED, _('已完成')),
+        (STATUS_PARTIAL_FAILED, _('部分失败')),
+        (STATUS_FAILED, _('执行失败')),
+        (STATUS_REJECTED, _('已作废')),
+    ]
+
+    command = models.ForeignKey(
+        GMCommand,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='batch_jobs',
+        verbose_name=_('命令'),
+    )
+    command_code = models.CharField(_('命令编号'), max_length=20)
+    command_name = models.CharField(_('命令名称'), max_length=200)
+    review_type = models.CharField(_('审核类型'), max_length=20, blank=True, default='')
+    status = models.CharField(_('任务状态'), max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT)
+    submitter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='submitted_batch_jobs',
+        verbose_name=_('提交人'),
+    )
+    submitter_username = models.CharField(_('提交用户名'), max_length=150, blank=True, default='')
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_batch_jobs',
+        verbose_name=_('审核人'),
+    )
+    reviewer_username = models.CharField(_('审核用户名'), max_length=150, blank=True, default='')
+    source_filename = models.CharField(_('来源文件名'), max_length=255, blank=True, default='')
+    total_items = models.PositiveIntegerField(_('总条数'), default=0)
+    success_count = models.PositiveIntegerField(_('成功数'), default=0)
+    failed_count = models.PositiveIntegerField(_('失败数'), default=0)
+    unknown_count = models.PositiveIntegerField(_('未知数'), default=0)
+    created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
+    started_at = models.DateTimeField(_('开始时间'), null=True, blank=True)
+    finished_at = models.DateTimeField(_('结束时间'), null=True, blank=True)
+    updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('批量执行任务')
+        verbose_name_plural = _('批量执行任务')
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', '-created_at'], name='batchjob_status_ct_idx'),
+            models.Index(fields=['submitter', '-created_at'], name='batchjob_submit_ct_idx'),
+            models.Index(fields=['command_code', '-created_at'], name='batchjob_cmd_ct_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.command_code} - {self.get_status_display()} - {self.total_items}'
+
+
+class BatchExecuteItem(models.Model):
+    """批量执行任务中的单条命令明细。"""
+    STATUS_PENDING = 'pending'
+    STATUS_RUNNING = 'running'
+    STATUS_SUCCESS = 'success'
+    STATUS_FAILED = 'failed'
+    STATUS_UNKNOWN = 'unknown'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, _('待执行')),
+        (STATUS_RUNNING, _('执行中')),
+        (STATUS_SUCCESS, _('成功')),
+        (STATUS_FAILED, _('失败')),
+        (STATUS_UNKNOWN, _('结果未知')),
+    ]
+
+    job = models.ForeignKey(
+        BatchExecuteJob,
+        on_delete=models.CASCADE,
+        related_name='items',
+        verbose_name=_('批量任务'),
+    )
+    row_index = models.PositiveIntegerField(_('行号'))
+    params = models.JSONField(_('请求参数'), default=dict)
+    status = models.CharField(_('执行状态'), max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    attempt_count = models.PositiveIntegerField(_('尝试次数'), default=0)
+    response_data = models.JSONField(_('响应数据'), null=True, blank=True)
+    error_message = models.TextField(_('错误信息'), blank=True, default='')
+    command_log = models.ForeignKey(
+        CommandLog,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='batch_items',
+        verbose_name=_('命令日志'),
+    )
+    executed_at = models.DateTimeField(_('执行时间'), null=True, blank=True)
+    created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
+
+    class Meta:
+        verbose_name = _('批量执行明细')
+        verbose_name_plural = _('批量执行明细')
+        ordering = ['row_index']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['job', 'row_index'],
+                name='uniq_batch_item_job_row',
+            )
+        ]
+        indexes = [
+            models.Index(fields=['job', 'status'], name='batchitem_job_status_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.job_id}#{self.row_index} - {self.get_status_display()}'

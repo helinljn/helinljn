@@ -85,7 +85,9 @@ def _render_command_review_list(request, *, review_type, active_review_tab, page
     if not has_command_review_type_permission(request.user, review_type, request):
         return _command_review_permission_denied(request, review_type)
 
-    reviews = CommandReview.objects.select_related('submitter', 'reviewer', 'command').filter(
+    reviews = CommandReview.objects.select_related(
+        'submitter', 'reviewer', 'command', 'batch_job',
+    ).filter(
         review_type=review_type,
     )
 

@@ -25,6 +25,9 @@
     <a href="{% url 'gmtool:command_list' %}" class="btn btn-sm btn-outline-secondary me-2">
         <i class="ti ti-arrow-left me-1"></i>{% trans "返回列表" %}
     </a>
+    <a href="{% url 'gmtool:command_batch' command.command_id %}" class="btn btn-sm btn-outline-primary me-2">
+        <i class="ti ti-upload me-1"></i>{% trans "批量导入" %}
+    </a>
     <span class="badge bg-secondary-lt">{{ command.command_id }}</span>
 </div>
 

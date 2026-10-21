@@ -33,6 +33,12 @@
                                 <span class="nav-link-title">{% trans "命令管理" %}</span>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% block nav_batch %}{% endblock %}" href="{% url 'gmtool:batch_job_list' %}">
+                                <span class="nav-link-icon"><i class="ti ti-stack-2"></i></span>
+                                <span class="nav-link-title">{% trans "批量任务" %}</span>
+                            </a>
+                        </li>
                         {% if has_announcement_permission %}
                         <li class="nav-item">
                             <a class="nav-link {% block nav_announcements %}{% endblock %}" href="{% url 'gmtool:announcement_query' %}">

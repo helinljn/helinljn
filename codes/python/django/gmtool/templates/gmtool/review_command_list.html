@@ -98,6 +98,11 @@
                     <td><code>{{ review.id }}</code></td>
                     <td>
                         <span class="command-review-preview" title="{{ review.command_name }}">{{ review.command_name }}</span>
+                        {% if review.batch_job_id %}
+                        <a href="{% url 'gmtool:batch_job_detail' review.batch_job_id %}" class="badge bg-azure-lt text-decoration-none">
+                            {% trans "批量" %} {{ review.batch_job.total_items }} {% trans "条" %}
+                        </a>
+                        {% endif %}
                         <div class="text-muted small"><code>{{ review.command_code }}</code> {{ review.request_name }}</div>
                     </td>
                     <td>{{ review.partition }}</td>
