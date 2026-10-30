@@ -1,0 +1,39 @@
+[
+  {
+    "id": "gpt-6.1-sol",
+    "name": "gpt-6.1-sol",
+    "vendor": "Custom",
+    "url": "https://api.site/v1",
+    "apiKey": "xxx",
+    "descriptionZh": "OpenAI GPT-6.1 Sol，1.05M 上下文窗口、128K 最大输出，支持文本与图像输入",
+    "descriptionEn": "OpenAI GPT-6.1 Sol with 1.05M context window, 128K max output, text and image input",
+    "contextWindow": {
+      "defaultLength": 272000,
+      "supportedLengths": [
+        272000,
+        1000000
+      ]
+    },
+    "maxInputTokens": 1050000,
+    "maxOutputTokens": 128000,
+    "maxAllowedSize": 1050000,
+    "supportsToolCall": true,
+    "supportsImages": true,
+    "supportsReasoning": true,
+    "onlyReasoning": true,
+    "useCustomProtocol": false,
+    "temperature": 1,
+    "reasoning": {
+      "defaultEffort": "xhigh",
+      "supportedEfforts": [
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ],
+      "canDisableThinking": false,
+      "summary": "auto"
+    }
+  }
+]
