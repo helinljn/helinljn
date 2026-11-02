@@ -8,11 +8,11 @@
     4. Markdown All in One
 
 【下载地址】
-    https://update.code.visualstudio.com/1.128.1/win32-x64/stable
+    https://update.code.visualstudio.com/1.144.0/win32-x64/stable
 
 【常用设置】
 {
-    // VSCode version: VSCodeSetup-x64-1.128.1
+    // VSCode version: VSCodeSetup-x64-1.144.0
     "workbench.colorTheme": "Light Modern",
     "workbench.startupEditor": "none",
 
