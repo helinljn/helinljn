@@ -7,8 +7,6 @@
 
     4. Markdown All in One
 
-    5. Tencent Cloud CodeBuddy
-
 【下载地址】
     https://update.code.visualstudio.com/1.128.1/win32-x64/stable
 
@@ -92,11 +90,6 @@
     "C_Cpp.intelliSenseUpdateDelay": 500,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.autocompleteAddParentheses": true,
-
-    "codingcopilot.autoRun": true,
-    "codingcopilot.enableInlineChat": false,
-    "codingcopilot.enableInlineChatAutoFormatCode": false,
-    "codingcopilot.enableInlineChatIDEShortcutsTip": false,
 }
 
 【键盘设置】
