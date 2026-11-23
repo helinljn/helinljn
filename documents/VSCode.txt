@@ -24,6 +24,7 @@
     "workbench.tree.renderIndentGuides": "always",
 
     "chat.disableAIFeatures": true,
+    "network.meteredConnection": "off",
 
     "diffEditor.codeLens": true,
     "diffEditor.ignoreTrimWhitespace": false,
