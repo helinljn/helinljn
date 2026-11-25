@@ -87,6 +87,7 @@ conda config --add channels defaults
 
     一键安装(重建环境)，根据yml文件创建新环境
     conda env create -f environment.yml
+    conda env create -f history.yml
 
     根据yml文件更新环境
     conda env update -f environment.yml --prune
