@@ -1,6 +1,9 @@
-# Miniconda下载地址，首选：Miniconda3-py38_23.11.0-2-Windows-x86_64
-# 安装时选择：Install for all users，勾选所有选项
+# Miniconda下载地址，首选：Miniconda3-py312_26.9.4-1-Windows-x86_64
+# 安装时选择：Install for all users，不要勾选任何选项
 https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/?C=M&O=D
+
+# 显示现有源
+pip config debug
 
 # 显示现有源
 conda config --show channels
@@ -44,7 +47,7 @@ conda config --add channels defaults
 
 # Conda常用命令(如果更改base环境的话，则需要管理员权限)
     创建指定python版本的环境
-    conda create -n py312 python=3.12.13
+    conda create -n py312 python=3.12
 
     删除指定python版本的环境
     conda env remove -n py312
@@ -87,5 +90,6 @@ conda config --add channels defaults
 
     根据yml文件更新环境
     conda env update -f environment.yml --prune
+    conda env update -f history.yml --prune
 
 如果遇到：raise ValueError("check_hostname requires server_hostname")报错，需要关闭翻墙代理

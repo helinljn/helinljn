@@ -1,0 +1,13 @@
+name: py312
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+  - defaults
+dependencies:
+  - python=3.12
+  - django=5.2
+  - python-decouple
+  - mysqlclient
+  - requests
+  - gettext
+prefix: C:\Users\helin\.conda\envs\py312
