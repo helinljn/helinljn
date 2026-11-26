@@ -1,7 +1,6 @@
 name: py312
 channels:
   - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
-  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
   - defaults
 dependencies:
   - python=3.12
