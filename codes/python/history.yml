@@ -11,4 +11,3 @@ dependencies:
   - python-decouple
   - requests
   - gettext
-prefix: C:\Users\helin\.conda\envs\py312

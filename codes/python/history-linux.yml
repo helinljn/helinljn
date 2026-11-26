@@ -12,4 +12,3 @@ dependencies:
   - python-decouple
   - requests
   - gettext
-prefix: /home/django/miniconda3/envs/py312
