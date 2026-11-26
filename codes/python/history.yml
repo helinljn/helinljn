@@ -6,8 +6,9 @@ channels:
 dependencies:
   - python=3.12
   - django=5.2
+  - django-redis=7.0.0
+  - mysqlclient=2.3.2
   - python-decouple
-  - mysqlclient
   - requests
   - gettext
 prefix: C:\Users\helin\.conda\envs\py312
