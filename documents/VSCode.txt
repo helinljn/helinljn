@@ -7,6 +7,11 @@
 
     4. Markdown All in One
 
+    5. Database Client
+        CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY '111111';
+        GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1';
+        FLUSH PRIVILEGES;
+
 【下载地址】
     https://update.code.visualstudio.com/1.144.1/win32-x64/stable
 

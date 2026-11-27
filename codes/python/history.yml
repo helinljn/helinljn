@@ -9,4 +9,3 @@ dependencies:
   - mysqlclient=2.3.2
   - python-decouple
   - requests
-  - gettext
